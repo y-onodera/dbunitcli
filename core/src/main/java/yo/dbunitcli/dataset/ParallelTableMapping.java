@@ -7,9 +7,12 @@ import yo.dbunitcli.resource.ThreadContexts;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.IntFunction;
 import java.util.function.Supplier;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 /**
  * ソースを別スレッドで並列に読み込む。
@@ -22,6 +25,13 @@ public final class ParallelTableMapping {
     private static final Logger LOGGER = LoggerFactory.getLogger(ParallelTableMapping.class);
 
     private static final AtomicInteger THREAD_NO = new AtomicInteger();
+
+    /**
+     * forEachByKeyの作業スレッドごとの待ち行列の上限
+     */
+    private static final int QUEUE_CAPACITY = 64;
+
+    private static final Object END_OF_ITEMS = new Object();
 
     private ParallelTableMapping() {
     }
@@ -83,6 +93,76 @@ public final class ParallelTableMapping {
             }
             return null;
         });
+    }
+
+    /**
+     * itemsを順に読み、keyが同じitemは同じ作業スレッドへ渡して並列に処理する。同じkeyのitemは元の順に処理するため、
+     * 同じ出力先へ書くitemは逐次と同じ順になる。作業スレッドごとの待ち行列に上限を設け、itemsを先読みしすぎない。
+     * いずれかが失敗したら残りを中断して例外を投げる。戻る前に作業スレッドの終了を待つ
+     */
+    public static <T> void forEachByKey(final int threads, final Stream<T> items, final Function<? super T, ?> key
+            , final Consumer<? super T> action) {
+        ParallelTableMapping.LOGGER.info("forEachByKey() - parallel threads={}", threads);
+        final List<BlockingQueue<Object>> queues = IntStream.range(0, threads)
+                .<BlockingQueue<Object>>mapToObj(i -> new ArrayBlockingQueue<>(ParallelTableMapping.QUEUE_CAPACITY))
+                .toList();
+        final ExecutorService executor = ParallelTableMapping.newExecutor(threads, "generate-");
+        // submitは投入元のスレッドで呼ばれるため、ここで投入元の文脈を包む
+        final List<Future<?>> futures = queues.stream()
+                .<Future<?>>map(queue -> executor.submit(ThreadContexts.propagate(() -> ParallelTableMapping.drain(queue, action))))
+                .toList();
+        try {
+            final Iterator<T> iterator = items.iterator();
+            while (iterator.hasNext()) {
+                final T item = iterator.next();
+                ParallelTableMapping.put(queues.get(Math.floorMod(Objects.hashCode(key.apply(item)), threads)), item, futures);
+            }
+            for (final BlockingQueue<Object> queue : queues) {
+                ParallelTableMapping.put(queue, ParallelTableMapping.END_OF_ITEMS, futures);
+            }
+            for (final Future<?> future : futures) {
+                future.get();
+            }
+        } catch (final ExecutionException e) {
+            futures.forEach(it -> it.cancel(true));
+            throw ParallelTableMapping.rethrow(e.getCause());
+        } catch (final InterruptedException e) {
+            futures.forEach(it -> it.cancel(true));
+            Thread.currentThread().interrupt();
+            throw new CancellationException("generate-interrupted");
+        } catch (final RuntimeException | Error e) {
+            futures.forEach(it -> it.cancel(true));
+            throw e;
+        } finally {
+            ParallelTableMapping.shutdown(executor);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <T> void drain(final BlockingQueue<Object> queue, final Consumer<? super T> action) {
+        try {
+            Object item;
+            while ((item = queue.take()) != ParallelTableMapping.END_OF_ITEMS) {
+                action.accept((T) item);
+            }
+        } catch (final InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new CancellationException("interrupted");
+        }
+    }
+
+    /**
+     * 待ち行列が空くまで待って入れる。作業スレッドが先に終わった（失敗した）場合は、その例外を投げる
+     */
+    private static void put(final BlockingQueue<Object> queue, final Object item, final List<Future<?>> futures)
+            throws InterruptedException, ExecutionException {
+        while (!queue.offer(item, 100, TimeUnit.MILLISECONDS)) {
+            for (final Future<?> future : futures) {
+                if (future.isDone()) {
+                    future.get();
+                }
+            }
+        }
     }
 
     /**

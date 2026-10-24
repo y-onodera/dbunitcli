@@ -177,6 +177,71 @@ public class GenerateTableParallelTest {
         }
     }
 
+    @ParameterizedTest
+    @CsvSource({"txt,true", "txt,false", "xlsx,false"})
+    public void generate_record_same_as_sequential(final String generateType, final boolean includeMetaData) throws IOException {
+        final File template = "txt".equals(generateType)
+                ? this.template
+                : TestJxlsTemplates.create(this.tempDir, generateType);
+        final Map<String, byte[]> results = new HashMap<>();
+        for (final String parallel : List.of("", "1")) {
+            final File result = this.tempDir.resolve("result-record-" + generateType + includeMetaData + parallel).toFile();
+            Generate.main(new String[]{
+                    "-srcType=csv"
+                    , "-src=" + this.src.getAbsolutePath()
+                    , "-encoding=UTF-8"
+                    , "-src.includeMetaData=" + includeMetaData
+                    // Excelは1行1ブックで重いため1テーブルに絞る
+                    , "-regInclude=" + ("txt".equals(generateType) ? "" : "a")
+                    , "-generateType=" + generateType
+                    , "-unit=record"
+                    , "-parallel=" + parallel
+                    , "-template=" + template.getAbsolutePath()
+                    , "-templateParameterAttribute="
+                    , "-result=" + result.getAbsolutePath()
+                    , "-resultPath=$rowNumber$_$ID$." + generateType
+            });
+            try (final Stream<Path> files = Files.list(result.toPath())) {
+                for (final Path file : files.toList()) {
+                    final byte[] content = "txt".equals(generateType) ? Files.readAllBytes(file) : this.cellValues(file);
+                    final byte[] previous = results.putIfAbsent(file.getFileName().toString(), content);
+                    if (previous != null) {
+                        Assertions.assertArrayEquals(previous, content, file.getFileName().toString());
+                    }
+                }
+            }
+        }
+        Assertions.assertEquals(("txt".equals(generateType) ? GenerateTableParallelTest.TABLES.size() : 1) * 100, results.size());
+    }
+
+    @Test
+    public void generate_record_to_same_file_keeps_last_row() throws IOException {
+        // 全行が同じファイルへ出力する場合も、並列では同じスレッドで元の順に書くため最後の行の内容が残る
+        final File template = this.tempDir.resolve("record.txt").toFile();
+        Files.writeString(template.toPath(), "$ID$", StandardCharsets.UTF_8);
+        final File result = this.tempDir.resolve("result").toFile();
+        Generate.main(new String[]{
+                "-srcType=csv"
+                , "-src=" + this.src.getAbsolutePath()
+                , "-encoding=UTF-8"
+                , "-generateType=txt"
+                , "-unit=record"
+                , "-template=" + template.getAbsolutePath()
+                , "-templateParameterAttribute="
+                , "-result=" + result.getAbsolutePath()
+                , "-resultPath=all.txt"
+        });
+        Assertions.assertEquals("d99", Files.readString(new File(result, "all.txt").toPath(), StandardCharsets.UTF_8));
+    }
+
+    private byte[] cellValues(final Path file) throws IOException {
+        try (final Workbook workbook = WorkbookFactory.create(file.toFile())) {
+            final StringBuilder result = new StringBuilder();
+            workbook.getSheetAt(0).forEach(row -> row.forEach(cell -> result.append(cell.toString()).append(',')));
+            return result.toString().getBytes(StandardCharsets.UTF_8);
+        }
+    }
+
     @Test
     public void load_does_not_keep_rows_in_unloaded_dto() {
         final ComparableDataSetParam param = ComparableDataSetParam.builder()

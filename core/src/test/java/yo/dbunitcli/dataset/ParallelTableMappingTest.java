@@ -46,6 +46,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 public class ParallelTableMappingTest {
 
@@ -306,6 +307,49 @@ public class ParallelTableMappingTest {
         Assertions.assertEquals(Map.of("a", "submitter", "b", "submitter", "c", "submitter", "d", "submitter"), actual);
         Assertions.assertEquals(2, threads.size());
         Assertions.assertEquals(Set.of(true, false), firsts);
+    }
+
+    @Test
+    public void forEachByKey_keeps_order_per_key_on_workers_with_context() {
+        final Map<Integer, List<Integer>> actual = new ConcurrentHashMap<>();
+        final Set<String> threads = ConcurrentHashMap.newKeySet();
+        final Set<String> contexts = ConcurrentHashMap.newKeySet();
+        ScopedValue.where(TestThreadContextPropagator.VALUE, "submitter")
+                .run(() -> ParallelTableMapping.forEachByKey(4, IntStream.range(0, 1000).boxed(), it -> it % 7, it -> {
+                    actual.computeIfAbsent(it % 7, k -> Collections.synchronizedList(new ArrayList<>())).add(it);
+                    threads.add(Thread.currentThread().getName());
+                    contexts.add(TestThreadContextPropagator.VALUE.orElse("unbound"));
+                }));
+        Assertions.assertEquals(7, actual.size());
+        actual.forEach((key, values) -> Assertions.assertEquals(
+                IntStream.range(0, 1000).filter(it -> it % 7 == key).boxed().toList(), values, "key=" + key));
+        Assertions.assertTrue(threads.size() > 1, threads.toString());
+        Assertions.assertEquals(Set.of("submitter"), contexts);
+    }
+
+    @Test
+    public void forEachByKey_rethrows_failure_of_worker() {
+        final AssertionError actual = Assertions.assertThrows(AssertionError.class
+                , () -> ParallelTableMapping.forEachByKey(2, IntStream.range(0, 10000).boxed(), it -> it, it -> {
+                    if (it == 10) {
+                        throw new AssertionError("failed " + it);
+                    }
+                }));
+        Assertions.assertEquals("failed 10", actual.getMessage());
+    }
+
+    @Test
+    public void forEachByKey_rethrows_failure_of_items() {
+        final Stream<Integer> items = IntStream.range(0, 100).boxed().map(it -> {
+            if (it == 50) {
+                throw new IllegalStateException("failed " + it);
+            }
+            return it;
+        });
+        final IllegalStateException actual = Assertions.assertThrows(IllegalStateException.class
+                , () -> ParallelTableMapping.forEachByKey(2, items, it -> it, it -> {
+                }));
+        Assertions.assertEquals("failed 50", actual.getMessage());
     }
 
     @Test

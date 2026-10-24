@@ -67,6 +67,14 @@ public class ParallelParameterTest {
     public void generateHidesParallelWhenSourceIsNotParallelizable() {
         Assertions.assertFalse(this.generateHasParallel("-srcType=file", "-generateType=txt", "-unit=table"));
         Assertions.assertFalse(this.generateHasParallel("-srcType=dir", "-generateType=fixedColumnDef"));
+        Assertions.assertFalse(this.generateHasParallel("-srcType=none", "-generateType=txt", "-unit=record"));
+    }
+
+    @Test
+    public void generateShowsParallelForRecordUnit() {
+        // unit=recordは出力を並列にするため、srcを並列に読み込めない形式でも表示する
+        Assertions.assertTrue(this.generateHasParallel("-srcType=file", "-generateType=txt", "-unit=record"));
+        Assertions.assertTrue(this.generateHasParallel("-srcType=dir", "-generateType=xlsx", "-unit=record"));
     }
 
     @Test

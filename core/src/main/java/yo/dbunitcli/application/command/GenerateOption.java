@@ -11,6 +11,7 @@ import yo.dbunitcli.application.option.TemplateRenderOption;
 import yo.dbunitcli.common.Parameter;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.dataset.ComparableDataSetProducer;
+import yo.dbunitcli.dataset.DataSourceType;
 import yo.dbunitcli.dataset.DbOperation;
 import yo.dbunitcli.dataset.ParallelTableMapping;
 import yo.dbunitcli.dataset.TableSeparators;
@@ -78,7 +79,8 @@ public record GenerateOption(Parameter parameter, String resultDir, String resul
     }
 
     /**
-     * 出力単位ごとに、出力先とパラメータを渡す。unit=tableは、並列化できればテーブルごとに別スレッドで出力する（処理順は不定）。
+     * 出力単位ごとに、出力先とパラメータを渡す。unit=recordは、読込は全件まとめて済ませ、並列数が2以上なら描画・書込を並列にする。
+     * unit=tableは、並列化できればテーブルごとに別スレッドで出力する（いずれも処理順は不定）。
      * <ul>
      *     <li>テキスト・Excel（lazyLoad）: 読込から出力までをテーブルごとに行う。並列化できる条件はsrcの並列読込と同じ</li>
      *     <li>Excel（lazyLoadなし）: 読込は全件まとめて済ませ（srcの並列読込の対象）、出力だけを並列にする</li>
@@ -88,8 +90,15 @@ public record GenerateOption(Parameter parameter, String resultDir, String resul
      */
     public void forEachParameter(final BiConsumer<File, Parameter> action) {
         if (this.unit() != ParameterUnit.table) {
-            try (final Stream<Parameter> parameters = this.parameterStream()) {
-                parameters.forEach(it -> action.accept(this.resultFile(it), it));
+            try (final Stream<RecordOutput> outputs = this.parameterStream().map(it -> new RecordOutput(this.resultFile(it), it))) {
+                final int threads = ParallelTableMapping.parallelism(this.dataSetParam());
+                if (this.unit() == ParameterUnit.record && threads > 1) {
+                    // 行番号と出力先は読込順に決め、描画・書込だけを並列にする（同じ出力先は同じスレッドで元の順に書く）
+                    ParallelTableMapping.forEachByKey(threads, outputs, RecordOutput::resultFile
+                            , it -> action.accept(it.resultFile(), it.parameter()));
+                } else {
+                    outputs.forEach(it -> action.accept(it.resultFile(), it.parameter()));
+                }
             }
             return;
         }
@@ -141,6 +150,9 @@ public record GenerateOption(Parameter parameter, String resultDir, String resul
     }
 
     private record TableOutput(ParameterUnit.TableTemplate template, File resultFile) {
+    }
+
+    private record RecordOutput(File resultFile, Parameter parameter) {
     }
 
     public TableSeparators unitTableSeparators() {
@@ -240,10 +252,11 @@ public record GenerateOption(Parameter parameter, String resultDir, String resul
     }
 
     /**
-     * -parallelを表示するか。srcを並列に読み込める形式の場合
+     * -parallelを表示するか。srcを並列に読み込める形式か、unit=record（出力を並列にする）の場合
      */
     public boolean isParallelizable() {
-        return this.srcData.srcType() != null && this.srcData.srcType().isParallelizable();
+        return this.srcData.srcType() != null && this.srcData.srcType() != DataSourceType.none
+                && (this.srcData.srcType().isParallelizable() || this.unit() == ParameterUnit.record);
     }
 
     /**
