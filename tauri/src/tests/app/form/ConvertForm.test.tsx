@@ -346,10 +346,22 @@ describe("ConvertFormの描画テスト", () => {
 	});
 
 	describe("parallel（並列化できるときだけ表示）", () => {
-		it("並列化できない入力（xlsx）ではparallelを表示しない", () => {
+		it("xlsx入力ではparallelを表示する", () => {
 			render(
 				<ConvertForm
 					{...makeConvertProps(convertRefreshSrcTypeXlsxResponseFixture)}
+				/>,
+			);
+
+			expect(
+				document.querySelector('input[type="text"][name="-result.parallel"]'),
+			).toBeInTheDocument();
+		});
+
+		it("並列化できない入力（table）ではparallelを表示しない", () => {
+			render(
+				<ConvertForm
+					{...makeConvertProps(convertRefreshSrcTypeTableResponseFixture)}
 				/>,
 			);
 

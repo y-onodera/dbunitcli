@@ -46,6 +46,11 @@ public class ManualRowsMappingTableBuilder implements XlsxRowsToTableBuilder {
     }
 
     @Override
+    public String[] getTableNames() {
+        return this.tableNames.clone();
+    }
+
+    @Override
     public boolean isTableStart(final int rowNum) {
         if (!this.existsToBeMapping()) {
             return false;

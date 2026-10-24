@@ -1,6 +1,5 @@
 package yo.dbunitcli.dataset;
 
-import org.dbunit.dataset.Column;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -126,7 +125,8 @@ public final class ParallelTableMapping {
         for (int i = 0; i < tasks.size(); i++) {
             parent[i] = i;
             final int index = i;
-            tableSeparators.getAddSettingTableMetaData(tasks.get(i).source().createMetaData(new Column[0]))
+            tasks.get(i).outputTableCandidates()
+                    .flatMap(tableSeparators::getAddSettingTableMetaData)
                     .map(AddSettingTableMetaData::getTableName)
                     .forEach(tableName -> {
                         final Integer other = firstWriter.putIfAbsent(tableName, index);

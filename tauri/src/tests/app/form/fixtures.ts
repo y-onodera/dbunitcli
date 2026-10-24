@@ -659,7 +659,7 @@ export const parameterizeLoadResponseFixture = {
 // convert-refresh-srcType-xlsx-response.json をもとにしたフィクスチャ
 export const convertRefreshSrcTypeXlsxResponseFixture = {
 	srcData: makeXlsxSrcData(),
-	convertResult: makeCsvConvertResult(false, false),
+	convertResult: makeCsvConvertResult(),
 } as ConvertOptions;
 
 // convert-refresh-srcType-table-response.json をもとにしたフィクスチャ

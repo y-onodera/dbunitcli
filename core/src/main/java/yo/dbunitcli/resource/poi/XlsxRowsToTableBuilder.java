@@ -19,4 +19,9 @@ public interface XlsxRowsToTableBuilder {
 
     boolean isNowProcessing();
 
+    /**
+     * @return このシートから作るテーブル名（シートを読む前に出力テーブルを決めるのに使う）
+     */
+    String[] getTableNames();
+
 }

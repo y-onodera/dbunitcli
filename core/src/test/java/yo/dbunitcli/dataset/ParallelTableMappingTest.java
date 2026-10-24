@@ -1,9 +1,13 @@
 package yo.dbunitcli.dataset;
 
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import yo.dbunitcli.application.json.FromJsonXlsxSchemaBuilder;
 import yo.dbunitcli.application.json.TableMetaDataFilterParser;
 import yo.dbunitcli.dataset.converter.CsvConverter;
 import yo.dbunitcli.dataset.converter.DBConverter;
@@ -11,9 +15,12 @@ import yo.dbunitcli.dataset.converter.DataSetConverterLoader;
 import yo.dbunitcli.dataset.converter.XlsConverter;
 import yo.dbunitcli.dataset.converter.XlsxConverter;
 import yo.dbunitcli.dataset.producer.ComparableCsvDataSetProducer;
+import yo.dbunitcli.dataset.producer.ComparableXlsxDataSetProducer;
 import yo.dbunitcli.resource.jdbc.DatabaseConnectionLoader;
+import yo.dbunitcli.resource.poi.XlsxSchema;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -167,6 +174,75 @@ public class ParallelTableMappingTest {
             rs.next();
             return rs.getInt(1);
         }
+    }
+
+    @Test
+    public void lanes_group_xlsx_by_sheet_name() throws IOException {
+        final File xlsx = this.writeXlsx(Map.of("x1", List.of("s1", "s2"), "x2", List.of("s2", "s3"), "x3", List.of("s4"), "x4", List.of("s5")));
+        final ComparableXlsxDataSetProducer producer = this.xlsxProducer(xlsx, XlsxSchema.DEFAULT, null);
+        Assertions.assertEquals(Set.of(Set.of("x1.xlsx", "x2.xlsx"), Set.of("x3.xlsx"), Set.of("x4.xlsx")), this.laneFileNames(producer));
+    }
+
+    @Test
+    public void lanes_group_xlsx_by_schema_table_name() throws IOException {
+        // パターンに一致するシート（M_A・M_B）は別名でも同じテーブルMになる。スキーマに無いシートは読まない
+        final XlsxSchema schema = new FromJsonXlsxSchemaBuilder().build("""
+                {"patterns": {"M": "M_"}
+                , "rows": [{"tableName": "M", "sheetName": "M", "header": ["ID", "VAL"], "dataStart": 1, "columnIndex": [0, 1], "breakKey": []}]}
+                """);
+        final File xlsx = this.writeXlsx(Map.of("x1", List.of("s1", "M_A"), "x2", List.of("M_B"), "x3", List.of("s1")));
+        final ComparableXlsxDataSetProducer producer = this.xlsxProducer(xlsx, schema, null);
+        Assertions.assertEquals(Set.of(Set.of("x1.xlsx", "x2.xlsx"), Set.of("x3.xlsx")), this.laneFileNames(producer));
+    }
+
+    @Test
+    public void produce_xlsx_same_as_sequential() throws IOException {
+        final File xlsx = this.writeXlsx(Map.of("x1", List.of("s1", "s2"), "x2", List.of("s2", "s3"), "x3", List.of("s4")));
+        final ComparableDataSet sequential = this.xlsxProducer(xlsx, XlsxSchema.DEFAULT, 1).loadDataSet();
+        final ComparableDataSet parallel = this.xlsxProducer(xlsx, XlsxSchema.DEFAULT, 4).loadDataSet();
+        Assertions.assertArrayEquals(new String[]{"s1", "s2", "s3", "s4"}, parallel.getTableNames());
+        for (final String tableName : sequential.getTableNames()) {
+            Assertions.assertEquals(this.rows(sequential.getTable(tableName)), this.rows(parallel.getTable(tableName)));
+        }
+        Assertions.assertEquals(20, parallel.getTable("s2").getRowCount());
+    }
+
+    private Set<Set<String>> laneFileNames(final ComparableDataSetProducer producer) {
+        final List<ComparableTableMappingTask> tasks = producer.getSourceStream().map(producer::createTableMappingTask).collect(Collectors.toList());
+        return ParallelTableMapping.lanes(producer, tasks).orElseThrow().stream()
+                .map(lane -> lane.stream().map(it -> it.source().fileName()).collect(Collectors.toSet()))
+                .collect(Collectors.toSet());
+    }
+
+    private File writeXlsx(final Map<String, List<String>> sheetsByFile) throws IOException {
+        final File dir = Files.createDirectories(this.tempDir.resolve("xlsx")).toFile();
+        for (final Map.Entry<String, List<String>> file : sheetsByFile.entrySet()) {
+            try (final XSSFWorkbook workbook = new XSSFWorkbook();
+                 final FileOutputStream out = new FileOutputStream(new File(dir, file.getKey() + ".xlsx"))) {
+                for (final String sheetName : file.getValue()) {
+                    final Sheet sheet = workbook.createSheet(sheetName);
+                    final Row header = sheet.createRow(0);
+                    header.createCell(0).setCellValue("ID");
+                    header.createCell(1).setCellValue("VAL");
+                    for (int i = 1; i <= 10; i++) {
+                        final Row row = sheet.createRow(i);
+                        row.createCell(0).setCellValue(file.getKey() + "-" + i);
+                        row.createCell(1).setCellValue(sheetName);
+                    }
+                }
+                workbook.write(out);
+            }
+        }
+        return dir;
+    }
+
+    private ComparableXlsxDataSetProducer xlsxProducer(final File src, final XlsxSchema schema, final Integer parallel) {
+        return new ComparableXlsxDataSetProducer(ComparableDataSetParam.builder()
+                .setSrc(src)
+                .setSource(DataSourceType.xlsx)
+                .setXlsxSchema(schema)
+                .setParallel(parallel)
+                .build());
     }
 
     private TableSeparators renameBToA() {
