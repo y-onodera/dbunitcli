@@ -17,11 +17,12 @@ public class ParallelParameterTest {
         Assertions.assertTrue(this.convertHasParallel("-srcType=csv", "-resultType=table"));
         Assertions.assertTrue(this.convertHasParallel("-srcType=csv", "-resultType=xlsx", "-excelTable=BOOK"));
         Assertions.assertTrue(this.convertHasParallel("-srcType=xlsx", "-resultType=csv"));
+        Assertions.assertTrue(this.convertHasParallel("-srcType=xls", "-resultType=csv"));
     }
 
     @Test
     public void convertHidesParallelWhenSourceIsNotParallelizable() {
-        Assertions.assertFalse(this.convertHasParallel("-srcType=xls", "-resultType=csv"));
+        Assertions.assertFalse(this.convertHasParallel("-srcType=table", "-resultType=csv"));
         Assertions.assertFalse(this.convertHasParallel("-srcType=csvq", "-resultType=csv"));
     }
 
@@ -41,7 +42,7 @@ public class ParallelParameterTest {
 
     @Test
     public void compareHidesParallelWhenNeitherIsParallelizable() {
-        Assertions.assertFalse(this.compareHasParallel("-new.srcType=xls", "-old.srcType=csvq"));
+        Assertions.assertFalse(this.compareHasParallel("-new.srcType=sql", "-old.srcType=csvq"));
         Assertions.assertFalse(this.compareHasParallel("-targetType=image", "-new.srcType=csv", "-old.srcType=csv"));
     }
 

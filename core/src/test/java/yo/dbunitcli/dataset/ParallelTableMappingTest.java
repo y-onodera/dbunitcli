@@ -1,7 +1,9 @@
 package yo.dbunitcli.dataset;
 
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -15,6 +17,7 @@ import yo.dbunitcli.dataset.converter.DataSetConverterLoader;
 import yo.dbunitcli.dataset.converter.XlsConverter;
 import yo.dbunitcli.dataset.converter.XlsxConverter;
 import yo.dbunitcli.dataset.producer.ComparableCsvDataSetProducer;
+import yo.dbunitcli.dataset.producer.ComparableXlsDataSetProducer;
 import yo.dbunitcli.dataset.producer.ComparableXlsxDataSetProducer;
 import yo.dbunitcli.resource.jdbc.DatabaseConnectionLoader;
 import yo.dbunitcli.resource.poi.XlsxSchema;
@@ -207,6 +210,25 @@ public class ParallelTableMappingTest {
         Assertions.assertEquals(20, parallel.getTable("s2").getRowCount());
     }
 
+    @Test
+    public void lanes_group_xls_by_sheet_name() throws IOException {
+        final File xls = this.writeExcel(Map.of("x1", List.of("s1", "s2"), "x2", List.of("s2", "s3"), "x3", List.of("s4"), "x4", List.of("s5")), "xls");
+        final ComparableXlsDataSetProducer producer = this.xlsProducer(xls, null);
+        Assertions.assertEquals(Set.of(Set.of("x1.xls", "x2.xls"), Set.of("x3.xls"), Set.of("x4.xls")), this.laneFileNames(producer));
+    }
+
+    @Test
+    public void produce_xls_same_as_sequential() throws IOException {
+        final File xls = this.writeExcel(Map.of("x1", List.of("s1", "s2"), "x2", List.of("s2", "s3"), "x3", List.of("s4")), "xls");
+        final ComparableDataSet sequential = this.xlsProducer(xls, 1).loadDataSet();
+        final ComparableDataSet parallel = this.xlsProducer(xls, 4).loadDataSet();
+        Assertions.assertArrayEquals(new String[]{"s1", "s2", "s3", "s4"}, parallel.getTableNames());
+        for (final String tableName : sequential.getTableNames()) {
+            Assertions.assertEquals(this.rows(sequential.getTable(tableName)), this.rows(parallel.getTable(tableName)));
+        }
+        Assertions.assertEquals(20, parallel.getTable("s2").getRowCount());
+    }
+
     private Set<Set<String>> laneFileNames(final ComparableDataSetProducer producer) {
         final List<ComparableTableMappingTask> tasks = producer.getSourceStream().map(producer::createTableMappingTask).collect(Collectors.toList());
         return ParallelTableMapping.lanes(producer, tasks).orElseThrow().stream()
@@ -215,10 +237,14 @@ public class ParallelTableMappingTest {
     }
 
     private File writeXlsx(final Map<String, List<String>> sheetsByFile) throws IOException {
-        final File dir = Files.createDirectories(this.tempDir.resolve("xlsx")).toFile();
+        return this.writeExcel(sheetsByFile, "xlsx");
+    }
+
+    private File writeExcel(final Map<String, List<String>> sheetsByFile, final String extension) throws IOException {
+        final File dir = Files.createDirectories(this.tempDir.resolve(extension)).toFile();
         for (final Map.Entry<String, List<String>> file : sheetsByFile.entrySet()) {
-            try (final XSSFWorkbook workbook = new XSSFWorkbook();
-                 final FileOutputStream out = new FileOutputStream(new File(dir, file.getKey() + ".xlsx"))) {
+            try (final Workbook workbook = "xls".equals(extension) ? new HSSFWorkbook() : new XSSFWorkbook();
+                 final FileOutputStream out = new FileOutputStream(new File(dir, file.getKey() + "." + extension))) {
                 for (final String sheetName : file.getValue()) {
                     final Sheet sheet = workbook.createSheet(sheetName);
                     final Row header = sheet.createRow(0);
@@ -234,6 +260,14 @@ public class ParallelTableMappingTest {
             }
         }
         return dir;
+    }
+
+    private ComparableXlsDataSetProducer xlsProducer(final File src, final Integer parallel) {
+        return new ComparableXlsDataSetProducer(ComparableDataSetParam.builder()
+                .setSrc(src)
+                .setSource(DataSourceType.xls)
+                .setParallel(parallel)
+                .build());
     }
 
     private ComparableXlsxDataSetProducer xlsxProducer(final File src, final XlsxSchema schema, final Integer parallel) {
