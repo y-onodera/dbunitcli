@@ -316,9 +316,21 @@ describe("ConvertFormの描画テスト", () => {
 			expect(options).toEqual(["SHEET", "BOOK"]);
 		});
 
-		it("excelTableをBOOKに変えると再構成する", async () => {
+		it("excelTableをSHEET以外に変えると再構成する", async () => {
 			const props = makeConvertProps(
 				convertRefreshResultTypeXlsxResponseFixture,
+			);
+			render(<ConvertForm {...props} />);
+
+			await userEvent.clear(
+				querySelectorOrThrow('input[type="text"][name="-result.excelTable"]'),
+			);
+			expect(props.handleTypeSelect).toHaveBeenCalled();
+		});
+
+		it("SHEET以外どうし（BOOK・環境変数など）の変更では再構成せず、SHEETにすると再構成する", async () => {
+			const props = makeConvertProps(
+				convertRefreshExcelTableBookResponseFixture,
 			);
 			render(<ConvertForm {...props} />);
 
@@ -326,9 +338,9 @@ describe("ConvertFormの描画テスト", () => {
 				'input[type="text"][name="-result.excelTable"]',
 			);
 			await userEvent.clear(excelTable);
-			await userEvent.type(excelTable, "BOO");
+			await userEvent.type(excelTable, "SHEE");
 			expect(props.handleTypeSelect).not.toHaveBeenCalled();
-			await userEvent.type(excelTable, "K");
+			await userEvent.type(excelTable, "T");
 			expect(props.handleTypeSelect).toHaveBeenCalledTimes(1);
 		});
 

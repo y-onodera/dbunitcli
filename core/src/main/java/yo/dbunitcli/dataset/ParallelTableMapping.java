@@ -2,18 +2,19 @@ package yo.dbunitcli.dataset;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import yo.dbunitcli.resource.FileResources;
+import yo.dbunitcli.resource.ThreadContexts;
 
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
-import java.util.function.UnaryOperator;
+import java.util.stream.IntStream;
 
 /**
  * ソースを別スレッドで並列に読み込む。
  * 出力テーブルを共有するソースは同じレーンにまとめ、レーン内は元の順に逐次処理するため、
- * 同じテーブルへの追記順は逐次実行と変わらない。レーンごとにコンテキストとconverterを分けるので、レーン間で状態を共有しない。
+ * 同じテーブルへの追記順は逐次実行と変わらない。作業スレッド（ワーカー）ごとにコンテキスト・converter・DB接続を持ち、
+ * ワーカーはレーンを順に取り出して処理するので、ワーカー間で状態を共有しない。
  */
 public final class ParallelTableMapping {
 
@@ -21,17 +22,18 @@ public final class ParallelTableMapping {
 
     private static final AtomicInteger THREAD_NO = new AtomicInteger();
 
-    private static volatile UnaryOperator<Runnable> taskDecorator = UnaryOperator.identity();
-
     private ParallelTableMapping() {
     }
 
     /**
-     * 作業スレッドへ渡すタスクを包む関数を設定する。
-     * 関数は投入元のスレッドで呼ばれるので、投入元の文脈（ログの振り分け先など）を作業スレッドへ引き継ぐのに使う。
+     * タスクを列挙せずに判定できる条件で、並列化の余地があるか
      */
-    public static void setTaskDecorator(final UnaryOperator<Runnable> decorator) {
-        ParallelTableMapping.taskDecorator = decorator == null ? UnaryOperator.identity() : decorator;
+    public static boolean isParallelizable(final ComparableDataSetProducer producer) {
+        final ComparableDataSetParam param = producer.param();
+        return ParallelTableMapping.parallelism(param) > 1
+                && producer.isParallelizableSource()
+                && (param.converter() == null || param.converter().isParallelizable())
+                && ParallelTableMapping.isIndependentTables(param.tableSeparators());
     }
 
     /**
@@ -39,15 +41,10 @@ public final class ParallelTableMapping {
      */
     public static Optional<List<List<ComparableTableMappingTask>>> lanes(final ComparableDataSetProducer producer
             , final List<ComparableTableMappingTask> tasks) {
-        final ComparableDataSetParam param = producer.param();
-        if (ParallelTableMapping.parallelism(param) <= 1
-                || tasks.size() < 2
-                || !producer.isParallelizableSource()
-                || (param.converter() != null && !param.converter().isParallelizable())
-                || !ParallelTableMapping.isIndependentTables(param.tableSeparators())) {
+        if (tasks.size() < 2 || !ParallelTableMapping.isParallelizable(producer)) {
             return Optional.empty();
         }
-        final List<List<ComparableTableMappingTask>> result = ParallelTableMapping.groupBySharedTable(param.tableSeparators(), tasks);
+        final List<List<ComparableTableMappingTask>> result = ParallelTableMapping.groupBySharedTable(producer.param().tableSeparators(), tasks);
         if (result.size() < 2) {
             return Optional.empty();
         }
@@ -58,28 +55,22 @@ public final class ParallelTableMapping {
             , final List<List<ComparableTableMappingTask>> lanes) {
         final int threads = Math.min(ParallelTableMapping.parallelism(param), lanes.size());
         ParallelTableMapping.LOGGER.info("produce() - parallel lanes={}, threads={}", lanes.size(), threads);
-        final BlockingQueue<Future<TreeMap<String, ComparableTable>>> completed = new LinkedBlockingQueue<>();
+        final Queue<List<ComparableTableMappingTask>> queue = new ConcurrentLinkedQueue<>(lanes);
         final ExecutorService executor = Executors.newFixedThreadPool(threads, runnable -> {
             final Thread thread = new Thread(runnable, "produce-" + ParallelTableMapping.THREAD_NO.incrementAndGet());
             thread.setDaemon(true);
             return thread;
         });
-        final List<FutureTask<TreeMap<String, ComparableTable>>> futures = new ArrayList<>();
+        // executeは投入元のスレッドで呼ばれるため、ここで投入元の文脈を包む
+        final CompletionService<TreeMap<String, ComparableTable>> completion = new ExecutorCompletionService<>(
+                command -> executor.execute(ThreadContexts.propagate(command)));
+        final List<Future<TreeMap<String, ComparableTable>>> futures = IntStream.range(0, threads)
+                .mapToObj(i -> completion.submit(() -> ParallelTableMapping.runWorker(param, queue, i == 0)))
+                .toList();
+        final TreeMap<String, ComparableTable> result = new TreeMap<>();
         try {
-            for (int i = 0; i < lanes.size(); i++) {
-                final List<ComparableTableMappingTask> lane = lanes.get(i);
-                final boolean first = i == 0;
-                final FutureTask<TreeMap<String, ComparableTable>> future = new FutureTask<>(() -> ParallelTableMapping.runLane(param, lane, first)) {
-                    @Override
-                    protected void done() {
-                        completed.add(this);
-                    }
-                };
-                futures.add(future);
-                executor.execute(ParallelTableMapping.taskDecorator.apply(FileResources.propagateContext(future)));
-            }
-            for (int i = 0; i < futures.size(); i++) {
-                completed.take().get();
+            for (int i = 0; i < threads; i++) {
+                result.putAll(completion.take().get());
             }
         } catch (final ExecutionException e) {
             futures.forEach(it -> it.cancel(true));
@@ -91,8 +82,6 @@ public final class ParallelTableMapping {
         } finally {
             ParallelTableMapping.shutdown(executor);
         }
-        final TreeMap<String, ComparableTable> result = new TreeMap<>();
-        futures.forEach(it -> result.putAll(it.resultNow()));
         return result;
     }
 
@@ -118,24 +107,27 @@ public final class ParallelTableMapping {
     }
 
     /**
-     * 出力テーブル名を1つでも共有するソースを同じレーンにまとめる（連結成分）。レーン内・レーン間とも元の順を保つ
+     * 出力テーブル名を1つでも共有するソースを同じレーンにまとめる（連結成分）。レーン内・レーン間とも元の順を保つ。
+     * 出力テーブルの候補はxls/xlsxでファイルを開くため、タスクごとに並列に求める
      */
     private static List<List<ComparableTableMappingTask>> groupBySharedTable(final TableSeparators tableSeparators
             , final List<ComparableTableMappingTask> tasks) {
+        final List<List<String>> outputTables = tasks.parallelStream()
+                .map(task -> task.outputTableCandidates()
+                        .flatMap(tableSeparators::getAddSettingTableMetaData)
+                        .map(AddSettingTableMetaData::getTableName)
+                        .toList())
+                .toList();
         final int[] parent = new int[tasks.size()];
         final Map<String, Integer> firstWriter = new HashMap<>();
         for (int i = 0; i < tasks.size(); i++) {
             parent[i] = i;
-            final int index = i;
-            tasks.get(i).outputTableCandidates()
-                    .flatMap(tableSeparators::getAddSettingTableMetaData)
-                    .map(AddSettingTableMetaData::getTableName)
-                    .forEach(tableName -> {
-                        final Integer other = firstWriter.putIfAbsent(tableName, index);
-                        if (other != null) {
-                            ParallelTableMapping.union(parent, other, index);
-                        }
-                    });
+            for (final String tableName : outputTables.get(i)) {
+                final Integer other = firstWriter.putIfAbsent(tableName, i);
+                if (other != null) {
+                    ParallelTableMapping.union(parent, other, i);
+                }
+            }
         }
         final Map<Integer, List<ComparableTableMappingTask>> result = new LinkedHashMap<>();
         for (int i = 0; i < tasks.size(); i++) {
@@ -160,32 +152,36 @@ public final class ParallelTableMapping {
     }
 
     /**
-     * @param first 最初のレーンは元のconverterをそのまま使う（DB出力で接続を余分に張らない）
+     * キューが空になるまでレーンを取り出して処理する。converter・DB接続はワーカー単位で確保してレーン間で使い回す。
+     * レーンごとに出力テーブルが異なるので、コンテキストもワーカーで1つにできる
+     *
+     * @param first 最初のワーカーは元のconverterとタスクをそのまま使う（DB接続を余分に張らない）
      */
-    private static TreeMap<String, ComparableTable> runLane(final ComparableDataSetParam param
-            , final List<ComparableTableMappingTask> lane, final boolean first) {
-        final IDataSetConverter converter = ParallelTableMapping.laneConverter(param.converter(), first);
-        try (final LaneResources resources = new LaneResources()) {
+    private static TreeMap<String, ComparableTable> runWorker(final ComparableDataSetParam param
+            , final Queue<List<ComparableTableMappingTask>> queue, final boolean first) {
+        try (final WorkerResources resources = new WorkerResources()) {
+            final IDataSetConverter converter = first || param.converter() == null
+                    ? param.converter()
+                    : param.converter().splitForParallel(resources);
             final ComparableTableMappingContext context = new ComparableTableMappingContext(param.tableSeparators(), converter);
             context.open();
-            for (final ComparableTableMappingTask task : lane) {
-                if (Thread.currentThread().isInterrupted()) {
-                    throw new CancellationException("produce interrupted");
+            List<ComparableTableMappingTask> lane;
+            while ((lane = queue.poll()) != null) {
+                for (final ComparableTableMappingTask task : lane) {
+                    if (Thread.currentThread().isInterrupted()) {
+                        throw new CancellationException("produce interrupted");
+                    }
+                    (first ? task : task.forWorker(resources)).run(context);
                 }
-                (first ? task : task.forLane(resources)).run(context);
             }
             return context.close();
-        } finally {
-            if (converter != null && converter != param.converter()) {
-                converter.release();
-            }
         }
     }
 
     /**
-     * レーン（スレッド）ごとに確保する資源（DB接続など）。同じkeyはレーン内で使い回し、レーン終了時に閉じる
+     * 作業スレッドごとに確保する資源（DB接続など）。同じkeyはスレッド内で使い回し、スレッドの処理終了時（失敗時も）に閉じる
      */
-    public static final class LaneResources implements AutoCloseable {
+    public static final class WorkerResources implements AutoCloseable {
 
         private final Map<Object, Object> resources = new LinkedHashMap<>();
 
@@ -199,7 +195,7 @@ public final class ParallelTableMapping {
                     try {
                         closer.close(resource);
                     } catch (final Exception e) {
-                        ParallelTableMapping.LOGGER.warn("failed to close lane resource:{}", k, e);
+                        ParallelTableMapping.LOGGER.warn("failed to close worker resource:{}", k, e);
                     }
                 });
                 return resource;
@@ -215,13 +211,6 @@ public final class ParallelTableMapping {
         public interface Closer<T> {
             void close(T resource) throws Exception;
         }
-    }
-
-    private static IDataSetConverter laneConverter(final IDataSetConverter converter, final boolean first) {
-        if (converter == null || first) {
-            return converter;
-        }
-        return converter.splitForParallel();
     }
 
     private static RuntimeException rethrow(final Throwable cause) {

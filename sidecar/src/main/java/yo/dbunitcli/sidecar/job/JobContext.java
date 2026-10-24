@@ -12,7 +12,7 @@ final class JobContext {
 
     static final String ATTRIBUTE = "dbunitcli.job";
 
-    /** ログの振り分け（JobLogAppender）用。runの範囲内だけ束縛される。core内部の別スレッドへはpropagateで包んだタスクだけ引き継ぐ */
+    /** ログの振り分け（JobLogAppender）用。runの範囲内だけ束縛される。core内部の別スレッドへはJobContextPropagator（ThreadContexts#propagate）経由で引き継ぐ */
     private static final ScopedValue<JobContext> CURRENT = ScopedValue.newInstance();
 
     /** ログを求められていなければnull */

@@ -11,8 +11,6 @@ import org.apache.poi.xssf.eventusermodel.XSSFSheetXMLHandler;
 import org.apache.poi.xssf.model.SharedStrings;
 import org.apache.poi.xssf.model.Styles;
 import org.apache.poi.xssf.model.StylesTable;
-import org.dbunit.dataset.Column;
-import org.dbunit.dataset.DefaultTableMetaData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.ContentHandler;
@@ -28,7 +26,6 @@ import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -92,25 +89,21 @@ public record ComparableXlsxDataSetProducer(ComparableDataSetParam param) implem
          */
         @Override
         public Stream<TableMetaDataWithSource> outputTableCandidates() {
-            final List<TableMetaDataWithSource> result = new ArrayList<>();
+            final List<String> sheetNames = new ArrayList<>();
             try (final OPCPackage pkg = OPCPackage.open(this.source.filePath(), PackageAccess.READ)) {
                 final XSSFReader.SheetIterator iterator = (XSSFReader.SheetIterator) new XSSFReader(pkg).getSheetsData();
                 while (iterator.hasNext()) {
                     try (final InputStream ignored = iterator.next()) {
-                        final String sheetName = iterator.getSheetName();
-                        if (this.sheetNameFilter.predicate(sheetName) && this.schema.contains(sheetName)) {
-                            final Source sheet = this.source.sheetName(sheetName);
-                            Stream.concat(Arrays.stream(this.schema.getRowsTableBuilder(this.param.startRow(), this.param.headerNames(), sheet).getTableNames())
-                                            , Arrays.stream(this.schema.getCellRecordBuilder(this.param.headerNames(), sheet).getTableNames()))
-                                    .distinct()
-                                    .forEach(tableName -> result.add(sheet.wrap(new DefaultTableMetaData(tableName, new Column[0]))));
-                        }
+                        sheetNames.add(iterator.getSheetName());
                     }
                 }
             } catch (final IOException | OpenXML4JException e) {
                 throw new AssertionError(e);
             }
-            return result.stream();
+            return sheetNames.stream()
+                    .filter(sheetName -> this.sheetNameFilter.predicate(sheetName) && this.schema.contains(sheetName))
+                    .flatMap(sheetName -> this.schema.getTableCandidates(this.param.startRow(), this.param.headerNames()
+                            , this.source.sheetName(sheetName)));
         }
 
         @Override

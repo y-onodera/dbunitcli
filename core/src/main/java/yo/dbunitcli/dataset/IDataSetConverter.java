@@ -81,17 +81,11 @@ public interface IDataSetConverter extends IDataSetConsumer {
     }
 
     /**
-     * 別スレッドで使うインスタンスを作る。startDataSet()は呼び出し側が行う
+     * 別スレッドで使うインスタンスを作る。startDataSet()は呼び出し側が行う。
+     * スレッド間で共有できない資源（DB接続など）はresourcesから取得する（スレッドの処理終了時に閉じられる）
      */
-    default IDataSetConverter splitForParallel() {
+    default IDataSetConverter splitForParallel(final ParallelTableMapping.WorkerResources resources) {
         return this.split();
-    }
-
-    /**
-     * splitForParallel()で確保した資源を解放する。処理が失敗しても呼ばれる
-     */
-    default void release() {
-        // nothing default
     }
 
     default boolean isEnableRowProcessing(final AddSettingTableMetaData metaData, final List<ComparableTableJoin> joins) {

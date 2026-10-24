@@ -43,11 +43,14 @@ class DataSetConverterOptionTest {
     }
 
     @Test
-    void excelIsParallelizableOnlyForBook() {
+    void excelIsNotParallelizableOnlyForSheet() {
         final DataSetConverterDto dto = new DataSetConverterDto();
         dto.setResultType(ResultType.xlsx);
         Assertions.assertFalse(new DataSetConverterOption("result", dto).isParallelizable());
         dto.setExcelTable("BOOK");
+        Assertions.assertTrue(new DataSetConverterOption("result", dto).isParallelizable());
+        // 環境変数など実行時に決まる値は、SHEETと確定していないので表示する
+        dto.setExcelTable("$excelTable$");
         Assertions.assertTrue(new DataSetConverterOption("result", dto).isParallelizable());
         dto.setResultType(ResultType.csv);
         dto.setExcelTable(null);

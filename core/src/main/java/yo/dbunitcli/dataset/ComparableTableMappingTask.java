@@ -29,10 +29,10 @@ public interface ComparableTableMappingTask {
     }
 
     /**
-     * 並列実行で2つ目以降のレーンが使うタスクを返す。スレッド間で共有できない資源（DB接続など）は
-     * resourcesからレーン専用のものを取得して差し替える
+     * 並列実行で2つ目以降の作業スレッドが使うタスクを返す。スレッド間で共有できない資源（DB接続など）は
+     * resourcesからそのスレッド専用のものを取得して差し替える
      */
-    default ComparableTableMappingTask forLane(final ParallelTableMapping.LaneResources resources) {
+    default ComparableTableMappingTask forWorker(final ParallelTableMapping.WorkerResources resources) {
         return this;
     }
 

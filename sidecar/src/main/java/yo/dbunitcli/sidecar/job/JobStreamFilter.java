@@ -19,7 +19,6 @@ import org.slf4j.LoggerFactory;
 import reactor.core.Disposable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Sinks;
-import yo.dbunitcli.dataset.ParallelTableMapping;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -59,7 +58,6 @@ public class JobStreamFilter implements HttpServerFilter {
         this.appender.setContext(context);
         this.appender.start();
         context.getLogger(Logger.ROOT_LOGGER_NAME).addAppender(this.appender);
-        ParallelTableMapping.setTaskDecorator(JobContext::propagate);
     }
 
     @Override
@@ -91,7 +89,6 @@ public class JobStreamFilter implements HttpServerFilter {
         final LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
         context.getLogger(Logger.ROOT_LOGGER_NAME).detachAppender(this.appender);
         this.appender.stop();
-        ParallelTableMapping.setTaskDecorator(null);
     }
 
     private boolean isTarget(final HttpRequest<?> request) {

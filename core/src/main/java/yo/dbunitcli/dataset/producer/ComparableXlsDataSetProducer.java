@@ -8,19 +8,15 @@ import org.apache.poi.hssf.record.Record;
 import org.apache.poi.poifs.filesystem.POIFSFileSystem;
 import org.apache.poi.ss.util.CellAddress;
 import org.apache.poi.ss.util.CellReference;
-import org.dbunit.dataset.Column;
-import org.dbunit.dataset.DefaultTableMetaData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import yo.dbunitcli.common.Source;
 import yo.dbunitcli.common.TableMetaDataWithSource;
 import yo.dbunitcli.dataset.*;
-import yo.dbunitcli.resource.poi.XlsxSchema;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -127,16 +123,10 @@ public record ComparableXlsDataSetProducer(ComparableDataSetParam param) impleme
             } catch (final IOException | HSSFUserException e) {
                 throw new AssertionError(e);
             }
-            final XlsxSchema schema = this.param.xlsxSchema();
             return sheetNames.stream()
                     .filter(this.sheetNameFilter::predicate)
-                    .flatMap(sheetName -> {
-                        final Source sheet = new Source(file, this.addFileInfo).sheetName(sheetName);
-                        return Stream.concat(Arrays.stream(schema.getRowsTableBuilder(this.param.startRow(), this.headerNames, sheet).getTableNames())
-                                        , Arrays.stream(schema.getCellRecordBuilder(this.headerNames, sheet).getTableNames()))
-                                .distinct()
-                                .map(tableName -> sheet.wrap(new DefaultTableMetaData(tableName, new Column[0])));
-                    });
+                    .flatMap(sheetName -> this.param.xlsxSchema().getTableCandidates(this.param.startRow(), this.headerNames
+                            , new Source(file, this.addFileInfo).sheetName(sheetName)));
         }
 
         @Override

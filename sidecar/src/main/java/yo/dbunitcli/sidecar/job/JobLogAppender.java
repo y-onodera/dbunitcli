@@ -7,7 +7,7 @@ import ch.qos.logback.core.UnsynchronizedAppenderBase;
 /**
  * ジョブの実行スレッドで出力されたログイベントを、そのジョブのイベントへ転送するappender。
  * 判定はスレッド単位のため、core内部で別スレッドから出力されたログは対象外になる
- * （ソースの並列読込の作業スレッドは JobContext#propagate で引き継ぐ）。
+ * （core内部の作業スレッドは JobContextPropagator で引き継ぐ）。
  */
 class JobLogAppender extends UnsynchronizedAppenderBase<ILoggingEvent> {
 

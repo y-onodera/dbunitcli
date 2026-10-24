@@ -522,7 +522,7 @@ export const compareLoadResponseFixture = {
 			"WORKSPACE",
 			false,
 		),
-		parallel: makeElement("parallel", "TEXT", "", "WORKSPACE", false),
+		...parallelElement(true),
 	},
 	expectData: {
 		prefix: "expect",

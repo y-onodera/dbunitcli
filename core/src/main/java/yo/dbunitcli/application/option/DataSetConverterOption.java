@@ -89,11 +89,8 @@ public record DataSetConverterOption(
         final ResultType type = ResultType.valueOf(this.resultType.name());
         if (type == ResultType.table) {
             result.put("-op", this.operation == null ? DbOperation.CLEAN_INSERT : this.operation
-                          , DbOperation.class);
-            if (showParallel) {
-                result.put("-parallel", this.parallel);
-            }
-            result.addComponent("jdbc", this.jdbcOption.toParameters());
+                          , DbOperation.class)
+                  .addComponent("jdbc", this.jdbcOption.toParameters());
         } else {
             result.putDir("-result", this.resultDir, BaseDir.RESULT)
                   .put("-resultPath", this.resultPath)
@@ -114,19 +111,20 @@ public record DataSetConverterOption(
             } else {
                 result.put("-excelTable", this.excelTable);
             }
-            if (showParallel) {
-                result.put("-parallel", this.parallel);
-            }
+        }
+        if (showParallel) {
+            result.put("-parallel", this.parallel);
         }
         return result;
     }
 
     /**
-     * 出力側が並列書込に対応するか（xls/xlsxは1ブックにまとめるSHEETでは不可）
+     * 出力側が並列書込に対応するか。xls/xlsxは1ブックにまとめるSHEETでは不可。
+     * excelTableは環境変数で渡せる自由入力のため、SHEETと確定しているときだけ不可とする（実行時はconverterが判定する）
      */
     public boolean isParallelizable() {
         return (this.resultType != ResultType.xls && this.resultType != ResultType.xlsx)
-                || XlsConverter.TableExportType.BOOK.name().equals(this.excelTable);
+                || !XlsConverter.TableExportType.SHEET.name().equals(this.excelTable);
     }
 
     public DataSetConverterParam.Builder getParam() {

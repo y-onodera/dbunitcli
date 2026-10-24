@@ -37,6 +37,7 @@ public enum DataSourceType {
      * 画面でparallelを表示するかの判定に使う
      */
     public boolean isParallelizable() {
-        return this == table || this == sql || this == csv || this == csvq || this == reg || this == fixed || this == xls || this == xlsx;
+        // file/dirはソースが常に1つ、noneは読み込まない
+        return this != none && this != file && this != dir;
     }
 }

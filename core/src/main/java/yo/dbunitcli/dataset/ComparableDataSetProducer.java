@@ -28,19 +28,26 @@ public interface ComparableDataSetProducer {
 
     default TreeMap<String, ComparableTable> produce() {
         LOGGER.info("produce() - start");
-        final List<ComparableTableMappingTask> tasks = this.getSourceStream()
-                .map(this::createTableMappingTask)
-                .collect(Collectors.toList());
-        final TreeMap<String, ComparableTable> result = ParallelTableMapping.lanes(this, tasks)
-                .map(lanes -> ParallelTableMapping.run(this.param(), lanes))
-                .orElseGet(() -> {
-                    final ComparableTableMappingContext context = new ComparableTableMappingContext(this.param().tableSeparators(), this.param().converter());
-                    context.open();
-                    tasks.forEach(it -> it.run(context));
-                    return context.close();
-                });
+        final Stream<ComparableTableMappingTask> tasks = this.getSourceStream().map(this::createTableMappingTask);
+        final TreeMap<String, ComparableTable> result;
+        if (ParallelTableMapping.isParallelizable(this)) {
+            // レーン分けには全タスクが要るため、並列化の余地があるときだけ先に列挙する
+            final List<ComparableTableMappingTask> taskList = tasks.collect(Collectors.toList());
+            result = ParallelTableMapping.lanes(this, taskList)
+                    .map(lanes -> ParallelTableMapping.run(this.param(), lanes))
+                    .orElseGet(() -> this.produceSequential(taskList.stream()));
+        } else {
+            result = this.produceSequential(tasks);
+        }
         LOGGER.info("produce() - end");
         return result;
+    }
+
+    private TreeMap<String, ComparableTable> produceSequential(final Stream<ComparableTableMappingTask> tasks) {
+        final ComparableTableMappingContext context = new ComparableTableMappingContext(this.param().tableSeparators(), this.param().converter());
+        context.open();
+        tasks.forEach(it -> it.run(context));
+        return context.close();
     }
 
     /**
