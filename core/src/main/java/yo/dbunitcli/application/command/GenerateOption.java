@@ -11,6 +11,7 @@ import yo.dbunitcli.common.Parameter;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.dataset.ComparableDataSetProducer;
 import yo.dbunitcli.dataset.DbOperation;
+import yo.dbunitcli.dataset.ParallelTableMapping;
 import yo.dbunitcli.dataset.TableSeparators;
 import yo.dbunitcli.dataset.producer.ComparableDataSetLoader;
 import yo.dbunitcli.resource.FileResources;
@@ -19,7 +20,11 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 public record GenerateOption(Parameter parameter, String resultDir, String resultPath, GenerateType generateType,
@@ -83,6 +88,41 @@ public record GenerateOption(Parameter parameter, String resultDir, String resul
                 .wrapProducer(this, loader.getComparableDataSetProducer(this.dataSetParam()));
         return this.unit().templateStream(loader, producer,
                                           this.unit() == ParameterUnit.table ? this.unitTableSeparators() : TableSeparators.NONE);
+    }
+
+    /**
+     * 出力単位のパラメータを順に渡す。unit=tableのテンプレート出力は、並列化できればテーブルごとに別スレッドで
+     * 読込から出力まで行う（処理順は不定）。並列化できる条件はsrcの並列読込と同じで、加えて出力先がテーブルごとに異なること。
+     * 読込タスクを共有するテーブル（1つのソースから複数のテーブルを作る場合）は同じレーンにまとめ、レーン内は元の順に逐次処理する
+     * （タスクは状態を持ちうるため、同じタスクを同時に実行しない）
+     */
+    public void forEachParameter(final Consumer<Parameter> action) {
+        if (this.generateType.isExcel() || this.unit() != ParameterUnit.table) {
+            this.parameterStream().forEach(action);
+            return;
+        }
+        final ComparableDataSetLoader loader = this.getComparableDataSetLoader();
+        final ComparableDataSetProducer producer = this.generateType()
+                .wrapProducer(this, loader.getComparableDataSetProducer(this.dataSetParam()));
+        final List<ParameterUnit.TableTemplate> templates = ParameterUnit.tableTemplates(loader, producer,
+                                                                                         this.unitTableSeparators()).toList();
+        final List<List<ParameterUnit.TableTemplate>> lanes = ParallelTableMapping.groupByShared(templates,
+                templates.stream().map(it -> it.dto().getTask().tasks().toList()).toList());
+        if (lanes.size() < 2 || !ParallelTableMapping.isParallelizable(producer) || this.hasSameResultFile(templates)) {
+            templates.forEach(it -> action.accept(it.load()));
+            return;
+        }
+        ParallelTableMapping.forEach(producer.param(), lanes,
+                                     (lane, resources, first) -> lane.forEach(
+                                             it -> action.accept((first ? it : it.forWorker(resources)).load())));
+    }
+
+    /**
+     * 同じファイルへ出力するテーブルがあると、並列では最後に書くテーブルが不定になる
+     */
+    private boolean hasSameResultFile(final List<ParameterUnit.TableTemplate> templates) {
+        final Set<String> resultFiles = new HashSet<>();
+        return !templates.stream().allMatch(it -> resultFiles.add(this.resultFile(it.unloaded()).getAbsolutePath()));
     }
 
     public TableSeparators unitTableSeparators() {

@@ -284,6 +284,50 @@ public class ParallelTableMappingTest {
         Assertions.assertEquals(Map.of("a", expected, "b", expected), actual);
     }
 
+    @Test
+    public void forEach_processes_all_items_on_workers_with_context() {
+        final Map<String, String> actual = new ConcurrentHashMap<>();
+        final Set<String> threads = ConcurrentHashMap.newKeySet();
+        final Set<Boolean> firsts = ConcurrentHashMap.newKeySet();
+        ScopedValue.where(TestThreadContextPropagator.VALUE, "submitter")
+                .run(() -> ParallelTableMapping.forEach(this.producer(TableSeparators.NONE, null, 2).param()
+                        , List.of("a", "b", "c", "d")
+                        , (item, resources, first) -> {
+                            actual.put(item, TestThreadContextPropagator.VALUE.orElse("unbound"));
+                            threads.add(Thread.currentThread().getName());
+                            firsts.add(first);
+                            try {
+                                // 1つのワーカーが全件を取り切らないよう待つ
+                                Thread.sleep(50);
+                            } catch (final InterruptedException e) {
+                                Thread.currentThread().interrupt();
+                            }
+                        }));
+        Assertions.assertEquals(Map.of("a", "submitter", "b", "submitter", "c", "submitter", "d", "submitter"), actual);
+        Assertions.assertEquals(2, threads.size());
+        Assertions.assertEquals(Set.of(true, false), firsts);
+    }
+
+    @Test
+    public void groupByShared_groups_items_sharing_any_key() {
+        final List<List<String>> actual = ParallelTableMapping.groupByShared(List.of("a", "b", "c", "d", "e")
+                , List.of(List.of("x"), List.of("y"), List.of("z", "x"), List.of("w"), List.of("y")));
+        Assertions.assertEquals(List.of(List.of("a", "c"), List.of("b", "e"), List.of("d")), actual);
+    }
+
+    @Test
+    public void forEach_rethrows_failure_of_item() {
+        final AssertionError actual = Assertions.assertThrows(AssertionError.class
+                , () -> ParallelTableMapping.forEach(this.producer(TableSeparators.NONE, null, 2).param()
+                        , List.of("a", "b", "c", "d")
+                        , (item, resources, first) -> {
+                            if (item.equals("c")) {
+                                throw new AssertionError("failed " + item);
+                            }
+                        }));
+        Assertions.assertEquals("failed c", actual.getMessage());
+    }
+
     private ComparableTableMappingTask captureTask(final String name, final Consumer<ComparableTableMappingContext> body) {
         final Source source = new Source(new File(this.src, name + ".csv"), false);
         final ComparableDataSetParam param = this.producer(TableSeparators.NONE, null, 2).param();

@@ -56,11 +56,7 @@ public final class ParallelTableMapping {
         final int threads = Math.min(ParallelTableMapping.parallelism(param), lanes.size());
         ParallelTableMapping.LOGGER.info("produce() - parallel lanes={}, threads={}", lanes.size(), threads);
         final Queue<List<ComparableTableMappingTask>> queue = new ConcurrentLinkedQueue<>(lanes);
-        final ExecutorService executor = Executors.newFixedThreadPool(threads, runnable -> {
-            final Thread thread = new Thread(runnable, "produce-" + ParallelTableMapping.THREAD_NO.incrementAndGet());
-            thread.setDaemon(true);
-            return thread;
-        });
+        final ExecutorService executor = ParallelTableMapping.newExecutor(threads, "produce-");
         // executeは投入元のスレッドで呼ばれるため、ここで投入元の文脈を包む
         final CompletionService<TreeMap<String, ComparableTable>> completion = new ExecutorCompletionService<>(
                 command -> executor.execute(ThreadContexts.propagate(command)));
@@ -83,6 +79,50 @@ public final class ParallelTableMapping {
             ParallelTableMapping.shutdown(executor);
         }
         return result;
+    }
+
+    /**
+     * itemsを作業スレッドで並列に処理する（処理順は不定）。ワーカーはキューが空になるまでitemを取り出して処理し、
+     * DB接続などの資源はワーカー単位で確保して使い回す。いずれかが失敗したら残りを中断して例外を投げる
+     *
+     * @param action 最初のワーカー（first=true）は元の資源をそのまま使う（DB接続を余分に張らない）
+     */
+    public static <T> void forEach(final ComparableDataSetParam param, final List<T> items, final WorkerAction<T> action) {
+        final int threads = Math.min(ParallelTableMapping.parallelism(param), items.size());
+        ParallelTableMapping.LOGGER.info("forEach() - parallel items={}, threads={}", items.size(), threads);
+        final Queue<T> queue = new ConcurrentLinkedQueue<>(items);
+        final ExecutorService executor = ParallelTableMapping.newExecutor(threads, "generate-");
+        // executeは投入元のスレッドで呼ばれるため、ここで投入元の文脈を包む
+        final CompletionService<Void> completion = new ExecutorCompletionService<>(
+                command -> executor.execute(ThreadContexts.propagate(command)));
+        final List<Future<Void>> futures = IntStream.range(0, threads)
+                .mapToObj(i -> completion.submit(() -> {
+                    try (final WorkerResources resources = new WorkerResources()) {
+                        T item;
+                        while ((item = queue.poll()) != null) {
+                            if (Thread.currentThread().isInterrupted()) {
+                                throw new CancellationException("forEach interrupted");
+                            }
+                            action.accept(item, resources, i == 0);
+                        }
+                    }
+                    return (Void) null;
+                }))
+                .toList();
+        try {
+            for (int i = 0; i < threads; i++) {
+                completion.take().get();
+            }
+        } catch (final ExecutionException e) {
+            futures.forEach(it -> it.cancel(true));
+            throw ParallelTableMapping.rethrow(e.getCause());
+        } catch (final InterruptedException e) {
+            futures.forEach(it -> it.cancel(true));
+            Thread.currentThread().interrupt();
+            throw new CancellationException("forEach interrupted");
+        } finally {
+            ParallelTableMapping.shutdown(executor);
+        }
     }
 
     static int parallelism(final ComparableDataSetParam param) {
@@ -118,20 +158,29 @@ public final class ParallelTableMapping {
                         .map(AddSettingTableMetaData::getTableName)
                         .toList())
                 .toList();
-        final int[] parent = new int[tasks.size()];
-        final Map<String, Integer> firstWriter = new HashMap<>();
-        for (int i = 0; i < tasks.size(); i++) {
+        return ParallelTableMapping.groupByShared(tasks, outputTables);
+    }
+
+    /**
+     * keysを1つでも共有する要素を同じグループにまとめる（連結成分）。グループ内・グループ間とも元の順を保つ
+     *
+     * @param keys itemsと同じ並びで、各要素のkey
+     */
+    public static <T> List<List<T>> groupByShared(final List<T> items, final List<? extends Collection<?>> keys) {
+        final int[] parent = new int[items.size()];
+        final Map<Object, Integer> firstOwner = new HashMap<>();
+        for (int i = 0; i < items.size(); i++) {
             parent[i] = i;
-            for (final String tableName : outputTables.get(i)) {
-                final Integer other = firstWriter.putIfAbsent(tableName, i);
+            for (final Object key : keys.get(i)) {
+                final Integer other = firstOwner.putIfAbsent(key, i);
                 if (other != null) {
                     ParallelTableMapping.union(parent, other, i);
                 }
             }
         }
-        final Map<Integer, List<ComparableTableMappingTask>> result = new LinkedHashMap<>();
-        for (int i = 0; i < tasks.size(); i++) {
-            result.computeIfAbsent(ParallelTableMapping.find(parent, i), k -> new ArrayList<>()).add(tasks.get(i));
+        final Map<Integer, List<T>> result = new LinkedHashMap<>();
+        for (int i = 0; i < items.size(); i++) {
+            result.computeIfAbsent(ParallelTableMapping.find(parent, i), k -> new ArrayList<>()).add(items.get(i));
         }
         return new ArrayList<>(result.values());
     }
@@ -176,6 +225,19 @@ public final class ParallelTableMapping {
             }
             return context.close();
         }
+    }
+
+    private static ExecutorService newExecutor(final int threads, final String threadNamePrefix) {
+        return Executors.newFixedThreadPool(threads, runnable -> {
+            final Thread thread = new Thread(runnable, threadNamePrefix + ParallelTableMapping.THREAD_NO.incrementAndGet());
+            thread.setDaemon(true);
+            return thread;
+        });
+    }
+
+    @FunctionalInterface
+    public interface WorkerAction<T> {
+        void accept(T item, WorkerResources resources, boolean first);
     }
 
     /**

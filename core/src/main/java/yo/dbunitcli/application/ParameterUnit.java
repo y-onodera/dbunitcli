@@ -73,20 +73,7 @@ public enum ParameterUnit {
         public Stream<Parameter> templateStream(final ComparableDataSetLoader loader,
                                                 final ComparableDataSetProducer producer,
                                                 final TableSeparators unitTableSeparators) {
-            final Map<String, Object> tables = producer.lazyLoad(true);
-            final int[] row = new int[]{0};
-            return tables.keySet().stream()
-                         .map(tableName -> {
-                             ComparableTableDto dto = (ComparableTableDto) tables.get(tableName);
-                             dto.applyDataSetSeparators(unitTableSeparators);
-                             Map<String, Object> dataset = new LinkedHashMap<>();
-                             dataset.put(tableName, dto);
-                             return loader.parameter()
-                                          .asInputParam()
-                                          .withRowNumber(row[0]++)
-                                          .addAll(dto)
-                                          .add("dataSet", dataset);
-                         });
+            return ParameterUnit.tableTemplates(loader, producer, unitTableSeparators).map(TableTemplate::load);
         }
     },
     dataset;
@@ -113,5 +100,48 @@ public enum ParameterUnit {
                                             final ComparableDataSetProducer producer,
                                             final TableSeparators unitTableSeparators) {
         return this.dataSetToStream(loader, producer.param());
+    }
+
+    /**
+     * unit=tableのテンプレート出力を、行を読み込む前のテーブル単位で列挙する。行はload()で1テーブルずつ読み込む
+     */
+    public static Stream<TableTemplate> tableTemplates(final ComparableDataSetLoader loader,
+                                                       final ComparableDataSetProducer producer,
+                                                       final TableSeparators unitTableSeparators) {
+        final Map<String, Object> tables = producer.lazyLoad(true);
+        final int[] row = new int[]{0};
+        return tables.values().stream()
+                     .map(it -> new TableTemplate(loader.parameter().asInputParam().withRowNumber(row[0]++),
+                                                  (ComparableTableDto) it, unitTableSeparators));
+    }
+
+    public record TableTemplate(Parameter base, ComparableTableDto dto, TableSeparators unitTableSeparators) {
+
+        /**
+         * 行を読み込む前のパラメータ（rowsは未読込）。出力先の決定など、行を参照しない用途に使う
+         */
+        public Parameter unloaded() {
+            return this.toParameter(this.dto);
+        }
+
+        /**
+         * 行を読み込んだパラメータ。読み込んだ行は戻り値だけが参照する（dtoは変更しない）
+         */
+        public Parameter load() {
+            return this.toParameter(this.dto.applyDataSetSeparators(this.unitTableSeparators));
+        }
+
+        /**
+         * 並列実行で2つ目以降の作業スレッドが使うTableTemplateを返す
+         */
+        public TableTemplate forWorker(final ParallelTableMapping.WorkerResources resources) {
+            return new TableTemplate(this.base, this.dto.forWorker(resources), this.unitTableSeparators);
+        }
+
+        private Parameter toParameter(final ComparableTableDto target) {
+            final Map<String, Object> dataset = new LinkedHashMap<>();
+            dataset.put(target.getTableName(), target);
+            return this.base.addAll(target).add("dataSet", dataset);
+        }
     }
 }
