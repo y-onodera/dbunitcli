@@ -14,7 +14,7 @@
 
 全resultType共通: `resultDir`（`-result`）/ `resultPath` / `exportEmptyTable` / `exportHeader`（`table`除く）。
 
-`parallel`（並列化できる組み合わせのときだけ表示。Convertは`srcType.isParallelizable()`かつ`DataSetConverterOption.isParallelizable()`、Compareはnew/oldのどちらかが`isParallelizable()`）: ソースの並列読込数（`ComparableDataSetParam.parallel`へ渡す。Compareはnew/oldの読込に適用）。未指定はCPUコア数、`1`は逐次。並列化の可否は`ParallelTableMapping.lanes`が判定し、出力テーブルを共有するソースは同じレーン（同一スレッド・元の順）にまとめる。対象はproducerが`isParallelizableSource()`（csv/fixed/reg/xls/xlsx。xls/xlsxはタスクの`outputTableCandidates()`でシート名とxlsxSchemaから出力テーブルを先読み）かつconverterが`isParallelizable()`（FlatFile系・xls/xlsxのBOOK・tableは`splitForParallel()`でレーンごとに接続を張る）またはnull、join・件数分割なしのとき。
+`parallel`（並列化できる組み合わせのときだけ表示。Convertは`srcType.isParallelizable()`かつ`DataSetConverterOption.isParallelizable()`、Compareはnew/oldのどちらかが`isParallelizable()`）: ソースの並列読込数（`ComparableDataSetParam.parallel`へ渡す。Compareはnew/oldの読込に適用）。未指定はCPUコア数、`1`は逐次。並列化の可否は`ParallelTableMapping.lanes`が判定し、出力テーブルを共有するソースは同じレーン（同一スレッド・元の順）にまとめる。対象はproducerが`isParallelizableSource()`（csv/csvq/fixed/reg/xls/xlsx。xls/xlsxはタスクの`outputTableCandidates()`でシート名とxlsxSchemaから出力テーブルを先読み）。作業スレッドへは`FileResources`のContextを引き継ぐかつconverterが`isParallelizable()`（FlatFile系・xls/xlsxのBOOK・tableは`splitForParallel()`でレーンごとに接続を張る）またはnull、join・件数分割なしのとき。
 
 ## 実装チェックリスト（変換仕様の変更箇所）
 

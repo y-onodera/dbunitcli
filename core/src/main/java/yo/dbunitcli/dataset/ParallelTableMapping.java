@@ -2,6 +2,7 @@ package yo.dbunitcli.dataset;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import yo.dbunitcli.resource.FileResources;
 
 import java.util.*;
 import java.util.concurrent.*;
@@ -74,7 +75,7 @@ public final class ParallelTableMapping {
                     }
                 };
                 futures.add(future);
-                executor.execute(ParallelTableMapping.taskDecorator.apply(future));
+                executor.execute(ParallelTableMapping.taskDecorator.apply(FileResources.propagateContext(future)));
             }
             for (int i = 0; i < futures.size(); i++) {
                 completed.take().get();

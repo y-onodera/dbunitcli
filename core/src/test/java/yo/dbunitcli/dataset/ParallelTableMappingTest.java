@@ -11,14 +11,18 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import yo.dbunitcli.application.json.FromJsonXlsxSchemaBuilder;
 import yo.dbunitcli.application.json.TableMetaDataFilterParser;
+import yo.dbunitcli.common.Parameter;
+import yo.dbunitcli.common.Source;
 import yo.dbunitcli.dataset.converter.CsvConverter;
 import yo.dbunitcli.dataset.converter.DBConverter;
 import yo.dbunitcli.dataset.converter.DataSetConverterLoader;
 import yo.dbunitcli.dataset.converter.XlsConverter;
 import yo.dbunitcli.dataset.converter.XlsxConverter;
+import yo.dbunitcli.dataset.producer.ComparableCSVQueryDataSetProducer;
 import yo.dbunitcli.dataset.producer.ComparableCsvDataSetProducer;
 import yo.dbunitcli.dataset.producer.ComparableXlsDataSetProducer;
 import yo.dbunitcli.dataset.producer.ComparableXlsxDataSetProducer;
+import yo.dbunitcli.resource.FileResources;
 import yo.dbunitcli.resource.jdbc.DatabaseConnectionLoader;
 import yo.dbunitcli.resource.poi.XlsxSchema;
 
@@ -34,6 +38,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -227,6 +233,83 @@ public class ParallelTableMappingTest {
             Assertions.assertEquals(this.rows(sequential.getTable(tableName)), this.rows(parallel.getTable(tableName)));
         }
         Assertions.assertEquals(20, parallel.getTable("s2").getRowCount());
+    }
+
+    @Test
+    public void produce_csvq_same_as_sequential() throws IOException {
+        final File queryDir = Files.createDirectories(this.tempDir.resolve("csvq")).toFile();
+        for (final String name : List.of("a", "b", "c", "d")) {
+            final String csv = new File(this.src, name + ".csv").getAbsolutePath().replace("\\", "/");
+            Files.writeString(new File(queryDir, "q" + name + ".sql").toPath()
+                    , "SELECT * FROM CSVREAD('" + csv + "', null, 'charset=UTF-8') ORDER BY ID", StandardCharsets.UTF_8);
+        }
+        final ComparableDataSet sequential = this.csvqProducer(queryDir, 1).loadDataSet();
+        final ComparableDataSet parallel = this.csvqProducer(queryDir, 4).loadDataSet();
+        Assertions.assertArrayEquals(new String[]{"qa", "qb", "qc", "qd"}, parallel.getTableNames());
+        for (final String tableName : sequential.getTableNames()) {
+            Assertions.assertEquals(this.rows(sequential.getTable(tableName)), this.rows(parallel.getTable(tableName)));
+            Assertions.assertEquals(100, parallel.getTable(tableName).getRowCount());
+        }
+    }
+
+    @Test
+    public void run_propagates_file_resources_context_to_worker() {
+        final String before = System.getProperty(FileResources.PROPERTY_DATASET_BASE);
+        final File expected = this.tempDir.resolve("dataset").toFile();
+        final Map<String, File> actual = new ConcurrentHashMap<>();
+        final List<List<ComparableTableMappingTask>> lanes = List.of("a", "b").stream()
+                .map(name -> List.of(this.captureTask(name, it -> actual.put(name, FileResources.datasetDir()))))
+                .toList();
+        try {
+            System.setProperty(FileResources.PROPERTY_DATASET_BASE, expected.getPath());
+            FileResources.runInContext(() -> {
+                // 実行中にシステムプロパティが変わっても、作業スレッドは実行開始時のContextを参照する
+                System.setProperty(FileResources.PROPERTY_DATASET_BASE, this.tempDir.resolve("other").toString());
+                ParallelTableMapping.run(this.producer(TableSeparators.NONE, null, 2).param(), lanes);
+            });
+        } finally {
+            if (before == null) {
+                System.clearProperty(FileResources.PROPERTY_DATASET_BASE);
+            } else {
+                System.setProperty(FileResources.PROPERTY_DATASET_BASE, before);
+            }
+        }
+        Assertions.assertEquals(Map.of("a", expected, "b", expected), actual);
+    }
+
+    private ComparableTableMappingTask captureTask(final String name, final Consumer<ComparableTableMappingContext> body) {
+        final Source source = new Source(new File(this.src, name + ".csv"), false);
+        final ComparableDataSetParam param = this.producer(TableSeparators.NONE, null, 2).param();
+        return new ComparableTableMappingTask() {
+            @Override
+            public Source source() {
+                return source;
+            }
+
+            @Override
+            public ComparableDataSetParam param() {
+                return param;
+            }
+
+            @Override
+            public void run(final ComparableTableMappingContext context) {
+                body.accept(context);
+            }
+
+            @Override
+            public ComparableTableMappingTask with(final ComparableDataSetParam.Builder builder) {
+                return this;
+            }
+        };
+    }
+
+    private ComparableCSVQueryDataSetProducer csvqProducer(final File src, final Integer parallel) {
+        return new ComparableCSVQueryDataSetProducer(ComparableDataSetParam.builder()
+                .setSrc(src)
+                .setSource(DataSourceType.csvq)
+                .setEncoding("UTF-8")
+                .setParallel(parallel)
+                .build(), Parameter.none());
     }
 
     private Set<Set<String>> laneFileNames(final ComparableDataSetProducer producer) {
