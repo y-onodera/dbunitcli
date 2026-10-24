@@ -16,6 +16,7 @@ import yo.dbunitcli.application.option.DataSetLoadOption;
 import yo.dbunitcli.common.Parameter;
 import yo.dbunitcli.dataset.AddSettingTableMetaData;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
+import yo.dbunitcli.dataset.ComparableDataSetProducer;
 import yo.dbunitcli.dataset.ComparableTable;
 import yo.dbunitcli.dataset.IDataSetConverter;
 import yo.dbunitcli.dataset.producer.ComparableDataSetLoader;
@@ -87,9 +88,12 @@ public class DatasetSettingsController extends AbstractResourceFileController<Da
     public String tablePreview(@Body final DatasetTablePreviewRequestDto request) {
         try {
             List<ComparableTable.Builder> metaDataBuilder = new ArrayList<>();
-            new ComparableDataSetLoader(this.buildParameter(request)).getComparableDataSetProducer(
-                    this.toParam(request, "true").setConverter(new TargetTableHandler(request, metaDataBuilder))
-                        .build()).produce();
+            try (final ComparableDataSetProducer producer = new ComparableDataSetLoader(this.buildParameter(request))
+                    .getComparableDataSetProducer(this.toParam(request, "true")
+                                                      .setConverter(new TargetTableHandler(request, metaDataBuilder))
+                                                      .build())) {
+                producer.produce();
+            }
             if (metaDataBuilder.isEmpty()) {
                 return ObjectMapper.getDefault()
                                    .writeValueAsString(new DatasetTablePreviewResponseDto(new String[0], List.of()));

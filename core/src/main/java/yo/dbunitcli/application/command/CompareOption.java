@@ -145,21 +145,26 @@ public record CompareOption(
     }
 
     public boolean compare() {
-        final CompareResult result = this.getDataSetCompareBuilder()
-                .newDataSet(this.newDataSet())
-                .oldDataSet(this.oldDataSet())
-                .tableSeparators(this.getTableSeparators())
-                .dataSetConverter(this.result().converter())
-                .build()
-                .result();
-        if (this.expectData().srcType() != DataSourceType.none) {
-            return !new DataSetCompareBuilder()
-                    .newDataSet(this.resultDataSet())
-                    .oldDataSet(this.expectDataSet())
-                    .tableSeparators(this.expectData().getParam().getTableSeparators())
-                    .dataSetConverter(this.expectedDiffConverter())
+        final CompareResult result;
+        try (final IDataSetConverter converter = this.result().converter()) {
+            result = this.getDataSetCompareBuilder()
+                    .newDataSet(this.newDataSet())
+                    .oldDataSet(this.oldDataSet())
+                    .tableSeparators(this.getTableSeparators())
+                    .dataSetConverter(converter)
                     .build()
-                    .result().existDiff();
+                    .result();
+        }
+        if (this.expectData().srcType() != DataSourceType.none) {
+            try (final IDataSetConverter converter = this.expectedDiffConverter()) {
+                return !new DataSetCompareBuilder()
+                        .newDataSet(this.resultDataSet())
+                        .oldDataSet(this.expectDataSet())
+                        .tableSeparators(this.expectData().getParam().getTableSeparators())
+                        .dataSetConverter(converter)
+                        .build()
+                        .result().existDiff();
+            }
         }
         return !result.existDiff();
     }

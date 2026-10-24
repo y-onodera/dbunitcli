@@ -26,7 +26,7 @@ public class ComparableXlsxSchemaMetaDataProducer extends ComparableDataSetProdu
     };
 
     public ComparableXlsxSchemaMetaDataProducer(final ComparableDataSetProducer delegate) {
-        super(delegate);
+        super(delegate, COLUMN_DEF_SCHEMA);
     }
 
     public static Column[] outputSchema() {
@@ -34,12 +34,12 @@ public class ComparableXlsxSchemaMetaDataProducer extends ComparableDataSetProdu
     }
 
     @Override
-    public void startTable(final ITableMetaData metaData) throws DataSetException {
+    protected void convertTable(final ITableMetaData metaData, final Conversion conversion) throws DataSetException {
         final String tableName = metaData.getTableName();
         final Set<String> primaryKeyNames = Arrays.stream(metaData.getPrimaryKeys())
                 .map(Column::getColumnName)
                 .collect(Collectors.toSet());
-        this.writeColumnRows(tableName, COLUMN_DEF_SCHEMA, metaData.getColumns(), (column, index) -> {
+        conversion.writeColumnRows(tableName, metaData.getColumns(), (column, index) -> {
             final String columnName = column.getColumnName();
             return new Object[]{
                     columnName,

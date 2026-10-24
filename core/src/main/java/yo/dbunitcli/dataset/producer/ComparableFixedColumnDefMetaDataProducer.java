@@ -22,7 +22,7 @@ public class ComparableFixedColumnDefMetaDataProducer extends ComparableDataSetP
 
     public ComparableFixedColumnDefMetaDataProducer(final ComparableDataSetProducer delegate,
                                                       final String[] lengths, final int defaultLength, final String align) {
-        super(delegate);
+        super(delegate, COLUMN_DEF_SCHEMA);
         this.lengths = lengths;
         this.defaultLength = defaultLength;
         this.align = align;
@@ -33,8 +33,8 @@ public class ComparableFixedColumnDefMetaDataProducer extends ComparableDataSetP
     }
 
     @Override
-    public void startTable(final ITableMetaData metaData) throws DataSetException {
-        this.writeColumnRows(metaData.getTableName(), COLUMN_DEF_SCHEMA, metaData.getColumns(), (column, index) -> {
+    protected void convertTable(final ITableMetaData metaData, final Conversion conversion) throws DataSetException {
+        conversion.writeColumnRows(metaData.getTableName(), metaData.getColumns(), (column, index) -> {
             final int length = index < this.lengths.length ? Integer.parseInt(this.lengths[index].trim()) : this.defaultLength;
             return new Object[]{column.getColumnName(), length, this.align, " "};
         });

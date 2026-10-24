@@ -46,6 +46,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 public class ParallelTableMappingTest {
 
@@ -282,6 +283,93 @@ public class ParallelTableMappingTest {
             }
         }
         Assertions.assertEquals(Map.of("a", expected, "b", expected), actual);
+    }
+
+    @Test
+    public void forEach_processes_all_items_on_workers_with_context() {
+        final Map<String, String> actual = new ConcurrentHashMap<>();
+        final Set<String> threads = ConcurrentHashMap.newKeySet();
+        final Set<Boolean> firsts = ConcurrentHashMap.newKeySet();
+        ScopedValue.where(TestThreadContextPropagator.VALUE, "submitter")
+                .run(() -> ParallelTableMapping.forEach(this.producer(TableSeparators.NONE, null, 2).param()
+                        , List.of("a", "b", "c", "d")
+                        , (item, resources, first) -> {
+                            actual.put(item, TestThreadContextPropagator.VALUE.orElse("unbound"));
+                            threads.add(Thread.currentThread().getName());
+                            firsts.add(first);
+                            try {
+                                // 1つのワーカーが全件を取り切らないよう待つ
+                                Thread.sleep(50);
+                            } catch (final InterruptedException e) {
+                                Thread.currentThread().interrupt();
+                            }
+                        }));
+        Assertions.assertEquals(Map.of("a", "submitter", "b", "submitter", "c", "submitter", "d", "submitter"), actual);
+        Assertions.assertEquals(2, threads.size());
+        Assertions.assertEquals(Set.of(true, false), firsts);
+    }
+
+    @Test
+    public void forEachByKey_keeps_order_per_key_on_workers_with_context() {
+        final Map<Integer, List<Integer>> actual = new ConcurrentHashMap<>();
+        final Set<String> threads = ConcurrentHashMap.newKeySet();
+        final Set<String> contexts = ConcurrentHashMap.newKeySet();
+        ScopedValue.where(TestThreadContextPropagator.VALUE, "submitter")
+                .run(() -> ParallelTableMapping.<Integer>forEachByKey(4, it -> it % 7, it -> {
+                    actual.computeIfAbsent(it % 7, k -> Collections.synchronizedList(new ArrayList<>())).add(it);
+                    threads.add(Thread.currentThread().getName());
+                    contexts.add(TestThreadContextPropagator.VALUE.orElse("unbound"));
+                }, submit -> IntStream.range(0, 1000).boxed().forEach(submit)));
+        Assertions.assertEquals(7, actual.size());
+        actual.forEach((key, values) -> Assertions.assertEquals(
+                IntStream.range(0, 1000).filter(it -> it % 7 == key).boxed().toList(), values, "key=" + key));
+        Assertions.assertTrue(threads.size() > 1, threads.toString());
+        Assertions.assertEquals(Set.of("submitter"), contexts);
+    }
+
+    @Test
+    public void forEachByKey_rethrows_failure_of_worker() {
+        final AssertionError actual = Assertions.assertThrows(AssertionError.class
+                , () -> ParallelTableMapping.<Integer>forEachByKey(2, it -> it, it -> {
+                    if (it == 10) {
+                        throw new AssertionError("failed " + it);
+                    }
+                }, submit -> IntStream.range(0, 10000).boxed().forEach(submit)));
+        Assertions.assertEquals("failed 10", actual.getMessage());
+    }
+
+    @Test
+    public void forEachByKey_rethrows_failure_of_source() {
+        final Stream<Integer> items = IntStream.range(0, 100).boxed().map(it -> {
+            if (it == 50) {
+                throw new IllegalStateException("failed " + it);
+            }
+            return it;
+        });
+        final IllegalStateException actual = Assertions.assertThrows(IllegalStateException.class
+                , () -> ParallelTableMapping.<Integer>forEachByKey(2, it -> it, it -> {
+                }, items::forEach));
+        Assertions.assertEquals("failed 50", actual.getMessage());
+    }
+
+    @Test
+    public void groupByShared_groups_items_sharing_any_key() {
+        final List<List<String>> actual = ParallelTableMapping.groupByShared(List.of("a", "b", "c", "d", "e")
+                , List.of(List.of("x"), List.of("y"), List.of("z", "x"), List.of("w"), List.of("y")));
+        Assertions.assertEquals(List.of(List.of("a", "c"), List.of("b", "e"), List.of("d")), actual);
+    }
+
+    @Test
+    public void forEach_rethrows_failure_of_item() {
+        final AssertionError actual = Assertions.assertThrows(AssertionError.class
+                , () -> ParallelTableMapping.forEach(this.producer(TableSeparators.NONE, null, 2).param()
+                        , List.of("a", "b", "c", "d")
+                        , (item, resources, first) -> {
+                            if (item.equals("c")) {
+                                throw new AssertionError("failed " + item);
+                            }
+                        }));
+        Assertions.assertEquals("failed c", actual.getMessage());
     }
 
     private ComparableTableMappingTask captureTask(final String name, final Consumer<ComparableTableMappingContext> body) {

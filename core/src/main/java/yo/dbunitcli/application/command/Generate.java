@@ -5,6 +5,7 @@ import yo.dbunitcli.common.Parameter;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 
 public class Generate implements Command<GenerateDto, GenerateOption> {
 
@@ -14,21 +15,21 @@ public class Generate implements Command<GenerateDto, GenerateOption> {
 
     @Override
     public void exec(final GenerateOption options) {
-        options.parameterStream()
-                .forEach(param -> {
-                            final File resultFile = options.resultFile(param);
-                            if (!resultFile.getParentFile().exists()) {
-                                if (!resultFile.getParentFile().mkdirs()) {
-                                    throw new AssertionError("failed create directory " + resultFile.getParentFile());
-                                }
-                            }
-                            try {
-                                options.write(resultFile, param);
-                            } catch (final IOException e) {
-                                throw new AssertionError(e);
-                            }
-                        }
-                );
+        final GenerateType.Writer writer;
+        try {
+            writer = options.writer();
+        } catch (final IOException e) {
+            throw new AssertionError(e);
+        }
+        // unit=tableでは複数スレッドから呼ばれる
+        options.forEachParameter((resultFile, param) -> {
+            try {
+                Files.createDirectories(resultFile.getParentFile().toPath());
+                writer.write(resultFile, param);
+            } catch (final IOException e) {
+                throw new AssertionError(e);
+            }
+        });
     }
 
     @Override

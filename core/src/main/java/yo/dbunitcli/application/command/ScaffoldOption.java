@@ -206,19 +206,22 @@ public record ScaffoldOption(
 
     private void writeWrappedDatasetSrcFiles(final File srcDir,
                                               final ComparableDataSetProducerWrapper wrapped) throws IOException {
-        this.writeConverted(srcDir, Arrays.asList(wrapped.loadDataSet().getTables()));
+        try (wrapped) {
+            this.writeConverted(srcDir, Arrays.asList(wrapped.loadDataSet().getTables()));
+        }
     }
 
     private void writeConverted(final File srcDir, final Iterable<? extends ITable> tables) throws IOException {
         if (!srcDir.mkdirs() && !srcDir.isDirectory()) {
             return;
         }
-        final IDataSetConverter converter = this.createSrcConverter(srcDir);
-        converter.startDataSet();
-        for (final ITable table : tables) {
-            converter.convert(table);
+        try (final IDataSetConverter converter = this.createSrcConverter(srcDir)) {
+            converter.startDataSet();
+            for (final ITable table : tables) {
+                converter.convert(table);
+            }
+            converter.endDataSet();
         }
-        converter.endDataSet();
     }
 
     private ComparableDataSetProducer sourceProducer() {

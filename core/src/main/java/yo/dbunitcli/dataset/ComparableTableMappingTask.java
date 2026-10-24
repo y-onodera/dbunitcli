@@ -81,8 +81,14 @@ public interface ComparableTableMappingTask {
 
         @Override
         public Stream<TableMetaDataWithSource> outputTableCandidates() {
-            return Stream.concat(Stream.of(this.head), this.rest.stream())
-                    .flatMap(ComparableTableMappingTask::outputTableCandidates);
+            return this.tasks().flatMap(ComparableTableMappingTask::outputTableCandidates);
+        }
+
+        /**
+         * runで順に実行するタスク
+         */
+        public Stream<ComparableTableMappingTask> tasks() {
+            return Stream.concat(Stream.of(this.head), this.rest.stream());
         }
 
         @Override
@@ -102,6 +108,12 @@ public interface ComparableTableMappingTask {
             newRest.add(target.head());
             newRest.addAll(target.rest());
             return new WithTargetTable(this.targetTableName(), this.head(), newRest);
+        }
+
+        @Override
+        public WithTargetTable forWorker(final ParallelTableMapping.WorkerResources resources) {
+            return new WithTargetTable(this.targetTableName, this.head.forWorker(resources),
+                                       this.rest.stream().map(it -> it.forWorker(resources)).toList());
         }
     }
 }

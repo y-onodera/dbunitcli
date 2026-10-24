@@ -111,6 +111,9 @@ export function GenerateForm(prop: {
 					.map((field) => (
 						<PlainText key={field.name} prefix="" element={field} />
 					))}
+				{generate.parallel && (
+					<PlainText prefix="" element={generate.parallel} />
+				)}
 				<FileText prefix="" element={generate.result} />
 				<PlainText prefix="" element={generate.resultPath} />
 				{generate.outputEncoding && (

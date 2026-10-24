@@ -38,6 +38,13 @@ public class ComparableTableDto extends HashMap<String, Object> {
         this.put("subTable", this.subTables);
     }
 
+    private ComparableTableDto(final ComparableTableDto origin) {
+        super(origin);
+        this.task = origin.task;
+        this.subTables.putAll(origin.subTables);
+        this.put("subTable", this.subTables);
+    }
+
     public ComparableTableMappingTask.WithTargetTable getTask() {
         return this.task;
     }
@@ -91,17 +98,32 @@ public class ComparableTableDto extends HashMap<String, Object> {
         return this.subTables;
     }
 
-    public void applyDataSetSeparators(TableSeparators dataSetSeparators) {
-        String tableName = this.task.targetTableName();
-        Consumer<TableSeparators.Builder> builder = origin ->
+    /**
+     * 並列実行で2つ目以降の作業スレッドが使うDTOを返す（タスクをそのスレッド専用の資源を使うものに差し替える）
+     */
+    public ComparableTableDto forWorker(final ParallelTableMapping.WorkerResources resources) {
+        final ComparableTableDto result = new ComparableTableDto(this);
+        result.setRows(this.task.forWorker(resources));
+        return result;
+    }
+
+    /**
+     * 行を読み込んだDTOを新たに作って返す（このDTOは変更しない）。
+     * 読込前のDTOを一覧で保持していても、読み込んだ行は返したDTOを手放せば解放される
+     */
+    public ComparableTableDto applyDataSetSeparators(final TableSeparators dataSetSeparators) {
+        final String tableName = this.task.targetTableName();
+        final Consumer<TableSeparators.Builder> builder = origin ->
                 origin.setFilter(origin.getFilter().and(new SplitOrNameFilter(tableName)))
                       .setNext(origin.getNext().then(dataSetSeparators));
         final TreeMap<String, ComparableTable> tables = this.task.runWith(builder, null);
+        final ComparableTableDto result = new ComparableTableDto(this);
         final ComparableTable target = tables.get(tableName);
-        this.setRows(target == null ? new ArrayList<>() : target.toMap(false));
+        result.setRows(target == null ? new ArrayList<>() : target.toMap(false));
         tables.entrySet().stream()
               .filter(it -> !it.getKey().equals(tableName))
-              .forEach(it -> this.getSubTables().put(it.getKey(), it.getValue().toMap(true).getFirst()));
+              .forEach(it -> result.getSubTables().put(it.getKey(), it.getValue().toMap(true).getFirst()));
+        return result;
     }
 
 }

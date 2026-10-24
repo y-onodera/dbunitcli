@@ -45,22 +45,25 @@ public record DataSetConverterOption(
                 , dto.getExtension()
                 , dto.getFixedColumnDefFile()
                 , Strings.isNotEmpty(dto.getFixedLengthType()) ? dto.getFixedLengthType() : "char"
-                , DataSetConverterOption.parallel(dto)
+                , DataSetConverterOption.parallel(dto.getParallel())
         );
     }
 
-    private static String parallel(final DataSetConverterDto dto) {
-        if (Strings.isEmpty(dto.getParallel())) {
+    /**
+     * -parallelの値を検証する。未指定は空文字（並列化できればCPUコア数で自動）
+     */
+    public static String parallel(final String parallel) {
+        if (Strings.isEmpty(parallel)) {
             return "";
         }
         try {
-            if (Integer.parseInt(dto.getParallel().trim()) < 1) {
-                throw new IllegalArgumentException("-parallel must be 1 or more: " + dto.getParallel());
+            if (Integer.parseInt(parallel.trim()) < 1) {
+                throw new IllegalArgumentException("-parallel must be 1 or more: " + parallel);
             }
         } catch (final NumberFormatException e) {
-            throw new IllegalArgumentException("-parallel must be a number: " + dto.getParallel(), e);
+            throw new IllegalArgumentException("-parallel must be a number: " + parallel, e);
         }
-        return dto.getParallel().trim();
+        return parallel.trim();
     }
 
     private static ResultType resultType(final DataSetConverterDto dto) {
@@ -149,7 +152,15 @@ public record DataSetConverterOption(
      * @return ソースの並列読込数。未指定ならnull（並列化できればCPUコア数で自動）
      */
     public Integer parallelism() {
-        return Strings.isEmpty(this.parallel) ? null : Integer.valueOf(this.parallel);
+        return DataSetConverterOption.parallelism(this.parallel);
+    }
+
+    /**
+     * @param parallel parallel(String)で検証した値
+     * @return ソースの並列読込数。未指定ならnull（並列化できればCPUコア数で自動）
+     */
+    public static Integer parallelism(final String parallel) {
+        return Strings.isEmpty(parallel) ? null : Integer.valueOf(parallel);
     }
 
     public File getResultDir() {

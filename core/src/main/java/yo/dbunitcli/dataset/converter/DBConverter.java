@@ -21,25 +21,36 @@ public class DBConverter implements IDataSetConverter {
     private final DBOperator operator;
     /** 並列実行用に別の接続を張るためのloader。nullなら並列化しない */
     private final DatabaseConnectionLoader connectionLoader;
+    /** 接続を自分で張ったか（closeで閉じる）。他から受け取った接続は渡した側が閉じる */
+    private final boolean ownsConnection;
 
     public DBConverter(final DataSetConverterParam param) {
         this(param.databaseConnectionLoader().loadConnection()
                 , param.operation()
                 , param.exportEmptyTable()
-                , param.databaseConnectionLoader());
+                , param.databaseConnectionLoader()
+                , true);
     }
 
     public DBConverter(final IDatabaseConnection connection, final DbOperation operation, final boolean exportEmptyTable) {
-        this(connection, operation, exportEmptyTable, null);
+        this(connection, operation, exportEmptyTable, null, false);
     }
 
     private DBConverter(final IDatabaseConnection connection, final DbOperation operation, final boolean exportEmptyTable
-            , final DatabaseConnectionLoader connectionLoader) {
+            , final DatabaseConnectionLoader connectionLoader, final boolean ownsConnection) {
         this.connection = connection;
         this.operation = operation;
         this.exportEmptyTable = exportEmptyTable;
         this.operator = this.createOperator(operation, connection);
         this.connectionLoader = connectionLoader;
+        this.ownsConnection = ownsConnection;
+    }
+
+    @Override
+    public void close() {
+        if (this.ownsConnection) {
+            DatabaseConnectionLoader.close(this.connection);
+        }
     }
 
     private DBOperator createOperator(final DbOperation operation, final IDatabaseConnection connection) {
@@ -77,7 +88,8 @@ public class DBConverter implements IDataSetConverter {
     public IDataSetConverter splitForParallel(final ParallelTableMapping.WorkerResources resources) {
         final IDatabaseConnection connection = resources.get(List.of(DBConverter.class, this.connectionLoader)
                 , this.connectionLoader::loadConnection, IDatabaseConnection::close);
-        return new DBConverter(connection, this.operation, this.exportEmptyTable, this.connectionLoader);
+        // 接続はWorkerResourcesが作業スレッドの終了時に閉じる
+        return new DBConverter(connection, this.operation, this.exportEmptyTable, this.connectionLoader, false);
     }
 
     @Override

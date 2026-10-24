@@ -23,7 +23,7 @@
 
 | unit | 1回の実行に渡るParameter | 用途の目安 |
 |---|---|---|
-| `record`（既定） | `-param`の1行（`mapIncludeMetaData`時は`row`も付与、行番号付き） | 行ごとに1コマンド（データ駆動の基本） |
+| `record`（既定） | `-param`の1行（列の値・`tableName`・テーブルごとの`rowNumber`。`mapIncludeMetaData`時はテーブル全体と`row`。`RecordConverter`でテーブル名順に1テーブルずつ作る（Generateと同じ形）。全件読込後に逐次実行） | 行ごとに1コマンド（データ駆動の基本） |
 | `table` | テーブル毎に1件（テーブルの先頭行相当のマップ） | テーブル単位のバッチ |
 | `dataset` | データセット全体で1件 | 全体で1回だけ実行（固定連鎖） |
 

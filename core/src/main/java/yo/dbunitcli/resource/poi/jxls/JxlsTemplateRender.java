@@ -6,10 +6,9 @@ import org.jxls.builder.xls.XlsCommentAreaBuilder;
 import org.jxls.transform.poi.JxlsPoiTemplateFillerBuilder;
 import yo.dbunitcli.common.Parameter;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -31,37 +30,38 @@ public record JxlsTemplateRender(
         return this.templateParameterAttribute;
     }
 
-    public void render(final File aTemplate, final File aResultFile, final Parameter param, final boolean useStreamingEach) throws IOException {
+    /**
+     * 読み込み済みのテンプレートで出力する。templateは変更しないため、複数スレッドから同時に使える
+     */
+    public void render(final byte[] template, final File aResultFile, final Parameter param, final boolean useStreamingEach) throws IOException {
         final Map<String, Object> context = new HashMap<>();
         if (Optional.ofNullable(this.getTemplateParameterAttribute()).orElse("").isEmpty()) {
             param.forEach(context::put);
         } else {
             context.put(this.getTemplateParameterAttribute(), param);
         }
-        try (final InputStream is = new FileInputStream(aTemplate)) {
-            final XlsCommentAreaBuilder areaBuilder = new XlsCommentAreaBuilder();
-            if (useStreamingEach) {
-                areaBuilder.addCommandMapping(StreamingEachCommand.COMMAND_NAME, StreamingEachCommand.class);
-            }
-            final JxlsPoiTemplateFillerBuilder builder = JxlsPoiTemplateFillerBuilder.newInstance()
-                    .withAreaBuilder(areaBuilder)
-                    .withTemplate(is)
-                    .withTransformerFactory(new UserFormulasValueClearPoiTransformerFactory(this.deleteBlankCells));
-            if (this.fastFormulaProcess) {
-                builder.withFastFormulaProcessor();
-            }
+        final XlsCommentAreaBuilder areaBuilder = new XlsCommentAreaBuilder();
+        if (useStreamingEach) {
+            areaBuilder.addCommandMapping(StreamingEachCommand.COMMAND_NAME, StreamingEachCommand.class);
+        }
+        final JxlsPoiTemplateFillerBuilder builder = JxlsPoiTemplateFillerBuilder.newInstance()
+                .withAreaBuilder(areaBuilder)
+                .withTemplate(new ByteArrayInputStream(template))
+                .withTransformerFactory(new UserFormulasValueClearPoiTransformerFactory(this.deleteBlankCells));
+        if (this.fastFormulaProcess) {
+            builder.withFastFormulaProcessor();
+        }
 
-            if (!aResultFile.getName().endsWith(".xls") && !this.formulaProcess) {
-                builder
-                        .withStreaming(JxlsStreaming.STREAMING_ON)
-                        .withUpdateCellDataArea(false)
-                        .buildAndFill(context, new JxlsOutputFile(aResultFile));
-            } else {
-                builder
-                        .withRecalculateFormulasBeforeSaving(this.evaluateFormulas)
-                        .withRecalculateFormulasOnOpening(this.forceFormulaRecalc)
-                        .buildAndFill(context, new JxlsOutputFile(aResultFile));
-            }
+        if (!aResultFile.getName().endsWith(".xls") && !this.formulaProcess) {
+            builder
+                    .withStreaming(JxlsStreaming.STREAMING_ON)
+                    .withUpdateCellDataArea(false)
+                    .buildAndFill(context, new JxlsOutputFile(aResultFile));
+        } else {
+            builder
+                    .withRecalculateFormulasBeforeSaving(this.evaluateFormulas)
+                    .withRecalculateFormulasOnOpening(this.forceFormulaRecalc)
+                    .buildAndFill(context, new JxlsOutputFile(aResultFile));
         }
     }
 

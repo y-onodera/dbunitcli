@@ -5,6 +5,7 @@ import yo.dbunitcli.application.ArgumentMapper;
 import yo.dbunitcli.application.option.DataSetLoadOption;
 import yo.dbunitcli.application.option.ResultOption;
 import yo.dbunitcli.common.Parameter;
+import yo.dbunitcli.dataset.IDataSetConverter;
 
 public record ConvertOption(Parameter parameter, ResultOption result,
                             DataSetLoadOption srcData) implements CommandLineOption<ConvertDto> {
@@ -40,11 +41,13 @@ public record ConvertOption(Parameter parameter, ResultOption result,
     }
 
     public void convertDataset() {
-        this.getComparableDataSetLoader()
-                .loadDataSet(this.srcData.getParam()
-                        .setConverter(this.result().converter(it -> it.setResultPath(this.result().getResultPath())))
-                        .setParallel(this.result().convertResult().parallelism())
-                        .build());
+        try (final IDataSetConverter converter = this.result().converter(it -> it.setResultPath(this.result().getResultPath()))) {
+            this.getComparableDataSetLoader()
+                    .loadDataSet(this.srcData.getParam()
+                            .setConverter(converter)
+                            .setParallel(this.result().convertResult().parallelism())
+                            .build());
+        }
     }
 
 }

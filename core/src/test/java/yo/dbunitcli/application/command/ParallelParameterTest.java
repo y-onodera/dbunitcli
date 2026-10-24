@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 import yo.dbunitcli.application.Option;
 
 /**
- * -result.parallel は並列化できる組み合わせのときだけ表示する
+ * -result.parallel（generateは-parallel）は並列化できる組み合わせのときだけ表示する
  */
 public class ParallelParameterTest {
 
@@ -48,6 +48,49 @@ public class ParallelParameterTest {
     public void compareHidesParallelWhenNeitherIsParallelizable() {
         Assertions.assertFalse(this.compareHasParallel("-new.srcType=file", "-old.srcType=dir"));
         Assertions.assertFalse(this.compareHasParallel("-targetType=image", "-new.srcType=csv", "-old.srcType=csv"));
+    }
+
+    @Test
+    public void generateShowsParallelWhenSourceAndGenerateTypeAreParallelizable() {
+        Assertions.assertTrue(this.generateHasParallel("-srcType=csv", "-generateType=txt", "-unit=table"));
+        Assertions.assertTrue(this.generateHasParallel("-srcType=csv", "-generateType=txt"));
+        Assertions.assertTrue(this.generateHasParallel("-srcType=xlsx", "-generateType=xlsx", "-unit=table"));
+        Assertions.assertTrue(this.generateHasParallel("-srcType=table", "-generateType=sql"));
+        // srcのproducerを包むgenerateTypeも、包んだproducerが並列読込できれば並列化する
+        Assertions.assertTrue(this.generateHasParallel("-srcType=table", "-generateType=ddl"));
+        Assertions.assertTrue(this.generateHasParallel("-srcType=table", "-generateType=javaBean"));
+        Assertions.assertTrue(this.generateHasParallel("-srcType=csv", "-generateType=xlsxSchema"));
+        Assertions.assertTrue(this.generateHasParallel("-srcType=csv", "-generateType=fixedColumnDef"));
+    }
+
+    @Test
+    public void generateHidesParallelWhenSourceIsNotParallelizable() {
+        Assertions.assertFalse(this.generateHasParallel("-srcType=file", "-generateType=txt", "-unit=table"));
+        Assertions.assertFalse(this.generateHasParallel("-srcType=dir", "-generateType=fixedColumnDef"));
+        Assertions.assertFalse(this.generateHasParallel("-srcType=none", "-generateType=txt", "-unit=record"));
+    }
+
+    @Test
+    public void generateShowsParallelForRecordUnit() {
+        // unit=recordは出力を並列にするため、srcを並列に読み込めない形式でも表示する
+        Assertions.assertTrue(this.generateHasParallel("-srcType=file", "-generateType=txt", "-unit=record"));
+        Assertions.assertTrue(this.generateHasParallel("-srcType=dir", "-generateType=xlsx", "-unit=record"));
+    }
+
+    @Test
+    public void generateParallelIsPassedToSourceLoading() {
+        Assertions.assertEquals(2, new Generate().parseOption(new String[]{"-srcType=csv", "-parallel=2"}).dataSetParam().parallel());
+        Assertions.assertNull(new Generate().parseOption(new String[]{"-srcType=csv"}).dataSetParam().parallel());
+    }
+
+    @Test
+    public void generateRejectsInvalidParallel() {
+        Assertions.assertThrows(IllegalArgumentException.class, () -> new Generate().parseOption(new String[]{"-srcType=csv", "-parallel=0"}));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> new Generate().parseOption(new String[]{"-srcType=csv", "-parallel=a"}));
+    }
+
+    private boolean generateHasParallel(final String... args) {
+        return new Generate().parseOption(args).toParameters().options().containsKey("-parallel");
     }
 
     private boolean convertHasParallel(final String... args) {

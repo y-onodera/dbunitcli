@@ -117,6 +117,7 @@ export type GenerateOptions = CommandOptions & {
 	sqlFileSuffix?: CommandOption;
 	includeAllColumns?: CommandOption;
 	lazyLoad?: CommandOption;
+	parallel?: CommandOption;
 	srcData: DatasetSource;
 	templateOption?: GenerateTemplateOption;
 };

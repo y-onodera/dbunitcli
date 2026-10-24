@@ -368,7 +368,7 @@ function makeImageFileSrcData(prefix: string) {
 	};
 }
 
-// parallelは入力・出力とも並列化できるときだけレスポンスに含まれる
+// parallelは並列化できるときだけレスポンスに含まれる（convertは入力・出力とも、generateはsrcが並列読込できるとき）
 function parallelElement(parallel: boolean) {
 	return parallel
 		? { parallel: makeElement("parallel", "TEXT", "", "WORKSPACE", false) }
@@ -555,6 +555,7 @@ export const generateLoadResponseFixture = {
 		"dataset",
 	]),
 	template: makeElement("template", "FILE", "sample.stg", "TEMPLATE", true),
+	...parallelElement(true),
 	result: makeElement(
 		"result",
 		"DIR",
@@ -903,6 +904,7 @@ export const generateRefreshSrcTypeTableResponseFixture = {
 		"dataset",
 	]),
 	template: makeElement("template", "FILE", "", "TEMPLATE", true),
+	...parallelElement(true),
 	result: makeElement("result", "DIR", "", "RESULT", false),
 	resultPath: makeElement("resultPath", "TEXT", "result", "WORKSPACE", false),
 	outputEncoding: makeElement(
@@ -994,6 +996,7 @@ function makeGenerateJxlsFixture(
 			UNIT_OPTIONS,
 		),
 		template: makeElement("template", "FILE", "", "TEMPLATE", true),
+		...parallelElement(true),
 		result: makeElement("result", "DIR", "", "RESULT", false),
 		resultPath: makeElement("resultPath", "TEXT", "result", "WORKSPACE", false),
 		srcData: makeCsvSrcData("src", ""),
@@ -1018,6 +1021,7 @@ export const generateRefreshGenerateTypeSqlResponseFixture = {
 		false,
 		GENERATE_TYPE_OPTIONS,
 	),
+	...parallelElement(true),
 	result: makeElement("result", "DIR", "", "RESULT", false),
 	resultPath: makeElement("resultPath", "TEXT", "result", "WORKSPACE", false),
 	outputEncoding: makeElement(
@@ -1051,6 +1055,7 @@ export const generateRefreshXlsxSchemaResponseFixture = {
 		false,
 		GENERATE_TYPE_OPTIONS,
 	),
+	...parallelElement(true),
 	result: makeElement("result", "DIR", "", "RESULT", false),
 	resultPath: makeElement("resultPath", "TEXT", "result", "WORKSPACE", false),
 	outputEncoding: makeElement(
@@ -1074,6 +1079,7 @@ export const generateRefreshSettingsResponseFixture = {
 		false,
 		GENERATE_TYPE_OPTIONS,
 	),
+	...parallelElement(true),
 	result: makeElement("result", "DIR", "", "RESULT", false),
 	resultPath: makeElement("resultPath", "TEXT", "result", "WORKSPACE", false),
 	outputEncoding: makeElement(
@@ -1097,6 +1103,7 @@ export const generateRefreshFixedColumnDefResponseFixture = {
 		false,
 		GENERATE_TYPE_OPTIONS,
 	),
+	...parallelElement(true),
 	result: makeElement("result", "DIR", "", "RESULT", false),
 	resultPath: makeElement("resultPath", "TEXT", "result", "WORKSPACE", false),
 	outputEncoding: makeElement(

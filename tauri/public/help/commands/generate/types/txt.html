@@ -30,8 +30,8 @@
   <p>unit の選択によってテンプレート内で使用できる変数が異なります。</p>
   <table>
     <tr><th>変数名</th><th>説明</th><th class="center">record</th><th class="center">table</th><th class="center">dataset</th></tr>
-    <tr><td>rowNumber</td><td>行 / テーブルのインデックス（0 始まり、dataset は常に 0）</td><td class="center">○</td><td class="center">○</td><td class="center">○</td></tr>
-    <tr><td>tableName</td><td>テーブル名</td><td class="center">○</td><td class="center">○</td><td class="center">—</td></tr>
+    <tr><td>rowNumber</td><td>record はテーブルごとの行番号（テーブルごとに 0 始まり）、table はテーブルのインデックス（0 始まり）、dataset は常に 0</td><td class="center">○</td><td class="center">○</td><td class="center">○</td></tr>
+    <tr><td>tableName</td><td>テーブル名（record では行の属するテーブル名）</td><td class="center">○</td><td class="center">○</td><td class="center">—</td></tr>
     <tr><td>columns</td><td>カラムの配列（各要素に <code>columnName</code>・<code>dataType</code>）</td><td class="center">○</td><td class="center">○</td><td class="center">—</td></tr>
     <tr><td>primaryKeys</td><td>主キーカラムの配列（各要素に <code>columnName</code>・<code>dataType</code>）</td><td class="center">○</td><td class="center">○</td><td class="center">—</td></tr>
     <tr><td>columnsExcludeKey</td><td>主キー以外のカラムの配列（各要素に <code>columnName</code>・<code>dataType</code>）</td><td class="center">○</td><td class="center">○</td><td class="center">—</td></tr>

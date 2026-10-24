@@ -51,13 +51,20 @@ public record TemplateRender(File templateGroup, String templateParameterAttribu
         return target;
     }
 
+    /**
+     * target中の各パラメータの変数（getAttributeName）を値の文字列に置き換える。
+     * 値の文字列化はtargetに変数が含まれる場合だけ行う（行の一覧など大きな値を毎回文字列化しない）
+     */
     public String replaceParameter(final String target, final Parameter parameter) {
         String result = target;
         for (final Map.Entry<String, Object> entry : parameter.entrySet()) {
             if (entry.getValue() == null) {
                 continue;
             }
-            result = result.replace(this.getAttributeName(entry.getKey()), entry.getValue().toString());
+            final String attributeName = this.getAttributeName(entry.getKey());
+            if (result.contains(attributeName)) {
+                result = result.replace(attributeName, entry.getValue().toString());
+            }
         }
         return result;
     }
@@ -99,9 +106,22 @@ public record TemplateRender(File templateGroup, String templateParameterAttribu
         return stGroup;
     }
 
-    public void write(final STGroup stGroup, final String templateString, final Parameter param, final File resultFile,
-                      final String outputEncoding) throws IOException {
-        final ST result = new ST(stGroup == null ? this.createSTGroup() : stGroup, templateString);
+    /**
+     * テンプレートをコンパイルする（stgは先に読み込む）。戻り値はwrite(ST, ...)で複数スレッドから使い回せる
+     */
+    public ST compile(final STGroup stGroup, final String templateString) {
+        final STGroup group = stGroup == null ? this.createSTGroup() : stGroup;
+        group.load();
+        return new ST(group, templateString);
+    }
+
+    /**
+     * compileしたテンプレートを複製して出力する。ST(ST)はCompiledSTも複製するため、
+     * addで引数が定義されるのは複製側だけで、templateは変更しない（複数スレッドから同時に使える）
+     */
+    public void write(final ST template, final Parameter param, final File resultFile, final String outputEncoding)
+            throws IOException {
+        final ST result = new ST(template);
         param.forEach(result::add);
         result.write(resultFile, ErrorManager.DEFAULT_ERROR_LISTENER, outputEncoding);
     }

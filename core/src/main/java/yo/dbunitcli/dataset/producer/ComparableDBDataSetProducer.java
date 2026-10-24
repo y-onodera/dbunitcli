@@ -35,6 +35,11 @@ public class ComparableDBDataSetProducer implements ComparableDataSetProducer {
     }
 
     @Override
+    public void close() {
+        DatabaseConnectionLoader.close(this.connection);
+    }
+
+    @Override
     public Stream<? extends Source> getSourceStream() {
         return this.getSrcFiles()
                 .map(it -> {

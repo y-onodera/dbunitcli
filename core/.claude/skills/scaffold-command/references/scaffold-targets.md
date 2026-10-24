@@ -19,7 +19,7 @@
 | `command/ScaffoldTarget.java` | enum定数追加。フック: `sampleUnitSettingPath()`（サンプルunitSettingのclasspathパス）/`datasetSchema()`（記述子列定義）/`wrapProducer()`（記述子dataset合成producer）/`customTemplateResultPath()`（txt駆動時の`-resultPath`）/`putBuiltinExtraParams()`（builtin駆動時のtarget固有オプション、必要な場合のみ） |
 | `command/ScaffoldDto.java` | `-target`の説明文（対応target一覧）を更新。target固有オプションがあれば追加 |
 | `command/ScaffoldOption.java` | 通常変更不要（`executeTarget()`は4target共通フロー）。target固有オプションを追加する場合のみrecordフィールド追加 |
-| `dataset/producer/Comparable{TypeName}MetaDataProducer.java` | `GenerateType.wrapProducer()`と共有する記述子行合成producer（`ComparableDataSetProducerWrapper`継承、`outputSchema()`静的メソッド、親の`writeColumnRows()`利用） |
+| `dataset/producer/Comparable{TypeName}MetaDataProducer.java` | `GenerateType.wrapProducer()`と共有する記述子行合成producer（`ComparableDataSetProducerWrapper`継承、`outputSchema()`静的メソッド、`convertTable()`で`Conversion#writeColumnRows()`利用） |
 | `src/main/resources/{typeName}/{typeName}Settings.json` | `defaultSettingsPath()`を持たないtargetのみ必要なScaffold専用サンプルunitSetting |
 | `command/ScaffoldTest.java` | targetごとの`@Nested`テストクラス＋`ScaffoldToGenerate`のE2E（builtin駆動とtxt駆動のバイト一致検証を含める） |
 
