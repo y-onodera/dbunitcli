@@ -79,6 +79,37 @@ class RunnerTest {
     }
 
     @Test
+    void parallelFailureWaitsRunningScriptAndSkipsUnstarted() {
+        final List<String> started = new CopyOnWriteArrayList<>();
+        final List<String> finished = new CopyOnWriteArrayList<>();
+        final CountDownLatch slowStarted = new CountDownLatch(1);
+        final CountDownLatch failing = new CountDownLatch(1);
+        final Runner target = file -> {
+            started.add(file.getName());
+            if (file.getName().equals("slow")) {
+                slowStarted.countDown();
+                RunnerTest.await(failing);
+                try {
+                    // 失敗の後も割り込まれずに最後まで実行される
+                    Thread.sleep(100);
+                } catch (final InterruptedException e) {
+                    throw new IllegalStateException("interrupted", e);
+                }
+            } else if (file.getName().equals("fail")) {
+                RunnerTest.await(slowStarted);
+                failing.countDown();
+                throw new AssertionError("fail");
+            }
+            finished.add(file.getName());
+        };
+        final AssertionError error = assertThrows(AssertionError.class
+                , () -> target.run(RunnerTest.files("slow", "fail", "x1", "x2"), 2));
+        assertEquals("fail", error.getMessage());
+        assertEquals(List.of("slow"), finished);
+        assertEquals(Set.of("slow", "fail"), Set.copyOf(started));
+    }
+
+    @Test
     void stdErrIsRestoredWhenRunnersOverlap() throws Exception {
         // 2つのRunnerを重ねて実行し、先に始めた方が先に終わっても後の方が終わるまでは差し替えたまま、最後に元へ戻る
         final PrintStream original = System.err;

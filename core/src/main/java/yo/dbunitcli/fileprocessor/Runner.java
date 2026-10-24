@@ -14,7 +14,8 @@ public interface Runner {
     Logger LOGGER = LoggerFactory.getLogger(Runner.class);
 
     /**
-     * @param parallelism 並列数。2以上ならファイルを作業スレッドで並列に実行する（実行順は不定）。1以下は逐次
+     * @param parallelism 並列数。2以上ならファイルを作業スレッドで並列に実行する（実行順は不定）。1以下は逐次。
+     *                    並列時に失敗したら未着手のファイルは始めず、実行中のファイルが終わるのを待ってから失敗させる
      */
     default void run(final Stream<File> targetFiles, final int parallelism) {
         StdErrToLog.begin();
@@ -28,7 +29,7 @@ public interface Runner {
                 files.forEach(this::runScript);
                 return;
             }
-            ParallelTableMapping.forEach(parallelism, "run-", files, (target, resources, first) -> this.runScript(target));
+            ParallelTableMapping.forEachUntilFailure(parallelism, "run-", files, this::runScript);
         } finally {
             StdErrToLog.end();
         }
