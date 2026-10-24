@@ -20,6 +20,8 @@ import yo.dbunitcli.dataset.converter.XlsConverter;
 import yo.dbunitcli.dataset.converter.XlsxConverter;
 import yo.dbunitcli.dataset.producer.ComparableCSVQueryDataSetProducer;
 import yo.dbunitcli.dataset.producer.ComparableCsvDataSetProducer;
+import yo.dbunitcli.dataset.producer.ComparableDBDataSetProducer;
+import yo.dbunitcli.dataset.producer.ComparableQueryDataSetProducer;
 import yo.dbunitcli.dataset.producer.ComparableXlsDataSetProducer;
 import yo.dbunitcli.dataset.producer.ComparableXlsxDataSetProducer;
 import yo.dbunitcli.resource.FileResources;
@@ -301,6 +303,57 @@ public class ParallelTableMappingTest {
                 return this;
             }
         };
+    }
+
+    @Test
+    public void produce_from_table_and_sql_with_connection_per_lane() throws SQLException, IOException {
+        final String url = "jdbc:h2:mem:parallelSource;DB_CLOSE_DELAY=-1";
+        final File listFile = this.tempDir.resolve("tables.txt").toFile();
+        final File queryDir = Files.createDirectories(this.tempDir.resolve("sql")).toFile();
+        try (final Connection conn = DriverManager.getConnection(url, "sa", "");
+             final Statement stmt = conn.createStatement()) {
+            for (final String table : List.of("t1", "t2", "t3", "t4")) {
+                stmt.execute("create table " + table + " (ID varchar(10) primary key, VAL varchar(10))");
+                stmt.execute("insert into " + table + " select '" + table + "-' || x, x from system_range(1, 100)");
+                Files.writeString(new File(queryDir, "q" + table + ".sql").toPath(), "select * from " + table + " order by ID", StandardCharsets.UTF_8);
+            }
+        }
+        Files.writeString(listFile.toPath(), String.join("\n", "t1", "t2", "t3", "t4"), StandardCharsets.UTF_8);
+        try (final Connection admin = DriverManager.getConnection(url, "sa", "");
+             final Statement sessions = admin.createStatement()) {
+            for (final Map.Entry<DataSourceType, File> src : Map.of(DataSourceType.table, listFile, DataSourceType.sql, queryDir).entrySet()) {
+                final ComparableDataSetProducer producer = this.dbProducer(src.getKey(), src.getValue(), url, 4);
+                Assertions.assertEquals(4, ParallelTableMapping.lanes(producer, this.tasks(producer)).orElseThrow().size(), src.getKey().name());
+                final int before = this.count(sessions, "information_schema.sessions");
+                final ComparableDataSet parallel = producer.loadDataSet();
+                // 2つ目以降のレーンで張った接続はレーン終了時に閉じる
+                Assertions.assertEquals(before, this.count(sessions, "information_schema.sessions"), src.getKey().name());
+                final ComparableDataSet sequential = this.dbProducer(src.getKey(), src.getValue(), url, 1).loadDataSet();
+                Assertions.assertArrayEquals(sequential.getTableNames(), parallel.getTableNames(), src.getKey().name());
+                Assertions.assertEquals(4, parallel.getTableNames().length, src.getKey().name());
+                for (final String tableName : sequential.getTableNames()) {
+                    Assertions.assertEquals(this.rows(sequential.getTable(tableName)), this.rows(parallel.getTable(tableName)), tableName);
+                    Assertions.assertEquals(100, parallel.getTable(tableName).getRowCount(), tableName);
+                }
+            }
+        }
+    }
+
+    private ComparableDataSetProducer dbProducer(final DataSourceType type, final File src, final String url, final Integer parallel) {
+        final ComparableDataSetParam param = ComparableDataSetParam.builder()
+                .setSrc(src)
+                .setSource(type)
+                .setEncoding("UTF-8")
+                .setDatabaseConnectionLoader(this.connectionLoader(url))
+                .setParallel(parallel)
+                .build();
+        return type == DataSourceType.sql
+                ? new ComparableQueryDataSetProducer(param, Parameter.none())
+                : new ComparableDBDataSetProducer(param);
+    }
+
+    private List<ComparableTableMappingTask> tasks(final ComparableDataSetProducer producer) {
+        return producer.getSourceStream().map(producer::createTableMappingTask).collect(Collectors.toList());
     }
 
     private ComparableCSVQueryDataSetProducer csvqProducer(final File src, final Integer parallel) {

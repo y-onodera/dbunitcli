@@ -7,6 +7,7 @@ import yo.dbunitcli.resource.FileResources;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 
 /**
@@ -164,20 +165,55 @@ public final class ParallelTableMapping {
     private static TreeMap<String, ComparableTable> runLane(final ComparableDataSetParam param
             , final List<ComparableTableMappingTask> lane, final boolean first) {
         final IDataSetConverter converter = ParallelTableMapping.laneConverter(param.converter(), first);
-        try {
+        try (final LaneResources resources = new LaneResources()) {
             final ComparableTableMappingContext context = new ComparableTableMappingContext(param.tableSeparators(), converter);
             context.open();
             for (final ComparableTableMappingTask task : lane) {
                 if (Thread.currentThread().isInterrupted()) {
                     throw new CancellationException("produce interrupted");
                 }
-                task.run(context);
+                (first ? task : task.forLane(resources)).run(context);
             }
             return context.close();
         } finally {
             if (converter != null && converter != param.converter()) {
                 converter.release();
             }
+        }
+    }
+
+    /**
+     * レーン（スレッド）ごとに確保する資源（DB接続など）。同じkeyはレーン内で使い回し、レーン終了時に閉じる
+     */
+    public static final class LaneResources implements AutoCloseable {
+
+        private final Map<Object, Object> resources = new LinkedHashMap<>();
+
+        private final List<Runnable> closers = new ArrayList<>();
+
+        @SuppressWarnings("unchecked")
+        public <T> T get(final Object key, final Supplier<T> factory, final Closer<T> closer) {
+            return (T) this.resources.computeIfAbsent(key, k -> {
+                final T resource = factory.get();
+                this.closers.add(() -> {
+                    try {
+                        closer.close(resource);
+                    } catch (final Exception e) {
+                        ParallelTableMapping.LOGGER.warn("failed to close lane resource:{}", k, e);
+                    }
+                });
+                return resource;
+            });
+        }
+
+        @Override
+        public void close() {
+            this.closers.forEach(Runnable::run);
+        }
+
+        @FunctionalInterface
+        public interface Closer<T> {
+            void close(T resource) throws Exception;
         }
     }
 

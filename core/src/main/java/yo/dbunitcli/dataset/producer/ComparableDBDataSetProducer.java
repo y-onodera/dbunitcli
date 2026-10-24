@@ -8,7 +8,9 @@ import org.dbunit.dataset.datatype.DataType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import yo.dbunitcli.common.Source;
+import yo.dbunitcli.common.TableMetaDataWithSource;
 import yo.dbunitcli.dataset.*;
+import yo.dbunitcli.resource.jdbc.DatabaseConnectionLoader;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -52,6 +54,14 @@ public class ComparableDBDataSetProducer implements ComparableDataSetProducer {
                 .filter(it -> this.param().tableNameFilter().predicate(it.tableName()));
     }
 
+    /**
+     * JDBC接続は複数スレッドから同時に使えないため、2つ目以降のレーンはレーンごとに接続を張る（{@link DBTableExecutor#forLane}）
+     */
+    @Override
+    public boolean isParallelizableSource() {
+        return true;
+    }
+
     @Override
     public ComparableTableMappingTask createTableMappingTask(final Source source) {
         return new DBTableExecutor(source, this.param, this.connection);
@@ -87,6 +97,27 @@ public class ComparableDBDataSetProducer implements ComparableDataSetProducer {
         @Override
         public ComparableTableMappingTask with(final ComparableDataSetParam.Builder builder) {
             return new DBTableExecutor(this.source, builder.build(), this.connection);
+        }
+
+        /**
+         * DBのメタデータでテーブル名の大文字・小文字が変わりうるため、両方を候補に含める
+         */
+        @Override
+        public Stream<TableMetaDataWithSource> outputTableCandidates() {
+            final String tableName = this.source.getTableName();
+            return Stream.of(tableName, tableName.toUpperCase(), tableName.toLowerCase())
+                    .distinct()
+                    .map(name -> this.source.wrap(new DefaultTableMetaData(name, new Column[0])));
+        }
+
+        @Override
+        public ComparableTableMappingTask forLane(final ParallelTableMapping.LaneResources resources) {
+            final DatabaseConnectionLoader loader = this.param.databaseConnectionLoader();
+            return this.withConnection(resources.get(loader, loader::loadConnection, IDatabaseConnection::close));
+        }
+
+        protected DBTableExecutor withConnection(final IDatabaseConnection connection) {
+            return new DBTableExecutor(this.source, this.param, connection);
         }
 
         protected ITable getTable(final String tableName) {

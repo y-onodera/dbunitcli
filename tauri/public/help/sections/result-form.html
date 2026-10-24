@@ -52,8 +52,8 @@
   <p>入力ソースが複数ある場合に、ソースごとに別スレッドで読み込み・出力します。出力先のテーブルが同じになるソース同士は同じスレッドで元の順に処理するため、追記の順序は逐次処理と変わりません。</p>
   <p><code>parallel</code> は次の組み合わせのときだけ表示されます。</p>
   <ul>
-    <li>Convert: 入力の srcType が <code>csv</code> / <code>csvq</code> / <code>fixed</code> / <code>reg</code> / <code>xls</code> / <code>xlsx</code> で、出力形式が <code>xls</code> / <code>xlsx</code> 以外、または <code>excelTable</code> が <code>BOOK</code>（<code>excelTable</code> を <code>SHEET</code> / <code>BOOK</code> に切り替えるとフォームが再構成されます）</li>
-    <li>Compare: new / old のどちらかの srcType が <code>csv</code> / <code>csvq</code> / <code>fixed</code> / <code>reg</code> / <code>xls</code> / <code>xlsx</code>（出力形式は問わない）</li>
+    <li>Convert: 入力の srcType が <code>file</code> / <code>dir</code> 以外で、出力形式が <code>xls</code> / <code>xlsx</code> 以外、または <code>excelTable</code> が <code>BOOK</code>（<code>excelTable</code> を <code>SHEET</code> / <code>BOOK</code> に切り替えるとフォームが再構成されます）</li>
+    <li>Compare: new / old のどちらかの srcType が <code>file</code> / <code>dir</code> 以外（出力形式は問わない）</li>
   </ul>
   <p>表示されていても、次の場合は実行時に逐次処理になります。</p>
   <ul>
@@ -62,6 +62,6 @@
   </ul>
   <p>xls / xlsx 入力は、実行前に各ファイルのシート名だけを読み、xlsxSchema の定義も含めて出力テーブルを求めます。同じテーブル（同名シート、またはスキーマで同じテーブル名になるシート）を含むファイル同士は同じスレッドで順に処理します。</p>
   <p>Compare では、new / old それぞれの読み込みに適用されます（比較結果の出力自体は並列化しません）。並び替え・重複除去を指定したテーブルは全行をメモリに保持するため、並列数を増やすとメモリ使用量も増えます。</p>
-  <p>出力形式が <code>table</code> の場合は、スレッドごとに DB 接続を張って書き込みます（詳細は <a href="result-form/types/table.html">table</a> を参照）。</p>
+  <p>入力の srcType が <code>table</code> / <code>sql</code> の場合と、出力形式が <code>table</code> の場合は、スレッドごとに DB 接続を張って読み込み・書き込みます（接続数は読み込み・書き込みそれぞれ最大で並列数。詳細は <a href="result-form/types/table.html">table</a> を参照）。</p>
 </body>
 </html>

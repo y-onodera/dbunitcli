@@ -1,12 +1,14 @@
 package yo.dbunitcli.dataset.producer;
 
 import org.dbunit.database.IDatabaseConnection;
+import org.dbunit.dataset.Column;
 import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.ITable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import yo.dbunitcli.common.Parameter;
 import yo.dbunitcli.common.Source;
+import yo.dbunitcli.common.TableMetaDataWithSource;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.dataset.ComparableTableMappingTask;
 
@@ -53,6 +55,19 @@ public class ComparableQueryDataSetProducer extends ComparableDBDataSetProducer 
         @Override
         public ComparableTableMappingTask with(final ComparableDataSetParam.Builder builder) {
             return new QueryTableExecutor(this.source, builder.build(), this.connection, this.parameter);
+        }
+
+        /**
+         * テーブル名はクエリファイル名で決まる
+         */
+        @Override
+        public Stream<TableMetaDataWithSource> outputTableCandidates() {
+            return Stream.of(this.source.createMetaData(new Column[0]));
+        }
+
+        @Override
+        protected DBTableExecutor withConnection(final IDatabaseConnection connection) {
+            return new QueryTableExecutor(this.source, this.param, connection, this.parameter);
         }
 
         @Override

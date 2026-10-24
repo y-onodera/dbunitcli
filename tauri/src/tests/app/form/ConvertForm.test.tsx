@@ -358,7 +358,7 @@ describe("ConvertFormの描画テスト", () => {
 			).toBeInTheDocument();
 		});
 
-		it("並列化できない入力（table）ではparallelを表示しない", () => {
+		it("table入力ではparallelを表示する", () => {
 			render(
 				<ConvertForm
 					{...makeConvertProps(convertRefreshSrcTypeTableResponseFixture)}
@@ -366,8 +366,8 @@ describe("ConvertFormの描画テスト", () => {
 			);
 
 			expect(
-				document.querySelector('[name="-result.parallel"]'),
-			).not.toBeInTheDocument();
+				document.querySelector('input[type="text"][name="-result.parallel"]'),
+			).toBeInTheDocument();
 		});
 	});
 });

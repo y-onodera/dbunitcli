@@ -28,6 +28,14 @@ public interface ComparableTableMappingTask {
         return Stream.of(this.source().createMetaData(new Column[0]));
     }
 
+    /**
+     * 並列実行で2つ目以降のレーンが使うタスクを返す。スレッド間で共有できない資源（DB接続など）は
+     * resourcesからレーン専用のものを取得して差し替える
+     */
+    default ComparableTableMappingTask forLane(final ParallelTableMapping.LaneResources resources) {
+        return this;
+    }
+
     default TreeMap<String, ComparableTable> runWith(final Consumer<TableSeparators.Builder> editor,
                                                      IDataSetConverter converter) {
         ComparableTableMappingContext context = new ComparableTableMappingContext(

@@ -665,7 +665,7 @@ export const convertRefreshSrcTypeXlsxResponseFixture = {
 // convert-refresh-srcType-table-response.json をもとにしたフィクスチャ
 export const convertRefreshSrcTypeTableResponseFixture = {
 	srcData: makeTableSrcData("src"),
-	convertResult: makeCsvConvertResult(false, false),
+	convertResult: makeCsvConvertResult(),
 } as ConvertOptions;
 
 // convert-refresh-resultType-xlsx-response.json をもとにしたフィクスチャ
