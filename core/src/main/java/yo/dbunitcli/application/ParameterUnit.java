@@ -4,6 +4,7 @@ import yo.dbunitcli.common.Parameter;
 import yo.dbunitcli.dataset.*;
 import yo.dbunitcli.dataset.producer.ComparableDataSetLoader;
 
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,28 +15,31 @@ import java.util.stream.Stream;
 
 public enum ParameterUnit {
     record {
+        /**
+         * 行ごとのパラメータ。inputParam・tableName・rowNumber（テーブルごとの0始まりの番号）と行の列の値
+         * （includeMetaDataではテーブル全体（tableName等）とrow）。Generateの読込中の出力（RecordConverter）と同じ形
+         */
         @Override
         public Stream<Parameter> dataSetToStream(final ComparableDataSetLoader loader,
                                                  final ComparableDataSetParam loadParam) {
             final ComparableDataSet dataSet = loader.loadDataSet(loadParam);
-            if ((loadParam.mapIncludeMetaData())) {
-                final Integer[] rowNum = new Integer[]{0};
-                return dataSet.toMap()
-                              .flatMap(it -> ((List<Map<String, Object>>) it.get("rows")).stream()
-                                                                                         .map(row -> loader.parameter()
-                                                                                                           .asInputParam()
-                                                                                                           .withRowNumber(
-                                                                                                                   rowNum[0]++)
-                                                                                                           .addAll(it)
-                                                                                                           .add("row",
-                                                                                                                row)));
+            if (loadParam.source() == DataSourceType.none) {
+                return dataSet.toMap().map(it -> loader.parameter().asInputParam().withRowNumber(0).addAll(it));
             }
-            final Integer[] rowNum = new Integer[]{0};
-            return dataSet.toMap()
-                          .map(it -> loader.parameter()
-                                           .asInputParam()
-                                           .withRowNumber(rowNum[0]++)
-                                           .addAll(it));
+            return Arrays.stream(dataSet.getTableNames()).flatMap(tableName -> {
+                final ComparableTable table = dataSet.getTable(tableName);
+                if (loadParam.mapIncludeMetaData()) {
+                    final Map<String, Object> tableMap = table.toMap(true).getFirst();
+                    final List<Map<String, Object>> rows = (List<Map<String, Object>>) tableMap.get("rows");
+                    return IntStream.range(0, rows.size())
+                                    .mapToObj(i -> loader.parameter().asInputParam().withRowNumber(i)
+                                                         .addAll(tableMap).add("row", rows.get(i)));
+                }
+                // 列の値を後に入れる（tableNameという列があれば列の値を優先する）
+                return IntStream.range(0, table.getRowCount())
+                                .mapToObj(i -> loader.parameter().asInputParam().withRowNumber(i)
+                                                     .add("tableName", tableName).addAll(table.getRowToMap(i)));
+            });
         }
 
         @Override

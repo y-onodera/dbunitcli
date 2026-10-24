@@ -42,7 +42,7 @@
   <p><code>unit</code> はテンプレートへのパラメータ受け渡し単位を指定します。</p>
   <table>
     <tr><th>値</th><th>説明</th></tr>
-    <tr><td>row</td><td><code>paramData</code> の行ごとに 1 回コマンドを実行</td></tr>
+    <tr><td>row</td><td><code>paramData</code> の行ごとに 1 回コマンドを実行。列の値のほか、<code>tableName</code>（行の属するテーブル名）と <code>rowNumber</code>（テーブルごとに 0 始まりの行番号）を参照できます（Generate の <code>unit=record</code> と同じ）</td></tr>
     <tr><td>table</td><td><code>paramData</code> のテーブルごとに 1 回コマンドを実行</td></tr>
     <tr><td>dataset</td><td><code>paramData</code> 全体を 1 つとして 1 回コマンドを実行</td></tr>
   </table>
