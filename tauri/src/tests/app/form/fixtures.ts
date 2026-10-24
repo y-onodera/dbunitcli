@@ -402,6 +402,7 @@ function makeCsvConvertResult(required = false) {
 			"WORKSPACE",
 			false,
 		),
+		parallel: makeElement("parallel", "TEXT", "", "WORKSPACE", false),
 	};
 }
 
@@ -431,6 +432,7 @@ function makeXlsxConvertResult(resultValue: string) {
 			false,
 		),
 		excelTable: makeElement("excelTable", "TEXT", "SHEET", "WORKSPACE", false),
+		parallel: makeElement("parallel", "TEXT", "", "WORKSPACE", false),
 	};
 }
 
@@ -507,6 +509,7 @@ export const compareLoadResponseFixture = {
 			"WORKSPACE",
 			false,
 		),
+		parallel: makeElement("parallel", "TEXT", "", "WORKSPACE", false),
 	},
 	expectData: {
 		prefix: "expect",

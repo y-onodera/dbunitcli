@@ -288,5 +288,48 @@ describe("ConvertFormの描画テスト", () => {
 				document.querySelector('[name="-result.outputEncoding"]'),
 			).not.toBeInTheDocument();
 		});
+
+		it("resultセクションにparallelが含まれる", () => {
+			render(
+				<ConvertForm
+					{...makeConvertProps(convertRefreshResultTypeXlsxResponseFixture)}
+				/>,
+			);
+
+			expect(
+				document.querySelector('input[type="text"][name="-result.parallel"]'),
+			).toBeInTheDocument();
+		});
+	});
+
+	describe("parallel（レスポンスに含まれるときだけ表示）", () => {
+		it("csv resultではparallelが表示される", () => {
+			render(
+				<ConvertForm
+					{...makeConvertProps(convertRefreshSrcTypeXlsxResponseFixture)}
+				/>,
+			);
+
+			expect(
+				document.querySelector('input[type="text"][name="-result.parallel"]'),
+			).toBeInTheDocument();
+		});
+
+		it("レスポンスにparallelが無ければ表示しない（table result）", () => {
+			const { parallel: _, ...withoutParallel } =
+				convertLoadResponseFixture.convertResult;
+			render(
+				<ConvertForm
+					{...makeConvertProps({
+						...convertLoadResponseFixture,
+						convertResult: withoutParallel,
+					})}
+				/>,
+			);
+
+			expect(
+				document.querySelector('[name="-result.parallel"]'),
+			).not.toBeInTheDocument();
+		});
 	});
 });

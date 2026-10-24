@@ -20,6 +20,7 @@ export default function ResultFormSection({
 	const outputExtension = resultOption.outputExtension;
 	const fixedColumnDef = resultOption.fixedColumnDef;
 	const fixedLengthType = resultOption.fixedLengthType;
+	const parallel = resultOption.parallel;
 	return (
 		<>
 			<Select
@@ -51,6 +52,7 @@ export default function ResultFormSection({
 			{fixedLengthType && (
 				<PlainText prefix={prefix} element={fixedLengthType} />
 			)}
+			{parallel && <PlainText prefix={prefix} element={parallel} />}
 			{resultOption.op && (
 				<Select
 					prefix={prefix}
