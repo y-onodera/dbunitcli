@@ -2,13 +2,12 @@ package yo.dbunitcli.dataset;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import yo.dbunitcli.resource.FileResources;
+import yo.dbunitcli.resource.ThreadContexts;
 
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
-import java.util.function.UnaryOperator;
 import java.util.stream.IntStream;
 
 /**
@@ -23,17 +22,7 @@ public final class ParallelTableMapping {
 
     private static final AtomicInteger THREAD_NO = new AtomicInteger();
 
-    private static volatile UnaryOperator<Runnable> taskDecorator = UnaryOperator.identity();
-
     private ParallelTableMapping() {
-    }
-
-    /**
-     * 作業スレッドへ渡すタスクを包む関数を設定する。
-     * 関数は投入元のスレッドで呼ばれるので、投入元の文脈（ログの振り分け先など）を作業スレッドへ引き継ぐのに使う。
-     */
-    public static void setTaskDecorator(final UnaryOperator<Runnable> decorator) {
-        ParallelTableMapping.taskDecorator = decorator == null ? UnaryOperator.identity() : decorator;
     }
 
     /**
@@ -74,7 +63,7 @@ public final class ParallelTableMapping {
         });
         // executeは投入元のスレッドで呼ばれるため、ここで投入元の文脈を包む
         final CompletionService<TreeMap<String, ComparableTable>> completion = new ExecutorCompletionService<>(
-                command -> executor.execute(ParallelTableMapping.taskDecorator.apply(FileResources.propagateContext(command))));
+                command -> executor.execute(ThreadContexts.propagate(command)));
         final List<Future<TreeMap<String, ComparableTable>>> futures = IntStream.range(0, threads)
                 .mapToObj(i -> completion.submit(() -> ParallelTableMapping.runWorker(param, queue, i == 0)))
                 .toList();

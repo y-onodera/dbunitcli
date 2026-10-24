@@ -26,6 +26,7 @@ import yo.dbunitcli.dataset.producer.ComparableQueryDataSetProducer;
 import yo.dbunitcli.dataset.producer.ComparableXlsDataSetProducer;
 import yo.dbunitcli.dataset.producer.ComparableXlsxDataSetProducer;
 import yo.dbunitcli.resource.FileResources;
+import yo.dbunitcli.resource.TestThreadContextPropagator;
 import yo.dbunitcli.resource.jdbc.DatabaseConnectionLoader;
 import yo.dbunitcli.resource.poi.XlsxSchema;
 
@@ -245,6 +246,17 @@ public class ParallelTableMappingTest {
         Assertions.assertArrayEquals(new String[]{"qa", "qb", "qc", "qd"}, parallel.getTableNames());
         this.assertSameTables(sequential, parallel);
         Arrays.stream(parallel.getTableNames()).forEach(it -> Assertions.assertEquals(100, parallel.getTable(it).getRowCount()));
+    }
+
+    @Test
+    public void run_applies_registered_thread_context_propagator() {
+        final Map<String, String> actual = new ConcurrentHashMap<>();
+        final List<List<ComparableTableMappingTask>> lanes = List.of("a", "b").stream()
+                .map(name -> List.of(this.captureTask(name, it -> actual.put(name, TestThreadContextPropagator.VALUE.orElse("unbound")))))
+                .toList();
+        ScopedValue.where(TestThreadContextPropagator.VALUE, "submitter")
+                .run(() -> ParallelTableMapping.run(this.producer(TableSeparators.NONE, null, 2).param(), lanes));
+        Assertions.assertEquals(Map.of("a", "submitter", "b", "submitter"), actual);
     }
 
     @Test

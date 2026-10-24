@@ -19,7 +19,7 @@
 - 表示: 並列化できる組み合わせのときだけ。Convertは`DataSourceType.isParallelizable()`かつ`DataSetConverterOption.isParallelizable()`（xls/xlsxはexcelTableが環境変数等を含む自由入力のため、`SHEET`と確定しているときだけ非表示）、Compareはnew/oldのどちらかが`DataSourceType.isParallelizable()`
 - 実行: `ParallelTableMapping`。producerの`isParallelizableSource()`（`DataSourceType.isParallelizable()`と一致させる。`ParallelTableMappingTest`で検証）、converterの`isParallelizable()`（FlatFile系・xls/xlsxのBOOK・table）、join・件数分割なしのとき、出力テーブルを共有するソースを同じレーン（同一スレッド・元の順）にまとめて作業スレッドで処理する
 - 出力テーブルの先読み: タスクの`outputTableCandidates()`（xls/xlsxはシート名とxlsxSchemaから）
-- スレッド間で共有できない資源: DB接続は作業スレッドごとに張る（入力は`ComparableTableMappingTask.forWorker()`、出力は`IDataSetConverter.splitForParallel()`。どちらも`ParallelTableMapping.WorkerResources`から取得し終了時に閉じる）。`FileResources`のContextとsidecarのログ振り分けは作業スレッドへ引き継ぐ
+- スレッド間で共有できない資源: DB接続は作業スレッドごとに張る（入力は`ComparableTableMappingTask.forWorker()`、出力は`IDataSetConverter.splitForParallel()`。どちらも`ParallelTableMapping.WorkerResources`から取得し終了時に閉じる）。作業スレッドへの文脈の引き継ぎは`ThreadContexts.propagate`（`FileResources`のContextは常に、それ以外は`META-INF/services`に登録した`ThreadContextPropagator`。sidecarは`JobContextPropagator`でログ振り分け先を引き継ぐ）
 
 ## 実装チェックリスト（変換仕様の変更箇所）
 
