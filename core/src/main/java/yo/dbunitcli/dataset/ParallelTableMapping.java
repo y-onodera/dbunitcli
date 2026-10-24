@@ -13,6 +13,7 @@ import java.util.function.Function;
 import java.util.function.IntFunction;
 import java.util.function.Supplier;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 /**
  * ソースを別スレッドで並列に読み込む。
@@ -80,15 +81,43 @@ public final class ParallelTableMapping {
      * @param action 最初のワーカー（first=true）は元の資源をそのまま使う（DB接続を余分に張らない）
      */
     public static <T> void forEach(final ComparableDataSetParam param, final List<T> items, final WorkerAction<T> action) {
-        ParallelTableMapping.forEach(ParallelTableMapping.parallelism(param), "generate-", items, action);
+        ParallelTableMapping.forEachOnWorkers(ParallelTableMapping.parallelism(param), "generate-", items, action);
     }
 
     /**
-     * forEach(param, items, action)の並列数とスレッド名を直接指定する版
-     *
-     * @param parallelism 並列数（2以上。itemsの件数を上限にする）
+     * itemsを処理する。並列数が2以上かつitemsが2件以上なら作業スレッドで並列に処理し（処理順は不定）、
+     * いずれかが失敗したら未着手のitemは始めず、実行中のitemには割り込まずに終わるのを待ってから、最初の失敗を投げる
+     * （DB更新などを途中で止めない）。呼び出し元が割り込まれた場合は、forEachと同様に作業スレッドを中断する。
+     * それ以外は呼び出し元のスレッドで逐次に処理し、失敗したらその場で投げる
      */
-    public static <T> void forEach(final int parallelism, final String threadNamePrefix, final List<T> items
+    public static <T> void forEachUntilFailure(final int parallelism, final String threadNamePrefix, final Stream<T> items
+            , final Consumer<? super T> action) {
+        if (parallelism < 2) {
+            items.forEach(action);
+            return;
+        }
+        final List<T> list = items.toList();
+        if (list.size() < 2) {
+            list.forEach(action);
+            return;
+        }
+        final AtomicReference<Throwable> failure = new AtomicReference<>();
+        ParallelTableMapping.forEachOnWorkers(parallelism, threadNamePrefix, list, (item, resources, first) -> {
+            if (failure.get() != null) {
+                return;
+            }
+            try {
+                action.accept(item);
+            } catch (final Throwable e) {
+                failure.compareAndSet(null, e);
+            }
+        });
+        if (failure.get() != null) {
+            throw ParallelTableMapping.rethrow(failure.get());
+        }
+    }
+
+    private static <T> void forEachOnWorkers(final int parallelism, final String threadNamePrefix, final List<T> items
             , final WorkerAction<T> action) {
         final int threads = Math.min(parallelism, items.size());
         ParallelTableMapping.LOGGER.info("forEach() - parallel items={}, threads={}", items.size(), threads);
@@ -103,36 +132,6 @@ public final class ParallelTableMapping {
             }
             return null;
         });
-    }
-
-    /**
-     * itemsを作業スレッドで並列に処理する（処理順は不定）。いずれかが失敗したら未着手のitemは始めず、
-     * 実行中のitemには割り込まずに終わるのを待ってから、最初の失敗を投げる（DB更新などを途中で止めない）。
-     * 呼び出し元が割り込まれた場合は、forEachと同様に作業スレッドを中断する
-     *
-     * @param parallelism 並列数（2以上。itemsの件数を上限にする）
-     */
-    public static <T> void forEachUntilFailure(final int parallelism, final String threadNamePrefix, final List<T> items
-            , final Consumer<? super T> action) {
-        final int threads = Math.min(parallelism, items.size());
-        ParallelTableMapping.LOGGER.info("forEachUntilFailure() - parallel items={}, threads={}", items.size(), threads);
-        final Queue<T> queue = new ConcurrentLinkedQueue<>(items);
-        final AtomicReference<Throwable> failure = new AtomicReference<>();
-        ParallelTableMapping.runWorkers(threads, threadNamePrefix, i -> () -> {
-            T item;
-            while (failure.get() == null && (item = queue.poll()) != null) {
-                ParallelTableMapping.checkInterrupted();
-                try {
-                    action.accept(item);
-                } catch (final Throwable e) {
-                    failure.compareAndSet(null, e);
-                }
-            }
-            return null;
-        });
-        if (failure.get() != null) {
-            throw ParallelTableMapping.rethrow(failure.get());
-        }
     }
 
     /**

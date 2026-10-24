@@ -72,7 +72,7 @@ public record RunOption(
      * @return 並列数。未指定なら1（スクリプトは実行順に依存しやすいため、convert/generateと違い既定は逐次）
      */
     public int parallelism() {
-        return Strings.isEmpty(this.parallel) ? 1 : Integer.parseInt(this.parallel);
+        return DataSetConverterOption.parallelism(this.parallel, 1);
     }
 
     public Runner runner() {

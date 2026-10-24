@@ -375,7 +375,7 @@ public class ParallelTableMappingTest {
         final CountDownLatch slowStarted = new CountDownLatch(1);
         final CountDownLatch failing = new CountDownLatch(1);
         final AssertionError actual = Assertions.assertThrows(AssertionError.class
-                , () -> ParallelTableMapping.forEachUntilFailure(2, "test-", List.of("slow", "fail", "x1", "x2", "x3"), item -> {
+                , () -> ParallelTableMapping.forEachUntilFailure(2, "test-", Stream.of("slow", "fail", "x1", "x2", "x3"), item -> {
                     started.add(item);
                     try {
                         if (item.equals("slow")) {
@@ -402,15 +402,17 @@ public class ParallelTableMappingTest {
     public void forEachUntilFailure_processes_all_items_on_workers_with_context() {
         final Map<String, String> actual = new ConcurrentHashMap<>();
         final Set<String> threads = ConcurrentHashMap.newKeySet();
+        // 2件が同時に実行中にならないとlatchが0にならない（1つのワーカーが全件を取り切らない）
+        final CountDownLatch bothStarted = new CountDownLatch(2);
         ScopedValue.where(TestThreadContextPropagator.VALUE, "submitter")
-                .run(() -> ParallelTableMapping.forEachUntilFailure(2, "test-", List.of("a", "b", "c", "d"), item -> {
+                .run(() -> ParallelTableMapping.forEachUntilFailure(2, "test-", Stream.of("a", "b", "c", "d"), item -> {
                     actual.put(item, TestThreadContextPropagator.VALUE.orElse("unbound"));
                     threads.add(Thread.currentThread().getName());
+                    bothStarted.countDown();
                     try {
-                        // 1つのワーカーが全件を取り切らないよう待つ
-                        Thread.sleep(50);
+                        Assertions.assertTrue(bothStarted.await(10, TimeUnit.SECONDS));
                     } catch (final InterruptedException e) {
-                        Thread.currentThread().interrupt();
+                        throw new IllegalStateException(e);
                     }
                 }));
         Assertions.assertEquals(Map.of("a", "submitter", "b", "submitter", "c", "submitter", "d", "submitter"), actual);

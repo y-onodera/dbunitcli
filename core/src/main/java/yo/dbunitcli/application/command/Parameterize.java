@@ -6,7 +6,6 @@ import yo.dbunitcli.application.Command;
 import yo.dbunitcli.common.Parameter;
 import yo.dbunitcli.dataset.ParallelTableMapping;
 
-import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
@@ -38,16 +37,7 @@ public class Parameterize implements Command<ParameterizeDto, ParameterizeOption
             }
         };
         try (final Stream<Parameter> params = options.loadParams()) {
-            if (options.parallelism() < 2) {
-                params.forEach(action);
-            } else {
-                final List<Parameter> items = params.toList();
-                if (items.size() < 2) {
-                    items.forEach(action);
-                } else {
-                    ParallelTableMapping.forEachUntilFailure(options.parallelism(), "parameterize-", items, action);
-                }
-            }
+            ParallelTableMapping.forEachUntilFailure(options.parallelism(), "parameterize-", params, action);
         }
         if (failCount.get() > 0) {
             Parameterize.LOGGER.info("total fail count:{}", failCount.get());

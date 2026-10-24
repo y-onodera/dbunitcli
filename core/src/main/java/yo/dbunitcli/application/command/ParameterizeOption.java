@@ -105,7 +105,7 @@ public record ParameterizeOption(
      * @return 並列数。未指定なら1（行ごとのコマンドは実行順に依存しやすいため、runと同じく既定は逐次）
      */
     public int parallelism() {
-        return Strings.isEmpty(this.parallel) ? 1 : Integer.parseInt(this.parallel);
+        return DataSetConverterOption.parallelism(this.parallel, 1);
     }
 
     public Stream<Parameter> loadParams() {

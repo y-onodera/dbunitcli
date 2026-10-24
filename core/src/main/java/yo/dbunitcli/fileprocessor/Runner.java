@@ -6,7 +6,6 @@ import org.slf4j.LoggerFactory;
 import yo.dbunitcli.dataset.ParallelTableMapping;
 
 import java.io.File;
-import java.util.List;
 import java.util.stream.Stream;
 
 public interface Runner {
@@ -20,16 +19,7 @@ public interface Runner {
     default void run(final Stream<File> targetFiles, final int parallelism) {
         StdErrToLog.begin();
         try {
-            if (parallelism < 2) {
-                targetFiles.forEach(this::runScript);
-                return;
-            }
-            final List<File> files = targetFiles.toList();
-            if (files.size() < 2) {
-                files.forEach(this::runScript);
-                return;
-            }
-            ParallelTableMapping.forEachUntilFailure(parallelism, "run-", files, this::runScript);
+            ParallelTableMapping.forEachUntilFailure(parallelism, "run-", targetFiles, this::runScript);
         } finally {
             StdErrToLog.end();
         }

@@ -50,7 +50,7 @@ public record DataSetConverterOption(
     }
 
     /**
-     * -parallelの値を検証する。未指定は空文字（並列化できればCPUコア数で自動）
+     * -parallelの値を検証する。未指定は空文字（未指定時の並列数はコマンドごとに決める。convert/compare/generateはCPUコア数で自動、run/parameterizeは逐次）
      */
     public static String parallel(final String parallel) {
         if (Strings.isEmpty(parallel)) {
@@ -161,6 +161,14 @@ public record DataSetConverterOption(
      */
     public static Integer parallelism(final String parallel) {
         return Strings.isEmpty(parallel) ? null : Integer.valueOf(parallel);
+    }
+
+    /**
+     * @param parallel  parallel(String)で検証した値
+     * @param whenEmpty 未指定のときの並列数
+     */
+    public static int parallelism(final String parallel, final int whenEmpty) {
+        return Strings.isEmpty(parallel) ? whenEmpty : Integer.parseInt(parallel);
     }
 
     public File getResultDir() {
