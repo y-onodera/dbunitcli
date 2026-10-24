@@ -21,7 +21,10 @@ public record ComparableCSVQueryDataSetProducer(ComparableDataSetParam param,
                                                 Parameter parameter) implements QueryDataSetProducer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ComparableCSVQueryDataSetProducer.class);
-    private static final String URL = "jdbc:h2:file:" + FileResources.datasetDir().getAbsolutePath() + ";MODE=Oracle";
+
+    private static String url() {
+        return "jdbc:h2:file:" + FileResources.datasetDir().getAbsolutePath() + ";MODE=Oracle";
+    }
 
     @Override
     public ComparableTableMappingTask createTableMappingTask(final Source source) {
@@ -36,7 +39,7 @@ public record ComparableCSVQueryDataSetProducer(ComparableDataSetParam param,
             try {
                 final String query = this.param.templateRender().render(new File(this.source.filePath()), this.parameter);
                 ComparableCSVQueryDataSetProducer.LOGGER.info("produce - start filePath={},query={}", this.source.filePath(), query);
-                try (final Connection conn = DriverManager.getConnection(ComparableCSVQueryDataSetProducer.URL);
+                try (final Connection conn = DriverManager.getConnection(ComparableCSVQueryDataSetProducer.url());
                      final Statement stmt = conn.createStatement();
                      final ResultSet rst = stmt.executeQuery(query)
                 ) {
