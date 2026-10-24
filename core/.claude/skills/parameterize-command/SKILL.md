@@ -6,12 +6,13 @@ DO NOT TRIGGER when: 読み取りのみ、または他コマンド（Compare/Con
 
 Parameterizeは、`-param`の各単位を引数へ展開して別コマンドを繰り返し実行するオーケストレータ。`loadParams()`が`unit`でParameterストリームを作り、各Parameterで`createCommand()`（`-cmd`をST4展開）＋`createArgs()`でサブコマンドを`exec()`する。
 
-## 設計の4軸
+## 設計の5軸
 
 1. **unit**: `ParameterUnit`（record/table/dataset。Generateと共有）
 2. **引数テンプレート供給元**: `-cmdParam`（ファイル名をParameterで動的決定）＞`-template`（固定）。どちらも無ければ`-arg`のみ
 3. **展開（`-parameterize`）**: true（既定）はST4展開してから引数化。`-arg`/`-A`はキー一致で上書きマージ
 4. **失敗継続（`-ignoreFail`）**: `CommandFailException`時に記録継続か即中断。失敗総数>0で全体失敗
+5. **並列（`-parallel`）**: 既定1＝逐次。2以上は`ParallelTableMapping.forEachUntilFailure`で並列（順不定。失敗時は未着手を始めず実行中の完了を待つ）
 
 ## 実装の骨格
 

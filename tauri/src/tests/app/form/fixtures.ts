@@ -639,6 +639,7 @@ export const parameterizeLoadResponseFixture = {
 	]),
 	parameterize: makeElement("parameterize", "FLG", "true", "WORKSPACE", false),
 	ignoreFail: makeElement("ignoreFail", "FLG", "false", "WORKSPACE", false),
+	parallel: makeElement("parallel", "TEXT", "", "WORKSPACE", false),
 	cmd: makeElement("cmd", "TEXT", "convert", "WORKSPACE", false),
 	cmdParam: makeElement("cmdParam", "TEXT", "", "WORKSPACE", false),
 	template: makeElement(

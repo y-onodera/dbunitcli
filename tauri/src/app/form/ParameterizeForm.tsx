@@ -43,6 +43,9 @@ export function ParameterizeForm(prop: {
 				/>
 				<Check prefix="" element={parameterize.parameterize} />
 				<Check prefix="" element={parameterize.ignoreFail} />
+				{parameterize.parallel && (
+					<PlainText prefix="" element={parameterize.parallel} />
+				)}
 				<PlainText
 					prefix=""
 					element={parameterize.cmd}

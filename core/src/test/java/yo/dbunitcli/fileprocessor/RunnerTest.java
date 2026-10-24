@@ -3,12 +3,14 @@ package yo.dbunitcli.fileprocessor;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
+import java.io.PrintStream;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -74,5 +76,40 @@ class RunnerTest {
         };
         target.run(RunnerTest.files("a"), 4);
         assertEquals(List.of("a"), executed);
+    }
+
+    @Test
+    void stdErrIsRestoredWhenRunnersOverlap() throws Exception {
+        // 2つのRunnerを重ねて実行し、先に始めた方が先に終わっても後の方が終わるまでは差し替えたまま、最後に元へ戻る
+        final PrintStream original = System.err;
+        final CountDownLatch firstStarted = new CountDownLatch(1);
+        final CountDownLatch secondStarted = new CountDownLatch(1);
+        final CountDownLatch firstFinished = new CountDownLatch(1);
+        final AtomicReference<PrintStream> afterFirst = new AtomicReference<>();
+        final Thread first = new Thread(() -> ((Runner) file -> {
+            firstStarted.countDown();
+            RunnerTest.await(secondStarted);
+        }).run(RunnerTest.files("a"), 1));
+        final Thread second = new Thread(() -> ((Runner) file -> {
+            RunnerTest.await(firstStarted);
+            secondStarted.countDown();
+            RunnerTest.await(firstFinished);
+            afterFirst.set(System.err);
+        }).run(RunnerTest.files("b"), 1));
+        first.start();
+        second.start();
+        first.join(10000);
+        firstFinished.countDown();
+        second.join(10000);
+        assertNotSame(original, afterFirst.get());
+        assertSame(original, System.err);
+    }
+
+    private static void await(final CountDownLatch latch) {
+        try {
+            assertTrue(latch.await(10, TimeUnit.SECONDS));
+        } catch (final InterruptedException e) {
+            throw new AssertionError(e);
+        }
     }
 }

@@ -7,6 +7,7 @@ import yo.dbunitcli.resource.ThreadContexts;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.IntFunction;
@@ -102,6 +103,36 @@ public final class ParallelTableMapping {
             }
             return null;
         });
+    }
+
+    /**
+     * itemsを作業スレッドで並列に処理する（処理順は不定）。いずれかが失敗したら未着手のitemは始めず、
+     * 実行中のitemには割り込まずに終わるのを待ってから、最初の失敗を投げる（DB更新などを途中で止めない）。
+     * 呼び出し元が割り込まれた場合は、forEachと同様に作業スレッドを中断する
+     *
+     * @param parallelism 並列数（2以上。itemsの件数を上限にする）
+     */
+    public static <T> void forEachUntilFailure(final int parallelism, final String threadNamePrefix, final List<T> items
+            , final Consumer<? super T> action) {
+        final int threads = Math.min(parallelism, items.size());
+        ParallelTableMapping.LOGGER.info("forEachUntilFailure() - parallel items={}, threads={}", items.size(), threads);
+        final Queue<T> queue = new ConcurrentLinkedQueue<>(items);
+        final AtomicReference<Throwable> failure = new AtomicReference<>();
+        ParallelTableMapping.runWorkers(threads, threadNamePrefix, i -> () -> {
+            T item;
+            while (failure.get() == null && (item = queue.poll()) != null) {
+                ParallelTableMapping.checkInterrupted();
+                try {
+                    action.accept(item);
+                } catch (final Throwable e) {
+                    failure.compareAndSet(null, e);
+                }
+            }
+            return null;
+        });
+        if (failure.get() != null) {
+            throw ParallelTableMapping.rethrow(failure.get());
+        }
     }
 
     /**

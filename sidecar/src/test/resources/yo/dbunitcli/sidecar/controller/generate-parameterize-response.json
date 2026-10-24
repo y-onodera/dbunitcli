@@ -32,6 +32,15 @@
     },
     "value": "false"
   },
+  "parallel": {
+    "name": "parallel",
+    "attribute": {
+      "type": "TEXT",
+      "required": false,
+      "defaultPath": "WORKSPACE"
+    },
+    "value": ""
+  },
   "cmd": {
     "name": "cmd",
     "attribute": {

@@ -136,6 +136,7 @@ export type ParameterizeOptions = CommandOptions & {
 	unit: CommandOption;
 	parameterize: CommandOption;
 	ignoreFail: CommandOption;
+	parallel?: CommandOption;
 	cmd: CommandOption;
 	cmdParam: CommandOption;
 	template: CommandOption;

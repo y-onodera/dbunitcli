@@ -44,6 +44,8 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -364,6 +366,55 @@ public class ParallelTableMappingTest {
         final List<List<String>> actual = ParallelTableMapping.groupByShared(List.of("a", "b", "c", "d", "e")
                 , List.of(List.of("x"), List.of("y"), List.of("z", "x"), List.of("w"), List.of("y")));
         Assertions.assertEquals(List.of(List.of("a", "c"), List.of("b", "e"), List.of("d")), actual);
+    }
+
+    @Test
+    public void forEachUntilFailure_waits_running_item_and_skips_unstarted_items() {
+        final List<String> started = Collections.synchronizedList(new ArrayList<>());
+        final List<String> finished = Collections.synchronizedList(new ArrayList<>());
+        final CountDownLatch slowStarted = new CountDownLatch(1);
+        final CountDownLatch failing = new CountDownLatch(1);
+        final AssertionError actual = Assertions.assertThrows(AssertionError.class
+                , () -> ParallelTableMapping.forEachUntilFailure(2, "test-", List.of("slow", "fail", "x1", "x2", "x3"), item -> {
+                    started.add(item);
+                    try {
+                        if (item.equals("slow")) {
+                            slowStarted.countDown();
+                            Assertions.assertTrue(failing.await(10, TimeUnit.SECONDS));
+                            // 失敗の後も割り込まれずに最後まで実行される
+                            Thread.sleep(100);
+                        } else if (item.equals("fail")) {
+                            Assertions.assertTrue(slowStarted.await(10, TimeUnit.SECONDS));
+                            failing.countDown();
+                            throw new AssertionError("failed " + item);
+                        }
+                    } catch (final InterruptedException e) {
+                        throw new IllegalStateException("interrupted " + item, e);
+                    }
+                    finished.add(item);
+                }));
+        Assertions.assertEquals("failed fail", actual.getMessage());
+        Assertions.assertEquals(List.of("slow"), finished);
+        Assertions.assertEquals(Set.of("slow", "fail"), Set.copyOf(started));
+    }
+
+    @Test
+    public void forEachUntilFailure_processes_all_items_on_workers_with_context() {
+        final Map<String, String> actual = new ConcurrentHashMap<>();
+        final Set<String> threads = ConcurrentHashMap.newKeySet();
+        ScopedValue.where(TestThreadContextPropagator.VALUE, "submitter")
+                .run(() -> ParallelTableMapping.forEachUntilFailure(2, "test-", List.of("a", "b", "c", "d"), item -> {
+                    actual.put(item, TestThreadContextPropagator.VALUE.orElse("unbound"));
+                    threads.add(Thread.currentThread().getName());
+                    try {
+                        // 1つのワーカーが全件を取り切らないよう待つ
+                        Thread.sleep(50);
+                    } catch (final InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                    }
+                }));
+        Assertions.assertEquals(Map.of("a", "submitter", "b", "submitter", "c", "submitter", "d", "submitter"), actual);
+        Assertions.assertEquals(2, threads.size());
     }
 
     @Test

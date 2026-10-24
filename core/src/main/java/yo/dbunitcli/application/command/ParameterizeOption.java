@@ -2,6 +2,7 @@ package yo.dbunitcli.application.command;
 
 import yo.dbunitcli.Strings;
 import yo.dbunitcli.application.*;
+import yo.dbunitcli.application.option.DataSetConverterOption;
 import yo.dbunitcli.application.option.DataSetLoadOption;
 import yo.dbunitcli.application.option.TemplateRenderOption;
 import yo.dbunitcli.common.Parameter;
@@ -18,6 +19,7 @@ public record ParameterizeOption(
         , String cmdParam
         , Map<String, String> args
         , boolean ignoreFail
+        , String parallel
         , boolean parameterize
         , ParameterUnit unit
         , String template
@@ -71,6 +73,7 @@ public record ParameterizeOption(
                 , dto.getCmdParam()
                 , new HashMap<>(dto.getArg())
                 , Strings.isNotEmpty(dto.getIgnoreFail()) && Boolean.parseBoolean(dto.getIgnoreFail())
+                , DataSetConverterOption.parallel(dto.getParallel())
                 , !Strings.isNotEmpty(dto.getParameterize()) || Boolean.parseBoolean(dto.getParameterize())
                 , dto.getUnit() != null ? dto.getUnit() : ParameterUnit.record
                 , dto.getTemplate()
@@ -91,10 +94,18 @@ public record ParameterizeOption(
                 .put("-unit", this.unit, ParameterUnit.class)
                 .put("-parameterize", this.parameterize)
                 .put("-ignoreFail", this.ignoreFail)
+                .put("-parallel", this.parallel)
                 .put("-cmd", this.cmd)
                 .put("-cmdParam", this.cmdParam)
                 .putFile("-template", this.template, BaseDir.PARAMETERIZE_TEMPLATE)
                 .addComponent("templateOption", this.templateOption.toParameters());
+    }
+
+    /**
+     * @return 並列数。未指定なら1（行ごとのコマンドは実行順に依存しやすいため、runと同じく既定は逐次）
+     */
+    public int parallelism() {
+        return Strings.isEmpty(this.parallel) ? 1 : Integer.parseInt(this.parallel);
     }
 
     public Stream<Parameter> loadParams() {
