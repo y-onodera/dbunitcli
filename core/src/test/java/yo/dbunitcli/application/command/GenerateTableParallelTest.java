@@ -47,6 +47,11 @@ public class GenerateTableParallelTest {
 
     private File src;
 
+    /**
+     * テーブルaだけを置いたsrc（-regIncludeはパスにも一致しうるため、1テーブルに絞るときはディレクトリを分ける）
+     */
+    private File srcA;
+
     private File template;
 
     @BeforeEach
@@ -58,6 +63,8 @@ public class GenerateTableParallelTest {
                     .collect(Collectors.joining("\n", "\"ID\",\"VAL\"\n", "\n"));
             Files.writeString(new File(this.src, name + ".csv").toPath(), body, StandardCharsets.UTF_8);
         }
+        this.srcA = Files.createDirectories(this.tempDir.resolve("srcA")).toFile();
+        Files.copy(new File(this.src, "a.csv").toPath(), new File(this.srcA, "a.csv").toPath());
         this.template = this.tempDir.resolve("template.txt").toFile();
         Files.writeString(this.template.toPath(), "$tableName$:$rows:{it|$it.ID$};separator=\",\"$", StandardCharsets.UTF_8);
     }
@@ -188,11 +195,10 @@ public class GenerateTableParallelTest {
             final File result = this.tempDir.resolve("result-record-" + generateType + includeMetaData + parallel).toFile();
             Generate.main(new String[]{
                     "-srcType=csv"
-                    , "-src=" + this.src.getAbsolutePath()
+                    // Excelは1行1ブックで重いため1テーブルに絞る
+                    , "-src=" + ("txt".equals(generateType) ? this.src : this.srcA).getAbsolutePath()
                     , "-encoding=UTF-8"
                     , "-src.includeMetaData=" + includeMetaData
-                    // Excelは1行1ブックで重いため1テーブルに絞る
-                    , "-regInclude=" + ("txt".equals(generateType) ? "" : "a")
                     , "-generateType=" + generateType
                     , "-unit=record"
                     , "-parallel=" + parallel
@@ -227,9 +233,8 @@ public class GenerateTableParallelTest {
         final File result = this.tempDir.resolve("result").toFile();
         Generate.main(new String[]{
                 "-srcType=csv"
-                , "-src=" + this.src.getAbsolutePath()
+                , "-src=" + this.srcA.getAbsolutePath()
                 , "-encoding=UTF-8"
-                , "-regInclude=a"
                 , "-generateType=txt"
                 , "-unit=record"
                 , "-template=" + template.getAbsolutePath()
