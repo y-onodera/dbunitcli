@@ -89,11 +89,8 @@ public record DataSetConverterOption(
         final ResultType type = ResultType.valueOf(this.resultType.name());
         if (type == ResultType.table) {
             result.put("-op", this.operation == null ? DbOperation.CLEAN_INSERT : this.operation
-                          , DbOperation.class);
-            if (showParallel) {
-                result.put("-parallel", this.parallel);
-            }
-            result.addComponent("jdbc", this.jdbcOption.toParameters());
+                          , DbOperation.class)
+                  .addComponent("jdbc", this.jdbcOption.toParameters());
         } else {
             result.putDir("-result", this.resultDir, BaseDir.RESULT)
                   .put("-resultPath", this.resultPath)
@@ -114,9 +111,9 @@ public record DataSetConverterOption(
             } else {
                 result.put("-excelTable", this.excelTable);
             }
-            if (showParallel) {
-                result.put("-parallel", this.parallel);
-            }
+        }
+        if (showParallel) {
+            result.put("-parallel", this.parallel);
         }
         return result;
     }

@@ -14,7 +14,12 @@
 
 全resultType共通: `resultDir`（`-result`）/ `resultPath` / `exportEmptyTable` / `exportHeader`（`table`除く）。
 
-`parallel`（並列化できる組み合わせのときだけ表示。Convertは`srcType.isParallelizable()`かつ`DataSetConverterOption.isParallelizable()`、Compareはnew/oldのどちらかが`isParallelizable()`）: ソースの並列読込数（`ComparableDataSetParam.parallel`へ渡す。Compareはnew/oldの読込に適用）。未指定はCPUコア数、`1`は逐次。並列化の可否は`ParallelTableMapping.lanes`が判定し、出力テーブルを共有するソースは同じレーン（同一スレッド・元の順）にまとめる。対象はproducerが`isParallelizableSource()`（file/dir以外。table/sqlは2つ目以降のレーンで`forLane()`によりレーンごとに接続を張る。xls/xlsxはタスクの`outputTableCandidates()`でシート名とxlsxSchemaから出力テーブルを先読み）。作業スレッドへは`FileResources`のContextを引き継ぐかつconverterが`isParallelizable()`（FlatFile系・xls/xlsxのBOOK・tableは`splitForParallel()`でレーンごとに接続を張る）またはnull、join・件数分割なしのとき。
+`parallel`: ソースの並列読込数（`ComparableDataSetParam.parallel`へ渡す。Compareはnew/oldの読込に適用）。未指定はCPUコア数、`1`は逐次。
+
+- 表示: 並列化できる組み合わせのときだけ。Convertは`DataSourceType.isParallelizable()`かつ`DataSetConverterOption.isParallelizable()`、Compareはnew/oldのどちらかが`DataSourceType.isParallelizable()`
+- 実行: `ParallelTableMapping`。producerの`isParallelizableSource()`（`DataSourceType.isParallelizable()`と一致させる。`ParallelTableMappingTest`で検証）、converterの`isParallelizable()`（FlatFile系・xls/xlsxのBOOK・table）、join・件数分割なしのとき、出力テーブルを共有するソースを同じレーン（同一スレッド・元の順）にまとめて作業スレッドで処理する
+- 出力テーブルの先読み: タスクの`outputTableCandidates()`（xls/xlsxはシート名とxlsxSchemaから）
+- スレッド間で共有できない資源: DB接続は作業スレッドごとに張る（入力は`ComparableTableMappingTask.forWorker()`、出力は`IDataSetConverter.splitForParallel()`。どちらも`ParallelTableMapping.WorkerResources`から取得し終了時に閉じる）。`FileResources`のContextとsidecarのログ振り分けは作業スレッドへ引き継ぐ
 
 ## 実装チェックリスト（変換仕様の変更箇所）
 

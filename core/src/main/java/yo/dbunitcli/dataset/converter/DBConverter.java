@@ -7,10 +7,11 @@ import yo.dbunitcli.dataset.AddSettingTableMetaData;
 import yo.dbunitcli.dataset.DataSetConverterParam;
 import yo.dbunitcli.dataset.DbOperation;
 import yo.dbunitcli.dataset.IDataSetConverter;
+import yo.dbunitcli.dataset.ParallelTableMapping;
 import yo.dbunitcli.dataset.converter.db.*;
 import yo.dbunitcli.resource.jdbc.DatabaseConnectionLoader;
 
-import java.sql.SQLException;
+import java.util.List;
 
 public class DBConverter implements IDataSetConverter {
 
@@ -20,29 +21,25 @@ public class DBConverter implements IDataSetConverter {
     private final DBOperator operator;
     /** 並列実行用に別の接続を張るためのloader。nullなら並列化しない */
     private final DatabaseConnectionLoader connectionLoader;
-    /** 接続をこのインスタンスで張った（release()で閉じる）か */
-    private final boolean ownConnection;
 
     public DBConverter(final DataSetConverterParam param) {
         this(param.databaseConnectionLoader().loadConnection()
                 , param.operation()
                 , param.exportEmptyTable()
-                , param.databaseConnectionLoader()
-                , false);
+                , param.databaseConnectionLoader());
     }
 
     public DBConverter(final IDatabaseConnection connection, final DbOperation operation, final boolean exportEmptyTable) {
-        this(connection, operation, exportEmptyTable, null, false);
+        this(connection, operation, exportEmptyTable, null);
     }
 
     private DBConverter(final IDatabaseConnection connection, final DbOperation operation, final boolean exportEmptyTable
-            , final DatabaseConnectionLoader connectionLoader, final boolean ownConnection) {
+            , final DatabaseConnectionLoader connectionLoader) {
         this.connection = connection;
         this.operation = operation;
         this.exportEmptyTable = exportEmptyTable;
         this.operator = this.createOperator(operation, connection);
         this.connectionLoader = connectionLoader;
-        this.ownConnection = ownConnection;
     }
 
     private DBOperator createOperator(final DbOperation operation, final IDatabaseConnection connection) {
@@ -73,21 +70,14 @@ public class DBConverter implements IDataSetConverter {
         return this.connectionLoader != null;
     }
 
+    /**
+     * 読込側（同じスレッドで結果セットを読みながら書き込む）とは別の接続にするため、keyにDBConverterを含める
+     */
     @Override
-    public IDataSetConverter splitForParallel() {
-        return new DBConverter(this.connectionLoader.loadConnection(), this.operation, this.exportEmptyTable
-                , this.connectionLoader, true);
-    }
-
-    @Override
-    public void release() {
-        if (this.ownConnection) {
-            try {
-                this.connection.close();
-            } catch (final SQLException e) {
-                throw new AssertionError(e);
-            }
-        }
+    public IDataSetConverter splitForParallel(final ParallelTableMapping.WorkerResources resources) {
+        final IDatabaseConnection connection = resources.get(List.of(DBConverter.class, this.connectionLoader)
+                , this.connectionLoader::loadConnection, IDatabaseConnection::close);
+        return new DBConverter(connection, this.operation, this.exportEmptyTable, this.connectionLoader);
     }
 
     @Override

@@ -55,7 +55,7 @@ public class ComparableDBDataSetProducer implements ComparableDataSetProducer {
     }
 
     /**
-     * JDBC接続は複数スレッドから同時に使えないため、2つ目以降のレーンはレーンごとに接続を張る（{@link DBTableExecutor#forLane}）
+     * JDBC接続は複数スレッドから同時に使えないため、2つ目以降の作業スレッドはスレッドごとに接続を張る（{@link DBTableExecutor#forWorker}）
      */
     @Override
     public boolean isParallelizableSource() {
@@ -111,7 +111,7 @@ public class ComparableDBDataSetProducer implements ComparableDataSetProducer {
         }
 
         @Override
-        public ComparableTableMappingTask forLane(final ParallelTableMapping.LaneResources resources) {
+        public ComparableTableMappingTask forWorker(final ParallelTableMapping.WorkerResources resources) {
             final DatabaseConnectionLoader loader = this.param.databaseConnectionLoader();
             return this.withConnection(resources.get(loader, loader::loadConnection, IDatabaseConnection::close));
         }

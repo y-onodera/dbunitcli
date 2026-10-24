@@ -21,6 +21,7 @@ import yo.dbunitcli.dataset.converter.XlsxConverter;
 import yo.dbunitcli.dataset.producer.ComparableCSVQueryDataSetProducer;
 import yo.dbunitcli.dataset.producer.ComparableCsvDataSetProducer;
 import yo.dbunitcli.dataset.producer.ComparableDBDataSetProducer;
+import yo.dbunitcli.dataset.producer.ComparableDataSetLoader;
 import yo.dbunitcli.dataset.producer.ComparableQueryDataSetProducer;
 import yo.dbunitcli.dataset.producer.ComparableXlsDataSetProducer;
 import yo.dbunitcli.dataset.producer.ComparableXlsxDataSetProducer;
@@ -114,9 +115,7 @@ public class ParallelTableMappingTest {
         final ComparableDataSet parallel = this.producer(this.renameBToA(), null, 4).loadDataSet();
         Assertions.assertArrayEquals(new String[]{"a", "c", "d"}, parallel.getTableNames());
         Assertions.assertArrayEquals(sequential.getTableNames(), parallel.getTableNames());
-        for (final String tableName : sequential.getTableNames()) {
-            Assertions.assertEquals(this.rows(sequential.getTable(tableName)), this.rows(parallel.getTable(tableName)));
-        }
+        this.assertSameTables(sequential, parallel);
         Assertions.assertEquals(200, parallel.getTable("a").getRowCount());
     }
 
@@ -189,7 +188,7 @@ public class ParallelTableMappingTest {
 
     @Test
     public void lanes_group_xlsx_by_sheet_name() throws IOException {
-        final File xlsx = this.writeXlsx(Map.of("x1", List.of("s1", "s2"), "x2", List.of("s2", "s3"), "x3", List.of("s4"), "x4", List.of("s5")));
+        final File xlsx = this.writeExcel(Map.of("x1", List.of("s1", "s2"), "x2", List.of("s2", "s3"), "x3", List.of("s4"), "x4", List.of("s5")), "xlsx");
         final ComparableXlsxDataSetProducer producer = this.xlsxProducer(xlsx, XlsxSchema.DEFAULT, null);
         Assertions.assertEquals(Set.of(Set.of("x1.xlsx", "x2.xlsx"), Set.of("x3.xlsx"), Set.of("x4.xlsx")), this.laneFileNames(producer));
     }
@@ -201,20 +200,18 @@ public class ParallelTableMappingTest {
                 {"patterns": {"M": "M_"}
                 , "rows": [{"tableName": "M", "sheetName": "M", "header": ["ID", "VAL"], "dataStart": 1, "columnIndex": [0, 1], "breakKey": []}]}
                 """);
-        final File xlsx = this.writeXlsx(Map.of("x1", List.of("s1", "M_A"), "x2", List.of("M_B"), "x3", List.of("s1")));
+        final File xlsx = this.writeExcel(Map.of("x1", List.of("s1", "M_A"), "x2", List.of("M_B"), "x3", List.of("s1")), "xlsx");
         final ComparableXlsxDataSetProducer producer = this.xlsxProducer(xlsx, schema, null);
         Assertions.assertEquals(Set.of(Set.of("x1.xlsx", "x2.xlsx"), Set.of("x3.xlsx")), this.laneFileNames(producer));
     }
 
     @Test
     public void produce_xlsx_same_as_sequential() throws IOException {
-        final File xlsx = this.writeXlsx(Map.of("x1", List.of("s1", "s2"), "x2", List.of("s2", "s3"), "x3", List.of("s4")));
+        final File xlsx = this.writeExcel(Map.of("x1", List.of("s1", "s2"), "x2", List.of("s2", "s3"), "x3", List.of("s4")), "xlsx");
         final ComparableDataSet sequential = this.xlsxProducer(xlsx, XlsxSchema.DEFAULT, 1).loadDataSet();
         final ComparableDataSet parallel = this.xlsxProducer(xlsx, XlsxSchema.DEFAULT, 4).loadDataSet();
         Assertions.assertArrayEquals(new String[]{"s1", "s2", "s3", "s4"}, parallel.getTableNames());
-        for (final String tableName : sequential.getTableNames()) {
-            Assertions.assertEquals(this.rows(sequential.getTable(tableName)), this.rows(parallel.getTable(tableName)));
-        }
+        this.assertSameTables(sequential, parallel);
         Assertions.assertEquals(20, parallel.getTable("s2").getRowCount());
     }
 
@@ -231,9 +228,7 @@ public class ParallelTableMappingTest {
         final ComparableDataSet sequential = this.xlsProducer(xls, 1).loadDataSet();
         final ComparableDataSet parallel = this.xlsProducer(xls, 4).loadDataSet();
         Assertions.assertArrayEquals(new String[]{"s1", "s2", "s3", "s4"}, parallel.getTableNames());
-        for (final String tableName : sequential.getTableNames()) {
-            Assertions.assertEquals(this.rows(sequential.getTable(tableName)), this.rows(parallel.getTable(tableName)));
-        }
+        this.assertSameTables(sequential, parallel);
         Assertions.assertEquals(20, parallel.getTable("s2").getRowCount());
     }
 
@@ -248,10 +243,8 @@ public class ParallelTableMappingTest {
         final ComparableDataSet sequential = this.csvqProducer(queryDir, 1).loadDataSet();
         final ComparableDataSet parallel = this.csvqProducer(queryDir, 4).loadDataSet();
         Assertions.assertArrayEquals(new String[]{"qa", "qb", "qc", "qd"}, parallel.getTableNames());
-        for (final String tableName : sequential.getTableNames()) {
-            Assertions.assertEquals(this.rows(sequential.getTable(tableName)), this.rows(parallel.getTable(tableName)));
-            Assertions.assertEquals(100, parallel.getTable(tableName).getRowCount());
-        }
+        this.assertSameTables(sequential, parallel);
+        Arrays.stream(parallel.getTableNames()).forEach(it -> Assertions.assertEquals(100, parallel.getTable(it).getRowCount()));
     }
 
     @Test
@@ -331,10 +324,8 @@ public class ParallelTableMappingTest {
                 final ComparableDataSet sequential = this.dbProducer(src.getKey(), src.getValue(), url, 1).loadDataSet();
                 Assertions.assertArrayEquals(sequential.getTableNames(), parallel.getTableNames(), src.getKey().name());
                 Assertions.assertEquals(4, parallel.getTableNames().length, src.getKey().name());
-                for (final String tableName : sequential.getTableNames()) {
-                    Assertions.assertEquals(this.rows(sequential.getTable(tableName)), this.rows(parallel.getTable(tableName)), tableName);
-                    Assertions.assertEquals(100, parallel.getTable(tableName).getRowCount(), tableName);
-                }
+                this.assertSameTables(sequential, parallel);
+                Arrays.stream(parallel.getTableNames()).forEach(it -> Assertions.assertEquals(100, parallel.getTable(it).getRowCount(), it));
             }
         }
     }
@@ -366,14 +357,9 @@ public class ParallelTableMappingTest {
     }
 
     private Set<Set<String>> laneFileNames(final ComparableDataSetProducer producer) {
-        final List<ComparableTableMappingTask> tasks = producer.getSourceStream().map(producer::createTableMappingTask).collect(Collectors.toList());
-        return ParallelTableMapping.lanes(producer, tasks).orElseThrow().stream()
+        return ParallelTableMapping.lanes(producer, this.tasks(producer)).orElseThrow().stream()
                 .map(lane -> lane.stream().map(it -> it.source().fileName()).collect(Collectors.toSet()))
                 .collect(Collectors.toSet());
-    }
-
-    private File writeXlsx(final Map<String, List<String>> sheetsByFile) throws IOException {
-        return this.writeExcel(sheetsByFile, "xlsx");
     }
 
     private File writeExcel(final Map<String, List<String>> sheetsByFile, final String extension) throws IOException {
@@ -439,7 +425,30 @@ public class ParallelTableMappingTest {
 
     private List<ComparableTableMappingTask> tasks(final TableSeparators tableSeparators) {
         final ComparableCsvDataSetProducer producer = this.producer(tableSeparators, null, null);
-        return producer.getSourceStream().map(producer::createTableMappingTask).collect(Collectors.toList());
+        return this.tasks(producer);
+    }
+
+    @Test
+    public void data_source_type_matches_producer() {
+        // 画面の表示判定（DataSourceType）と実行時の判定（producer）がずれないこと
+        for (final DataSourceType type : DataSourceType.values()) {
+            final ComparableDataSetParam param = ComparableDataSetParam.builder()
+                    .setSrc(new File(this.src, "a.csv"))
+                    .setSource(type)
+                    .setFixedLength("1")
+                    .setDatabaseConnectionLoader(this.connectionLoader("jdbc:h2:mem:sourceType;DB_CLOSE_DELAY=-1"))
+                    .build();
+            Assertions.assertEquals(type.isParallelizable()
+                    , new ComparableDataSetLoader(Parameter.none()).getComparableDataSetProducer(param).isParallelizableSource()
+                    , type.name());
+        }
+    }
+
+    private void assertSameTables(final ComparableDataSet expected, final ComparableDataSet actual) {
+        Assertions.assertArrayEquals(expected.getTableNames(), actual.getTableNames());
+        for (final String tableName : expected.getTableNames()) {
+            Assertions.assertEquals(this.rows(expected.getTable(tableName)), this.rows(actual.getTable(tableName)), tableName);
+        }
     }
 
     private List<List<Object>> rows(final ComparableTable table) {

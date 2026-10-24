@@ -1,5 +1,10 @@
 package yo.dbunitcli.resource.poi;
 
+import org.dbunit.dataset.Column;
+import org.dbunit.dataset.DefaultTableMetaData;
+import yo.dbunitcli.common.TableMetaDataWithSource;
+import java.util.Arrays;
+import java.util.stream.Stream;
 import yo.dbunitcli.common.Source;
 import yo.dbunitcli.common.TargetFilter;
 
@@ -26,6 +31,16 @@ public interface XlsxSchema {
 
     default XlsxCellsToTableBuilder getCellRecordBuilder(final String[] headerNames, final Source source) {
         return XlsxCellsToTableBuilder.NO_TARGET;
+    }
+
+    /**
+     * シートから作るテーブルのメタデータ（列は空）。シートを読む前に出力テーブルを決めるのに使う
+     */
+    default Stream<TableMetaDataWithSource> getTableCandidates(final int startRow, final String[] headerNames, final Source sheet) {
+        return Stream.concat(Arrays.stream(this.getRowsTableBuilder(startRow, headerNames, sheet).getTableNames())
+                        , Arrays.stream(this.getCellRecordBuilder(headerNames, sheet).getTableNames()))
+                .distinct()
+                .map(tableName -> sheet.wrap(new DefaultTableMetaData(tableName, new Column[0])));
     }
 
     interface Builder {
