@@ -6,13 +6,26 @@ import org.dbunit.dataset.DefaultTableMetaData;
 import yo.dbunitcli.common.Source;
 import yo.dbunitcli.common.TableMetaDataWithSource;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Stream;
 
 public abstract class ComparableDataSetProducerWrapper implements ComparableDataSetProducer, IDataSetConverter {
 
     protected final ComparableDataSetProducer delegate;
 
-    private ComparableTableMappingContext outputContext;
+    /**
+     * ソースごとの変換結果。unit=tableはテーブル一覧の作成とテーブルごとの出力で同じタスクを2回実行するため、
+     * 2回目以降は保持した結果を出力する（DB入力ではメタデータ照会を繰り返さない）
+     */
+    private final Map<Source, List<ConvertedTable>> converted = new HashMap<>();
+
+    /**
+     * 変換中のソースの結果を受け取る（startTable→writeColumnRowsで追加する）
+     */
+    private List<ConvertedTable> converting;
 
     protected ComparableDataSetProducerWrapper(final ComparableDataSetProducer delegate) {
         this.delegate = delegate;
@@ -68,23 +81,28 @@ public abstract class ComparableDataSetProducerWrapper implements ComparableData
         return this;
     }
 
-    protected ComparableTableMapper createOutputMapper(final TableMetaDataWithSource metaData) {
-        return this.outputContext.createMapper(metaData);
-    }
-
     /**
      * サブクラス共通の「列メタデータを1列1行に変換する」処理。tableNameのSource.NONEラップ・
      * DefaultTableMetaData生成・startTable/addRow/endTableの反復を一括で行う。
      */
     protected void writeColumnRows(final String tableName, final Column[] outputSchema,
                                    final Column[] sourceColumns, final RowBuilder rowBuilder) {
-        final ComparableTableMapper mapper = this.createOutputMapper(
-                Source.NONE.tableName(tableName).wrap(new DefaultTableMetaData(tableName, outputSchema)));
-        mapper.startTable();
+        final List<Object[]> rows = new ArrayList<>();
         for (int i = 0; i < sourceColumns.length; i++) {
-            mapper.addRow(rowBuilder.buildRow(sourceColumns[i], i));
+            rows.add(rowBuilder.buildRow(sourceColumns[i], i));
         }
-        mapper.endTable();
+        this.converting.add(new ConvertedTable(
+                Source.NONE.tableName(tableName).wrap(new DefaultTableMetaData(tableName, outputSchema)), rows));
+    }
+
+    private record ConvertedTable(TableMetaDataWithSource metaData, List<Object[]> rows) {
+
+        void writeTo(final ComparableTableMappingContext context) {
+            final ComparableTableMapper mapper = context.createMapper(this.metaData);
+            mapper.startTable();
+            this.rows.forEach(mapper::addRow);
+            mapper.endTable();
+        }
     }
 
     @FunctionalInterface
@@ -114,12 +132,26 @@ public abstract class ComparableDataSetProducerWrapper implements ComparableData
 
         @Override
         public void run(final ComparableTableMappingContext context) {
-            ComparableDataSetProducerWrapper.this.outputContext = context;
-            final ComparableTableMappingContext captureContext = new ComparableTableMappingContext(
-                    this.delegateTask.param().tableSeparators(), ComparableDataSetProducerWrapper.this);
-            captureContext.open();
-            this.delegateTask.run(captureContext);
-            captureContext.close();
+            ComparableDataSetProducerWrapper.this.converted.computeIfAbsent(this.source, k -> this.convert())
+                    .forEach(it -> it.writeTo(context));
+        }
+
+        /**
+         * delegateのタスクを実行し、読み込んだテーブルのメタデータを変換する（行データは読み込みの有無によらず使わない）
+         */
+        private List<ConvertedTable> convert() {
+            final List<ConvertedTable> result = new ArrayList<>();
+            ComparableDataSetProducerWrapper.this.converting = result;
+            try {
+                final ComparableTableMappingContext captureContext = new ComparableTableMappingContext(
+                        this.delegateTask.param().tableSeparators(), ComparableDataSetProducerWrapper.this);
+                captureContext.open();
+                this.delegateTask.run(captureContext);
+                captureContext.close();
+            } finally {
+                ComparableDataSetProducerWrapper.this.converting = null;
+            }
+            return result;
         }
 
         @Override
