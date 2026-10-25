@@ -7,6 +7,7 @@ import type {
 	CommandOption,
 	TemplateOption,
 } from "../../../model/CommandOption";
+import EncodingText from "./element/EncodingText";
 import PlainText from "./element/PlainText";
 import TemplateText from "./element/TemplateText";
 
@@ -32,7 +33,7 @@ export default function TemplateFormSection({
 				label="Template"
 			/>
 			{templateOption.encoding && showEncoding && (
-				<PlainText
+				<EncodingText
 					prefix={templateOption.prefix}
 					element={templateOption.encoding}
 					hidden={!showOptional}

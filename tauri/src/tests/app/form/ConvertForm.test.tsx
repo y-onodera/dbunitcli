@@ -97,6 +97,19 @@ describe("ConvertFormの描画テスト", () => {
 			).toBeInTheDocument();
 		});
 
+		it("encodingの入力欄にUTF-8・MS932の候補が付く", () => {
+			render(<ConvertForm {...makeConvertProps()} />);
+
+			const input = document.querySelector(
+				'input[type="text"][name="-src.encoding"]',
+			);
+			const listId = input?.getAttribute("list") ?? "";
+			const options = Array.from(
+				document.querySelectorAll(`datalist[id="${listId}"] option`),
+			).map((option) => option.getAttribute("value"));
+			expect(options).toEqual(["UTF-8", "MS932"]);
+		});
+
 		it("traversal option要素（recursive・regInclude等）は初期状態でhiddenになっている", () => {
 			render(<ConvertForm {...makeConvertProps()} />);
 

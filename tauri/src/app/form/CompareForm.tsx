@@ -5,8 +5,8 @@ import { buildDatasetSrcInfo } from "../../model/CommandOption";
 import type { CompareOptions } from "../../model/SelectParameter";
 import { DatasetLoadForm } from "./section/DatasetLoadForm";
 import Check from "./section/element/Check";
+import EncodingText from "./section/element/EncodingText";
 import FileText from "./section/element/FileText";
-import PlainText from "./section/element/PlainText";
 import Select from "./section/element/Select";
 import ImageOptionFormSection from "./section/ImageOptionFormSection";
 import ResultFormSection from "./section/ResultFormSection";
@@ -56,7 +56,7 @@ export function CompareForm(prop: {
 						hideDatasetSettingEdit={true}
 					/>
 				)}
-				<PlainText prefix="" element={settingEncodingElement} />
+				<EncodingText prefix="" element={settingEncodingElement} />
 				{targetType === "data" && (
 					<Check prefix="" element={createPatchSqlElement} />
 				)}
