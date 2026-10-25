@@ -17,6 +17,7 @@ import yo.dbunitcli.dataset.DataSourceType;
 import yo.dbunitcli.dataset.DbOperation;
 import yo.dbunitcli.dataset.ParallelTableMapping;
 import yo.dbunitcli.dataset.TableSeparators;
+import yo.dbunitcli.dataset.converter.FixedColumnDef;
 import yo.dbunitcli.dataset.producer.ComparableDataSetLoader;
 import yo.dbunitcli.resource.FileResources;
 import yo.dbunitcli.resource.Workers;
@@ -221,6 +222,9 @@ public record GenerateOption(Parameter parameter, String resultDir, String resul
     public List<Violation> validate() {
         return Option.concat(this.srcData.validate()
                 , this.validateEncoding("-outputEncoding", this.outputEncoding)
+                , this.generateType == GenerateType.fixedColumnDef
+                        ? this.validateOneOf("-align", this.align, FixedColumnDef.ALIGNS)
+                        : List.of()
                 , this.generateType == GenerateType.sql
                         ? this.validateRequired("-op", this.operation == null ? null : this.operation.name())
                         : List.of()

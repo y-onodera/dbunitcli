@@ -33,6 +33,8 @@ public record ImageCompareOption(
         , String excludedRectangleColor
 ) implements Option {
 
+    // excludedAreas全体の書式（[x1,y1,x2,y2]を0個以上連結）
+    private static final Pattern AREAS_FORMAT = Pattern.compile("(\\[(\\d+\\.?\\d*,){3}\\d+\\.?\\d*])*");
     private static final Pattern AREA_REGEX = Pattern.compile("(?=\\[)\\[((\\d+\\.?\\d*,){3}(\\d+\\.?\\d*))\\]((?=\\[)|$)");
 
     public ImageCompareOption(final String prefix) {
@@ -61,6 +63,17 @@ public record ImageCompareOption(
     @Override
     public String getPrefix() {
         return this.prefix;
+    }
+
+    /**
+     * 書式に合わない矩形は黙って無視されるため、全体が書式どおりであることを確かめる
+     */
+    @Override
+    public List<Violation> validate() {
+        if (Strings.isEmpty(this.excludedAreas) || AREAS_FORMAT.matcher(this.excludedAreas).matches()) {
+            return List.of();
+        }
+        return this.invalidValue("-excludedAreas", "expected [x1,y1,x2,y2] repeated but was '" + this.excludedAreas + "'");
     }
 
     @Override

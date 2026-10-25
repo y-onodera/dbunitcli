@@ -116,7 +116,8 @@ public record CompareOption(
                 , this.newData.validate()
                 , this.oldData.validate()
                 , this.expectData.validate()
-                , this.result.convertResult().validate());
+                , this.result.convertResult().validate()
+                , this.targetType.isAny(Type.image, Type.pdf) ? this.imageOption.validate() : List.of());
     }
 
     @Override

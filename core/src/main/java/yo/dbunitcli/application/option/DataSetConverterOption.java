@@ -3,6 +3,7 @@ package yo.dbunitcli.application.option;
 import yo.dbunitcli.Strings;
 import yo.dbunitcli.application.Option;
 import yo.dbunitcli.application.dto.DataSetConverterDto;
+import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.dataset.DataSetConverterParam;
 import yo.dbunitcli.dataset.DbOperation;
 import yo.dbunitcli.dataset.ResultType;
@@ -92,7 +93,11 @@ public record DataSetConverterOption(
             case xls, xlsx -> this.validateOneOf("-excelTable", this.excelTable, Arrays.stream(
                     XlsConverter.TableExportType.values()).map(Enum::name).toList());
             case fixed -> Option.concat(this.validateEncoding("-outputEncoding", this.outputEncoding)
-                    , this.validateFileExists("-fixedColumnDef", this.fixedColumnDefFile, BaseDir.FIXED_COLUMN_DEF));
+                    , this.validateFileExists("-fixedColumnDef", this.fixedColumnDefFile, BaseDir.FIXED_COLUMN_DEF)
+                    , this.validateOneOfIgnoreCase("-fixedLengthType", this.fixedLengthType
+                            , ComparableDataSetParam.LengthType.names()));
+            case format -> Option.concat(this.validateEncoding("-outputEncoding", this.outputEncoding)
+                    , this.validateRequired("-format", this.format));
             case null -> List.of();
             default -> this.validateEncoding("-outputEncoding", this.outputEncoding);
         };

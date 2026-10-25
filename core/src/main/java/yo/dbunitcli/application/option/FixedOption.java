@@ -35,7 +35,9 @@ public record FixedOption(
     @Override
     public List<Violation> validate() {
         return Option.concat(this.validateRequired("-fixedLength", this.fixedLength)
-                , this.validateRequired("-headerName", this.headerName));
+                , this.validateRequired("-headerName", this.headerName)
+                , this.validateOneOfIgnoreCase("-fixedLengthType", this.fixedLengthType
+                        , ComparableDataSetParam.LengthType.names()));
     }
 
     @Override

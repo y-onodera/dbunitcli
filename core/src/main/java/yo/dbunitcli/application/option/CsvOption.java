@@ -4,11 +4,12 @@ import yo.dbunitcli.Strings;
 import yo.dbunitcli.application.dto.DataSetLoadDto;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 
+import java.util.List;
 import java.util.Optional;
 
 public record CsvOption(
         String prefix
-        , char delimiter
+        , String delimiter
         , boolean ignoreQuoted
 ) implements ComparableDataSetParamOption {
 
@@ -22,8 +23,7 @@ public record CsvOption(
                                 .replace("\\n", "\n")
                                 .replace("\\r", "\r")
                                 .replace("\\f", "\f")
-                                .charAt(0)
-                        ).orElse(',')
+                        ).orElse(",")
                 , dto.getIgnoreQuoted());
     }
 
@@ -35,7 +35,7 @@ public record CsvOption(
     @Override
     public ParametersBuilder toParametersBuilder() {
         return new ParametersBuilder(this.getPrefix())
-                .put("-delimiter", String.valueOf(this.delimiter)
+                .put("-delimiter", this.delimiter
                         .replace("\b", "\\b")
                         .replace("\t", "\\t")
                         .replace("\n", "\\n")
@@ -45,10 +45,18 @@ public record CsvOption(
                 .put("-ignoreQuoted", this.ignoreQuoted);
     }
 
+    /**
+     * エスケープ（\t等）を戻した後の区切り文字は1文字でなければならない
+     */
+    @Override
+    public List<Violation> validate() {
+        return this.validateSingleChar("-delimiter", this.delimiter);
+    }
+
     @Override
     public ComparableDataSetParam.Builder populate(final ComparableDataSetParam.Builder builder) {
         return builder
-                .setDelimiter(this.delimiter)
+                .setDelimiter(this.delimiter.charAt(0))
                 .setIgnoreQuoted(this.ignoreQuoted);
     }
 

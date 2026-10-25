@@ -14,8 +14,8 @@ public record TemplateRenderOption(
         String prefix
         , String encoding
         , String templateParameterAttribute
-        , char templateVarStart
-        , char templateVarStop
+        , String templateVarStart
+        , String templateVarStop
         , boolean formulaProcess
         , boolean evaluateFormulas
         , boolean forceFormulaRecalc
@@ -28,8 +28,8 @@ public record TemplateRenderOption(
         this(prefix
                 , Strings.isNotEmpty(dto.getEncoding()) ? dto.getEncoding() : Charset.defaultCharset().displayName()
                 , dto.getTemplateParameterAttribute() != null ? dto.getTemplateParameterAttribute() : "param"
-                , Strings.isNotEmpty(dto.getTemplateVarStart()) ? dto.getTemplateVarStart().charAt(0) : '$'
-                , Strings.isNotEmpty(dto.getTemplateVarStop()) ? dto.getTemplateVarStop().charAt(0) : '$'
+                , Strings.isNotEmpty(dto.getTemplateVarStart()) ? dto.getTemplateVarStart() : "$"
+                , Strings.isNotEmpty(dto.getTemplateVarStop()) ? dto.getTemplateVarStop() : "$"
                 , Strings.isEmpty(dto.getFormulaProcess()) || Boolean.parseBoolean(dto.getFormulaProcess())
                 , Strings.isEmpty(dto.getEvaluateFormulas()) || Boolean.parseBoolean(dto.getEvaluateFormulas())
                 , !Strings.isEmpty(dto.getForceFormulaRecalc()) || Boolean.parseBoolean(dto.getForceFormulaRecalc())
@@ -57,7 +57,9 @@ public record TemplateRenderOption(
     @Override
     public List<Violation> validate() {
         return Option.concat(this.validateFileExists("-templateGroup", this.templateGroup, BaseDir.TEMPLATE)
-                , this.validateEncoding("-encoding", this.encoding));
+                , this.validateEncoding("-encoding", this.encoding)
+                , this.validateSingleChar("-templateVarStart", this.templateVarStart)
+                , this.validateSingleChar("-templateVarStop", this.templateVarStop));
     }
 
     @Override
@@ -70,8 +72,8 @@ public record TemplateRenderOption(
                 .setEncoding(this.encoding())
                 .setTemplateGroup(FileResources.searchTemplate(this.templateGroup))
                 .setTemplateParameterAttribute(this.templateParameterAttribute)
-                .setTemplateVarStart(this.templateVarStart)
-                .setTemplateVarStop(this.templateVarStop)
+                .setTemplateVarStart(this.templateVarStart.charAt(0))
+                .setTemplateVarStop(this.templateVarStop.charAt(0))
                 .build();
     }
 

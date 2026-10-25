@@ -68,6 +68,21 @@ public interface Option {
         return this.invalidValue(key, "expected one of " + candidates + " but was '" + value + "'");
     }
 
+    default List<Violation> validateOneOfIgnoreCase(final String key, final String value
+            , final Collection<String> candidates) {
+        if (Strings.isEmpty(value) || candidates.stream().anyMatch(value::equalsIgnoreCase)) {
+            return List.of();
+        }
+        return this.invalidValue(key, "expected one of " + candidates + " (case-insensitive) but was '" + value + "'");
+    }
+
+    default List<Violation> validateSingleChar(final String key, final String value) {
+        if (Strings.isEmpty(value) || value.length() == 1) {
+            return List.of();
+        }
+        return this.invalidValue(key, "expected a single character but was '" + value + "'");
+    }
+
     default List<Violation> validateEncoding(final String key, final String value) {
         if (Strings.isEmpty(value)) {
             return List.of();

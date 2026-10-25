@@ -8,6 +8,8 @@ import yo.dbunitcli.resource.st4.TemplateRender;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -435,6 +437,10 @@ public record ComparableDataSetParam(
 
     public enum LengthType {
         CHAR, BYTE;
+
+        public static List<String> names() {
+            return Arrays.stream(LengthType.values()).map(Enum::name).toList();
+        }
 
         public static LengthType of(final String value) {
             if ("byte".equalsIgnoreCase(value)) {

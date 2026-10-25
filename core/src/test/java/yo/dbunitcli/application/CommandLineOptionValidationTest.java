@@ -5,6 +5,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import yo.dbunitcli.application.command.Compare;
 import yo.dbunitcli.application.command.Convert;
 import yo.dbunitcli.application.command.Generate;
 import yo.dbunitcli.application.command.Parameterize;
@@ -163,6 +164,12 @@ class CommandLineOptionValidationTest {
         }
 
         @Test
+        void templateVarStartMustBeSingleChar() {
+            assertEquals(List.of("Invalid value for option '-template.templateVarStart': expected a single character but was '<<'")
+                    , this.validate("-cmd=convert", "-template.templateVarStart=<<"));
+        }
+
+        @Test
         void templateCmdIsNotChecked() {
             assertEquals(List.of(), this.validate("-cmd=$param.cmd$"));
         }
@@ -239,6 +246,32 @@ class CommandLineOptionValidationTest {
         }
 
         @Test
+        void fixedLengthTypeMustBeCharOrByte() {
+            assertEquals(List.of("Invalid value for option '-src.fixedLengthType': "
+                            + "expected one of [CHAR, BYTE] (case-insensitive) but was 'bytes'")
+                    , this.validate("-src.srcType=fixed", "-src.fixedLength=3", "-src.headerName=A"
+                            , "-src.fixedLengthType=bytes"));
+            assertEquals(List.of(), this.validate("-src.srcType=fixed", "-src.fixedLength=3", "-src.headerName=A"
+                    , "-src.fixedLengthType=BYTE"));
+            assertEquals(List.of("Invalid value for option '-result.fixedLengthType': "
+                            + "expected one of [CHAR, BYTE] (case-insensitive) but was 'x'")
+                    , this.validate("-result.resultType=fixed", "-result.fixedLengthType=x"));
+        }
+
+        @Test
+        void delimiterMustBeSingleCharAfterUnescape() {
+            assertEquals(List.of("Invalid value for option '-src.delimiter': expected a single character but was ';;'")
+                    , this.validate("-src.delimiter=;;"));
+            assertEquals(List.of(), this.validate("-src.delimiter=\\t"));
+        }
+
+        @Test
+        void formatResultRequiresFormat() {
+            assertEquals(List.of("Missing required option: '-result.format=<format>'")
+                    , this.validate("-result.resultType=format"));
+        }
+
+        @Test
         void resultFixedColumnDefIsValidated() {
             assertEquals(List.of("Invalid value for option '-result.fixedColumnDef': file not found: 'def.json'")
                     , this.validate("-result.resultType=fixed", "-result.fixedColumnDef=def.json"));
@@ -260,6 +293,12 @@ class CommandLineOptionValidationTest {
         @Test
         void fixedTemplateDoesNotRequireTemplate() {
             assertEquals(List.of(), this.validate("-generateType=settings"));
+        }
+
+        @Test
+        void fixedColumnDefAlignMustBeLeftOrRight() {
+            assertEquals(List.of("Invalid value for option '-align': expected one of [left, right] but was 'center'")
+                    , this.validate("-generateType=fixedColumnDef", "-align=center"));
         }
 
         @Test
@@ -288,6 +327,21 @@ class CommandLineOptionValidationTest {
                             + "[compare, convert, generate, parameterize, run, scaffold] but was 'foo'")
                     , CommandLineOptionValidationTest.this.validate(
                             () -> new Scaffold().parseOption(new String[]{"-target=parameter", "-commandType=foo"})));
+        }
+    }
+
+    @Nested
+    class CompareOption {
+
+        @Test
+        void excludedAreasMustMatchFormat() {
+            assertEquals(List.of("Invalid value for option '-image.excludedAreas': expected [x1,y1,x2,y2] repeated but was '[1,2,3]'")
+                    , this.validate("-targetType=image", "-image.excludedAreas=[1,2,3]"));
+            assertEquals(List.of(), this.validate("-targetType=image", "-image.excludedAreas=[0,0,10,10][5.5,5,20,20]"));
+        }
+
+        private List<String> validate(final String... args) {
+            return CommandLineOptionValidationTest.this.validate(() -> new Compare().parseOption(args));
         }
     }
 

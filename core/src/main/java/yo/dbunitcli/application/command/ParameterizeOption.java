@@ -119,7 +119,7 @@ public record ParameterizeOption(
 
     // 行ごとにテンプレートで展開する値は、展開後でないと検証できない
     private boolean isTemplate(final String value) {
-        return Strings.isNotEmpty(value) && value.indexOf(this.templateOption.templateVarStart()) >= 0;
+        return Strings.isNotEmpty(value) && value.contains(this.templateOption.templateVarStart());
     }
 
     /**

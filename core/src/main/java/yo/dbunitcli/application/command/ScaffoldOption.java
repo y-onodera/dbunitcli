@@ -18,6 +18,7 @@ import yo.dbunitcli.dataset.DataSourceType;
 import yo.dbunitcli.dataset.IDataSetConverter;
 import yo.dbunitcli.dataset.ResultType;
 import yo.dbunitcli.dataset.converter.DataSetConverterLoader;
+import yo.dbunitcli.dataset.converter.FixedColumnDef;
 import yo.dbunitcli.dataset.producer.ComparableDataSetLoader;
 import yo.dbunitcli.resource.FileResources;
 
@@ -159,7 +160,10 @@ public record ScaffoldOption(
         return Option.concat(this.hasDataset() ? this.dataset.validate() : List.of()
                 , this.validateOneOf("-commandType", this.commandType
                         , Arrays.stream(Type.values()).map(Enum::name).toList())
-                , this.validateEncoding("-datasetEncoding", this.datasetEncoding));
+                , this.validateEncoding("-datasetEncoding", this.datasetEncoding)
+                , ScaffoldTarget.fixedColumnDef.name().equals(this.target)
+                        ? this.validateOneOf("-align", this.align, FixedColumnDef.ALIGNS)
+                        : List.of());
     }
 
     @Override
