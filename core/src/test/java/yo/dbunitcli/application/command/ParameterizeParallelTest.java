@@ -5,6 +5,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import yo.dbunitcli.application.Command;
+import yo.dbunitcli.application.Option;
 import yo.dbunitcli.resource.FileResources;
 
 import java.io.File;
@@ -54,8 +55,9 @@ public class ParameterizeParallelTest {
 
     @Test
     public void parallelMustBeOneOrMore() {
-        Assertions.assertThrows(IllegalArgumentException.class
-                , () -> new Parameterize().parseOption(new String[]{"-cmd=convert", "-parallel=0"}));
+        Assertions.assertEquals(List.of("Invalid value for option '-parallel': must be 1 or more but was '0'")
+                , new Parameterize().parseOption(new String[]{"-cmd=convert", "-parallel=0"}).validate().stream()
+                                    .map(Option.Violation::message).toList());
     }
 
     @Test

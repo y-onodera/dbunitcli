@@ -18,9 +18,9 @@ public record ParameterizeOption(
         , String cmd
         , String cmdParam
         , Map<String, String> args
-        , boolean ignoreFail
+        , String ignoreFail
         , String parallel
-        , boolean parameterize
+        , String parameterize
         , ParameterUnit unit
         , String template
         , DataSetLoadOption paramData
@@ -75,9 +75,9 @@ public record ParameterizeOption(
                 , dto.getCmd()
                 , dto.getCmdParam()
                 , new HashMap<>(dto.getArg())
-                , Strings.isNotEmpty(dto.getIgnoreFail()) && Boolean.parseBoolean(dto.getIgnoreFail())
+                , Strings.isNotEmpty(dto.getIgnoreFail()) ? dto.getIgnoreFail() : "false"
                 , DataSetConverterOption.parallel(dto.getParallel())
-                , !Strings.isNotEmpty(dto.getParameterize()) || Boolean.parseBoolean(dto.getParameterize())
+                , Strings.isNotEmpty(dto.getParameterize()) ? dto.getParameterize() : "true"
                 , dto.getUnit() != null ? dto.getUnit() : ParameterUnit.record
                 , dto.getTemplate()
                 , new DataSetLoadOption("param", dto.getParamData(), true)
@@ -95,8 +95,8 @@ public record ParameterizeOption(
         return new ParametersBuilder()
                 .addComponent("paramData", this.paramData.toParameters())
                 .put("-unit", this.unit, ParameterUnit.class)
-                .put("-parameterize", this.parameterize)
-                .put("-ignoreFail", this.ignoreFail)
+                .putFlag("-parameterize", this.parameterize)
+                .putFlag("-ignoreFail", this.ignoreFail)
                 .put("-parallel", this.parallel)
                 .put("-cmd", this.cmd)
                 .put("-cmdParam", this.cmdParam)
@@ -113,6 +113,9 @@ public record ParameterizeOption(
                 , this.isTemplate(this.cmd) ? List.of() : this.validateOneOf("-cmd", this.cmd, COMMANDS)
                 , this.validateExclusive("-cmdParam", this.cmdParam, "-template", this.template)
                 , this.validateFileExists("-template", this.template, BaseDir.PARAMETERIZE_TEMPLATE)
+                , this.validateBoolean("-ignoreFail", this.ignoreFail)
+                , this.validateBoolean("-parameterize", this.parameterize)
+                , DataSetConverterOption.validateParallel(this, this.parallel)
                 , this.paramData.validate()
                 , this.templateOption.validate());
     }
@@ -134,7 +137,7 @@ public record ParameterizeOption(
     }
 
     public String[] createArgs(final Parameter aParam) {
-        final String parameterList = this.parameterize()
+        final String parameterList = Boolean.parseBoolean(this.parameterize())
                 ? this.templateOption.getTemplateRender()
                 .render(this.getTemplateArgs(aParam), aParam)
                 : this.getTemplateArgs(aParam);

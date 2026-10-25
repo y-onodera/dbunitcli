@@ -86,7 +86,8 @@ public record RunOption(
         return Option.concat(this.srcData.validate()
                 , this.templateOption.validate()
                 , this.scriptType == ScriptType.sql ? this.jdbcOption.validate() : List.of()
-                , this.validateFileExists("-baseDir", this.baseDir, BaseDir.DATASET));
+                , this.validateFileExists("-baseDir", this.baseDir, BaseDir.DATASET)
+                , DataSetConverterOption.validateParallel(this, this.parallel));
     }
 
     @Override

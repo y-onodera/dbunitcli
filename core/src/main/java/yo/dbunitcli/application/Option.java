@@ -76,6 +76,58 @@ public interface Option {
         return this.invalidValue(key, "expected one of " + candidates + " (case-insensitive) but was '" + value + "'");
     }
 
+    // 型変換は値を使う所で行うため、変換できることをここで確かめる（文言はpicocliの型変換エラーに揃える）
+    default List<Violation> validateBoolean(final String key, final String value) {
+        if (Strings.isEmpty(value) || "true".equalsIgnoreCase(value) || "false".equalsIgnoreCase(value)) {
+            return List.of();
+        }
+        return this.invalidValue(key, "'" + value + "' is not a boolean");
+    }
+
+    default List<Violation> validateInteger(final String key, final String value) {
+        return this.validateInteger(key, value, Integer.MIN_VALUE);
+    }
+
+    default List<Violation> validateInteger(final String key, final String value, final int min) {
+        if (Strings.isEmpty(value)) {
+            return List.of();
+        }
+        try {
+            if (Integer.parseInt(value.trim()) >= min) {
+                return List.of();
+            }
+            return this.invalidValue(key, "must be " + min + " or more but was '" + value + "'");
+        } catch (final NumberFormatException ex) {
+            return this.invalidValue(key, "'" + value + "' is not an int");
+        }
+    }
+
+    default List<Violation> validateDecimal(final String key, final String value) {
+        if (Strings.isEmpty(value)) {
+            return List.of();
+        }
+        try {
+            Double.parseDouble(value);
+            return List.of();
+        } catch (final NumberFormatException ex) {
+            return this.invalidValue(key, "'" + value + "' is not a double");
+        }
+    }
+
+    /**
+     * カンマ区切りの整数（-fixedLength等）
+     */
+    default List<Violation> validateIntegers(final String key, final String value) {
+        if (Strings.isEmpty(value)) {
+            return List.of();
+        }
+        return Arrays.stream(value.split(","))
+                     .filter(it -> !it.trim().matches("-?\\d+"))
+                     .findFirst()
+                     .map(it -> this.invalidValue(key, "'" + it + "' in '" + value + "' is not an int"))
+                     .orElse(List.of());
+    }
+
     default List<Violation> validateSingleChar(final String key, final String value) {
         if (Strings.isEmpty(value) || value.length() == 1) {
             return List.of();
@@ -354,7 +406,14 @@ public interface Option {
         }
 
         public ParametersBuilder put(final String key, final boolean value) {
-            return this.put(key, Boolean.toString(value), new Attribute(ParamType.FLG, false));
+            return this.putFlag(key, Boolean.toString(value));
+        }
+
+        /**
+         * 真偽値を文字列のまま持つオプション用。不正な値もそのまま出し、検証は{@link Option#validate()}で行う
+         */
+        public ParametersBuilder putFlag(final String key, final String value) {
+            return this.put(key, value, new Attribute(ParamType.FLG, false));
         }
 
         public ParametersBuilder put(final String key, final char value, final boolean required) {

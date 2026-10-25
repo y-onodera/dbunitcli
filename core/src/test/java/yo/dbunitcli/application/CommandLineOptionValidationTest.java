@@ -11,6 +11,8 @@ import yo.dbunitcli.application.command.Generate;
 import yo.dbunitcli.application.command.Parameterize;
 import yo.dbunitcli.application.command.Run;
 import yo.dbunitcli.application.command.Scaffold;
+import yo.dbunitcli.application.dto.TemplateRenderDto;
+import yo.dbunitcli.application.option.TemplateRenderOption;
 import yo.dbunitcli.common.Parameter;
 import yo.dbunitcli.resource.FileResources;
 
@@ -24,6 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -266,6 +269,24 @@ class CommandLineOptionValidationTest {
         }
 
         @Test
+        void booleanAndIntegerTypesAreValidated() {
+            assertEquals(List.of("Invalid value for option '-src.loadData': 'ture' is not a boolean"
+                            , "Invalid value for option '-src.recursive': 'yes' is not a boolean"
+                            , "Invalid value for option '-src.startRow': 'a' is not an int")
+                    , this.validate("-src.startRow=a", "-src.loadData=ture", "-src.recursive=yes"));
+            assertEquals(List.of("Invalid value for option '-src.fixedLength': 'x' in '3,x' is not an int")
+                    , this.validate("-src.srcType=fixed", "-src.fixedLength=3,x", "-src.headerName=A,B"));
+            assertEquals(List.of(), this.validate("-src.startRow=2", "-src.loadData=FALSE", "-src.recursive=true"));
+        }
+
+        @Test
+        void invalidValueDoesNotBreakFormDisplay() {
+            // フォーム表示（toParameters）は型変換しないため、不正な値でも組み立てられる
+            assertDoesNotThrow(() -> FileResources.runInContext(
+                    () -> new Convert().parseOption(new String[]{"-src.startRow=a", "-src.loadData=ture"}).toParameters()));
+        }
+
+        @Test
         void formatResultRequiresFormat() {
             assertEquals(List.of("Missing required option: '-result.format=<format>'")
                     , this.validate("-result.resultType=format"));
@@ -302,6 +323,19 @@ class CommandLineOptionValidationTest {
         }
 
         @Test
+        void fixedColumnDefLengthsMustBeIntegers() {
+            assertEquals(List.of("Invalid value for option '-fixedLength': 'a' in '3,a' is not an int"
+                            , "Invalid value for option '-defaultLength': 'ten' is not an int")
+                    , this.validate("-generateType=fixedColumnDef", "-fixedLength=3,a", "-defaultLength=ten"));
+        }
+
+        @Test
+        void sqlCommitMustBeBoolean() {
+            assertEquals(List.of("Invalid value for option '-commit': 'no' is not a boolean")
+                    , this.validate("-generateType=sql", "-op=INSERT", "-commit=no"));
+        }
+
+        @Test
         void sqlRequiresOp() {
             assertEquals(List.of("Missing required option: '-op=<op>'"), this.validate("-generateType=sql"));
             assertEquals(List.of(), this.validate("-generateType=sql", "-op=INSERT"));
@@ -334,6 +368,13 @@ class CommandLineOptionValidationTest {
     class CompareOption {
 
         @Test
+        void imageNumbersMustMatchType() {
+            assertEquals(List.of("Invalid value for option '-image.threshold': '1.5' is not an int"
+                            , "Invalid value for option '-image.pixelToleranceLevel': 'abc' is not a double")
+                    , this.validate("-targetType=image", "-image.threshold=1.5", "-image.pixelToleranceLevel=abc"));
+        }
+
+        @Test
         void excludedAreasMustMatchFormat() {
             assertEquals(List.of("Invalid value for option '-image.excludedAreas': expected [x1,y1,x2,y2] repeated but was '[1,2,3]'")
                     , this.validate("-targetType=image", "-image.excludedAreas=[1,2,3]"));
@@ -342,6 +383,20 @@ class CommandLineOptionValidationTest {
 
         private List<String> validate(final String... args) {
             return CommandLineOptionValidationTest.this.validate(() -> new Compare().parseOption(args));
+        }
+    }
+
+    @Nested
+    class TemplateRender {
+
+        @Test
+        void forceFormulaRecalcIsFalseUnlessSpecifiedTrue() {
+            final TemplateRenderDto dto = new TemplateRenderDto();
+            assertEquals("false", new TemplateRenderOption("template", dto).forceFormulaRecalc());
+            dto.setForceFormulaRecalc("false");
+            assertEquals("false", new TemplateRenderOption("template", dto).forceFormulaRecalc());
+            dto.setForceFormulaRecalc("true");
+            assertEquals("true", new TemplateRenderOption("template", dto).forceFormulaRecalc());
         }
     }
 

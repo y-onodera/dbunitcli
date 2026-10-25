@@ -84,7 +84,7 @@ enum ScaffoldTarget {
             final String[] lengths = Strings.isNotEmpty(option.fixedLength())
                     ? option.fixedLength().split(",") : new String[0];
             return new ComparableFixedColumnDefMetaDataProducer(source, lengths,
-                                                                option.defaultLength(), option.align());
+                                                                Integer.parseInt(option.defaultLength().trim()), option.align());
         }
 
         @Override
@@ -95,7 +95,7 @@ enum ScaffoldTarget {
         @Override
         void putBuiltinExtraParams(final ScaffoldOption option, final Option.ParametersBuilder builder) {
             builder.put("-fixedLength", option.fixedLength())
-                   .put("-defaultLength", Integer.toString(option.defaultLength()))
+                   .put("-defaultLength", option.defaultLength())
                    .put("-align", option.align());
         }
     };

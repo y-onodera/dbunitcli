@@ -4,23 +4,35 @@ import yo.dbunitcli.Strings;
 import yo.dbunitcli.application.dto.DataSetLoadDto;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 
+import java.util.List;
+
 public record StartRowOption(
         String prefix,
-        int startRow
+        String startRow
 ) implements ComparableDataSetParamOption {
 
     public StartRowOption(final String prefix, final DataSetLoadDto dto) {
-        this(prefix, Strings.isNotEmpty(dto.getStartRow()) ? Integer.parseInt(dto.getStartRow()) : 1);
+        this(prefix, Strings.isNotEmpty(dto.getStartRow()) ? dto.getStartRow() : "1");
+    }
+
+    @Override
+    public String getPrefix() {
+        return this.prefix;
+    }
+
+    @Override
+    public List<Violation> validate() {
+        return this.validateInteger("-startRow", this.startRow);
     }
 
     @Override
     public ComparableDataSetParam.Builder populate(final ComparableDataSetParam.Builder builder) {
-        return builder.setStartRow(this.startRow);
+        return builder.setStartRow(Integer.parseInt(this.startRow.trim()));
     }
 
     @Override
     public ParametersBuilder toParametersBuilder() {
         return new ParametersBuilder(this.prefix)
-                .put("-startRow", String.valueOf(this.startRow));
+                .put("-startRow", this.startRow);
     }
 }

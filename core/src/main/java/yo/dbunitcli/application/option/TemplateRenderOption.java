@@ -16,11 +16,11 @@ public record TemplateRenderOption(
         , String templateParameterAttribute
         , String templateVarStart
         , String templateVarStop
-        , boolean formulaProcess
-        , boolean evaluateFormulas
-        , boolean forceFormulaRecalc
-        , boolean fastFormulaProcess
-        , boolean deleteBlankCells
+        , String formulaProcess
+        , String evaluateFormulas
+        , String forceFormulaRecalc
+        , String fastFormulaProcess
+        , String deleteBlankCells
         , String templateGroup
 ) implements ComparableDataSetParamOption {
 
@@ -30,11 +30,11 @@ public record TemplateRenderOption(
                 , dto.getTemplateParameterAttribute() != null ? dto.getTemplateParameterAttribute() : "param"
                 , Strings.isNotEmpty(dto.getTemplateVarStart()) ? dto.getTemplateVarStart() : "$"
                 , Strings.isNotEmpty(dto.getTemplateVarStop()) ? dto.getTemplateVarStop() : "$"
-                , Strings.isEmpty(dto.getFormulaProcess()) || Boolean.parseBoolean(dto.getFormulaProcess())
-                , Strings.isEmpty(dto.getEvaluateFormulas()) || Boolean.parseBoolean(dto.getEvaluateFormulas())
-                , !Strings.isEmpty(dto.getForceFormulaRecalc()) || Boolean.parseBoolean(dto.getForceFormulaRecalc())
-                , !Strings.isEmpty(dto.getFastFormulaProcess()) && Boolean.parseBoolean(dto.getFastFormulaProcess())
-                , !Strings.isEmpty(dto.getDeleteBlankCells()) && Boolean.parseBoolean(dto.getDeleteBlankCells())
+                , Strings.isNotEmpty(dto.getFormulaProcess()) ? dto.getFormulaProcess() : "true"
+                , Strings.isNotEmpty(dto.getEvaluateFormulas()) ? dto.getEvaluateFormulas() : "true"
+                , Strings.isNotEmpty(dto.getForceFormulaRecalc()) ? dto.getForceFormulaRecalc() : "false"
+                , Strings.isNotEmpty(dto.getFastFormulaProcess()) ? dto.getFastFormulaProcess() : "false"
+                , Strings.isNotEmpty(dto.getDeleteBlankCells()) ? dto.getDeleteBlankCells() : "false"
                 , dto.getTemplateGroup()
         );
     }
@@ -59,7 +59,12 @@ public record TemplateRenderOption(
         return Option.concat(this.validateFileExists("-templateGroup", this.templateGroup, BaseDir.TEMPLATE)
                 , this.validateEncoding("-encoding", this.encoding)
                 , this.validateSingleChar("-templateVarStart", this.templateVarStart)
-                , this.validateSingleChar("-templateVarStop", this.templateVarStop));
+                , this.validateSingleChar("-templateVarStop", this.templateVarStop)
+                , this.validateBoolean("-formulaProcess", this.formulaProcess)
+                , this.validateBoolean("-evaluateFormulas", this.evaluateFormulas)
+                , this.validateBoolean("-forceFormulaRecalc", this.forceFormulaRecalc)
+                , this.validateBoolean("-fastFormulaProcess", this.fastFormulaProcess)
+                , this.validateBoolean("-deleteBlankCells", this.deleteBlankCells));
     }
 
     @Override

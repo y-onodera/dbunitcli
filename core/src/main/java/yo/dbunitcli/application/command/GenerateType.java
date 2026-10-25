@@ -238,7 +238,7 @@ public enum GenerateType {
         protected ComparableDataSetProducer wrapProducer(final GenerateOption option, final ComparableDataSetProducer producer) {
             final String[] lengths =
                     Strings.isNotEmpty(option.fixedLength()) ? option.fixedLength().split(",") : new String[0];
-            return new ComparableFixedColumnDefMetaDataProducer(producer, lengths, option.defaultLength(), option.align());
+            return new ComparableFixedColumnDefMetaDataProducer(producer, lengths, Integer.parseInt(option.defaultLength().trim()), option.align());
         }
     };
 
@@ -343,11 +343,11 @@ public enum GenerateType {
     private static Writer excelWriter(final GenerateOption option) throws IOException {
         final JxlsTemplateRender render = JxlsTemplateRender.builder()
                 .setTemplateParameterAttribute(option.templateOption().templateParameterAttribute())
-                .setFormulaProcess(option.templateOption().formulaProcess())
-                .setEvaluateFormulas(option.templateOption().evaluateFormulas())
-                .setForceFormulaRecalc(option.templateOption().forceFormulaRecalc())
-                .setFastFormulaProcess(option.templateOption().fastFormulaProcess())
-                .setDeleteBlankCells(option.templateOption().deleteBlankCells()).build();
+                .setFormulaProcess(Boolean.parseBoolean(option.templateOption().formulaProcess()))
+                .setEvaluateFormulas(Boolean.parseBoolean(option.templateOption().evaluateFormulas()))
+                .setForceFormulaRecalc(Boolean.parseBoolean(option.templateOption().forceFormulaRecalc()))
+                .setFastFormulaProcess(Boolean.parseBoolean(option.templateOption().fastFormulaProcess()))
+                .setDeleteBlankCells(Boolean.parseBoolean(option.templateOption().deleteBlankCells())).build();
         final byte[] template = Files.readAllBytes(option.getTemplatePath().toPath());
         final boolean useStreamingEach = option.unit() != ParameterUnit.record;
         return (resultFile, param) -> render.render(template, resultFile, param, useStreamingEach);

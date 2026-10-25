@@ -4,6 +4,8 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import yo.dbunitcli.application.Option;
 
+import java.util.List;
+
 /**
  * -result.parallel（generateは-parallel）は並列化できる組み合わせのときだけ表示する
  */
@@ -85,8 +87,14 @@ public class ParallelParameterTest {
 
     @Test
     public void generateRejectsInvalidParallel() {
-        Assertions.assertThrows(IllegalArgumentException.class, () -> new Generate().parseOption(new String[]{"-srcType=csv", "-parallel=0"}));
-        Assertions.assertThrows(IllegalArgumentException.class, () -> new Generate().parseOption(new String[]{"-srcType=csv", "-parallel=a"}));
+        Assertions.assertTrue(this.parallelViolations("-srcType=csv", "-parallel=0")
+                                  .contains("Invalid value for option '-parallel': must be 1 or more but was '0'"));
+        Assertions.assertTrue(this.parallelViolations("-srcType=csv", "-parallel=a")
+                                  .contains("Invalid value for option '-parallel': 'a' is not an int"));
+    }
+
+    private List<String> parallelViolations(final String... args) {
+        return new Generate().parseOption(args).validate().stream().map(Option.Violation::message).toList();
     }
 
     private boolean generateHasParallel(final String... args) {

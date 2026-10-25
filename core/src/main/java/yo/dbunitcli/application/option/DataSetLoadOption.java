@@ -23,8 +23,8 @@ public record DataSetLoadOption(
         , String settingEncoding
         , String regTableInclude
         , String regTableExclude
-        , boolean loadData
-        , boolean includeMetaData
+        , String loadData
+        , String includeMetaData
         , ComparableDataSetParamOption dataSetParam
 ) implements Option {
 
@@ -50,8 +50,8 @@ public record DataSetLoadOption(
                         : Charset.defaultCharset().displayName()
                 , dto.getRegTableInclude()
                 , dto.getRegTableExclude()
-                , !Strings.isNotEmpty(dto.getLoadData()) || Boolean.parseBoolean(dto.getLoadData())
-                , Strings.isNotEmpty(dto.getIncludeMetaData()) && Boolean.parseBoolean(dto.getIncludeMetaData())
+                , Strings.isNotEmpty(dto.getLoadData()) ? dto.getLoadData() : "true"
+                , Strings.isNotEmpty(dto.getIncludeMetaData()) ? dto.getIncludeMetaData() : "false"
                 , new DataSourceTypeOptionFactory().create(prefix, DataSetLoadOption.getSrcType(dto), dto)
         );
     }
@@ -75,8 +75,8 @@ public record DataSetLoadOption(
                 .put("-settingEncoding", this.settingEncoding)
                 .put("-regTableInclude", this.regTableInclude)
                 .put("-regTableExclude", this.regTableExclude)
-                .put("-loadData", this.loadData)
-                .put("-includeMetaData", this.includeMetaData);
+                .putFlag("-loadData", this.loadData)
+                .putFlag("-includeMetaData", this.includeMetaData);
     }
 
     /**
@@ -92,6 +92,8 @@ public record DataSetLoadOption(
                 , this.validateEncoding("-settingEncoding", this.settingEncoding)
                 , this.validatePattern("-regTableInclude", this.regTableInclude)
                 , this.validatePattern("-regTableExclude", this.regTableExclude)
+                , this.validateBoolean("-loadData", this.loadData)
+                , this.validateBoolean("-includeMetaData", this.includeMetaData)
                 , this.dataSetParam.validate());
     }
 
@@ -107,8 +109,8 @@ public record DataSetLoadOption(
                 .setTableSeparators(this.getTableSeparators())
                 .setRegTableInclude(this.regTableInclude)
                 .setRegTableExclude(this.regTableExclude)
-                .setLoadData(this.loadData)
-                .setMapIncludeMetaData(this.includeMetaData)
+                .setLoadData(Boolean.parseBoolean(this.loadData))
+                .setMapIncludeMetaData(Boolean.parseBoolean(this.includeMetaData))
         );
     }
 

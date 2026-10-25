@@ -17,18 +17,18 @@ import java.util.regex.Pattern;
 
 public record ImageCompareOption(
         String prefix
-        , boolean drawExcludedRectangles
+        , String drawExcludedRectangles
         , String threshold
         , String pixelToleranceLevel
         , String allowingPercentOfDifferentPixels
         , String rectangleLineWidth
         , String minimalRectangleSize
         , String maximalRectangleCount
-        , boolean fillDifferenceRectangles
+        , String fillDifferenceRectangles
         , String percentOpacityDifferenceRectangles
         , String differenceRectangleColor
         , String excludedAreas
-        , boolean fillExcludedRectangles
+        , String fillExcludedRectangles
         , String percentOpacityExcludedRectangles
         , String excludedRectangleColor
 ) implements Option {
@@ -43,18 +43,18 @@ public record ImageCompareOption(
 
     public ImageCompareOption(final String prefix, final ImageCompareDto dto) {
         this(prefix
-                , !Strings.isNotEmpty(dto.getDrawExcludedRectangles()) || Boolean.parseBoolean(dto.getDrawExcludedRectangles())
+                , Strings.isNotEmpty(dto.getDrawExcludedRectangles()) ? dto.getDrawExcludedRectangles() : "true"
                 , dto.getThreshold()
                 , dto.getPixelToleranceLevel()
                 , dto.getAllowingPercentOfDifferentPixels()
                 , dto.getRectangleLineWidth()
                 , dto.getMinimalRectangleSize()
                 , dto.getMaximalRectangleCount()
-                , Strings.isNotEmpty(dto.getFillDifferenceRectangles()) && Boolean.parseBoolean(dto.getFillDifferenceRectangles())
+                , Strings.isNotEmpty(dto.getFillDifferenceRectangles()) ? dto.getFillDifferenceRectangles() : "false"
                 , dto.getPercentOpacityDifferenceRectangles()
                 , dto.getDifferenceRectangleColor()
                 , dto.getExcludedAreas()
-                , Strings.isNotEmpty(dto.getFillExcludedRectangles()) && Boolean.parseBoolean(dto.getFillExcludedRectangles())
+                , Strings.isNotEmpty(dto.getFillExcludedRectangles()) ? dto.getFillExcludedRectangles() : "false"
                 , dto.getPercentOpacityExcludedRectangles()
                 , dto.getExcludedRectangleColor()
         );
@@ -70,10 +70,20 @@ public record ImageCompareOption(
      */
     @Override
     public List<Violation> validate() {
-        if (Strings.isEmpty(this.excludedAreas) || AREAS_FORMAT.matcher(this.excludedAreas).matches()) {
-            return List.of();
-        }
-        return this.invalidValue("-excludedAreas", "expected [x1,y1,x2,y2] repeated but was '" + this.excludedAreas + "'");
+        return Option.concat(Strings.isEmpty(this.excludedAreas) || AREAS_FORMAT.matcher(this.excludedAreas).matches()
+                        ? List.of()
+                        : this.invalidValue("-excludedAreas", "expected [x1,y1,x2,y2] repeated but was '" + this.excludedAreas + "'")
+                , this.validateInteger("-threshold", this.threshold)
+                , this.validateDecimal("-pixelToleranceLevel", this.pixelToleranceLevel)
+                , this.validateDecimal("-allowingPercentOfDifferentPixels", this.allowingPercentOfDifferentPixels)
+                , this.validateInteger("-rectangleLineWidth", this.rectangleLineWidth)
+                , this.validateInteger("-minimalRectangleSize", this.minimalRectangleSize)
+                , this.validateInteger("-maximalRectangleCount", this.maximalRectangleCount)
+                , this.validateDecimal("-percentOpacityDifferenceRectangles", this.percentOpacityDifferenceRectangles)
+                , this.validateDecimal("-percentOpacityExcludedRectangles", this.percentOpacityExcludedRectangles)
+                , this.validateBoolean("-drawExcludedRectangles", this.drawExcludedRectangles)
+                , this.validateBoolean("-fillDifferenceRectangles", this.fillDifferenceRectangles)
+                , this.validateBoolean("-fillExcludedRectangles", this.fillExcludedRectangles));
     }
 
     @Override
@@ -86,11 +96,11 @@ public record ImageCompareOption(
                 .put("-minimalRectangleSize", this.minimalRectangleSize)
                 .put("-maximalRectangleCount", this.maximalRectangleCount)
                 .put("-excludedAreas", this.excludedAreas)
-                .put("-drawExcludedRectangles", this.drawExcludedRectangles)
-                .put("-fillExcludedRectangles", this.fillExcludedRectangles)
+                .putFlag("-drawExcludedRectangles", this.drawExcludedRectangles)
+                .putFlag("-fillExcludedRectangles", this.fillExcludedRectangles)
                 .put("-percentOpacityExcludedRectangles", this.percentOpacityExcludedRectangles)
                 .put("-excludedRectangleColor", this.excludedRectangleColor)
-                .put("-fillDifferenceRectangles", this.fillDifferenceRectangles)
+                .putFlag("-fillDifferenceRectangles", this.fillDifferenceRectangles)
                 .put("-percentOpacityDifferenceRectangles", this.percentOpacityDifferenceRectangles)
                 .put("-differenceRectangleColor", this.differenceRectangleColor);
     }
@@ -104,12 +114,12 @@ public record ImageCompareOption(
                 .setRectangleLineWidth(Integer.parseInt(Optional.ofNullable(this.rectangleLineWidth).orElse("1")))
                 .setMinimalRectangleSize(Integer.valueOf(Optional.ofNullable(this.minimalRectangleSize).orElse("1")))
                 .setMaximalRectangleCount(Integer.valueOf(Optional.ofNullable(this.maximalRectangleCount).orElse("-1")))
-                .setFillDifferenceRectangles(this.fillDifferenceRectangles)
+                .setFillDifferenceRectangles(Boolean.parseBoolean(this.fillDifferenceRectangles))
                 .setPercentOpacityDifferenceRectangles(Double.parseDouble(Optional.ofNullable(this.percentOpacityDifferenceRectangles).orElse("20.0")))
                 .setDifferenceRectangleColor(Optional.ofNullable(Color.getColor(this.differenceRectangleColor)).orElse(Color.red))
                 .setExcludeAreaList(this.excludeAreaList())
-                .setDrawExcludedRectangles(this.drawExcludedRectangles)
-                .setFillExcludedRectangles(this.fillExcludedRectangles)
+                .setDrawExcludedRectangles(Boolean.parseBoolean(this.drawExcludedRectangles))
+                .setFillExcludedRectangles(Boolean.parseBoolean(this.fillExcludedRectangles))
                 .setPercentOpacityExcludedRectangles(Double.parseDouble(Optional.ofNullable(this.percentOpacityExcludedRectangles).orElse("20.0")))
                 .setExcludedRectangleColor(Optional.ofNullable(Color.getColor(this.excludedRectangleColor)).orElse(Color.green))
                 ;

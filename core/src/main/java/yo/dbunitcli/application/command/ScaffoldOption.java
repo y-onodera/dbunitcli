@@ -47,7 +47,7 @@ public record ScaffoldOption(
         , ResultType datasetType
         , String datasetEncoding
         , String fixedLength
-        , int defaultLength
+        , String defaultLength
         , String align
 ) implements CommandLineOption<ScaffoldDto> {
 
@@ -82,7 +82,7 @@ public record ScaffoldOption(
                 , dto.getDatasetType() != null ? dto.getDatasetType() : ResultType.csv
                 , Strings.isNotEmpty(dto.getDatasetEncoding()) ? dto.getDatasetEncoding() : "UTF-8"
                 , Strings.isNotEmpty(dto.getFixedLength()) ? dto.getFixedLength() : ""
-                , Strings.isNotEmpty(dto.getDefaultLength()) ? Integer.parseInt(dto.getDefaultLength()) : 10
+                , Strings.isNotEmpty(dto.getDefaultLength()) ? dto.getDefaultLength() : "10"
                 , Strings.isNotEmpty(dto.getAlign()) ? dto.getAlign() : "left"
         );
     }
@@ -162,7 +162,9 @@ public record ScaffoldOption(
                         , Arrays.stream(Type.values()).map(Enum::name).toList())
                 , this.validateEncoding("-datasetEncoding", this.datasetEncoding)
                 , ScaffoldTarget.fixedColumnDef.name().equals(this.target)
-                        ? this.validateOneOf("-align", this.align, FixedColumnDef.ALIGNS)
+                        ? Option.concat(this.validateOneOf("-align", this.align, FixedColumnDef.ALIGNS)
+                        , this.validateIntegers("-fixedLength", this.fixedLength)
+                        , this.validateInteger("-defaultLength", this.defaultLength))
                         : List.of());
     }
 
@@ -182,7 +184,7 @@ public record ScaffoldOption(
         result.put("-commandType", this.commandType);
         if (ScaffoldTarget.fixedColumnDef.name().equals(this.target)) {
             result.put("-fixedLength", this.fixedLength)
-                  .put("-defaultLength", Integer.toString(this.defaultLength))
+                  .put("-defaultLength", this.defaultLength)
                   .put("-align", this.align);
         }
         Arrays.stream(this.commandInput)

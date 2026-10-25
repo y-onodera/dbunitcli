@@ -29,7 +29,7 @@ public class Parameterize implements Command<ParameterizeDto, ParameterizeOption
             try {
                 options.createCommand(it).exec(options.createArgs(it), it);
             } catch (final Command.CommandFailException fail) {
-                if (!options.ignoreFail()) {
+                if (!Boolean.parseBoolean(options.ignoreFail())) {
                     throw fail;
                 }
                 Parameterize.LOGGER.info(fail.getMessage());

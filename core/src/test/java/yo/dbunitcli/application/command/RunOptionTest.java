@@ -7,9 +7,11 @@ import yo.dbunitcli.application.Option;
 import yo.dbunitcli.common.Parameter;
 import yo.dbunitcli.dataset.DataSourceType;
 
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class RunOptionTest {
 
@@ -154,7 +156,8 @@ class RunOptionTest {
         @Test
         void invalid() {
             RunOptionTest.this.src.setParallel("0");
-            assertThrows(IllegalArgumentException.class, RunOptionTest.this::createTarget);
+            assertTrue(RunOptionTest.this.createTarget().validate().stream()
+                                         .anyMatch(it -> it.options().equals(List.of("-parallel"))));
         }
     }
 }
