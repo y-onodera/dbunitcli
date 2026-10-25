@@ -84,11 +84,11 @@ public record DataSetLoadOption(
      * srcType=noneは読み込まないため検証しない。-srcは未指定ならカレントディレクトリを読むため必須にしない
      */
     @Override
-    public List<String> validate() {
+    public List<Violation> validate() {
         if (this.srcType == null || this.srcType == DataSourceType.none) {
             return List.of();
         }
-        final List<String> result = new ArrayList<>(this.validateFileExists("-src", this.src, BaseDir.DATASET));
+        final List<Violation> result = new ArrayList<>(this.validateFileExists("-src", this.src, BaseDir.DATASET));
         result.addAll(this.validateFileExists("-setting", this.setting, BaseDir.SETTING));
         result.addAll(this.dataSetParam.validate());
         return result;

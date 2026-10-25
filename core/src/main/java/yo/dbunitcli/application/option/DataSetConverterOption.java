@@ -85,7 +85,7 @@ public record DataSetConverterOption(
      * -resultは出力先のため存在確認しない
      */
     @Override
-    public List<String> validate() {
+    public List<Violation> validate() {
         if (this.resultType == ResultType.table) {
             return this.jdbcOption.validate();
         } else if (this.resultType == ResultType.fixed) {

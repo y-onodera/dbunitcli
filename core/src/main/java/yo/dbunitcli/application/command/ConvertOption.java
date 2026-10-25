@@ -29,7 +29,7 @@ public record ConvertOption(Parameter parameter, ResultOption result,
     }
 
     @Override
-    public List<String> validate() {
+    public List<Violation> validate() {
         return Stream.concat(this.srcData.validate().stream(), this.result.convertResult().validate().stream())
                      .toList();
     }

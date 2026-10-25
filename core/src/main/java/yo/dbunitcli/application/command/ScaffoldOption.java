@@ -154,7 +154,7 @@ public record ScaffoldOption(
      * -targetは未指定なら何もしない。datasetは-dataset.src/-dataset.srcTypeを指定したときだけ使う
      */
     @Override
-    public List<String> validate() {
+    public List<Violation> validate() {
         return this.hasDataset() ? this.dataset.validate() : List.of();
     }
 

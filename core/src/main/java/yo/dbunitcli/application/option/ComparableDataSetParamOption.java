@@ -30,7 +30,7 @@ public interface ComparableDataSetParamOption extends Option {
         }
 
         @Override
-        public List<String> validate() {
+        public List<Violation> validate() {
             return Arrays.stream(this.leaf).flatMap(it -> it.validate().stream()).toList();
         }
 

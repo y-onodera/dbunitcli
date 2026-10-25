@@ -31,7 +31,7 @@ public record JdbcLoadOption(
     }
 
     @Override
-    public List<String> validate() {
+    public List<Violation> validate() {
         return this.jdbc.validate();
     }
 

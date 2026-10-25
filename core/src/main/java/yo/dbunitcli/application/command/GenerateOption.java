@@ -218,8 +218,8 @@ public record GenerateOption(Parameter parameter, String resultDir, String resul
     }
 
     @Override
-    public List<String> validate() {
-        final List<String> result = new ArrayList<>(this.srcData.validate());
+    public List<Violation> validate() {
+        final List<Violation> result = new ArrayList<>(this.srcData.validate());
         if (!this.generateType.isFixedTemplate()) {
             result.addAll(this.validateRequired("-template", this.template));
             result.addAll(this.validateFileExists("-template", this.template, BaseDir.TEMPLATE));

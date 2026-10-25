@@ -47,9 +47,9 @@ public interface Command<DTO extends CommandDto, T extends CommandLineOption<DTO
      * 展開済みのoptionsを{@link Option#validate()}で検証し、違反があればまとめて{@link OptionValidationException}で投げる
      */
     default void exec(final T options) {
-        final List<String> errors = options.validate();
-        if (!errors.isEmpty()) {
-            throw new OptionValidationException(String.join(System.lineSeparator(), errors));
+        final List<Option.Violation> violations = options.validate();
+        if (!violations.isEmpty()) {
+            throw new OptionValidationException(violations);
         }
         this.execute(options);
     }

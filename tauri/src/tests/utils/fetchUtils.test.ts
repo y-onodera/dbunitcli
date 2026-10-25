@@ -1,6 +1,10 @@
 import { fetch } from "@tauri-apps/plugin-http";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { fetchData, isAbortError } from "../../utils/fetchUtils";
+import {
+	fetchData,
+	isAbortError,
+	OptionValidationError,
+} from "../../utils/fetchUtils";
 
 vi.mock("@tauri-apps/plugin-http", () => ({ fetch: vi.fn() }));
 
@@ -88,6 +92,35 @@ describe("fetchData（ジョブのSSE）", () => {
 		expect(onLog.mock.calls).toEqual([["line 1"], ["line 2"]]);
 		expect(requestHeaders().get("X-Job-Log")).toBe("true");
 		expect(await response.text()).toBe("ok");
+	});
+
+	it("resultのオプション検証エラーはOptionValidationErrorにして違反を渡す", async () => {
+		const violations = [
+			{ options: ["-src.src"], message: "file not found" },
+			{ options: ["-cmdParam", "-template"], message: "mutually exclusive" },
+		];
+		mockFetch.mockResolvedValue(
+			sseResponse(
+				sseStream([
+					sseResult(
+						400,
+						JSON.stringify({ message: "invalid", violations }),
+						"Invalid Option",
+					),
+				]),
+			),
+		);
+
+		const error = await fetchData({
+			...execParams,
+			signal: new AbortController().signal,
+		}).catch((ex: unknown) => ex);
+
+		expect(error).toBeInstanceOf(OptionValidationError);
+		expect((error as OptionValidationError).message).toBe("invalid");
+		expect((error as OptionValidationError).violations).toStrictEqual(
+			violations,
+		);
 	});
 
 	it("resultのエラー応答は従来と同じ形式のエラーにする", async () => {

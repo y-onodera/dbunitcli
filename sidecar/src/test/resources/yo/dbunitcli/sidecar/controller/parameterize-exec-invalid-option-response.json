@@ -1,0 +1,13 @@
+{
+  "message": "Missing required option: '-cmd=<cmd>'\nError: -cmdParam=<cmdParam>, -template=<template> are mutually exclusive (specify only one)",
+  "violations": [
+    {
+      "options": ["-cmd"],
+      "message": "Missing required option: '-cmd=<cmd>'"
+    },
+    {
+      "options": ["-cmdParam", "-template"],
+      "message": "Error: -cmdParam=<cmdParam>, -template=<template> are mutually exclusive (specify only one)"
+    }
+  ]
+}

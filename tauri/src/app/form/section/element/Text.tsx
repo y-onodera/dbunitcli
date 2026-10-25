@@ -6,6 +6,10 @@ import {
 	InputLabel,
 	ResourceDatalist,
 } from "../../../../components/element/Input";
+import {
+	useFieldErrors,
+	useSetFieldErrors,
+} from "../../../../context/FieldErrorProvider";
 import { useWorkspaceContext } from "../../../../context/WorkspaceResourcesProvider";
 import { DirectoryChooser, FileChooser, OpenInOS } from "./Chooser";
 import type { FileProp, TextProp } from "./FormElementProp";
@@ -33,11 +37,17 @@ export default function Text({
 	const workspacePath = context.workspace;
 	const showWorkspaceAsSecondary =
 		showDefaulePath && workspacePath !== "" && workspacePath !== basePath;
+	const fieldErrors = useFieldErrors(fieldName);
+	const setFieldErrors = useSetFieldErrors();
 
 	const handleChange = (ev: React.ChangeEvent<HTMLInputElement>) => {
 		const newValue = ev.target.value;
 		setPath(newValue);
 		onValueChange?.(newValue);
+		// 入力し直したら、この欄の検証エラーは消す
+		if (fieldErrors.length > 0) {
+			setFieldErrors(({ [fieldName]: _, ...rest }) => rest);
+		}
 	};
 
 	return (
@@ -73,6 +83,12 @@ export default function Text({
 								{workspacePath}
 							</p>
 						)}
+						{!hidden &&
+							fieldErrors.map((message) => (
+								<p key={message} className="text-xs text-error">
+									{message}
+								</p>
+							))}
 					</div>
 					{!hidden &&
 						children &&

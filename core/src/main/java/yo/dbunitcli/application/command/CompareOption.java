@@ -109,7 +109,7 @@ public record CompareOption(
     }
 
     @Override
-    public List<String> validate() {
+    public List<Violation> validate() {
         return Stream.of(this.validateFileExists("-setting", this.setting, BaseDir.SETTING)
                              , this.newData.validate()
                              , this.oldData.validate()

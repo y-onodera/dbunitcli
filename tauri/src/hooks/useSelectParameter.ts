@@ -1,5 +1,9 @@
 import { useEnvironment } from "../context/EnvironmentProvider";
 import {
+	type FieldErrors,
+	useSetFieldErrors,
+} from "../context/FieldErrorProvider";
+import {
 	useSelectParameter,
 	useSetSelectParameter,
 	useSetSelectParameterState,
@@ -16,6 +20,8 @@ import {
 	getErrorMessage,
 	handleFetchError,
 	isAbortError,
+	OptionValidationError,
+	type OptionViolation,
 } from "../utils/fetchUtils";
 
 export type Running = {
@@ -194,10 +200,35 @@ const parseResponse = async (
 	};
 };
 
+const INVALID_OPTION_MESSAGE = "Invalid Option";
+
+// 表示中（display:noneでない）の入力欄があるか。折りたたんだ欄はhiddenでdisplay:noneになる
+const isFieldVisible = (name: string) =>
+	Array.from(document.getElementsByName(name)).some(
+		(element) => element.style.display !== "none",
+	);
+
+// 表示中の入力欄に関わる違反はその欄に表示し、どの欄にも出せない違反はalertでまとめて知らせる
+const toFieldErrors = (violations: OptionViolation[]) => {
+	const fieldErrors: FieldErrors = {};
+	const unmatched: string[] = [];
+	for (const violation of violations) {
+		const names = violation.options.filter(isFieldVisible);
+		if (names.length === 0) {
+			unmatched.push(violation.message);
+		}
+		for (const name of names) {
+			fieldErrors[name] = [...(fieldErrors[name] ?? []), violation.message];
+		}
+	}
+	return { fieldErrors, unmatched };
+};
+
 // 結果（失敗時はエラーメッセージ）を返す。中断されたときはnull
 const useParameterAction = () => {
 	const parameter = useSelectParameter();
 	const environment = useEnvironment();
+	const setFieldErrors = useSetFieldErrors();
 	return async (
 		action: ParameterAction,
 		extraBody: Record<string, unknown>,
@@ -214,12 +245,21 @@ const useParameterAction = () => {
 			signal,
 			onLog,
 		};
+		setFieldErrors({});
 		try {
 			const response = await fetchData(fetchParams);
 			return await parseResponse(action, response);
 		} catch (ex) {
 			if (isAbortError(ex)) {
 				return null;
+			}
+			if (ex instanceof OptionValidationError) {
+				const { fieldErrors, unmatched } = toFieldErrors(ex.violations);
+				setFieldErrors(fieldErrors);
+				if (unmatched.length > 0) {
+					alert(unmatched.join("\n"));
+				}
+				return { resultMessage: INVALID_OPTION_MESSAGE, resultDir: "" };
 			}
 			const errorMessage = getErrorMessage(ex);
 			handleFetchError(errorMessage, fetchParams);

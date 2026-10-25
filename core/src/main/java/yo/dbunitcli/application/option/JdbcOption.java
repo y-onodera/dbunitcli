@@ -47,7 +47,7 @@ public record JdbcOption(
     }
 
     @Override
-    public List<String> validate() {
+    public List<Violation> validate() {
         return this.validateFileExists("-jdbcProperties", this.jdbcProperties, BaseDir.JDBC);
     }
 

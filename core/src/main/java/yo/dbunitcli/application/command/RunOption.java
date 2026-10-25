@@ -81,7 +81,7 @@ public record RunOption(
     }
 
     @Override
-    public List<String> validate() {
+    public List<Violation> validate() {
         return Stream.of(this.srcData.validate(), this.templateOption.validate(), this.jdbcOption.validate())
                      .flatMap(List::stream)
                      .toList();

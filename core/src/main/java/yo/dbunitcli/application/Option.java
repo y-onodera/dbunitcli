@@ -24,31 +24,33 @@ public interface Option {
     /**
      * 展開済みの値を検証し、違反内容を返す。デフォルト値の有無やsrcType等による使われ方の違いは各Optionが考慮する
      */
-    default List<String> validate() {
+    default List<Violation> validate() {
         return List.of();
     }
 
     // 違反の文言はpicocliのエラー表示に揃える
-    default List<String> validateRequired(final String key, final String value) {
+    default List<Violation> validateRequired(final String key, final String value) {
         if (Strings.isNotEmpty(value)) {
             return List.of();
         }
-        return List.of("Missing required option: '" + this.optionLabel(key) + "'");
+        return List.of(new Violation(List.of(this.optionName(key))
+                , "Missing required option: '" + this.optionLabel(key) + "'"));
     }
 
-    default List<String> validateExclusive(final String key1, final String value1
+    default List<Violation> validateExclusive(final String key1, final String value1
             , final String key2, final String value2) {
         if (Strings.isEmpty(value1) || Strings.isEmpty(value2)) {
             return List.of();
         }
-        return List.of("Error: " + this.optionLabel(key1) + ", " + this.optionLabel(key2)
-                + " are mutually exclusive (specify only one)");
+        return List.of(new Violation(List.of(this.optionName(key1), this.optionName(key2))
+                , "Error: " + this.optionLabel(key1) + ", " + this.optionLabel(key2)
+                + " are mutually exclusive (specify only one)"));
     }
 
     /**
      * 指定されているときだけ、実行時と同じ探し方で存在を確認する。settingはカンマ区切りで複数指定できる
      */
-    default List<String> validateFileExists(final String key, final String value, final BaseDir baseDir) {
+    default List<Violation> validateFileExists(final String key, final String value, final BaseDir baseDir) {
         if (Strings.isEmpty(value)) {
             return List.of();
         }
@@ -56,7 +58,8 @@ public interface Option {
         return Arrays.stream(paths)
                      .map(String::trim)
                      .filter(it -> !baseDir.search(it).exists())
-                     .map(it -> "Invalid value for option '" + this.optionName(key) + "': file not found: '" + it + "'")
+                     .map(it -> new Violation(List.of(this.optionName(key))
+                             , "Invalid value for option '" + this.optionName(key) + "': file not found: '" + it + "'"))
                      .toList();
     }
 
@@ -345,6 +348,12 @@ public interface Option {
     }
 
     record Arg(String value, Attribute attribute) {
+    }
+
+    /**
+     * 検証の違反。optionsは違反に関わるオプション名（prefix付き）で、GUIでは該当する入力欄にmessageを表示する
+     */
+    record Violation(List<String> options, String message) {
     }
 
     record Attribute(ParamType type, ArrayList<String> selectOption, boolean required, BaseDir defaultPath) {

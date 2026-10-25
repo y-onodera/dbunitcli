@@ -25,7 +25,7 @@ public record ExcelOption(String prefix, String xlsxSchemaSource) implements Com
     }
 
     @Override
-    public List<String> validate() {
+    public List<Violation> validate() {
         return this.validateFileExists("-xlsxSchema", this.xlsxSchemaSource, BaseDir.XLSX_SCHEMA);
     }
 

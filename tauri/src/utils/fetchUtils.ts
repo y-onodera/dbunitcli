@@ -84,8 +84,47 @@ export async function fetchAndUpdate<T>(
 		});
 }
 
-const ensureOk = (response: Response) => {
+// sidecarのオプション検証エラー。optionsは違反に関わる入力欄のname（-src.src等）
+export type OptionViolation = { options: string[]; message: string };
+
+export class OptionValidationError extends Error {
+	readonly violations: OptionViolation[];
+
+	constructor(message: string, violations: OptionViolation[]) {
+		super(message);
+		this.name = "OptionValidationError";
+		this.violations = violations;
+	}
+}
+
+// 検証エラーの応答（{message, violations}）なら取り出す。それ以外の本文ならnull
+const parseOptionValidationError = (
+	body: string,
+): OptionValidationError | null => {
+	try {
+		const json = JSON.parse(body) as {
+			message?: string;
+			violations?: OptionViolation[];
+		};
+		if (Array.isArray(json.violations)) {
+			return new OptionValidationError(json.message ?? "", json.violations);
+		}
+	} catch {
+		// JSONでない本文は検証エラーではない
+	}
+	return null;
+};
+
+const ensureOk = async (response: Response) => {
 	if (!response.ok) {
+		if (response.status === 400) {
+			const validationError = parseOptionValidationError(
+				await response.clone().text(),
+			);
+			if (validationError) {
+				throw validationError;
+			}
+		}
 		throw new Error(
 			`Status: ${response.status}\nDetails: ${response.statusText || "Fetch request failed"}`,
 		);

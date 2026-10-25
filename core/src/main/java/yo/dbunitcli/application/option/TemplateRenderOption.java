@@ -54,7 +54,7 @@ public record TemplateRenderOption(
     }
 
     @Override
-    public List<String> validate() {
+    public List<Violation> validate() {
         return this.validateFileExists("-templateGroup", this.templateGroup, BaseDir.TEMPLATE);
     }
 

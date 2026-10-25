@@ -48,9 +48,13 @@ class CommandLineOptionValidationTest {
     }
 
     private List<String> validate(final Supplier<? extends Option> option) {
-        final List<List<String>> result = new ArrayList<>();
+        final List<List<Option.Violation>> result = new ArrayList<>();
         FileResources.runInContext(() -> result.add(option.get().validate()));
-        return result.getFirst();
+        return messages(result.getFirst());
+    }
+
+    private static List<String> messages(final List<Option.Violation> violations) {
+        return violations.stream().map(Option.Violation::message).toList();
     }
 
     @Nested
@@ -59,37 +63,46 @@ class CommandLineOptionValidationTest {
         private final TestOption option = new TestOption("new", List.of());
 
         @Test
+        void violationHasPrefixedOptionNames() {
+            assertEquals(List.of(List.of("-new.cmd")), this.option.validateRequired("-cmd", "").stream()
+                                                                  .map(Option.Violation::options).toList());
+            assertEquals(List.of(List.of("-new.cmdParam", "-new.template"))
+                    , this.option.validateExclusive("-cmdParam", "a", "-template", "b").stream()
+                                 .map(Option.Violation::options).toList());
+        }
+
+        @Test
         void requiredEmptyIsInvalid() {
-            assertEquals(List.of("Missing required option: '-new.cmd=<cmd>'"), this.option.validateRequired("-cmd", ""));
+            assertEquals(List.of("Missing required option: '-new.cmd=<cmd>'"), messages(this.option.validateRequired("-cmd", "")));
         }
 
         @Test
         void requiredSpecifiedIsValid() {
-            assertEquals(List.of(), this.option.validateRequired("-cmd", "convert"));
+            assertEquals(List.of(), messages(this.option.validateRequired("-cmd", "convert")));
         }
 
         @Test
         void fileNotExistsIsInvalid() {
             assertEquals(List.of("Invalid value for option '-new.setting': file not found: 'notExists.json'")
-                    , this.option.validateFileExists("-setting", "notExists.json", Option.BaseDir.SETTING));
+                    , messages(this.option.validateFileExists("-setting", "notExists.json", Option.BaseDir.SETTING)));
         }
 
         @Test
         void fileExistsIsValid() throws IOException {
             CommandLineOptionValidationTest.this.createFile("resources/setting/a.json");
-            assertEquals(List.of(), this.option.validateFileExists("-setting", "a.json", Option.BaseDir.SETTING));
+            assertEquals(List.of(), messages(this.option.validateFileExists("-setting", "a.json", Option.BaseDir.SETTING)));
         }
 
         @Test
         void fileEmptyIsNotChecked() {
-            assertEquals(List.of(), this.option.validateFileExists("-setting", "", Option.BaseDir.SETTING));
+            assertEquals(List.of(), messages(this.option.validateFileExists("-setting", "", Option.BaseDir.SETTING)));
         }
 
         @Test
         void settingIsCommaSeparated() throws IOException {
             CommandLineOptionValidationTest.this.createFile("resources/setting/a.json");
             assertEquals(List.of("Invalid value for option '-new.setting': file not found: 'b.json'")
-                    , this.option.validateFileExists("-setting", "a.json, b.json", Option.BaseDir.SETTING));
+                    , messages(this.option.validateFileExists("-setting", "a.json, b.json", Option.BaseDir.SETTING)));
         }
     }
 
@@ -100,8 +113,9 @@ class CommandLineOptionValidationTest {
         void validateBeforeExecute() {
             final TestCommand command = new TestCommand();
             final OptionValidationException ex = assertThrows(OptionValidationException.class
-                    , () -> command.exec(new TestOption("", List.of("error1", "error2"))));
-            assertEquals("error1" + System.lineSeparator() + "error2", ex.getMessage());
+                    , () -> command.exec(new TestOption("", List.of(new Option.Violation(List.of(), "error1")
+                            , new Option.Violation(List.of(), "error2")))));
+            assertEquals("error1\nerror2", ex.getMessage());
             assertEquals(0, command.executed.size());
         }
 
@@ -236,11 +250,11 @@ class CommandLineOptionValidationTest {
             final RuntimeException ex = assertThrows(RuntimeException.class
                     , () -> new Parameterize().exec(new String[]{"-cmdParam=a", "-template=b"}));
             assertEquals("2", ex.getMessage());
-            assertEquals(String.join(System.lineSeparator()
+            assertEquals(String.join("\n"
                     , "Missing required option: '-cmd=<cmd>'"
                     , "Error: -cmdParam=<cmdParam>, -template=<template> are mutually exclusive (specify only one)"
-                    , "Invalid value for option '-template': file not found: 'b'"
-                    , ""), this.err.toString(StandardCharsets.UTF_8));
+                    , "Invalid value for option '-template': file not found: 'b'")
+                    + System.lineSeparator(), this.err.toString(StandardCharsets.UTF_8));
         }
 
         @Test
@@ -262,7 +276,7 @@ class CommandLineOptionValidationTest {
         }
     }
 
-    record TestOption(String prefix, List<String> errors) implements CommandLineOption<CommandDto> {
+    record TestOption(String prefix, List<Option.Violation> errors) implements CommandLineOption<CommandDto> {
 
         @Override
         public String getPrefix() {
@@ -270,7 +284,7 @@ class CommandLineOptionValidationTest {
         }
 
         @Override
-        public List<String> validate() {
+        public List<Option.Violation> validate() {
             return this.errors;
         }
 

@@ -105,8 +105,8 @@ public record ParameterizeOption(
      * cmdParamは行ごとに展開するテンプレートのため存在確認しない。cmdParamがあるとtemplateは使われないため同時に指定させない
      */
     @Override
-    public List<String> validate() {
-        final List<String> result = new ArrayList<>(this.validateRequired("-cmd", this.cmd));
+    public List<Violation> validate() {
+        final List<Violation> result = new ArrayList<>(this.validateRequired("-cmd", this.cmd));
         result.addAll(this.validateExclusive("-cmdParam", this.cmdParam, "-template", this.template));
         result.addAll(this.validateFileExists("-template", this.template, BaseDir.PARAMETERIZE_TEMPLATE));
         result.addAll(this.paramData.validate());
