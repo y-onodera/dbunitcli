@@ -7,6 +7,9 @@ import yo.dbunitcli.application.option.ResultOption;
 import yo.dbunitcli.common.Parameter;
 import yo.dbunitcli.dataset.IDataSetConverter;
 
+import java.util.List;
+import java.util.stream.Stream;
+
 public record ConvertOption(Parameter parameter, ResultOption result,
                             DataSetLoadOption srcData) implements CommandLineOption<ConvertDto> {
 
@@ -23,6 +26,12 @@ public record ConvertOption(Parameter parameter, ResultOption result,
         this(param
                 , new ResultOption(resultFile, dto.getConvertResult())
                 , new DataSetLoadOption("src", dto.getSrcData()));
+    }
+
+    @Override
+    public List<String> validate() {
+        return Stream.concat(this.srcData.validate().stream(), this.result.convertResult().validate().stream())
+                     .toList();
     }
 
     @Override

@@ -43,10 +43,13 @@ public interface Command<DTO extends CommandDto, T extends CommandLineOption<DTO
     }
 
     /**
-     * 展開済みのoptionsを{@link CommandLineOption#validate()}で検証してから実行する
+     * 展開済みのoptionsを{@link Option#validate()}で検証し、違反があればまとめて{@link OptionValidationException}で投げる
      */
     default void exec(final T options) {
-        options.validate();
+        final List<String> errors = options.validate();
+        if (!errors.isEmpty()) {
+            throw new OptionValidationException(String.join(System.lineSeparator(), errors));
+        }
         this.execute(options);
     }
 

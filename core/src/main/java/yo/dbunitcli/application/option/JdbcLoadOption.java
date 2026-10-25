@@ -4,6 +4,8 @@ import yo.dbunitcli.Strings;
 import yo.dbunitcli.application.dto.DataSetLoadDto;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 
+import java.util.List;
+
 public record JdbcLoadOption(
         String prefix
         , JdbcOption jdbc
@@ -26,6 +28,11 @@ public record JdbcLoadOption(
         return new ParametersBuilder(this.getPrefix())
                 .putAll(this.jdbc.toParameters())
                 .put("-useJdbcMetaData", this.useJdbcMetaData);
+    }
+
+    @Override
+    public List<String> validate() {
+        return this.jdbc.validate();
     }
 
     @Override

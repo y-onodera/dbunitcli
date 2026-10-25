@@ -10,6 +10,7 @@ import yo.dbunitcli.dataset.converter.XlsConverter;
 import yo.dbunitcli.resource.FileResources;
 
 import java.io.File;
+import java.util.List;
 
 public record DataSetConverterOption(
         String prefix
@@ -78,6 +79,19 @@ public record DataSetConverterOption(
     @Override
     public ParametersBuilder toParametersBuilder() {
         return this.toParametersBuilder(false);
+    }
+
+    /**
+     * -resultは出力先のため存在確認しない
+     */
+    @Override
+    public List<String> validate() {
+        if (this.resultType == ResultType.table) {
+            return this.jdbcOption.validate();
+        } else if (this.resultType == ResultType.fixed) {
+            return this.validateFileExists("-fixedColumnDef", this.fixedColumnDefFile, BaseDir.FIXED_COLUMN_DEF);
+        }
+        return List.of();
     }
 
     /**

@@ -12,6 +12,8 @@ import yo.dbunitcli.resource.FileResources;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.List;
 
 public record DataSetLoadOption(
         String prefix
@@ -76,6 +78,20 @@ public record DataSetLoadOption(
                 .put("-regTableExclude", this.regTableExclude)
                 .put("-loadData", this.loadData)
                 .put("-includeMetaData", this.includeMetaData);
+    }
+
+    /**
+     * srcType=noneは読み込まないため検証しない。-srcは未指定ならカレントディレクトリを読むため必須にしない
+     */
+    @Override
+    public List<String> validate() {
+        if (this.srcType == null || this.srcType == DataSourceType.none) {
+            return List.of();
+        }
+        final List<String> result = new ArrayList<>(this.validateFileExists("-src", this.src, BaseDir.DATASET));
+        result.addAll(this.validateFileExists("-setting", this.setting, BaseDir.SETTING));
+        result.addAll(this.dataSetParam.validate());
+        return result;
     }
 
     public ComparableDataSetParam.Builder getParam() {

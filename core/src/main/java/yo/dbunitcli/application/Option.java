@@ -1,6 +1,7 @@
 package yo.dbunitcli.application;
 
 import yo.dbunitcli.Strings;
+import yo.dbunitcli.resource.FileResources;
 
 import java.io.File;
 import java.util.*;
@@ -20,12 +21,65 @@ public interface Option {
         return this.toParametersBuilder().build();
     }
 
+    /**
+     * 展開済みの値を検証し、違反内容を返す。デフォルト値の有無やsrcType等による使われ方の違いは各Optionが考慮する
+     */
+    default List<String> validate() {
+        return List.of();
+    }
+
+    default List<String> validateRequired(final String key, final String value) {
+        if (Strings.isNotEmpty(value)) {
+            return List.of();
+        }
+        return List.of("Missing required option: '" + this.optionName(key) + "'");
+    }
+
+    /**
+     * 指定されているときだけ、実行時と同じ探し方で存在を確認する。settingはカンマ区切りで複数指定できる
+     */
+    default List<String> validateFileExists(final String key, final String value, final BaseDir baseDir) {
+        if (Strings.isEmpty(value)) {
+            return List.of();
+        }
+        final String[] paths = baseDir == BaseDir.SETTING ? value.split(",") : new String[]{value};
+        return Arrays.stream(paths)
+                     .map(String::trim)
+                     .filter(it -> !baseDir.search(it).exists())
+                     .map(it -> "File not exists: '" + this.optionName(key) + "=" + it + "'")
+                     .toList();
+    }
+
+    default String optionName(final String key) {
+        if (Strings.isEmpty(this.getPrefix())) {
+            return key;
+        }
+        return key.replace("-", "-" + this.getPrefix() + ".");
+    }
+
     enum ParamType {
         TEXT, ENUM, FLG, FILE, DIR, FILE_OR_DIR,
     }
 
     enum BaseDir {
-        WORKSPACE, COMMAND_PARAM, DATASET, RESULT, SETTING, TEMPLATE, PARAMETERIZE_TEMPLATE, JDBC, XLSX_SCHEMA, FIXED_COLUMN_DEF,
+        WORKSPACE, COMMAND_PARAM, DATASET, RESULT, SETTING, TEMPLATE, PARAMETERIZE_TEMPLATE, JDBC, XLSX_SCHEMA, FIXED_COLUMN_DEF;
+
+        /**
+         * 各オプションが実行時に探すのと同じ順でpathを解決する
+         */
+        public File search(final String path) {
+            return switch (this) {
+                case WORKSPACE, COMMAND_PARAM -> FileResources.searchWorkspace(path);
+                case DATASET -> FileResources.searchDatasetBase(path);
+                case RESULT -> FileResources.resultDir(path);
+                case SETTING -> FileResources.searchSetting(path);
+                case TEMPLATE -> FileResources.searchTemplate(path);
+                case PARAMETERIZE_TEMPLATE -> FileResources.searchParameterizeTemplate(path);
+                case JDBC -> FileResources.searchJdbc(path);
+                case XLSX_SCHEMA -> FileResources.searchXlsxSchema(path);
+                case FIXED_COLUMN_DEF -> FileResources.searchFixedColumnDef(path);
+            };
+        }
     }
 
     enum FilterType {

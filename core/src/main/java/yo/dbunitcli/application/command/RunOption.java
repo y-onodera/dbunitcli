@@ -18,6 +18,7 @@ import yo.dbunitcli.fileprocessor.SqlRunner;
 import yo.dbunitcli.resource.FileResources;
 
 import java.io.File;
+import java.util.List;
 import java.util.stream.Stream;
 
 public record RunOption(
@@ -77,6 +78,13 @@ public record RunOption(
 
     public Runner runner() {
         return this.scriptType().createRunner(this);
+    }
+
+    @Override
+    public List<String> validate() {
+        return Stream.of(this.srcData.validate(), this.templateOption.validate(), this.jdbcOption.validate())
+                     .flatMap(List::stream)
+                     .toList();
     }
 
     @Override

@@ -8,6 +8,7 @@ import yo.dbunitcli.resource.jdbc.DatabaseConnectionLoader;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.List;
 import java.util.Properties;
 
 public record JdbcOption(
@@ -43,6 +44,11 @@ public record JdbcOption(
                 .put("-jdbcUrl", this.jdbcUrl)
                 .put("-jdbcUser", this.jdbcUser)
                 .put("-jdbcPass", this.jdbcPass);
+    }
+
+    @Override
+    public List<String> validate() {
+        return this.validateFileExists("-jdbcProperties", this.jdbcProperties, BaseDir.JDBC);
     }
 
     public DatabaseConnectionLoader getDatabaseConnectionLoader() {

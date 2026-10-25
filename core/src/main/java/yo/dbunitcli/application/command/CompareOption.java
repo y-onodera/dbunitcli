@@ -109,6 +109,17 @@ public record CompareOption(
     }
 
     @Override
+    public List<String> validate() {
+        return Stream.of(this.validateFileExists("-setting", this.setting, BaseDir.SETTING)
+                             , this.newData.validate()
+                             , this.oldData.validate()
+                             , this.expectData.validate()
+                             , this.result.convertResult().validate())
+                     .flatMap(List::stream)
+                     .toList();
+    }
+
+    @Override
     public CompareDto toDto() {
         return CompareOption.toDto(this.toArgs(true));
     }

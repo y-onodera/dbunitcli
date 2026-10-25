@@ -24,6 +24,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.BiConsumer;
@@ -214,6 +215,20 @@ public record GenerateOption(Parameter parameter, String resultDir, String resul
 
     public GenerateType.Writer writer() throws IOException {
         return this.generateType().writer(this);
+    }
+
+    @Override
+    public List<String> validate() {
+        final List<String> result = new ArrayList<>(this.srcData.validate());
+        if (!this.generateType.isFixedTemplate()) {
+            result.addAll(this.validateRequired("-template", this.template));
+            result.addAll(this.validateFileExists("-template", this.template, BaseDir.TEMPLATE));
+            result.addAll(this.templateOption.validate());
+            if (this.unit == ParameterUnit.table && !this.generateType.isExcel()) {
+                result.addAll(this.validateFileExists("-unitSetting", this.unitSetting, BaseDir.SETTING));
+            }
+        }
+        return result;
     }
 
     @Override

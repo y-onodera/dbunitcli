@@ -5,6 +5,8 @@ import yo.dbunitcli.application.json.FromJsonXlsxSchemaBuilder;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.resource.FileResources;
 
+import java.util.List;
+
 public record ExcelOption(String prefix, String xlsxSchemaSource) implements ComparableDataSetParamOption {
 
     public ExcelOption(final String prefix, final DataSetLoadDto dto) {
@@ -20,6 +22,11 @@ public record ExcelOption(String prefix, String xlsxSchemaSource) implements Com
     public ParametersBuilder toParametersBuilder() {
         return new ParametersBuilder(this.getPrefix())
                 .putFile("-xlsxSchema", this.xlsxSchemaSource, BaseDir.XLSX_SCHEMA);
+    }
+
+    @Override
+    public List<String> validate() {
+        return this.validateFileExists("-xlsxSchema", this.xlsxSchemaSource, BaseDir.XLSX_SCHEMA);
     }
 
     @Override

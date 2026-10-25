@@ -7,6 +7,7 @@ import yo.dbunitcli.resource.FileResources;
 import yo.dbunitcli.resource.st4.TemplateRender;
 
 import java.nio.charset.Charset;
+import java.util.List;
 
 public record TemplateRenderOption(
         String prefix
@@ -50,6 +51,11 @@ public record TemplateRenderOption(
                 .put("-templateParameterAttribute", this.templateParameterAttribute)
                 .put("-templateVarStart", this.templateVarStart)
                 .put("-templateVarStop", this.templateVarStop);
+    }
+
+    @Override
+    public List<String> validate() {
+        return this.validateFileExists("-templateGroup", this.templateGroup, BaseDir.TEMPLATE);
     }
 
     @Override
