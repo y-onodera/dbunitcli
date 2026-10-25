@@ -26,8 +26,8 @@
   <p><strong>テーブル名:</strong> 拡張子を除いたファイル名。</p>
   <p><strong>固有オプション:</strong></p>
   <ul>
-    <li><code>regHeaderSplit</code> — ヘッダ行を列に分割する正規表現。</li>
-    <li><code>regDataSplit</code> — データ行を列に分割する正規表現。ヘッダと区切りロジックを変えたい場合（例: 引用符内のカンマを区切らない等）に使用します。</li>
+    <li><code>regHeaderSplit</code> — ヘッダ行を列に分割する正規表現。<code>headerName</code> で列名を指定しない場合は必須です。</li>
+    <li><code>regDataSplit</code> — （必須）データ行を列に分割する正規表現。ヘッダと区切りロジックを変えたい場合（例: 引用符内のカンマを区切らない等）に使用します。</li>
   </ul>
   <p><strong>データイメージ例:</strong></p>
   <pre>入力 (dirty.txt):

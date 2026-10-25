@@ -2,6 +2,7 @@ package yo.dbunitcli.application.command;
 
 import yo.dbunitcli.Strings;
 import yo.dbunitcli.application.CommandLineOption;
+import yo.dbunitcli.application.Option;
 import yo.dbunitcli.application.ArgumentMapper;
 import yo.dbunitcli.application.option.AntOption;
 import yo.dbunitcli.application.option.DataSetConverterOption;
@@ -18,6 +19,7 @@ import yo.dbunitcli.fileprocessor.SqlRunner;
 import yo.dbunitcli.resource.FileResources;
 
 import java.io.File;
+import java.util.List;
 import java.util.stream.Stream;
 
 public record RunOption(
@@ -77,6 +79,15 @@ public record RunOption(
 
     public Runner runner() {
         return this.scriptType().createRunner(this);
+    }
+
+    @Override
+    public List<Violation> validate() {
+        return Option.concat(this.srcData.validate()
+                , this.templateOption.validate()
+                , this.scriptType == ScriptType.sql ? this.jdbcOption.validate() : List.of()
+                , this.validateFileExists("-baseDir", this.baseDir, BaseDir.DATASET)
+                , this.validateParallel(this.parallel));
     }
 
     @Override

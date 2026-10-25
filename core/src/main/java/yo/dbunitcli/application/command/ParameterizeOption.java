@@ -18,9 +18,9 @@ public record ParameterizeOption(
         , String cmd
         , String cmdParam
         , Map<String, String> args
-        , boolean ignoreFail
+        , String ignoreFail
         , String parallel
-        , boolean parameterize
+        , String parameterize
         , ParameterUnit unit
         , String template
         , DataSetLoadOption paramData
@@ -57,6 +57,12 @@ public record ParameterizeOption(
     };
     private static final ArgumentFilter ARGS_IGNORE_FILTER = new DefaultArgumentFilter("-P", "-A", "-arg");
 
+    // 行ごとに実行できるコマンド（scaffoldは対象外）
+    private static final List<String> COMMANDS = Arrays.stream(Type.values())
+                                                       .filter(it -> it != Type.scaffold)
+                                                       .map(Enum::name)
+                                                       .toList();
+
     public static ParameterizeDto toDto(final String[] args) {
         final ParameterizeDto dto = new ParameterizeDto();
         new ArgumentMapper("", CommandLineOption.ARGUMENT_FUNCTION, ParameterizeOption.ARGS_IGNORE_FILTER)
@@ -72,9 +78,9 @@ public record ParameterizeOption(
                 , dto.getCmd()
                 , dto.getCmdParam()
                 , new HashMap<>(dto.getArg())
-                , Strings.isNotEmpty(dto.getIgnoreFail()) && Boolean.parseBoolean(dto.getIgnoreFail())
+                , Strings.isNotEmpty(dto.getIgnoreFail()) ? dto.getIgnoreFail() : "false"
                 , DataSetConverterOption.parallel(dto.getParallel())
-                , !Strings.isNotEmpty(dto.getParameterize()) || Boolean.parseBoolean(dto.getParameterize())
+                , Strings.isNotEmpty(dto.getParameterize()) ? dto.getParameterize() : "true"
                 , dto.getUnit() != null ? dto.getUnit() : ParameterUnit.record
                 , dto.getTemplate()
                 , new DataSetLoadOption("param", dto.getParamData(), true)
@@ -92,13 +98,34 @@ public record ParameterizeOption(
         return new ParametersBuilder()
                 .addComponent("paramData", this.paramData.toParameters())
                 .put("-unit", this.unit, ParameterUnit.class)
-                .put("-parameterize", this.parameterize)
-                .put("-ignoreFail", this.ignoreFail)
+                .putFlag("-parameterize", this.parameterize)
+                .putFlag("-ignoreFail", this.ignoreFail)
                 .put("-parallel", this.parallel)
                 .put("-cmd", this.cmd)
                 .put("-cmdParam", this.cmdParam)
                 .putFile("-template", this.template, BaseDir.PARAMETERIZE_TEMPLATE)
                 .addComponent("templateOption", this.templateOption.toParameters());
+    }
+
+    /**
+     * cmdParamは行ごとに展開するテンプレートのため存在確認しない。cmdParamがあるとtemplateは使われないため同時に指定させない
+     */
+    @Override
+    public List<Violation> validate() {
+        return Option.concat(this.validateRequired("-cmd", this.cmd)
+                , this.isTemplate(this.cmd) ? List.of() : this.validateOneOf("-cmd", this.cmd, COMMANDS)
+                , this.validateExclusive("-cmdParam", this.cmdParam, "-template", this.template)
+                , this.validateFileExists("-template", this.template, BaseDir.PARAMETERIZE_TEMPLATE)
+                , this.validateBoolean("-ignoreFail", this.ignoreFail)
+                , this.validateBoolean("-parameterize", this.parameterize)
+                , this.validateParallel(this.parallel)
+                , this.paramData.validate()
+                , this.templateOption.validate());
+    }
+
+    // 行ごとにテンプレートで展開する値は、展開後でないと検証できない
+    private boolean isTemplate(final String value) {
+        return Strings.isNotEmpty(value) && value.contains(this.templateOption.templateVarStart());
     }
 
     /**
@@ -113,7 +140,7 @@ public record ParameterizeOption(
     }
 
     public String[] createArgs(final Parameter aParam) {
-        final String parameterList = this.parameterize()
+        final String parameterList = Boolean.parseBoolean(this.parameterize())
                 ? this.templateOption.getTemplateRender()
                 .render(this.getTemplateArgs(aParam), aParam)
                 : this.getTemplateArgs(aParam);
@@ -134,14 +161,10 @@ public record ParameterizeOption(
     }
 
     private Command<?, ?> createCommand(final String cmdType) {
-        return switch (cmdType) {
-            case "compare" -> new Compare();
-            case "convert" -> new Convert();
-            case "generate" -> new Generate();
-            case "run" -> new Run();
-            case "parameterize" -> new Parameterize();
-            default -> throw new IllegalArgumentException("no executable command : " + cmdType);
-        };
+        if (!COMMANDS.contains(cmdType)) {
+            throw new IllegalArgumentException("no executable command : " + cmdType);
+        }
+        return Type.valueOf(cmdType).getCommand();
     }
 
     private String getTemplateArgs(final Parameter aParam) {

@@ -2,8 +2,11 @@ package yo.dbunitcli.application.option;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import yo.dbunitcli.application.Option;
 import yo.dbunitcli.application.dto.DataSetConverterDto;
 import yo.dbunitcli.dataset.ResultType;
+
+import java.util.List;
 
 class DataSetConverterOptionTest {
 
@@ -27,10 +30,12 @@ class DataSetConverterOptionTest {
     void parallelMustBePositiveNumber() {
         final DataSetConverterDto zero = new DataSetConverterDto();
         zero.setParallel("0");
-        Assertions.assertThrows(IllegalArgumentException.class, () -> new DataSetConverterOption("result", zero));
+        Assertions.assertEquals(List.of("Invalid value for option '-result.parallel': must be 1 or more but was '0'")
+                , new DataSetConverterOption("result", zero).validate().stream().map(Option.Violation::message).toList());
         final DataSetConverterDto text = new DataSetConverterDto();
         text.setParallel("auto");
-        Assertions.assertThrows(IllegalArgumentException.class, () -> new DataSetConverterOption("result", text));
+        Assertions.assertEquals(List.of("Invalid value for option '-result.parallel': 'auto' is not an int")
+                , new DataSetConverterOption("result", text).validate().stream().map(Option.Violation::message).toList());
     }
 
     @Test

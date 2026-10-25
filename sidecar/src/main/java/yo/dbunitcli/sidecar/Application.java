@@ -16,6 +16,7 @@ import java.util.Arrays;
 
 @SerdeImport(value = Option.Arg.class)
 @SerdeImport(value = Option.Attribute.class)
+@SerdeImport(value = Option.Violation.class)
 @Factory
 public class Application {
 

@@ -5,6 +5,7 @@ import yo.dbunitcli.application.dto.DataSetLoadDto;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 
 import java.nio.charset.Charset;
+import java.util.List;
 
 public record EncodingOption(String prefix, String encoding) implements ComparableDataSetParamOption {
 
@@ -23,6 +24,11 @@ public record EncodingOption(String prefix, String encoding) implements Comparab
     public ParametersBuilder toParametersBuilder() {
         return new ParametersBuilder(this.getPrefix())
                 .put("-encoding", this.encoding);
+    }
+
+    @Override
+    public List<Violation> validate() {
+        return this.validateEncoding("-encoding", this.encoding);
     }
 
     @Override

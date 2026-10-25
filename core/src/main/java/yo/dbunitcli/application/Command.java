@@ -2,6 +2,7 @@ package yo.dbunitcli.application;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import picocli.CommandLine;
 import yo.dbunitcli.Strings;
 import yo.dbunitcli.common.Parameter;
 import yo.dbunitcli.resource.FileResources;
@@ -23,10 +24,11 @@ public interface Command<DTO extends CommandDto, T extends CommandLineOption<DTO
             FileResources.runInContext(() -> this.exec(this.parseOption(args, Parameter.none())));
         } catch (final CommandFailException ex) {
             Command.LOGGER.info(ex.getMessage());
-            if (Boolean.getBoolean("dbunitcli.noExit")) {
-                throw new RuntimeException("1");
-            }
-            System.exit(1);
+            Command.exit(1);
+        } catch (final CommandLine.ParameterException | OptionValidationException ex) {
+            // picocliの既定のエラー表示に揃え、メッセージだけをstderrに出して使い方の誤りの終了コードで終える
+            System.err.println(ex.getMessage());
+            Command.exit(CommandLine.ExitCode.USAGE);
         } catch (final Throwable th) {
             Command.LOGGER.error("args:{}", Arrays.toString(args));
             Command.LOGGER.error("error:", th);
@@ -34,7 +36,25 @@ public interface Command<DTO extends CommandDto, T extends CommandLineOption<DTO
         }
     }
 
-    void exec(T options);
+    private static void exit(final int status) {
+        if (Boolean.getBoolean("dbunitcli.noExit")) {
+            throw new RuntimeException(String.valueOf(status));
+        }
+        System.exit(status);
+    }
+
+    /**
+     * 展開済みのoptionsを{@link Option#validate()}で検証し、違反があればまとめて{@link OptionValidationException}で投げる
+     */
+    default void exec(final T options) {
+        final List<Option.Violation> violations = options.validate();
+        if (!violations.isEmpty()) {
+            throw new OptionValidationException(violations);
+        }
+        this.execute(options);
+    }
+
+    void execute(T options);
 
     default void exec(final String[] args, final Parameter param) {
         FileResources.runInContext(() -> this.exec(this.parseOption(args, param)));

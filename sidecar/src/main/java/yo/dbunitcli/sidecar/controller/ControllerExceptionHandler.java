@@ -5,6 +5,8 @@ import io.micronaut.http.HttpResponse;
 import io.micronaut.http.HttpStatus;
 import io.micronaut.http.annotation.Error;
 import io.micronaut.http.hateoas.JsonError;
+import yo.dbunitcli.application.OptionValidationException;
+import yo.dbunitcli.sidecar.dto.OptionValidationErrorDto;
 
 import java.io.IOException;
 
@@ -14,6 +16,13 @@ public interface ControllerExceptionHandler {
     default HttpResponse<JsonError> handleException(final HttpRequest<?> request, final ApplicationException ex) {
         return HttpResponse.<JsonError>status(HttpStatus.BAD_REQUEST, "Fix Input Parameter")
                            .body(new JsonError("Execution failed. cause: " + ex.getMessage()));
+    }
+
+    @Error
+    default HttpResponse<OptionValidationErrorDto> handleOptionValidationException(final HttpRequest<?> request
+            , final OptionValidationException ex) {
+        return HttpResponse.<OptionValidationErrorDto>status(HttpStatus.BAD_REQUEST, "Invalid Option")
+                           .body(new OptionValidationErrorDto(ex.getMessage(), ex.getViolations()));
     }
 
     @Error

@@ -23,6 +23,7 @@ public record ComparableFixedFileDataSetProducer(ComparableDataSetParam param,
 
     public ComparableFixedFileDataSetProducer(final ComparableDataSetParam param) {
         this(param, Arrays.stream(param.fixedLength().split(","))
+                .map(String::trim)
                 .map(Integer::valueOf)
                 .collect(Collectors.toCollection(ArrayList::new)));
     }

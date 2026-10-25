@@ -1,11 +1,17 @@
 package yo.dbunitcli.application;
 
 import yo.dbunitcli.Strings;
+import yo.dbunitcli.dataset.converter.FixedColumnDef;
+import yo.dbunitcli.resource.FileResources;
 
 import java.io.File;
+import java.nio.charset.Charset;
+import java.nio.charset.IllegalCharsetNameException;
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 import java.util.stream.Collectors;
 
 public interface Option {
@@ -20,12 +26,249 @@ public interface Option {
         return this.toParametersBuilder().build();
     }
 
+    /**
+     * 展開済みの値を検証し、違反内容を返す。デフォルト値の有無やsrcType等による使われ方の違いは各Optionが考慮する
+     */
+    default List<Violation> validate() {
+        return List.of();
+    }
+
+    // 違反の文言はpicocliのエラー表示に揃える
+    default List<Violation> validateRequired(final String key, final String value) {
+        if (Strings.isNotEmpty(value)) {
+            return List.of();
+        }
+        return List.of(new Violation(List.of(this.optionName(key))
+                , "Missing required option: '" + this.optionLabel(key) + "'"));
+    }
+
+    default List<Violation> validateExclusive(final String key1, final String value1
+            , final String key2, final String value2) {
+        if (Strings.isEmpty(value1) || Strings.isEmpty(value2)) {
+            return List.of();
+        }
+        return List.of(new Violation(List.of(this.optionName(key1), this.optionName(key2))
+                , "Error: " + this.optionLabel(key1) + ", " + this.optionLabel(key2)
+                + " are mutually exclusive (specify only one)"));
+    }
+
+    default List<Violation> validateRequiredEither(final String key1, final String value1
+            , final String key2, final String value2) {
+        if (Strings.isNotEmpty(value1) || Strings.isNotEmpty(value2)) {
+            return List.of();
+        }
+        return List.of(new Violation(List.of(this.optionName(key1), this.optionName(key2))
+                , "Error: Missing required argument (specify one of these): ("
+                + this.optionLabel(key1) + " | " + this.optionLabel(key2) + ")"));
+    }
+
+    default List<Violation> validateOneOf(final String key, final String value, final Collection<String> candidates) {
+        if (Strings.isEmpty(value) || candidates.contains(value)) {
+            return List.of();
+        }
+        return this.invalidValue(key, "expected one of " + candidates + " but was '" + value + "'");
+    }
+
+    default List<Violation> validateOneOf(final String key, final String value, final Enum<?>[] candidates) {
+        return this.validateOneOf(key, value, Option.names(candidates));
+    }
+
+    default List<Violation> validateOneOfIgnoreCase(final String key, final String value, final Enum<?>[] candidates) {
+        return this.validateOneOfIgnoreCase(key, value, Option.names(candidates));
+    }
+
+    default List<Violation> validateOneOfIgnoreCase(final String key, final String value
+            , final Collection<String> candidates) {
+        if (Strings.isEmpty(value) || candidates.stream().anyMatch(value::equalsIgnoreCase)) {
+            return List.of();
+        }
+        return this.invalidValue(key, "expected one of " + candidates + " (case-insensitive) but was '" + value + "'");
+    }
+
+    // 型変換は値を使う所で行うため、変換できることをここで確かめる（文言はpicocliの型変換エラーに揃える）
+    default List<Violation> validateBoolean(final String key, final String value) {
+        if (Strings.isEmpty(value) || "true".equalsIgnoreCase(value) || "false".equalsIgnoreCase(value)) {
+            return List.of();
+        }
+        return this.invalidValue(key, "'" + value + "' is not a boolean");
+    }
+
+    default List<Violation> validateInteger(final String key, final String value) {
+        return this.validateInteger(key, value, Integer.MIN_VALUE);
+    }
+
+    default List<Violation> validateInteger(final String key, final String value, final int min) {
+        if (Strings.isEmpty(value)) {
+            return List.of();
+        }
+        try {
+            if (Integer.parseInt(value.trim()) >= min) {
+                return List.of();
+            }
+            return this.invalidValue(key, "must be " + min + " or more but was '" + value + "'");
+        } catch (final NumberFormatException ex) {
+            return this.invalidValue(key, "'" + value + "' is not an int");
+        }
+    }
+
+    /**
+     * -parallel（同時に動かす数）は1以上の整数
+     */
+    default List<Violation> validateParallel(final String value) {
+        return this.validateInteger("-parallel", value, 1);
+    }
+
+    /**
+     * 固定長カラム定義を作るオプション（generateとscaffoldのfixedColumnDef）
+     */
+    default List<Violation> validateFixedColumnDef(final String fixedLength, final String defaultLength, final String align) {
+        return Option.concat(this.validateIntegers("-fixedLength", fixedLength)
+                , this.validateInteger("-defaultLength", defaultLength)
+                , this.validateOneOf("-align", align, FixedColumnDef.ALIGNS));
+    }
+
+    default List<Violation> validateDecimal(final String key, final String value) {
+        if (Strings.isEmpty(value)) {
+            return List.of();
+        }
+        try {
+            Double.parseDouble(value);
+            return List.of();
+        } catch (final NumberFormatException ex) {
+            return this.invalidValue(key, "'" + value + "' is not a double");
+        }
+    }
+
+    /**
+     * カンマ区切りの整数（-fixedLength等）
+     */
+    default List<Violation> validateIntegers(final String key, final String value) {
+        if (Strings.isEmpty(value)) {
+            return List.of();
+        }
+        for (final String it : value.split(",")) {
+            try {
+                Integer.parseInt(it.trim());
+            } catch (final NumberFormatException ex) {
+                return this.invalidValue(key, "'" + it + "' in '" + value + "' is not an int");
+            }
+        }
+        return List.of();
+    }
+
+    default List<Violation> validateSingleChar(final String key, final String value) {
+        if (Strings.isEmpty(value) || value.length() == 1) {
+            return List.of();
+        }
+        return this.invalidValue(key, "expected a single character but was '" + value + "'");
+    }
+
+    default List<Violation> validateEncoding(final String key, final String value) {
+        if (Strings.isEmpty(value)) {
+            return List.of();
+        }
+        try {
+            if (Charset.isSupported(value)) {
+                return List.of();
+            }
+        } catch (final IllegalCharsetNameException ex) {
+            // 文字コード名として不正なものも未対応として扱う
+        }
+        return this.invalidValue(key, "unsupported encoding: '" + value + "'");
+    }
+
+    default List<Violation> validatePattern(final String key, final String value) {
+        if (Strings.isEmpty(value)) {
+            return List.of();
+        }
+        try {
+            Pattern.compile(value);
+            return List.of();
+        } catch (final PatternSyntaxException ex) {
+            return this.invalidValue(key, "invalid regex: '" + value + "' (" + ex.getDescription() + ")");
+        }
+    }
+
+    default List<Violation> invalidValue(final String key, final String reason) {
+        return List.of(new Violation(List.of(this.optionName(key))
+                , "Invalid value for option '" + this.optionName(key) + "': " + reason));
+    }
+
+    /**
+     * 指定されているときだけ、実行時と同じ探し方で存在を確認する
+     */
+    default List<Violation> validateFileExists(final String key, final String value, final BaseDir baseDir) {
+        if (Strings.isEmpty(value) || baseDir.search(value).exists()) {
+            return List.of();
+        }
+        return this.invalidValue(key, "file not found: '" + value + "'");
+    }
+
+    /**
+     * カンマ区切りで複数指定できるオプション（-setting等）の各ファイルの存在を確認する
+     */
+    default List<Violation> validateFilesExist(final String key, final String values, final BaseDir baseDir) {
+        if (Strings.isEmpty(values)) {
+            return List.of();
+        }
+        return Arrays.stream(values.split(","))
+                     .flatMap(it -> this.validateFileExists(key, it.trim(), baseDir).stream())
+                     .toList();
+    }
+
+    /**
+     * picocliと同じ「-name=&lt;name&gt;」形式の表示名
+     */
+    default String optionLabel(final String key) {
+        return this.optionName(key) + "=<" + key.substring(1) + ">";
+    }
+
+    default String optionName(final String key) {
+        return Option.withPrefix(this.getPrefix(), key);
+    }
+
+    /**
+     * -nameをprefix付きの-prefix.nameにする（prefixが空か、既にprefix付きならそのまま）
+     */
+    static String withPrefix(final String prefix, final String key) {
+        if (Strings.isEmpty(prefix) || key.startsWith("-" + prefix + ".")) {
+            return key;
+        }
+        return key.replace("-", "-" + prefix + ".");
+    }
+
+    static List<String> names(final Enum<?>[] values) {
+        return Arrays.stream(values).map(Enum::name).toList();
+    }
+
+    @SafeVarargs
+    static List<Violation> concat(final List<Violation>... violations) {
+        return Arrays.stream(violations).flatMap(List::stream).toList();
+    }
+
     enum ParamType {
         TEXT, ENUM, FLG, FILE, DIR, FILE_OR_DIR,
     }
 
     enum BaseDir {
-        WORKSPACE, COMMAND_PARAM, DATASET, RESULT, SETTING, TEMPLATE, PARAMETERIZE_TEMPLATE, JDBC, XLSX_SCHEMA, FIXED_COLUMN_DEF,
+        WORKSPACE, COMMAND_PARAM, DATASET, RESULT, SETTING, TEMPLATE, PARAMETERIZE_TEMPLATE, JDBC, XLSX_SCHEMA, FIXED_COLUMN_DEF;
+
+        /**
+         * 各オプションが実行時に探すのと同じ順でpathを解決する
+         */
+        public File search(final String path) {
+            return switch (this) {
+                case WORKSPACE, COMMAND_PARAM -> FileResources.searchWorkspace(path);
+                case DATASET -> FileResources.searchDatasetBase(path);
+                case RESULT -> FileResources.resultDir(path);
+                case SETTING -> FileResources.searchSetting(path);
+                case TEMPLATE -> FileResources.searchTemplate(path);
+                case PARAMETERIZE_TEMPLATE -> FileResources.searchParameterizeTemplate(path);
+                case JDBC -> FileResources.searchJdbc(path);
+                case XLSX_SCHEMA -> FileResources.searchXlsxSchema(path);
+                case FIXED_COLUMN_DEF -> FileResources.searchFixedColumnDef(path);
+            };
+        }
     }
 
     enum FilterType {
@@ -141,10 +384,7 @@ public interface Option {
         }
 
         private String withPrefix(final String key) {
-            if (Optional.ofNullable(this.prefix).orElse("").isEmpty() || key.startsWith("-" + this.prefix + ".")) {
-                return key;
-            }
-            return key.replace("-", "-" + this.prefix + ".");
+            return Option.withPrefix(this.prefix, key);
         }
 
         private String templateEscape(final String key) {
@@ -198,7 +438,14 @@ public interface Option {
         }
 
         public ParametersBuilder put(final String key, final boolean value) {
-            return this.put(key, Boolean.toString(value), new Attribute(ParamType.FLG, false));
+            return this.putFlag(key, Boolean.toString(value));
+        }
+
+        /**
+         * 真偽値を文字列のまま持つオプション用。不正な値もそのまま出し、検証は{@link Option#validate()}で行う
+         */
+        public ParametersBuilder putFlag(final String key, final String value) {
+            return this.put(key, value, new Attribute(ParamType.FLG, false));
         }
 
         public ParametersBuilder put(final String key, final char value, final boolean required) {
@@ -266,14 +513,17 @@ public interface Option {
         }
 
         private String withPrefix(final String key) {
-            if (Optional.ofNullable(this.prefix).orElse("").isEmpty() || key.startsWith("-" + this.prefix + ".")) {
-                return key;
-            }
-            return key.replace("-", "-" + this.prefix + ".");
+            return Option.withPrefix(this.prefix, key);
         }
     }
 
     record Arg(String value, Attribute attribute) {
+    }
+
+    /**
+     * 検証の違反。optionsは違反に関わるオプション名（prefix付き）で、GUIでは該当する入力欄にmessageを表示する
+     */
+    record Violation(List<String> options, String message) {
     }
 
     record Attribute(ParamType type, ArrayList<String> selectOption, boolean required, BaseDir defaultPath) {

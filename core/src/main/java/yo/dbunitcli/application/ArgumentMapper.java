@@ -1,6 +1,7 @@
 package yo.dbunitcli.application;
 
 import picocli.CommandLine;
+import yo.dbunitcli.Strings;
 import yo.dbunitcli.resource.FileResources;
 
 import java.io.File;
@@ -32,7 +33,31 @@ public record ArgumentMapper(String prefix, ArgumentFunction function, ArgumentF
     public void populate(final String[] args, final Object dto) {
         final CommandLine cmdLine = new CommandLine(dto);
         final String[] targetArgs = this.replaceEnv(this.function().apply(args, this.prefix()));
-        cmdLine.parseArgs(this.filter().filterArguments(this.prefix(), cmdLine, targetArgs));
+        try {
+            cmdLine.parseArgs(this.filter().filterArguments(this.prefix(), cmdLine, targetArgs));
+        } catch (final CommandLine.ParameterException ex) {
+            throw new CommandLine.ParameterException(cmdLine, this.withPrefix(ex.getMessage(), cmdLine, targetArgs), ex);
+        }
+    }
+
+    /**
+     * prefix付きで指定されたオプションは、エラー表示のオプション名もprefix付きにする（picocliはprefixを除いた名前で表示するため）
+     */
+    private String withPrefix(final String message, final CommandLine cmdLine, final String[] args) {
+        if (Strings.isEmpty(this.prefix())) {
+            return message;
+        }
+        String result = message;
+        for (final CommandLine.Model.OptionSpec option : cmdLine.getCommandSpec().options()) {
+            for (final String name : option.names()) {
+                final String prefixed = Option.withPrefix(this.prefix(), name);
+                if (Arrays.stream(args).anyMatch(it -> it.startsWith(prefixed + "="))) {
+                    result = result.replace("'" + name + "'", "'" + prefixed + "'")
+                                   .replace("'" + name + "=", "'" + prefixed + "=");
+                }
+            }
+        }
+        return result;
     }
 
     private String[] replaceEnv(final String[] args) {

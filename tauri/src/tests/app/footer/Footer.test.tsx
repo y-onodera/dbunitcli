@@ -3,17 +3,23 @@ import userEvent from "@testing-library/user-event";
 import { type ReactNode, useEffect } from "react";
 import { describe, expect, it, vi } from "vitest";
 import Footer from "../../../app/footer/Footer";
+import Text from "../../../app/form/section/element/Text";
 import {
 	type Environment,
 	environmentContext,
 } from "../../../context/EnvironmentProvider";
+import FieldErrorProvider from "../../../context/FieldErrorProvider";
 import ParameterInputProvider from "../../../context/ParameterInputProvider";
 import SelectParameterProvider, {
 	useSetSelectParameterState,
 } from "../../../context/SelectParameterProvider";
 import WorkspaceResourcesProvider from "../../../context/WorkspaceResourcesProvider";
+import type { CommandOption } from "../../../model/CommandOption";
 import { type Options, SelectParameter } from "../../../model/SelectParameter";
-import type { FetchParams } from "../../../utils/fetchUtils";
+import {
+	type FetchParams,
+	OptionValidationError,
+} from "../../../utils/fetchUtils";
 import type { CollectedFormValues } from "../../../utils/formValues";
 import { environmentFixture, workspaceResourcesFixture } from "../../setup";
 
@@ -29,7 +35,8 @@ const { mockFetchData } = vi.hoisted(() => {
 		}),
 	};
 });
-vi.mock("../../../utils/fetchUtils", () => ({
+vi.mock("../../../utils/fetchUtils", async (importOriginal) => ({
+	...(await importOriginal<typeof import("../../../utils/fetchUtils")>()),
 	fetchData: mockFetchData,
 	handleFetchError: vi.fn(),
 	getErrorMessage: vi.fn(),
@@ -180,5 +187,67 @@ describe("Footerの実行ボタン", () => {
 
 		expect(screen.queryByText("Now Execution")).not.toBeInTheDocument();
 		expect(screen.queryByText("Execution Success")).not.toBeInTheDocument();
+	});
+});
+
+describe("Execのオプション検証エラー", () => {
+	const textOption = (name: string): CommandOption => ({
+		name,
+		value: "",
+		attribute: {
+			type: "FILE",
+			required: false,
+			selectOption: [],
+			defaultPath: "WORKSPACE",
+		},
+		optional: false,
+	});
+
+	const renderWithFields = () => {
+		const wrapper = ({ children }: { children: ReactNode }) => (
+			<environmentContext.Provider value={mockEnvironment}>
+				<WorkspaceResourcesProvider>
+					<SelectParameterProvider>
+						<SelectConvert />
+						<ParameterInputProvider>
+							<FieldErrorProvider>{children}</FieldErrorProvider>
+						</ParameterInputProvider>
+					</SelectParameterProvider>
+				</WorkspaceResourcesProvider>
+			</environmentContext.Provider>
+		);
+		return render(
+			<>
+				<Text prefix="src" element={textOption("src")} />
+				<Text prefix="src" element={textOption("setting")} hidden />
+				<Footer formData={() => ({ values: {}, validationError: false })} />
+			</>,
+			{ wrapper },
+		);
+	};
+
+	it("表示中の欄の違反は欄の下に出し、出せない違反はalertで知らせ、入力し直すと消す", async () => {
+		const alertSpy = vi.spyOn(window, "alert").mockImplementation(() => {});
+		await act(async () => {
+			renderWithFields();
+		});
+		// 描画時のワークスペース読込が済んでから、execの応答だけを検証エラーにする
+		mockFetchData.mockRejectedValueOnce(
+			new OptionValidationError("invalid", [
+				{ options: ["-src.src"], message: "src not found" },
+				{ options: ["-src.setting"], message: "setting not found" },
+				{ options: ["-cmd"], message: "cmd is required" },
+			]),
+		);
+		await userEvent.click(screen.getByText("Exec"));
+
+		expect(screen.getByText("Invalid Option")).toBeInTheDocument();
+		expect(screen.getByText("src not found")).toBeInTheDocument();
+		expect(screen.queryByText("setting not found")).not.toBeInTheDocument();
+		expect(alertSpy).toHaveBeenCalledWith("setting not found\ncmd is required");
+
+		await userEvent.type(screen.getByLabelText("-src.src"), "a");
+		expect(screen.queryByText("src not found")).not.toBeInTheDocument();
+		alertSpy.mockRestore();
 	});
 });

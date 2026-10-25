@@ -1,11 +1,14 @@
 package yo.dbunitcli.application.command;
 
 import yo.dbunitcli.application.CommandLineOption;
+import yo.dbunitcli.application.Option;
 import yo.dbunitcli.application.ArgumentMapper;
 import yo.dbunitcli.application.option.DataSetLoadOption;
 import yo.dbunitcli.application.option.ResultOption;
 import yo.dbunitcli.common.Parameter;
 import yo.dbunitcli.dataset.IDataSetConverter;
+
+import java.util.List;
 
 public record ConvertOption(Parameter parameter, ResultOption result,
                             DataSetLoadOption srcData) implements CommandLineOption<ConvertDto> {
@@ -23,6 +26,11 @@ public record ConvertOption(Parameter parameter, ResultOption result,
         this(param
                 , new ResultOption(resultFile, dto.getConvertResult())
                 , new DataSetLoadOption("src", dto.getSrcData()));
+    }
+
+    @Override
+    public List<Violation> validate() {
+        return Option.concat(this.srcData.validate(), this.result.convertResult().validate());
     }
 
     @Override

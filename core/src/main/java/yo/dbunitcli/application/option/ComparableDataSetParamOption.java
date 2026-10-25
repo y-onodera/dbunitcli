@@ -4,6 +4,7 @@ import yo.dbunitcli.application.Option;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 
 import java.util.Arrays;
+import java.util.List;
 
 public interface ComparableDataSetParamOption extends Option {
 
@@ -26,6 +27,11 @@ public interface ComparableDataSetParamOption extends Option {
                 builder = delegate.populate(builder);
             }
             return builder;
+        }
+
+        @Override
+        public List<Violation> validate() {
+            return Arrays.stream(this.leaf).flatMap(it -> it.validate().stream()).toList();
         }
 
         @Override

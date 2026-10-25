@@ -22,3 +22,4 @@ tauri/src/App.css
 tauri/bun.lock
 node_modules/
 *.mv.db
+*.trace.db

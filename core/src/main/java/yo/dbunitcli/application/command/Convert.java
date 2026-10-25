@@ -11,7 +11,7 @@ public class Convert implements Command<ConvertDto, ConvertOption> {
     }
 
     @Override
-    public void exec(final ConvertOption options) {
+    public void execute(final ConvertOption options) {
         options.convertDataset();
     }
 

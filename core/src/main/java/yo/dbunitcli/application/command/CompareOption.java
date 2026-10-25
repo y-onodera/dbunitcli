@@ -2,6 +2,7 @@ package yo.dbunitcli.application.command;
 
 import yo.dbunitcli.Strings;
 import yo.dbunitcli.application.CommandLineOption;
+import yo.dbunitcli.application.Option;
 import yo.dbunitcli.application.ArgumentMapper;
 import yo.dbunitcli.application.DefaultArgumentFunction;
 import yo.dbunitcli.application.json.FromJsonTableSeparatorsBuilder;
@@ -106,6 +107,17 @@ public record CompareOption(
                 , new DataSetLoadOption("new", dto.getNewData())
                 , new DataSetLoadOption("old", dto.getOldData())
                 , new DataSetLoadOption("expect", dto.getExpectData(), true));
+    }
+
+    @Override
+    public List<Violation> validate() {
+        return Option.concat(this.validateFilesExist("-setting", this.setting, BaseDir.SETTING)
+                , this.validateEncoding("-settingEncoding", this.settingEncoding)
+                , this.newData.validate()
+                , this.oldData.validate()
+                , this.expectData.validate()
+                , this.result.convertResult().validate()
+                , this.targetType.isAny(Type.image, Type.pdf) ? this.imageOption.validate() : List.of());
     }
 
     @Override

@@ -12,7 +12,7 @@ public class Scaffold implements Command<ScaffoldDto, ScaffoldOption> {
     }
 
     @Override
-    public void exec(final ScaffoldOption options) {
+    public void execute(final ScaffoldOption options) {
         try {
             options.execute();
         } catch (final IOException e) {

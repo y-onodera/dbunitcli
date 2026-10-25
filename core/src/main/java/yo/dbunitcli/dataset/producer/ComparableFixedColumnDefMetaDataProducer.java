@@ -28,6 +28,15 @@ public class ComparableFixedColumnDefMetaDataProducer extends ComparableDataSetP
         this.align = align;
     }
 
+    /**
+     * オプションの値（カンマ区切りの長さ・既定の長さ・寄せ）から作る
+     */
+    public static ComparableFixedColumnDefMetaDataProducer of(final ComparableDataSetProducer delegate
+            , final String fixedLength, final String defaultLength, final String align) {
+        final String[] lengths = fixedLength == null || fixedLength.isEmpty() ? new String[0] : fixedLength.split(",");
+        return new ComparableFixedColumnDefMetaDataProducer(delegate, lengths, Integer.parseInt(defaultLength.trim()), align);
+    }
+
     public static Column[] outputSchema() {
         return COLUMN_DEF_SCHEMA.clone();
     }

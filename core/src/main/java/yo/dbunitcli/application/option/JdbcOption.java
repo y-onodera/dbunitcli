@@ -8,6 +8,7 @@ import yo.dbunitcli.resource.jdbc.DatabaseConnectionLoader;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.List;
 import java.util.Properties;
 
 public record JdbcOption(
@@ -45,6 +46,28 @@ public record JdbcOption(
                 .put("-jdbcPass", this.jdbcPass);
     }
 
+    /**
+     * 接続先のurlは-jdbcUrlか、-jdbcPropertiesのファイルに書いたurlで決まる
+     */
+    @Override
+    public List<Violation> validate() {
+        final List<Violation> fileNotFound = this.validateFileExists("-jdbcProperties", this.jdbcProperties, BaseDir.JDBC);
+        if (Strings.isNotEmpty(this.jdbcUrl) || !fileNotFound.isEmpty()) {
+            return fileNotFound;
+        }
+        if (Strings.isEmpty(this.jdbcProperties)) {
+            return this.validateRequiredEither("-jdbcUrl", this.jdbcUrl, "-jdbcProperties", this.jdbcProperties);
+        }
+        try {
+            if (this.loadJdbcTemplate().get("url") == null) {
+                return this.invalidValue("-jdbcProperties", "url is not defined in '" + this.jdbcProperties + "'");
+            }
+            return List.of();
+        } catch (final IOException ex) {
+            return this.invalidValue("-jdbcProperties", ex.getMessage());
+        }
+    }
+
     public DatabaseConnectionLoader getDatabaseConnectionLoader() {
         try {
             return new DatabaseConnectionLoader(this.loadJdbcTemplate());
@@ -56,7 +79,10 @@ public record JdbcOption(
     public Properties loadJdbcTemplate() throws IOException {
         final Properties jdbcProp = new Properties();
         if (Strings.isNotEmpty(this.jdbcProperties)) {
-            jdbcProp.load(new FileInputStream(FileResources.searchJdbc(this.jdbcProperties)));
+            // 閉じないとWindowsでファイルがロックされたままになる
+            try (final FileInputStream input = new FileInputStream(FileResources.searchJdbc(this.jdbcProperties))) {
+                jdbcProp.load(input);
+            }
         }
         if (Strings.isNotEmpty(this.jdbcUrl)) {
             jdbcProp.put("url", this.jdbcUrl);

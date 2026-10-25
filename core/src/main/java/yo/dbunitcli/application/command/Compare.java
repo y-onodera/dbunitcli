@@ -10,7 +10,7 @@ public class Compare implements Command<CompareDto, CompareOption> {
     }
 
     @Override
-    public void exec(final CompareOption options) {
+    public void execute(final CompareOption options) {
         final boolean success = options.compare();
         Compare.LOGGER.info("compare finish.");
         if (!success) {

@@ -3,6 +3,7 @@ package yo.dbunitcli.application.option;
 import yo.dbunitcli.Strings;
 import yo.dbunitcli.application.Option;
 import yo.dbunitcli.application.dto.DataSetConverterDto;
+import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.dataset.DataSetConverterParam;
 import yo.dbunitcli.dataset.DbOperation;
 import yo.dbunitcli.dataset.ResultType;
@@ -10,6 +11,7 @@ import yo.dbunitcli.dataset.converter.XlsConverter;
 import yo.dbunitcli.resource.FileResources;
 
 import java.io.File;
+import java.util.List;
 
 public record DataSetConverterOption(
         String prefix
@@ -18,8 +20,8 @@ public record DataSetConverterOption(
         , DbOperation operation
         , String resultDir
         , String resultPath
-        , boolean exportEmptyTable
-        , boolean skipHeader
+        , String exportEmptyTable
+        , String skipHeader
         , String outputEncoding
         , String excelTable
         , String format
@@ -37,8 +39,8 @@ public record DataSetConverterOption(
                 , dto.getOperation()
                 , dto.getResultDir()
                 , dto.getResultPath()
-                , Strings.isEmpty(dto.getExportEmptyTable()) || Boolean.parseBoolean(dto.getExportEmptyTable())
-                , Strings.isEmpty(dto.getExportHeader()) || Boolean.parseBoolean(dto.getExportHeader())
+                , Strings.isNotEmpty(dto.getExportEmptyTable()) ? dto.getExportEmptyTable() : "true"
+                , Strings.isNotEmpty(dto.getExportHeader()) ? dto.getExportHeader() : "true"
                 , Strings.isNotEmpty(dto.getOutputEncoding()) ? dto.getOutputEncoding() : "UTF-8"
                 , Strings.isNotEmpty(dto.getExcelTable()) ? dto.getExcelTable() : "SHEET"
                 , dto.getFormat()
@@ -50,20 +52,11 @@ public record DataSetConverterOption(
     }
 
     /**
-     * -parallelの値を検証する。未指定は空文字（未指定時の並列数はコマンドごとに決める。convert/compare/generateはCPUコア数で自動（作業スレッドの中では逐次）、run/parameterizeは逐次）
+     * -parallelの値を整える。未指定は空文字（未指定時の並列数はコマンドごとに決める。convert/compare/generateはCPUコア数で自動（作業スレッドの中では逐次）、run/parameterizeは逐次）。
+     * 値の検証は{@link Option#validateParallel(String)}で行う
      */
     public static String parallel(final String parallel) {
-        if (Strings.isEmpty(parallel)) {
-            return "";
-        }
-        try {
-            if (Integer.parseInt(parallel.trim()) < 1) {
-                throw new IllegalArgumentException("-parallel must be 1 or more: " + parallel);
-            }
-        } catch (final NumberFormatException e) {
-            throw new IllegalArgumentException("-parallel must be a number: " + parallel, e);
-        }
-        return parallel.trim();
+        return Strings.isEmpty(parallel) ? "" : parallel.trim();
     }
 
     private static ResultType resultType(final DataSetConverterDto dto) {
@@ -78,6 +71,33 @@ public record DataSetConverterOption(
     @Override
     public ParametersBuilder toParametersBuilder() {
         return this.toParametersBuilder(false);
+    }
+
+    /**
+     * -resultは出力先のため存在確認しない
+     */
+    @Override
+    public List<Violation> validate() {
+        return Option.concat(this.validateResultType()
+                , this.resultType == ResultType.table ? List.of() : Option.concat(
+                        this.validateBoolean("-exportEmptyTable", this.exportEmptyTable)
+                        , this.validateBoolean("-exportHeader", this.skipHeader))
+                , this.validateParallel(this.parallel));
+    }
+
+    private List<Violation> validateResultType() {
+        return switch (this.resultType) {
+            case table -> this.jdbcOption.validate();
+            case xls, xlsx -> this.validateOneOf("-excelTable", this.excelTable, XlsConverter.TableExportType.values());
+            case fixed -> Option.concat(this.validateEncoding("-outputEncoding", this.outputEncoding)
+                    , this.validateFileExists("-fixedColumnDef", this.fixedColumnDefFile, BaseDir.FIXED_COLUMN_DEF)
+                    , this.validateOneOfIgnoreCase("-fixedLengthType", this.fixedLengthType
+                            , ComparableDataSetParam.LengthType.values()));
+            case format -> Option.concat(this.validateEncoding("-outputEncoding", this.outputEncoding)
+                    , this.validateRequired("-format", this.format));
+            case null -> List.of();
+            default -> this.validateEncoding("-outputEncoding", this.outputEncoding);
+        };
     }
 
     /**
@@ -97,8 +117,8 @@ public record DataSetConverterOption(
         } else {
             result.putDir("-result", this.resultDir, BaseDir.RESULT)
                   .put("-resultPath", this.resultPath)
-                  .put("-exportEmptyTable", this.exportEmptyTable)
-                  .put("-exportHeader", this.skipHeader);
+                  .putFlag("-exportEmptyTable", this.exportEmptyTable)
+                  .putFlag("-exportHeader", this.skipHeader);
             if (type == ResultType.csv) {
                 result.put("-outputEncoding", this.outputEncoding);
                 result.put("-outputExtension", this.extension);
@@ -137,8 +157,8 @@ public record DataSetConverterOption(
                                     .setDatabaseConnectionLoader(this.jdbcOption.getDatabaseConnectionLoader())
                                     .setResultDir(this.getResultDir())
                                     .setResultPath(this.resultPath)
-                                    .setExportEmptyTable(this.exportEmptyTable)
-                                    .setSkipHeader(this.skipHeader)
+                                    .setExportEmptyTable(Boolean.parseBoolean(this.exportEmptyTable))
+                                    .setSkipHeader(Boolean.parseBoolean(this.skipHeader))
                                     .setOutputEncoding(this.outputEncoding)
                                     .setExcelTable(this.excelTable)
                                     .setFormat(this.format)
@@ -156,7 +176,7 @@ public record DataSetConverterOption(
     }
 
     /**
-     * @param parallel parallel(String)で検証した値
+     * @param parallel validateParallel(String)で検証した値
      * @return ソースの並列読込数。未指定ならnull（並列化できればCPUコア数で自動）
      */
     public static Integer parallelism(final String parallel) {
@@ -164,7 +184,7 @@ public record DataSetConverterOption(
     }
 
     /**
-     * @param parallel  parallel(String)で検証した値
+     * @param parallel  validateParallel(String)で検証した値
      * @param whenEmpty 未指定のときの並列数
      */
     public static int parallelism(final String parallel, final int whenEmpty) {

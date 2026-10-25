@@ -3,6 +3,7 @@ package yo.dbunitcli.application.command;
 import yo.dbunitcli.Strings;
 import yo.dbunitcli.application.ArgumentMapper;
 import yo.dbunitcli.application.CommandLineOption;
+import yo.dbunitcli.application.Option;
 import yo.dbunitcli.application.ParameterUnit;
 import yo.dbunitcli.application.RecordConverter;
 import yo.dbunitcli.application.json.FromJsonTableSeparatorsBuilder;
@@ -33,9 +34,9 @@ import java.util.stream.Stream;
 public record GenerateOption(Parameter parameter, String resultDir, String resultPath, GenerateType generateType,
                              ParameterUnit unit, String unitSetting, String unitSettingEncoding, DbOperation operation,
                              String sqlFilePrefix, String sqlFileSuffix,
-                             boolean commit, String template, String outputEncoding, DataSetLoadOption srcData,
-                             TemplateRenderOption templateOption, boolean includeAllColumns, boolean lazyLoad,
-                             String fixedLength, int defaultLength, String align, String parallel)
+                             String commit, String template, String outputEncoding, DataSetLoadOption srcData,
+                             TemplateRenderOption templateOption, String includeAllColumns, String lazyLoad,
+                             String fixedLength, String defaultLength, String align, String parallel)
         implements CommandLineOption<GenerateDto> {
 
     public GenerateOption(final String resultFile, final GenerateDto dto, final Parameter param) {
@@ -52,14 +53,14 @@ public record GenerateOption(Parameter parameter, String resultDir, String resul
              dto.getOperation(),
              Strings.isNotEmpty(dto.getSqlFilePrefix()) ? dto.getSqlFilePrefix() : "",
              Strings.isNotEmpty(dto.getSqlFileSuffix()) ? dto.getSqlFileSuffix() : "",
-             !Strings.isNotEmpty(dto.getCommit()) || Boolean.parseBoolean(dto.getCommit()), dto.getTemplate(),
+             Strings.isNotEmpty(dto.getCommit()) ? dto.getCommit() : "true", dto.getTemplate(),
              Strings.isNotEmpty(dto.getOutputEncoding()) ? dto.getOutputEncoding() : "UTF-8",
              new DataSetLoadOption("src", dto.getSrcData()),
              new TemplateRenderOption("template", dto.getTemplateOption()),
-             Strings.isNotEmpty(dto.getIncludeAllColumns()) && Boolean.parseBoolean(dto.getIncludeAllColumns()),
-             !Strings.isNotEmpty(dto.getLazyLoad()) || Boolean.parseBoolean(dto.getLazyLoad()),
+             Strings.isNotEmpty(dto.getIncludeAllColumns()) ? dto.getIncludeAllColumns() : "false",
+             Strings.isNotEmpty(dto.getLazyLoad()) ? dto.getLazyLoad() : "true",
              Strings.isNotEmpty(dto.getFixedLength()) ? dto.getFixedLength() : "",
-             Strings.isNotEmpty(dto.getDefaultLength()) ? Integer.parseInt(dto.getDefaultLength()) : 10,
+             Strings.isNotEmpty(dto.getDefaultLength()) ? dto.getDefaultLength() : "10",
              Strings.isNotEmpty(dto.getAlign()) ? dto.getAlign() : "left",
              DataSetConverterOption.parallel(dto.getParallel()));
     }
@@ -104,7 +105,7 @@ public record GenerateOption(Parameter parameter, String resultDir, String resul
         }
         final ComparableDataSetLoader loader = this.getComparableDataSetLoader();
         final ComparableDataSetParam param = this.dataSetParam();
-        if (this.generateType.isExcel() && !this.lazyLoad) {
+        if (this.generateType.isExcel() && !Boolean.parseBoolean(this.lazyLoad)) {
             this.forEachTable(ParameterUnit.loadedTableTemplates(loader, loader.loadDataSet(param)).toList(),
                               param, ParallelTableMapping.parallelism(param) > 1, action);
             return;
@@ -150,7 +151,7 @@ public record GenerateOption(Parameter parameter, String resultDir, String resul
      * dataset（またはsrcのないrecord）の出力単位。全件を読み込んでから出力する（Excelのdataset+lazyLoadは出力の中で読む）
      */
     private Stream<Parameter> parameterStream() {
-        return this.generateType.isExcel() && this.lazyLoad
+        return this.generateType.isExcel() && Boolean.parseBoolean(this.lazyLoad)
                 ? this.unit().lazyLoadStream(this.getComparableDataSetLoader(), this.dataSetParam())
                 : this.unit().dataSetToStream(this.getComparableDataSetLoader(), this.dataSetParam());
     }
@@ -217,6 +218,38 @@ public record GenerateOption(Parameter parameter, String resultDir, String resul
     }
 
     @Override
+    public List<Violation> validate() {
+        return Option.concat(this.srcData.validate()
+                , this.validateEncoding("-outputEncoding", this.outputEncoding)
+                , this.generateType.isFixedTemplate() ? List.of() : this.validateTemplate()
+                , this.validateGenerateTypeOption()
+                , this.validateParallel(this.parallel));
+    }
+
+    // generateTypeごとに使うオプション（toParametersBuilderで出すもの）の型
+    private List<Violation> validateGenerateTypeOption() {
+        return switch (this.generateType) {
+            case sql -> Option.concat(
+                    this.validateRequired("-op", this.operation == null ? null : this.operation.name())
+                    , this.validateBoolean("-commit", this.commit));
+            case settings -> this.validateBoolean("-includeAllColumns", this.includeAllColumns);
+            case xlsx, xls -> this.validateBoolean("-lazyLoad", this.lazyLoad);
+            case fixedColumnDef -> this.validateFixedColumnDef(this.fixedLength, this.defaultLength, this.align);
+            default -> List.of();
+        };
+    }
+
+    private List<Violation> validateTemplate() {
+        return Option.concat(this.validateRequired("-template", this.template)
+                , this.validateFileExists("-template", this.template, BaseDir.TEMPLATE)
+                , this.templateOption.validate()
+                , this.unit == ParameterUnit.table && !this.generateType.isExcel()
+                        ? Option.concat(this.validateFileExists("-unitSetting", this.unitSetting, BaseDir.SETTING)
+                        , this.validateEncoding("-unitSettingEncoding", this.unitSettingEncoding))
+                        : List.of());
+    }
+
+    @Override
     public GenerateDto toDto() {
         return GenerateOption.toDto(this.toArgs(true));
     }
@@ -224,7 +257,8 @@ public record GenerateOption(Parameter parameter, String resultDir, String resul
     @Override
     public ComparableDataSetLoader getComparableDataSetLoader() {
         return new ComparableDataSetLoader(
-                this.parameter().add("commit", this.commit).add("includeAllColumns", this.includeAllColumns));
+                this.parameter().add("commit", Boolean.parseBoolean(this.commit))
+                                .add("includeAllColumns", Boolean.parseBoolean(this.includeAllColumns)));
     }
 
     @Override
@@ -252,13 +286,13 @@ public record GenerateOption(Parameter parameter, String resultDir, String resul
             srcComponent.remove("-src.loadData");
         }
         switch (this.generateType) {
-            case sql -> result.put("-commit", Boolean.toString(this.commit)).put("-op", this.operation, DbOperation.class)
+            case sql -> result.put("-commit", this.commit).put("-op", this.operation, DbOperation.class)
                               .put("-sqlFilePrefix", this.sqlFilePrefix).put("-sqlFileSuffix", this.sqlFileSuffix);
             case ddl -> result.put("-sqlFilePrefix", this.sqlFilePrefix).put("-sqlFileSuffix", this.sqlFileSuffix);
             case fixedColumnDef -> result.put("-fixedLength", this.fixedLength)
-                                          .put("-defaultLength", Integer.toString(this.defaultLength)).put("-align", this.align);
-            case settings -> result.put("-includeAllColumns", Boolean.toString(this.includeAllColumns));
-            case xlsx, xls -> result.put("-lazyLoad", Boolean.toString(this.lazyLoad));
+                                          .put("-defaultLength", this.defaultLength).put("-align", this.align);
+            case settings -> result.put("-includeAllColumns", this.includeAllColumns);
+            case xlsx, xls -> result.put("-lazyLoad", this.lazyLoad);
             default -> {
             }
         }
@@ -313,12 +347,12 @@ public record GenerateOption(Parameter parameter, String resultDir, String resul
         final ParametersBuilder templateComponent = this.templateOption.toParametersBuilder();
         if (this.generateType.isExcel()) {
             if (this.generateType == GenerateType.xlsx) {
-                templateComponent.put("-formulaProcess", this.templateOption.formulaProcess());
+                templateComponent.putFlag("-formulaProcess", this.templateOption.formulaProcess());
             }
-            templateComponent.put("-evaluateFormulas", this.templateOption.evaluateFormulas());
-            templateComponent.put("-forceFormulaRecalc", this.templateOption.forceFormulaRecalc());
-            templateComponent.put("-fastFormulaProcess", this.templateOption.fastFormulaProcess());
-            templateComponent.put("-deleteBlankCells", this.templateOption.deleteBlankCells());
+            templateComponent.putFlag("-evaluateFormulas", this.templateOption.evaluateFormulas());
+            templateComponent.putFlag("-forceFormulaRecalc", this.templateOption.forceFormulaRecalc());
+            templateComponent.putFlag("-fastFormulaProcess", this.templateOption.fastFormulaProcess());
+            templateComponent.putFlag("-deleteBlankCells", this.templateOption.deleteBlankCells());
         }
         return templateComponent.build();
     }

@@ -3,6 +3,8 @@ package yo.dbunitcli.application.option;
 import yo.dbunitcli.application.dto.DataSetLoadDto;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 
+import java.util.List;
+
 public record FileTraverseOption(TraverseOption traverseOption
         , String extension) implements ComparableDataSetParamOption {
 
@@ -14,6 +16,11 @@ public record FileTraverseOption(TraverseOption traverseOption
     public ParametersBuilder toParametersBuilder() {
         return this.traverseOption().toParametersBuilder()
                 .put("-extension", this.extension());
+    }
+
+    @Override
+    public List<Violation> validate() {
+        return this.traverseOption().validate();
     }
 
     @Override
