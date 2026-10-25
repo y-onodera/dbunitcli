@@ -72,7 +72,7 @@ export default function Text({
 							value={path}
 							handleChange={handleChange}
 						/>
-						{!hidden && resourceFiles && (
+						{!hidden && hasResources && (
 							<ResourceDatalist id={id} resources={resourceFiles} />
 						)}
 						{!hidden && showDefaulePath && (
