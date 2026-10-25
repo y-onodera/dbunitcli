@@ -5,6 +5,7 @@ import type { CommandOption } from "../../../../model/CommandOption";
 import type { ScaffoldOptions } from "../../../../model/SelectParameter";
 import type { FormValues } from "../../../../utils/formValues";
 import { DatasetLoadForm } from "../DatasetLoadForm";
+import EncodingText from "../element/EncodingText";
 import PlainText from "../element/PlainText";
 import Select from "../element/Select";
 import { RefreshableDialogShell } from "./RefreshableDialogShell";
@@ -180,7 +181,7 @@ function TxtTemplateGenerateDialog({
 								prefix=""
 								element={options.datasetType}
 							/>
-							<PlainText prefix="" element={options.datasetEncoding} />
+							<EncodingText prefix="" element={options.datasetEncoding} />
 							{[options.fixedLength, options.defaultLength, options.align]
 								.filter(
 									(field): field is NonNullable<typeof field> => field != null,

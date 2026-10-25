@@ -10,6 +10,7 @@ import {
 } from "./section/dialog/TxtTemplateGenerateDialog";
 import { XlsxTemplateGenerateButton } from "./section/dialog/XlsxTemplateGenerateDialog";
 import Check from "./section/element/Check";
+import EncodingText from "./section/element/EncodingText";
 import FileText from "./section/element/FileText";
 import PlainText from "./section/element/PlainText";
 import Select from "./section/element/Select";
@@ -88,7 +89,7 @@ export function GenerateForm(prop: {
 					<FileText prefix="" element={generate.unitSetting} />
 				)}
 				{generate.unitSettingEncoding && (
-					<PlainText prefix="" element={generate.unitSettingEncoding} />
+					<EncodingText prefix="" element={generate.unitSettingEncoding} />
 				)}
 				{generate.template && (
 					<TemplateFileText
@@ -117,7 +118,7 @@ export function GenerateForm(prop: {
 				<FileText prefix="" element={generate.result} />
 				<PlainText prefix="" element={generate.resultPath} />
 				{generate.outputEncoding && (
-					<PlainText prefix="" element={generate.outputEncoding} />
+					<EncodingText prefix="" element={generate.outputEncoding} />
 				)}
 				{generate.commit && <Check prefix="" element={generate.commit} />}
 				{generate.op && (

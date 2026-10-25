@@ -5,8 +5,8 @@ import type {
 	SrcType,
 } from "../../../model/CommandOption";
 import { isSqlRelatedType } from "../../../model/QueryDatasource";
+import EncodingText from "./element/EncodingText";
 import FileText from "./element/FileText";
-import PlainText from "./element/PlainText";
 import SqlSrcText from "./element/SqlSrcText";
 import JdbcFormSection from "./JdbcFormSection";
 
@@ -43,7 +43,7 @@ export default function SrcFormSection({
 				/>
 			)}
 			{srcElements.encoding && (
-				<PlainText
+				<EncodingText
 					prefix={prefix}
 					element={srcElements.encoding}
 					handleValueChange={handleValueChange(srcElements.encoding)}

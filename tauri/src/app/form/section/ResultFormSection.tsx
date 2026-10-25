@@ -1,5 +1,6 @@
 import type { ResultOption } from "../../../model/CommandOption";
 import Check from "./element/Check";
+import EncodingText from "./element/EncodingText";
 import FileText from "./element/FileText";
 import FixedColumnDefText from "./element/FixedColumnDefText";
 import PlainText from "./element/PlainText";
@@ -57,7 +58,9 @@ export default function ResultFormSection({
 					handleValueChange={handleExcelTableChange}
 				/>
 			)}
-			{outputEncoding && <PlainText prefix={prefix} element={outputEncoding} />}
+			{outputEncoding && (
+				<EncodingText prefix={prefix} element={outputEncoding} />
+			)}
 			{format && <PlainText prefix={prefix} element={format} />}
 			{outputExtension && (
 				<PlainText prefix={prefix} element={outputExtension} />

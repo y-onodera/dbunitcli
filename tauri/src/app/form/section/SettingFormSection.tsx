@@ -1,6 +1,6 @@
 import type { CommandOption, SrcElements } from "../../../model/CommandOption";
 import DatasetSettingText from "./element/DatasetSettingText";
-import PlainText from "./element/PlainText";
+import EncodingText from "./element/EncodingText";
 
 export default function SettingFormSection({
 	settingElements,
@@ -20,7 +20,7 @@ export default function SettingFormSection({
 				hidden={false}
 				handleValueChange={handleValueChange(settingElements.setting)}
 			/>
-			<PlainText
+			<EncodingText
 				prefix={prefix}
 				element={settingElements.settingEncoding}
 				handleValueChange={handleValueChange(settingElements.settingEncoding)}
