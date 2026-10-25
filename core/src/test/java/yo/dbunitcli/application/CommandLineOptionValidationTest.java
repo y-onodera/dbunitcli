@@ -202,9 +202,11 @@ class CommandLineOptionValidationTest {
         }
 
         @Test
-        void fixedRequiresFixedLength() {
-            assertEquals(List.of("Missing required option: '-src.fixedLength=<fixedLength>'")
+        void fixedRequiresFixedLengthAndHeaderName() {
+            assertEquals(List.of("Missing required option: '-src.fixedLength=<fixedLength>'"
+                            , "Missing required option: '-src.headerName=<headerName>'")
                     , this.validate("-src.srcType=fixed"));
+            assertEquals(List.of(), this.validate("-src.srcType=fixed", "-src.fixedLength=3,5", "-src.headerName=A,B"));
         }
 
         @Test

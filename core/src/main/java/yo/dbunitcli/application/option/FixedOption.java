@@ -1,5 +1,6 @@
 package yo.dbunitcli.application.option;
 
+import yo.dbunitcli.application.Option;
 import yo.dbunitcli.application.dto.DataSetLoadDto;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 
@@ -9,10 +10,11 @@ public record FixedOption(
         String prefix
         , String fixedLength
         , String fixedLengthType
+        , String headerName
 ) implements ComparableDataSetParamOption {
 
     public FixedOption(final String prefix, final DataSetLoadDto dto) {
-        this(prefix, dto.getFixedLength(), dto.getFixedLengthType());
+        this(prefix, dto.getFixedLength(), dto.getFixedLengthType(), dto.getHeaderName());
     }
 
     @Override
@@ -27,9 +29,13 @@ public record FixedOption(
                 .put("-fixedLengthType", this.fixedLengthType);
     }
 
+    /**
+     * 固定長ファイルはヘッダ行を持たないため、列名は-headerNameで与える
+     */
     @Override
     public List<Violation> validate() {
-        return this.validateRequired("-fixedLength", this.fixedLength);
+        return Option.concat(this.validateRequired("-fixedLength", this.fixedLength)
+                , this.validateRequired("-headerName", this.headerName));
     }
 
     @Override
