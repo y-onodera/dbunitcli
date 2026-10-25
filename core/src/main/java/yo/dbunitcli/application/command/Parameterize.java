@@ -23,7 +23,7 @@ public class Parameterize implements Command<ParameterizeDto, ParameterizeOption
      * ignoreFail=falseで失敗したら未着手のコマンドは始めず、並列時は実行中のコマンドが終わるのを待ってから失敗させる
      */
     @Override
-    public void exec(final ParameterizeOption options) {
+    public void execute(final ParameterizeOption options) {
         final AtomicInteger failCount = new AtomicInteger();
         final Consumer<Parameter> action = it -> {
             try {

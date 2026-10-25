@@ -14,7 +14,7 @@ public class Generate implements Command<GenerateDto, GenerateOption> {
     }
 
     @Override
-    public void exec(final GenerateOption options) {
+    public void execute(final GenerateOption options) {
         final GenerateType.Writer writer;
         try {
             writer = options.writer();

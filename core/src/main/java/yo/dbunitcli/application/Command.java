@@ -23,10 +23,11 @@ public interface Command<DTO extends CommandDto, T extends CommandLineOption<DTO
             FileResources.runInContext(() -> this.exec(this.parseOption(args, Parameter.none())));
         } catch (final CommandFailException ex) {
             Command.LOGGER.info(ex.getMessage());
-            if (Boolean.getBoolean("dbunitcli.noExit")) {
-                throw new RuntimeException("1");
-            }
-            System.exit(1);
+            Command.exitByFail();
+        } catch (final OptionValidationException ex) {
+            Command.LOGGER.error("args:{}", Arrays.toString(args));
+            Command.LOGGER.error("invalid option:{}", ex.getMessage());
+            Command.exitByFail();
         } catch (final Throwable th) {
             Command.LOGGER.error("args:{}", Arrays.toString(args));
             Command.LOGGER.error("error:", th);
@@ -34,7 +35,22 @@ public interface Command<DTO extends CommandDto, T extends CommandLineOption<DTO
         }
     }
 
-    void exec(T options);
+    private static void exitByFail() {
+        if (Boolean.getBoolean("dbunitcli.noExit")) {
+            throw new RuntimeException("1");
+        }
+        System.exit(1);
+    }
+
+    /**
+     * 展開済みのoptionsを{@link CommandLineOption#validate()}で検証してから実行する
+     */
+    default void exec(final T options) {
+        options.validate();
+        this.execute(options);
+    }
+
+    void execute(T options);
 
     default void exec(final String[] args, final Parameter param) {
         FileResources.runInContext(() -> this.exec(this.parseOption(args, param)));
