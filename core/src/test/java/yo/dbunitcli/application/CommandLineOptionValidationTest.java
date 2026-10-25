@@ -102,7 +102,7 @@ class CommandLineOptionValidationTest {
         void settingIsCommaSeparated() throws IOException {
             CommandLineOptionValidationTest.this.createFile("resources/setting/a.json");
             assertEquals(List.of("Invalid value for option '-new.setting': file not found: 'b.json'")
-                    , messages(this.option.validateFileExists("-setting", "a.json, b.json", Option.BaseDir.SETTING)));
+                    , messages(this.option.validateFilesExist("-setting", "a.json, b.json", Option.BaseDir.SETTING)));
         }
     }
 

@@ -12,7 +12,6 @@ import yo.dbunitcli.resource.FileResources;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
-import java.util.ArrayList;
 import java.util.List;
 
 public record DataSetLoadOption(
@@ -88,10 +87,9 @@ public record DataSetLoadOption(
         if (this.srcType == null || this.srcType == DataSourceType.none) {
             return List.of();
         }
-        final List<Violation> result = new ArrayList<>(this.validateFileExists("-src", this.src, BaseDir.DATASET));
-        result.addAll(this.validateFileExists("-setting", this.setting, BaseDir.SETTING));
-        result.addAll(this.dataSetParam.validate());
-        return result;
+        return Option.concat(this.validateFileExists("-src", this.src, BaseDir.DATASET)
+                , this.validateFilesExist("-setting", this.setting, BaseDir.SETTING)
+                , this.dataSetParam.validate());
     }
 
     public ComparableDataSetParam.Builder getParam() {

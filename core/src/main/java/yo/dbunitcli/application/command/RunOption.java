@@ -2,6 +2,7 @@ package yo.dbunitcli.application.command;
 
 import yo.dbunitcli.Strings;
 import yo.dbunitcli.application.CommandLineOption;
+import yo.dbunitcli.application.Option;
 import yo.dbunitcli.application.ArgumentMapper;
 import yo.dbunitcli.application.option.AntOption;
 import yo.dbunitcli.application.option.DataSetConverterOption;
@@ -82,9 +83,7 @@ public record RunOption(
 
     @Override
     public List<Violation> validate() {
-        return Stream.of(this.srcData.validate(), this.templateOption.validate(), this.jdbcOption.validate())
-                     .flatMap(List::stream)
-                     .toList();
+        return Option.concat(this.srcData.validate(), this.templateOption.validate(), this.jdbcOption.validate());
     }
 
     @Override

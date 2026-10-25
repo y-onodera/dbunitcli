@@ -2,6 +2,7 @@ import { useEnvironment } from "../context/EnvironmentProvider";
 import {
 	type FieldErrors,
 	useSetFieldErrors,
+	useVisibleFields,
 } from "../context/FieldErrorProvider";
 import {
 	useSelectParameter,
@@ -202,18 +203,15 @@ const parseResponse = async (
 
 const INVALID_OPTION_MESSAGE = "Invalid Option";
 
-// 表示中（display:noneでない）の入力欄があるか。折りたたんだ欄はhiddenでdisplay:noneになる
-const isFieldVisible = (name: string) =>
-	Array.from(document.getElementsByName(name)).some(
-		(element) => element.style.display !== "none",
-	);
-
-// 表示中の入力欄に関わる違反はその欄に表示し、どの欄にも出せない違反はalertでまとめて知らせる
-const toFieldErrors = (violations: OptionViolation[]) => {
+// 表示中の入力欄に関わる違反はその欄に表示し、どの欄にも出せない違反（折りたたんだ欄など）はalertでまとめて知らせる
+const toFieldErrors = (
+	violations: OptionViolation[],
+	visibleFields: Set<string>,
+) => {
 	const fieldErrors: FieldErrors = {};
 	const unmatched: string[] = [];
 	for (const violation of violations) {
-		const names = violation.options.filter(isFieldVisible);
+		const names = violation.options.filter((name) => visibleFields.has(name));
 		if (names.length === 0) {
 			unmatched.push(violation.message);
 		}
@@ -229,6 +227,7 @@ const useParameterAction = () => {
 	const parameter = useSelectParameter();
 	const environment = useEnvironment();
 	const setFieldErrors = useSetFieldErrors();
+	const visibleFields = useVisibleFields();
 	return async (
 		action: ParameterAction,
 		extraBody: Record<string, unknown>,
@@ -245,7 +244,8 @@ const useParameterAction = () => {
 			signal,
 			onLog,
 		};
-		setFieldErrors({});
+		// 空のままなら同じ値を返して、全入力欄の再描画を避ける
+		setFieldErrors((prev) => (Object.keys(prev).length === 0 ? prev : {}));
 		try {
 			const response = await fetchData(fetchParams);
 			return await parseResponse(action, response);
@@ -254,7 +254,10 @@ const useParameterAction = () => {
 				return null;
 			}
 			if (ex instanceof OptionValidationError) {
-				const { fieldErrors, unmatched } = toFieldErrors(ex.violations);
+				const { fieldErrors, unmatched } = toFieldErrors(
+					ex.violations,
+					visibleFields,
+				);
 				setFieldErrors(fieldErrors);
 				if (unmatched.length > 0) {
 					alert(unmatched.join("\n"));

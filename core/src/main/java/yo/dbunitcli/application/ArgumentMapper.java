@@ -50,7 +50,7 @@ public record ArgumentMapper(String prefix, ArgumentFunction function, ArgumentF
         String result = message;
         for (final CommandLine.Model.OptionSpec option : cmdLine.getCommandSpec().options()) {
             for (final String name : option.names()) {
-                final String prefixed = "-" + this.prefix() + "." + name.substring(1);
+                final String prefixed = Option.withPrefix(this.prefix(), name);
                 if (Arrays.stream(args).anyMatch(it -> it.startsWith(prefixed + "="))) {
                     result = result.replace("'" + name + "'", "'" + prefixed + "'")
                                    .replace("'" + name + "=", "'" + prefixed + "=");

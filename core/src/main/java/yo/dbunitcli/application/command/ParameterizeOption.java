@@ -106,12 +106,11 @@ public record ParameterizeOption(
      */
     @Override
     public List<Violation> validate() {
-        final List<Violation> result = new ArrayList<>(this.validateRequired("-cmd", this.cmd));
-        result.addAll(this.validateExclusive("-cmdParam", this.cmdParam, "-template", this.template));
-        result.addAll(this.validateFileExists("-template", this.template, BaseDir.PARAMETERIZE_TEMPLATE));
-        result.addAll(this.paramData.validate());
-        result.addAll(this.templateOption.validate());
-        return result;
+        return Option.concat(this.validateRequired("-cmd", this.cmd)
+                , this.validateExclusive("-cmdParam", this.cmdParam, "-template", this.template)
+                , this.validateFileExists("-template", this.template, BaseDir.PARAMETERIZE_TEMPLATE)
+                , this.paramData.validate()
+                , this.templateOption.validate());
     }
 
     /**

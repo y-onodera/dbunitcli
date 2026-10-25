@@ -3,6 +3,7 @@ package yo.dbunitcli.application.command;
 import yo.dbunitcli.Strings;
 import yo.dbunitcli.application.ArgumentMapper;
 import yo.dbunitcli.application.CommandLineOption;
+import yo.dbunitcli.application.Option;
 import yo.dbunitcli.application.ParameterUnit;
 import yo.dbunitcli.application.RecordConverter;
 import yo.dbunitcli.application.json.FromJsonTableSeparatorsBuilder;
@@ -24,7 +25,6 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.BiConsumer;
@@ -219,16 +219,16 @@ public record GenerateOption(Parameter parameter, String resultDir, String resul
 
     @Override
     public List<Violation> validate() {
-        final List<Violation> result = new ArrayList<>(this.srcData.validate());
-        if (!this.generateType.isFixedTemplate()) {
-            result.addAll(this.validateRequired("-template", this.template));
-            result.addAll(this.validateFileExists("-template", this.template, BaseDir.TEMPLATE));
-            result.addAll(this.templateOption.validate());
-            if (this.unit == ParameterUnit.table && !this.generateType.isExcel()) {
-                result.addAll(this.validateFileExists("-unitSetting", this.unitSetting, BaseDir.SETTING));
-            }
+        if (this.generateType.isFixedTemplate()) {
+            return this.srcData.validate();
         }
-        return result;
+        return Option.concat(this.srcData.validate()
+                , this.validateRequired("-template", this.template)
+                , this.validateFileExists("-template", this.template, BaseDir.TEMPLATE)
+                , this.templateOption.validate()
+                , this.unit == ParameterUnit.table && !this.generateType.isExcel()
+                        ? this.validateFileExists("-unitSetting", this.unitSetting, BaseDir.SETTING)
+                        : List.of());
     }
 
     @Override

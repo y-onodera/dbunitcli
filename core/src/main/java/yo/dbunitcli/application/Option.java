@@ -48,18 +48,25 @@ public interface Option {
     }
 
     /**
-     * 指定されているときだけ、実行時と同じ探し方で存在を確認する。settingはカンマ区切りで複数指定できる
+     * 指定されているときだけ、実行時と同じ探し方で存在を確認する
      */
     default List<Violation> validateFileExists(final String key, final String value, final BaseDir baseDir) {
-        if (Strings.isEmpty(value)) {
+        if (Strings.isEmpty(value) || baseDir.search(value).exists()) {
             return List.of();
         }
-        final String[] paths = baseDir == BaseDir.SETTING ? value.split(",") : new String[]{value};
-        return Arrays.stream(paths)
-                     .map(String::trim)
-                     .filter(it -> !baseDir.search(it).exists())
-                     .map(it -> new Violation(List.of(this.optionName(key))
-                             , "Invalid value for option '" + this.optionName(key) + "': file not found: '" + it + "'"))
+        return List.of(new Violation(List.of(this.optionName(key))
+                , "Invalid value for option '" + this.optionName(key) + "': file not found: '" + value + "'"));
+    }
+
+    /**
+     * カンマ区切りで複数指定できるオプション（-setting等）の各ファイルの存在を確認する
+     */
+    default List<Violation> validateFilesExist(final String key, final String values, final BaseDir baseDir) {
+        if (Strings.isEmpty(values)) {
+            return List.of();
+        }
+        return Arrays.stream(values.split(","))
+                     .flatMap(it -> this.validateFileExists(key, it.trim(), baseDir).stream())
                      .toList();
     }
 
@@ -71,10 +78,22 @@ public interface Option {
     }
 
     default String optionName(final String key) {
-        if (Strings.isEmpty(this.getPrefix())) {
+        return Option.withPrefix(this.getPrefix(), key);
+    }
+
+    /**
+     * -nameをprefix付きの-prefix.nameにする（prefixが空か、既にprefix付きならそのまま）
+     */
+    static String withPrefix(final String prefix, final String key) {
+        if (Strings.isEmpty(prefix) || key.startsWith("-" + prefix + ".")) {
             return key;
         }
-        return key.replace("-", "-" + this.getPrefix() + ".");
+        return key.replace("-", "-" + prefix + ".");
+    }
+
+    @SafeVarargs
+    static List<Violation> concat(final List<Violation>... violations) {
+        return Arrays.stream(violations).flatMap(List::stream).toList();
     }
 
     enum ParamType {
@@ -215,10 +234,7 @@ public interface Option {
         }
 
         private String withPrefix(final String key) {
-            if (Optional.ofNullable(this.prefix).orElse("").isEmpty() || key.startsWith("-" + this.prefix + ".")) {
-                return key;
-            }
-            return key.replace("-", "-" + this.prefix + ".");
+            return Option.withPrefix(this.prefix, key);
         }
 
         private String templateEscape(final String key) {
@@ -340,10 +356,7 @@ public interface Option {
         }
 
         private String withPrefix(final String key) {
-            if (Optional.ofNullable(this.prefix).orElse("").isEmpty() || key.startsWith("-" + this.prefix + ".")) {
-                return key;
-            }
-            return key.replace("-", "-" + this.prefix + ".");
+            return Option.withPrefix(this.prefix, key);
         }
     }
 

@@ -8,6 +8,7 @@ import {
 } from "../../../../components/element/Input";
 import {
 	useFieldErrors,
+	useRegisterVisibleField,
 	useSetFieldErrors,
 } from "../../../../context/FieldErrorProvider";
 import { useWorkspaceContext } from "../../../../context/WorkspaceResourcesProvider";
@@ -39,6 +40,7 @@ export default function Text({
 		showDefaulePath && workspacePath !== "" && workspacePath !== basePath;
 	const fieldErrors = useFieldErrors(fieldName);
 	const setFieldErrors = useSetFieldErrors();
+	useRegisterVisibleField(fieldName, !hidden);
 
 	const handleChange = (ev: React.ChangeEvent<HTMLInputElement>) => {
 		const newValue = ev.target.value;

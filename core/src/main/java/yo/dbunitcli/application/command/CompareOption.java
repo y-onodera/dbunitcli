@@ -2,6 +2,7 @@ package yo.dbunitcli.application.command;
 
 import yo.dbunitcli.Strings;
 import yo.dbunitcli.application.CommandLineOption;
+import yo.dbunitcli.application.Option;
 import yo.dbunitcli.application.ArgumentMapper;
 import yo.dbunitcli.application.DefaultArgumentFunction;
 import yo.dbunitcli.application.json.FromJsonTableSeparatorsBuilder;
@@ -110,13 +111,11 @@ public record CompareOption(
 
     @Override
     public List<Violation> validate() {
-        return Stream.of(this.validateFileExists("-setting", this.setting, BaseDir.SETTING)
-                             , this.newData.validate()
-                             , this.oldData.validate()
-                             , this.expectData.validate()
-                             , this.result.convertResult().validate())
-                     .flatMap(List::stream)
-                     .toList();
+        return Option.concat(this.validateFilesExist("-setting", this.setting, BaseDir.SETTING)
+                , this.newData.validate()
+                , this.oldData.validate()
+                , this.expectData.validate()
+                , this.result.convertResult().validate());
     }
 
     @Override

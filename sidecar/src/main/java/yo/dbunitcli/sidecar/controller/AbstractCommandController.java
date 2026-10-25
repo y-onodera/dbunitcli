@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import yo.dbunitcli.application.Command;
 import yo.dbunitcli.application.CommandParameters;
 import yo.dbunitcli.application.Option;
+import yo.dbunitcli.application.OptionValidationException;
 import yo.dbunitcli.application.command.Type;
 import yo.dbunitcli.resource.FileResources;
 import yo.dbunitcli.sidecar.domain.project.Workspace;
@@ -192,6 +193,9 @@ public abstract class AbstractCommandController implements ControllerExceptionHa
                 LOGGER.info("cause:", th);
             }
             return parameters.resultDir(body.getName());
+        } catch (final OptionValidationException ex) {
+            // 入力欄ごとに違反を返すため、ApplicationExceptionで包まずに専用のハンドラへ渡す
+            throw ex;
         } catch (final Throwable th) {
             LOGGER.error("cause:", th);
             throw new ApplicationException(th);

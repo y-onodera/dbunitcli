@@ -97,6 +97,9 @@ export class OptionValidationError extends Error {
 	}
 }
 
+// sidecarがオプション検証エラーの応答に付ける理由句
+const OPTION_VALIDATION_ERROR_REASON = "Invalid Option";
+
 // 検証エラーの応答（{message, violations}）なら取り出す。それ以外の本文ならnull
 const parseOptionValidationError = (
 	body: string,
@@ -117,10 +120,8 @@ const parseOptionValidationError = (
 
 const ensureOk = async (response: Response) => {
 	if (!response.ok) {
-		if (response.status === 400) {
-			const validationError = parseOptionValidationError(
-				await response.clone().text(),
-			);
+		if (response.statusText === OPTION_VALIDATION_ERROR_REASON) {
+			const validationError = parseOptionValidationError(await response.text());
 			if (validationError) {
 				throw validationError;
 			}
