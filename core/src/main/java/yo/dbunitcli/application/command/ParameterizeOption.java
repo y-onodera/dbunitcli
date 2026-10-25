@@ -107,9 +107,7 @@ public record ParameterizeOption(
     @Override
     public List<String> validate() {
         final List<String> result = new ArrayList<>(this.validateRequired("-cmd", this.cmd));
-        if (Strings.isNotEmpty(this.cmdParam) && Strings.isNotEmpty(this.template)) {
-            result.add("-cmdParam and -template are mutually exclusive (specify only one)");
-        }
+        result.addAll(this.validateExclusive("-cmdParam", this.cmdParam, "-template", this.template));
         result.addAll(this.validateFileExists("-template", this.template, BaseDir.PARAMETERIZE_TEMPLATE));
         result.addAll(this.paramData.validate());
         result.addAll(this.templateOption.validate());

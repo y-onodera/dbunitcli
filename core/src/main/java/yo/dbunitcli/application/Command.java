@@ -2,6 +2,7 @@ package yo.dbunitcli.application;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import picocli.CommandLine;
 import yo.dbunitcli.Strings;
 import yo.dbunitcli.common.Parameter;
 import yo.dbunitcli.resource.FileResources;
@@ -23,11 +24,11 @@ public interface Command<DTO extends CommandDto, T extends CommandLineOption<DTO
             FileResources.runInContext(() -> this.exec(this.parseOption(args, Parameter.none())));
         } catch (final CommandFailException ex) {
             Command.LOGGER.info(ex.getMessage());
-            Command.exitByFail();
-        } catch (final OptionValidationException ex) {
-            Command.LOGGER.error("args:{}", Arrays.toString(args));
-            Command.LOGGER.error("invalid option:{}", ex.getMessage());
-            Command.exitByFail();
+            Command.exit(1);
+        } catch (final CommandLine.ParameterException | OptionValidationException ex) {
+            // picocliの既定のエラー表示に揃え、メッセージだけをstderrに出して使い方の誤りの終了コードで終える
+            System.err.println(ex.getMessage());
+            Command.exit(CommandLine.ExitCode.USAGE);
         } catch (final Throwable th) {
             Command.LOGGER.error("args:{}", Arrays.toString(args));
             Command.LOGGER.error("error:", th);
@@ -35,11 +36,11 @@ public interface Command<DTO extends CommandDto, T extends CommandLineOption<DTO
         }
     }
 
-    private static void exitByFail() {
+    private static void exit(final int status) {
         if (Boolean.getBoolean("dbunitcli.noExit")) {
-            throw new RuntimeException("1");
+            throw new RuntimeException(String.valueOf(status));
         }
-        System.exit(1);
+        System.exit(status);
     }
 
     /**

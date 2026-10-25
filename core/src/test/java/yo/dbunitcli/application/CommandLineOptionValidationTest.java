@@ -12,7 +12,10 @@ import yo.dbunitcli.application.command.Scaffold;
 import yo.dbunitcli.common.Parameter;
 import yo.dbunitcli.resource.FileResources;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.PrintStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -21,6 +24,7 @@ import java.util.function.Supplier;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class CommandLineOptionValidationTest {
 
@@ -56,7 +60,7 @@ class CommandLineOptionValidationTest {
 
         @Test
         void requiredEmptyIsInvalid() {
-            assertEquals(List.of("Missing required option: '-new.cmd'"), this.option.validateRequired("-cmd", ""));
+            assertEquals(List.of("Missing required option: '-new.cmd=<cmd>'"), this.option.validateRequired("-cmd", ""));
         }
 
         @Test
@@ -66,7 +70,7 @@ class CommandLineOptionValidationTest {
 
         @Test
         void fileNotExistsIsInvalid() {
-            assertEquals(List.of("File not exists: '-new.setting=notExists.json'")
+            assertEquals(List.of("Invalid value for option '-new.setting': file not found: 'notExists.json'")
                     , this.option.validateFileExists("-setting", "notExists.json", Option.BaseDir.SETTING));
         }
 
@@ -84,7 +88,7 @@ class CommandLineOptionValidationTest {
         @Test
         void settingIsCommaSeparated() throws IOException {
             CommandLineOptionValidationTest.this.createFile("resources/setting/a.json");
-            assertEquals(List.of("File not exists: '-new.setting=b.json'")
+            assertEquals(List.of("Invalid value for option '-new.setting': file not found: 'b.json'")
                     , this.option.validateFileExists("-setting", "a.json, b.json", Option.BaseDir.SETTING));
         }
     }
@@ -116,18 +120,18 @@ class CommandLineOptionValidationTest {
         @Test
         void cmdParamAndTemplateIsExclusive() throws IOException {
             CommandLineOptionValidationTest.this.createFile("template.txt");
-            assertEquals(List.of("-cmdParam and -template are mutually exclusive (specify only one)")
+            assertEquals(List.of("Error: -cmdParam=<cmdParam>, -template=<template> are mutually exclusive (specify only one)")
                     , this.validate("-cmd=convert", "-cmdParam=param.txt", "-template=template.txt"));
         }
 
         @Test
         void cmdIsRequired() {
-            assertEquals(List.of("Missing required option: '-cmd'"), this.validate("-cmdParam=param.txt"));
+            assertEquals(List.of("Missing required option: '-cmd=<cmd>'"), this.validate("-cmdParam=param.txt"));
         }
 
         @Test
         void templateNotExistsIsInvalid() {
-            assertEquals(List.of("File not exists: '-template=template.txt'")
+            assertEquals(List.of("Invalid value for option '-template': file not found: 'template.txt'")
                     , this.validate("-cmd=convert", "-template=template.txt"));
         }
 
@@ -146,7 +150,7 @@ class CommandLineOptionValidationTest {
 
         @Test
         void srcNotExistsIsInvalid() {
-            assertEquals(List.of("File not exists: '-src.src=notExists'"), this.validate("-src.src=notExists"));
+            assertEquals(List.of("Invalid value for option '-src.src': file not found: 'notExists'"), this.validate("-src.src=notExists"));
         }
 
         @Test
@@ -157,13 +161,13 @@ class CommandLineOptionValidationTest {
         @Test
         void subOptionIsValidated() throws IOException {
             CommandLineOptionValidationTest.this.createFile("dataset/a.xlsx");
-            assertEquals(List.of("File not exists: '-src.xlsxSchema=schema.json'")
+            assertEquals(List.of("Invalid value for option '-src.xlsxSchema': file not found: 'schema.json'")
                     , this.validate("-src.src=dataset", "-src.srcType=xlsx", "-src.xlsxSchema=schema.json"));
         }
 
         @Test
         void resultFixedColumnDefIsValidated() {
-            assertEquals(List.of("File not exists: '-result.fixedColumnDef=def.json'")
+            assertEquals(List.of("Invalid value for option '-result.fixedColumnDef': file not found: 'def.json'")
                     , this.validate("-result.resultType=fixed", "-result.fixedColumnDef=def.json"));
         }
 
@@ -177,7 +181,7 @@ class CommandLineOptionValidationTest {
 
         @Test
         void templateIsRequired() {
-            assertEquals(List.of("Missing required option: '-template'"), this.validate("-generateType=txt"));
+            assertEquals(List.of("Missing required option: '-template=<template>'"), this.validate("-generateType=txt"));
         }
 
         @Test
@@ -197,6 +201,64 @@ class CommandLineOptionValidationTest {
         void noTargetIsValid() {
             assertEquals(List.of(), CommandLineOptionValidationTest.this.validate(
                     () -> new Scaffold().parseOption(new String[]{"-result=out"})));
+        }
+    }
+
+    @Nested
+    class CliOutput {
+
+        private final ByteArrayOutputStream err = new ByteArrayOutputStream();
+
+        private PrintStream originalErr;
+
+        private String originalNoExit;
+
+        @BeforeEach
+        void setUp() {
+            this.originalNoExit = System.setProperty("dbunitcli.noExit", "true");
+            this.originalErr = System.err;
+            System.setErr(new PrintStream(this.err, true, StandardCharsets.UTF_8));
+        }
+
+        @AfterEach
+        void tearDown() {
+            System.setErr(this.originalErr);
+            // surefireが全テストに-Ddbunitcli.noExit=trueを渡しているため、消さずに元へ戻す
+            if (this.originalNoExit == null) {
+                System.clearProperty("dbunitcli.noExit");
+            } else {
+                System.setProperty("dbunitcli.noExit", this.originalNoExit);
+            }
+        }
+
+        @Test
+        void validationErrorPrintsMessageOnlyWithUsageExitCode() {
+            final RuntimeException ex = assertThrows(RuntimeException.class
+                    , () -> new Parameterize().exec(new String[]{"-cmdParam=a", "-template=b"}));
+            assertEquals("2", ex.getMessage());
+            assertEquals(String.join(System.lineSeparator()
+                    , "Missing required option: '-cmd=<cmd>'"
+                    , "Error: -cmdParam=<cmdParam>, -template=<template> are mutually exclusive (specify only one)"
+                    , "Invalid value for option '-template': file not found: 'b'"
+                    , ""), this.err.toString(StandardCharsets.UTF_8));
+        }
+
+        @Test
+        void parseErrorShowsPrefixedOptionName() {
+            final RuntimeException ex = assertThrows(RuntimeException.class
+                    , () -> new Convert().exec(new String[]{"-src.srcType=foo"}));
+            assertEquals("2", ex.getMessage());
+            assertTrue(this.err.toString(StandardCharsets.UTF_8)
+                               .startsWith("Invalid value for option '-src.srcType': expected one of ")
+                    , this.err.toString(StandardCharsets.UTF_8));
+        }
+
+        @Test
+        void parseErrorShowsOptionNameAsSpecified() {
+            assertThrows(RuntimeException.class, () -> new Convert().exec(new String[]{"-srcType=foo"}));
+            assertTrue(this.err.toString(StandardCharsets.UTF_8)
+                               .startsWith("Invalid value for option '-srcType': expected one of ")
+                    , this.err.toString(StandardCharsets.UTF_8));
         }
     }
 

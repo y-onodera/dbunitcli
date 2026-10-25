@@ -28,11 +28,21 @@ public interface Option {
         return List.of();
     }
 
+    // 違反の文言はpicocliのエラー表示に揃える
     default List<String> validateRequired(final String key, final String value) {
         if (Strings.isNotEmpty(value)) {
             return List.of();
         }
-        return List.of("Missing required option: '" + this.optionName(key) + "'");
+        return List.of("Missing required option: '" + this.optionLabel(key) + "'");
+    }
+
+    default List<String> validateExclusive(final String key1, final String value1
+            , final String key2, final String value2) {
+        if (Strings.isEmpty(value1) || Strings.isEmpty(value2)) {
+            return List.of();
+        }
+        return List.of("Error: " + this.optionLabel(key1) + ", " + this.optionLabel(key2)
+                + " are mutually exclusive (specify only one)");
     }
 
     /**
@@ -46,8 +56,15 @@ public interface Option {
         return Arrays.stream(paths)
                      .map(String::trim)
                      .filter(it -> !baseDir.search(it).exists())
-                     .map(it -> "File not exists: '" + this.optionName(key) + "=" + it + "'")
+                     .map(it -> "Invalid value for option '" + this.optionName(key) + "': file not found: '" + it + "'")
                      .toList();
+    }
+
+    /**
+     * picocliと同じ「-name=&lt;name&gt;」形式の表示名
+     */
+    default String optionLabel(final String key) {
+        return this.optionName(key) + "=<" + key.substring(1) + ">";
     }
 
     default String optionName(final String key) {
