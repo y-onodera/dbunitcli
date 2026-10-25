@@ -8,6 +8,7 @@ import org.junit.jupiter.api.io.TempDir;
 import yo.dbunitcli.application.command.Convert;
 import yo.dbunitcli.application.command.Generate;
 import yo.dbunitcli.application.command.Parameterize;
+import yo.dbunitcli.application.command.Run;
 import yo.dbunitcli.application.command.Scaffold;
 import yo.dbunitcli.common.Parameter;
 import yo.dbunitcli.resource.FileResources;
@@ -154,6 +155,18 @@ class CommandLineOptionValidationTest {
             assertEquals(List.of(), this.validate("-cmd=convert", "-cmdParam=$param.name$.txt"));
         }
 
+        @Test
+        void unknownCmdIsInvalid() {
+            assertEquals(List.of("Invalid value for option '-cmd': expected one of "
+                            + "[compare, convert, generate, run, parameterize] but was 'scaffold'")
+                    , this.validate("-cmd=scaffold"));
+        }
+
+        @Test
+        void templateCmdIsNotChecked() {
+            assertEquals(List.of(), this.validate("-cmd=$param.cmd$"));
+        }
+
         private List<String> validate(final String... args) {
             return CommandLineOptionValidationTest.this.validate(() -> new Parameterize().parseOption(args));
         }
@@ -180,6 +193,50 @@ class CommandLineOptionValidationTest {
         }
 
         @Test
+        void regRequiresDataSplitAndHeaderSplitOrHeaderName() {
+            assertEquals(List.of("Missing required option: '-src.regDataSplit=<regDataSplit>'"
+                            , "Error: Missing required argument (specify one of these): "
+                                    + "(-src.regHeaderSplit=<regHeaderSplit> | -src.headerName=<headerName>)")
+                    , this.validate("-src.srcType=reg"));
+            assertEquals(List.of(), this.validate("-src.srcType=reg", "-src.regDataSplit=,", "-src.headerName=A,B"));
+        }
+
+        @Test
+        void fixedRequiresFixedLength() {
+            assertEquals(List.of("Missing required option: '-src.fixedLength=<fixedLength>'")
+                    , this.validate("-src.srcType=fixed"));
+        }
+
+        @Test
+        void unsupportedEncodingIsInvalid() {
+            assertEquals(List.of("Invalid value for option '-src.encoding': unsupported encoding: 'XXX'")
+                    , this.validate("-src.encoding=XXX"));
+        }
+
+        @Test
+        void invalidRegexIsInvalid() {
+            assertEquals(List.of("Invalid value for option '-src.regInclude': invalid regex: '[' (Unclosed character class)")
+                    , this.validate("-src.regInclude=["));
+        }
+
+        @Test
+        void tableResultRequiresJdbcUrl() throws IOException {
+            assertEquals(List.of("Error: Missing required argument (specify one of these): "
+                            + "(-result.jdbcUrl=<jdbcUrl> | -result.jdbcProperties=<jdbcProperties>)")
+                    , this.validate("-result.resultType=table"));
+            CommandLineOptionValidationTest.this.createFile("resources/jdbc/noUrl.properties");
+            assertEquals(List.of("Invalid value for option '-result.jdbcProperties': url is not defined in 'noUrl.properties'")
+                    , this.validate("-result.resultType=table", "-result.jdbcProperties=noUrl.properties"));
+            assertEquals(List.of(), this.validate("-result.resultType=table", "-result.jdbcUrl=jdbc:h2:mem:test"));
+        }
+
+        @Test
+        void excelTableMustBeSheetOrBook() {
+            assertEquals(List.of("Invalid value for option '-result.excelTable': expected one of [SHEET, BOOK] but was 'PAGE'")
+                    , this.validate("-result.resultType=xlsx", "-result.excelTable=PAGE"));
+        }
+
+        @Test
         void resultFixedColumnDefIsValidated() {
             assertEquals(List.of("Invalid value for option '-result.fixedColumnDef': file not found: 'def.json'")
                     , this.validate("-result.resultType=fixed", "-result.fixedColumnDef=def.json"));
@@ -203,6 +260,12 @@ class CommandLineOptionValidationTest {
             assertEquals(List.of(), this.validate("-generateType=settings"));
         }
 
+        @Test
+        void sqlRequiresOp() {
+            assertEquals(List.of("Missing required option: '-op=<op>'"), this.validate("-generateType=sql"));
+            assertEquals(List.of(), this.validate("-generateType=sql", "-op=INSERT"));
+        }
+
         private List<String> validate(final String... args) {
             return CommandLineOptionValidationTest.this.validate(() -> new Generate().parseOption(args));
         }
@@ -215,6 +278,36 @@ class CommandLineOptionValidationTest {
         void noTargetIsValid() {
             assertEquals(List.of(), CommandLineOptionValidationTest.this.validate(
                     () -> new Scaffold().parseOption(new String[]{"-result=out"})));
+        }
+
+        @Test
+        void unknownCommandTypeIsInvalid() {
+            assertEquals(List.of("Invalid value for option '-commandType': expected one of "
+                            + "[compare, convert, generate, parameterize, run, scaffold] but was 'foo'")
+                    , CommandLineOptionValidationTest.this.validate(
+                            () -> new Scaffold().parseOption(new String[]{"-target=parameter", "-commandType=foo"})));
+        }
+    }
+
+    @Nested
+    class RunOption {
+
+        @Test
+        void baseDirNotExistsIsInvalid() {
+            assertEquals(List.of("Invalid value for option '-baseDir': file not found: 'notExists'")
+                    , this.validate("-scriptType=cmd", "-baseDir=notExists"));
+        }
+
+        @Test
+        void sqlRequiresJdbcUrl() {
+            assertEquals(List.of("Error: Missing required argument (specify one of these): "
+                            + "(-jdbc.jdbcUrl=<jdbcUrl> | -jdbc.jdbcProperties=<jdbcProperties>)")
+                    , this.validate("-scriptType=sql"));
+            assertEquals(List.of(), this.validate("-scriptType=cmd"));
+        }
+
+        private List<String> validate(final String... args) {
+            return CommandLineOptionValidationTest.this.validate(() -> new Run().parseOption(args));
         }
     }
 

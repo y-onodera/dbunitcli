@@ -83,7 +83,10 @@ public record RunOption(
 
     @Override
     public List<Violation> validate() {
-        return Option.concat(this.srcData.validate(), this.templateOption.validate(), this.jdbcOption.validate());
+        return Option.concat(this.srcData.validate()
+                , this.templateOption.validate()
+                , this.scriptType == ScriptType.sql ? this.jdbcOption.validate() : List.of()
+                , this.validateFileExists("-baseDir", this.baseDir, BaseDir.DATASET));
     }
 
     @Override

@@ -1,8 +1,11 @@
 package yo.dbunitcli.application.option;
 
 import yo.dbunitcli.Strings;
+import yo.dbunitcli.application.Option;
 import yo.dbunitcli.application.dto.DataSetLoadDto;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
+
+import java.util.List;
 
 public record TraverseOption(
         String prefix
@@ -30,6 +33,12 @@ public record TraverseOption(
                 .put("-recursive", this.recursive)
                 .put("-regInclude", this.regInclude)
                 .put("-regExclude", this.regExclude);
+    }
+
+    @Override
+    public List<Violation> validate() {
+        return Option.concat(this.validatePattern("-regInclude", this.regInclude)
+                , this.validatePattern("-regExclude", this.regExclude));
     }
 
     @Override

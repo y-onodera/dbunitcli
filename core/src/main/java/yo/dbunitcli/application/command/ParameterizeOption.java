@@ -57,6 +57,9 @@ public record ParameterizeOption(
     };
     private static final ArgumentFilter ARGS_IGNORE_FILTER = new DefaultArgumentFilter("-P", "-A", "-arg");
 
+    // createCommandで実行できるコマンド
+    private static final List<String> COMMANDS = List.of("compare", "convert", "generate", "run", "parameterize");
+
     public static ParameterizeDto toDto(final String[] args) {
         final ParameterizeDto dto = new ParameterizeDto();
         new ArgumentMapper("", CommandLineOption.ARGUMENT_FUNCTION, ParameterizeOption.ARGS_IGNORE_FILTER)
@@ -107,10 +110,16 @@ public record ParameterizeOption(
     @Override
     public List<Violation> validate() {
         return Option.concat(this.validateRequired("-cmd", this.cmd)
+                , this.isTemplate(this.cmd) ? List.of() : this.validateOneOf("-cmd", this.cmd, COMMANDS)
                 , this.validateExclusive("-cmdParam", this.cmdParam, "-template", this.template)
                 , this.validateFileExists("-template", this.template, BaseDir.PARAMETERIZE_TEMPLATE)
                 , this.paramData.validate()
                 , this.templateOption.validate());
+    }
+
+    // 行ごとにテンプレートで展開する値は、展開後でないと検証できない
+    private boolean isTemplate(final String value) {
+        return Strings.isNotEmpty(value) && value.indexOf(this.templateOption.templateVarStart()) >= 0;
     }
 
     /**

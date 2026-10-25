@@ -3,6 +3,8 @@ package yo.dbunitcli.application.option;
 import yo.dbunitcli.application.dto.DataSetLoadDto;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 
+import java.util.List;
+
 public record FixedOption(
         String prefix
         , String fixedLength
@@ -23,6 +25,11 @@ public record FixedOption(
         return new ParametersBuilder(this.getPrefix())
                 .put("-fixedLength", this.fixedLength)
                 .put("-fixedLengthType", this.fixedLengthType);
+    }
+
+    @Override
+    public List<Violation> validate() {
+        return this.validateRequired("-fixedLength", this.fixedLength);
     }
 
     @Override

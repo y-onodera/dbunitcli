@@ -1,6 +1,7 @@
 package yo.dbunitcli.application.option;
 
 import yo.dbunitcli.Strings;
+import yo.dbunitcli.application.Option;
 import yo.dbunitcli.application.dto.TemplateRenderDto;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.resource.FileResources;
@@ -55,7 +56,8 @@ public record TemplateRenderOption(
 
     @Override
     public List<Violation> validate() {
-        return this.validateFileExists("-templateGroup", this.templateGroup, BaseDir.TEMPLATE);
+        return Option.concat(this.validateFileExists("-templateGroup", this.templateGroup, BaseDir.TEMPLATE)
+                , this.validateEncoding("-encoding", this.encoding));
     }
 
     @Override

@@ -134,7 +134,7 @@ class JobStreamTest {
 
     @Test
     public void testStream_継承したexecのログを流す() throws Exception {
-        final Stream stream = this.stream(HttpRequest.POST("dbunit-cli/run/exec", "{\"name\":\"none\",\"input\":{\"-unknown\":\"x\"}}")
+        final Stream stream = this.stream(HttpRequest.POST("dbunit-cli/run/exec", "{\"name\":\"none\",\"input\":{\"-unknown\":\"x\",\"-jdbc.jdbcUrl\":\"jdbc:h2:mem:test\"}}")
                 .header(JobStreamFilter.LOG_HEADER, "true"));
 
         Assertions.assertEquals(200, stream.result().get("status"));
@@ -160,7 +160,7 @@ class JobStreamTest {
 
     @Test
     public void testStream_ログを求めなければログは流さない() throws Exception {
-        final Stream stream = this.stream(HttpRequest.POST("dbunit-cli/run/exec", "{\"name\":\"none\",\"input\":{\"-unknown\":\"x\"}}"));
+        final Stream stream = this.stream(HttpRequest.POST("dbunit-cli/run/exec", "{\"name\":\"none\",\"input\":{\"-unknown\":\"x\",\"-jdbc.jdbcUrl\":\"jdbc:h2:mem:test\"}}"));
 
         Assertions.assertEquals(200, stream.result().get("status"));
         Assertions.assertEquals(List.of(), stream.logs());

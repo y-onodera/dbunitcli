@@ -89,6 +89,9 @@ public record DataSetLoadOption(
         }
         return Option.concat(this.validateFileExists("-src", this.src, BaseDir.DATASET)
                 , this.validateFilesExist("-setting", this.setting, BaseDir.SETTING)
+                , this.validateEncoding("-settingEncoding", this.settingEncoding)
+                , this.validatePattern("-regTableInclude", this.regTableInclude)
+                , this.validatePattern("-regTableExclude", this.regTableExclude)
                 , this.dataSetParam.validate());
     }
 

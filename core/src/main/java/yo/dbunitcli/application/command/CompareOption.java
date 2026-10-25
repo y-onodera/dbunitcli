@@ -112,6 +112,7 @@ public record CompareOption(
     @Override
     public List<Violation> validate() {
         return Option.concat(this.validateFilesExist("-setting", this.setting, BaseDir.SETTING)
+                , this.validateEncoding("-settingEncoding", this.settingEncoding)
                 , this.newData.validate()
                 , this.oldData.validate()
                 , this.expectData.validate()

@@ -6,6 +6,7 @@ import yo.dbunitcli.Strings;
 import yo.dbunitcli.application.ArgumentMapper;
 import yo.dbunitcli.application.CommandLineOption;
 import yo.dbunitcli.application.CommandParameters;
+import yo.dbunitcli.application.Option;
 import yo.dbunitcli.application.ParameterUnit;
 import yo.dbunitcli.application.option.DataSetLoadOption;
 import yo.dbunitcli.common.Parameter;
@@ -155,7 +156,10 @@ public record ScaffoldOption(
      */
     @Override
     public List<Violation> validate() {
-        return this.hasDataset() ? this.dataset.validate() : List.of();
+        return Option.concat(this.hasDataset() ? this.dataset.validate() : List.of()
+                , this.validateOneOf("-commandType", this.commandType
+                        , Arrays.stream(Type.values()).map(Enum::name).toList())
+                , this.validateEncoding("-datasetEncoding", this.datasetEncoding));
     }
 
     @Override

@@ -219,15 +219,21 @@ public record GenerateOption(Parameter parameter, String resultDir, String resul
 
     @Override
     public List<Violation> validate() {
-        if (this.generateType.isFixedTemplate()) {
-            return this.srcData.validate();
-        }
         return Option.concat(this.srcData.validate()
-                , this.validateRequired("-template", this.template)
+                , this.validateEncoding("-outputEncoding", this.outputEncoding)
+                , this.generateType == GenerateType.sql
+                        ? this.validateRequired("-op", this.operation == null ? null : this.operation.name())
+                        : List.of()
+                , this.generateType.isFixedTemplate() ? List.of() : this.validateTemplate());
+    }
+
+    private List<Violation> validateTemplate() {
+        return Option.concat(this.validateRequired("-template", this.template)
                 , this.validateFileExists("-template", this.template, BaseDir.TEMPLATE)
                 , this.templateOption.validate()
                 , this.unit == ParameterUnit.table && !this.generateType.isExcel()
-                        ? this.validateFileExists("-unitSetting", this.unitSetting, BaseDir.SETTING)
+                        ? Option.concat(this.validateFileExists("-unitSetting", this.unitSetting, BaseDir.SETTING)
+                        , this.validateEncoding("-unitSettingEncoding", this.unitSettingEncoding))
                         : List.of());
     }
 

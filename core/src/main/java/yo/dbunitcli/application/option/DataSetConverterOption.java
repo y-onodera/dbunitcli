@@ -10,6 +10,7 @@ import yo.dbunitcli.dataset.converter.XlsConverter;
 import yo.dbunitcli.resource.FileResources;
 
 import java.io.File;
+import java.util.Arrays;
 import java.util.List;
 
 public record DataSetConverterOption(
@@ -86,12 +87,15 @@ public record DataSetConverterOption(
      */
     @Override
     public List<Violation> validate() {
-        if (this.resultType == ResultType.table) {
-            return this.jdbcOption.validate();
-        } else if (this.resultType == ResultType.fixed) {
-            return this.validateFileExists("-fixedColumnDef", this.fixedColumnDefFile, BaseDir.FIXED_COLUMN_DEF);
-        }
-        return List.of();
+        return switch (this.resultType) {
+            case table -> this.jdbcOption.validate();
+            case xls, xlsx -> this.validateOneOf("-excelTable", this.excelTable, Arrays.stream(
+                    XlsConverter.TableExportType.values()).map(Enum::name).toList());
+            case fixed -> Option.concat(this.validateEncoding("-outputEncoding", this.outputEncoding)
+                    , this.validateFileExists("-fixedColumnDef", this.fixedColumnDefFile, BaseDir.FIXED_COLUMN_DEF));
+            case null -> List.of();
+            default -> this.validateEncoding("-outputEncoding", this.outputEncoding);
+        };
     }
 
     /**

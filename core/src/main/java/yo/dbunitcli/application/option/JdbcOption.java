@@ -46,9 +46,26 @@ public record JdbcOption(
                 .put("-jdbcPass", this.jdbcPass);
     }
 
+    /**
+     * 接続先のurlは-jdbcUrlか、-jdbcPropertiesのファイルに書いたurlで決まる
+     */
     @Override
     public List<Violation> validate() {
-        return this.validateFileExists("-jdbcProperties", this.jdbcProperties, BaseDir.JDBC);
+        final List<Violation> fileNotFound = this.validateFileExists("-jdbcProperties", this.jdbcProperties, BaseDir.JDBC);
+        if (Strings.isNotEmpty(this.jdbcUrl) || !fileNotFound.isEmpty()) {
+            return fileNotFound;
+        }
+        if (Strings.isEmpty(this.jdbcProperties)) {
+            return this.validateRequiredEither("-jdbcUrl", this.jdbcUrl, "-jdbcProperties", this.jdbcProperties);
+        }
+        try {
+            if (this.loadJdbcTemplate().get("url") == null) {
+                return this.invalidValue("-jdbcProperties", "url is not defined in '" + this.jdbcProperties + "'");
+            }
+            return List.of();
+        } catch (final IOException ex) {
+            return this.invalidValue("-jdbcProperties", ex.getMessage());
+        }
     }
 
     public DatabaseConnectionLoader getDatabaseConnectionLoader() {

@@ -4,9 +4,13 @@ import yo.dbunitcli.Strings;
 import yo.dbunitcli.resource.FileResources;
 
 import java.io.File;
+import java.nio.charset.Charset;
+import java.nio.charset.IllegalCharsetNameException;
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 import java.util.stream.Collectors;
 
 public interface Option {
@@ -47,6 +51,54 @@ public interface Option {
                 + " are mutually exclusive (specify only one)"));
     }
 
+    default List<Violation> validateRequiredEither(final String key1, final String value1
+            , final String key2, final String value2) {
+        if (Strings.isNotEmpty(value1) || Strings.isNotEmpty(value2)) {
+            return List.of();
+        }
+        return List.of(new Violation(List.of(this.optionName(key1), this.optionName(key2))
+                , "Error: Missing required argument (specify one of these): ("
+                + this.optionLabel(key1) + " | " + this.optionLabel(key2) + ")"));
+    }
+
+    default List<Violation> validateOneOf(final String key, final String value, final Collection<String> candidates) {
+        if (Strings.isEmpty(value) || candidates.contains(value)) {
+            return List.of();
+        }
+        return this.invalidValue(key, "expected one of " + candidates + " but was '" + value + "'");
+    }
+
+    default List<Violation> validateEncoding(final String key, final String value) {
+        if (Strings.isEmpty(value)) {
+            return List.of();
+        }
+        try {
+            if (Charset.isSupported(value)) {
+                return List.of();
+            }
+        } catch (final IllegalCharsetNameException ex) {
+            // 文字コード名として不正なものも未対応として扱う
+        }
+        return this.invalidValue(key, "unsupported encoding: '" + value + "'");
+    }
+
+    default List<Violation> validatePattern(final String key, final String value) {
+        if (Strings.isEmpty(value)) {
+            return List.of();
+        }
+        try {
+            Pattern.compile(value);
+            return List.of();
+        } catch (final PatternSyntaxException ex) {
+            return this.invalidValue(key, "invalid regex: '" + value + "' (" + ex.getDescription() + ")");
+        }
+    }
+
+    default List<Violation> invalidValue(final String key, final String reason) {
+        return List.of(new Violation(List.of(this.optionName(key))
+                , "Invalid value for option '" + this.optionName(key) + "': " + reason));
+    }
+
     /**
      * 指定されているときだけ、実行時と同じ探し方で存在を確認する
      */
@@ -54,8 +106,7 @@ public interface Option {
         if (Strings.isEmpty(value) || baseDir.search(value).exists()) {
             return List.of();
         }
-        return List.of(new Violation(List.of(this.optionName(key))
-                , "Invalid value for option '" + this.optionName(key) + "': file not found: '" + value + "'"));
+        return this.invalidValue(key, "file not found: '" + value + "'");
     }
 
     /**
