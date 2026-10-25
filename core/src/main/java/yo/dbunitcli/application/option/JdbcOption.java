@@ -79,7 +79,10 @@ public record JdbcOption(
     public Properties loadJdbcTemplate() throws IOException {
         final Properties jdbcProp = new Properties();
         if (Strings.isNotEmpty(this.jdbcProperties)) {
-            jdbcProp.load(new FileInputStream(FileResources.searchJdbc(this.jdbcProperties)));
+            // 閉じないとWindowsでファイルがロックされたままになる
+            try (final FileInputStream input = new FileInputStream(FileResources.searchJdbc(this.jdbcProperties))) {
+                jdbcProp.load(input);
+            }
         }
         if (Strings.isNotEmpty(this.jdbcUrl)) {
             jdbcProp.put("url", this.jdbcUrl);
