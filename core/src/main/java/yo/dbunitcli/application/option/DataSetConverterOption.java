@@ -11,7 +11,6 @@ import yo.dbunitcli.dataset.converter.XlsConverter;
 import yo.dbunitcli.resource.FileResources;
 
 import java.io.File;
-import java.util.Arrays;
 import java.util.List;
 
 public record DataSetConverterOption(
@@ -54,14 +53,10 @@ public record DataSetConverterOption(
 
     /**
      * -parallelの値を整える。未指定は空文字（未指定時の並列数はコマンドごとに決める。convert/compare/generateはCPUコア数で自動（作業スレッドの中では逐次）、run/parameterizeは逐次）。
-     * 値の検証は{@link #validateParallel(Option, String)}で行う
+     * 値の検証は{@link Option#validateParallel(String)}で行う
      */
     public static String parallel(final String parallel) {
         return Strings.isEmpty(parallel) ? "" : parallel.trim();
-    }
-
-    public static List<Violation> validateParallel(final Option option, final String parallel) {
-        return option.validateInteger("-parallel", parallel, 1);
     }
 
     private static ResultType resultType(final DataSetConverterDto dto) {
@@ -87,18 +82,17 @@ public record DataSetConverterOption(
                 , this.resultType == ResultType.table ? List.of() : Option.concat(
                         this.validateBoolean("-exportEmptyTable", this.exportEmptyTable)
                         , this.validateBoolean("-exportHeader", this.skipHeader))
-                , DataSetConverterOption.validateParallel(this, this.parallel));
+                , this.validateParallel(this.parallel));
     }
 
     private List<Violation> validateResultType() {
         return switch (this.resultType) {
             case table -> this.jdbcOption.validate();
-            case xls, xlsx -> this.validateOneOf("-excelTable", this.excelTable, Arrays.stream(
-                    XlsConverter.TableExportType.values()).map(Enum::name).toList());
+            case xls, xlsx -> this.validateOneOf("-excelTable", this.excelTable, XlsConverter.TableExportType.values());
             case fixed -> Option.concat(this.validateEncoding("-outputEncoding", this.outputEncoding)
                     , this.validateFileExists("-fixedColumnDef", this.fixedColumnDefFile, BaseDir.FIXED_COLUMN_DEF)
                     , this.validateOneOfIgnoreCase("-fixedLengthType", this.fixedLengthType
-                            , ComparableDataSetParam.LengthType.names()));
+                            , ComparableDataSetParam.LengthType.values()));
             case format -> Option.concat(this.validateEncoding("-outputEncoding", this.outputEncoding)
                     , this.validateRequired("-format", this.format));
             case null -> List.of();
@@ -182,7 +176,7 @@ public record DataSetConverterOption(
     }
 
     /**
-     * @param parallel parallel(String)で検証した値
+     * @param parallel validateParallel(String)で検証した値
      * @return ソースの並列読込数。未指定ならnull（並列化できればCPUコア数で自動）
      */
     public static Integer parallelism(final String parallel) {
@@ -190,7 +184,7 @@ public record DataSetConverterOption(
     }
 
     /**
-     * @param parallel  parallel(String)で検証した値
+     * @param parallel  validateParallel(String)で検証した値
      * @param whenEmpty 未指定のときの並列数
      */
     public static int parallelism(final String parallel, final int whenEmpty) {

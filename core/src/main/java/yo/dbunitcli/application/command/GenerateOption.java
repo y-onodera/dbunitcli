@@ -17,7 +17,6 @@ import yo.dbunitcli.dataset.DataSourceType;
 import yo.dbunitcli.dataset.DbOperation;
 import yo.dbunitcli.dataset.ParallelTableMapping;
 import yo.dbunitcli.dataset.TableSeparators;
-import yo.dbunitcli.dataset.converter.FixedColumnDef;
 import yo.dbunitcli.dataset.producer.ComparableDataSetLoader;
 import yo.dbunitcli.resource.FileResources;
 import yo.dbunitcli.resource.Workers;
@@ -222,25 +221,20 @@ public record GenerateOption(Parameter parameter, String resultDir, String resul
     public List<Violation> validate() {
         return Option.concat(this.srcData.validate()
                 , this.validateEncoding("-outputEncoding", this.outputEncoding)
-                , this.generateType == GenerateType.fixedColumnDef
-                        ? this.validateOneOf("-align", this.align, FixedColumnDef.ALIGNS)
-                        : List.of()
-                , this.generateType == GenerateType.sql
-                        ? this.validateRequired("-op", this.operation == null ? null : this.operation.name())
-                        : List.of()
                 , this.generateType.isFixedTemplate() ? List.of() : this.validateTemplate()
                 , this.validateGenerateTypeOption()
-                , DataSetConverterOption.validateParallel(this, this.parallel));
+                , this.validateParallel(this.parallel));
     }
 
     // generateTypeごとに使うオプション（toParametersBuilderで出すもの）の型
     private List<Violation> validateGenerateTypeOption() {
         return switch (this.generateType) {
-            case sql -> this.validateBoolean("-commit", this.commit);
+            case sql -> Option.concat(
+                    this.validateRequired("-op", this.operation == null ? null : this.operation.name())
+                    , this.validateBoolean("-commit", this.commit));
             case settings -> this.validateBoolean("-includeAllColumns", this.includeAllColumns);
             case xlsx, xls -> this.validateBoolean("-lazyLoad", this.lazyLoad);
-            case fixedColumnDef -> Option.concat(this.validateIntegers("-fixedLength", this.fixedLength)
-                    , this.validateInteger("-defaultLength", this.defaultLength));
+            case fixedColumnDef -> this.validateFixedColumnDef(this.fixedLength, this.defaultLength, this.align);
             default -> List.of();
         };
     }

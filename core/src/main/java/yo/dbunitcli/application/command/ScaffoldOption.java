@@ -18,7 +18,6 @@ import yo.dbunitcli.dataset.DataSourceType;
 import yo.dbunitcli.dataset.IDataSetConverter;
 import yo.dbunitcli.dataset.ResultType;
 import yo.dbunitcli.dataset.converter.DataSetConverterLoader;
-import yo.dbunitcli.dataset.converter.FixedColumnDef;
 import yo.dbunitcli.dataset.producer.ComparableDataSetLoader;
 import yo.dbunitcli.resource.FileResources;
 
@@ -158,13 +157,10 @@ public record ScaffoldOption(
     @Override
     public List<Violation> validate() {
         return Option.concat(this.hasDataset() ? this.dataset.validate() : List.of()
-                , this.validateOneOf("-commandType", this.commandType
-                        , Arrays.stream(Type.values()).map(Enum::name).toList())
+                , this.validateOneOf("-commandType", this.commandType, Type.values())
                 , this.validateEncoding("-datasetEncoding", this.datasetEncoding)
                 , ScaffoldTarget.fixedColumnDef.name().equals(this.target)
-                        ? Option.concat(this.validateOneOf("-align", this.align, FixedColumnDef.ALIGNS)
-                        , this.validateIntegers("-fixedLength", this.fixedLength)
-                        , this.validateInteger("-defaultLength", this.defaultLength))
+                        ? this.validateFixedColumnDef(this.fixedLength, this.defaultLength, this.align)
                         : List.of());
     }
 

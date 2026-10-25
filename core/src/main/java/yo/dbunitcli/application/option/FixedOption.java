@@ -38,7 +38,7 @@ public record FixedOption(
                 , this.validateIntegers("-fixedLength", this.fixedLength)
                 , this.validateRequired("-headerName", this.headerName)
                 , this.validateOneOfIgnoreCase("-fixedLengthType", this.fixedLengthType
-                        , ComparableDataSetParam.LengthType.names()));
+                        , ComparableDataSetParam.LengthType.values()));
     }
 
     @Override

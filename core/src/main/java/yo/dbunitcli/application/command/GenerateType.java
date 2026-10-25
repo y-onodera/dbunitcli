@@ -2,7 +2,6 @@ package yo.dbunitcli.application.command;
 
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
-import yo.dbunitcli.Strings;
 import yo.dbunitcli.application.ParameterUnit;
 import yo.dbunitcli.common.Parameter;
 import yo.dbunitcli.dataset.ComparableDataSetProducer;
@@ -236,9 +235,7 @@ public enum GenerateType {
 
         @Override
         protected ComparableDataSetProducer wrapProducer(final GenerateOption option, final ComparableDataSetProducer producer) {
-            final String[] lengths =
-                    Strings.isNotEmpty(option.fixedLength()) ? option.fixedLength().split(",") : new String[0];
-            return new ComparableFixedColumnDefMetaDataProducer(producer, lengths, Integer.parseInt(option.defaultLength().trim()), option.align());
+            return ComparableFixedColumnDefMetaDataProducer.of(producer, option.fixedLength(), option.defaultLength(), option.align());
         }
     };
 

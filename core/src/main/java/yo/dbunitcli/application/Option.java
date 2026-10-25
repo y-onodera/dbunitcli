@@ -1,6 +1,7 @@
 package yo.dbunitcli.application;
 
 import yo.dbunitcli.Strings;
+import yo.dbunitcli.dataset.converter.FixedColumnDef;
 import yo.dbunitcli.resource.FileResources;
 
 import java.io.File;
@@ -68,6 +69,14 @@ public interface Option {
         return this.invalidValue(key, "expected one of " + candidates + " but was '" + value + "'");
     }
 
+    default List<Violation> validateOneOf(final String key, final String value, final Enum<?>[] candidates) {
+        return this.validateOneOf(key, value, Option.names(candidates));
+    }
+
+    default List<Violation> validateOneOfIgnoreCase(final String key, final String value, final Enum<?>[] candidates) {
+        return this.validateOneOfIgnoreCase(key, value, Option.names(candidates));
+    }
+
     default List<Violation> validateOneOfIgnoreCase(final String key, final String value
             , final Collection<String> candidates) {
         if (Strings.isEmpty(value) || candidates.stream().anyMatch(value::equalsIgnoreCase)) {
@@ -102,6 +111,22 @@ public interface Option {
         }
     }
 
+    /**
+     * -parallel（同時に動かす数）は1以上の整数
+     */
+    default List<Violation> validateParallel(final String value) {
+        return this.validateInteger("-parallel", value, 1);
+    }
+
+    /**
+     * 固定長カラム定義を作るオプション（generateとscaffoldのfixedColumnDef）
+     */
+    default List<Violation> validateFixedColumnDef(final String fixedLength, final String defaultLength, final String align) {
+        return Option.concat(this.validateIntegers("-fixedLength", fixedLength)
+                , this.validateInteger("-defaultLength", defaultLength)
+                , this.validateOneOf("-align", align, FixedColumnDef.ALIGNS));
+    }
+
     default List<Violation> validateDecimal(final String key, final String value) {
         if (Strings.isEmpty(value)) {
             return List.of();
@@ -121,11 +146,14 @@ public interface Option {
         if (Strings.isEmpty(value)) {
             return List.of();
         }
-        return Arrays.stream(value.split(","))
-                     .filter(it -> !it.trim().matches("-?\\d+"))
-                     .findFirst()
-                     .map(it -> this.invalidValue(key, "'" + it + "' in '" + value + "' is not an int"))
-                     .orElse(List.of());
+        for (final String it : value.split(",")) {
+            try {
+                Integer.parseInt(it.trim());
+            } catch (final NumberFormatException ex) {
+                return this.invalidValue(key, "'" + it + "' in '" + value + "' is not an int");
+            }
+        }
+        return List.of();
     }
 
     default List<Violation> validateSingleChar(final String key, final String value) {
@@ -207,6 +235,10 @@ public interface Option {
             return key;
         }
         return key.replace("-", "-" + prefix + ".");
+    }
+
+    static List<String> names(final Enum<?>[] values) {
+        return Arrays.stream(values).map(Enum::name).toList();
     }
 
     @SafeVarargs

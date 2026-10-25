@@ -33,9 +33,11 @@ public record ImageCompareOption(
         , String excludedRectangleColor
 ) implements Option {
 
-    // excludedAreas全体の書式（[x1,y1,x2,y2]を0個以上連結）
-    private static final Pattern AREAS_FORMAT = Pattern.compile("(\\[(\\d+\\.?\\d*,){3}\\d+\\.?\\d*])*");
-    private static final Pattern AREA_REGEX = Pattern.compile("(?=\\[)\\[((\\d+\\.?\\d*,){3}(\\d+\\.?\\d*))\\]((?=\\[)|$)");
+    // 1つの矩形[x1,y1,x2,y2]。group(1)が座標のカンマ区切り
+    private static final String AREA = "\\[((?:\\d+\\.?\\d*,){3}\\d+\\.?\\d*)]";
+    private static final Pattern AREA_REGEX = Pattern.compile(AREA);
+    // excludedAreas全体の書式（矩形を0個以上連結）
+    private static final Pattern AREAS_FORMAT = Pattern.compile("(?:" + AREA + ")*");
 
     public ImageCompareOption(final String prefix) {
         this(prefix, new ImageCompareDto());

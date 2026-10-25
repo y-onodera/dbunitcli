@@ -57,8 +57,11 @@ public record ParameterizeOption(
     };
     private static final ArgumentFilter ARGS_IGNORE_FILTER = new DefaultArgumentFilter("-P", "-A", "-arg");
 
-    // createCommandで実行できるコマンド
-    private static final List<String> COMMANDS = List.of("compare", "convert", "generate", "run", "parameterize");
+    // 行ごとに実行できるコマンド（scaffoldは対象外）
+    private static final List<String> COMMANDS = Arrays.stream(Type.values())
+                                                       .filter(it -> it != Type.scaffold)
+                                                       .map(Enum::name)
+                                                       .toList();
 
     public static ParameterizeDto toDto(final String[] args) {
         final ParameterizeDto dto = new ParameterizeDto();
@@ -115,7 +118,7 @@ public record ParameterizeOption(
                 , this.validateFileExists("-template", this.template, BaseDir.PARAMETERIZE_TEMPLATE)
                 , this.validateBoolean("-ignoreFail", this.ignoreFail)
                 , this.validateBoolean("-parameterize", this.parameterize)
-                , DataSetConverterOption.validateParallel(this, this.parallel)
+                , this.validateParallel(this.parallel)
                 , this.paramData.validate()
                 , this.templateOption.validate());
     }
@@ -158,14 +161,10 @@ public record ParameterizeOption(
     }
 
     private Command<?, ?> createCommand(final String cmdType) {
-        return switch (cmdType) {
-            case "compare" -> new Compare();
-            case "convert" -> new Convert();
-            case "generate" -> new Generate();
-            case "run" -> new Run();
-            case "parameterize" -> new Parameterize();
-            default -> throw new IllegalArgumentException("no executable command : " + cmdType);
-        };
+        if (!COMMANDS.contains(cmdType)) {
+            throw new IllegalArgumentException("no executable command : " + cmdType);
+        }
+        return Type.valueOf(cmdType).getCommand();
     }
 
     private String getTemplateArgs(final Parameter aParam) {

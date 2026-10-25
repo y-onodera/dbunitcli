@@ -1,7 +1,6 @@
 package yo.dbunitcli.application.command;
 
 import org.dbunit.dataset.Column;
-import yo.dbunitcli.Strings;
 import yo.dbunitcli.application.Option;
 import yo.dbunitcli.dataset.ComparableDataSetProducer;
 import yo.dbunitcli.dataset.ComparableDataSetProducerWrapper;
@@ -81,10 +80,7 @@ enum ScaffoldTarget {
 
         @Override
         ComparableDataSetProducerWrapper wrapProducer(final ScaffoldOption option, final ComparableDataSetProducer source) {
-            final String[] lengths = Strings.isNotEmpty(option.fixedLength())
-                    ? option.fixedLength().split(",") : new String[0];
-            return new ComparableFixedColumnDefMetaDataProducer(source, lengths,
-                                                                Integer.parseInt(option.defaultLength().trim()), option.align());
+            return ComparableFixedColumnDefMetaDataProducer.of(source, option.fixedLength(), option.defaultLength(), option.align());
         }
 
         @Override

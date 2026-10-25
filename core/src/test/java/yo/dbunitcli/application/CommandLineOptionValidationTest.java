@@ -162,7 +162,7 @@ class CommandLineOptionValidationTest {
         @Test
         void unknownCmdIsInvalid() {
             assertEquals(List.of("Invalid value for option '-cmd': expected one of "
-                            + "[compare, convert, generate, run, parameterize] but was 'scaffold'")
+                            + "[compare, convert, generate, parameterize, run] but was 'scaffold'")
                     , this.validate("-cmd=scaffold"));
         }
 
