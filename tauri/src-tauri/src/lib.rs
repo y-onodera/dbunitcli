@@ -9,10 +9,13 @@ use std::{
 };
 use tauri::{Manager, WindowEvent};
 use tauri_plugin_cli::CliExt;
-use windows_sys::Win32::System::JobObjects::{
-    AssignProcessToJobObject, CreateJobObjectW, JobObjectExtendedLimitInformation,
-    SetInformationJobObject, JOBOBJECT_EXTENDED_LIMIT_INFORMATION,
-    JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE,
+use windows_sys::Win32::System::{
+    JobObjects::{
+        AssignProcessToJobObject, CreateJobObjectW, JobObjectExtendedLimitInformation,
+        SetInformationJobObject, JOBOBJECT_EXTENDED_LIMIT_INFORMATION,
+        JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE,
+    },
+    Threading::CREATE_NO_WINDOW,
 };
 /// 起動したsidecar。ジョブのハンドルは本体の終了まで保持する（閉じるとOSがsidecarを終了させる）
 struct Sidecar {
@@ -37,10 +40,6 @@ pub fn run() {
             // sidecarのカレントディレクトリは変えない（workspace等の既定値"."の基準になっている）
             let backend = app.path().resource_dir()?.join("backend");
             let mut args = vec![format!("-Djava.home={}", backend.display())];
-
-            let java_tool_options_args = env::var("JAVA_TOOL_OPTIONS")
-                .map(|options| split_java_options(&options))
-                .unwrap_or_default();
 
             match app.cli().matches() {
                 Ok(matches) => {
@@ -76,7 +75,11 @@ pub fn run() {
                 Err(e) => println!("{:?}", e),
             }
 
-            args.extend(java_tool_options_args);
+            args.extend(
+                env::var("JAVA_TOOL_OPTIONS")
+                    .map(|options| split_java_options(&options))
+                    .unwrap_or_default(),
+            );
 
             // 読まないパイプにするとバッファが埋まった時点でsidecarのログ出力がブロックし、処理全体が止まる。
             // devはコンソールへそのまま出し、配布版は捨てる（ログはsidecarのログファイルに残る）
@@ -88,20 +91,16 @@ pub fn run() {
                 }
             };
             let child = Command::new(backend.join("dbunit-cli-sidecar.exe"))
-                .creation_flags(0x08000000) // CREATE_NO_WINDOW
+                .creation_flags(CREATE_NO_WINDOW)
                 .args(args)
                 .stdout(output())
                 .stderr(output())
                 .spawn()
                 .expect("Failed to spawn child process");
             // 本体がクラッシュ・強制終了しても、ジョブのハンドルが閉じられるとOSがsidecarを終了させる
-            let job = match kill_on_close_job(&child) {
-                Ok(job) => Some(job),
-                Err(e) => {
-                    eprintln!("Failed to assign sidecar to job object: {e}");
-                    None
-                }
-            };
+            let job = kill_on_close_job(&child)
+                .inspect_err(|e| eprintln!("Failed to assign sidecar to job object: {e}"))
+                .ok();
             app.manage(Sidecar {
                 child: Mutex::new(child),
                 _job: job,
@@ -137,7 +136,6 @@ fn stop_sidecar(app: &tauri::AppHandle) {
     if let Some(sidecar) = app.try_state::<Sidecar>() {
         if let Ok(mut child) = sidecar.child.lock() {
             let _ = child.kill();
-            let _ = child.wait();
         }
     }
 }
