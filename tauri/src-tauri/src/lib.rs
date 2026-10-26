@@ -1,5 +1,6 @@
 use std::{
     env,
+    io::{Read, Write},
     os::windows::process::CommandExt,
     process::{Command, Stdio},
     sync::mpsc::sync_channel,
@@ -70,6 +71,13 @@ pub fn run() {
                 .stderr(Stdio::piped())
                 .spawn()
                 .expect("Failed to spawn child process");
+            // パイプを読まないとバッファが埋まった時点でsidecarのログ出力がブロックし、処理全体が止まる
+            if let Some(stdout) = child.stdout.take() {
+                drain(stdout, std::io::stdout());
+            }
+            if let Some(stderr) = child.stderr.take() {
+                drain(stderr, std::io::stderr());
+            }
             thread::spawn(move || {
                 while let Ok(signal) = rx.recv() {
                     if signal == -1 {
@@ -106,4 +114,19 @@ fn add_arg(
         };
         args.push(new_arg);
     }
+}
+/// 子プロセスの出力を終わりまで読み続け、outへ転送する。
+/// コンソールの無い配布版ではoutへの書き込みが失敗するが、読み続けることが目的なので無視する
+fn drain<R: Read + Send + 'static, W: Write + Send + 'static>(mut reader: R, mut out: W) {
+    thread::spawn(move || {
+        let mut buf = [0u8; 8192];
+        loop {
+            match reader.read(&mut buf) {
+                Ok(0) | Err(_) => break,
+                Ok(n) => {
+                    let _ = out.write_all(&buf[..n]);
+                }
+            }
+        }
+    });
 }
