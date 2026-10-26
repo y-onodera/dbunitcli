@@ -63,11 +63,20 @@ pub fn run() {
 
             args.extend(java_tool_options_args);
 
+            // 読まないパイプにするとバッファが埋まった時点でsidecarのログ出力がブロックし、処理全体が止まる。
+            // devはコンソールへそのまま出し、配布版は捨てる（ログはsidecarのログファイルに残る）
+            let output = || {
+                if cfg!(debug_assertions) {
+                    Stdio::inherit()
+                } else {
+                    Stdio::null()
+                }
+            };
             let mut child = Command::new("backend/dbunit-cli-sidecar.exe")
                 .creation_flags(0x08000000) // CREATE_NO_WINDOW
                 .args(args)
-                .stdout(Stdio::piped())
-                .stderr(Stdio::piped())
+                .stdout(output())
+                .stderr(output())
                 .spawn()
                 .expect("Failed to spawn child process");
             thread::spawn(move || {
