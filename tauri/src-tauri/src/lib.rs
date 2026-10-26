@@ -1,12 +1,20 @@
 use std::{
-    env,
-    os::windows::process::CommandExt,
-    process::{Command, Stdio},
+    env, io,
+    os::windows::{
+        io::{AsRawHandle, FromRawHandle, OwnedHandle},
+        process::CommandExt,
+    },
+    process::{Child, Command, Stdio},
     sync::mpsc::sync_channel,
     thread,
 };
-use tauri::WindowEvent;
+use tauri::{Manager, WindowEvent};
 use tauri_plugin_cli::CliExt;
+use windows_sys::Win32::System::JobObjects::{
+    AssignProcessToJobObject, CreateJobObjectW, JobObjectExtendedLimitInformation,
+    SetInformationJobObject, JOBOBJECT_EXTENDED_LIMIT_INFORMATION,
+    JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE,
+};
 #[tauri::command]
 fn open_directory(path: String) {
     Command::new("explorer").args([path]).spawn().unwrap();
@@ -19,7 +27,10 @@ pub fn run() {
         .plugin(tauri_plugin_cli::init())
         .plugin(tauri_plugin_shell::init())
         .setup(|app: &mut tauri::App| {
-            let mut args = vec![String::from("-Djava.home=backend")];
+            // 起動時のカレントディレクトリに依存しないよう、同梱リソース（exeと同じディレクトリ）から解決する。
+            // sidecarのカレントディレクトリは変えない（workspace等の既定値"."の基準になっている）
+            let backend = app.path().resource_dir()?.join("backend");
+            let mut args = vec![format!("-Djava.home={}", backend.display())];
 
             let mut java_tool_options_args = vec![];
             if let Ok(java_tool_options) = env::var("JAVA_TOOL_OPTIONS") {
@@ -72,14 +83,24 @@ pub fn run() {
                     Stdio::null()
                 }
             };
-            let mut child = Command::new("backend/dbunit-cli-sidecar.exe")
+            let mut child = Command::new(backend.join("dbunit-cli-sidecar.exe"))
                 .creation_flags(0x08000000) // CREATE_NO_WINDOW
                 .args(args)
                 .stdout(output())
                 .stderr(output())
                 .spawn()
                 .expect("Failed to spawn child process");
+            // 本体がクラッシュ・強制終了しても、ジョブのハンドルが閉じられるとOSがsidecarを終了させる
+            let job = match kill_on_close_job(&child) {
+                Ok(job) => Some(job),
+                Err(e) => {
+                    eprintln!("Failed to assign sidecar to job object: {e}");
+                    None
+                }
+            };
             thread::spawn(move || {
+                // 本体の終了まで保持する（スレッドはウィンドウを閉じるまで終わらない）
+                let _job = job;
                 while let Ok(signal) = rx.recv() {
                     if signal == -1 {
                         child.kill().expect("Failed to stop child process");
@@ -114,5 +135,33 @@ fn add_arg(
             None => format!("{}{}", arg, default_value),
         };
         args.push(new_arg);
+    }
+}
+/// 閉じるとchildを終了させるジョブにchildを入れる。返したハンドルは本体の終了まで保持すること。
+/// 本体のプロセスが終わればOSがハンドルを閉じるため、終了の仕方によらずsidecarが残らない
+fn kill_on_close_job(child: &Child) -> io::Result<OwnedHandle> {
+    // SAFETY: Win32 APIへ渡すポインタ・ハンドルは呼び出しの間だけ有効であればよく、
+    // 作成したジョブのハンドルは直後にOwnedHandleへ移して所有権を一元化する
+    unsafe {
+        let raw = CreateJobObjectW(std::ptr::null(), std::ptr::null());
+        if raw.is_null() {
+            return Err(io::Error::last_os_error());
+        }
+        let job = OwnedHandle::from_raw_handle(raw);
+        let mut info: JOBOBJECT_EXTENDED_LIMIT_INFORMATION = std::mem::zeroed();
+        info.BasicLimitInformation.LimitFlags = JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE;
+        if SetInformationJobObject(
+            job.as_raw_handle(),
+            JobObjectExtendedLimitInformation,
+            &info as *const _ as *const _,
+            std::mem::size_of::<JOBOBJECT_EXTENDED_LIMIT_INFORMATION>() as u32,
+        ) == 0
+        {
+            return Err(io::Error::last_os_error());
+        }
+        if AssignProcessToJobObject(job.as_raw_handle(), child.as_raw_handle()) == 0 {
+            return Err(io::Error::last_os_error());
+        }
+        Ok(job)
     }
 }
