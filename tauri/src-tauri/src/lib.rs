@@ -5,8 +5,7 @@ use std::{
         process::CommandExt,
     },
     process::{Child, Command, Stdio},
-    sync::mpsc::sync_channel,
-    thread,
+    sync::Mutex,
 };
 use tauri::{Manager, WindowEvent};
 use tauri_plugin_cli::CliExt;
@@ -15,28 +14,33 @@ use windows_sys::Win32::System::JobObjects::{
     SetInformationJobObject, JOBOBJECT_EXTENDED_LIMIT_INFORMATION,
     JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE,
 };
+/// 起動したsidecar。ジョブのハンドルは本体の終了まで保持する（閉じるとOSがsidecarを終了させる）
+struct Sidecar {
+    child: Mutex<Child>,
+    _job: Option<OwnedHandle>,
+}
 #[tauri::command]
-fn open_directory(path: String) {
-    Command::new("explorer").args([path]).spawn().unwrap();
+fn open_directory(path: String) -> Result<(), String> {
+    Command::new("explorer")
+        .arg(path)
+        .spawn()
+        .map(|_| ())
+        .map_err(|e| e.to_string())
 }
 pub fn run() {
-    let (tx, rx) = sync_channel::<i64>(1);
     tauri::Builder::default()
         .plugin(tauri_plugin_http::init())
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_cli::init())
-        .plugin(tauri_plugin_shell::init())
         .setup(|app: &mut tauri::App| {
             // 起動時のカレントディレクトリに依存しないよう、同梱リソース（exeと同じディレクトリ）から解決する。
             // sidecarのカレントディレクトリは変えない（workspace等の既定値"."の基準になっている）
             let backend = app.path().resource_dir()?.join("backend");
             let mut args = vec![format!("-Djava.home={}", backend.display())];
 
-            let mut java_tool_options_args = vec![];
-            if let Ok(java_tool_options) = env::var("JAVA_TOOL_OPTIONS") {
-                java_tool_options_args
-                    .extend(java_tool_options.split_whitespace().map(String::from));
-            }
+            let java_tool_options_args = env::var("JAVA_TOOL_OPTIONS")
+                .map(|options| split_java_options(&options))
+                .unwrap_or_default();
 
             match app.cli().matches() {
                 Ok(matches) => {
@@ -83,7 +87,7 @@ pub fn run() {
                     Stdio::null()
                 }
             };
-            let mut child = Command::new(backend.join("dbunit-cli-sidecar.exe"))
+            let child = Command::new(backend.join("dbunit-cli-sidecar.exe"))
                 .creation_flags(0x08000000) // CREATE_NO_WINDOW
                 .args(args)
                 .stdout(output())
@@ -98,25 +102,16 @@ pub fn run() {
                     None
                 }
             };
-            thread::spawn(move || {
-                // 本体の終了まで保持する（スレッドはウィンドウを閉じるまで終わらない）
-                let _job = job;
-                while let Ok(signal) = rx.recv() {
-                    if signal == -1 {
-                        child.kill().expect("Failed to stop child process");
-                        break;
-                    }
-                }
+            app.manage(Sidecar {
+                child: Mutex::new(child),
+                _job: job,
             });
             Ok(())
         })
-        .on_window_event(move |window, event| match event {
-            WindowEvent::Destroyed => {
-                if window.label() == "main" {
-                    tx.send(-1).expect("Failed to stop child process");
-                }
+        .on_window_event(|window, event| {
+            if matches!(event, WindowEvent::Destroyed) && window.label() == "main" {
+                stop_sidecar(window.app_handle());
             }
-            _ => {}
         })
         .invoke_handler(tauri::generate_handler![open_directory])
         .run(tauri::generate_context!())
@@ -129,13 +124,54 @@ fn add_arg(
     arg: &str,
     default_value: &str,
 ) {
-    if let Some(value) = matches.args.get(key).clone() {
+    if let Some(value) = matches.args.get(key) {
         let new_arg = match value.value.as_str() {
             Some(s) => format!("{}{}", arg, s),
             None => format!("{}{}", arg, default_value),
         };
         args.push(new_arg);
     }
+}
+/// 終了処理なので、既に終了していた等で止められなくても何もしない
+fn stop_sidecar(app: &tauri::AppHandle) {
+    if let Some(sidecar) = app.try_state::<Sidecar>() {
+        if let Ok(mut child) = sidecar.child.lock() {
+            let _ = child.kill();
+            let _ = child.wait();
+        }
+    }
+}
+/// JAVA_TOOL_OPTIONSをJVMと同じ規則で分割する。
+/// 空白で区切り、'または"で囲んだ部分は空白を含めて1つの値にする（引用符は取り除く）
+fn split_java_options(options: &str) -> Vec<String> {
+    let mut result = Vec::new();
+    let mut current = String::new();
+    let mut in_token = false;
+    let mut quote = None;
+    for c in options.chars() {
+        match quote {
+            Some(q) if c == q => quote = None,
+            Some(_) => current.push(c),
+            None if c == '\'' || c == '"' => {
+                quote = Some(c);
+                in_token = true;
+            }
+            None if c.is_whitespace() => {
+                if in_token {
+                    result.push(std::mem::take(&mut current));
+                    in_token = false;
+                }
+            }
+            None => {
+                current.push(c);
+                in_token = true;
+            }
+        }
+    }
+    if in_token {
+        result.push(current);
+    }
+    result
 }
 /// 閉じるとchildを終了させるジョブにchildを入れる。返したハンドルは本体の終了まで保持すること。
 /// 本体のプロセスが終わればOSがハンドルを閉じるため、終了の仕方によらずsidecarが残らない
@@ -163,5 +199,30 @@ fn kill_on_close_job(child: &Child) -> io::Result<OwnedHandle> {
             return Err(io::Error::last_os_error());
         }
         Ok(job)
+    }
+}
+#[cfg(test)]
+mod tests {
+    use super::split_java_options;
+
+    #[test]
+    fn split_java_options_splits_by_whitespace() {
+        assert_eq!(
+            split_java_options("  -Xmx1g \t-Da=b  "),
+            vec!["-Xmx1g", "-Da=b"]
+        );
+    }
+
+    #[test]
+    fn split_java_options_keeps_quoted_whitespace() {
+        assert_eq!(
+            split_java_options(r#"-Dx="C:\Program Files\a" '-Dy=a b' -Dz=c"#),
+            vec![r"-Dx=C:\Program Files\a", "-Dy=a b", "-Dz=c"]
+        );
+    }
+
+    #[test]
+    fn split_java_options_empty() {
+        assert!(split_java_options("   ").is_empty());
     }
 }
