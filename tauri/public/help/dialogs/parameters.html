@@ -44,7 +44,7 @@
   <p>-P の値はパラメータごとに保存されます。同じ値を複数のパラメータや環境で切り替えたい場合は Env を使います（<a href="#env-vs-p">Env との使い分け</a> を参照）。CLI から実行する場合は、引数に <code>-Pキー=値</code> を付けて渡します。</p>
 
   <h2 id="reference">値の参照方法</h2>
-  <p>参照する場所によって書き方が変わります。テンプレートの区切り文字は既定の <code>$</code>、変数をまとめる属性名（templateParameterAttribute）は既定の <code>param</code> の場合の例です。</p>
+  <p>参照する場所によって書き方が変わります。テンプレートの区切り文字はデフォルトの <code>$</code>、変数をまとめる属性名（templateParameterAttribute）はデフォルトの <code>param</code> の場合の例です。</p>
   <table>
     <tr><th>使う場所</th><th>書き方</th></tr>
     <tr><td>SQL ファイル（srcType=sql / csvq、Run の sql）</td><td><code>$param.キー$</code>（templateParameterAttribute を空にした場合は <code>$キー$</code>）</td></tr>
@@ -65,7 +65,7 @@ $if(param.orderDate)$WHERE ORDER_DATE = '$param.orderDate$'$endif$</pre>
   <p>Env（<a href="workspace.html">Workspace</a> の ChangeWorkspace で選ぶ環境変数ファイル）と -P は、どちらも値を外から渡す仕組みですが、適用範囲と効く場所が違います。</p>
   <table>
     <tr><th>観点</th><th>Env（<code>${env.変数名}</code>）</th><th>Parameters（<code>-Pキー=値</code>）</th></tr>
-    <tr><td>定義する場所</td><td>Workspace 内の .properties ファイル（既定は <code>env.properties</code>）</td><td>Edit Parameters (-P) ダイアログ。Save で <code>option/&lt;command&gt;/&lt;name&gt;.txt</code> に保存</td></tr>
+    <tr><td>定義する場所</td><td>Workspace 内の .properties ファイル（デフォルトは <code>env.properties</code>）</td><td>Edit Parameters (-P) ダイアログ。Save で <code>option/&lt;command&gt;/&lt;name&gt;.txt</code> に保存</td></tr>
     <tr><td>適用範囲</td><td><strong>Workspace 全体</strong>。選んだ Env ファイルが、その Workspace のすべてのパラメータの実行に使われる</td><td><strong>1 ファイル（そのパラメータ）だけ</strong></td></tr>
     <tr><td>切り替え方</td><td>ChangeWorkspace で Env ファイルを選び直す。パラメータは書き換えない</td><td>パラメータごとに値を編集して Save する</td></tr>
     <tr><td>オプションの置換</td><td><strong>する</strong>。どのオプションの値でも、<code>${env.変数名}</code> を実行前に置き換える</td><td><strong>しない</strong>。例外は Generate の resultPath と、Parameterize の cmd / cmdParam / テンプレート（テンプレートとして処理されるため）</td></tr>
@@ -76,7 +76,7 @@ $if(param.orderDate)$WHERE ORDER_DATE = '$param.orderDate$'$endif$</pre>
 
   <h3>どちらを使うか</h3>
   <ul>
-    <li><strong>環境ごとに違う値</strong>（接続先・ユーザー・スキーマ・出力先のフォルダなど）で、オプションに直接書く値 → Env</li>
+    <li><strong>環境ごとに違う値</strong>（接続先・ユーザ・スキーマ・出力先のディレクトリなど）で、オプションに直接書く値 → Env</li>
     <li><strong>そのパラメータの実行条件</strong>（対象日・ID・テーブル名など）で、SQL やテンプレートの中で使う値 → -P</li>
     <li>環境ごとに違う値を SQL やテンプレートの中で使いたい → 両方を組み合わせて、-P の値に Env を書く（例：<code>-PorderDate=${env.orderDate}</code>）。-P の値も引数の一部なので、実行前に Env の値に置き換わってから SQL やテンプレートに渡される</li>
   </ul>

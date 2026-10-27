@@ -22,7 +22,7 @@
 <body>
   <p><a href="../index.html">&larr; ヘルプ一覧に戻る</a></p>
   <h1>Dataset Settings</h1>
-  <p>テーブルごとのメタデータ（主キー・カラム選択・ソート・フィルタなど）を定義する設定ファイルです。<code>settings</code> 配列で個別のテーブル設定を、<code>commonSettings</code> 配列で複数テーブル共通の設定を記述します。各フィールドの UI 操作・記述例や JeXL 式の書き方は <a href="dataset-setting.html">Dataset Setting</a> を参照してください。</p>
+  <p>テーブルごとのメタデータ（主キー・カラム選択・ソート・フィルタなど）を定義する設定ファイルです。<code>settings</code> 配列で個別のテーブル設定を、<code>commonSettings</code> 配列で複数テーブル共通の設定を記述します。各フィールドの UI 操作・記述例や JEXL 式の書き方は <a href="dataset-setting.html">Dataset Setting</a> を参照してください。</p>
 
   <h2>settings のフィールド</h2>
   <p>各フィールドの詳細は <a href="dataset-setting.html">Dataset Setting</a> を参照してください。</p>
@@ -60,16 +60,16 @@
   <h3>Additional Columns（追加カラム）</h3>
   <table>
     <tr><th>フィールド</th><th>説明</th></tr>
-    <tr><td>string</td><td>文字列型の追加カラム。値は JeXL 式（カラム名をキーとするオブジェクト）</td></tr>
-    <tr><td>number</td><td>数値型の追加カラム。値は JeXL 式（カラム名をキーとするオブジェクト）</td></tr>
-    <tr><td>boolean</td><td>真偽値型の追加カラム。値は JeXL 式（カラム名をキーとするオブジェクト）</td></tr>
-    <tr><td>sqlFunction</td><td>関数表現による追加カラム。複雑なロジックを JeXL 関数として定義</td></tr>
+    <tr><td>string</td><td>文字列型の追加カラム。値は JEXL 式（カラム名をキーとするオブジェクト）</td></tr>
+    <tr><td>number</td><td>数値型の追加カラム。値は JEXL 式（カラム名をキーとするオブジェクト）</td></tr>
+    <tr><td>boolean</td><td>真偽値型の追加カラム。値は JEXL 式（カラム名をキーとするオブジェクト）</td></tr>
+    <tr><td>sqlFunction</td><td>関数表現による追加カラム。複雑なロジックを JEXL 関数として定義</td></tr>
   </table>
 
   <h3>Rows（行フィルタ）</h3>
   <table>
     <tr><th>フィールド</th><th>説明</th></tr>
-    <tr><td>filter</td><td>データ選択条件の JeXL 式（複数指定時は AND 扱い）</td></tr>
+    <tr><td>filter</td><td>データ選択条件の JEXL 式（複数指定時は AND 扱い）</td></tr>
     <tr><td>distinct</td><td>重複除去フラグ</td></tr>
   </table>
 

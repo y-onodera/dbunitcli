@@ -145,7 +145,7 @@ $rows:{row | $row.ID$: $row.NAME$ ($row.STATUS$)}; separator="\n"$</pre>
   <table>
     <tr><th>generateType</th><th>組み込みの設定ファイル</th><th>条件別ループとしての使われ方</th></tr>
     <tr><td>ddl</td><td><code>sql/ddlSettings.json</code></td><td>全カラムを <code>rows</code> で繰り返して列定義を出し、<code>filter: ["IS_PK"]</code> で作った <code>PK</code> サブテーブルを <code>subTable.PK.rows</code> で繰り返して <code>PRIMARY KEY (...)</code> を出す（<strong>全行ループと主キーのみループの 2 回</strong>）。あわせて空欄の null 化と <code>NULLABLE</code> / <code>IS_PK</code> の真偽値化も行う</td></tr>
-    <tr><td>xlsxSchema</td><td><code>xlsxschema/xlsxSchemaSettings.json</code></td><td><code>rows</code>（ヘッダー・列位置）に加え、<code>PK</code>（主キーのみ。<code>breakKey</code> 用）と <code>CELLS</code>（セル位置用。<code>cellAddress</code> 用）の 2 つのサブテーブルを作り、JSON の項目ごとにそれぞれ繰り返す</td></tr>
+    <tr><td>xlsxSchema</td><td><code>xlsxschema/xlsxSchemaSettings.json</code></td><td><code>rows</code>（ヘッダ・列位置）に加え、<code>PK</code>（主キーのみ。<code>breakKey</code> 用）と <code>CELLS</code>（セル位置用。<code>cellAddress</code> 用）の 2 つのサブテーブルを作り、JSON の項目ごとにそれぞれ繰り返す</td></tr>
     <tr><td>javaBean</td><td><code>javabean/javaBeanSettings.json</code></td><td>サブテーブルは作らず、全テーブルに共通で派生列（<code>className</code> / <code>javaType</code> / <code>isBoolean</code> など）を足して、テンプレートの判定を不要にする</td></tr>
     <tr><td>fixedColumnDef</td><td>（組み込みなし。Scaffold のサンプル <code>fixedcolumndef/fixedColumnDefSettings.json</code>）</td><td>テンプレートが読む列（<code>name</code> / <code>length</code> / <code>align</code> / <code>pad</code>）をそのまま通すだけのサンプル。他のデータソースの列名に合わせて書き換える起点にする</td></tr>
   </table>
@@ -265,7 +265,7 @@ subTable（空。EMPLOYEE 自身は含まれず、PK も存在しない）</pre>
     <li><strong>空欄の判定ができない</strong>: <code>DECIMAL_DIGITS</code> の空文字が値ありと扱われ、<code>INTEGER(10,)</code> や <code>VARCHAR(100,)</code> のように不正な型指定が出力されます。</li>
   </ul>
 
-  <h2>例 2: 組み込みを改造する（コメントの既定値を追加）</h2>
+  <h2>例 2: 組み込みを改造する（コメントのデフォルト値を追加）</h2>
   <p>組み込みの DDL では、備考（<code>REMARKS</code>）が空のカラムは <code>COMMENT ON COLUMN ... IS ''</code> と空のコメントになります。ここでは、備考が空なら<strong>カラム名をコメントにする</strong>ように、unitSetting とテンプレートの両方に手を加えます。</p>
   <p><strong>1. unitSetting: 判定を設定側に追加する</strong> — <code>ddlSettings.json</code> の最初の <code>separate</code> の <code>string</code> に、<code>COMMENT_TEXT</code> を 1 行足します。</p>
 <pre>"string": {
@@ -295,7 +295,7 @@ COMMENT ON COLUMN EMPLOYEE.SALARY IS 'SALARY';</pre></td>
   <p>手を加える範囲の目安は次のとおりです。</p>
   <ul>
     <li>表示を変えるだけ（文言・並び・インデント）: テンプレートだけを編集する。</li>
-    <li>判定や変換を足したい（空欄の既定値、型の読み替え、条件分岐の元になるフラグ）: unitSetting に <code>string</code> / <code>boolean</code> を足し、テンプレートで参照する。</li>
+    <li>判定や変換を足したい（空欄のデフォルト値、型の読み替え、条件分岐の元になるフラグ）: unitSetting に <code>string</code> / <code>boolean</code> を足し、テンプレートで参照する。</li>
     <li>一部の行を別に扱いたい（主キーだけ、特定の列だけ）: unitSetting の <code>separate</code> + <code>filter</code> でサブテーブルを作り、テンプレートで <code>subTable.{名前}.rows</code> を参照する。</li>
   </ul>
 </body>

@@ -33,7 +33,7 @@
     <tr><td>parallel</td><td>同時に実行するコマンド数。<code>2</code> 以上でパラメータ（unit の単位）ごとのコマンドを並列に実行する（実行順は不定）。空欄または <code>1</code> なら 1 件ずつ順に実行（デフォルト: 空欄＝逐次）。詳細は下記「並列実行」を参照</td></tr>
     <tr><td>cmd</td><td>（必須）データ駆動で実行する対象コマンド（<a href="compare.html">Compare</a> / <a href="convert.html">Convert</a> / <a href="generate.html">Generate</a> など）</td></tr>
     <tr><td>cmdParam</td><td>コマンド用パラメータファイル。ファイル名はパラメータデータセットから動的に決定</td></tr>
-    <tr><td>template</td><td>既定のテンプレートファイル。cmdParam とは同時に指定できない（両方指定すると実行時にエラー）</td></tr>
+    <tr><td>template</td><td>デフォルトのテンプレートファイル。cmdParam とは同時に指定できない（両方指定すると実行時にエラー）</td></tr>
     <tr><td>paramData</td><td>パラメータデータセットのソース</td></tr>
     <tr><td>templateOption</td><td><a href="../sections/template.html">テンプレートエンジン</a>のオプション</td></tr>
   </table>
@@ -84,7 +84,7 @@ data/old/products,data/new/products,settings/products.json</pre>
   <p><code>paramData</code> の各行（<code>OLD_DIR</code>・<code>NEW_DIR</code>・<code>SETTING</code>）が <code>$param.列名$</code> としてテンプレートに展開され、行数分だけ Compare が実行されます。</p>
 
   <h3 id="example-cmdparam">cmdParam でパラメータファイルを動的に切り替える</h3>
-  <p>パラメータ CSV の列値でコマンドパラメータファイルのパスを動的に決定する例です。<code>parameterize</code> を有効にすると <code>cmdParam</code> の文字列もテンプレートとして展開されます。</p>
+  <p>パラメータ CSV の列値でコマンドパラメータファイルのパスを動的に決定する例です。<code>parameterize</code> を ON にすると <code>cmdParam</code> の文字列もテンプレートとして展開されます。</p>
   <p><code>paramData</code> に読み込む CSV（例: <code>params/targets.csv</code>）:</p>
   <pre>TARGET
 orders

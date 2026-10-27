@@ -22,7 +22,7 @@
 <body>
   <p><a href="../index.html">&larr; ヘルプ一覧に戻る</a></p>
   <h1>Workspace</h1>
-  <p>Workspace は、パラメータやリソースファイルを置く作業ディレクトリです。ヘッダーの ChangeWorkspace ボタンからダイアログを開いて切り替えます。このページでは、Workspace を選んでからコマンドを作り、保存し、再利用するまでの流れを説明します。</p>
+  <p>Workspace は、パラメータやリソースファイルを置く作業ディレクトリです。ヘッダの ChangeWorkspace ボタンからダイアログを開いて切り替えます。このページでは、Workspace を選んでからコマンドを作り、保存し、再利用するまでの流れを説明します。</p>
 
   <h2 id="toc">目次</h2>
   <ol>
@@ -49,13 +49,13 @@
   <h2 id="flow">基本の流れ</h2>
 
   <h3 id="step-workspace">1. Workspace を選ぶ</h3>
-  <p>ヘッダーの ChangeWorkspace ボタンでダイアログを開き、Workspace を選んで <code>confirm</code> を押します。Dataset Base / Result Base / Env は空欄のままでもかまいません（それぞれ Workspace、Workspace、<code>env.properties</code> になります）。切り替えると、サイドバーのパラメータ一覧と各設定ダイアログの内容が、新しい Workspace のものに変わります。各項目の詳細は <a href="#fields">ChangeWorkspace の入力項目</a> を参照してください。</p>
+  <p>ヘッダの ChangeWorkspace ボタンでダイアログを開き、Workspace を選んで <code>confirm</code> を押します。Dataset Base / Result Base / Env は空欄のままでもかまいません（それぞれ Workspace、Workspace、<code>env.properties</code> になります）。切り替えると、サイドバーのパラメータ一覧と各設定ダイアログの内容が、新しい Workspace のものに変わります。各項目の詳細は <a href="#fields">ChangeWorkspace の入力項目</a> を参照してください。</p>
 
   <h3 id="step-command">2. コマンドを選ぶ</h3>
   <p>サイドバーでコマンド名（Convert / Compare / Generate / Run / Parameterize）をクリックすると、保存済みパラメータの一覧が開きます。</p>
   <ul>
     <li>新しく作る場合は ＋ を押します。<code>new item</code> という名前のパラメータが作られます</li>
-    <li>既存のものを使う場合はパラメータ名をクリックします。フォームに内容が表示され、ヘッダー右側に <code>コマンド: パラメータ名</code> が表示されます</li>
+    <li>既存のものを使う場合はパラメータ名をクリックします。フォームに内容が表示され、ヘッダ右側に <code>コマンド: パラメータ名</code> が表示されます</li>
     <li>既存のパラメータを元に別のものを作る場合は、⚙ の Copy で複製してから開きます</li>
   </ul>
 
@@ -99,9 +99,9 @@
   <p>パラメータの中ではパスを相対パスで書き、環境で変わる値を <code>${env.変数名}</code> にしておくと、パラメータを書き換えずに ChangeWorkspace の設定だけで使い回せます。</p>
   <table>
     <tr><th>切り替えるもの</th><th>向いている場面</th><th>パラメータの書き方</th></tr>
-    <tr><td>Dataset Base</td><td>入力データだけが違う（例：月ごとのデータフォルダ、テスト用と本番用の入力）</td><td>入力ファイル（src など）を相対パスで書く</td></tr>
+    <tr><td>Dataset Base</td><td>入力データだけが違う（例：月ごとのデータディレクトリ、テスト用と本番用の入力）</td><td>入力ファイル（src など）を相対パスで書く</td></tr>
     <tr><td>Result Base</td><td>出力先を分けたい（例：環境ごと、実行日ごと）</td><td>出力先（result など）を相対パスで書く</td></tr>
-    <tr><td>Env</td><td>接続先・ユーザー・スキーマなどの値が環境ごとに違う（例：開発 DB とステージング DB）</td><td>値を <code>${env.変数名}</code> で書き、環境ごとの .properties を用意する</td></tr>
+    <tr><td>Env</td><td>接続先・ユーザ・スキーマなどの値が環境ごとに違う（例：開発 DB とステージング DB）</td><td>値を <code>${env.変数名}</code> で書き、環境ごとの .properties を用意する</td></tr>
     <tr><td>Workspace</td><td>パラメータやリソース一式を別にしたい（例：プロジェクトごと）</td><td>—（パラメータ・設定ファイルごと切り替わる）</td></tr>
   </table>
   <p>例：開発環境で作ったパラメータをステージングで使う場合</p>

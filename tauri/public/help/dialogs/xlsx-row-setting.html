@@ -22,18 +22,18 @@
 <body>
   <p><a href="../index.html">&larr; ヘルプ一覧に戻る</a></p>
   <h1>Xlsx Row Setting</h1>
-  <p>Xlsx シートから行方向に整列したデータをテーブルとして抽出するための設定を編集するダイアログです。全体構成は <a href="xlsx-schema.html">Xlsx Schema</a> を参照してください。</p>
+  <p>Excel シートから行方向に整列したデータをテーブルとして抽出するための設定を編集するダイアログです。全体構成は <a href="xlsx-schema.html">Xlsx Schema</a> を参照してください。</p>
 
   <h2>設定項目</h2>
   <table>
     <tr><th>フィールド</th><th>説明</th></tr>
-    <tr><td>sheetName</td><td>抽出対象の Xlsx シート名。データセットがロード済みの場合、候補がデータリストから選択できます。</td></tr>
-    <tr><td>tableName</td><td>抽出結果に付与する論理テーブル名。</td></tr>
+    <tr><td>sheetName</td><td>抽出対象の Excel シート名。データセットがロード済みの場合、候補がデータリストから選択できます。</td></tr>
+    <tr><td>tableName</td><td>抽出結果に付与する論理テーブル名</td></tr>
     <tr><td>header</td><td>カラム名の並び。カンマ区切りで指定し、<code>columnIndex</code> で指定した列の順序と対応させます。</td></tr>
     <tr><td>dataStart</td><td>データ開始位置をセルアドレスで指定します（例: <code>A2</code>）。ヘッダ行の直下など、最初のレコードがあるセルを指定します。</td></tr>
     <tr><td>columnIndex</td><td>各カラムが格納されている列をカンマ区切りで指定します（例: <code>A,B,D</code>）。<code>header</code> と同じ並びで対応させます。</td></tr>
     <tr><td>breakKey</td><td>連続データの区切り判定に利用するカラム名をカンマ区切りで指定します。指定したキーで値が変わったタイミングをレコード境界とみなします。</td></tr>
-    <tr><td>addFileInfo</td><td>元ファイル名などのファイル情報カラムを結果に追加するかどうか。</td></tr>
+    <tr><td>addFileInfo</td><td>元ファイル名などのファイル情報カラムを結果に追加するかどうか</td></tr>
   </table>
 
   <h2>記述例</h2>
@@ -51,7 +51,7 @@
   <ol>
     <li><code>sheetName</code> と <code>tableName</code> の両方が入力されていない行は保存対象から除外されます。</li>
     <li><code>header</code> と <code>columnIndex</code> は要素数を一致させてください。</li>
-    <li><code>dataStart</code> は Xlsx のセルアドレス表記（<code>A1</code> 形式）で指定します。</li>
+    <li><code>dataStart</code> は Excel のセルアドレス表記（<code>A1</code> 形式）で指定します。</li>
   </ol>
 </body>
 </html>

@@ -25,14 +25,14 @@
   <p>各コマンドで「データセットの入力」を指定するための共通フォームです。<a href="../commands/compare.html">Compare</a> の <code>oldData</code> / <code>newData</code> / <code>expectData</code>、<a href="../commands/convert.html">Convert</a> / <a href="../commands/generate.html">Generate</a> / <a href="../commands/run.html">Run</a> の <code>srcData</code>、<a href="../commands/parameterize.html">Parameterize</a> の <code>paramData</code> は、いずれもこのフォームによって構成されます。</p>
   <p>1 つの入力は、以下の 5 つの領域から構成されます。</p>
   <ul>
-    <li><strong>Source Type 選択</strong> — 入力の形式（CSV / Table / SQL / Regex / Fixed / Xls / Xlsx）</li>
+    <li><strong><code>srcType</code> 選択</strong> — 入力の形式（CSV / Table / SQL / Regex / Fixed / Xls / Xlsx）</li>
     <li><strong>Source</strong> — 入力元ファイル・SQL、文字コード</li>
     <li><strong><a href="traversal.html">Traversal</a></strong> — ディレクトリを <code>src</code> に指定した際の走査条件</li>
     <li><strong><a href="data-load.html">Data Load</a></strong> — ヘッダ・開始行・メタデータなど、読み込み時の挙動</li>
     <li><strong>Setting</strong> — Dataset Settings ファイルによるテーブル単位のメタデータ指定</li>
   </ul>
 
-  <h2>Source Type 選択</h2>
+  <h2><code>srcType</code> 選択</h2>
   <p>入力データの形式を選択します。選択した形式に応じて、固有の設定項目がフォーム下部に表示されます。以下の表は早見表です。各形式の詳細（<code>src</code> の意味・固有オプション・データイメージ例）は、形式名のリンク先の個別ページを参照してください。</p>
   <table>
     <tr><th>形式</th><th>説明</th></tr>
@@ -53,7 +53,7 @@
   <p>入力元となるファイルやクエリ、補助的なオプションを指定します。</p>
   <table>
     <tr><th>項目</th><th>説明</th></tr>
-    <tr><td>src</td><td>入力元のパス。Source Type によって意味が異なる: ファイル・ディレクトリ（<code>csv</code> / <code>fixed</code> / <code>reg</code> / <code>xls</code> / <code>xlsx</code> / <code>file</code> / <code>dir</code>）、SQL ファイル（<code>sql</code> / <code>csvq</code>）、テーブル名リストファイル（<code>table</code>）</td></tr>
+    <tr><td>src</td><td>入力元のパス。<code>srcType</code> によって意味が異なる: ファイル・ディレクトリ（<code>csv</code> / <code>fixed</code> / <code>reg</code> / <code>xls</code> / <code>xlsx</code> / <code>file</code> / <code>dir</code>）、SQL ファイル（<code>sql</code> / <code>csvq</code>）、テーブル名リストファイル（<code>table</code>）</td></tr>
     <tr><td>encoding</td><td>テキスト系入力の文字コード</td></tr>
     <tr><td>jdbcProperties</td><td>Table / SQL を選んだ場合の <a href="jdbc.html">JDBC 接続情報</a>（URL・ユーザ・パスワードなど）</td></tr>
     <tr><td>templateGroup</td><td><a href="template.html">テンプレート処理</a>を行う場合の補助設定</td></tr>

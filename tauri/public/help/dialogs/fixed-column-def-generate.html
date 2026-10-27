@@ -28,13 +28,13 @@
     <li>元データセットのカラム名を並び順どおりに取り込み、カラムごとの幅・寄せ方向・パディング文字の定義を一括で作成する。</li>
     <li>生成結果を編集ダイアログで確認し、カラムごとの幅などを修正して名前を付けて保存する。</li>
   </ul>
-  <p>生成直後は全カラムが同じ既定値（幅 10・左寄せ・空白パディング）になるため、実際の固定長レイアウトに合わせて各カラムの幅を手直しする使い方を想定しています。</p>
+  <p>生成直後は全カラムが同じデフォルト値（幅 10・左寄せ・空白パディング）になるため、実際の固定長レイアウトに合わせて各カラムの幅を手直しする使い方を想定しています。</p>
 
   <h2>入力</h2>
-  <p>雛型の元にするデータセットを、共通の <a href="../sections/dataset-load-form.html">Dataset Load Form</a> で指定します。ソースタイプの選択に応じて入力項目が切り替わります。データ行は読み込まず、カラム名のみを利用します。</p>
+  <p>雛型の元にするデータセットを、共通の <a href="../sections/dataset-load-form.html">Dataset Load Form</a> で指定します。<code>srcType</code> の選択に応じて入力項目が切り替わります。データ行は読み込まず、カラム名のみを利用します。</p>
   <table>
     <tr><th>項目</th><th>説明</th></tr>
-    <tr><td>srcData</td><td>雛型の元にするデータセット。ソースタイプ・パス・エンコーディング・ヘッダ指定などを <a href="../sections/dataset-load-form.html">Dataset Load Form</a> と同じ要領で指定します。</td></tr>
+    <tr><td>srcData</td><td>雛型の元にするデータセット。<code>srcType</code>・パス・文字コード・ヘッダ指定などを <a href="../sections/dataset-load-form.html">Dataset Load Form</a> と同じ要領で指定します。</td></tr>
   </table>
 
   <h2>操作の流れ</h2>

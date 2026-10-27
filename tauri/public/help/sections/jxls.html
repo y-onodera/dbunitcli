@@ -26,7 +26,7 @@
   <h2 id="section-fields">設定項目</h2>
   <p>フォームの <strong>jxls option</strong> 展開ボタンから設定します。</p>
   <table>
-    <tr><th>項目</th><th>説明</th><th>既定</th></tr>
+    <tr><th>項目</th><th>説明</th><th>デフォルト</th></tr>
     <tr><td>templateParameterAttribute</td><td>テンプレート内でデータ行にアクセスする属性名。例えば <code>param</code> を指定すると <code>param.columnName</code> で参照できます。空にするとカラム名で直接参照します</td><td>param</td></tr>
     <tr><td>formulaProcess</td><td>（xlsx のみ）数式セルを処理するか。<code>false</code> にすると低メモリで動作しますが、行追加時にセル参照が更新されません</td><td>true</td></tr>
     <tr><td>evaluateFormulas</td><td>Excel 数式を評価するか</td><td>true</td></tr>
@@ -36,7 +36,7 @@
   </table>
 
   <h2 id="section-template">テンプレートの書き方</h2>
-  <p>Excel のセルコメントにディレクティブを記述します。各行のデータは <code>templateParameterAttribute</code> で指定した名前のオブジェクトとして参照します（既定: <code>param</code>）。</p>
+  <p>Excel のセルコメントにディレクティブを記述します。各行のデータは <code>templateParameterAttribute</code> で指定した名前のオブジェクトとして参照します（デフォルト: <code>param</code>）。</p>
   <pre>セル A1 のコメント:
   jx:each(items="items" var="param" lastCell="C1")
 

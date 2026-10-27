@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8" />
-  <title>ヘルプ - Source Type: csv</title>
+  <title>ヘルプ - srcType: csv</title>
   <style>
     body { font-family: system-ui, sans-serif; margin: 2rem; color: #1f2937; line-height: 1.6; }
     h1 { font-size: 1.5rem; border-bottom: 2px solid #4f46e5; padding-bottom: 0.5rem; }
@@ -21,7 +21,7 @@
 </head>
 <body>
   <p><a href="../../dataset-load-form.html">&larr; Dataset Load Form に戻る</a></p>
-  <h1>Source Type: csv</h1>
+  <h1>srcType: csv</h1>
   <p><strong>src の意味:</strong> CSV / TSV ファイル、または複数 CSV を含むディレクトリ。</p>
   <p><strong>テーブル名:</strong> 拡張子を除いたファイル名。</p>
   <p><strong>固有オプション:</strong></p>
@@ -29,7 +29,7 @@
     <li><code>delimiter</code> — 区切り文字を 1 文字で指定します。デフォルトは <code>,</code>（カンマ）。タブ・改行など制御文字はエスケープ記法で指定可能で、<code>\b</code> / <code>\t</code> / <code>\n</code> / <code>\r</code> / <code>\f</code> がサポートされます。</li>
     <li><code>ignoreQuoted</code> — 引用符（<code>"</code>）の扱いを切り替えます。デフォルトは OFF。
       <ul>
-        <li>OFF（既定）: 引用符をクォート文字として扱う。フィールドを囲む <code>"</code> は除去され、引用符内の区切り文字はフィールドの一部となる</li>
+        <li>OFF（デフォルト）: 引用符をクォート文字として扱う。フィールドを囲む <code>"</code> は除去され、引用符内の区切り文字はフィールドの一部となる</li>
         <li>ON: 引用符を特別扱いせず、ただの文字として保持する</li>
       </ul>
       値に区切り文字や改行を含む可能性がある通常の CSV では OFF のままにしてください。ON は、引用符をリテラルとして保持したい特殊ファイル向けです。
@@ -66,7 +66,7 @@ key,column1,column2
 1,"a,b",3
 2,"あいうえお",5
 
-ignoreQuoted = OFF (既定):
+ignoreQuoted = OFF (デフォルト):
   カラム:     [key, column1, column2]
   データ行:
     [1, a,b,           3]        (外側の " は除去、内側のカンマは値の一部)

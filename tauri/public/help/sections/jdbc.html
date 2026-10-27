@@ -22,19 +22,19 @@
 <body>
   <p><a href="../index.html">&larr; ヘルプ一覧に戻る</a></p>
   <h1>JDBC</h1>
-  <p>データベースへ接続するための設定を指定します。入力は <a href="dataset-load-form.html">Dataset Load Form</a> の Source Type で指定し、以下の場面で必要になります。</p>
+  <p>データベースへ接続するための設定を指定します。入力は <a href="dataset-load-form.html">Dataset Load Form</a> の <code>srcType</code> で指定し、以下の場面で必要になります。</p>
   <ul>
-    <li><a href="dataset-load-form/types/table.html">Source Type = table</a>（テーブル名リストから読み込む）</li>
-    <li><a href="dataset-load-form/types/sql.html">Source Type = sql</a>（SQL クエリ結果を読み込む）</li>
-    <li>Result Type = table（<a href="../commands/compare.html">Compare</a> / <a href="../commands/convert.html">Convert</a> / <a href="../commands/generate.html">Generate</a> の結果をテーブルに出力）</li>
-    <li><a href="../commands/run.html">Run</a> の Script Type = sql（SQL スクリプトを DB で実行）</li>
+    <li><a href="dataset-load-form/types/table.html"><code>srcType</code> = table</a>（テーブル名リストから読み込む）</li>
+    <li><a href="dataset-load-form/types/sql.html"><code>srcType</code> = sql</a>（SQL クエリ結果を読み込む）</li>
+    <li><code>resultType</code> = table（<a href="../commands/compare.html">Compare</a> / <a href="../commands/convert.html">Convert</a> / <a href="../commands/generate.html">Generate</a> の結果をテーブルに出力）</li>
+    <li><a href="../commands/run.html">Run</a> の <code>scriptType</code> = sql（SQL スクリプトを DB で実行）</li>
   </ul>
 
   <h2 id="section-fields">設定項目</h2>
   <p>フォームの <code>jdbc option</code> 展開ボタンから設定します。各項目は個別に入力しても、<code>jdbcProperties</code> に保存済みの <code>.properties</code> ファイルを選んでも構いません。両方が指定された場合、<strong><code>jdbcUrl</code> / <code>jdbcUser</code> / <code>jdbcPass</code> が <code>jdbcProperties</code> の同名キーを上書き</strong>します。</p>
   <table>
     <tr><th>項目</th><th>説明</th></tr>
-    <tr><td>jdbcProperties</td><td>接続情報を記述した <code>.properties</code> ファイルのパス。中身は <code>url=</code> / <code>user=</code> / <code>pass=</code> の 3 行。ワークスペースの <code>jdbc/</code> ディレクトリ配下を既定の参照先とします。</td></tr>
+    <tr><td>jdbcProperties</td><td>接続情報を記述した <code>.properties</code> ファイルのパス。中身は <code>url=</code> / <code>user=</code> / <code>pass=</code> の 3 行。ワークスペースの <code>jdbc/</code> ディレクトリ配下をデフォルトの参照先とします。</td></tr>
     <tr><td>jdbcUrl</td><td>JDBC 接続 URL（例: <code>jdbc:postgresql://localhost:5432/mydb</code>）。<code>jdbcProperties</code> の <code>url</code> を上書きします。</td></tr>
     <tr><td>jdbcUser</td><td>ログインユーザ名。<code>jdbcProperties</code> の <code>user</code> を上書きします。</td></tr>
     <tr><td>jdbcPass</td><td>ログインパスワード。<code>jdbcProperties</code> の <code>pass</code> を上書きします。</td></tr>
@@ -50,7 +50,7 @@ pass=app_password</pre>
   <h2 id="section-url-builder">JDBC URL Builder</h2>
   <p><code>jdbcUrl</code> テキストボックス横の編集ボタンから開くダイアログです。代表的な RDB の URL テンプレートに従って URL を組み立てます。Host / Port / Service Name (Database Name) を入力すると、下部の Preview に完成 URL が表示され、Apply で <code>jdbcUrl</code> に反映されます。</p>
   <table>
-    <tr><th>Database</th><th>既定ポート</th><th>URL テンプレート</th></tr>
+    <tr><th>Database</th><th>デフォルトポート</th><th>URL テンプレート</th></tr>
     <tr><td>oracle</td><td>1521</td><td>jdbc:oracle:thin:@//{host}:{port}/{serviceName}</td></tr>
     <tr><td>postgres</td><td>5432</td><td>jdbc:postgresql://{host}:{port}/{serviceName}</td></tr>
     <tr><td>h2</td><td>9092</td><td>jdbc:h2:tcp://{host}:{port}/{serviceName}</td></tr>

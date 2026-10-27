@@ -32,10 +32,10 @@
   <p>テーブルが多いデータセットでも、手入力せずに設定ファイルの骨組みを用意できます。生成後は、実際に必要な設定（除外カラム・ソート・行フィルタなど）を追記する使い方を想定しています。</p>
 
   <h2>入力</h2>
-  <p>雛型の元にするデータセットを、共通の <a href="../sections/dataset-load-form.html">Dataset Load Form</a> で指定します。ソースタイプの選択に応じて入力項目が切り替わります。データ行は読み込まず、テーブル名・カラム名・主キーのメタデータのみを利用します。</p>
+  <p>雛型の元にするデータセットを、共通の <a href="../sections/dataset-load-form.html">Dataset Load Form</a> で指定します。<code>srcType</code> の選択に応じて入力項目が切り替わります。データ行は読み込まず、テーブル名・カラム名・主キーのメタデータのみを利用します。</p>
   <table>
     <tr><th>項目</th><th>説明</th></tr>
-    <tr><td>srcData</td><td>雛型の元にするデータセット。ソースタイプ・パス・エンコーディング・ヘッダ指定などを <a href="../sections/dataset-load-form.html">Dataset Load Form</a> と同じ要領で指定します。</td></tr>
+    <tr><td>srcData</td><td>雛型の元にするデータセット。<code>srcType</code>・パス・文字コード・ヘッダ指定などを <a href="../sections/dataset-load-form.html">Dataset Load Form</a> と同じ要領で指定します。</td></tr>
   </table>
 
   <h2>操作の流れ</h2>

@@ -30,7 +30,7 @@
     <tr><th>種別</th><th>説明</th></tr>
     <tr><td>name</td><td>テーブル名を1件以上列挙して指定します。<code>filePath</code> で設定ファイルからの相対パスを指定することも可能です。</td></tr>
     <tr><td>pattern</td><td>テーブル名のマッチで対象を特定します。<code>pattern</code> オブジェクトには部分一致用の <code>string</code> または正規表現用の <code>regex</code> を指定し、<code>exclude</code> 配列で除外パターンを追加できます。<code>filePath</code>（正規表現）を指定すると、そのパスに一致するファイル由来のテーブルのみが対象になります。</td></tr>
-    <tr><td>outerJoin / innerJoin / fullJoin</td><td>2テーブルを結合して1つの論理テーブルとして扱います。<code>left</code> と <code>right</code> に結合対象のテーブル名、条件は <code>on</code>（JeXL 式）か <code>column</code>（共通カラム名）で指定します。<code>filePath</code>（正規表現）を指定すると、left / right ともそのパスに一致するファイル由来のテーブルのみを結合対象にします。right だけ別のパスにしたい場合は <code>rightFilePath</code> を指定します（指定した場合 right は <code>filePath</code> より優先されます）。</td></tr>
+    <tr><td>outerJoin / innerJoin / fullJoin</td><td>2テーブルを結合して1つの論理テーブルとして扱います。<code>left</code> と <code>right</code> に結合対象のテーブル名、条件は <code>on</code>（JEXL 式）か <code>column</code>（共通カラム名）で指定します。<code>filePath</code>（正規表現）を指定すると、left / right ともそのパスに一致するファイル由来のテーブルのみを結合対象にします。right だけ別のパスにしたい場合は <code>rightFilePath</code> を指定します（指定した場合 right は <code>filePath</code> より優先されます）。</td></tr>
   </table>
 
   <h3>変化の例</h3>
@@ -133,7 +133,7 @@ id | type | amount
     <tr><td>keys</td><td>派生テーブルの主キーとなるカラム</td></tr>
     <tr><td>include</td><td>派生テーブルに残すカラム（列の切り出し）。指定すると include 以外は除外される。</td></tr>
     <tr><td>exclude</td><td>派生テーブルから除外するカラム</td></tr>
-    <tr><td>filter</td><td>派生テーブルに残す行の条件（JeXL 式）。複数指定した場合は AND 扱い。</td></tr>
+    <tr><td>filter</td><td>派生テーブルに残す行の条件（JEXL 式）。複数指定した場合は AND 扱い。</td></tr>
     <tr><td>order</td><td>派生テーブル内の並び順に使用するカラム</td></tr>
     <tr><td>distinct</td><td>派生テーブルの重複行を排除するフラグ</td></tr>
     <tr><td>string / number / boolean / sqlFunction</td><td>追加カラム定義。派生テーブルごとに個別に指定できる（詳細は Additional Columns を参照）。</td></tr>
@@ -202,13 +202,13 @@ id | amount
 </code></pre>
 
   <h2>Additional Columns</h2>
-  <p>元データに存在しないカラムを追加します。値には JeXL 式を記述できます。</p>
+  <p>元データに存在しないカラムを追加します。値には JEXL 式を記述できます。</p>
   <table>
     <tr><th>型</th><th>説明</th></tr>
     <tr><td>string</td><td>文字列型カラム。既存カラムの連結や <code>substring</code> による抽出に利用します。</td></tr>
     <tr><td>number</td><td>数値型カラム。算術演算で集計値や派生値を定義します。</td></tr>
     <tr><td>boolean</td><td>真偽値型カラム。条件式で判定結果を持たせます。</td></tr>
-    <tr><td>sqlFunction</td><td>関数表現によるカラム。複雑なロジックを JeXL 関数として定義します。</td></tr>
+    <tr><td>sqlFunction</td><td>関数表現によるカラム。複雑なロジックを JEXL 関数として定義します。</td></tr>
   </table>
 
   <h3>変化の例</h3>
@@ -277,7 +277,7 @@ id | status   | mark
     <tr><td>exclude</td><td>処理から除外するカラム</td></tr>
     <tr><td>include</td><td>処理対象にするカラム（指定すると include 以外は除外）</td></tr>
     <tr><td>keys</td><td>主キーのカラム名</td></tr>
-    <tr><td>filter</td><td>データ選択条件（JeXL 式）。複数指定した場合は AND 扱い。</td></tr>
+    <tr><td>filter</td><td>データ選択条件（JEXL 式）。複数指定した場合は AND 扱い。</td></tr>
     <tr><td>order</td><td>並び順に使用するカラム</td></tr>
   </table>
 
@@ -358,7 +358,7 @@ id | name
 3  | Carol
 </code></pre>
 
-  <h2>JeXL 式の書き方</h2>
+  <h2>JEXL 式の書き方</h2>
   <p><code>filter</code>、追加カラム（<code>string</code> / <code>number</code> / <code>boolean</code> / <code>sqlFunction</code>）、結合条件 <code>on</code> では Apache Commons JEXL3 の式を利用できます。</p>
 
   <h3>演算子</h3>

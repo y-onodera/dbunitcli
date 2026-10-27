@@ -22,23 +22,23 @@
 <body>
   <p><a href="../index.html">&larr; ヘルプ一覧に戻る</a></p>
   <h1>Xlsx Schema</h1>
-  <p>Xlsx ファイルをデータセットとして読み込む際のマッピング定義を編集するダイアログです。1 つの Xlsx ファイルから複数の論理テーブルを抽出するための設定を、2 種類のマッピング形式で記述します。</p>
+  <p>Excel ファイルをデータセットとして読み込む際のマッピング定義を編集するダイアログです。1 つの Excel ファイルから複数の論理テーブルを抽出するための設定を、2 種類のマッピング形式で記述します。</p>
 
   <h2>Rows Mapping Tables</h2>
   <p>シート上に行方向に整列したデータ（ヘッダ行 + 連続するデータ行）をテーブルとして抽出します。通常の表形式データはこちらで定義します。</p>
   <p>1 行が 1 レコードとなるテーブルを定義します。各行の編集ダイアログの詳細は <a href="xlsx-row-setting.html">Xlsx Row Setting</a> を参照してください。</p>
 
   <h2>Random Cell Mapping Tables</h2>
-  <p>シート上の任意のセル位置から値を拾い集めてテーブルを構成します。帳票やフォーマット化された Xlsx など、行方向に整列していないデータの抽出に利用します。</p>
+  <p>シート上の任意のセル位置から値を拾い集めてテーブルを構成します。帳票やフォーマット化された Excel など、行方向に整列していないデータの抽出に利用します。</p>
   <p>指定したセルアドレスごとに 1 レコードを生成します。各行の編集ダイアログの詳細は <a href="xlsx-cell-setting.html">Xlsx Cell Setting</a> を参照してください。</p>
 
   <h2>共通の考え方</h2>
   <table>
     <tr><th>項目</th><th>説明</th></tr>
-    <tr><td>sheetName</td><td>抽出対象となる Xlsx のシート名。</td></tr>
+    <tr><td>sheetName</td><td>抽出対象となる Excel のシート名</td></tr>
     <tr><td>tableName</td><td>抽出結果に付与する論理テーブル名。<code>DatasetSetting</code> 等から参照する名前になります。</td></tr>
-    <tr><td>header</td><td>カラム名の並び。1 行 1 カラム定義で、Xlsx 上のカラム並びと対応させます。</td></tr>
-    <tr><td>addFileInfo</td><td>抽出結果に元ファイル情報のカラムを追加するかどうか。</td></tr>
+    <tr><td>header</td><td>カラム名の並び。1 行 1 カラム定義で、Excel 上のカラム並びと対応させます。</td></tr>
+    <tr><td>addFileInfo</td><td>抽出結果に元ファイル情報のカラムを追加するかどうか</td></tr>
   </table>
 
   <h2>雛型の生成</h2>

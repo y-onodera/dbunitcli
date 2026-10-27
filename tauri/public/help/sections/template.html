@@ -22,7 +22,7 @@
 <body>
   <p><a href="../index.html">&larr; ヘルプ一覧に戻る</a></p>
   <h1>Template</h1>
-  <p>テンプレート処理のための設定です。テンプレートエンジンは <strong>StringTemplate 4 (ST4)</strong>。式は既定で <code>$...$</code> の記法を用い、入力データセットの各行をパラメータとして埋め込みます。以下の場面で利用されます。</p>
+  <p>テンプレート処理のための設定です。テンプレートエンジンは <strong>StringTemplate 4 (ST4)</strong>。式はデフォルトで <code>$...$</code> の記法を用い、入力データセットの各行をパラメータとして埋め込みます。以下の場面で利用されます。</p>
   <ul>
     <li><a href="../commands/generate.html">Generate</a> — <code>generateType = txt</code> でテキストファイル（SQL・CSV 等）を生成。xlsx / xls 出力は <a href="jxls.html">Jxls</a> を参照</li>
     <li><a href="../commands/run.html">Run</a> — SQL / ANT スクリプトを実行する前にテンプレートとしてレンダリング</li>
@@ -33,8 +33,8 @@
   <h2 id="section-fields">設定項目</h2>
   <p>フォームの <code>template option</code> 展開ボタンから設定します。</p>
   <table>
-    <tr><th>項目</th><th>説明</th><th>既定</th></tr>
-    <tr><td>encoding</td><td>テンプレートファイルの文字コード。Generate の <code>template</code> ファイル等に適用</td><td>システム既定の文字コード</td></tr>
+    <tr><th>項目</th><th>説明</th><th>デフォルト</th></tr>
+    <tr><td>encoding</td><td>テンプレートファイルの文字コード。Generate の <code>template</code> ファイル等に適用</td><td>システムデフォルトの文字コード</td></tr>
     <tr><td>templateGroup</td><td>StringTemplate グループファイル（<code>.stg</code>）のパス。共通マクロ（サブテンプレート）を別ファイルにまとめて読み込みます。ワークスペースの <code>template/</code> ディレクトリを基準に解決</td><td>空（グループなし）</td></tr>
     <tr><td>templateParameterAttribute</td><td>テンプレート内で入力行にアクセスする属性名。例えば <code>param</code> を指定すると、テンプレートに渡されたレコードは <code>$param.columnName$</code> で参照できます。空文字を指定した場合は属性でラップせず、カラム名で直接参照します</td><td>param</td></tr>
     <tr><td>templateVarStart</td><td>テンプレート式の開始文字（1 文字）</td><td>$</td></tr>
@@ -46,7 +46,7 @@
 
   <h2 id="section-parameter-binding">パラメータのバインド</h2>
   <p>入力データセットの各行は、テンプレートに対して <code>templateParameterAttribute</code> で指定した属性名のオブジェクトとして渡されます。</p>
-  <p><strong>例 1: <code>templateParameterAttribute = param</code>（既定）</strong></p>
+  <p><strong>例 1: <code>templateParameterAttribute = param</code>（デフォルト）</strong></p>
   <pre>入力行 (1 件):
   tableName = USERS
   columnNames = id, name

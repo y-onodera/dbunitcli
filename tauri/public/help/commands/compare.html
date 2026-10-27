@@ -29,11 +29,11 @@
     <tr><th>オプション</th><th>説明</th></tr>
     <tr><td>targetType</td><td>比較対象の種類（下記参照）</td></tr>
     <tr><td>setting</td><td>比較設定ファイル（<code>data</code> モード時のみ有効。<a href="../dialogs/dataset-settings.html">Dataset Settings</a> 形式）</td></tr>
-    <tr><td>settingEncoding</td><td>設定ファイルのエンコーディング（デフォルト: システム既定）</td></tr>
+    <tr><td>settingEncoding</td><td>設定ファイルの文字コード（デフォルト: システムデフォルト）</td></tr>
     <tr><td>oldData</td><td>比較元（旧）データセット</td></tr>
     <tr><td>newData</td><td>比較対象となる新データセット</td></tr>
     <tr><td>expectData</td><td>期待値データセット（省略時はスキップ）</td></tr>
-    <tr><td>createPatchSql</td><td>行レベルの差分（<code>MODIFY_VALUE</code> / <code>KEY_DELETE</code> / <code>KEY_ADD</code>）を旧データから新データへ補正するパッチ SQL を生成する（<code>data</code> モードのみ有効。デフォルト: 無効）</td></tr>
+    <tr><td>createPatchSql</td><td>行レベルの差分（<code>MODIFY_VALUE</code> / <code>KEY_DELETE</code> / <code>KEY_ADD</code>）を旧データから新データへ補正するパッチ SQL を生成する（<code>data</code> モードのみ有効。デフォルト: OFF）</td></tr>
     <tr><td>imageOption</td><td><a href="../reference/image.html">画像比較のオプション</a>（<code>image</code> / <code>pdf</code> モード時のみ表示）</td></tr>
     <tr><td>convertResult</td><td><a href="../sections/result-form.html">出力形式と出力先の設定</a></td></tr>
   </table>

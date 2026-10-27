@@ -22,16 +22,16 @@
 <body>
   <p><a href="../index.html">&larr; ヘルプ一覧に戻る</a></p>
   <h1>Xlsx Cell Setting</h1>
-  <p>Xlsx シート上の任意のセル位置から値を拾い集めてテーブルを構成するための設定を編集するダイアログです。帳票・フォーマット化された Xlsx など、行方向に整列していないデータの抽出に利用します。全体構成は <a href="xlsx-schema.html">Xlsx Schema</a> を参照してください。</p>
+  <p>Excel シート上の任意のセル位置から値を拾い集めてテーブルを構成するための設定を編集するダイアログです。帳票・フォーマット化された Excel など、行方向に整列していないデータの抽出に利用します。全体構成は <a href="xlsx-schema.html">Xlsx Schema</a> を参照してください。</p>
 
   <h2>設定項目</h2>
   <table>
     <tr><th>フィールド</th><th>説明</th></tr>
-    <tr><td>sheetName</td><td>抽出対象の Xlsx シート名。データセットがロード済みの場合、候補がデータリストから選択できます。</td></tr>
-    <tr><td>tableName</td><td>抽出結果に付与する論理テーブル名。</td></tr>
+    <tr><td>sheetName</td><td>抽出対象の Excel シート名。データセットがロード済みの場合、候補がデータリストから選択できます。</td></tr>
+    <tr><td>tableName</td><td>抽出結果に付与する論理テーブル名</td></tr>
     <tr><td>header</td><td>カラム名の並び。カンマ区切りで指定します。各レコードのセルアドレスと同じ順序で対応させます。</td></tr>
     <tr><td>rows</td><td>1 レコード分のセルアドレスをカンマ区切りで指定します。行を追加することで複数レコードを定義できます。</td></tr>
-    <tr><td>addFileInfo</td><td>元ファイル名などのファイル情報カラムを結果に追加するかどうか。</td></tr>
+    <tr><td>addFileInfo</td><td>元ファイル名などのファイル情報カラムを結果に追加するかどうか</td></tr>
   </table>
 
   <h2>記述例</h2>
@@ -49,7 +49,7 @@
   <ol>
     <li><code>sheetName</code> と <code>tableName</code> の両方が入力されていない行は保存対象から除外されます。</li>
     <li><code>header</code> と各 <code>rows</code> のセルアドレス数は一致させてください。</li>
-    <li>セルアドレスは Xlsx の <code>A1</code> 形式で指定します。</li>
+    <li>セルアドレスは Excel の <code>A1</code> 形式で指定します。</li>
   </ol>
 </body>
 </html>

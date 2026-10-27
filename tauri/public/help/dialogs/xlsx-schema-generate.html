@@ -29,13 +29,13 @@
     <li>カラム名・カラムの並び順・主キー（<code>breakKey</code>）・先頭データ行・セル位置を、元データセットから引き継ぐ。</li>
     <li>生成結果を Xlsx Schema の編集ダイアログで確認・修正し、名前を付けて保存する。</li>
   </ul>
-  <p>一から手入力する代わりに、生成した雛型を実際の Xlsx に合わせて手直しする使い方を想定しています（特に <code>sheetName</code> はテーブル名が入るため、実際のシート名への修正が必要です）。</p>
+  <p>一から手入力する代わりに、生成した雛型を実際の Excel に合わせて手直しする使い方を想定しています（特に <code>sheetName</code> はテーブル名が入るため、実際のシート名への修正が必要です）。</p>
 
   <h2>入力</h2>
-  <p>雛型の元にするデータセットを、共通の <a href="../sections/dataset-load-form.html">Dataset Load Form</a> で指定します。ソースタイプの選択に応じて入力項目が切り替わります（CSV / Excel / テーブル / SQL など）。各ソースタイプの詳細は Dataset Load Form のページを参照してください。</p>
+  <p>雛型の元にするデータセットを、共通の <a href="../sections/dataset-load-form.html">Dataset Load Form</a> で指定します。<code>srcType</code> の選択に応じて入力項目が切り替わります（CSV / Excel / テーブル / SQL など）。各 <code>srcType</code> の詳細は Dataset Load Form のページを参照してください。</p>
   <table>
     <tr><th>項目</th><th>説明</th></tr>
-    <tr><td>srcData</td><td>雛型の元にするデータセット。ソースタイプ・パス・エンコーディング・ヘッダ指定などを <a href="../sections/dataset-load-form.html">Dataset Load Form</a> と同じ要領で指定します。</td></tr>
+    <tr><td>srcData</td><td>雛型の元にするデータセット。<code>srcType</code>・パス・文字コード・ヘッダ指定などを <a href="../sections/dataset-load-form.html">Dataset Load Form</a> と同じ要領で指定します。</td></tr>
   </table>
 
   <h2>操作の流れ</h2>
@@ -71,13 +71,13 @@
   <h3>生成ルール</h3>
   <table>
     <tr><th>項目</th><th>生成される値</th></tr>
-    <tr><td>sheetName</td><td>テーブル名と同じ値。実際の Xlsx のシート名に合わせて編集してください。</td></tr>
-    <tr><td>tableName</td><td>元データセットのテーブル名。</td></tr>
-    <tr><td>header</td><td>元テーブルのカラム名を並び順どおりに設定。</td></tr>
-    <tr><td>dataStart</td><td>常に <code>1</code>（ヘッダ行の次の行から、0 始まり）。</td></tr>
-    <tr><td>columnIndex</td><td>カラムの並び順に <code>0</code> から連番。</td></tr>
+    <tr><td>sheetName</td><td>テーブル名と同じ値。実際の Excel のシート名に合わせて編集してください。</td></tr>
+    <tr><td>tableName</td><td>元データセットのテーブル名</td></tr>
+    <tr><td>header</td><td>元テーブルのカラム名を並び順どおりに設定</td></tr>
+    <tr><td>dataStart</td><td>常に <code>1</code>（ヘッダ行の次の行から、0 始まり）</td></tr>
+    <tr><td>columnIndex</td><td>カラムの並び順に <code>0</code> から連番</td></tr>
     <tr><td>breakKey</td><td>主キーのカラム名。主キーが無い場合は先頭カラムのみ。</td></tr>
-    <tr><td>cellAddress</td><td><code>dataStart</code> 行の各カラムのセル位置（上の例では <code>A2</code>, <code>B2</code>, <code>C2</code>）。</td></tr>
+    <tr><td>cellAddress</td><td><code>dataStart</code> 行の各カラムのセル位置（上の例では <code>A2</code>, <code>B2</code>, <code>C2</code>）</td></tr>
   </table>
   <p>テーブルごとに <a href="xlsx-schema.html">Xlsx Schema</a> の Rows Mapping Tables と Random Cell Mapping Tables の両方に 1 件ずつ生成されます。不要な側の行は編集ダイアログで削除してください。</p>
 
