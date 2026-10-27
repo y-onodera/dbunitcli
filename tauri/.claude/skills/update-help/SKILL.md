@@ -24,3 +24,4 @@ DO NOT TRIGGER when: 見た目のみの変更（CSS/クラス名）、タイプ�
 4. **クロスページリンクにアンカーを付けない** — 他ページへは相対パスの `page.html`（例: `../sections/jdbc.html`）のみ
 5. **ディレクトリ構成を守る** — `commands/`（`commands/<cmd>/types/` に固有type）、`sections/`（`dataset-load-form/types/`=srcType、`result-form/types/`=resultType）、`dialogs/`、`reference/`、`guide/`（使い方）、ルートは `index.html` のみ。アプリ側の呼び出しは `helpCommand`/`command` に `public/help` からの拡張子なしパス（例: `sections/jdbc`）を指定する
 6. **同一ページ内アンカーはそのまま維持する** — `<h2 id="...">` と `href="#..."` の対応を壊さない
+7. **スタイルは `help.css` に集約する** — ページに `<style>` を書かず、`<link rel="stylesheet" href="（相対パス）help.css" />` で読み込む
