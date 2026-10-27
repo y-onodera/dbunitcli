@@ -5,7 +5,6 @@ import {
 	StatusMessage,
 } from "../../../../components/dialog";
 import {
-	useDeleteXlsxSchema,
 	useSaveXlsxSchema,
 	useXlsxSchemaData,
 } from "../../../../hooks/useXlsxSchema";
@@ -16,11 +15,6 @@ import {
 	XlsxSchema,
 } from "../../../../model/XlsxSchema";
 import { saveOnSuccess } from "../../../../utils/fetchUtils";
-import {
-	createEditButton,
-	RemoveResource,
-	type ResourceEditButtonProp,
-} from "./ResourceEditButton";
 import XlsxCellSettingDialog from "./XlsxCellSettingDialog";
 import XlsxRowSettingDialog from "./XlsxRowSettingDialog";
 
@@ -90,19 +84,5 @@ export function XlsxSchemaEditDialog(props: {
 				newSetting={createCellSetting}
 			/>
 		</SettingDialog>
-	);
-}
-export const XlsxSchemaEditButton = createEditButton(XlsxSchemaDialog);
-export function RemoveXlsxSchemaButton({
-	path,
-	setPath,
-}: ResourceEditButtonProp) {
-	const deleteResource = useDeleteXlsxSchema();
-	return (
-		<RemoveResource
-			path={path}
-			setPath={setPath}
-			deleteResource={deleteResource}
-		/>
 	);
 }

@@ -1,9 +1,10 @@
 import { useResourcesSettings } from "../../../../context/WorkspaceResourcesProvider";
-import {
-	FixedColumnDefEditButton,
-	RemoveFixedColumnDefButton,
-} from "../dialog/FixedColumnDefDialog";
+import FixedColumnDefDialog from "../dialog/FixedColumnDefDialog";
 import { FixedColumnDefGenerateButton } from "../dialog/FixedColumnDefGenerateDialog";
+import {
+	EditResourceButton,
+	RemoveResourceButton,
+} from "../dialog/ResourceEditButton";
 import type { TextProp } from "./FormElementProp";
 import Text, { TextDropDownMenu } from "./Text";
 
@@ -32,7 +33,8 @@ export default function FixedColumnDefText({
 					element={element}
 					isValueInDatalist={isValueInDatalist}
 					editButtons={[
-						<FixedColumnDefEditButton
+						<EditResourceButton
+							dialog={FixedColumnDefDialog}
 							key="edit"
 							path={path}
 							setPath={setPath}
@@ -44,7 +46,11 @@ export default function FixedColumnDefText({
 						/>,
 					]}
 					removeButton={() => (
-						<RemoveFixedColumnDefButton path={path} setPath={setPath} />
+						<RemoveResourceButton
+							kind="fixedColumnDef"
+							path={path}
+							setPath={setPath}
+						/>
 					)}
 				/>
 			)}

@@ -1,7 +1,7 @@
 import type { Dispatch, SetStateAction } from "react";
 import { useResourcesSettings } from "../../../../context/WorkspaceResourcesProvider";
 import type { CommandOption } from "../../../../model/CommandOption";
-import { RemoveJdbcPropertiesButton } from "../dialog/JdbcSavePropertiesDialog";
+import { RemoveResourceButton } from "../dialog/ResourceEditButton";
 import Text, { TextDropDownMenu } from "./Text";
 
 export default function JdbcPropertiesTextField({
@@ -39,7 +39,8 @@ export default function JdbcPropertiesTextField({
 						setPath={wrappedSetPath}
 						isValueInDatalist={isValueInDatalist}
 						removeButton={(closeMenu) => (
-							<RemoveJdbcPropertiesButton
+							<RemoveResourceButton
+								kind="jdbc"
 								path={path}
 								setPath={(value) => {
 									wrappedSetPath(value);

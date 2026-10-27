@@ -13,26 +13,6 @@ import {
 	type OperationResult,
 } from "../utils/fetchUtils";
 
-export const useDeleteFixedColumnDef = () => {
-	const { apiUrl } = useEnvironment();
-	const setResourcesSettings = useSetResourcesSettings();
-	return async (name: string): Promise<OperationResult> =>
-		fetchAndUpdate<string[]>(
-			{
-				endpoint: `${apiUrl}fixed-column-def/delete`,
-				options: {
-					method: "POST",
-					headers: { "Content-Type": "text/plain" },
-					body: name,
-				},
-			},
-			(defs) =>
-				setResourcesSettings((current) =>
-					current.with({ fixedColumnDefs: defs }),
-				),
-		);
-};
-
 export const useSaveFixedColumnDef = () => {
 	const { apiUrl } = useEnvironment();
 	const setResourcesSettings = useSetResourcesSettings();

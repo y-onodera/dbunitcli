@@ -45,26 +45,6 @@ const useResourceContent = (
 	return { content, loading };
 };
 
-export const useDeleteTemplate = () => {
-	const { apiUrl } = useEnvironment();
-	const setResourcesSettings = useSetResourcesSettings();
-	return async (name: string): Promise<OperationResult> =>
-		fetchAndUpdate<string[]>(
-			{
-				endpoint: `${apiUrl}template/delete`,
-				options: {
-					method: "POST",
-					headers: { "Content-Type": "text/plain" },
-					body: name,
-				},
-			},
-			(settings) =>
-				setResourcesSettings((current) =>
-					current.with({ templateFiles: settings }),
-				),
-		);
-};
-
 // parameterize/template の保存応答(ファイル一覧)は画面状態に保持しないため反映しない
 export const useParameterizeTemplateSaveContent = () => {
 	const { apiUrl } = useEnvironment();

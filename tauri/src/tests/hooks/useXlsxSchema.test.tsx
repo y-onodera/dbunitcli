@@ -8,7 +8,6 @@ import WorkspaceResourcesProvider, {
 	useResourcesSettings,
 } from "../../context/WorkspaceResourcesProvider";
 import {
-	useDeleteXlsxSchema,
 	useSaveXlsxSchema,
 	useXlsxSchemaData,
 } from "../../hooks/useXlsxSchema";
@@ -58,7 +57,6 @@ const wrapper = ({ children }: { children: React.ReactNode }) => (
 );
 
 const mockUpdatedSettings = ["test-setting", "other-setting"];
-const mockRemainingSettings = [] as string[];
 
 const { mockFetchData, mockFetchAndUpdate } = vi.hoisted(() => {
 	const mockFetchData = vi.fn((params: FetchParams) => {
@@ -72,11 +70,6 @@ const { mockFetchData, mockFetchAndUpdate } = vi.hoisted(() => {
 		}
 		if (params.endpoint.includes("/xlsx-schema/save")) {
 			return Promise.resolve(new Response(JSON.stringify(mockUpdatedSettings)));
-		}
-		if (params.endpoint.includes("/xlsx-schema/delete")) {
-			return Promise.resolve(
-				new Response(JSON.stringify(mockRemainingSettings)),
-			);
 		}
 		return Promise.resolve(new Response());
 	});
@@ -144,31 +137,6 @@ describe("XlsxSchemaProviderのテスト", () => {
 			});
 			expect(result.current.resources.xlsxSchemas).toStrictEqual(
 				mockUpdatedSettings,
-			);
-		});
-	});
-
-	describe("useDeleteXlsxSchema", () => {
-		it("正常な削除が行われることを確認", async () => {
-			const { result, rerender } = renderHook(
-				() => {
-					const deleteXlsxSchema = useDeleteXlsxSchema();
-					const resources = useResourcesSettings();
-					return { resources, deleteXlsxSchema };
-				},
-				{ wrapper },
-			);
-			await act(async () => {
-				rerender();
-			});
-			expect(result.current.resources.xlsxSchemas).toStrictEqual(
-				mockWorkspaceResources.resources.xlsxSchemas,
-			);
-			await act(async () => {
-				result.current.deleteXlsxSchema("test-setting");
-			});
-			expect(result.current.resources.xlsxSchemas).toStrictEqual(
-				mockRemainingSettings,
 			);
 		});
 	});

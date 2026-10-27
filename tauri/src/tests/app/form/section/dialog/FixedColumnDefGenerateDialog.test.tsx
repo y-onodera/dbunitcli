@@ -40,7 +40,6 @@ vi.mock("../../../../../context/EnvironmentProvider", () => ({
 vi.mock("../../../../../hooks/useJdbc", () => ({
 	useJdbcConnectionTest: () => vi.fn(),
 	useJdbcSaveProperties: () => vi.fn(),
-	useDeleteJdbcProperties: () => vi.fn(),
 }));
 
 vi.mock("../../../../../hooks/useWorkspaceResources", () => ({
@@ -55,7 +54,6 @@ const { mockSaveDef } = vi.hoisted(() => ({
 }));
 vi.mock("../../../../../hooks/useFixedColumnDef", () => ({
 	useSaveFixedColumnDef: () => mockSaveDef,
-	useDeleteFixedColumnDef: () => vi.fn(),
 	useFixedColumnDefData: () => ({ def: null, loading: true }),
 }));
 

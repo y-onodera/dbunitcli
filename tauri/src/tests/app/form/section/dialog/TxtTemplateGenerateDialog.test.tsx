@@ -44,7 +44,6 @@ vi.mock("../../../../../context/EnvironmentProvider", () => ({
 vi.mock("../../../../../hooks/useJdbc", () => ({
 	useJdbcConnectionTest: () => vi.fn(),
 	useJdbcSaveProperties: () => vi.fn(),
-	useDeleteJdbcProperties: () => vi.fn(),
 }));
 
 const { mockReloadResources } = vi.hoisted(() => ({

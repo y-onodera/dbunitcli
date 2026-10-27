@@ -1,8 +1,6 @@
 import { useResourcesSettings } from "../../../../context/WorkspaceResourcesProvider";
-import {
-	RemoveTemplateButton,
-	TemplateEditButton,
-} from "../dialog/TemplateEditDialog";
+import { RemoveResourceButton } from "../dialog/ResourceEditButton";
+import { TemplateEditButton } from "../dialog/TemplateEditDialog";
 import type { TextProp } from "./FormElementProp";
 import Text, { TextDropDownMenu } from "./Text";
 
@@ -34,7 +32,11 @@ export default function TemplateText({
 						<TemplateEditButton key="edit" path={path} setPath={setPath} />,
 					]}
 					removeButton={() => (
-						<RemoveTemplateButton path={path} setPath={setPath} />
+						<RemoveResourceButton
+							kind="template"
+							path={path}
+							setPath={setPath}
+						/>
 					)}
 				/>
 			)}

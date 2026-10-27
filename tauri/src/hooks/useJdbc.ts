@@ -21,24 +21,6 @@ function toJdbcRequestBody(jdbcValues: Record<string, string>) {
 	};
 }
 
-export const useDeleteJdbcProperties = () => {
-	const { apiUrl } = useEnvironment();
-	const setResourcesSettings = useSetResourcesSettings();
-	return async (name: string): Promise<OperationResult> =>
-		fetchAndUpdate<string[]>(
-			{
-				endpoint: `${apiUrl}jdbc/delete`,
-				options: {
-					method: "POST",
-					headers: { "Content-Type": "text/plain" },
-					body: name,
-				},
-			},
-			(files) =>
-				setResourcesSettings((current) => current.with({ jdbcFiles: files })),
-		);
-};
-
 // 一覧の取得を中断する（自分で中断したときはエラー表示しない）signalと、実行中のログの受け取り先
 export type JdbcFetchOptions = Pick<FetchParams, "signal" | "onLog">;
 

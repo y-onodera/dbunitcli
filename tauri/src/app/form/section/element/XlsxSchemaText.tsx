@@ -1,8 +1,9 @@
 import { useResourcesSettings } from "../../../../context/WorkspaceResourcesProvider";
 import {
-	RemoveXlsxSchemaButton,
-	XlsxSchemaEditButton,
-} from "../dialog/XlsxSchemaDialog";
+	EditResourceButton,
+	RemoveResourceButton,
+} from "../dialog/ResourceEditButton";
+import XlsxSchemaDialog from "../dialog/XlsxSchemaDialog";
 import { XlsxSchemaGenerateButton } from "../dialog/XlsxSchemaGenerateDialog";
 import type { TextProp } from "./FormElementProp";
 import Text, { TextDropDownMenu } from "./Text";
@@ -32,7 +33,12 @@ export default function XlsxSchemaText({
 					element={element}
 					isValueInDatalist={isValueInDatalist}
 					editButtons={[
-						<XlsxSchemaEditButton key="edit" path={path} setPath={setPath} />,
+						<EditResourceButton
+							key="edit"
+							dialog={XlsxSchemaDialog}
+							path={path}
+							setPath={setPath}
+						/>,
 						<XlsxSchemaGenerateButton
 							key="generate"
 							path={path}
@@ -40,7 +46,11 @@ export default function XlsxSchemaText({
 						/>,
 					]}
 					removeButton={() => (
-						<RemoveXlsxSchemaButton path={path} setPath={setPath} />
+						<RemoveResourceButton
+							kind="xlsxSchema"
+							path={path}
+							setPath={setPath}
+						/>
 					)}
 				/>
 			)}

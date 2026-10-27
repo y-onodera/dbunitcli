@@ -3,11 +3,12 @@ import { InlineActions } from "../../../../components/dialog";
 import { useDatasetSrcInfo } from "../../../../context/DatasetSrcInfoProvider";
 import { useResourcesSettings } from "../../../../context/WorkspaceResourcesProvider";
 import { DatasetSettingGenerateButton } from "../dialog/DatasetSettingGenerateDialog";
-import {
-	DatasetSettingEditButton,
-	RemoveDatasetSettingButton,
-} from "../dialog/DatasetSettingsDialog";
+import DatasetSettingsDialog from "../dialog/DatasetSettingsDialog";
 import DatasetTableNamesPreviewButton from "../dialog/DatasetTableNamesPreviewButton";
+import {
+	EditResourceButton,
+	RemoveResourceButton,
+} from "../dialog/ResourceEditButton";
 import type { TextProp } from "./FormElementProp";
 import Text, { TextDropDownMenu } from "./Text";
 
@@ -63,7 +64,8 @@ export default function DatasetSettingText({
 						editButtons={
 							!hideDatasetSettingEdit
 								? [
-										<DatasetSettingEditButton
+										<EditResourceButton
+											dialog={DatasetSettingsDialog}
 											key="edit"
 											path={path}
 											setPath={handleSetPath}
@@ -77,7 +79,11 @@ export default function DatasetSettingText({
 								: undefined
 						}
 						removeButton={() => (
-							<RemoveDatasetSettingButton path={path} setPath={handleSetPath} />
+							<RemoveResourceButton
+								kind="datasetSetting"
+								path={path}
+								setPath={handleSetPath}
+							/>
 						)}
 					/>
 				);

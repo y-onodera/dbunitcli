@@ -7,15 +7,10 @@ import {
 import { EditButton } from "../../../../components/element/ButtonIcon";
 import { TextArea } from "../../../../components/element/Input";
 import {
-	useDeleteTemplate,
 	useTemplateData,
 	useTemplateSaveContent,
 } from "../../../../hooks/useTemplate";
 import { saveOnSuccess } from "../../../../utils/fetchUtils";
-import {
-	RemoveResource,
-	type ResourceEditButtonProp,
-} from "./ResourceEditButton";
 
 export default function TemplateEditDialog({
 	name,
@@ -100,18 +95,5 @@ export function TemplateEditButton({
 				/>
 			)}
 		</>
-	);
-}
-export function RemoveTemplateButton({
-	path,
-	setPath,
-}: ResourceEditButtonProp) {
-	const deleteResource = useDeleteTemplate();
-	return (
-		<RemoveResource
-			path={path}
-			setPath={setPath}
-			deleteResource={deleteResource}
-		/>
 	);
 }

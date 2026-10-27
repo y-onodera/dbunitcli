@@ -213,26 +213,6 @@ export const useDatasetTablePreview = (
 	return { preview, loading, logs };
 };
 
-export const useDeleteDatasetSettings = () => {
-	const { apiUrl } = useEnvironment();
-	const setResourcesSettings = useSetResourcesSettings();
-	return async (name: string): Promise<OperationResult> =>
-		fetchAndUpdate<string[]>(
-			{
-				endpoint: `${apiUrl}dataset-setting/delete`,
-				options: {
-					method: "POST",
-					headers: { "Content-Type": "text/plain" },
-					body: name,
-				},
-			},
-			(settings) =>
-				setResourcesSettings((current) =>
-					current.with({ datasetSettings: settings }),
-				),
-		);
-};
-
 export const useSaveDatasetSettings = () => {
 	const { apiUrl } = useEnvironment();
 	const setResourcesSettings = useSetResourcesSettings();

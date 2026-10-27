@@ -5,11 +5,6 @@ import {
 	SettingDialog,
 } from "../../../../components/dialog";
 import { PreviewField } from "../../../../components/element/Input";
-import { useDeleteJdbcProperties } from "../../../../hooks/useJdbc";
-import {
-	RemoveResource,
-	type ResourceEditButtonProp,
-} from "./ResourceEditButton";
 
 type JdbcSavePropertiesDialogProps = {
 	jdbcValues: Record<string, string>;
@@ -70,18 +65,5 @@ export default function JdbcSavePropertiesDialog({
 				</DialogField>
 			</DialogBody>
 		</SettingDialog>
-	);
-}
-export function RemoveJdbcPropertiesButton({
-	path,
-	setPath,
-}: ResourceEditButtonProp) {
-	const deleteResource = useDeleteJdbcProperties();
-	return (
-		<RemoveResource
-			path={path}
-			setPath={setPath}
-			deleteResource={deleteResource}
-		/>
 	);
 }

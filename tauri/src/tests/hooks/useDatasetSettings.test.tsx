@@ -9,7 +9,6 @@ import WorkspaceResourcesProvider, {
 } from "../../context/WorkspaceResourcesProvider";
 import {
 	useDatasetSettingsData,
-	useDeleteDatasetSettings,
 	useSaveDatasetSettings,
 	useSrcInfoColumnNames,
 } from "../../hooks/useDatasetSettings";
@@ -29,7 +28,6 @@ const mockDatasetSettingsResponse: {
 };
 
 const mockUpdatedSettings = ["test-setting", "other-setting"];
-const mockRemainingSettings = [] as string[];
 
 const mockWorkspaceResources: WorkspaceResources = {
 	...workspaceResourcesFixture,
@@ -61,11 +59,6 @@ const { mockFetchData, mockFetchAndUpdate } = vi.hoisted(() => {
 		}
 		if (params.endpoint.includes("/dataset-setting/save")) {
 			return Promise.resolve(new Response(JSON.stringify(mockUpdatedSettings)));
-		}
-		if (params.endpoint.includes("/dataset-setting/delete")) {
-			return Promise.resolve(
-				new Response(JSON.stringify(mockRemainingSettings)),
-			);
 		}
 		if (params.endpoint.includes("/dataset-setting/table-names")) {
 			return Promise.resolve(new Response(JSON.stringify(["t1", "t2"])));
@@ -148,31 +141,6 @@ describe("DatasetSettingsProviderのテスト", () => {
 			});
 			expect(result.current.resources.datasetSettings).toStrictEqual(
 				mockUpdatedSettings,
-			);
-		});
-	});
-
-	describe("useDeleteDatasetSettingsのテスト", () => {
-		it("データセット設定を正常に削除できることを確認", async () => {
-			const { result, rerender } = renderHook(
-				() => {
-					const deleteDatasetSettings = useDeleteDatasetSettings();
-					const resources = useResourcesSettings();
-					return { resources, deleteDatasetSettings };
-				},
-				{ wrapper },
-			);
-			await act(async () => {
-				rerender();
-			});
-			expect(result.current.resources.datasetSettings).toStrictEqual(
-				mockWorkspaceResources.resources.datasetSettings,
-			);
-			await act(async () => {
-				result.current.deleteDatasetSettings("test-setting");
-			});
-			expect(result.current.resources.datasetSettings).toStrictEqual(
-				mockRemainingSettings,
 			);
 		});
 	});
