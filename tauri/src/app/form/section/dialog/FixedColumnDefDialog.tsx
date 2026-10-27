@@ -16,7 +16,11 @@ import {
 } from "../../../../model/FixedColumnDef";
 import { saveOnSuccess } from "../../../../utils/fetchUtils";
 import ColumnDefSettingDialog from "./ColumnDefSettingDialog";
-import { createEditButton, createRemoveButton } from "./ResourceEditButton";
+import {
+	createEditButton,
+	RemoveResource,
+	type ResourceEditButtonProp,
+} from "./ResourceEditButton";
 
 export default function FixedColumnDefDialog(props: {
 	fileName: string;
@@ -71,6 +75,16 @@ export function FixedColumnDefEditDialog(props: {
 }
 
 export const FixedColumnDefEditButton = createEditButton(FixedColumnDefDialog);
-export const RemoveFixedColumnDefButton = createRemoveButton(
-	useDeleteFixedColumnDef,
-);
+export function RemoveFixedColumnDefButton({
+	path,
+	setPath,
+}: ResourceEditButtonProp) {
+	const deleteResource = useDeleteFixedColumnDef();
+	return (
+		<RemoveResource
+			path={path}
+			setPath={setPath}
+			deleteResource={deleteResource}
+		/>
+	);
+}

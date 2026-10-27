@@ -78,15 +78,6 @@ describe("CellSettingクラス", () => {
 		expect(setting.addFileInfo).toBe(false);
 	});
 
-	it("空のCellSettingを作成できること", () => {
-		const setting = createCellSetting();
-		expect(setting.sheetName).toBe("");
-		expect(setting.tableName).toBe("");
-		expect(setting.header).toEqual([]);
-		expect(setting.rows).toEqual([]);
-		expect(setting.addFileInfo).toBe(false);
-	});
-
 	it("値を指定してCellSettingを作成できること", () => {
 		const builder: CellSettingBuilder = {
 			sheetName: "Sheet1",

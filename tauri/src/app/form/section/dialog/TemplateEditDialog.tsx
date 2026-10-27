@@ -12,7 +12,10 @@ import {
 	useTemplateSaveContent,
 } from "../../../../hooks/useTemplate";
 import { saveOnSuccess } from "../../../../utils/fetchUtils";
-import { createRemoveButton } from "./ResourceEditButton";
+import {
+	RemoveResource,
+	type ResourceEditButtonProp,
+} from "./ResourceEditButton";
 
 export default function TemplateEditDialog({
 	name,
@@ -99,4 +102,16 @@ export function TemplateEditButton({
 		</>
 	);
 }
-export const RemoveTemplateButton = createRemoveButton(useDeleteTemplate);
+export function RemoveTemplateButton({
+	path,
+	setPath,
+}: ResourceEditButtonProp) {
+	const deleteResource = useDeleteTemplate();
+	return (
+		<RemoveResource
+			path={path}
+			setPath={setPath}
+			deleteResource={deleteResource}
+		/>
+	);
+}

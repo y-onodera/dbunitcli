@@ -157,19 +157,18 @@ describe("CommandFormのテスト", () => {
 			testId: "mock-parameterize-form",
 			parameter: parameterizeLoadResponseFixture,
 		},
-	])("command=$commandのとき、対応するフォームが表示される", ({
-		command,
-		testId,
-		parameter,
-	}) => {
-		mockUseSelectParameter.mockReturnValue(
-			makeSelectParameter(command as Command, parameter),
-		);
+	])(
+		"command=$commandのとき、対応するフォームが表示される",
+		({ command, testId, parameter }) => {
+			mockUseSelectParameter.mockReturnValue(
+				makeSelectParameter(command as Command, parameter),
+			);
 
-		render(<CommandForm formData={mockFormData} />);
+			render(<CommandForm formData={mockFormData} />);
 
-		expect(screen.getByTestId(testId)).toBeInTheDocument();
-	});
+			expect(screen.getByTestId(testId)).toBeInTheDocument();
+		},
+	);
 
 	it("handleTypeSelectが呼ばれたとき、formDataの値でrefreshSelectが実行される", async () => {
 		mockUseSelectParameter.mockReturnValue(
@@ -190,18 +189,18 @@ describe("CommandFormのテスト", () => {
 		{ command: "generate", parameter: generateLoadResponseFixture },
 		{ command: "run", parameter: runLoadResponseFixture },
 		{ command: "parameterize", parameter: parameterizeLoadResponseFixture },
-	])("command=$commandのとき、useRefreshSelectParameterが$commandで呼ばれる", ({
-		command,
-		parameter,
-	}) => {
-		mockUseSelectParameter.mockReturnValue(
-			makeSelectParameter(command as Command, parameter),
-		);
+	])(
+		"command=$commandのとき、useRefreshSelectParameterが$commandで呼ばれる",
+		({ command, parameter }) => {
+			mockUseSelectParameter.mockReturnValue(
+				makeSelectParameter(command as Command, parameter),
+			);
 
-		render(<CommandForm formData={mockFormData} />);
+			render(<CommandForm formData={mockFormData} />);
 
-		expect(mockUseRefreshSelectParameter).toHaveBeenCalledWith(command);
-	});
+			expect(mockUseRefreshSelectParameter).toHaveBeenCalledWith(command);
+		},
+	);
 
 	it.each([
 		{ command: "convert", testId: "mock-convert-form" },
@@ -209,40 +208,40 @@ describe("CommandFormのテスト", () => {
 		{ command: "generate", testId: "mock-generate-form" },
 		{ command: "run", testId: "mock-run-form" },
 		{ command: "parameterize", testId: "mock-parameterize-form" },
-	])("refreshレスポンスのパラメータでcommand=$commandのとき、対応するフォームが表示される", ({
-		command,
-		testId,
-	}) => {
-		mockUseSelectParameter.mockReturnValue(
-			makeSelectParameterWithRefresh(command as Command),
-		);
+	])(
+		"refreshレスポンスのパラメータでcommand=$commandのとき、対応するフォームが表示される",
+		({ command, testId }) => {
+			mockUseSelectParameter.mockReturnValue(
+				makeSelectParameterWithRefresh(command as Command),
+			);
 
-		render(<CommandForm formData={mockFormData} />);
+			render(<CommandForm formData={mockFormData} />);
 
-		expect(screen.getByTestId(testId)).toBeInTheDocument();
-	});
+			expect(screen.getByTestId(testId)).toBeInTheDocument();
+		},
+	);
 
 	it.each([
 		{ command: "generate", parameter: generateLoadResponseFixture },
 		{ command: "run", parameter: runLoadResponseFixture },
-	])("command=$commandで同種の別名コマンドを選択したとき、フォームが再マウントされる", ({
-		command,
-		parameter,
-	}) => {
-		const select = (name: string) =>
-			new SelectParameter(parameter, command as Command, name);
-		mockUseSelectParameter.mockReturnValue(select("first"));
-		const { rerender } = render(<CommandForm formData={mockFormData} />);
-		expect(mockMount).toHaveBeenCalledTimes(1);
+	])(
+		"command=$commandで同種の別名コマンドを選択したとき、フォームが再マウントされる",
+		({ command, parameter }) => {
+			const select = (name: string) =>
+				new SelectParameter(parameter, command as Command, name);
+			mockUseSelectParameter.mockReturnValue(select("first"));
+			const { rerender } = render(<CommandForm formData={mockFormData} />);
+			expect(mockMount).toHaveBeenCalledTimes(1);
 
-		mockUseSelectParameter.mockReturnValue(select("first"));
-		rerender(<CommandForm formData={mockFormData} />);
-		expect(mockMount).toHaveBeenCalledTimes(1);
+			mockUseSelectParameter.mockReturnValue(select("first"));
+			rerender(<CommandForm formData={mockFormData} />);
+			expect(mockMount).toHaveBeenCalledTimes(1);
 
-		mockUseSelectParameter.mockReturnValue(select("second"));
-		rerender(<CommandForm formData={mockFormData} />);
-		expect(mockMount).toHaveBeenCalledTimes(2);
-	});
+			mockUseSelectParameter.mockReturnValue(select("second"));
+			rerender(<CommandForm formData={mockFormData} />);
+			expect(mockMount).toHaveBeenCalledTimes(2);
+		},
+	);
 
 	it("scaffold結果の反映後、入力欄へ値を表示するためgenerateフォームが再マウントされる", async () => {
 		mockUseSelectParameter.mockReturnValue(

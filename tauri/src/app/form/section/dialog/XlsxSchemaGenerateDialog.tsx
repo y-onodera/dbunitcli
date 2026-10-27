@@ -2,13 +2,17 @@ import {
 	XlsxSchema,
 	type XlsxSchemaBuilder,
 } from "../../../../model/XlsxSchema";
-import { createModelGenerateButton } from "./GenerateDialog";
+import {
+	type GenerateButtonProps,
+	ModelGenerateButton,
+	type ModelGenerateConfig,
+} from "./GenerateDialog";
 import { XlsxSchemaEditDialog } from "./XlsxSchemaDialog";
 
-export const XlsxSchemaGenerateButton = createModelGenerateButton<
+const xlsxSchemaGenerateConfig: ModelGenerateConfig<
 	XlsxSchemaBuilder,
 	XlsxSchema
->({
+> = {
 	generateType: "xlsxSchema",
 	formId: "xlsxSchemaGenerateForm",
 	name: "xlsxSchemaGenerate",
@@ -21,4 +25,10 @@ export const XlsxSchemaGenerateButton = createModelGenerateButton<
 	renderEditDialog: (schema, props) => (
 		<XlsxSchemaEditDialog schema={schema} {...props} />
 	),
-});
+};
+
+export function XlsxSchemaGenerateButton({ setPath }: GenerateButtonProps) {
+	return (
+		<ModelGenerateButton config={xlsxSchemaGenerateConfig} setPath={setPath} />
+	);
+}

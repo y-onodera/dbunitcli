@@ -105,22 +105,3 @@ export function createEditButton(
 		return <ResourceEditButton renderDialog={renderDialog} />;
 	};
 }
-
-// 削除用フックからRemoveResourceを使う削除ボタンを生成する
-export function createRemoveButton(
-	useDeleteResource: () => (path: string) => Promise<string>,
-) {
-	return function RemoveResourceButton({
-		path,
-		setPath,
-	}: ResourceEditButtonProp) {
-		const deleteResource = useDeleteResource();
-		return (
-			<RemoveResource
-				path={path}
-				setPath={setPath}
-				deleteResource={deleteResource}
-			/>
-		);
-	};
-}

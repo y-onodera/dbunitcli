@@ -3,7 +3,7 @@
 Tauri v2 ベースのデスクトップ GUI。React フロントエンドが sidecar (Java) をバックエンドとして利用する。
 
 ## 技術スタック
-- **フロントエンド**: React 19 + TypeScript 5.9 + Tailwind CSS 4.x
+- **フロントエンド**: React 19 + TypeScript 7 + Tailwind CSS 4.x
 - **バックエンド**: Tauri v2 (Rust) — Java sidecar プロセスを起動・管理
 - **ビルド**: Bun + Vite、品質管理: Biome v2
 

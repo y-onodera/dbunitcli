@@ -213,30 +213,30 @@ describe("SelectParameterProviderのテスト", () => {
 		it.each([
 			{ command: "convert", response: mockConvertParams },
 			{ command: "generate", response: mockGenerateParams },
-		])("指定したコマンドのパラメータを読み込めることを確認", async ({
-			command,
-			response,
-		}) => {
-			const { result } = renderHook(
-				() => ({
-					parameter: useSelectParameter(),
-					loadParameter: useLoadSelectParameter(),
-				}),
-				{ wrapper },
-			);
-			await waitFor(() => {
-				expect(result.current.parameter).toEqual({} as SelectParameter);
-			});
-
-			result.current.loadParameter(command as Command, "test-param");
-			await waitFor(() => {
-				expect(result.current.parameter.name).toBe("test-param");
-				expect(result.current.parameter.options.command).toBe(command);
-				expect(result.current.parameter).toEqual(
-					new SelectParameter(response, command as Command, "test-param"),
+		])(
+			"指定したコマンドのパラメータを読み込めることを確認",
+			async ({ command, response }) => {
+				const { result } = renderHook(
+					() => ({
+						parameter: useSelectParameter(),
+						loadParameter: useLoadSelectParameter(),
+					}),
+					{ wrapper },
 				);
-			});
-		});
+				await waitFor(() => {
+					expect(result.current.parameter).toEqual({} as SelectParameter);
+				});
+
+				result.current.loadParameter(command as Command, "test-param");
+				await waitFor(() => {
+					expect(result.current.parameter.name).toBe("test-param");
+					expect(result.current.parameter.options.command).toBe(command);
+					expect(result.current.parameter).toEqual(
+						new SelectParameter(response, command as Command, "test-param"),
+					);
+				});
+			},
+		);
 	});
 
 	describe("useRefreshSelectParameter", () => {
@@ -251,42 +251,41 @@ describe("SelectParameterProviderのテスト", () => {
 				loadResponse: mockGenerateParams,
 				refreshResponse: mockRefreshGenerateParams,
 			},
-		])("パラメータを更新できることを確認：convert", async ({
-			command,
-			loadResponse,
-			refreshResponse,
-		}) => {
-			const { result } = renderHook(
-				() => ({
-					parameter: useSelectParameter(),
-					loadParameter: useLoadSelectParameter(),
-					refreshParameter: useRefreshSelectParameter(command),
-				}),
-				{ wrapper },
-			);
-			await waitFor(() => {
-				expect(result.current.parameter).toEqual({} as SelectParameter);
-			});
-			result.current.loadParameter(command as Command, "test-param");
-			await waitFor(() => {
-				expect(result.current.parameter).toEqual(
-					new SelectParameter(loadResponse, command as Command, "test-param"),
+		])(
+			"パラメータを更新できることを確認：convert",
+			async ({ command, loadResponse, refreshResponse }) => {
+				const { result } = renderHook(
+					() => ({
+						parameter: useSelectParameter(),
+						loadParameter: useLoadSelectParameter(),
+						refreshParameter: useRefreshSelectParameter(command),
+					}),
+					{ wrapper },
 				);
-			});
-			const mockData = { test: "value" };
-			result.current.refreshParameter(mockData);
-			await waitFor(() => {
-				expect(result.current.parameter.name).toBe("test-param");
-				expect(result.current.parameter.options.command).toBe(command);
-				expect(result.current.parameter).toEqual(
-					new SelectParameter(
-						refreshResponse,
-						command as Command,
-						"test-param",
-					),
-				);
-			});
-		});
+				await waitFor(() => {
+					expect(result.current.parameter).toEqual({} as SelectParameter);
+				});
+				result.current.loadParameter(command as Command, "test-param");
+				await waitFor(() => {
+					expect(result.current.parameter).toEqual(
+						new SelectParameter(loadResponse, command as Command, "test-param"),
+					);
+				});
+				const mockData = { test: "value" };
+				result.current.refreshParameter(mockData);
+				await waitFor(() => {
+					expect(result.current.parameter.name).toBe("test-param");
+					expect(result.current.parameter.options.command).toBe(command);
+					expect(result.current.parameter).toEqual(
+						new SelectParameter(
+							refreshResponse,
+							command as Command,
+							"test-param",
+						),
+					);
+				});
+			},
+		);
 	});
 
 	describe("useSaveParameter", () => {

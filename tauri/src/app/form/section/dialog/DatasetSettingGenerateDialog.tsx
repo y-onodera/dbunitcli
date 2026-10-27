@@ -3,12 +3,16 @@ import {
 	type DatasetSettingsBuilder,
 } from "../../../../model/DatasetSettings";
 import { DatasetSettingsEditDialog } from "./DatasetSettingsDialog";
-import { createModelGenerateButton } from "./GenerateDialog";
+import {
+	type GenerateButtonProps,
+	ModelGenerateButton,
+	type ModelGenerateConfig,
+} from "./GenerateDialog";
 
-export const DatasetSettingGenerateButton = createModelGenerateButton<
+const datasetSettingGenerateConfig: ModelGenerateConfig<
 	DatasetSettingsBuilder,
 	DatasetSettings
->({
+> = {
 	generateType: "settings",
 	formId: "datasetSettingGenerateForm",
 	name: "datasetSettingGenerate",
@@ -21,4 +25,13 @@ export const DatasetSettingGenerateButton = createModelGenerateButton<
 	renderEditDialog: (settings, props) => (
 		<DatasetSettingsEditDialog settings={settings} {...props} />
 	),
-});
+};
+
+export function DatasetSettingGenerateButton({ setPath }: GenerateButtonProps) {
+	return (
+		<ModelGenerateButton
+			config={datasetSettingGenerateConfig}
+			setPath={setPath}
+		/>
+	);
+}

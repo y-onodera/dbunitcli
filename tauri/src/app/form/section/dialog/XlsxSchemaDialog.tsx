@@ -16,7 +16,11 @@ import {
 	XlsxSchema,
 } from "../../../../model/XlsxSchema";
 import { saveOnSuccess } from "../../../../utils/fetchUtils";
-import { createEditButton, createRemoveButton } from "./ResourceEditButton";
+import {
+	createEditButton,
+	RemoveResource,
+	type ResourceEditButtonProp,
+} from "./ResourceEditButton";
 import XlsxCellSettingDialog from "./XlsxCellSettingDialog";
 import XlsxRowSettingDialog from "./XlsxRowSettingDialog";
 
@@ -89,4 +93,16 @@ export function XlsxSchemaEditDialog(props: {
 	);
 }
 export const XlsxSchemaEditButton = createEditButton(XlsxSchemaDialog);
-export const RemoveXlsxSchemaButton = createRemoveButton(useDeleteXlsxSchema);
+export function RemoveXlsxSchemaButton({
+	path,
+	setPath,
+}: ResourceEditButtonProp) {
+	const deleteResource = useDeleteXlsxSchema();
+	return (
+		<RemoveResource
+			path={path}
+			setPath={setPath}
+			deleteResource={deleteResource}
+		/>
+	);
+}
