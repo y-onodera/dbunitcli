@@ -2,34 +2,30 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8" />
-  <title>ヘルプ - Source Type: sql</title>
-  <style>
-    body { font-family: system-ui, sans-serif; margin: 2rem; color: #1f2937; line-height: 1.6; }
-    h1 { font-size: 1.5rem; border-bottom: 2px solid #4f46e5; padding-bottom: 0.5rem; }
-    h2 { font-size: 1.2rem; margin-top: 1.5rem; color: #374151; }
-    h3 { font-size: 1rem; margin-top: 1rem; color: #374151; }
-    p { color: #4b5563; }
-    table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
-    th, td { text-align: left; padding: 0.5rem 0.75rem; border-bottom: 1px solid #e5e7eb; vertical-align: top; }
-    th { background: #f9fafb; font-weight: 600; color: #374151; }
-    td:first-child { font-family: monospace; white-space: nowrap; color: #4f46e5; }
-    a { color: #4f46e5; }
-    pre { background: #f9fafb; padding: 0.75rem; border-radius: 0.375rem; overflow-x: auto; font-size: 0.85rem; }
-    code { font-family: monospace; color: #4f46e5; }
-    ol, ul { color: #4b5563; }
-  </style>
+  <title>ヘルプ - srcType: sql</title>
+  <link rel="stylesheet" href="../../../help.css" />
 </head>
 <body>
   <p><a href="../../dataset-load-form.html">&larr; Dataset Load Form に戻る</a></p>
-  <h1>Source Type: sql</h1>
-  <p><strong>src の意味:</strong> SQL クエリを記述したファイル、または複数 SQL を含むディレクトリ。<code>jdbcProperties</code>（JDBC 接続設定）が必須です。</p>
-  <p><strong>テーブル名:</strong> SQL ファイル名（拡張子除く）。</p>
-  <p><strong>固有オプション:</strong></p>
-  <ul>
-    <li><code>useJdbcMetaData</code> — 意味は <a href="table.html">table</a> と同じ。DBUnit のメタデータ取得経路を切り替えます。詳細は table の節を参照してください。</li>
-  </ul>
-  <p><strong>注:</strong> <code>headerName</code> / <code>startRow</code> / <code>addFileInfo</code> は SQL 実行結果には適用されず無効です。</p>
-  <p><strong>データイメージ例:</strong></p>
+  <h1>srcType: sql</h1>
+  <p>SQL ファイルを接続先のデータベースで実行し、結果をテーブルとして読み込みます。</p>
+
+  <h2 id="section-target">読み込み対象</h2>
+  <table>
+    <tr><th>項目</th><th>内容</th></tr>
+    <tr><td>src</td><td>SELECT 文を書いた SQL ファイル、またはファイルを置いたディレクトリ</td></tr>
+    <tr><td>テーブル名</td><td>SQL ファイル名（拡張子を除く）</td></tr>
+    <tr><td>接続先</td><td><a href="../../jdbc.html">JDBC</a> の設定が必須</td></tr>
+  </table>
+
+  <h2 id="section-options">固有オプション</h2>
+  <table>
+    <tr><th>項目</th><th>説明</th><th>デフォルト</th></tr>
+    <tr><td>useJdbcMetaData</td><td>ON にすると、カラムの型と主キーを接続先のスキーマ全体から調べる。<a href="table.html">srcType: table</a> と同じ</td><td>OFF</td></tr>
+  </table>
+
+  <h2 id="section-example">入出力例</h2>
+  <p>SELECT の結果を読み込む例:</p>
   <pre>入力 (active_users.sql):
   SELECT id, name FROM USERS WHERE active = 1
 
@@ -42,5 +38,11 @@ JDBC 実行結果:
 データ行:
   [1, Alice]
   [3, Carol]</pre>
+
+  <h2 id="section-notes">注意</h2>
+  <ul>
+    <li><a href="../../data-load.html">Data Load</a> の <code>headerName</code> / <code>startRow</code> / <code>addFileInfo</code> は効きません</li>
+    <li>SQL の中で -P 値を参照できます（<a href="../../../dialogs/parameters.html">Parameters (-P)</a>）</li>
+  </ul>
 </body>
 </html>

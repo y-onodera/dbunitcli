@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <title>ヘルプ - 基本的な使い方</title>
+  <link rel="stylesheet" href="../help.css" />
+</head>
+<body>
+  <p><a href="../index.html">&larr; ヘルプ一覧に戻る</a></p>
+  <h1>基本的な使い方</h1>
+  <p>Workspace を選んでからコマンドを作り、実行・保存し、別の環境で使い回すまでの流れを説明します。各画面の項目の詳しい説明は、それぞれのリンク先を参照してください。</p>
+
+  <h2 id="toc">目次</h2>
+  <ol>
+    <li><a href="#step-workspace">Workspace を選ぶ</a></li>
+    <li><a href="#step-command">コマンドを選ぶ</a></li>
+    <li><a href="#step-exec">Exec で実行しながらオプションを決める</a></li>
+    <li><a href="#step-save">Save で保存する</a></li>
+    <li><a href="#step-shell">Save Shell で .bat を保存する</a></li>
+    <li><a href="#step-parameterize">Parameterize で繰り返し実行する</a></li>
+    <li><a href="#step-reuse">Dataset Base / Result Base / Env を使い分けて再利用する</a></li>
+  </ol>
+
+  <h2 id="step-workspace">1. Workspace を選ぶ</h2>
+  <p>Workspace は、保存済みオプションや設定ファイルを置く作業ディレクトリです。ヘッダの ChangeWorkspace ボタンでダイアログを開き、Workspace を選んで <code>confirm</code> を押します。Dataset Base / Result Base / Env は空欄のままでもかまいません（それぞれ Workspace、Workspace、<code>env.properties</code> になります）。</p>
+  <p>切り替えると、サイドバーの保存済みオプションの一覧と各設定ダイアログの内容が、新しい Workspace のものに変わります。入力項目とディレクトリ構成は <a href="../dialogs/workspace.html">Workspace</a> を参照してください。</p>
+
+  <h2 id="step-command">2. コマンドを選ぶ</h2>
+  <p>サイドバーでコマンド名（Convert / Compare / Generate / Run / Parameterize）をクリックすると、保存済みオプションの一覧が開きます。</p>
+  <ul>
+    <li>新しく作る場合は ＋ を押します。<code>new item</code> という名前の保存済みオプションが作られます</li>
+    <li>既存のものを使う場合は名前をクリックします。フォームに内容が表示され、ヘッダ右側に <code>コマンド: 名前</code> が表示されます</li>
+    <li>既存のものを元に別のものを作る場合は、⚙ の Copy で複製してから開きます</li>
+  </ul>
+  <p>各コマンドでできることは、<a href="../index.html">ヘルプ一覧</a>の「コマンド」から各ページを参照してください。</p>
+
+  <h2 id="step-exec">3. Exec で実行しながらオプションを決める</h2>
+  <p>フォームでオプションを入力し、フッターの Exec を押して実行します。Exec はフォームに表示中の内容をそのまま実行するので、保存していなくても試せます。結果のダイアログにある Open Directory で出力先を開いて、出力を確認します。期待どおりになるまで、オプションを変えて Exec を繰り返してください。</p>
+  <ul>
+    <li>時間がかかる処理は、実行中に Abandoned を押すと中断できます</li>
+    <li>SQL やテンプレートに渡す値は Edit Parameters (-P) で入力できます。入力した -P 値は Save で一緒に保存されます（<a href="../dialogs/parameters.html">Parameters (-P)</a> を参照）</li>
+    <li>入力欄の横のファイル選択・ディレクトリ選択ボタンで選んだパスは、オプションごとの基準ディレクトリからの相対パスで入ります（<a href="../dialogs/workspace.html">Workspace</a> の「ファイル選択と Workspace」を参照）</li>
+    <li>あとで別の環境やデータで使い回す予定があるなら、この段階でパスを相対パスにし、接続先などを <code>${env.変数名}</code> にしておきます（<a href="#step-reuse">7.</a> を参照）</li>
+  </ul>
+
+  <h2 id="step-save">4. Save で保存する</h2>
+  <p>オプションが決まったら、フッターの Save を押します。フォームの内容と -P 値が <code>option/&lt;command&gt;/&lt;name&gt;.txt</code> に上書き保存されます。名前は、サイドバーの ⚙ から rename で分かりやすいものに変えてください。</p>
+
+  <h2 id="step-shell">5. Save Shell で .bat を保存する</h2>
+  <p>GUI を使わずに別のシェルやタスクスケジューラから実行したい場合は、フッターの Save Shell を押します。</p>
+  <ul>
+    <li>.bat は<strong>保存済み</strong>の内容を実行します。フォームで変えたばかりの内容は入らないので、先に Save してください</li>
+    <li>.bat はアプリを起動したディレクトリに <code>&lt;command&gt;_&lt;name&gt;.bat</code> という名前で作られます（Workspace の中ではありません）。同じ名前のファイルがあると上書きされます</li>
+    <li>作るときの Workspace / Dataset Base / Result Base / Env が .bat に書き込まれます</li>
+  </ul>
+
+  <h2 id="step-parameterize">6. Parameterize で繰り返し実行する</h2>
+  <p>同じコマンドを値だけ変えて何回も実行したい場合は、Parameterize を使います。</p>
+  <ol>
+    <li>元にするオプションを Save しておきます（Parameterize は保存済みの内容から作られます）</li>
+    <li>サイドバーでその名前の ⚙ を押し、Parameterize を選びます。次の 3 つが作られ、Parameterize のフォームが開きます
+      <ul>
+        <li>テンプレート <code>option/parameterize/template/&lt;name&gt;.txt</code>：各オプションが <code>-オプション名=$param.オプション名$</code> の形になります</li>
+        <li>パラメータデータの CSV <code>&lt;workspace&gt;/&lt;name&gt;.csv</code>：今の値が 1 行だけ入っています</li>
+        <li>Parameterize の保存済みオプション <code>option/parameterize/&lt;name&gt;.txt</code></li>
+      </ul>
+    </li>
+    <li>CSV に、実行したい回数ぶん行を足して値を変えます。変えない列はテンプレートで固定の値に書き換えてもかまいません</li>
+    <li>Exec で実行すると、CSV の行ごとにコマンドが実行されます。確認できたら Save し、必要なら Save Shell で .bat にします</li>
+  </ol>
+  <p><code>unit</code> や <code>cmdParam</code> などの設定は <a href="../commands/parameterize.html">Parameterize</a> を参照してください。</p>
+
+  <h2 id="step-reuse">7. Dataset Base / Result Base / Env を使い分けて再利用する</h2>
+  <p>オプションの中ではパスを相対パスで書き、環境で変わる値を <code>${env.変数名}</code> にしておくと、保存済みオプションを書き換えずに ChangeWorkspace の設定だけで使い回せます。</p>
+  <table>
+    <tr><th>切り替えるもの</th><th>向いている場面</th><th>オプションの書き方</th></tr>
+    <tr><td>Dataset Base</td><td>入力データだけが違う（例: 月ごとのデータディレクトリ、テスト用と本番用の入力）</td><td>入力ファイル（<code>src</code> など）を相対パスで書く</td></tr>
+    <tr><td>Result Base</td><td>出力先を分けたい（例: 環境ごと、実行日ごと）</td><td>出力先（<code>result</code> など）を相対パスで書く</td></tr>
+    <tr><td>Env</td><td>接続先・ユーザ・スキーマなどの値が環境ごとに違う（例: 開発 DB とステージング DB）</td><td>値を <code>${env.変数名}</code> で書き、環境ごとの <code>.properties</code> を用意する</td></tr>
+    <tr><td>Workspace</td><td>保存済みオプションや設定ファイル一式を別にしたい（例: プロジェクトごと）</td><td>—（保存済みオプション・設定ファイルごと切り替わる）</td></tr>
+  </table>
+  <p>例: 開発環境で作ったオプションをステージングで使う場合</p>
+  <ol>
+    <li>開発環境用の <code>env/dev.properties</code> とステージング用の <code>env/staging.properties</code> を用意します</li>
+    <li>オプションの接続先を <code>${env.host}</code> などにして Save します</li>
+    <li>ChangeWorkspace で Env を <code>env/staging.properties</code>、Result Base をステージング用の出力先に変えて <code>confirm</code> を押します</li>
+    <li>同じ保存済みオプションをそのまま Exec します。.bat も環境ごとに作る場合は、Save Shell のあとで .bat の名前を変えておいてください（同じ名前だと上書きされるため）</li>
+  </ol>
+  <p>Env ファイルの書き方は <a href="../dialogs/workspace.html">Workspace</a> の「環境変数（Env）」、-P 値との使い分けは <a href="../dialogs/parameters.html">Parameters (-P)</a> を参照してください。</p>
+
+  <h2 id="section-related">関連</h2>
+  <ul>
+    <li><a href="../dialogs/workspace.html">Workspace</a> — ChangeWorkspace の入力項目、ディレクトリ構成、サイドバーとフッターの操作</li>
+    <li><a href="../dialogs/parameters.html">Parameters (-P)</a> — 実行時に SQL やテンプレートへ値を渡す</li>
+    <li><a href="../commands/parameterize.html">Parameterize</a> — 繰り返し実行の設定</li>
+  </ul>
+</body>
+</html>

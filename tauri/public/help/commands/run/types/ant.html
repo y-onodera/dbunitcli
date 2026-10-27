@@ -2,39 +2,43 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8" />
-  <title>ヘルプ - Script Type: ant</title>
-  <style>
-    body { font-family: system-ui, sans-serif; margin: 2rem; color: #1f2937; line-height: 1.6; }
-    h1 { font-size: 1.5rem; border-bottom: 2px solid #4f46e5; padding-bottom: 0.5rem; }
-    h2 { font-size: 1.2rem; margin-top: 1.5rem; color: #374151; }
-    p { color: #4b5563; }
-    table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
-    th, td { text-align: left; padding: 0.5rem 0.75rem; border-bottom: 1px solid #e5e7eb; }
-    th { background: #f9fafb; font-weight: 600; color: #374151; }
-    td:first-child { font-family: monospace; white-space: nowrap; color: #4f46e5; }
-    a { color: #4f46e5; }
-  </style>
+  <title>ヘルプ - scriptType: ant</title>
+  <link rel="stylesheet" href="../../../help.css" />
 </head>
 <body>
   <p><a href="../../run.html">&larr; Run に戻る</a></p>
-  <h1>Script Type: ant</h1>
-  <p>Apache ANT の build.xml を実行します。<code>srcData</code> で指定したファイル一覧（.xml）が対象となり、各ファイルに対して <code>antTarget</code> で指定したターゲットが実行されます。パラメータは ANT プロパティとして渡されます。</p>
-  <h2>固有オプション</h2>
+  <h1>scriptType: ant</h1>
+  <p>Apache Ant のビルドファイル（<code>.xml</code>）を実行します。<code>srcData</code> にディレクトリを指定した場合は、配下の <code>.xml</code> ファイルを 1 ファイルずつ実行します。</p>
+
+  <h2 id="section-options">固有オプション</h2>
   <table>
-    <tr><th>オプション</th><th>説明</th></tr>
-    <tr><td>srcData</td><td>実行対象ファイル（拡張子は <code>.xml</code> に自動設定）</td></tr>
-    <tr><td>baseDir</td><td>スクリプトの作業ディレクトリ</td></tr>
-    <tr><td>antTarget</td><td>実行する ANT ターゲット名（省略時はデフォルトターゲット）</td></tr>
+    <tr><th>項目</th><th>説明</th><th>デフォルト</th></tr>
+    <tr><td>baseDir</td><td>Ant の basedir（実行時の作業ディレクトリ）</td><td>—</td></tr>
+    <tr><td>antTarget</td><td>実行するターゲット名</td><td>（空）＝ ビルドファイルのデフォルトターゲット</td></tr>
   </table>
-  <p><code>srcData</code> の入力フォーム詳細は <a href="../../../sections/dataset-load-form.html">Dataset Load Form</a> を参照してください。</p>
-  <h2>設定例</h2>
-  <table>
-    <tr><th>設定項目</th><th>値の例</th></tr>
-    <tr><td>scriptType</td><td>ant</td></tr>
-    <tr><td>srcData.src</td><td>scripts/（build.xml を格納したディレクトリ）</td></tr>
-    <tr><td>baseDir</td><td>work/（ANT 実行時の作業ディレクトリ）</td></tr>
-    <tr><td>antTarget</td><td>deploy（実行するターゲット名。省略時はデフォルトターゲット）</td></tr>
-  </table>
-  <p><code>srcData</code> で渡したデータセットの各行は ANT プロパティ（<code>property name="COLUMN_NAME" value="..."</code>）として build.xml 内から参照できます。</p>
+
+  <h2 id="section-example">設定例</h2>
+  <pre>ビルドファイル (scripts/build.xml):
+  &lt;project default="deploy"&gt;
+    &lt;target name="deploy"&gt;
+      &lt;echo message="deploy to ${stage}"/&gt;
+    &lt;/target&gt;
+  &lt;/project&gt;
+
+指定:
+  scriptType      = ant
+  srcData の src  = scripts/build.xml
+  baseDir         = work/
+  antTarget       = deploy
+  -P 値           = stage=staging
+
+出力:
+  [echo] deploy to staging</pre>
+  <p>-P 値は Ant のプロパティとして渡され、ビルドファイルの中から <code>${キー}</code> で参照できます。</p>
+
+  <h2 id="section-related">関連</h2>
+  <ul>
+    <li><a href="../../../dialogs/parameters.html">Parameters (-P)</a> — 実行時にスクリプトへ値を渡す</li>
+  </ul>
 </body>
 </html>

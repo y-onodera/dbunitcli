@@ -1,0 +1,29 @@
+/* ヘルプ全ページ共通のスタイル。各ページは <link rel="stylesheet" href="（相対パス）help.css" /> で読み込む */
+
+body { font-family: system-ui, sans-serif; margin: 2rem; color: #1f2937; line-height: 1.6; }
+h1 { font-size: 1.5rem; border-bottom: 2px solid #4f46e5; padding-bottom: 0.5rem; }
+h2 { font-size: 1.2rem; margin-top: 1.5rem; color: #374151; }
+h3 { font-size: 1rem; margin-top: 1rem; color: #374151; }
+h4 { font-size: 0.95rem; margin-top: 1rem; color: #4f46e5; }
+p { color: #4b5563; }
+ul, ol { color: #4b5563; }
+a { color: #4f46e5; }
+
+table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+th, td { text-align: left; padding: 0.5rem 0.75rem; border-bottom: 1px solid #e5e7eb; vertical-align: top; }
+th { background: #f9fafb; font-weight: 600; color: #374151; white-space: nowrap; }
+td:first-child { font-family: monospace; white-space: nowrap; color: #4f46e5; }
+.center { text-align: center; }
+
+pre { background: #f9fafb; padding: 0.75rem; border-radius: 0.375rem; overflow-x: auto; font-size: 0.85rem; }
+code { font-family: monospace; color: #4f46e5; }
+
+/* index.html のページ一覧 */
+ul.cards { list-style: none; padding: 0; }
+ul.cards li { margin-bottom: 0.5rem; }
+a.card { display: block; padding: 0.75rem 1rem; border: 1px solid #e5e7eb; border-radius: 0.5rem; text-decoration: none; color: inherit; transition: background 0.15s; }
+a.card:hover { background: #f3f4f6; }
+.cmd-name { font-size: 1.05rem; font-weight: 600; color: #4f46e5; }
+.cmd-desc { font-size: 0.9rem; color: #6b7280; margin-top: 0.25rem; }
+.types { font-size: 0.85rem; color: #6b7280; margin: 0.25rem 0 0 1rem; }
+.types a { margin-right: 0.5rem; }

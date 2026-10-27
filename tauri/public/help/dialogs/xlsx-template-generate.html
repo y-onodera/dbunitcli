@@ -3,42 +3,38 @@
 <head>
   <meta charset="UTF-8" />
   <title>ヘルプ - Xlsx Template Generate</title>
-  <style>
-    body { font-family: system-ui, sans-serif; margin: 2rem; color: #1f2937; line-height: 1.6; }
-    h1 { font-size: 1.5rem; border-bottom: 2px solid #4f46e5; padding-bottom: 0.5rem; }
-    h2 { font-size: 1.2rem; margin-top: 1.5rem; color: #374151; }
-    h3 { font-size: 1rem; margin-top: 1rem; color: #374151; }
-    p { color: #4b5563; }
-    table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
-    th, td { text-align: left; padding: 0.5rem 0.75rem; border-bottom: 1px solid #e5e7eb; vertical-align: top; }
-    th { background: #f9fafb; font-weight: 600; color: #374151; }
-    td:first-child { font-family: monospace; white-space: nowrap; color: #4f46e5; }
-    a { color: #4f46e5; }
-    pre { background: #f9fafb; padding: 0.75rem; border-radius: 0.375rem; overflow-x: auto; font-size: 0.85rem; }
-    code { font-family: monospace; color: #4f46e5; }
-    ol, ul { color: #4b5563; }
-  </style>
+  <link rel="stylesheet" href="../help.css" />
 </head>
 <body>
   <p><a href="../index.html">&larr; ヘルプ一覧に戻る</a></p>
   <h1>Xlsx Template Generate</h1>
   <p>既存データセット（CSV / Excel / DB など）のテーブル・カラム構成から、jxls 用の Excel テンプレート（<code>.xlsx</code>）を自動生成して template リソースへ保存します。generateType が <code>xlsx</code> / <code>xls</code> のとき、template テキストボックス横のメニューの generate ボタンから開きます。</p>
-  <p><strong>できること</strong></p>
+
+  <h2 id="toc">目次</h2>
+  <ol>
+    <li><a href="#section-overview">できること</a></li>
+    <li><a href="#section-input">入力</a></li>
+    <li><a href="#section-flow">操作の流れ</a></li>
+    <li><a href="#section-example">生成例</a></li>
+    <li><a href="#section-notes">注意</a></li>
+    <li><a href="#section-related">関連</a></li>
+  </ol>
+  <h2 id="section-overview">できること</h2>
   <ul>
-    <li>テーブルごとに 1 シートを作成し、1 行目にカラム名、2 行目に <code>${row.get('カラム名')}</code> 形式の埋め込み式を持つテンプレートを作る。</li>
+    <li>テーブルごとに 1 シートを作成し、1 行目にカラム名、2 行目に <code>${row.get('カラム名')}</code> 形式の埋め込み式を持つテンプレートを作る</li>
     <li>jxls のコマンド（<code>jx:area</code> / <code>jx:each</code>）をセルコメントとして自動設定する。<code>jx:each</code> はテーブルの全行（<code>param.dataSet.get('テーブル名').rows</code>）を繰り返す。</li>
-    <li>生成したファイルを template リソースに保存し、template テキストボックスへ設定する。</li>
+    <li>生成したファイルを template リソースに保存し、template テキストボックスへ設定する</li>
   </ul>
   <p>一から手入力する代わりに、生成したテンプレートへ書式・計算式・見出しなどを加えて仕上げる使い方を想定しています。テンプレートの利用方法は <a href="../sections/jxls.html">Jxls</a> を参照してください。</p>
 
-  <h2>入力</h2>
+  <h2 id="section-input">入力</h2>
   <table>
     <tr><th>項目</th><th>説明</th></tr>
-    <tr><td>fileName</td><td>必須。保存するテンプレートのファイル名。拡張子が <code>.xlsx</code> でなければ <code>.xlsx</code> が付与されます（<code>generateType=xls</code> を選択していても出力は常に <code>.xlsx</code> 形式です）。ディレクトリ区切り（<code>/</code> <code>\</code>）や <code>..</code> は使えません。同名のファイルがある場合は上書きされます。</td></tr>
-    <tr><td>srcData</td><td>テンプレートの元にするデータセット。ソースタイプ・パス・エンコーディング・ヘッダ指定などを <a href="../sections/dataset-load-form.html">Dataset Load Form</a> と同じ要領で指定します。</td></tr>
+    <tr><td>fileName（必須）</td><td>保存するテンプレートのファイル名。拡張子が <code>.xlsx</code> でなければ <code>.xlsx</code> が付与される（<code>generateType=xls</code> を選択していても出力は常に <code>.xlsx</code> 形式）。ディレクトリ区切り（<code>/</code> <code>\</code>）や <code>..</code> は使えない。同名のファイルがある場合は上書きされる。</td></tr>
+    <tr><td>srcData</td><td>テンプレートの元にするデータセット。<code>srcType</code>・パス・文字コード・ヘッダ指定などを <a href="../sections/dataset-load-form.html">Dataset Load Form</a> と同じ要領で指定する。</td></tr>
   </table>
 
-  <h2>操作の流れ</h2>
+  <h2 id="section-flow">操作の流れ</h2>
   <ol>
     <li>保存するファイル名と、元にするデータセットを指定します。</li>
     <li>Execute を押すと、テーブルごとのシートを持つテンプレートが生成され、template リソースへ保存されます。</li>
@@ -46,7 +42,7 @@
     <li>必要に応じて、保存されたファイルを Excel で開き、書式などを加えます。</li>
   </ol>
 
-  <h2>生成例</h2>
+  <h2 id="section-example">生成例</h2>
   <p>たとえば <code>USERS</code> テーブル（カラム <code>ID</code> / <code>NAME</code> / <code>EMAIL</code>）を含むデータセットを指定すると、シート <code>USERS</code> が次の内容で作られます。</p>
   <table>
     <tr><th>シート: USERS</th><th>A</th><th>B</th><th>C</th></tr>
@@ -60,11 +56,17 @@
   </table>
   <p>generate コマンドの <code>generateType=xlsx</code>（または <code>xls</code>）、<code>unit=dataset</code> でこのテンプレートを指定すると、各テーブルのデータが対応するシートに展開された Excel が出力されます。</p>
 
-  <h2>注意</h2>
+  <h2 id="section-notes">注意</h2>
   <ul>
     <li>テンプレートの生成にはデータ本体を読み込まず、カラム情報のみを使用します。</li>
     <li>Execute が失敗した場合は、ダイアログ内にエラーメッセージが表示されます。入力内容を見直して再度実行してください。</li>
     <li>Close を押すと、生成せずにダイアログを閉じます（template テキストボックスは変更されません）。</li>
+  </ul>
+
+  <h2 id="section-related">関連</h2>
+  <ul>
+    <li><a href="../sections/jxls.html">Jxls</a> — テンプレートの書き方</li>
+    <li><a href="../commands/generate/types/xlsxTemplate.html">generateType: xlsxTemplate</a> — Generate で雛型を作る</li>
   </ul>
 </body>
 </html>

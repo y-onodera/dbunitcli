@@ -3,47 +3,33 @@
 <head>
   <meta charset="UTF-8" />
   <title>ヘルプ - Scaffold</title>
-  <style>
-    body { font-family: system-ui, sans-serif; margin: 2rem; color: #1f2937; line-height: 1.6; }
-    h1 { font-size: 1.5rem; border-bottom: 2px solid #4f46e5; padding-bottom: 0.5rem; }
-    h2 { font-size: 1.2rem; margin-top: 1.5rem; color: #374151; }
-    h3 { font-size: 1rem; margin-top: 1rem; color: #374151; }
-    p { color: #4b5563; }
-    table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
-    th, td { text-align: left; padding: 0.5rem 0.75rem; border-bottom: 1px solid #e5e7eb; vertical-align: top; }
-    th { background: #f9fafb; font-weight: 600; color: #374151; }
-    td:first-child { font-family: monospace; white-space: nowrap; color: #4f46e5; }
-    a { color: #4f46e5; }
-    pre { background: #f9fafb; padding: 0.75rem; border-radius: 0.375rem; overflow-x: auto; font-size: 0.85rem; }
-    code { font-family: monospace; color: #4f46e5; }
-    ol, ul { color: #4b5563; }
-  </style>
+  <link rel="stylesheet" href="../help.css" />
 </head>
 <body>
   <p><a href="../index.html">&larr; ヘルプ一覧に戻る</a></p>
   <h1>Scaffold</h1>
-  <p>固定成果物タイプ（<code>ddl</code> / <code>javaBean</code> / <code>xlsxSchema</code> / <code>fixedColumnDef</code>）の組み込みテンプレートを、カスタマイズ生成の出発点としてワークスペースへ書き出し、その結果を generate フォームへ反映します。generateType が <code>txt</code> のとき、unit の上にある Scaffold ボタンから開きます（scaffold コマンドを実行します）。</p>
-  <p><strong>できること</strong></p>
+  <p>固定成果物タイプ（<code>ddl</code> / <code>javaBean</code> / <code>xlsxSchema</code> / <code>fixedColumnDef</code>）の組み込みテンプレートを、カスタマイズ生成の出発点として Workspace へ書き出し、その結果を generate フォームへ反映します。generateType が <code>txt</code> のとき、unit の上にある Scaffold ボタンから開きます（scaffold コマンドを実行します）。</p>
+  <h2 id="section-overview">できること</h2>
   <ul>
-    <li>組み込みテンプレート（<code>.stg</code> / <code>.txt</code>）と、サンプルの unitSetting をワークスペースへ書き出す。</li>
-    <li>データソースから、テーブルごとの記述子データセット（1 カラム = 1 行）を書き出す。</li>
-    <li>書き出した雛型で駆動する設定を generate フォームへ反映する。そのまま <code>Exec</code> で生成できます。</li>
+    <li>組み込みテンプレート（<code>.stg</code> / <code>.txt</code>）と、サンプルの unitSetting を Workspace へ書き出す</li>
+    <li>データソースから、テーブルごとの記述子データセット（1 カラム = 1 行）を書き出す</li>
+    <li>書き出した雛型で駆動する設定を generate フォームへ反映する。そのまま <code>Exec</code> で生成できる</li>
   </ul>
 
-  <h2>入力</h2>
+  <h2 id="section-input">入力</h2>
   <table>
     <tr><th>項目</th><th>説明</th><th>デフォルト</th></tr>
     <tr><td>target</td><td>雛型の生成対象（<code>ddl</code> / <code>javaBean</code> / <code>xlsxSchema</code> / <code>fixedColumnDef</code>）</td><td>ddl</td></tr>
-    <tr><td>template</td><td>書き出すテンプレートのファイル名（必須。<code>resources/template/{名前}.stg</code> と <code>{名前}.txt</code> をワークスペースへ出力）</td><td>—</td></tr>
-    <tr><td>unitSetting</td><td>書き出すサンプル unitSetting のファイル名（省略可。<code>resources/setting/{名前}.json</code> をワークスペースへ出力）</td><td>—</td></tr>
+    <tr><td>template（必須）</td><td>書き出すテンプレートのファイル名（<code>resources/template/{名前}.stg</code> と <code>{名前}.txt</code> を Workspace へ出力）</td><td>—</td></tr>
+    <tr><td>unitSetting</td><td>書き出すサンプル unitSetting のファイル名（省略可。<code>resources/setting/{名前}.json</code> を Workspace へ出力）</td><td>—</td></tr>
     <tr><td>datasetType</td><td>記述子データセットの出力形式（<code>csv</code> / <code>xls</code> / <code>xlsx</code> / <code>table</code> / <code>fixed</code>）</td><td>csv</td></tr>
     <tr><td>datasetEncoding</td><td>記述子データセットの出力文字コード（csv / fixed のみ）</td><td>UTF-8</td></tr>
     <tr><td>fixedLength / defaultLength / align</td><td>target が <code>fixedColumnDef</code> の場合のみ表示。記述子データセットに書き出す桁数・デフォルト桁数・寄せ方向</td><td>— / 10 / left</td></tr>
-    <tr><td>dataset</td><td>記述子データセットの元になるデータソース。ダイアログを開いた時点の <code>src</code> セクションの内容が初期値として引き継がれます。指定するとテーブルごとの記述子データセット（1 カラム = 1 行）をワークスペースの <code>src</code> へ出力します</td><td>—</td></tr>
+    <tr><td>dataset</td><td>記述子データセットの元になるデータソース。ダイアログを開いた時点の <code>src</code> セクションの内容が初期値として引き継がれる。指定するとテーブルごとの記述子データセット（1 カラム = 1 行）を Workspace の <code>src</code> へ出力する</td><td>—</td></tr>
   </table>
   <p>target に <code>parameter</code> は選択できません。</p>
 
-  <h2>generate section</h2>
+  <h3 id="section-generate-section">generate section</h3>
   <p>ダイアログ上部の <strong>generate section</strong> のチェックボックスで、unitSetting と src を生成対象にするかを選べます（初期状態は両方選択）。template は常に生成・反映されるため選択できません。</p>
   <ul>
     <li>チェックを外したセクションの入力欄はダイアログから非表示になり、そのファイルは生成されません。</li>
@@ -52,27 +38,32 @@
   </ul>
   <table>
     <tr><th>generate section</th><th>ダイアログの入力</th><th>result（generate フォームへ反映される項目）</th></tr>
-    <tr><td>template</td><td>template</td><td><code>template</code>（<code>{名前}.txt</code>）、<code>template.templateGroup</code>（<code>{名前}.stg</code>）。<code>resources/template</code> 配下を基準に検索されるため、接頭辞は省略した名前が入ります</td></tr>
-    <tr><td>unitSetting</td><td>unitSetting</td><td><code>unitSetting</code>（<code>{名前}.json</code>。<code>resources/setting</code> 配下を基準に検索されるため接頭辞は省略した名前が入ります）</td></tr>
-    <tr><td>src</td><td>dataset</td><td><code>src.src</code>（書き出した記述子データセットのディレクトリ。入力した dataset のパスではありません）</td></tr>
+    <tr><td>template</td><td>template</td><td><code>template</code>（<code>{名前}.txt</code>）、<code>template.templateGroup</code>（<code>{名前}.stg</code>）。<code>resources/template</code> 配下を基準に検索されるため、接頭辞は省略した名前が入る</td></tr>
+    <tr><td>unitSetting</td><td>unitSetting</td><td><code>unitSetting</code>（<code>{名前}.json</code>。<code>resources/setting</code> 配下を基準に検索されるため接頭辞は省略した名前が入る）</td></tr>
+    <tr><td>src</td><td>dataset</td><td><code>src.src</code>（書き出した記述子データセットのディレクトリ。入力した dataset のパスではない）</td></tr>
     <tr><td>src</td><td>datasetType</td><td><code>src.srcType</code></td></tr>
     <tr><td>src</td><td>datasetEncoding</td><td><code>src.encoding</code>（csv / fixed のみ）</td></tr>
   </table>
   <p>チェックを外した unitSetting / src に対応する result は生成されないため反映されません。scaffold の雛型は <code>unit=table</code> で駆動するため、反映時に <code>unit</code> は常に <code>table</code> に変更されます。上記以外の result（<code>generateType</code> / <code>resultPath</code> など）は generate フォームへ反映されません。</p>
 
-  <h2>操作の流れ</h2>
+  <h2 id="section-flow">操作の流れ</h2>
   <ol>
     <li>target と、書き出すテンプレートのファイル名（必須）を指定します。必要に応じて unitSetting・記述子データセットの形式・データソースを指定します。</li>
-    <li>Execute を押すと雛型ファイルがワークスペースへ生成されます。</li>
+    <li>Execute を押すと雛型ファイルが Workspace へ生成されます。</li>
     <li>選択した generate section に対応する result（上表）が generate フォームへ反映され、ダイアログが閉じます。</li>
     <li>書き出された記述子データセットを編集してから <code>Exec</code> で生成します。反映内容の保存は通常どおり <code>Save</code> ボタンで行ってください。</li>
   </ol>
 
-  <h2>注意</h2>
+  <h2 id="section-notes">注意</h2>
   <ul>
     <li>Execute が失敗した場合は、ダイアログ内にエラーメッセージが表示されます。入力内容を見直して再度実行してください。</li>
     <li>Close を押すと、何も書き出さずにダイアログを閉じます（generate フォームは変更されません）。</li>
   </ul>
-  <p>関連: <a href="../commands/generate/types/txt.html">Generate Type: txt</a></p>
+
+  <h2 id="section-related">関連</h2>
+  <ul>
+    <li><a href="../commands/generate/types/txt.html">generateType: txt</a> — 書き出したテンプレートで生成する</li>
+    <li><a href="../commands/generate/unitSetting.html">unitSetting</a> — 書き出した設定の書式</li>
+  </ul>
 </body>
 </html>

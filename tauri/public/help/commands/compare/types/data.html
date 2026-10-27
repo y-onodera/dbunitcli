@@ -2,26 +2,12 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8" />
-  <title>ヘルプ - Target Type: data</title>
-  <style>
-    body { font-family: system-ui, sans-serif; margin: 2rem; color: #1f2937; line-height: 1.6; }
-    h1 { font-size: 1.5rem; border-bottom: 2px solid #4f46e5; padding-bottom: 0.5rem; }
-    h2 { font-size: 1.2rem; margin-top: 1.5rem; color: #374151; }
-    h3 { font-size: 1rem; margin-top: 1rem; color: #374151; }
-    p { color: #4b5563; }
-    table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
-    th, td { text-align: left; padding: 0.5rem 0.75rem; border-bottom: 1px solid #e5e7eb; vertical-align: top; }
-    th { background: #f9fafb; font-weight: 600; color: #374151; }
-    td:first-child { font-family: monospace; white-space: nowrap; color: #4f46e5; }
-    a { color: #4f46e5; }
-    pre { background: #f9fafb; padding: 0.75rem; border-radius: 0.375rem; overflow-x: auto; font-size: 0.85rem; }
-    code { font-family: monospace; color: #4f46e5; }
-    ol, ul { color: #4b5563; }
-  </style>
+  <title>ヘルプ - targetType: data</title>
+  <link rel="stylesheet" href="../../../help.css" />
 </head>
 <body>
   <p><a href="../../compare.html">&larr; Compare に戻る</a></p>
-  <h1>Target Type: data</h1>
+  <h1>targetType: data</h1>
   <p>CSV・Excel・DB テーブルなど、表形式のデータセットを比較します。<code>setting</code> に指定した <a href="../../../dialogs/dataset-settings.html">Dataset Settings</a> ファイルで主キー・カラム選択・ソート順などを制御できます。</p>
   <ul>
     <li><code>oldData</code> と <code>newData</code> で対応するテーブルを 1 対 1 に突き合わせます</li>
@@ -29,17 +15,24 @@
     <li><code>setting</code> を省略するとすべてのカラムを対象に順序比較します</li>
   </ul>
 
-  <h2 id="section-setting">setting による比較内容の変更（data モード）</h2>
-  <p><code>targetType=data</code> のとき、<code>setting</code> に <a href="../../../dialogs/dataset-settings.html">Dataset Settings</a> 形式の JSON ファイルを指定することで、テーブルごとに比較内容を細かく制御できます。</p>
-
-  <h3>主な制御項目</h3>
+  <h2 id="section-options">固有オプション</h2>
   <table>
-    <tr><th>設定フィールド</th><th>比較への影響</th></tr>
+    <tr><th>項目</th><th>説明</th><th>デフォルト</th></tr>
+    <tr><td>setting</td><td>比較の設定ファイル（<a href="../../../dialogs/dataset-settings.html">Dataset Settings</a> 形式）。主キー・比較するカラム・並び順などをテーブルごとに指定する（下記「setting による比較の制御」を参照）</td><td>（空）</td></tr>
+    <tr><td>createPatchSql</td><td>ON にすると、旧データを新データへ補正するパッチ SQL を出力する（下記「createPatchSql によるパッチ SQL の出力」を参照）</td><td>OFF</td></tr>
+  </table>
+
+  <h2 id="section-setting">setting による比較の制御</h2>
+  <p><code>setting</code> に <a href="../../../dialogs/dataset-settings.html">Dataset Settings</a> 形式の JSON ファイルを指定することで、テーブルごとに比較内容を細かく制御できます。</p>
+
+  <h3>主な項目</h3>
+  <table>
+    <tr><th>項目</th><th>比較への影響</th></tr>
     <tr><td>keys</td><td>比較の主キーとなるカラムを指定。指定がない場合は行順序で比較</td></tr>
     <tr><td>include</td><td>比較対象に含めるカラムを限定</td></tr>
     <tr><td>exclude</td><td>比較対象から除外するカラム（タイムスタンプ列など差分を無視したい列に使用）</td></tr>
     <tr><td>order</td><td>比較前にデータをソートするカラム</td></tr>
-    <tr><td>filter</td><td>比較前に行を絞り込む JeXL 条件式</td></tr>
+    <tr><td>filter</td><td>比較前に行を絞り込む JEXL 条件式</td></tr>
   </table>
 
   <h3>記述例</h3>
@@ -60,15 +53,15 @@
 }</pre>
   <p>この例では <code>orders</code> テーブルを <code>order_id</code> で突き合わせ、タイムスタンプ列を比較対象から除外します。<code>commonSettings</code> の <code>exclude</code> はすべてのテーブルに適用されます。</p>
 
-  <h3>filePath を使って別フォルダの同名ファイルに異なる設定を適用する</h3>
-  <p>CSV や Excel を再帰的に読み込む場合、異なるサブフォルダに同名ファイルが存在することがあります。<code>name</code> を <code>{ "any": "テーブル名", "filePath": "正規表現" }</code> 形式で指定すると、ファイルパスで絞り込んだうえで設定を適用できます。</p>
-  <p>たとえば次のようなフォルダ構成で、<code>summary.csv</code> が 2 か所に存在するケースを考えます。</p>
+  <h3>filePath を使って別ディレクトリの同名ファイルに異なる設定を適用する</h3>
+  <p>CSV や Excel を再帰的に読み込む場合、異なるサブディレクトリに同名ファイルが存在することがあります。<code>name</code> を <code>{ "any": "テーブル名", "filePath": "正規表現" }</code> 形式で指定すると、ファイルパスで絞り込んだうえで設定を適用できます。</p>
+  <p>たとえば次のようなディレクトリ構成で、<code>summary.csv</code> が 2 か所に存在するケースを考えます。</p>
   <pre>old/
   domestic/
     summary.csv   ← 主キー: region_code
   overseas/
     summary.csv   ← 主キー: country_code</pre>
-  <p>この場合、<code>name</code> にテーブル名と <code>filePath</code> の正規表現を組み合わせることで、フォルダごとに異なる設定を適用できます。</p>
+  <p>この場合、<code>name</code> にテーブル名と <code>filePath</code> の正規表現を組み合わせることで、ディレクトリごとに異なる設定を適用できます。</p>
   <pre>{
   "settings": [
     {
@@ -98,7 +91,7 @@
     <tr><th>カラム</th><th>説明</th></tr>
     <tr><td>OLD_PATH</td><td>旧データのソースパス（ディレクトリまたは DB 接続先）</td></tr>
     <tr><td>NEW_PATH</td><td>新データのソースパス</td></tr>
-    <tr><td>TARGET_NAME</td><td>差分が検出されたテーブル名（image/pdf モードではファイル名）</td></tr>
+    <tr><td>TARGET_NAME</td><td>差分が検出されたテーブル名（<code>image</code> / <code>pdf</code> ではファイル名）</td></tr>
     <tr><td>DIFF</td><td>差分の種類（下表参照）</td></tr>
     <tr><td>OLD_VALUE</td><td>旧データ側の値・件数・カラム名</td></tr>
     <tr><td>NEW_VALUE</td><td>新データ側の値・件数・カラム名</td></tr>
@@ -153,12 +146,18 @@
   </table>
 
   <h3 id="result-create-patch-sql">createPatchSql によるパッチ SQL の出力</h3>
-  <p><code>createPatchSql</code> を有効にすると、行レベルの差分が検出されたテーブルごとに、旧データを新データへ補正するパッチ SQL 文が <code>{テーブル名}$PATCH.sql</code>（UTF-8）として <code>convertResult</code> の出力先に書き出されます。主キー（<code>setting</code> の <code>keys</code>）が設定されていないテーブルは対象外です。</p>
+  <p><code>createPatchSql</code> を ON にすると、行レベルの差分が検出されたテーブルごとに、旧データを新データへ補正するパッチ SQL 文が <code>{テーブル名}$PATCH.sql</code>（UTF-8）として <code>convertResult</code> の出力先に書き出されます。主キー（<code>setting</code> の <code>keys</code>）が設定されていないテーブルは対象外です。</p>
   <ul>
     <li><code>MODIFY_VALUE</code>（値が変化した行）→ <code>UPDATE</code> 文（主キー以外の全カラムを新データの値に更新）</li>
     <li><code>KEY_DELETE</code>（旧データにのみ存在する行）→ <code>DELETE</code> 文</li>
     <li><code>KEY_ADD</code>（新データにのみ存在する行）→ <code>INSERT</code> 文</li>
   </ul>
   <p>比較の結果が既に一致している行、およびテーブル・カラムの差分（<code>TABLE_ADD</code> 等）は SQL 生成の対象外です。</p>
+  <h2 id="section-related">関連</h2>
+  <ul>
+    <li><a href="../../../dialogs/dataset-settings.html">Dataset Settings</a> — <code>setting</code> の書式</li>
+    <li><a href="../../../dialogs/dataset-setting.html">Dataset Setting</a> — 各項目と JEXL 式の詳細</li>
+    <li><a href="../../../sections/result-form.html">Result Form</a> — 比較結果の出力形式と出力先</li>
+  </ul>
 </body>
 </html>

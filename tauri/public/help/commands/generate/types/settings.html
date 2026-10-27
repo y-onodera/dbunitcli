@@ -2,34 +2,22 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8" />
-  <title>ヘルプ - Generate Type: settings</title>
-  <style>
-    body { font-family: system-ui, sans-serif; margin: 2rem; color: #1f2937; line-height: 1.6; }
-    h1 { font-size: 1.5rem; border-bottom: 2px solid #4f46e5; padding-bottom: 0.5rem; }
-    h2 { font-size: 1.2rem; margin-top: 1.5rem; color: #374151; }
-    h3 { font-size: 1rem; margin-top: 1rem; color: #374151; }
-    h4 { font-size: 0.95rem; margin-top: 1rem; color: #4f46e5; }
-    p { color: #4b5563; }
-    table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
-    th, td { text-align: left; padding: 0.5rem 0.75rem; border-bottom: 1px solid #e5e7eb; vertical-align: top; }
-    th { background: #f9fafb; font-weight: 600; color: #374151; }
-    td:first-child { font-family: monospace; white-space: nowrap; color: #4f46e5; }
-    a { color: #4f46e5; }
-    pre { background: #f9fafb; padding: 0.75rem; border-radius: 0.375rem; overflow-x: auto; font-size: 0.85rem; }
-    code { font-family: monospace; color: #4f46e5; }
-    .center { text-align: center; }
-    ul { color: #4b5563; }
-  </style>
+  <title>ヘルプ - generateType: settings</title>
+  <link rel="stylesheet" href="../../../help.css" />
 </head>
 <body>
   <p><a href="../../generate.html">&larr; Generate に戻る</a></p>
   <h1>generateType: settings</h1>
-  <p>データセットのカラム情報から <a href="../../../dialogs/dataset-settings.html">Dataset Settings</a> ファイルのひな型を JSON 形式で生成します。<code>unit</code> は <code>dataset</code> に固定です。<code>template</code> は使用しません。</p>
+  <p>入力データのテーブル・カラム情報から、<a href="../../../dialogs/dataset-settings.html">Dataset Settings</a> ファイルの雛型（JSON）を生成します。<code>unit</code> は <code>dataset</code> 固定で、<code>template</code> は使いません。</p>
+
+  <h2 id="section-options">固有オプション</h2>
   <table>
     <tr><th>項目</th><th>説明</th><th>デフォルト</th></tr>
-    <tr><td>includeAllColumns</td><td>設定生成時にすべてのカラムを <code>include</code> / <code>string</code> 等の詳細ブロックとして含める（false の場合は主キーの <code>keys</code> のみ）</td><td>false</td></tr>
+    <tr><td>includeAllColumns</td><td>ON にすると、すべてのカラムを <code>include</code> / <code>string</code> などの項目として含める。OFF のときは主キーの <code>keys</code> だけ</td><td>OFF</td></tr>
   </table>
-  <p><strong>生成イメージ（<code>includeAllColumns=false</code>）:</strong></p>
+
+  <h2 id="section-example">出力例</h2>
+  <p><code>includeAllColumns</code> が OFF の場合の出力です。</p>
   <pre>{
   "settings": [
     {
@@ -42,5 +30,11 @@
     }
   ]
 }</pre>
+
+  <h2 id="section-related">関連</h2>
+  <ul>
+    <li><a href="../../../dialogs/dataset-settings.html">Dataset Settings</a> — 設定ファイルの書式</li>
+    <li><a href="../../../dialogs/dataset-setting-generate.html">Dataset Setting Generate</a> — 画面から雛型を作る</li>
+  </ul>
 </body>
 </html>

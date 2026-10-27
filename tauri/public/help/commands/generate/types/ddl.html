@@ -2,35 +2,23 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8" />
-  <title>ヘルプ - Generate Type: ddl</title>
-  <style>
-    body { font-family: system-ui, sans-serif; margin: 2rem; color: #1f2937; line-height: 1.6; }
-    h1 { font-size: 1.5rem; border-bottom: 2px solid #4f46e5; padding-bottom: 0.5rem; }
-    h2 { font-size: 1.2rem; margin-top: 1.5rem; color: #374151; }
-    h3 { font-size: 1rem; margin-top: 1rem; color: #374151; }
-    h4 { font-size: 0.95rem; margin-top: 1rem; color: #4f46e5; }
-    p { color: #4b5563; }
-    table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
-    th, td { text-align: left; padding: 0.5rem 0.75rem; border-bottom: 1px solid #e5e7eb; vertical-align: top; }
-    th { background: #f9fafb; font-weight: 600; color: #374151; }
-    td:first-child { font-family: monospace; white-space: nowrap; color: #4f46e5; }
-    a { color: #4f46e5; }
-    pre { background: #f9fafb; padding: 0.75rem; border-radius: 0.375rem; overflow-x: auto; font-size: 0.85rem; }
-    code { font-family: monospace; color: #4f46e5; }
-    .center { text-align: center; }
-    ul { color: #4b5563; }
-  </style>
+  <title>ヘルプ - generateType: ddl</title>
+  <link rel="stylesheet" href="../../../help.css" />
 </head>
 <body>
   <p><a href="../../generate.html">&larr; Generate に戻る</a></p>
   <h1>generateType: ddl</h1>
-  <p>データソースのメタデータ（テーブルのカラム情報）から CREATE TABLE 用の DDL ファイルを自動生成します。<code>unit</code> は <code>table</code> に固定です。<code>template</code> は使用しません（組み込み DDL テンプレートのみ使用されます）。ファイル名は <code>{sqlFilePrefix}{テーブル名}{sqlFileSuffix}.sql</code> になります。カラムの型・PK・NULL制約はソースのメタデータから取得します（JDBC ソースで <code>useJdbcMetaData</code> を有効にした場合に実値が入ります。CSV 等メタデータの無いソースではカラム名のみになります）。カラムサイズ・コメント・パッケージ名などメタデータに存在しない情報を含む完全な DDL を生成したい場合は、<a href="../../../dialogs/txt-template-generate.html">Scaffold</a>（scaffold コマンド）で書き出した記述子データセットを編集し、<code>generateType=txt</code> と <code>unitSetting</code>（既定は <code>sql/ddlSettings.json</code>）で生成してください。</p>
+  <p>入力データのカラム情報から、テーブルごとに CREATE TABLE の DDL ファイルを生成します。<code>unit</code> は <code>table</code> 固定で、<code>template</code> は使いません。ファイル名は <code>{sqlFilePrefix}{テーブル名}{sqlFileSuffix}.sql</code> です。</p>
+
+  <h2 id="section-options">固有オプション</h2>
   <table>
     <tr><th>項目</th><th>説明</th><th>デフォルト</th></tr>
-    <tr><td>sqlFilePrefix</td><td>生成 DDL ファイル名のプレフィックス</td><td>（空）</td></tr>
-    <tr><td>sqlFileSuffix</td><td>生成 DDL ファイル名のサフィックス</td><td>（空）</td></tr>
+    <tr><td>sqlFilePrefix</td><td>ファイル名の先頭に付ける文字列</td><td>（空）</td></tr>
+    <tr><td>sqlFileSuffix</td><td>ファイル名の末尾（拡張子の前）に付ける文字列</td><td>（空）</td></tr>
   </table>
-  <p><strong>生成イメージ（カラムサイズ・コメント等をすべて与えた場合。ファイル名: <code>EMPLOYEE.sql</code>）:</strong></p>
+
+  <h2 id="section-example">出力例</h2>
+  <p>カラムサイズ・コメントなどをすべて与えた場合の出力です（ファイル名: <code>EMPLOYEE.sql</code>）。</p>
   <pre>CREATE TABLE EMPLOYEE (
     EMPLOYEE_ID INTEGER(10) NOT NULL,
     EMPLOYEE_NAME VARCHAR(100),
@@ -42,5 +30,16 @@ COMMENT ON TABLE EMPLOYEE IS '社員マスタ';
 COMMENT ON COLUMN EMPLOYEE.EMPLOYEE_ID IS '社員ID';
 COMMENT ON COLUMN EMPLOYEE.EMPLOYEE_NAME IS '氏名';
 COMMENT ON COLUMN EMPLOYEE.SALARY IS '給与';</pre>
+
+  <h2 id="section-notes">注意</h2>
+  <ul>
+    <li>カラムの型・主キー・NULL 制約は入力データから取得します。値が入るのは、<code>srcType</code> が <code>table</code> / <code>sql</code> で <code>useJdbcMetaData</code> を ON にした場合です。CSV など型情報のない入力では、カラム名だけになります</li>
+    <li>カラムサイズ・コメントなど入力データにない情報を含めたい場合は、<a href="../../../dialogs/txt-template-generate.html">Scaffold</a> で書き出した記述子データセットを編集し、<code>generateType=txt</code> で生成してください</li>
+  </ul>
+
+  <h2 id="section-related">関連</h2>
+  <ul>
+    <li><a href="../../../dialogs/txt-template-generate.html">Scaffold</a> — 組み込みテンプレートを書き出してカスタマイズする</li>
+  </ul>
 </body>
 </html>

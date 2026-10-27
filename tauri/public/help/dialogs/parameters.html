@@ -3,21 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <title>ヘルプ - Parameters (-P)</title>
-  <style>
-    body { font-family: system-ui, sans-serif; margin: 2rem; color: #1f2937; line-height: 1.6; }
-    h1 { font-size: 1.5rem; border-bottom: 2px solid #4f46e5; padding-bottom: 0.5rem; }
-    h2 { font-size: 1.2rem; margin-top: 1.5rem; color: #374151; }
-    h3 { font-size: 1rem; margin-top: 1rem; color: #374151; }
-    p { color: #4b5563; }
-    table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
-    th, td { text-align: left; padding: 0.5rem 0.75rem; border-bottom: 1px solid #e5e7eb; vertical-align: top; }
-    th { background: #f9fafb; font-weight: 600; color: #374151; }
-    td:first-child { font-family: monospace; white-space: nowrap; color: #4f46e5; }
-    a { color: #4f46e5; }
-    pre { background: #f9fafb; padding: 0.75rem; border-radius: 0.375rem; overflow-x: auto; font-size: 0.85rem; }
-    code { font-family: monospace; color: #4f46e5; }
-    ul, ol { color: #4b5563; }
-  </style>
+  <link rel="stylesheet" href="../help.css" />
 </head>
 <body>
   <p><a href="../index.html">&larr; ヘルプ一覧に戻る</a></p>
@@ -28,7 +14,7 @@
   <ol>
     <li>フッターの Edit Parameters (-P) ボタンを押してダイアログを開く</li>
     <li>キーと値を入力する。キーを空にした行は削除される</li>
-    <li>Apply で反映する。設定がある場合はボタンに件数のバッジが付き、右に <code>— N parameter(s) set</code> と表示される。設定がない場合は <code>— No parameters</code> と表示される。保存済みのパラメータを開いたときも、保存された -P の件数が表示される</li>
+    <li>Apply で反映する。設定がある場合はボタンに件数のバッジが付き、右に <code>— N parameter(s) set</code> と表示される。設定がない場合は <code>— No parameters</code> と表示される。保存済みオプションを開いたときも、保存された -P の件数が表示される</li>
     <li>Exec で実行する。値を残す場合は Save で保存する</li>
   </ol>
 
@@ -39,12 +25,12 @@
     <tr><td>フォームの設定ダイアログ</td><td>Dataset Setting やカラム定義などのダイアログで、テーブル名・プレビュー・カラム名を読み込むときにも渡される（SQL でデータを読み込む場合に、Exec と同じ値で確認できる）</td></tr>
     <tr><td>Save</td><td>フォームの内容と一緒に <code>option/&lt;command&gt;/&lt;name&gt;.txt</code> に <code>-Pキー=値</code> の行として保存される</td></tr>
     <tr><td>Save Shell</td><td>保存済みの値が .bat の実行でも使われる（Apply しただけで Save していない値は使われない）</td></tr>
-    <tr><td>パラメータを開く</td><td>サイドバーでパラメータを開くと、そのパラメータに保存された値に置き換わる（保存された値がなければ空になる）。Save していない入力は失われる</td></tr>
+    <tr><td>保存済みオプションを開く</td><td>サイドバーで保存済みオプションを開くと、そこに保存された -P 値に置き換わる（保存された値がなければ空になる）。Save していない入力は失われる</td></tr>
   </table>
-  <p>-P の値はパラメータごとに保存されます。同じ値を複数のパラメータや環境で切り替えたい場合は Env を使います（<a href="#env-vs-p">Env との使い分け</a> を参照）。CLI から実行する場合は、引数に <code>-Pキー=値</code> を付けて渡します。</p>
+  <p>-P 値は保存済みオプションごとに保存されます。同じ値を複数の保存済みオプションや環境で切り替えたい場合は Env を使います（<a href="#env-vs-p">Env との使い分け</a> を参照）。CLI から実行する場合は、引数に <code>-Pキー=値</code> を付けて渡します。</p>
 
   <h2 id="reference">値の参照方法</h2>
-  <p>参照する場所によって書き方が変わります。テンプレートの区切り文字は既定の <code>$</code>、変数をまとめる属性名（templateParameterAttribute）は既定の <code>param</code> の場合の例です。</p>
+  <p>参照する場所によって書き方が変わります。テンプレートの区切り文字はデフォルトの <code>$</code>、変数をまとめる属性名（templateParameterAttribute）はデフォルトの <code>param</code> の場合の例です。</p>
   <table>
     <tr><th>使う場所</th><th>書き方</th></tr>
     <tr><td>SQL ファイル（srcType=sql / csvq、Run の sql）</td><td><code>$param.キー$</code>（templateParameterAttribute を空にした場合は <code>$キー$</code>）</td></tr>
@@ -54,7 +40,7 @@
     <tr><td>Run の ant</td><td>Ant のプロパティとして渡される（例：<code>${キー}</code>）</td></tr>
   </table>
 
-  <h3>例：SQL の条件を実行時に変える</h3>
+  <h3 id="example-sql">例: SQL の条件を実行時に変える</h3>
   <pre>-- select.sql
 SELECT * FROM ORDERS
 $if(param.orderDate)$WHERE ORDER_DATE = '$param.orderDate$'$endif$</pre>
@@ -65,20 +51,27 @@ $if(param.orderDate)$WHERE ORDER_DATE = '$param.orderDate$'$endif$</pre>
   <p>Env（<a href="workspace.html">Workspace</a> の ChangeWorkspace で選ぶ環境変数ファイル）と -P は、どちらも値を外から渡す仕組みですが、適用範囲と効く場所が違います。</p>
   <table>
     <tr><th>観点</th><th>Env（<code>${env.変数名}</code>）</th><th>Parameters（<code>-Pキー=値</code>）</th></tr>
-    <tr><td>定義する場所</td><td>Workspace 内の .properties ファイル（既定は <code>env.properties</code>）</td><td>Edit Parameters (-P) ダイアログ。Save で <code>option/&lt;command&gt;/&lt;name&gt;.txt</code> に保存</td></tr>
-    <tr><td>適用範囲</td><td><strong>Workspace 全体</strong>。選んだ Env ファイルが、その Workspace のすべてのパラメータの実行に使われる</td><td><strong>1 ファイル（そのパラメータ）だけ</strong></td></tr>
-    <tr><td>切り替え方</td><td>ChangeWorkspace で Env ファイルを選び直す。パラメータは書き換えない</td><td>パラメータごとに値を編集して Save する</td></tr>
+    <tr><td>定義する場所</td><td>Workspace 内の .properties ファイル（デフォルトは <code>env.properties</code>）</td><td>Edit Parameters (-P) ダイアログ。Save で <code>option/&lt;command&gt;/&lt;name&gt;.txt</code> に保存</td></tr>
+    <tr><td>適用範囲</td><td><strong>Workspace 全体</strong>。選んだ Env ファイルが、その Workspace のすべての保存済みオプションの実行に使われる</td><td><strong>その保存済みオプションだけ</strong></td></tr>
+    <tr><td>切り替え方</td><td>ChangeWorkspace で Env ファイルを選び直す。保存済みオプションは書き換えない</td><td>保存済みオプションごとに値を編集して Save する</td></tr>
     <tr><td>オプションの置換</td><td><strong>する</strong>。どのオプションの値でも、<code>${env.変数名}</code> を実行前に置き換える</td><td><strong>しない</strong>。例外は Generate の resultPath と、Parameterize の cmd / cmdParam / テンプレート（テンプレートとして処理されるため）</td></tr>
     <tr><td>テンプレート処理の変数</td><td><strong>使えない</strong>。SQL ファイルや Generate のテンプレートの中身は置き換えない</td><td><strong>使える</strong>。<a href="#reference">値の参照方法</a> の書き方で参照する。Run の cmd / bat / ant にも渡される</td></tr>
     <tr><td>未定義のとき</td><td>エラーになる</td><td>空として扱われる（<code>$if(param.キー)$</code> で分岐できる）</td></tr>
-    <tr><td>Save Shell の .bat</td><td>選んでいる Env ファイルの指定が .bat に書き込まれる</td><td>保存済みのパラメータに含まれるので、.bat の実行でも使われる</td></tr>
+    <tr><td>Save Shell の .bat</td><td>選んでいる Env ファイルの指定が .bat に書き込まれる</td><td>保存済みオプションに含まれるので、.bat の実行でも使われる</td></tr>
   </table>
 
-  <h3>どちらを使うか</h3>
+  <h3 id="which">どちらを使うか</h3>
   <ul>
-    <li><strong>環境ごとに違う値</strong>（接続先・ユーザー・スキーマ・出力先のフォルダなど）で、オプションに直接書く値 → Env</li>
-    <li><strong>そのパラメータの実行条件</strong>（対象日・ID・テーブル名など）で、SQL やテンプレートの中で使う値 → -P</li>
+    <li><strong>環境ごとに違う値</strong>（接続先・ユーザ・スキーマ・出力先のディレクトリなど）で、オプションに直接書く値 → Env</li>
+    <li><strong>その保存済みオプションの実行条件</strong>（対象日・ID・テーブル名など）で、SQL やテンプレートの中で使う値 → -P</li>
     <li>環境ごとに違う値を SQL やテンプレートの中で使いたい → 両方を組み合わせて、-P の値に Env を書く（例：<code>-PorderDate=${env.orderDate}</code>）。-P の値も引数の一部なので、実行前に Env の値に置き換わってから SQL やテンプレートに渡される</li>
+  </ul>
+
+  <h2 id="section-related">関連</h2>
+  <ul>
+    <li><a href="../guide/getting-started.html">基本的な使い方</a> — 実行・保存・再利用の流れ</li>
+    <li><a href="workspace.html">Workspace</a> — 環境変数（Env）の書き方</li>
+    <li><a href="../reference/st4.html">StringTemplate 4 書式リファレンス</a> — テンプレートでの条件分岐</li>
   </ul>
 </body>
 </html>

@@ -3,60 +3,45 @@
 <head>
   <meta charset="UTF-8" />
   <title>ヘルプ - Compare</title>
-  <style>
-    body { font-family: system-ui, sans-serif; margin: 2rem; color: #1f2937; line-height: 1.6; }
-    h1 { font-size: 1.5rem; border-bottom: 2px solid #4f46e5; padding-bottom: 0.5rem; }
-    h2 { font-size: 1.2rem; margin-top: 1.5rem; color: #374151; }
-    h3 { font-size: 1rem; margin-top: 1rem; color: #374151; }
-    p { color: #4b5563; }
-    table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
-    th, td { text-align: left; padding: 0.5rem 0.75rem; border-bottom: 1px solid #e5e7eb; vertical-align: top; }
-    th { background: #f9fafb; font-weight: 600; color: #374151; }
-    td:first-child { font-family: monospace; white-space: nowrap; color: #4f46e5; }
-    a { color: #4f46e5; }
-    pre { background: #f9fafb; padding: 0.75rem; border-radius: 0.375rem; overflow-x: auto; font-size: 0.85rem; }
-    code { font-family: monospace; color: #4f46e5; }
-    ol, ul { color: #4b5563; }
-  </style>
+  <link rel="stylesheet" href="../help.css" />
 </head>
 <body>
   <p><a href="../index.html">&larr; ヘルプ一覧に戻る</a></p>
   <h1>Compare</h1>
-  <p>データセットを比較して差分を検出します。旧データと新データを突き合わせ、差分があれば出力します。</p>
+  <p>旧データ（<code>oldData</code>）と新データ（<code>newData</code>）を突き合わせ、差分を <code>convertResult</code> に出力します。比較の対象は表形式のデータセット・PNG 画像・PDF から <code>targetType</code> で選びます。</p>
 
-  <h2>オプション</h2>
+  <h2 id="section-options">オプション</h2>
   <table>
-    <tr><th>オプション</th><th>説明</th></tr>
-    <tr><td>targetType</td><td>比較対象の種類（下記参照）</td></tr>
-    <tr><td>setting</td><td>比較設定ファイル（<code>data</code> モード時のみ有効。<a href="../dialogs/dataset-settings.html">Dataset Settings</a> 形式）</td></tr>
-    <tr><td>settingEncoding</td><td>設定ファイルのエンコーディング（デフォルト: システム既定）</td></tr>
-    <tr><td>oldData</td><td>比較元（旧）データセット</td></tr>
-    <tr><td>newData</td><td>比較対象となる新データセット</td></tr>
-    <tr><td>expectData</td><td>期待値データセット（省略時はスキップ）</td></tr>
-    <tr><td>createPatchSql</td><td>行レベルの差分（<code>MODIFY_VALUE</code> / <code>KEY_DELETE</code> / <code>KEY_ADD</code>）を旧データから新データへ補正するパッチ SQL を生成する（<code>data</code> モードのみ有効。デフォルト: 無効）</td></tr>
-    <tr><td>imageOption</td><td><a href="../reference/image.html">画像比較のオプション</a>（<code>image</code> / <code>pdf</code> モード時のみ表示）</td></tr>
-    <tr><td>convertResult</td><td><a href="../sections/result-form.html">出力形式と出力先の設定</a></td></tr>
+    <tr><th>項目</th><th>説明</th><th>デフォルト</th></tr>
+    <tr><td>targetType</td><td>比較対象の種類（下記「targetType 一覧」を参照）</td><td><code>data</code></td></tr>
+    <tr><td>setting</td><td>比較の設定ファイル（<a href="../dialogs/dataset-settings.html">Dataset Settings</a> 形式）。<code>data</code> のときだけ使う</td><td>（空）</td></tr>
+    <tr><td>settingEncoding</td><td><code>setting</code> の文字コード</td><td>システムデフォルト</td></tr>
+    <tr><td>oldData</td><td>比較元（旧）のデータセット</td><td>—</td></tr>
+    <tr><td>newData</td><td>比較先（新）のデータセット</td><td>—</td></tr>
+    <tr><td>expectData</td><td>期待値のデータセット。省略すると期待値との検証をしない（下記「expectData による検証」を参照）</td><td>（空）</td></tr>
+    <tr><td>createPatchSql</td><td>旧データを新データへ補正するパッチ SQL を出力する。<code>data</code> のときだけ使う</td><td>OFF</td></tr>
+    <tr><td>imageOption</td><td>画像比較のしきい値・除外領域など（<a href="../reference/image.html">Image Option</a>）。<code>image</code> / <code>pdf</code> のときだけ表示</td><td>—</td></tr>
+    <tr><td>convertResult</td><td>比較結果の出力形式と出力先（<a href="../sections/result-form.html">Result Form</a>）</td><td>—</td></tr>
   </table>
-  <p><code>oldData</code> / <code>newData</code> / <code>expectData</code> の入力フォーム詳細は <a href="../sections/dataset-load-form.html">Dataset Load Form</a> を参照してください。</p>
+  <p><code>oldData</code> / <code>newData</code> / <code>expectData</code> の指定方法は <a href="../sections/dataset-load-form.html">Dataset Load Form</a> を参照してください。</p>
 
-  <h2 id="section-target-type">targetType ごとの比較方法</h2>
-  <p><code>targetType</code> には <code>data</code>・<code>image</code>・<code>pdf</code> の 3 種類があります。各形式の比較方法の詳細は、形式名のリンク先の個別ページを参照してください。</p>
+  <h3 id="section-expect">expectData による検証</h3>
+  <p><code>expectData</code> に期待値のデータセットを指定すると、<code>convertResult</code> に出力した比較結果を期待値と突き合わせて検証します。期待値と一致しない差分は、<code>convertResult</code> の出力先の <code>expectedDiff/</code> ディレクトリに同じ形式で出力されます。</p>
+
+  <h2 id="section-target-type">targetType 一覧</h2>
+  <p><code>setting</code> の効き方と比較結果の形式は <code>targetType</code> ごとに異なります。詳細は各値のページを参照してください。</p>
   <table>
     <tr><th>値</th><th>説明</th></tr>
-    <tr><td><a href="compare/types/data.html">data</a></td><td>CSV・Excel・DB テーブルなど表形式のデータセットを比較（デフォルト）</td></tr>
-    <tr><td><a href="compare/types/image.html">image</a></td><td>PNG 画像ファイルをピクセル単位で比較</td></tr>
-    <tr><td><a href="compare/types/pdf.html">pdf</a></td><td>PDF ファイルをページ画像として比較</td></tr>
+    <tr><td><a href="compare/types/data.html">data</a></td><td>CSV・Excel・DB テーブルなど表形式のデータセットを比較。<code>setting</code> で主キーや比較対象のカラムを指定でき、行単位の差分ファイルとパッチ SQL を出力できる</td></tr>
+    <tr><td><a href="compare/types/image.html">image</a></td><td>PNG 画像ファイルをピクセル単位で比較し、差分を描画した画像を出力</td></tr>
+    <tr><td><a href="compare/types/pdf.html">pdf</a></td><td>PDF ファイルをページごとの画像として比較し、差分を描画した画像を出力</td></tr>
   </table>
 
-  <h2 id="section-setting">setting・比較結果の形式</h2>
-  <p><code>setting</code> による比較内容の変更と比較結果（<code>convertResult</code> の出力）の形式は targetType ごとに異なります。各 targetType のページを参照してください。</p>
+  <h2 id="section-related">関連</h2>
   <ul>
-    <li><a href="compare/types/data.html#section-setting">data</a> — <code>setting</code> による比較内容の変更、COMPARE_RESULT・DIFF の値・テーブルごとの詳細ファイル・パッチ SQL</li>
-    <li><a href="compare/types/image.html#section-result">image</a> — COMPARE_RESULT のカラム・DIFF の値</li>
-    <li><a href="compare/types/pdf.html#section-result">pdf</a> — COMPARE_RESULT のカラム・DIFF の値</li>
+    <li><a href="../sections/dataset-load-form.html">Dataset Load Form</a> — 比較するデータセットの指定</li>
+    <li><a href="../sections/result-form.html">Result Form</a> — 比較結果の出力形式と出力先</li>
+    <li><a href="../dialogs/dataset-settings.html">Dataset Settings</a> — <code>setting</code> の書式</li>
   </ul>
-
-  <h2 id="section-expect">expectData を指定した場合（共通）</h2>
-  <p><code>expectData</code> に期待値データセットを指定すると、<code>convertResult</code> の出力結果と期待値を再度突き合わせて検証します。期待値と一致しない差分は <code>convertResult</code> 配下の <code>expectedDiff/</code> ディレクトリに同形式で出力されます。</p>
 </body>
 </html>

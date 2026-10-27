@@ -3,75 +3,59 @@
 <head>
   <meta charset="UTF-8" />
   <title>ヘルプ - Dataset Load Form</title>
-  <style>
-    body { font-family: system-ui, sans-serif; margin: 2rem; color: #1f2937; line-height: 1.6; }
-    h1 { font-size: 1.5rem; border-bottom: 2px solid #4f46e5; padding-bottom: 0.5rem; }
-    h2 { font-size: 1.2rem; margin-top: 1.5rem; color: #374151; }
-    h3 { font-size: 1rem; margin-top: 1rem; color: #374151; }
-    p { color: #4b5563; }
-    table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
-    th, td { text-align: left; padding: 0.5rem 0.75rem; border-bottom: 1px solid #e5e7eb; vertical-align: top; }
-    th { background: #f9fafb; font-weight: 600; color: #374151; }
-    td:first-child { font-family: monospace; white-space: nowrap; color: #4f46e5; }
-    a { color: #4f46e5; }
-    pre { background: #f9fafb; padding: 0.75rem; border-radius: 0.375rem; overflow-x: auto; font-size: 0.85rem; }
-    code { font-family: monospace; color: #4f46e5; }
-    ol, ul { color: #4b5563; }
-  </style>
+  <link rel="stylesheet" href="../help.css" />
 </head>
 <body>
   <p><a href="../index.html">&larr; ヘルプ一覧に戻る</a></p>
   <h1>Dataset Load Form</h1>
-  <p>各コマンドで「データセットの入力」を指定するための共通フォームです。<a href="../commands/compare.html">Compare</a> の <code>oldData</code> / <code>newData</code> / <code>expectData</code>、<a href="../commands/convert.html">Convert</a> / <a href="../commands/generate.html">Generate</a> / <a href="../commands/run.html">Run</a> の <code>srcData</code>、<a href="../commands/parameterize.html">Parameterize</a> の <code>paramData</code> は、いずれもこのフォームによって構成されます。</p>
-  <p>1 つの入力は、以下の 5 つの領域から構成されます。</p>
+  <p>各コマンドで入力データセットを指定する共通のフォームです。Compare の <code>oldData</code> / <code>newData</code> / <code>expectData</code>、Convert / Generate / Run の <code>srcData</code>、Parameterize の <code>paramData</code> がこのフォームで構成されます。</p>
+  <p>フォームは次の 5 つの領域でできています。</p>
   <ul>
-    <li><strong>Source Type 選択</strong> — 入力の形式（CSV / Table / SQL / Regex / Fixed / Xls / Xlsx）</li>
-    <li><strong>Source</strong> — 入力元ファイル・SQL、文字コード</li>
-    <li><strong><a href="traversal.html">Traversal</a></strong> — ディレクトリを <code>src</code> に指定した際の走査条件</li>
-    <li><strong><a href="data-load.html">Data Load</a></strong> — ヘッダ・開始行・メタデータなど、読み込み時の挙動</li>
-    <li><strong>Setting</strong> — Dataset Settings ファイルによるテーブル単位のメタデータ指定</li>
+    <li><strong>srcType</strong> — 入力の形式（下記「srcType 一覧」を参照）</li>
+    <li><strong>Source</strong> — 入力元のファイル・SQL と文字コード</li>
+    <li><strong>Traversal</strong> — ディレクトリを読み込むときの走査条件（<a href="traversal.html">Traversal</a>）</li>
+    <li><strong>Data Load</strong> — ヘッダ行・開始行など、読み込み時の挙動（<a href="data-load.html">Data Load</a>）</li>
+    <li><strong>Setting</strong> — テーブルごとの主キー・フィルタなどの設定ファイル</li>
   </ul>
 
-  <h2>Source Type 選択</h2>
-  <p>入力データの形式を選択します。選択した形式に応じて、固有の設定項目がフォーム下部に表示されます。以下の表は早見表です。各形式の詳細（<code>src</code> の意味・固有オプション・データイメージ例）は、形式名のリンク先の個別ページを参照してください。</p>
+  <h2 id="section-src-type">srcType 一覧</h2>
+  <p>選んだ形式に応じて、固有の項目がフォームに表示されます。<code>src</code> に指定するもの・テーブル名の決まり方・固有オプションは、各値のページを参照してください。</p>
   <table>
-    <tr><th>形式</th><th>説明</th></tr>
-    <tr><td><a href="dataset-load-form/types/none.html">none</a></td><td>入力なし（空のデータセット）。入力データが不要なコマンド（テンプレート専用 Generate など）で使用</td></tr>
-    <tr><td><a href="dataset-load-form/types/csv.html">csv</a></td><td>CSV / TSV など区切り文字付きテキスト。区切り文字・囲み文字を指定可能</td></tr>
-    <tr><td><a href="dataset-load-form/types/fixed.html">fixed</a></td><td>固定長テキスト。カラム幅（バイト数）と <code>headerName</code> を指定して列に分割</td></tr>
-    <tr><td><a href="dataset-load-form/types/reg.html">reg</a></td><td>正規表現でヘッダ行・データ行をパースして列に分割</td></tr>
-    <tr><td><a href="dataset-load-form/types/xlsx.html">xls / xlsx</a></td><td>Excel ファイル。シート単位でテーブル化（マッピング定義は <a href="../dialogs/xlsx-schema.html">Xlsx Schema</a>）</td></tr>
-    <tr><td><a href="dataset-load-form/types/table.html">table</a></td><td>テーブル名を列挙したテキストファイルに従い、JDBC 接続先のテーブルを読み込む</td></tr>
-    <tr><td><a href="dataset-load-form/types/sql.html">sql</a></td><td>SQL クエリの実行結果。JDBC 接続設定と SQL ファイルを指定</td></tr>
-    <tr><td><a href="dataset-load-form/types/csvq.html">csvq</a></td><td>H2 上で SQL を実行した結果を取得。SQL 内の <code>CSVREAD()</code> 関数で CSV ファイルを参照し、複数 CSV の JOIN などに使用</td></tr>
-    <tr><td><a href="dataset-load-form/types/file.html">file</a></td><td>ディレクトリ配下のファイル一覧を、ファイルメタ情報（パス・サイズ・更新日時など）のテーブルとして読み込む</td></tr>
-    <tr><td><a href="dataset-load-form/types/dir.html">dir</a></td><td>ディレクトリ配下のサブディレクトリ一覧を、メタ情報のテーブルとして読み込む</td></tr>
+    <tr><th>値</th><th>説明</th></tr>
+    <tr><td><a href="dataset-load-form/types/none.html">none</a></td><td>入力なし。テンプレートだけで出力する Generate など、入力が不要な場合に使う</td></tr>
+    <tr><td><a href="dataset-load-form/types/csv.html">csv</a></td><td>CSV / TSV など区切り文字付きのテキスト</td></tr>
+    <tr><td><a href="dataset-load-form/types/fixed.html">fixed</a></td><td>固定長テキスト。カラムの幅を指定して列に分ける</td></tr>
+    <tr><td><a href="dataset-load-form/types/reg.html">reg</a></td><td>正規表現で行を列に分けるテキスト</td></tr>
+    <tr><td><a href="dataset-load-form/types/xlsx.html">xls / xlsx</a></td><td>Excel ファイル。シートごとに 1 テーブル</td></tr>
+    <tr><td><a href="dataset-load-form/types/table.html">table</a></td><td>接続先データベースのテーブル。読み込むテーブル名は一覧ファイルで指定する</td></tr>
+    <tr><td><a href="dataset-load-form/types/sql.html">sql</a></td><td>接続先データベースで SQL を実行した結果</td></tr>
+    <tr><td><a href="dataset-load-form/types/csvq.html">csvq</a></td><td>CSV ファイルに対して SQL を実行した結果。複数の CSV の JOIN などに使う</td></tr>
+    <tr><td><a href="dataset-load-form/types/file.html">file</a></td><td>ディレクトリ配下のファイルの一覧（パス・サイズ・更新日時など）</td></tr>
+    <tr><td><a href="dataset-load-form/types/dir.html">dir</a></td><td>ディレクトリ配下のサブディレクトリの一覧</td></tr>
   </table>
-  <p>各ページは「<strong>src の意味</strong> / <strong>テーブル名の決まり方</strong> / <strong>固有オプション</strong> / <strong>データイメージ例</strong>」の順で構成されています。共通オプション（<code>encoding</code>・<code>headerName</code>・<code>startRow</code>・<code>addFileInfo</code>）は後続の <a href="#section-source">Source</a> / <a href="traversal.html">Traversal</a> / <a href="data-load.html">Data Load</a> を参照してください。</p>
 
   <h2 id="section-source">Source</h2>
-  <p>入力元となるファイルやクエリ、補助的なオプションを指定します。</p>
   <table>
     <tr><th>項目</th><th>説明</th></tr>
-    <tr><td>src</td><td>入力元のパス。Source Type によって意味が異なる: ファイル・ディレクトリ（<code>csv</code> / <code>fixed</code> / <code>reg</code> / <code>xls</code> / <code>xlsx</code> / <code>file</code> / <code>dir</code>）、SQL ファイル（<code>sql</code> / <code>csvq</code>）、テーブル名リストファイル（<code>table</code>）</td></tr>
-    <tr><td>encoding</td><td>テキスト系入力の文字コード</td></tr>
-    <tr><td>jdbcProperties</td><td>Table / SQL を選んだ場合の <a href="jdbc.html">JDBC 接続情報</a>（URL・ユーザ・パスワードなど）</td></tr>
-    <tr><td>templateGroup</td><td><a href="template.html">テンプレート処理</a>を行う場合の補助設定</td></tr>
+    <tr><td>src</td><td>入力元のパス。<code>srcType</code> によって指すものが異なる（ファイル・ディレクトリ、SQL ファイル、テーブル名の一覧ファイル）</td></tr>
+    <tr><td>encoding</td><td>テキストの入力ファイルの文字コード</td></tr>
+    <tr><td>jdbcProperties</td><td><code>srcType</code> が <code>table</code> / <code>sql</code> のときの接続先（<a href="jdbc.html">JDBC</a>）</td></tr>
+    <tr><td>templateGroup</td><td>SQL をテンプレートとして処理するときの共通マクロ（<a href="template.html">Template</a>）</td></tr>
   </table>
 
-  <h2 id="section-traversal">Traversal</h2>
-  <p>ディレクトリを <code>src</code> に指定した際の走査条件（<code>extension</code> / <code>recursive</code> / <code>regInclude</code> / <code>regExclude</code>）は <a href="traversal.html">Traversal</a> を参照してください。</p>
-
-  <h2 id="section-data-load">Data Load</h2>
-  <p>読み込んだデータのテーブル化の指定（<code>headerName</code> / <code>startRow</code> / <code>addFileInfo</code> など）は <a href="data-load.html">Data Load</a> を参照してください。</p>
-
-  <h2>Setting</h2>
-  <p>Dataset Settings ファイルを指定することで、テーブルごとの主キー・ソート順・フィルタなどのメタデータを与えます。</p>
+  <h2 id="section-setting">Setting</h2>
   <table>
     <tr><th>項目</th><th>説明</th></tr>
-    <tr><td>setting</td><td>Dataset Settings ファイルのパス。書式は <a href="../dialogs/dataset-settings.html">Dataset Settings</a> を参照</td></tr>
-    <tr><td>settingEncoding</td><td>Dataset Settings ファイルの文字コード</td></tr>
+    <tr><td>setting</td><td>テーブルごとの主キー・並び順・フィルタなどを書いた設定ファイル（<a href="../dialogs/dataset-settings.html">Dataset Settings</a>）</td></tr>
+    <tr><td>settingEncoding</td><td><code>setting</code> の文字コード</td></tr>
   </table>
-  <p>テキストボックス横の編集ボタンから <a href="../dialogs/dataset-setting.html">Dataset Setting</a> ダイアログを開き、テーブルごとの設定を GUI で編集できます。generate ボタンからは、既存データセットのテーブル・カラム構成をもとに設定の雛型を生成できます。</p>
+  <p><code>setting</code> の横の編集ボタンから、テーブルごとの設定を画面で編集できます（<a href="../dialogs/dataset-setting.html">Dataset Setting</a>）。generate ボタンからは、既存のデータセットのテーブル・カラム構成をもとに雛型を作れます（<a href="../dialogs/dataset-setting-generate.html">Dataset Setting Generate</a>）。</p>
+
+  <h2 id="section-related">関連</h2>
+  <ul>
+    <li><a href="traversal.html">Traversal</a> — ディレクトリの走査条件</li>
+    <li><a href="data-load.html">Data Load</a> — ヘッダ行・開始行・ファイル情報カラム</li>
+    <li><a href="../dialogs/dataset-settings.html">Dataset Settings</a> — 設定ファイルの書式</li>
+  </ul>
 </body>
 </html>

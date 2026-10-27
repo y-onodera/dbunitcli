@@ -3,32 +3,18 @@
 <head>
   <meta charset="UTF-8" />
   <title>ヘルプ - Result Form</title>
-  <style>
-    body { font-family: system-ui, sans-serif; margin: 2rem; color: #1f2937; line-height: 1.6; }
-    h1 { font-size: 1.5rem; border-bottom: 2px solid #4f46e5; padding-bottom: 0.5rem; }
-    h2 { font-size: 1.2rem; margin-top: 1.5rem; color: #374151; }
-    h3 { font-size: 1rem; margin-top: 1rem; color: #374151; }
-    p { color: #4b5563; }
-    table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
-    th, td { text-align: left; padding: 0.5rem 0.75rem; border-bottom: 1px solid #e5e7eb; vertical-align: top; }
-    th { background: #f9fafb; font-weight: 600; color: #374151; }
-    td:first-child { font-family: monospace; white-space: nowrap; color: #4f46e5; }
-    a { color: #4f46e5; }
-    pre { background: #f9fafb; padding: 0.75rem; border-radius: 0.375rem; overflow-x: auto; font-size: 0.85rem; }
-    code { font-family: monospace; color: #4f46e5; }
-    ol, ul { color: #4b5563; }
-  </style>
+  <link rel="stylesheet" href="../help.css" />
 </head>
 <body>
   <p><a href="../index.html">&larr; ヘルプ一覧に戻る</a></p>
   <h1>Result Form</h1>
   <p>各コマンドで「出力先と出力形式」を指定するための共通フォームです。<a href="../commands/convert.html">Convert</a> の <code>convertResult</code>、<a href="../commands/compare.html">Compare</a> の出力設定などで使用されます。</p>
-  <p>フォームの構成は <strong>Result Type 選択</strong>により変わります。選択した形式ごとに表示される項目が異なります。各形式の固有オプションと出力例は、形式名のリンク先の個別ページを参照してください。</p>
+  <p>フォームの構成は <code>resultType</code> により変わります。選択した形式ごとに表示される項目が異なります。各形式の固有オプションと出力例は、形式名のリンク先の個別ページを参照してください。</p>
 
-  <h2>Result Type 選択</h2>
+  <h2 id="section-result-type">resultType 一覧</h2>
   <p>出力データの形式を選択します。以下の 6 種類から選択できます。</p>
   <table>
-    <tr><th>形式</th><th>説明</th></tr>
+    <tr><th>値</th><th>説明</th></tr>
     <tr><td><a href="result-form/types/csv.html">csv</a></td><td>CSV（区切り文字付きテキスト）で出力。拡張子・文字コードを変更可能</td></tr>
     <tr><td><a href="result-form/types/xlsx.html">xls</a></td><td>Excel 97-2003 形式（<code>.xls</code>）で出力</td></tr>
     <tr><td><a href="result-form/types/xlsx.html">xlsx</a></td><td>Excel 2007 以降の形式（<code>.xlsx</code>）で出力</td></tr>
@@ -38,18 +24,18 @@
   </table>
 
   <h2 id="section-common">共通項目（table 以外）</h2>
-  <p>Result Type が <code>table</code> 以外の場合に表示される共通項目です。</p>
+  <p><code>resultType</code> が <code>table</code> 以外の場合に表示される共通項目です。</p>
   <table>
-    <tr><th>項目</th><th>説明</th></tr>
-    <tr><td>result</td><td>出力先ディレクトリのパス</td></tr>
-    <tr><td>resultPath</td><td>出力先パスのテンプレート文字列。テーブル名などを変数として使用可能</td></tr>
-    <tr><td>exportEmptyTable</td><td>ON にすると、データ行が 0 件のテーブルも出力する（デフォルト: ON）</td></tr>
-    <tr><td>exportHeader</td><td>ON にすると、出力ファイルにヘッダ行を含める（デフォルト: ON）</td></tr>
-    <tr><td>parallel</td><td>入力ソース（ファイル）を並列に読み込むスレッド数（並列化できる組み合わせのときだけ表示。table でも表示）。<code>1</code> で逐次処理。空欄なら、並列化できる場合に CPU コア数で並列化する（parameterize の並列実行の中では逐次）（デフォルト: 空欄）。詳細は下記「並列読込」を参照</td></tr>
+    <tr><th>項目</th><th>説明</th><th>デフォルト</th></tr>
+    <tr><td>result</td><td>出力先ディレクトリのパス</td><td>—</td></tr>
+    <tr><td>resultPath</td><td>出力先のパス。テーブル名などを変数として使える</td><td>—</td></tr>
+    <tr><td>exportEmptyTable</td><td>ON にすると、データ行が 0 件のテーブルも出力する</td><td>ON</td></tr>
+    <tr><td>exportHeader</td><td>ON にすると、出力ファイルにヘッダ行を含める</td><td>ON</td></tr>
+    <tr><td>parallel</td><td>入力ソースを並列に読み込むスレッド数。並列化できる組み合わせのときだけ表示（<code>table</code> でも表示）。<code>1</code> で逐次。空欄なら並列化できる場合に CPU コア数で並列化する（Parameterize の並列実行の中では逐次）。詳細は下記「並列読込」を参照</td><td>（空）</td></tr>
   </table>
 
   <h2 id="section-parallel">並列読込（parallel）</h2>
-  <p>入力ソースが複数ある場合に、ソースごとに別スレッドで読み込み・出力します。出力先のテーブルが同じになるソース同士は同じスレッドで元の順に処理するため、追記の順序は逐次処理と変わりません。</p>
+  <p>入力ソースが複数ある場合に、ソースごとに並列に読み込み・出力します。出力先のテーブルが同じになるソース同士は同じスレッドで元の順に処理するため、追記の順序は逐次処理と変わりません。</p>
   <p><code>parallel</code> は次の組み合わせのときだけ表示されます。</p>
   <ul>
     <li>Convert: 入力の srcType が <code>file</code> / <code>dir</code> 以外で、出力形式が <code>xls</code> / <code>xlsx</code> 以外、または <code>excelTable</code> が <code>SHEET</code> 以外（<code>excelTable</code> は環境変数などで値を渡せるよう自由入力のため、<code>SHEET</code> と入力されているときだけ非表示にします。<code>SHEET</code> かどうかが変わるとフォームが再構成されます。実行時に値が <code>SHEET</code> になった場合は逐次処理です）</li>
@@ -63,5 +49,11 @@
   <p>xls / xlsx 入力は、実行前に各ファイルのシート名だけを読み、xlsxSchema の定義も含めて出力テーブルを求めます。同じテーブル（同名シート、またはスキーマで同じテーブル名になるシート）を含むファイル同士は同じスレッドで順に処理します。</p>
   <p>Compare では、new / old それぞれの読み込みに適用されます（比較結果の出力自体は並列化しません）。並び替え・重複除去を指定したテーブルは全行をメモリに保持するため、並列数を増やすとメモリ使用量も増えます。</p>
   <p>入力の srcType が <code>table</code> / <code>sql</code> の場合と、出力形式が <code>table</code> の場合は、スレッドごとに DB 接続を張って読み込み・書き込みます（接続数は読み込み・書き込みそれぞれ最大で並列数。詳細は <a href="result-form/types/table.html">table</a> を参照）。</p>
+
+  <h2 id="section-related">関連</h2>
+  <ul>
+    <li><a href="dataset-load-form.html">Dataset Load Form</a> — 入力データセットの指定</li>
+    <li><a href="jdbc.html">JDBC</a> — <code>resultType=table</code> の接続先</li>
+  </ul>
 </body>
 </html>
