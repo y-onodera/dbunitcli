@@ -212,12 +212,9 @@ export const useDatasetTablePreview = (
 };
 
 export const useSaveDatasetSettings = () => {
-	const updateResourceFiles = useUpdateResourceFiles("datasetSettings");
+	const updateResourceFiles = useUpdateResourceFiles("datasetSetting");
 	return (name: string, input: DatasetSettings) =>
-		updateResourceFiles(
-			"dataset-setting/save",
-			JSON.stringify({ name, input }),
-		);
+		updateResourceFiles("save", JSON.stringify({ name, input }));
 };
 
 export const useDatasetSettingsData = (

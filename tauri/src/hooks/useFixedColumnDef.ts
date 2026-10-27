@@ -12,12 +12,9 @@ import {
 import { useUpdateResourceFiles } from "./useResourceFiles";
 
 export const useSaveFixedColumnDef = () => {
-	const updateResourceFiles = useUpdateResourceFiles("fixedColumnDefs");
+	const updateResourceFiles = useUpdateResourceFiles("fixedColumnDef");
 	return (name: string, input: FixedColumnDef) =>
-		updateResourceFiles(
-			"fixed-column-def/save",
-			JSON.stringify({ name, input }),
-		);
+		updateResourceFiles("save", JSON.stringify({ name, input }));
 };
 
 export const useFixedColumnDefData = (

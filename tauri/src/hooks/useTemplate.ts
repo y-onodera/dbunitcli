@@ -63,12 +63,9 @@ export const useSaveParameterizeTemplate = () => {
 };
 
 export const useSaveTemplate = () => {
-	const updateResourceFiles = useUpdateResourceFiles("templateFiles");
+	const updateResourceFiles = useUpdateResourceFiles("template");
 	return (name: string, content: string) =>
-		updateResourceFiles(
-			"template/save",
-			JSON.stringify({ name, input: { content } }),
-		);
+		updateResourceFiles("save", JSON.stringify({ name, input: { content } }));
 };
 
 async function loadTemplateContent(

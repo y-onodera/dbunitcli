@@ -54,6 +54,26 @@ vi.mock("../../utils/fetchUtils", () => ({
 	fetchAndUpdate: mockFetchAndUpdate,
 }));
 
+// 名前"target"で操作を実行し、結果・送ったリクエスト・更新後のResourcesSettingsを返す
+async function runWithResources(
+	useOperation: () => (name: string) => Promise<OperationResult>,
+) {
+	const { result, rerender } = renderHook(
+		() => ({ operation: useOperation(), resources: useResourcesSettings() }),
+		{ wrapper },
+	);
+	// Providerがworkspaceの読込で一度suspendするため、解決を待つ
+	await act(async () => {
+		rerender();
+	});
+	let operationResult: OperationResult | undefined;
+	await act(async () => {
+		operationResult = await result.current.operation("target");
+	});
+	const [params] = mockFetchAndUpdate.mock.lastCall ?? [];
+	return { operationResult, params, resources: result.current.resources };
+}
+
 describe("useDeleteResourceのテスト", () => {
 	it.each<{
 		kind: ResourceKind;
@@ -76,33 +96,14 @@ describe("useDeleteResourceのテスト", () => {
 	])(
 		"kind=$kindのとき、$endpointへ名前を送り、応答で$keyを更新する",
 		async ({ kind, endpoint, key }) => {
-			const { result, rerender } = renderHook(
-				() => ({
-					deleteResource: useDeleteResource(kind),
-					resources: useResourcesSettings(),
-				}),
-				{ wrapper },
+			const { operationResult, params, resources } = await runWithResources(
+				() => useDeleteResource(kind),
 			);
-
-			// Providerがworkspaceの読込で一度suspendするため、解決を待つ
-			await act(async () => {
-				rerender();
-			});
-
-			let operationResult: string | undefined;
-			await act(async () => {
-				operationResult = await result.current.deleteResource("target");
-			});
 
 			expect(operationResult).toBe("success");
-			expect(mockFetchAndUpdate).toHaveBeenCalledWith(
-				expect.objectContaining({
-					endpoint: `${environmentFixture.apiUrl}${endpoint}`,
-					options: expect.objectContaining({ body: "target" }),
-				}),
-				expect.any(Function),
-			);
-			expect(result.current.resources[key]).toStrictEqual(mockUpdatedFiles);
+			expect(params?.endpoint).toBe(`${environmentFixture.apiUrl}${endpoint}`);
+			expect(params?.options.body).toBe("target");
+			expect(resources[key]).toStrictEqual(mockUpdatedFiles);
 		},
 	);
 });
@@ -178,29 +179,16 @@ describe("保存フックのテスト", () => {
 	])(
 		"$nameは$endpointへ名前と内容を送り、応答で$keyを更新する",
 		async ({ useSave, endpoint, input, key }) => {
-			const { result, rerender } = renderHook(
-				() => ({ save: useSave(), resources: useResourcesSettings() }),
-				{ wrapper },
-			);
-
-			// Providerがworkspaceの読込で一度suspendするため、解決を待つ
-			await act(async () => {
-				rerender();
-			});
-
-			let operationResult: string | undefined;
-			await act(async () => {
-				operationResult = await result.current.save("target");
-			});
+			const { operationResult, params, resources } =
+				await runWithResources(useSave);
 
 			expect(operationResult).toBe("success");
-			const [params] = mockFetchAndUpdate.mock.lastCall ?? [];
 			expect(params?.endpoint).toBe(`${environmentFixture.apiUrl}${endpoint}`);
 			expect(JSON.parse(String(params?.options.body))).toStrictEqual({
 				name: "target",
 				input: JSON.parse(JSON.stringify(input)),
 			});
-			expect(result.current.resources[key]).toStrictEqual(mockUpdatedFiles);
+			expect(resources[key]).toStrictEqual(mockUpdatedFiles);
 		},
 	);
 });

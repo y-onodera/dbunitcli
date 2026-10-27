@@ -10,9 +10,9 @@ import {
 import { useUpdateResourceFiles } from "./useResourceFiles";
 
 export const useSaveXlsxSchema = () => {
-	const updateResourceFiles = useUpdateResourceFiles("xlsxSchemas");
+	const updateResourceFiles = useUpdateResourceFiles("xlsxSchema");
 	return (name: string, input: XlsxSchema) =>
-		updateResourceFiles("xlsx-schema/save", JSON.stringify({ name, input }));
+		updateResourceFiles("save", JSON.stringify({ name, input }));
 };
 
 export const useXlsxSchemaData = (

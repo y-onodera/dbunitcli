@@ -3,20 +3,33 @@ import { useSetResourcesSettings } from "../context/WorkspaceResourcesProvider";
 import type { ResourcesSettingsBuilder } from "../model/WorkspaceResources";
 import { fetchAndUpdate, type OperationResult } from "../utils/fetchUtils";
 
-type ResourceFilesKey = keyof ResourcesSettingsBuilder;
+// リソース種類ごとのAPIの接頭辞と、応答（更新後のファイル一覧）を書き戻すResourcesSettingsのキー
+const resourceTargets = {
+	datasetSetting: { base: "dataset-setting", key: "datasetSettings" },
+	xlsxSchema: { base: "xlsx-schema", key: "xlsxSchemas" },
+	jdbc: { base: "jdbc", key: "jdbcFiles" },
+	template: { base: "template", key: "templateFiles" },
+	fixedColumnDef: { base: "fixed-column-def", key: "fixedColumnDefs" },
+} as const satisfies Record<
+	string,
+	{ base: string; key: keyof ResourcesSettingsBuilder }
+>;
 
-// POSTの応答（更新後のファイル一覧）をResourcesSettingsのkeyへ書き戻す関数を返す（保存・削除で共通）
-export const useUpdateResourceFiles = (key: ResourceFilesKey) => {
+export type ResourceKind = keyof typeof resourceTargets;
+
+// `${base}/${action}`へPOSTし、応答をResourcesSettingsへ書き戻す関数を返す（保存・削除で共通）
+export const useUpdateResourceFiles = (kind: ResourceKind) => {
 	const { apiUrl } = useEnvironment();
 	const setResourcesSettings = useSetResourcesSettings();
+	const { base, key } = resourceTargets[kind];
 	return async (
-		endpoint: string,
+		action: string,
 		body: string,
 		contentType = "application/json",
 	): Promise<OperationResult> =>
 		fetchAndUpdate<string[]>(
 			{
-				endpoint: `${apiUrl}${endpoint}`,
+				endpoint: `${apiUrl}${base}/${action}`,
 				options: {
 					method: "POST",
 					headers: { "Content-Type": contentType },
@@ -28,28 +41,7 @@ export const useUpdateResourceFiles = (key: ResourceFilesKey) => {
 		);
 };
 
-// 削除APIのエンドポイントと、応答を書き戻すResourcesSettingsのキー
-const deleteTargets = {
-	datasetSetting: {
-		endpoint: "dataset-setting/delete",
-		key: "datasetSettings",
-	},
-	xlsxSchema: { endpoint: "xlsx-schema/delete", key: "xlsxSchemas" },
-	jdbc: { endpoint: "jdbc/delete", key: "jdbcFiles" },
-	template: { endpoint: "template/delete", key: "templateFiles" },
-	fixedColumnDef: {
-		endpoint: "fixed-column-def/delete",
-		key: "fixedColumnDefs",
-	},
-} as const satisfies Record<
-	string,
-	{ endpoint: string; key: ResourceFilesKey }
->;
-
-export type ResourceKind = keyof typeof deleteTargets;
-
 export const useDeleteResource = (kind: ResourceKind) => {
-	const { endpoint, key } = deleteTargets[kind];
-	const updateResourceFiles = useUpdateResourceFiles(key);
-	return (name: string) => updateResourceFiles(endpoint, name, "text/plain");
+	const updateResourceFiles = useUpdateResourceFiles(kind);
+	return (name: string) => updateResourceFiles("delete", name, "text/plain");
 };

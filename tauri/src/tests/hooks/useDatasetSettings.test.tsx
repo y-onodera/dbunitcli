@@ -4,12 +4,9 @@ import {
 	type Environment,
 	environmentContext,
 } from "../../context/EnvironmentProvider";
-import WorkspaceResourcesProvider, {
-	useResourcesSettings,
-} from "../../context/WorkspaceResourcesProvider";
+import WorkspaceResourcesProvider from "../../context/WorkspaceResourcesProvider";
 import {
 	useDatasetSettingsData,
-	useSaveDatasetSettings,
 	useSrcInfoColumnNames,
 } from "../../hooks/useDatasetSettings";
 import type { DatasetSrcInfo } from "../../model/CommandOption";
@@ -26,8 +23,6 @@ const mockDatasetSettingsResponse: {
 	settings: [{ name: ["test-setting"] }],
 	commonSettings: [],
 };
-
-const mockUpdatedSettings = ["test-setting", "other-setting"];
 
 const mockWorkspaceResources: WorkspaceResources = {
 	...workspaceResourcesFixture,
@@ -56,9 +51,6 @@ const { mockFetchData, mockFetchAndUpdate } = vi.hoisted(() => {
 			return Promise.resolve(
 				new Response(JSON.stringify(mockDatasetSettingsResponse)),
 			);
-		}
-		if (params.endpoint.includes("/dataset-setting/save")) {
-			return Promise.resolve(new Response(JSON.stringify(mockUpdatedSettings)));
 		}
 		if (params.endpoint.includes("/dataset-setting/table-names")) {
 			return Promise.resolve(new Response(JSON.stringify(["t1", "t2"])));
@@ -113,34 +105,6 @@ describe("DatasetSettingsProviderのテスト", () => {
 			expect(result.current.settings.settings).toHaveLength(1);
 			expect(result.current.settings.settings[0].name).toStrictEqual(
 				mockDatasetSettingsResponse.settings[0].name,
-			);
-		});
-	});
-
-	describe("useSaveDatasetSettingsのテスト", () => {
-		it("データセット設定を正常に保存できることを確認", async () => {
-			const { result, rerender } = renderHook(
-				() => {
-					const saveDatasetSettings = useSaveDatasetSettings();
-					const resources = useResourcesSettings();
-					return { resources, saveDatasetSettings };
-				},
-				{ wrapper },
-			);
-			await act(async () => {
-				rerender();
-			});
-			expect(result.current.resources.datasetSettings).toStrictEqual(
-				mockWorkspaceResources.resources.datasetSettings,
-			);
-			await act(async () => {
-				result.current.saveDatasetSettings(
-					"test-setting",
-					DatasetSettings.create(),
-				);
-			});
-			expect(result.current.resources.datasetSettings).toStrictEqual(
-				mockUpdatedSettings,
 			);
 		});
 	});

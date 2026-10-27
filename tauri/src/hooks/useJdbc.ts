@@ -104,10 +104,10 @@ export const useJdbcConnectionTest = () => {
 };
 
 export const useSaveJdbcProperties = () => {
-	const updateResourceFiles = useUpdateResourceFiles("jdbcFiles");
+	const updateResourceFiles = useUpdateResourceFiles("jdbc");
 	return (name: string, jdbcValues: Record<string, string>) =>
 		updateResourceFiles(
-			"jdbc/save-properties",
+			"save-properties",
 			JSON.stringify({ name, input: toJdbcRequestBody(jdbcValues) }),
 		);
 };

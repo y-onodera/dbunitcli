@@ -164,7 +164,7 @@ function JdbcSavePropertiesButton({
 	prefix: string;
 	jdbcValues: Record<string, string>;
 }) {
-	const jdbcSaveProperties = useSaveJdbcProperties();
+	const saveJdbcProperties = useSaveJdbcProperties();
 	const [showDialog, setShowDialog] = useState(false);
 
 	const hasAnyValue =
@@ -183,7 +183,7 @@ function JdbcSavePropertiesButton({
 					jdbcValues={jdbcValues}
 					handleDialogClose={() => setShowDialog(false)}
 					handleSave={async (name) => {
-						await jdbcSaveProperties(name, jdbcValues);
+						await saveJdbcProperties(name, jdbcValues);
 						setShowDialog(false);
 					}}
 				/>
