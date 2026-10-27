@@ -179,8 +179,7 @@ export function ModelGenerateButton<BUILDER, MODEL>({
 	setPath,
 }: {
 	config: ModelGenerateConfig<BUILDER, MODEL>;
-	setPath: (value: string) => void;
-}) {
+} & Pick<ResourceEditButtonProp, "setPath">) {
 	return (
 		<GenerateButton setPath={setPath}>
 			{(handleDialogClose, handleSave) => (
