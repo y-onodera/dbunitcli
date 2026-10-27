@@ -46,7 +46,7 @@ const useResourceContent = (
 };
 
 // parameterize/template の保存応答(ファイル一覧)は画面状態に保持しないため反映しない
-export const useParameterizeTemplateSaveContent = () => {
+export const useSaveParameterizeTemplate = () => {
 	const { apiUrl } = useEnvironment();
 	return async (name: string, content: string): Promise<OperationResult> =>
 		fetchAndUpdate<string[]>(
@@ -62,7 +62,7 @@ export const useParameterizeTemplateSaveContent = () => {
 		);
 };
 
-export const useTemplateSaveContent = () => {
+export const useSaveTemplate = () => {
 	const updateResourceFiles = useUpdateResourceFiles("templateFiles");
 	return (name: string, content: string) =>
 		updateResourceFiles(

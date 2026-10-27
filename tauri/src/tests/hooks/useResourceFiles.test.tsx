@@ -6,12 +6,12 @@ import WorkspaceResourcesProvider, {
 } from "../../context/WorkspaceResourcesProvider";
 import { useSaveDatasetSettings } from "../../hooks/useDatasetSettings";
 import { useSaveFixedColumnDef } from "../../hooks/useFixedColumnDef";
-import { useJdbcSaveProperties } from "../../hooks/useJdbc";
+import { useSaveJdbcProperties } from "../../hooks/useJdbc";
 import {
 	type ResourceKind,
 	useDeleteResource,
 } from "../../hooks/useResourceFiles";
-import { useTemplateSaveContent } from "../../hooks/useTemplate";
+import { useSaveTemplate } from "../../hooks/useTemplate";
 import { useSaveXlsxSchema } from "../../hooks/useXlsxSchema";
 import { DatasetSettings } from "../../model/DatasetSettings";
 import { FixedColumnDef } from "../../model/FixedColumnDef";
@@ -156,9 +156,9 @@ describe("保存フックのテスト", () => {
 			key: "datasetSettings",
 		},
 		{
-			name: "useTemplateSaveContent",
+			name: "useSaveTemplate",
 			useSave: () => {
-				const save = useTemplateSaveContent();
+				const save = useSaveTemplate();
 				return (name) => save(name, "template content");
 			},
 			endpoint: "template/save",
@@ -166,9 +166,9 @@ describe("保存フックのテスト", () => {
 			key: "templateFiles",
 		},
 		{
-			name: "useJdbcSaveProperties",
+			name: "useSaveJdbcProperties",
 			useSave: () => {
-				const save = useJdbcSaveProperties();
+				const save = useSaveJdbcProperties();
 				return (name) => save(name, jdbcValues);
 			},
 			endpoint: "jdbc/save-properties",

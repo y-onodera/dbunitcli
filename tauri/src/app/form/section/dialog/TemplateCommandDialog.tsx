@@ -8,7 +8,7 @@ import { EditButton } from "../../../../components/element/ButtonIcon";
 import { TextArea } from "../../../../components/element/Input";
 import {
 	useParameterizeTemplateData,
-	useParameterizeTemplateSaveContent,
+	useSaveParameterizeTemplate,
 } from "../../../../hooks/useTemplate";
 import type { Command } from "../../../../model/SelectParameter";
 import { COMMANDS } from "../../../../model/SelectParameter";
@@ -60,7 +60,7 @@ function Dialog({
 	handleDialogClose: () => void;
 }) {
 	const [content, setContent] = useState<string>(initialContent);
-	const saveContent = useParameterizeTemplateSaveContent();
+	const saveContent = useSaveParameterizeTemplate();
 
 	const handleSave = (path: string) =>
 		saveOnSuccess(

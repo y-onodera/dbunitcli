@@ -103,7 +103,7 @@ export const useJdbcConnectionTest = () => {
 	};
 };
 
-export const useJdbcSaveProperties = () => {
+export const useSaveJdbcProperties = () => {
 	const updateResourceFiles = useUpdateResourceFiles("jdbcFiles");
 	return (name: string, jdbcValues: Record<string, string>) =>
 		updateResourceFiles(

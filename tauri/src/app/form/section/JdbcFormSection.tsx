@@ -8,7 +8,7 @@ import { BlueButton } from "../../../components/element/Button";
 import { useSetJdbcConnectionState } from "../../../context/JdbcConnectionProvider";
 import {
 	useJdbcConnectionTest,
-	useJdbcSaveProperties,
+	useSaveJdbcProperties,
 } from "../../../hooks/useJdbc";
 import type { JdbcOption } from "../../../model/CommandOption";
 import JdbcSavePropertiesDialog from "./dialog/JdbcSavePropertiesDialog";
@@ -164,7 +164,7 @@ function JdbcSavePropertiesButton({
 	prefix: string;
 	jdbcValues: Record<string, string>;
 }) {
-	const jdbcSaveProperties = useJdbcSaveProperties();
+	const jdbcSaveProperties = useSaveJdbcProperties();
 	const [showDialog, setShowDialog] = useState(false);
 
 	const hasAnyValue =

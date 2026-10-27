@@ -39,7 +39,7 @@ vi.mock("../../../../../context/EnvironmentProvider", () => ({
 // JDBC API フックのモック
 vi.mock("../../../../../hooks/useJdbc", () => ({
 	useJdbcConnectionTest: () => vi.fn(),
-	useJdbcSaveProperties: () => vi.fn(),
+	useSaveJdbcProperties: () => vi.fn(),
 }));
 
 vi.mock("../../../../../hooks/useWorkspaceResources", () => ({
