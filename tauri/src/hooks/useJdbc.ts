@@ -1,13 +1,11 @@
 import { useEnvironment } from "../context/EnvironmentProvider";
-import { useSetResourcesSettings } from "../context/WorkspaceResourcesProvider";
 import {
 	type FetchParams,
-	fetchAndUpdate,
 	fetchData,
 	getErrorMessage,
 	handleFetchError,
-	type OperationResult,
 } from "../utils/fetchUtils";
+import { useUpdateResourceFiles } from "./useResourceFiles";
 
 // タイムアウト時はsidecarへcancelも送られ、sidecar側の処理も中断する
 const JDBC_TIMEOUT_MS = 60_000;
@@ -106,22 +104,10 @@ export const useJdbcConnectionTest = () => {
 };
 
 export const useJdbcSaveProperties = () => {
-	const { apiUrl } = useEnvironment();
-	const setResourcesSettings = useSetResourcesSettings();
-	return async (
-		name: string,
-		jdbcValues: Record<string, string>,
-	): Promise<OperationResult> =>
-		fetchAndUpdate<string[]>(
-			{
-				endpoint: `${apiUrl}jdbc/save-properties`,
-				options: {
-					method: "POST",
-					headers: { "Content-Type": "application/json" },
-					body: JSON.stringify({ name, input: toJdbcRequestBody(jdbcValues) }),
-				},
-			},
-			(files) =>
-				setResourcesSettings((current) => current.with({ jdbcFiles: files })),
+	const updateResourceFiles = useUpdateResourceFiles("jdbcFiles");
+	return (name: string, jdbcValues: Record<string, string>) =>
+		updateResourceFiles(
+			"jdbc/save-properties",
+			JSON.stringify({ name, input: toJdbcRequestBody(jdbcValues) }),
 		);
 };

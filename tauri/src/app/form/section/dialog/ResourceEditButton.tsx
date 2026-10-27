@@ -6,7 +6,7 @@ import {
 import {
 	type ResourceKind,
 	useDeleteResource,
-} from "../../../../hooks/useDeleteResource";
+} from "../../../../hooks/useResourceFiles";
 
 export type ResourceEditButtonProp = {
 	path: string;

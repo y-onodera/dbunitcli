@@ -1,38 +1,22 @@
 import { useEffect, useState } from "react";
 import { useEnvironment } from "../context/EnvironmentProvider";
-import { useSetResourcesSettings } from "../context/WorkspaceResourcesProvider";
 import {
 	FixedColumnDef,
 	type FixedColumnDefBuilder,
 } from "../model/FixedColumnDef";
 import {
-	fetchAndUpdate,
 	fetchData,
 	getErrorMessage,
 	handleFetchError,
-	type OperationResult,
 } from "../utils/fetchUtils";
+import { useUpdateResourceFiles } from "./useResourceFiles";
 
 export const useSaveFixedColumnDef = () => {
-	const { apiUrl } = useEnvironment();
-	const setResourcesSettings = useSetResourcesSettings();
-	return async (
-		name: string,
-		input: FixedColumnDef,
-	): Promise<OperationResult> =>
-		fetchAndUpdate<string[]>(
-			{
-				endpoint: `${apiUrl}fixed-column-def/save`,
-				options: {
-					method: "POST",
-					headers: { "Content-Type": "application/json" },
-					body: JSON.stringify({ name, input }),
-				},
-			},
-			(defs) =>
-				setResourcesSettings((current) =>
-					current.with({ fixedColumnDefs: defs }),
-				),
+	const updateResourceFiles = useUpdateResourceFiles("fixedColumnDefs");
+	return (name: string, input: FixedColumnDef) =>
+		updateResourceFiles(
+			"fixed-column-def/save",
+			JSON.stringify({ name, input }),
 		);
 };
 

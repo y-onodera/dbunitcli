@@ -1,34 +1,18 @@
 import { useEffect, useState } from "react";
 import { useEnvironment } from "../context/EnvironmentProvider";
-import { useSetResourcesSettings } from "../context/WorkspaceResourcesProvider";
 import type { SrcInfo } from "../model/CommandOption";
 import { XlsxSchema, type XlsxSchemaBuilder } from "../model/XlsxSchema";
 import {
-	fetchAndUpdate,
 	fetchData,
 	getErrorMessage,
 	handleFetchError,
-	type OperationResult,
 } from "../utils/fetchUtils";
+import { useUpdateResourceFiles } from "./useResourceFiles";
 
 export const useSaveXlsxSchema = () => {
-	const { apiUrl } = useEnvironment();
-	const setResourcesSettings = useSetResourcesSettings();
-	return async (name: string, input: XlsxSchema): Promise<OperationResult> =>
-		fetchAndUpdate<string[]>(
-			{
-				endpoint: `${apiUrl}xlsx-schema/save`,
-				options: {
-					method: "POST",
-					headers: { "Content-Type": "application/json" },
-					body: JSON.stringify({ name, input }),
-				},
-			},
-			(schemas) =>
-				setResourcesSettings((current) =>
-					current.with({ xlsxSchemas: schemas }),
-				),
-		);
+	const updateResourceFiles = useUpdateResourceFiles("xlsxSchemas");
+	return (name: string, input: XlsxSchema) =>
+		updateResourceFiles("xlsx-schema/save", JSON.stringify({ name, input }));
 };
 
 export const useXlsxSchemaData = (

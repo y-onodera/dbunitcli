@@ -7,7 +7,7 @@ import WorkspaceResourcesProvider, {
 import {
 	type ResourceKind,
 	useDeleteResource,
-} from "../../hooks/useDeleteResource";
+} from "../../hooks/useResourceFiles";
 import type { ResourcesSettingsBuilder } from "../../model/WorkspaceResources";
 import type { FetchParams } from "../../utils/fetchUtils";
 import { environmentFixture, workspaceResourcesFixture } from "../setup";

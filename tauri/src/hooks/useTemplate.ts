@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { useEnvironment } from "../context/EnvironmentProvider";
-import { useSetResourcesSettings } from "../context/WorkspaceResourcesProvider";
 import {
 	fetchAndUpdate,
 	fetchData,
@@ -8,6 +7,7 @@ import {
 	handleFetchError,
 	type OperationResult,
 } from "../utils/fetchUtils";
+import { useUpdateResourceFiles } from "./useResourceFiles";
 
 export const useTemplateData = (name: string) =>
 	useResourceContent("template", name);
@@ -63,22 +63,11 @@ export const useParameterizeTemplateSaveContent = () => {
 };
 
 export const useTemplateSaveContent = () => {
-	const { apiUrl } = useEnvironment();
-	const setResourcesSettings = useSetResourcesSettings();
-	return async (name: string, content: string): Promise<OperationResult> =>
-		fetchAndUpdate<string[]>(
-			{
-				endpoint: `${apiUrl}template/save`,
-				options: {
-					method: "POST",
-					headers: { "Content-Type": "application/json" },
-					body: JSON.stringify({ name, input: { content } }),
-				},
-			},
-			(settings) =>
-				setResourcesSettings((current) =>
-					current.with({ templateFiles: settings }),
-				),
+	const updateResourceFiles = useUpdateResourceFiles("templateFiles");
+	return (name: string, content: string) =>
+		updateResourceFiles(
+			"template/save",
+			JSON.stringify({ name, input: { content } }),
 		);
 };
 
