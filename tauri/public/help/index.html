@@ -7,28 +7,88 @@
     body { font-family: system-ui, sans-serif; margin: 2rem; color: #1f2937; line-height: 1.6; }
     h1 { font-size: 1.5rem; border-bottom: 2px solid #4f46e5; padding-bottom: 0.5rem; }
     h2 { font-size: 1.2rem; margin-top: 1.5rem; color: #374151; }
+    h3 { font-size: 1rem; margin-top: 1rem; color: #374151; }
+    p { color: #4b5563; }
     ul { list-style: none; padding: 0; }
-    li { margin-bottom: 1rem; }
-    a { display: block; padding: 1rem; border: 1px solid #e5e7eb; border-radius: 0.5rem; text-decoration: none; color: inherit; transition: background 0.15s; }
-    a:hover { background: #f3f4f6; }
-    .cmd-name { font-size: 1.1rem; font-weight: 600; color: #4f46e5; }
+    li { margin-bottom: 0.5rem; }
+    a { color: #4f46e5; }
+    a.card { display: block; padding: 0.75rem 1rem; border: 1px solid #e5e7eb; border-radius: 0.5rem; text-decoration: none; color: inherit; transition: background 0.15s; }
+    a.card:hover { background: #f3f4f6; }
+    .cmd-name { font-size: 1.05rem; font-weight: 600; color: #4f46e5; }
     .cmd-desc { font-size: 0.9rem; color: #6b7280; margin-top: 0.25rem; }
+    .types { font-size: 0.85rem; color: #6b7280; margin: 0.25rem 0 0 1rem; }
+    .types a { margin-right: 0.5rem; }
   </style>
 </head>
 <body>
   <h1>DBUnit CLI ヘルプ</h1>
-  <h2>コマンド</h2>
+  <p>初めて使う場合は「基本的な使い方」から読んでください。各画面のヘルプボタンからは、その画面のページが直接開きます。</p>
+
+  <h2 id="section-guide">基本的な使い方</h2>
   <ul>
-    <li><a href="commands/convert.html"><div class="cmd-name">Convert</div><div class="cmd-desc">データ形式を変換する</div></a></li>
-    <li><a href="commands/compare.html"><div class="cmd-name">Compare</div><div class="cmd-desc">データセットを比較して差分を検出する</div></a></li>
-    <li><a href="commands/generate.html"><div class="cmd-name">Generate</div><div class="cmd-desc">テンプレートからファイルを生成する</div></a></li>
-    <li><a href="commands/run.html"><div class="cmd-name">Run</div><div class="cmd-desc">SQL やスクリプトを実行する</div></a></li>
-    <li><a href="commands/parameterize.html"><div class="cmd-name">Parameterize</div><div class="cmd-desc">パラメータでバッチ処理する</div></a></li>
+    <li><a class="card" href="guide/getting-started.html"><div class="cmd-name">基本的な使い方</div><div class="cmd-desc">Workspace を選んでから、実行・保存・繰り返し実行・別環境での再利用までの流れ</div></a></li>
   </ul>
-  <h2>設定</h2>
+
+  <h2 id="section-commands">コマンド</h2>
   <ul>
-    <li><a href="dialogs/workspace.html"><div class="cmd-name">Workspace</div><div class="cmd-desc">作業ディレクトリと環境変数（Env）を切り替える</div></a></li>
-    <li><a href="dialogs/parameters.html"><div class="cmd-name">Parameters (-P)</div><div class="cmd-desc">SQL やテンプレートに実行時の値を渡す</div></a></li>
+    <li><a class="card" href="commands/convert.html"><div class="cmd-name">Convert</div><div class="cmd-desc">データ形式を変換する</div></a></li>
+    <li><a class="card" href="commands/compare.html"><div class="cmd-name">Compare</div><div class="cmd-desc">データセットを比較して差分を検出する</div></a>
+      <div class="types">targetType: <a href="commands/compare/types/data.html">data</a><a href="commands/compare/types/image.html">image</a><a href="commands/compare/types/pdf.html">pdf</a></div></li>
+    <li><a class="card" href="commands/generate.html"><div class="cmd-name">Generate</div><div class="cmd-desc">テンプレートからファイルを生成する</div></a>
+      <div class="types">generateType: <a href="commands/generate/types/txt.html">txt</a><a href="commands/generate/types/xlsx.html">xlsx / xls</a><a href="commands/generate/types/settings.html">settings</a><a href="commands/generate/types/sql.html">sql</a><a href="commands/generate/types/ddl.html">ddl</a><a href="commands/generate/types/xlsxSchema.html">xlsxSchema</a><a href="commands/generate/types/javaBean.html">javaBean</a><a href="commands/generate/types/fixedColumnDef.html">fixedColumnDef</a><a href="commands/generate/types/xlsxTemplate.html">xlsxTemplate</a> ／ <a href="commands/generate/unitSetting.html">unitSetting</a></div></li>
+    <li><a class="card" href="commands/run.html"><div class="cmd-name">Run</div><div class="cmd-desc">SQL やスクリプトを実行する</div></a>
+      <div class="types">scriptType: <a href="commands/run/types/sql.html">sql</a><a href="commands/run/types/ant.html">ant</a><a href="commands/run/types/bat.html">bat / cmd</a></div></li>
+    <li><a class="card" href="commands/parameterize.html"><div class="cmd-name">Parameterize</div><div class="cmd-desc">パラメータデータの行ごとにコマンドを繰り返し実行する</div></a></li>
+  </ul>
+
+  <h2 id="section-details">画面・設定の詳細</h2>
+
+  <h3>Workspace と実行時の値</h3>
+  <ul>
+    <li><a class="card" href="dialogs/workspace.html"><div class="cmd-name">Workspace</div><div class="cmd-desc">ChangeWorkspace の入力項目、ディレクトリ構成、サイドバー・フッターの操作、環境変数（Env）</div></a></li>
+    <li><a class="card" href="dialogs/parameters.html"><div class="cmd-name">Parameters (-P)</div><div class="cmd-desc">SQL やテンプレートに実行時の値を渡す</div></a></li>
+  </ul>
+
+  <h3>データの入力</h3>
+  <ul>
+    <li><a class="card" href="sections/dataset-load-form.html"><div class="cmd-name">Dataset Load Form</div><div class="cmd-desc">各コマンド共通の入力データセットの指定</div></a>
+      <div class="types">srcType: <a href="sections/dataset-load-form/types/none.html">none</a><a href="sections/dataset-load-form/types/csv.html">csv</a><a href="sections/dataset-load-form/types/fixed.html">fixed</a><a href="sections/dataset-load-form/types/reg.html">reg</a><a href="sections/dataset-load-form/types/xlsx.html">xls / xlsx</a><a href="sections/dataset-load-form/types/table.html">table</a><a href="sections/dataset-load-form/types/sql.html">sql</a><a href="sections/dataset-load-form/types/csvq.html">csvq</a><a href="sections/dataset-load-form/types/file.html">file</a><a href="sections/dataset-load-form/types/dir.html">dir</a></div></li>
+    <li><a class="card" href="sections/traversal.html"><div class="cmd-name">Traversal</div><div class="cmd-desc">ディレクトリを読み込むときの走査条件</div></a></li>
+    <li><a class="card" href="sections/data-load.html"><div class="cmd-name">Data Load</div><div class="cmd-desc">ヘッダ行・開始行・ファイル情報カラムなど、読み込み時の挙動</div></a></li>
+    <li><a class="card" href="sections/jdbc.html"><div class="cmd-name">JDBC</div><div class="cmd-desc">データベースへの接続設定</div></a></li>
+    <li><a class="card" href="dialogs/sql-editor.html"><div class="cmd-name">SQL Editor</div><div class="cmd-desc">SQL ファイル・テーブル名リストの編集</div></a></li>
+    <li><a class="card" href="dialogs/xlsx-schema.html"><div class="cmd-name">Xlsx Schema</div><div class="cmd-desc">Excel のシート・セルからテーブルを読み込む定義</div></a>
+      <div class="types"><a href="dialogs/xlsx-row-setting.html">Xlsx Row Setting</a><a href="dialogs/xlsx-cell-setting.html">Xlsx Cell Setting</a><a href="dialogs/xlsx-schema-generate.html">Xlsx Schema Generate</a></div></li>
+  </ul>
+
+  <h3>テーブルごとの設定（Dataset Settings）</h3>
+  <ul>
+    <li><a class="card" href="dialogs/dataset-settings.html"><div class="cmd-name">Dataset Settings</div><div class="cmd-desc">主キー・カラム選択・フィルタなどを定義する設定ファイルの書式</div></a></li>
+    <li><a class="card" href="dialogs/dataset-setting.html"><div class="cmd-name">Dataset Setting</div><div class="cmd-desc">テーブルごとの設定の編集と JEXL 式の書き方</div></a></li>
+    <li><a class="card" href="dialogs/dataset-setting-generate.html"><div class="cmd-name">Dataset Setting Generate</div><div class="cmd-desc">既存データセットから Dataset Settings の雛型を生成</div></a></li>
+  </ul>
+
+  <h3>データの出力</h3>
+  <ul>
+    <li><a class="card" href="sections/result-form.html"><div class="cmd-name">Result Form</div><div class="cmd-desc">各コマンド共通の出力先と出力形式の指定</div></a>
+      <div class="types">resultType: <a href="sections/result-form/types/csv.html">csv</a><a href="sections/result-form/types/xlsx.html">xls / xlsx</a><a href="sections/result-form/types/table.html">table</a><a href="sections/result-form/types/format.html">format</a><a href="sections/result-form/types/fixed.html">fixed</a></div></li>
+    <li><a class="card" href="dialogs/fixed-column-def-generate.html"><div class="cmd-name">Fixed Column Def Generate</div><div class="cmd-desc">固定長出力のカラム幅定義の雛型を生成</div></a></li>
+  </ul>
+
+  <h3>テンプレート</h3>
+  <ul>
+    <li><a class="card" href="sections/template.html"><div class="cmd-name">Template</div><div class="cmd-desc">StringTemplate 4 によるテンプレート処理の設定</div></a></li>
+    <li><a class="card" href="reference/st4.html"><div class="cmd-name">StringTemplate 4 書式リファレンス</div><div class="cmd-desc">テンプレートの構文と書式指定子</div></a></li>
+    <li><a class="card" href="dialogs/template-edit.html"><div class="cmd-name">Template File Edit</div><div class="cmd-desc">Generate 用テンプレートの編集</div></a></li>
+    <li><a class="card" href="dialogs/txt-template-generate.html"><div class="cmd-name">Scaffold</div><div class="cmd-desc">組み込みテンプレートを書き出してカスタマイズの出発点にする</div></a></li>
+    <li><a class="card" href="dialogs/parameterize-template-edit.html"><div class="cmd-name">Edit Parameterize Template</div><div class="cmd-desc">Parameterize 用テンプレートの編集</div></a></li>
+    <li><a class="card" href="sections/jxls.html"><div class="cmd-name">Jxls</div><div class="cmd-desc">Excel テンプレート（xlsx / xls 出力）の設定</div></a></li>
+    <li><a class="card" href="dialogs/xlsx-template-generate.html"><div class="cmd-name">Xlsx Template Generate</div><div class="cmd-desc">既存データセットから jxls テンプレートの雛型を生成</div></a></li>
+  </ul>
+
+  <h3>比較</h3>
+  <ul>
+    <li><a class="card" href="reference/image.html"><div class="cmd-name">Image Option</div><div class="cmd-desc">画像・PDF 比較のしきい値・除外領域・描画の設定</div></a></li>
   </ul>
 </body>
 </html>

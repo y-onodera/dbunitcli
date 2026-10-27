@@ -12,7 +12,8 @@ DO NOT TRIGGER when: 見た目のみの変更（CSS/クラス名）、タイプ�
 | `form/section/ResultFormSection` / `TemplateFormSection` / `JxlsFormSection` / `JdbcFormSection` / `TraversalFormSection` | `sections/` の result-form / template / jxls / jdbc / traversal |
 | `form/section/dialog/*Dialog` ほかヘルプボタンを持つ画面 | ヘルプボタンの `command`（例: `"dialogs/sql-editor"`）が指す `.html` |
 | `form/GenerateForm` | `commands/generate.html` |
-| `main/Header`・`startup/StartupForm`・`sidebar/*`・`form/section/element/Chooser`（ファイル選択） | `dialogs/workspace.html` |
+| `main/Header`・`startup/StartupForm`・`sidebar/*`・`form/section/element/Chooser`（ファイル選択） | `dialogs/workspace.html`（作業の流れが変わるなら `guide/getting-started.html` も） |
+| ヘルプページの追加・削除 | `index.html`（全ページを載せる） |
 | `footer/Footer` | `dialogs/workspace.html`（フッターの操作）、-P は `dialogs/parameters.html` |
 
 ## 更新手順

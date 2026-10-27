@@ -22,21 +22,10 @@
 <body>
   <p><a href="../index.html">&larr; ヘルプ一覧に戻る</a></p>
   <h1>Workspace</h1>
-  <p>Workspace は、パラメータやリソースファイルを置く作業ディレクトリです。ヘッダの ChangeWorkspace ボタンからダイアログを開いて切り替えます。このページでは、Workspace を選んでからコマンドを作り、保存し、再利用するまでの流れを説明します。</p>
+  <p>Workspace は、保存済みオプションや設定ファイルを置く作業ディレクトリです。ヘッダの ChangeWorkspace ボタンからダイアログを開いて切り替えます。このページでは、ChangeWorkspace の入力項目、Workspace のディレクトリ構成、Workspace を基準に動くサイドバー・フッター・ファイル選択の挙動を説明します。Workspace を選んでから実行・保存・再利用するまでの流れは <a href="../guide/getting-started.html">基本的な使い方</a> を参照してください。</p>
 
   <h2 id="toc">目次</h2>
   <ol>
-    <li><a href="#flow">基本の流れ</a>
-      <ol>
-        <li><a href="#step-workspace">Workspace を選ぶ</a></li>
-        <li><a href="#step-command">コマンドを選ぶ</a></li>
-        <li><a href="#step-exec">Exec で実行しながらオプションを決める</a></li>
-        <li><a href="#step-save">Save で保存する</a></li>
-        <li><a href="#step-shell">Save Shell で .bat を保存する</a></li>
-        <li><a href="#step-parameterize">Parameterize で繰り返し処理する</a></li>
-        <li><a href="#step-reuse">Dataset Base / Result Base / Env を使い分けて再利用する</a></li>
-      </ol>
-    </li>
     <li><a href="#fields">ChangeWorkspace の入力項目</a></li>
     <li><a href="#structure">Workspace のディレクトリ構成</a></li>
     <li><a href="#scope">Workspace の影響範囲</a></li>
@@ -44,81 +33,16 @@
     <li><a href="#sidebar">サイドバーの操作</a></li>
     <li><a href="#footer">フッターの操作</a></li>
     <li><a href="#env">環境変数（Env）</a></li>
-  </ol>
-
-  <h2 id="flow">基本の流れ</h2>
-
-  <h3 id="step-workspace">1. Workspace を選ぶ</h3>
-  <p>ヘッダの ChangeWorkspace ボタンでダイアログを開き、Workspace を選んで <code>confirm</code> を押します。Dataset Base / Result Base / Env は空欄のままでもかまいません（それぞれ Workspace、Workspace、<code>env.properties</code> になります）。切り替えると、サイドバーのパラメータ一覧と各設定ダイアログの内容が、新しい Workspace のものに変わります。各項目の詳細は <a href="#fields">ChangeWorkspace の入力項目</a> を参照してください。</p>
-
-  <h3 id="step-command">2. コマンドを選ぶ</h3>
-  <p>サイドバーでコマンド名（Convert / Compare / Generate / Run / Parameterize）をクリックすると、保存済みパラメータの一覧が開きます。</p>
-  <ul>
-    <li>新しく作る場合は ＋ を押します。<code>new item</code> という名前のパラメータが作られます</li>
-    <li>既存のものを使う場合はパラメータ名をクリックします。フォームに内容が表示され、ヘッダ右側に <code>コマンド: パラメータ名</code> が表示されます</li>
-    <li>既存のパラメータを元に別のものを作る場合は、⚙ の Copy で複製してから開きます</li>
-  </ul>
-
-  <h3 id="step-exec">3. Exec で実行しながらオプションを決める</h3>
-  <p>フォームでオプションを入力し、フッターの Exec を押して実行します。Exec はフォームに表示中の内容をそのまま実行するので、保存していなくても試せます。結果のダイアログにある Open Directory で出力先を開いて、出力を確認します。期待どおりになるまで、オプションを変えて Exec を繰り返してください。</p>
-  <ul>
-    <li>時間がかかる処理は、実行中に Abandoned を押すと中断できます</li>
-    <li>SQL やテンプレートに渡す値は Edit Parameters (-P) で入力できます。入力した値は Save でパラメータと一緒に保存されます（<a href="parameters.html">Parameters (-P)</a> を参照）</li>
-    <li>入力欄の横のファイル選択・ディレクトリ選択ボタンで選んだパスは、オプションごとの基準ディレクトリからの相対パスで入ります（<a href="#chooser">ファイル選択と Workspace</a> を参照）</li>
-    <li>あとで別の環境やデータで使い回す予定があるなら、この段階でパスを相対パスにし、接続先などを <code>${env.変数名}</code> にしておきます（<a href="#step-reuse">7.</a> を参照）</li>
-  </ul>
-
-  <h3 id="step-save">4. Save で保存する</h3>
-  <p>オプションが決まったら、フッターの Save を押します。フォームの内容と Edit Parameters (-P) の値が <code>option/&lt;command&gt;/&lt;name&gt;.txt</code> に上書き保存されます。名前は、サイドバーの ⚙ から rename で分かりやすいものに変えてください。</p>
-
-  <h3 id="step-shell">5. Save Shell で .bat を保存する</h3>
-  <p>GUI を使わずに別のシェルやタスクスケジューラから実行したい場合は、フッターの Save Shell を押します。</p>
-  <ul>
-    <li>.bat は<strong>保存済み</strong>のパラメータを実行します。フォームで変えたばかりの内容は入らないので、先に Save してください</li>
-    <li>.bat はアプリを起動したディレクトリに <code>&lt;command&gt;_&lt;name&gt;.bat</code> という名前で作られます（Workspace の中ではありません）。同じ名前のファイルがあると上書きされます</li>
-    <li>作るときの Workspace / Dataset Base / Result Base / Env が .bat に書き込まれます</li>
-  </ul>
-
-  <h3 id="step-parameterize">6. Parameterize で繰り返し処理する</h3>
-  <p>同じコマンドを値だけ変えて何回も実行したい場合は、Parameterize を使います。</p>
-  <ol>
-    <li>元にするパラメータを Save しておきます（Parameterize は保存済みの内容から作られます）</li>
-    <li>サイドバーでそのパラメータの ⚙ を押し、Parameterize を選びます。次の 3 つが作られ、Parameterize のフォームが開きます
-      <ul>
-        <li>テンプレート <code>option/parameterize/template/&lt;name&gt;.txt</code>：各オプションが <code>-オプション名=$param.オプション名$</code> の形になります</li>
-        <li>パラメータ値の CSV <code>&lt;workspace&gt;/&lt;name&gt;.csv</code>：今の値が 1 行だけ入っています</li>
-        <li>Parameterize のパラメータ <code>option/parameterize/&lt;name&gt;.txt</code></li>
-      </ul>
-    </li>
-    <li>CSV に、実行したい回数ぶん行を足して値を変えます。変えない列はテンプレートで固定の値に書き換えてもかまいません</li>
-    <li>Exec で実行すると、CSV の行ごとにコマンドが実行されます。確認できたら Save し、必要なら Save Shell で .bat にします</li>
-  </ol>
-  <p>unit や cmdParam などの設定は <a href="../commands/parameterize.html">Parameterize</a> を参照してください。</p>
-
-  <h3 id="step-reuse">7. Dataset Base / Result Base / Env を使い分けて再利用する</h3>
-  <p>パラメータの中ではパスを相対パスで書き、環境で変わる値を <code>${env.変数名}</code> にしておくと、パラメータを書き換えずに ChangeWorkspace の設定だけで使い回せます。</p>
-  <table>
-    <tr><th>切り替えるもの</th><th>向いている場面</th><th>パラメータの書き方</th></tr>
-    <tr><td>Dataset Base</td><td>入力データだけが違う（例：月ごとのデータディレクトリ、テスト用と本番用の入力）</td><td>入力ファイル（src など）を相対パスで書く</td></tr>
-    <tr><td>Result Base</td><td>出力先を分けたい（例：環境ごと、実行日ごと）</td><td>出力先（result など）を相対パスで書く</td></tr>
-    <tr><td>Env</td><td>接続先・ユーザ・スキーマなどの値が環境ごとに違う（例：開発 DB とステージング DB）</td><td>値を <code>${env.変数名}</code> で書き、環境ごとの .properties を用意する</td></tr>
-    <tr><td>Workspace</td><td>パラメータやリソース一式を別にしたい（例：プロジェクトごと）</td><td>—（パラメータ・設定ファイルごと切り替わる）</td></tr>
-  </table>
-  <p>例：開発環境で作ったパラメータをステージングで使う場合</p>
-  <ol>
-    <li>開発環境用の <code>env/dev.properties</code> とステージング用の <code>env/staging.properties</code> を用意する</li>
-    <li>パラメータの接続先を <code>${env.host}</code> などにして Save する</li>
-    <li>ChangeWorkspace で Env を <code>env/staging.properties</code>、Result Base をステージング用の出力先に変えて <code>confirm</code></li>
-    <li>同じパラメータをそのまま Exec する。.bat も環境ごとに作る場合は、Save Shell のあとで .bat の名前を変えておく（同じ名前だと上書きされるため）</li>
+    <li><a href="#section-related">関連</a></li>
   </ol>
 
   <h2 id="fields">ChangeWorkspace の入力項目</h2>
   <table>
     <tr><th>項目</th><th>説明</th><th>デフォルト</th></tr>
-    <tr><td>Workspace</td><td>作業ディレクトリ（必須）。存在しない場合は作成されます。<code>%USERPROFILE%</code> / <code>%HOME%</code> を使えます</td><td>起動ディレクトリ</td></tr>
+    <tr><td>Workspace（必須）</td><td>作業ディレクトリ。存在しない場合は作成する。<code>%USERPROFILE%</code> / <code>%HOME%</code> を使える</td><td>起動ディレクトリ</td></tr>
     <tr><td>Dataset Base</td><td>データセット（入力ファイル）を相対パスで指定したときの基準ディレクトリ</td><td>Workspace</td></tr>
     <tr><td>Result Base</td><td>出力先を相対パスで指定したときの基準ディレクトリ</td><td>Workspace</td></tr>
-    <tr><td>Env</td><td>環境変数ファイル（<code>.properties</code>）のパス。Workspace からの相対パスで指定します（絶対パスも可）。ファイル選択で Workspace 配下を選ぶと相対パスに変換されます。空欄にするとデフォルトに戻ります</td><td><code>env.properties</code></td></tr>
+    <tr><td>Env</td><td>環境変数ファイル（<code>.properties</code>）のパス。Workspace からの相対パス（絶対パスも可）。ファイル選択で Workspace 配下を選ぶと相対パスに変換される。空欄にするとデフォルトに戻る</td><td><code>env.properties</code></td></tr>
   </table>
   <p>Workspace を変更すると、Workspace で始まる Dataset Base / Result Base は新しい Workspace に合わせて書き換わります。</p>
 
@@ -126,7 +50,7 @@
   <pre>&lt;workspace&gt;/
 ├── env.properties             環境変数ファイル（デフォルト）
 ├── option/
-│   ├── &lt;command&gt;/             コマンドごとの保存済みパラメータ
+│   ├── &lt;command&gt;/             コマンドごとの保存済みオプション
 │   └── parameterize/template/ Parameterize 用テンプレート
 └── resources/
     ├── setting/               Dataset Settings
@@ -140,7 +64,7 @@
   <p>Workspace を切り替えると、次の画面要素が新しい Workspace の内容に切り替わります。どのボタンがどこを読み書きするかは <a href="#sidebar">サイドバー</a> と <a href="#footer">フッター</a> を参照してください。</p>
   <table>
     <tr><th>画面要素</th><th>読み書きする場所</th></tr>
-    <tr><td>サイドバー</td><td><code>option/&lt;command&gt;/*.txt</code>（パラメータ一覧）</td></tr>
+    <tr><td>サイドバー</td><td><code>option/&lt;command&gt;/*.txt</code>（保存済みオプションの一覧）</td></tr>
     <tr><td>フォームの各設定ダイアログ</td><td><code>resources/</code> 配下（Dataset Settings・テンプレート・JDBC・Xlsx Schema・固定長カラム定義）</td></tr>
     <tr><td>フォームの相対パス</td><td>入力ファイルは Dataset Base、出力先は Result Base、それ以外は Workspace を基準に解決</td></tr>
     <tr><td>Exec / Save Shell</td><td>Env ファイル（<code>${env.変数名}</code> の置き換え）</td></tr>
@@ -188,43 +112,43 @@
 
   <h3 id="chooser-tips">再利用のためのポイント</h3>
   <ul>
-    <li>相対パスで保存したオプションは、Workspace / Dataset Base / Result Base を切り替えると、切り替え先の同じ相対位置を指します。<a href="#step-reuse">7. の使い分け</a>はこの仕組みを使っています</li>
+    <li>相対パスで保存したオプションは、Workspace / Dataset Base / Result Base を切り替えると、切り替え先の同じ相対位置を指します。<a href="../guide/getting-started.html">基本的な使い方</a> の「7. Dataset Base / Result Base / Env を使い分けて再利用する」はこの仕組みを使っています</li>
     <li>Workspace の外を選ぶと絶対パスになり、切り替えても同じ場所を指したままになります。環境ごとに変えたいファイルは Workspace（入力データなら Dataset Base）の中に置いてください</li>
     <li>設定・テンプレート・JDBC などのファイルは、<a href="#chooser-base">基準ディレクトリ</a>の中に置くと、ファイル名だけで指定できて管理しやすくなります</li>
   </ul>
 
   <h2 id="sidebar">サイドバーの操作</h2>
-  <p>コマンド（Convert / Compare / Generate / Run / Parameterize）ごとに、Workspace の <code>option/&lt;command&gt;/</code> に保存されたパラメータを一覧表示します。コマンド名をクリックすると一覧を開閉します。</p>
+  <p>コマンド（Convert / Compare / Generate / Run / Parameterize）ごとに、Workspace の <code>option/&lt;command&gt;/</code> に保存された保存済みオプションを一覧表示します。コマンド名をクリックすると一覧を開閉します。</p>
   <table>
     <tr><th>操作</th><th>動作</th><th>Workspace への影響</th></tr>
-    <tr><td>パラメータ名</td><td>パラメータを読み込んでフォームに表示</td><td>読み込みのみ</td></tr>
-    <tr><td>＋（Add）</td><td>空のパラメータ <code>new item</code> を追加（同名があれば <code>new item(1)</code> のように連番）</td><td><code>option/&lt;command&gt;/new item.txt</code> を作成</td></tr>
-    <tr><td>⚙（設定）</td><td>パラメータ名の横のボタン。次の操作メニューを開く</td><td>—</td></tr>
-    <tr><td>Delete</td><td>パラメータを削除</td><td><code>option/&lt;command&gt;/&lt;name&gt;.txt</code> を削除</td></tr>
+    <tr><td>名前</td><td>保存済みオプションを読み込んでフォームに表示</td><td>読み込みのみ</td></tr>
+    <tr><td>＋（Add）</td><td>空の保存済みオプション <code>new item</code> を追加（同名があれば <code>new item(1)</code> のように連番）</td><td><code>option/&lt;command&gt;/new item.txt</code> を作成</td></tr>
+    <tr><td>⚙（設定）</td><td>名前の横のボタン。次の操作メニューを開く</td><td>—</td></tr>
+    <tr><td>Delete</td><td>保存済みオプションを削除</td><td><code>option/&lt;command&gt;/&lt;name&gt;.txt</code> を削除</td></tr>
     <tr><td>rename</td><td>入力欄に新しい名前を入れて確定ボタンで変更（同名があれば連番）</td><td>ファイル名を変更</td></tr>
-    <tr><td>Copy</td><td>パラメータを複製（<code>&lt;name&gt;(1)</code> のように連番）</td><td>複製したファイルを作成</td></tr>
-    <tr><td>Parameterize</td><td>パラメータから Parameterize 用のパラメータを作成して開く（Parameterize 以外のコマンドのみ）</td><td><code>option/parameterize/template/&lt;name&gt;.txt</code>（テンプレート）、Workspace 直下の <code>&lt;name&gt;.csv</code>（パラメータ値）、<code>option/parameterize/&lt;name&gt;.txt</code> を作成</td></tr>
+    <tr><td>Copy</td><td>保存済みオプションを複製（<code>&lt;name&gt;(1)</code> のように連番）</td><td>複製したファイルを作成</td></tr>
+    <tr><td>Parameterize</td><td>保存済みオプションから Parameterize 用の保存済みオプションを作成して開く（Parameterize 以外のコマンドのみ）</td><td><code>option/parameterize/template/&lt;name&gt;.txt</code>（テンプレート）、Workspace 直下の <code>&lt;name&gt;.csv</code>（パラメータデータ）、<code>option/parameterize/&lt;name&gt;.txt</code> を作成</td></tr>
     <tr><td>Help</td><td>サイドバー下部のボタン。各コマンドのヘルプを開く</td><td>—</td></tr>
   </table>
 
   <h2 id="footer">フッターの操作</h2>
-  <p>パラメータを選択しているときに画面下部に表示されます。</p>
+  <p>保存済みオプションを選択しているときに画面下部に表示されます。</p>
   <table>
     <tr><th>ボタン</th><th>動作</th><th>Workspace への影響</th></tr>
-    <tr><td>Edit Parameters (-P)</td><td>SQL やテンプレートに渡す <code>-P</code> パラメータを入力（設定数が右に表示されます）。詳細は <a href="parameters.html">Parameters (-P)</a> を参照</td><td>Exec に渡され、Save でパラメータと一緒に保存される（保存後は .bat でも使われる）。パラメータを開くと保存済みの値に置き換わる</td></tr>
-    <tr><td>Exec</td><td>フォームに表示中の内容でコマンドを実行。保存は不要です。実行中は Abandoned で中断でき、完了後は Open Directory で出力先を開けます。必須の未入力・存在しないファイル・同時に指定できないオプション・不正な値（数値・真偽値として読めない値、文字コード・正規表現・選択肢にない値など）があると実行せずに Invalid Option と表示し、該当する入力欄の下にメッセージを赤字で出します（入力し直すと消えます。折りたたんだ欄など画面に出ていない欄のメッセージはダイアログで知らせます）</td><td>相対パスは Workspace / Dataset Base / Result Base を基準に解決し、<code>${env.変数名}</code> は Env ファイルの値に置き換わる。結果は Result Base 配下に出力</td></tr>
-    <tr><td>Save</td><td>フォームに表示中の内容をパラメータに上書き保存</td><td><code>option/&lt;command&gt;/&lt;name&gt;.txt</code> を上書き</td></tr>
-    <tr><td>Save Shell</td><td>保存済みのパラメータを CLI で実行する .bat を作成。未保存の変更は含まれないため、先に Save してください</td><td>.bat はアプリの起動ディレクトリに <code>&lt;command&gt;_&lt;name&gt;.bat</code> で作成（Workspace の中ではない）。現在の Workspace / Dataset Base / Result Base / Env が埋め込まれる</td></tr>
+    <tr><td>Edit Parameters (-P)</td><td>SQL やテンプレートに渡す -P 値を入力（設定数が右に表示される）。詳細は <a href="parameters.html">Parameters (-P)</a> を参照</td><td>Exec に渡され、Save で一緒に保存される（保存後は .bat でも使われる）。保存済みオプションを開くと保存済みの値に置き換わる</td></tr>
+    <tr><td>Exec</td><td>フォームに表示中の内容でコマンドを実行。保存は不要。実行中は Abandoned で中断でき、完了後は Open Directory で出力先を開ける。必須の未入力・存在しないファイル・同時に指定できないオプション・不正な値（数値・真偽値として読めない値、文字コード・正規表現・選択肢にない値など）があると実行せずに Invalid Option と表示し、該当する入力欄の下にメッセージを赤字で出す（入力し直すと消える。折りたたんだ欄など画面に出ていない欄のメッセージはダイアログで知らせる）</td><td>相対パスは Workspace / Dataset Base / Result Base を基準に解決し、<code>${env.変数名}</code> は Env ファイルの値に置き換わる。結果は Result Base 配下に出力</td></tr>
+    <tr><td>Save</td><td>フォームに表示中の内容を保存済みオプションに上書き保存</td><td><code>option/&lt;command&gt;/&lt;name&gt;.txt</code> を上書き</td></tr>
+    <tr><td>Save Shell</td><td>保存済みオプションを CLI で実行する .bat を作成。未保存の変更は含まれないため、先に Save する</td><td>.bat はアプリの起動ディレクトリに <code>&lt;command&gt;_&lt;name&gt;.bat</code> で作成（Workspace の中ではない）。現在の Workspace / Dataset Base / Result Base / Env が埋め込まれる</td></tr>
   </table>
 
   <h2 id="env">環境変数（Env）</h2>
-  <p>コマンドの引数に <code>${env.変数名}</code> と書くと、実行時に Env ファイルに定義した値に置き換わります。JDBC の接続先などを変数にしておき、Env ファイルを切り替えるだけで同じパラメータを複数の環境で使い回せます。</p>
+  <p>コマンドの引数に <code>${env.変数名}</code> と書くと、実行時に Env ファイルに定義した値に置き換わります。JDBC の接続先などを変数にしておき、Env ファイルを切り替えるだけで同じ保存済みオプションを複数の環境で使い回せます。</p>
   <h3>Env ファイルの例</h3>
   <pre># env/staging.properties
 host=staging-db
 port=5432
 user=app</pre>
-  <h3>パラメータでの使い方</h3>
+  <h3>オプションでの使い方</h3>
   <pre>-jdbc.url=jdbc:postgresql://${env.host}:${env.port}/app
 -jdbc.user=${env.user}</pre>
   <ul>
@@ -235,6 +159,12 @@ user=app</pre>
     <li>CLI から実行する場合は Java システムプロパティ <code>-Dyo.dbunit.cli.env=env/staging.properties</code> で指定します</li>
   </ul>
   <h3>Parameters (-P) との使い分け</h3>
-  <p>Env は Workspace 全体に効き、オプションの値を置き換えます。SQL やテンプレートの中では使えません。パラメータ 1 ファイルだけに効き、SQL やテンプレートの変数として使う値は Parameters (-P) で渡します。比較表と組み合わせ方は <a href="parameters.html">Parameters (-P)</a> の「Env との使い分け」を参照してください。</p>
+  <p>Env は Workspace 全体に効き、オプションの値を置き換えます。SQL やテンプレートの中では使えません。保存済みオプション 1 つだけに効き、SQL やテンプレートの変数として使う値は -P 値で渡します。比較表と組み合わせ方は <a href="parameters.html">Parameters (-P)</a> の「Env との使い分け」を参照してください。</p>
+
+  <h2 id="section-related">関連</h2>
+  <ul>
+    <li><a href="../guide/getting-started.html">基本的な使い方</a> — Workspace を選んでから実行・保存・再利用するまでの流れ</li>
+    <li><a href="parameters.html">Parameters (-P)</a> — 実行時に SQL やテンプレートへ値を渡す</li>
+  </ul>
 </body>
 </html>
