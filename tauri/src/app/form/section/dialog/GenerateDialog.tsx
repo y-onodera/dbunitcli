@@ -198,34 +198,6 @@ type FileGenerate = (
 	context: GenerateExecuteContext,
 ) => Promise<string | null>;
 
-function FileGenerateDialog({
-	config,
-	leading,
-	generate,
-	handleDialogClose,
-	handleSave,
-}: {
-	config: GenerateDialogConfig;
-	leading?: ReactNode;
-	generate: FileGenerate;
-	handleDialogClose: () => void;
-	handleSave: (fileName: string) => void;
-}) {
-	return (
-		<GenerateFormDialog
-			config={config}
-			leading={leading}
-			onClose={handleDialogClose}
-			onExecute={async (values, context) => {
-				const fileName = await generate(values, context);
-				if (fileName !== null) {
-					handleSave(fileName);
-				}
-			}}
-		/>
-	);
-}
-
 // 生成のみで完結しパスを返す形式（XlsxTemplate）。
 // generateは中断された場合はnull・成功時は保存したファイル名を返す
 export function FileGenerateButton({
@@ -241,12 +213,16 @@ export function FileGenerateButton({
 	return (
 		<GenerateButton setPath={setPath}>
 			{(handleDialogClose, handleSave) => (
-				<FileGenerateDialog
+				<GenerateFormDialog
 					config={config}
 					leading={leading}
-					generate={generate}
-					handleDialogClose={handleDialogClose}
-					handleSave={handleSave}
+					onClose={handleDialogClose}
+					onExecute={async (values, context) => {
+						const fileName = await generate(values, context);
+						if (fileName !== null) {
+							handleSave(fileName);
+						}
+					}}
 				/>
 			)}
 		</GenerateButton>

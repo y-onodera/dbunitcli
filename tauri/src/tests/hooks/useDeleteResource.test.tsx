@@ -1,9 +1,6 @@
 import { act, renderHook } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
-import {
-	type Environment,
-	environmentContext,
-} from "../../context/EnvironmentProvider";
+import { environmentContext } from "../../context/EnvironmentProvider";
 import WorkspaceResourcesProvider, {
 	useResourcesSettings,
 } from "../../context/WorkspaceResourcesProvider";
@@ -11,35 +8,23 @@ import {
 	type ResourceKind,
 	useDeleteResource,
 } from "../../hooks/useDeleteResource";
-import type {
-	ResourcesSettingsBuilder,
-	WorkspaceResources,
-} from "../../model/WorkspaceResources";
+import type { ResourcesSettingsBuilder } from "../../model/WorkspaceResources";
 import type { FetchParams } from "../../utils/fetchUtils";
 import { environmentFixture, workspaceResourcesFixture } from "../setup";
 
-const mockWorkspaceResources: WorkspaceResources = {
-	...workspaceResourcesFixture,
-};
-const mockEnvironment: Environment = { ...environmentFixture };
 const mockRemainingFiles = ["remaining"];
 
-function MockProvider({ children }: { children: React.ReactNode }) {
-	return (
-		<environmentContext.Provider value={mockEnvironment}>
-			<WorkspaceResourcesProvider>{children}</WorkspaceResourcesProvider>
-		</environmentContext.Provider>
-	);
-}
 const wrapper = ({ children }: { children: React.ReactNode }) => (
-	<MockProvider>{children}</MockProvider>
+	<environmentContext.Provider value={environmentFixture}>
+		<WorkspaceResourcesProvider>{children}</WorkspaceResourcesProvider>
+	</environmentContext.Provider>
 );
 
 const { mockFetchData, mockFetchAndUpdate } = vi.hoisted(() => {
 	const mockFetchData = vi.fn((params: FetchParams) => {
 		if (params.endpoint.includes("/workspace/resources")) {
 			return Promise.resolve(
-				new Response(JSON.stringify(mockWorkspaceResources)),
+				new Response(JSON.stringify(workspaceResourcesFixture)),
 			);
 		}
 		if (params.endpoint.endsWith("/delete")) {
@@ -106,7 +91,7 @@ describe("useDeleteResourceのテスト", () => {
 			expect(operationResult).toBe("success");
 			expect(mockFetchAndUpdate).toHaveBeenCalledWith(
 				expect.objectContaining({
-					endpoint: `${mockEnvironment.apiUrl}${endpoint}`,
+					endpoint: `${environmentFixture.apiUrl}${endpoint}`,
 					options: expect.objectContaining({ body: "target" }),
 				}),
 				expect.any(Function),

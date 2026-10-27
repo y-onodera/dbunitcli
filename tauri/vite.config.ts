@@ -28,10 +28,17 @@ const missingCssFallback = {
 };
 
 // https://vitejs.dev/config/
-export default defineConfig(async () => ({
+export default defineConfig(async ({ mode }) => ({
 	plugins: [
 		react(),
-		babel({ presets: [reactCompilerPreset()] }),
+		babel({
+			presets: [
+				// テスト時はコンパイルできない関数があれば失敗させる（黙ってメモ化されないのを防ぐ）
+				reactCompilerPreset(
+					mode === "test" ? { panicThreshold: "all_errors" } : {},
+				),
+			],
+		}),
 		missingCssFallback,
 	],
 	build: {
