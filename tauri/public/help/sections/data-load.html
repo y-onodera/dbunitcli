@@ -22,19 +22,21 @@
 <body>
   <p><a href="../index.html">&larr; ヘルプ一覧に戻る</a></p>
   <h1>Data Load</h1>
-  <p>読み込んだデータをどのようにテーブル化するかを指定します。<a href="dataset-load-form.html">Dataset Load Form</a> の <code>data load</code> セクションにある <code>data load option</code> の展開ボタンから設定します。</p>
+  <p>読み込んだデータをどのようにテーブル化するかを指定します。<a href="dataset-load-form.html">Dataset Load Form</a> の <code>data load option</code> から設定します。</p>
+
+  <h2 id="section-options">設定項目</h2>
   <table>
     <tr><th>項目</th><th>説明</th></tr>
-    <tr><td>headerName</td><td>カラム名をカンマ区切りで明示指定する。指定した場合、先頭行もデータ行として扱われる（詳細は下記）</td></tr>
-    <tr><td>startRow</td><td>データ読み込みを開始する行番号。<strong>1 始まり</strong>、デフォルトは <code>1</code>（詳細は下記）</td></tr>
-    <tr><td>addFileInfo</td><td>ON にすると、元ファイル情報を表す 3 カラム（<code>$FILE_PATH</code> / <code>$FILE_NAME</code> / <code>$SHEET_NAME</code>）を各行に追加する（詳細は下記）</td></tr>
-    <tr><td>loadData</td><td>実データを読み込むか（メタデータのみが必要な場合に OFF）</td></tr>
+    <tr><td>headerName</td><td>カラム名をカンマ区切りで指定する。指定すると先頭行もデータ行として扱う。詳細は下記</td></tr>
+    <tr><td>startRow</td><td>読み込みを始める行番号（<strong>1 始まり</strong>。デフォルトは <code>1</code>）。詳細は下記</td></tr>
+    <tr><td>addFileInfo</td><td>ON にすると、元ファイル情報を表す 3 カラム（<code>$FILE_PATH</code> / <code>$FILE_NAME</code> / <code>$SHEET_NAME</code>）を各行に追加する。詳細は下記</td></tr>
+    <tr><td>loadData</td><td>OFF にすると、データ行を読み込まずにテーブル名とカラムだけを読み込む</td></tr>
     <tr><td>includeMetaData</td><td>メタデータカラムを含めるか</td></tr>
-    <tr><td>regTableInclude</td><td>処理対象とするテーブル名の正規表現</td></tr>
-    <tr><td>regTableExclude</td><td>処理対象から除外するテーブル名の正規表現</td></tr>
+    <tr><td>regTableInclude</td><td>対象にするテーブル名の条件（正規表現）</td></tr>
+    <tr><td>regTableExclude</td><td>対象から外すテーブル名の条件（正規表現）</td></tr>
   </table>
 
-  <h2>headerName の詳細</h2>
+  <h2 id="section-header-name">headerName の詳細</h2>
   <p>カラム名をカンマ区切りで与えると、その名前順にテーブル列が構築されます。<strong>指定された場合は先頭行も自動的にはヘッダとみなされず、すべての行がデータ行になります</strong>。既にヘッダ行が存在するファイルでヘッダを上書きしたい場合は、<code>startRow</code> と併用してヘッダ行をスキップしてください。</p>
   <p><strong>例 1: ヘッダ行がない CSV に列名を与える</strong></p>
   <pre>入力 (users.csv):
@@ -61,7 +63,7 @@ Jane,25
   カラム:   [name, age]
   データ行: 2 行</pre>
 
-  <h2>startRow の詳細</h2>
+  <h2 id="section-start-row">startRow の詳細</h2>
   <p>読み込みを開始する行番号を 1 始まりで指定します。未指定時は <code>1</code>（ファイル先頭）です。タイトル行やメタ情報行をスキップしたいときに使用します。Excel 入力にも同様に適用されます。<code>headerName</code> を併用しない場合、<code>startRow</code> で指定した行がヘッダ行として扱われ、その次の行以降がデータになります。</p>
   <p><strong>例 1: タイトル行をスキップする</strong></p>
   <pre>入力 (sales.csv):
@@ -103,7 +105,7 @@ Jane,25
   カラム:   [name, age]           (headerName から)
   データ行: 2 行                   (2 行目以降すべてデータ)</pre>
 
-  <h2>addFileInfo の詳細</h2>
+  <h2 id="section-add-file-info">addFileInfo の詳細</h2>
   <p>ON にすると、読み込んだ各行の末尾に元ファイル情報を示す次の 3 カラムが自動で追加されます。</p>
   <table>
     <tr><th>カラム</th><th>内容</th></tr>
@@ -137,5 +139,11 @@ id,name
 結果 (テーブル "Orders" の 1 行):
   [10, 500, /abs/path/data/book.xlsx, book.xlsx, Orders]</pre>
   <p>比較対象から追加カラムを除外したい場合は、<a href="../dialogs/dataset-settings.html">Dataset Settings</a> の除外カラム設定と併用してください。</p>
+
+  <h2 id="section-related">関連</h2>
+  <ul>
+    <li><a href="dataset-load-form.html">Dataset Load Form</a> — 入力データセットの指定</li>
+    <li><a href="../dialogs/dataset-settings.html">Dataset Settings</a> — 追加したカラムを比較から外す</li>
+  </ul>
 </body>
 </html>

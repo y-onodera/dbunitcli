@@ -22,16 +22,24 @@
 <body>
   <p><a href="../../result-form.html">&larr; Result Form に戻る</a></p>
   <h1>resultType: format</h1>
-  <p><code>java.lang.String.format()</code> の書式文字列を使い、各行のデータをテキスト出力します。</p>
-  <p><strong>共通項目:</strong> <code>result</code> / <code>resultPath</code> / <code>exportEmptyTable</code> / <code>exportHeader</code> は <a href="../../result-form.html#section-common">Result Form の共通項目</a>を参照してください。</p>
-  <h2>固有オプション</h2>
+  <p>各行を書式文字列（Java の <code>String.format()</code> の形式）に当てはめて、テキストファイルとして出力します。</p>
+
+  <h2 id="section-target">出力先</h2>
   <table>
-    <tr><th>項目</th><th>説明</th></tr>
-    <tr><td>outputEncoding</td><td>出力ファイルの文字コード（デフォルト: <code>UTF-8</code>）</td></tr>
-    <tr><td>format</td><td>（必須）<code>String.format()</code> 書式文字列。例: <code>%s,%s\n</code></td></tr>
-    <tr><td>outputExtension</td><td>出力ファイルの拡張子（デフォルト: <code>.txt</code>）</td></tr>
+    <tr><th>項目</th><th>内容</th></tr>
+    <tr><td>ファイル</td><td>テーブルごとに 1 ファイル</td></tr>
   </table>
-  <h2>出力例</h2>
+  <p>共通項目（<code>result</code> / <code>resultPath</code> / <code>exportEmptyTable</code> / <code>exportHeader</code> / <code>parallel</code>）は <a href="../../result-form.html">Result Form</a> を参照してください。</p>
+
+  <h2 id="section-options">固有オプション</h2>
+  <table>
+    <tr><th>項目</th><th>説明</th><th>デフォルト</th></tr>
+    <tr><td>format（必須）</td><td>書式文字列。カラムの値が順に <code>%s</code> に入る（例: <code>%s,%s\n</code>）</td><td>—</td></tr>
+    <tr><td>outputEncoding</td><td>出力ファイルの文字コード</td><td><code>UTF-8</code></td></tr>
+    <tr><td>outputExtension</td><td>出力ファイルの拡張子</td><td><code>.txt</code></td></tr>
+  </table>
+
+  <h2 id="section-example">入出力例</h2>
   <pre>テーブル:
   id=1, name=Alice
   id=2, name=Bob

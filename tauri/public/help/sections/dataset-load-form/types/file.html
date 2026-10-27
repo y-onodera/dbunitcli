@@ -22,10 +22,21 @@
 <body>
   <p><a href="../../dataset-load-form.html">&larr; Dataset Load Form に戻る</a></p>
   <h1>srcType: file</h1>
-  <p><strong>src の意味:</strong> 走査対象のディレクトリ。</p>
-  <p><strong>テーブル名:</strong> 対象ファイルの拡張子（<code>extension</code> でフィルタした場合はその拡張子名）。</p>
-  <p><strong>固有オプション:</strong> なし。<a href="../../traversal.html">ディレクトリ走査系</a>（<code>extension</code>・<code>recursive</code>・<code>regInclude</code>・<code>regExclude</code>）で対象を絞り込みます。</p>
-  <p><strong>データイメージ例:</strong> ディレクトリ配下のファイル一覧をメタ情報テーブルとして生成。</p>
+  <p>ディレクトリ配下のファイルの一覧を、パス・サイズ・更新日時などを列に持つテーブルとして読み込みます。</p>
+
+  <h2 id="section-target">読み込み対象</h2>
+  <table>
+    <tr><th>項目</th><th>内容</th></tr>
+    <tr><td>src</td><td>一覧を作るディレクトリ</td></tr>
+    <tr><td>テーブル名</td><td>対象ファイルの拡張子（<code>extension</code> で絞り込んだ場合はその拡張子）</td></tr>
+    <tr><td>カラム</td><td><code>PATH</code> / <code>NAME</code> / <code>DIR</code> / <code>RELATIVE_PATH</code> / <code>SIZE_KB</code> / <code>LAST_MODIFIED</code></td></tr>
+  </table>
+
+  <h2 id="section-options">固有オプション</h2>
+  <p>なし。対象は <a href="../../traversal.html">Traversal</a> の <code>extension</code>・<code>recursive</code>・<code>regInclude</code>・<code>regExclude</code> で絞り込みます。</p>
+
+  <h2 id="section-example">入出力例</h2>
+  <p>拡張子 <code>.txt</code> のファイルを再帰的に読み込む例:</p>
   <pre>入力 (src = project/):
   project/a.txt         (2KB, 2026-04-01 10:00:00)
   project/sub/b.txt     (5KB, 2026-04-02 11:00:00)

@@ -22,10 +22,20 @@
 <body>
   <p><a href="../../dataset-load-form.html">&larr; Dataset Load Form に戻る</a></p>
   <h1>srcType: csvq</h1>
-  <p><strong>src の意味:</strong> H2 データベース（ファイルモード）上で実行する SQL ファイル。<strong>どの CSV を読むかも SQL ファイル内で <code>CSVREAD()</code> 関数により指定します</strong>（<code>src</code> が指す先は SQL ファイルであり、CSV を置いたディレクトリではありません）。</p>
-  <p><strong>テーブル名:</strong> SQL ファイル名（拡張子除く）。</p>
-  <p><strong>固有オプション:</strong> なし。</p>
-  <p><strong>データイメージ例:</strong> 複数 CSV を SQL で JOIN した結果を 1 テーブルとして取得。</p>
+  <p>SQL ファイルを H2 データベース上で実行し、その結果をテーブルとして読み込みます。SQL の中で <code>CSVREAD()</code> 関数を使って CSV ファイルを読むため、複数の CSV を JOIN するといった使い方ができます。</p>
+
+  <h2 id="section-target">読み込み対象</h2>
+  <table>
+    <tr><th>項目</th><th>内容</th></tr>
+    <tr><td>src</td><td>実行する SQL ファイル。読み込む CSV は SQL の中の <code>CSVREAD()</code> で指定する（<code>src</code> は CSV を置いたディレクトリではない）</td></tr>
+    <tr><td>テーブル名</td><td>SQL ファイル名（拡張子を除く）</td></tr>
+  </table>
+
+  <h2 id="section-options">固有オプション</h2>
+  <p>なし。</p>
+
+  <h2 id="section-example">入出力例</h2>
+  <p>複数の CSV を JOIN した結果を 1 テーブルとして読み込む例:</p>
   <pre>入力 CSV (csvquery/csv/header.csv):
 KEYCOLUMN,CD1,NAME,VALUE
 1,A1,太郎,10000
@@ -61,6 +71,6 @@ SQL (joinQuery.sql):
 データ行:
   [3, C1, 花子, 30000]
   [1, A1, 太郎, 10000]</pre>
-  <p><code>CSVREAD(fileName, columns, csvOptions)</code> の第 2 引数を <code>null</code> にすると先頭行がヘッダとして扱われます。第 3 引数では <code>charset</code>・<code>fieldSeparator</code>・<code>fieldDelimiter</code> などの H2 CSV オプションを指定できます（例: TSV を読む場合は <code>'charset=UTF-8 fieldSeparator=\t'</code>）。</p>
+  <p><code>CSVREAD(fileName, columns, csvOptions)</code> の第 2 引数を <code>null</code> にすると、先頭行がヘッダとして扱われます。第 3 引数では <code>charset</code>・<code>fieldSeparator</code>・<code>fieldDelimiter</code> などの H2 の CSV オプションを指定できます（例: TSV を読む場合は <code>'charset=UTF-8 fieldSeparator=\t'</code>）。</p>
 </body>
 </html>

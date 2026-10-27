@@ -22,15 +22,23 @@
 <body>
   <p><a href="../../result-form.html">&larr; Result Form に戻る</a></p>
   <h1>resultType: csv</h1>
-  <p>テーブルを CSV ファイルとして出力します。1 テーブルにつき 1 ファイルが生成されます。</p>
-  <p><strong>共通項目:</strong> <code>result</code> / <code>resultPath</code> / <code>exportEmptyTable</code> / <code>exportHeader</code> は <a href="../../result-form.html#section-common">Result Form の共通項目</a>を参照してください。</p>
-  <h2>固有オプション</h2>
+  <p>テーブルを CSV ファイルとして出力します。</p>
+
+  <h2 id="section-target">出力先</h2>
   <table>
-    <tr><th>項目</th><th>説明</th></tr>
-    <tr><td>outputEncoding</td><td>出力ファイルの文字コード（デフォルト: <code>UTF-8</code>）</td></tr>
-    <tr><td>outputExtension</td><td>出力ファイルの拡張子（デフォルト: <code>.csv</code>）。TSV として出力したい場合は <code>.tsv</code> を指定</td></tr>
+    <tr><th>項目</th><th>内容</th></tr>
+    <tr><td>ファイル</td><td>テーブルごとに 1 ファイル（<code>{テーブル名}.csv</code>）</td></tr>
   </table>
-  <h2>出力例</h2>
+  <p>共通項目（<code>result</code> / <code>resultPath</code> / <code>exportEmptyTable</code> / <code>exportHeader</code> / <code>parallel</code>）は <a href="../../result-form.html">Result Form</a> を参照してください。</p>
+
+  <h2 id="section-options">固有オプション</h2>
+  <table>
+    <tr><th>項目</th><th>説明</th><th>デフォルト</th></tr>
+    <tr><td>outputEncoding</td><td>出力ファイルの文字コード</td><td><code>UTF-8</code></td></tr>
+    <tr><td>outputExtension</td><td>出力ファイルの拡張子。TSV として出力する場合は <code>.tsv</code></td><td><code>.csv</code></td></tr>
+  </table>
+
+  <h2 id="section-example">入出力例</h2>
   <pre>テーブル名: users
 result    = output/
 outputEncoding = UTF-8

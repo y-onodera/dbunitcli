@@ -34,10 +34,10 @@
   <p>フォームの <code>jdbc option</code> 展開ボタンから設定します。各項目は個別に入力しても、<code>jdbcProperties</code> に保存済みの <code>.properties</code> ファイルを選んでも構いません。両方が指定された場合、<strong><code>jdbcUrl</code> / <code>jdbcUser</code> / <code>jdbcPass</code> が <code>jdbcProperties</code> の同名キーを上書き</strong>します。</p>
   <table>
     <tr><th>項目</th><th>説明</th></tr>
-    <tr><td>jdbcProperties</td><td>接続情報を記述した <code>.properties</code> ファイルのパス。中身は <code>url=</code> / <code>user=</code> / <code>pass=</code> の 3 行。ワークスペースの <code>jdbc/</code> ディレクトリ配下をデフォルトの参照先とします。</td></tr>
-    <tr><td>jdbcUrl</td><td>JDBC 接続 URL（例: <code>jdbc:postgresql://localhost:5432/mydb</code>）。<code>jdbcProperties</code> の <code>url</code> を上書きします。</td></tr>
-    <tr><td>jdbcUser</td><td>ログインユーザ名。<code>jdbcProperties</code> の <code>user</code> を上書きします。</td></tr>
-    <tr><td>jdbcPass</td><td>ログインパスワード。<code>jdbcProperties</code> の <code>pass</code> を上書きします。</td></tr>
+    <tr><td>jdbcProperties</td><td>接続情報を記述した <code>.properties</code> ファイルのパス。中身は <code>url=</code> / <code>user=</code> / <code>pass=</code> の 3 行。Workspace の <code>resources/jdbc/</code> を基準に探す</td></tr>
+    <tr><td>jdbcUrl</td><td>JDBC 接続 URL（例: <code>jdbc:postgresql://localhost:5432/mydb</code>）。<code>jdbcProperties</code> の <code>url</code> より優先する</td></tr>
+    <tr><td>jdbcUser</td><td>ログインユーザ名。<code>jdbcProperties</code> の <code>user</code> より優先する</td></tr>
+    <tr><td>jdbcPass</td><td>ログインパスワード。<code>jdbcProperties</code> の <code>pass</code> より優先する</td></tr>
     <tr><td>useJdbcMetaData</td><td>DBUnit のメタデータ取得経路を切り替えるフラグ（<a href="dataset-load-form/types/table.html">table</a> / <a href="dataset-load-form/types/sql.html">sql</a> の固有オプション）。デフォルトは OFF。詳細は table のページを参照。</td></tr>
   </table>
 
@@ -58,7 +58,7 @@ pass=app_password</pre>
   <p>Database ラベル（Service Name / Database Name）は RDB 種別に応じて切り替わります（Oracle は Service Name、PostgreSQL / H2 は Database Name）。既存 URL を開いた場合、Builder はその URL を解析してフォーム項目を初期値に復元します。</p>
 
   <h2 id="section-connection-test">Connection Test</h2>
-  <p>フォーム下部の <code>Connection Test</code> ボタンを押すと sidecar 経由で実際の接続を試し、結果（成功 / 失敗メッセージ）を隣に表示します。以下のいずれかが揃っていると押下可能です。</p>
+  <p>フォーム下部の <code>Connection Test</code> ボタンを押すと実際に接続を試し、結果（成功 / 失敗メッセージ）を隣に表示します。以下のいずれかが揃っていると押下可能です。</p>
   <ul>
     <li><code>jdbcUrl</code> + <code>jdbcUser</code> + <code>jdbcPass</code> がすべて入力されている</li>
     <li><code>jdbcProperties</code> が選択されている</li>
@@ -66,6 +66,13 @@ pass=app_password</pre>
   <p>フォーム値を変更すると接続 OK 状態は解除され、再度テストが必要になります。</p>
 
   <h2 id="section-save-properties">Save as Properties</h2>
-  <p>現在入力中の URL / User / Pass を新規 <code>.properties</code> ファイルとしてワークスペースの <code>jdbc/</code> に保存します。保存後は <code>jdbcProperties</code> で再利用できます。ダイアログには保存される内容のプレビュー（Pass はマスク）とファイル名入力欄が表示されます。</p>
+  <p>現在入力中の URL / User / Pass を新規 <code>.properties</code> ファイルとしてWorkspace の <code>resources/jdbc/</code> に保存します。保存後は <code>jdbcProperties</code> で再利用できます。ダイアログには保存される内容のプレビュー（Pass はマスク）とファイル名入力欄が表示されます。</p>
+
+  <h2 id="section-related">関連</h2>
+  <ul>
+    <li><a href="dataset-load-form/types/table.html">srcType: table</a> / <a href="dataset-load-form/types/sql.html">srcType: sql</a> — データベースから読み込む</li>
+    <li><a href="result-form/types/table.html">resultType: table</a> — データベースへ書き込む</li>
+    <li><a href="../dialogs/workspace.html">Workspace</a> — 接続先を Env で環境ごとに切り替える</li>
+  </ul>
 </body>
 </html>

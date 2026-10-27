@@ -22,14 +22,24 @@
 <body>
   <p><a href="../../dataset-load-form.html">&larr; Dataset Load Form に戻る</a></p>
   <h1>srcType: reg</h1>
-  <p><strong>src の意味:</strong> テキストファイル、または複数ファイルを含むディレクトリ。</p>
-  <p><strong>テーブル名:</strong> 拡張子を除いたファイル名。</p>
-  <p><strong>固有オプション:</strong></p>
-  <ul>
-    <li><code>regHeaderSplit</code> — ヘッダ行を列に分割する正規表現。<code>headerName</code> で列名を指定しない場合は必須です。</li>
-    <li><code>regDataSplit</code> — （必須）データ行を列に分割する正規表現。ヘッダと区切りロジックを変えたい場合（例: 引用符内のカンマを区切らない等）に使用します。</li>
-  </ul>
-  <p><strong>データイメージ例:</strong></p>
+  <p>正規表現で行を列に分けて、テキストファイルを読み込みます。CSV として読めない形式（引用符の中にカンマがあるなど）に使います。</p>
+
+  <h2 id="section-target">読み込み対象</h2>
+  <table>
+    <tr><th>項目</th><th>内容</th></tr>
+    <tr><td>src</td><td>テキストファイル、またはファイルを置いたディレクトリ</td></tr>
+    <tr><td>テーブル名</td><td>拡張子を除いたファイル名</td></tr>
+  </table>
+
+  <h2 id="section-options">固有オプション</h2>
+  <table>
+    <tr><th>項目</th><th>説明</th><th>デフォルト</th></tr>
+    <tr><td>regDataSplit（必須）</td><td>データ行を列に分ける正規表現</td><td>—</td></tr>
+    <tr><td>regHeaderSplit</td><td>ヘッダ行を列に分ける正規表現。<a href="../../data-load.html">Data Load</a> の <code>headerName</code> で列名を指定しない場合は必須</td><td>—</td></tr>
+  </table>
+
+  <h2 id="section-example">入出力例</h2>
+  <p>引用符の中のカンマでは区切らずに読み込む例:</p>
   <pre>入力 (dirty.txt):
 No,Contents,Time
 1,"最小値1～最大値999,999,999まで",2019-04-01 12:22:30

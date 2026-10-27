@@ -22,23 +22,37 @@
 <body>
   <p><a href="../../result-form.html">&larr; Result Form に戻る</a></p>
   <h1>resultType: table</h1>
-  <p>データを JDBC 接続先の DB テーブルへ書き込みます。<code>result</code> / <code>resultPath</code> / <code>exportEmptyTable</code> / <code>exportHeader</code> は表示されず、代わりに以下の項目が表示されます。</p>
-  <h2>固有オプション</h2>
+  <p>接続先データベースのテーブルへ書き込みます。<code>result</code> / <code>resultPath</code> / <code>exportEmptyTable</code> / <code>exportHeader</code> は表示されません。</p>
+
+  <h2 id="section-target">出力先</h2>
   <table>
-    <tr><th>項目</th><th>説明</th></tr>
-    <tr><td>op</td><td>DB への書き込み操作（下表参照）</td></tr>
-    <tr><td>jdbc</td><td>接続先の <a href="../../jdbc.html">JDBC 接続情報</a>（URL・ユーザ・パスワードなど）</td></tr>
-    <tr><td>parallel</td><td>入力ソースを並列に読み込み・書き込むスレッド数（<a href="../../result-form.html">Result Form</a> の「並列読込」参照）。並列時はスレッドごとに DB 接続を張るため、接続数は最大で並列数になる</td></tr>
+    <tr><th>項目</th><th>内容</th></tr>
+    <tr><td>書き込み先</td><td>入力のテーブル名と同じ名前のテーブル</td></tr>
+    <tr><td>接続先</td><td><a href="../../jdbc.html">JDBC</a> の設定が必須</td></tr>
   </table>
-  <p>並列時は出力先テーブルごとにスレッドが分かれ、テーブル単位で書き込み（CLEAN_INSERT の削除を含む）が同時に進みます。外部キー制約で親子関係のあるテーブルへ書き込む場合は、<code>parallel</code> に <code>1</code> を指定して逐次処理にしてください。</p>
-  <h3>op（DB 操作）</h3>
+
+  <h2 id="section-options">固有オプション</h2>
+  <table>
+    <tr><th>項目</th><th>説明</th><th>デフォルト</th></tr>
+    <tr><td>op</td><td>書き込み方法（下記「op 一覧」を参照）</td><td><code>CLEAN_INSERT</code></td></tr>
+    <tr><td>jdbc</td><td>接続先データベース（<a href="../../jdbc.html">JDBC</a>）</td><td>—</td></tr>
+    <tr><td>parallel</td><td>並列に読み込み・書き込むスレッド数（<a href="../../result-form.html">Result Form</a> の「並列読込」を参照）</td><td>（空）</td></tr>
+  </table>
+
+  <h3 id="section-op">op 一覧</h3>
   <table>
     <tr><th>値</th><th>説明</th></tr>
-    <tr><td>CLEAN_INSERT</td><td>既存データを全削除してから INSERT（デフォルト）</td></tr>
-    <tr><td>INSERT</td><td>既存データを残したまま INSERT</td></tr>
-    <tr><td>UPDATE</td><td>主キーで一致する行を UPDATE</td></tr>
-    <tr><td>REFRESH</td><td>一致行は UPDATE、存在しない行は INSERT</td></tr>
-    <tr><td>DELETE</td><td>主キーで一致する行を DELETE</td></tr>
+    <tr><td>CLEAN_INSERT</td><td>既存の行をすべて削除してから INSERT</td></tr>
+    <tr><td>INSERT</td><td>既存の行を残したまま INSERT</td></tr>
+    <tr><td>UPDATE</td><td>主キーが一致する行を UPDATE</td></tr>
+    <tr><td>REFRESH</td><td>主キーが一致する行は UPDATE、一致しない行は INSERT</td></tr>
+    <tr><td>DELETE</td><td>主キーが一致する行を DELETE</td></tr>
   </table>
+
+  <h2 id="section-notes">注意</h2>
+  <ul>
+    <li>並列にすると、書き込み先のテーブルごとに書き込み（<code>CLEAN_INSERT</code> の削除を含む）が同時に進み、並列数まで DB 接続を同時に使います</li>
+    <li>外部キー制約で親子関係のあるテーブルに書き込む場合は、<code>parallel</code> に <code>1</code> を指定して逐次にしてください</li>
+  </ul>
 </body>
 </html>

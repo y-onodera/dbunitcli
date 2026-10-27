@@ -22,25 +22,43 @@
 <body>
   <p><a href="../../result-form.html">&larr; Result Form に戻る</a></p>
   <h1>resultType: fixed</h1>
-  <p>各カラムを固定長バイト幅でパディングしたテキストファイルとして出力します。</p>
-  <p><strong>共通項目:</strong> <code>result</code> / <code>resultPath</code> / <code>exportEmptyTable</code> / <code>exportHeader</code> は <a href="../../result-form.html#section-common">Result Form の共通項目</a>を参照してください。</p>
-  <h2>固有オプション</h2>
+  <p>各カラムを決まった幅に揃えた固定長テキストファイルとして出力します。</p>
+
+  <h2 id="section-target">出力先</h2>
   <table>
-    <tr><th>項目</th><th>説明</th></tr>
-    <tr><td>outputEncoding</td><td>出力ファイルの文字コード（デフォルト: <code>UTF-8</code>）</td></tr>
-    <tr><td>outputExtension</td><td>出力ファイルの拡張子（デフォルト: <code>.txt</code>）</td></tr>
-    <tr><td>fixedColumnDef</td><td>各カラムの固定長幅定義ファイルのパス。カラムごとのバイト幅をカンマ区切りで記述したファイルを指定</td></tr>
-    <tr><td>fixedLengthType</td><td>バイト幅の計算方法: <code>char</code>（文字数基準、デフォルト）/ <code>byte</code>（バイト数基準）</td></tr>
+    <tr><th>項目</th><th>内容</th></tr>
+    <tr><td>ファイル</td><td>テーブルごとに 1 ファイル</td></tr>
   </table>
-  <p>テキストボックス横の編集ボタンから列定義を GUI で編集できます。generate ボタンからは、既存データセットのカラム構成をもとに定義の雛型（列名・デフォルト長・アラインメント）を生成できます。</p>
-  <h2>出力例</h2>
-  <pre>テーブル:
+  <p>共通項目（<code>result</code> / <code>resultPath</code> / <code>exportEmptyTable</code> / <code>exportHeader</code> / <code>parallel</code>）は <a href="../../result-form.html">Result Form</a> を参照してください。</p>
+
+  <h2 id="section-options">固有オプション</h2>
+  <table>
+    <tr><th>項目</th><th>説明</th><th>デフォルト</th></tr>
+    <tr><td>outputEncoding</td><td>出力ファイルの文字コード</td><td><code>UTF-8</code></td></tr>
+    <tr><td>outputExtension</td><td>出力ファイルの拡張子</td><td><code>.txt</code></td></tr>
+    <tr><td>fixedColumnDef</td><td>カラムごとの幅・寄せ方向・埋める文字を定義した JSON ファイル。横の編集ボタンで編集でき、generate ボタンから雛型を作れる（<a href="../../../dialogs/fixed-column-def-generate.html">Fixed Column Def Generate</a>）</td><td>—</td></tr>
+    <tr><td>fixedLengthType</td><td>幅の数え方: <code>char</code>（文字数）/ <code>byte</code>（バイト数）</td><td><code>char</code></td></tr>
+  </table>
+
+  <h2 id="section-example">入出力例</h2>
+  <pre>テーブル (members):
   id=1, name=Alice
 
-fixedColumnDef: 4,10
-fixedLengthType: char
+fixedColumnDef (members.json):
+{
+  "columns": [
+    {"name": "id",   "length": 4,  "align": "left", "pad": " "},
+    {"name": "name", "length": 10, "align": "left", "pad": " "}
+  ]
+}
 
 生成ファイル:
 1   Alice     </pre>
+
+  <h2 id="section-notes">注意</h2>
+  <ul>
+    <li>定義にないカラムは出力されません</li>
+    <li>値が幅より長い場合は、幅の位置で切り捨てられます</li>
+  </ul>
 </body>
 </html>

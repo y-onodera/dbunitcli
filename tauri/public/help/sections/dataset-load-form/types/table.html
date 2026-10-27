@@ -22,20 +22,25 @@
 <body>
   <p><a href="../../dataset-load-form.html">&larr; Dataset Load Form に戻る</a></p>
   <h1>srcType: table</h1>
-  <p><strong>src の意味:</strong> 読み込み対象のテーブル名を 1 行 1 件で列挙したテキストファイル、または同種のファイルを含むディレクトリ。<strong>ファイル自体は DB テーブルの名前ではなく、テーブル名のリストを記述したテキストファイルです。</strong></p>
-  <p><strong>テーブル名:</strong> src ファイル内の各行に書かれたテーブル名がそのまま DBUnit 上のテーブル名になります。<code>jdbcProperties</code>（JDBC 接続設定）が必須です。</p>
-  <p><strong>固有オプション:</strong></p>
-  <ul>
-    <li><code>useJdbcMetaData</code> — DBUnit のメタデータ取得方法を切り替えるフラグ。デフォルトは OFF。
-      <ul>
-        <li>OFF（デフォルト）: <code>connection.createTable(tableName)</code> を使用。対象テーブルのメタデータのみを JDBC から取得する軽量な経路</li>
-        <li>ON: <code>connection.createDataSet().getTable(tableName)</code> を使用。接続先スキーマ全体のデータセットを構築したうえで対象テーブルを取り出す。DBUnit 内部でのカラム型解決やプライマリキー情報の取得精度が上がる一方、スキーマが大きいと初期化コストが増える</li>
-      </ul>
-      通常は OFF で十分です。DB の種類や方言によってデフォルト経路でカラム型が想定と異なる場合にのみ ON を検討してください。
-    </li>
-  </ul>
-  <p><strong>注:</strong> <code>headerName</code> / <code>startRow</code> / <code>addFileInfo</code> は DB テーブルが対象のため無効です。src ファイル（テーブル名リスト）自体は空行・コメントを含まない前提で読み込まれます。</p>
-  <p><strong>データイメージ例:</strong> テーブル名リストファイル 1 件から複数テーブルを生成。</p>
+  <p>接続先データベースのテーブルを読み込みます。読み込むテーブルの名前は、テーブル名を並べたテキストファイルで指定します。</p>
+
+  <h2 id="section-target">読み込み対象</h2>
+  <table>
+    <tr><th>項目</th><th>内容</th></tr>
+    <tr><td>src</td><td>テーブル名を 1 行に 1 つずつ書いたテキストファイル、またはそのファイルを置いたディレクトリ（<code>src</code> はテーブル名ではなく、テーブル名の一覧ファイル）</td></tr>
+    <tr><td>テーブル名</td><td>一覧ファイルに書いたテーブル名</td></tr>
+    <tr><td>接続先</td><td><a href="../../jdbc.html">JDBC</a> の設定が必須</td></tr>
+  </table>
+
+  <h2 id="section-options">固有オプション</h2>
+  <table>
+    <tr><th>項目</th><th>説明</th><th>デフォルト</th></tr>
+    <tr><td>useJdbcMetaData</td><td>ON にすると、カラムの型と主キーを接続先のスキーマ全体から調べる。型の判定が正確になる一方、スキーマが大きいと読み込みの開始が遅くなる。OFF のときは対象のテーブルだけを調べる</td><td>OFF</td></tr>
+  </table>
+  <p>通常は OFF で十分です。データベースの種類によってカラムの型が想定と異なる場合に ON を試してください。</p>
+
+  <h2 id="section-example">入出力例</h2>
+  <p>一覧ファイル 1 つから 2 つのテーブルを読み込む例:</p>
   <pre>入力 (tables.txt):
 USERS
 ORDERS
@@ -57,5 +62,12 @@ JDBC 接続先:
   テーブル名: ORDERS
     カラム:     [id, amount]
     データ行:   [10, 500] / [11, 800]</pre>
+
+  <h2 id="section-notes">注意</h2>
+  <ul>
+    <li><a href="../../data-load.html">Data Load</a> の <code>headerName</code> / <code>startRow</code> / <code>addFileInfo</code> は効きません</li>
+    <li>テーブル名の一覧ファイルには、空行やコメントを書かないでください</li>
+    <li>テーブル名の一覧ファイルは <a href="../../../dialogs/sql-editor.html">SQL Editor</a> で編集できます</li>
+  </ul>
 </body>
 </html>

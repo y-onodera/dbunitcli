@@ -22,13 +22,20 @@
 <body>
   <p><a href="../index.html">&larr; ヘルプ一覧に戻る</a></p>
   <h1>Traversal</h1>
-  <p>ディレクトリを <code>src</code> に指定した際の走査条件です。<a href="dataset-load-form.html">Dataset Load Form</a> の <code>traversal</code> セクションにある <code>traversal option</code> の展開ボタンから設定します。</p>
+  <p><code>src</code> にディレクトリを指定したときに、どのファイルを読み込むかの条件です。<a href="dataset-load-form.html">Dataset Load Form</a> の <code>traversal option</code> から設定します。</p>
+
+  <h2 id="section-options">設定項目</h2>
   <table>
     <tr><th>項目</th><th>説明</th></tr>
-    <tr><td>extension</td><td>対象とするファイル拡張子</td></tr>
-    <tr><td>recursive</td><td>サブディレクトリを再帰的に走査するか</td></tr>
-    <tr><td>regInclude</td><td>対象ファイル名の包含条件（正規表現）</td></tr>
-    <tr><td>regExclude</td><td>対象ファイル名の除外条件（正規表現）</td></tr>
+    <tr><td>extension</td><td>対象にするファイルの拡張子</td></tr>
+    <tr><td>recursive</td><td>ON にすると、サブディレクトリの中も読み込む</td></tr>
+    <tr><td>regInclude</td><td>対象にするファイル名の条件（正規表現）</td></tr>
+    <tr><td>regExclude</td><td>対象から外すファイル名の条件（正規表現）</td></tr>
   </table>
+
+  <h2 id="section-related">関連</h2>
+  <ul>
+    <li><a href="dataset-load-form.html">Dataset Load Form</a> — 入力データセットの指定</li>
+  </ul>
 </body>
 </html>

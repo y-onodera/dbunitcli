@@ -31,12 +31,12 @@
   </ul>
 
   <h2 id="section-fields">設定項目</h2>
-  <p>フォームの <code>template option</code> 展開ボタンから設定します。</p>
+  <p>フォームの <code>template option</code> から設定します。</p>
   <table>
     <tr><th>項目</th><th>説明</th><th>デフォルト</th></tr>
     <tr><td>encoding</td><td>テンプレートファイルの文字コード。Generate の <code>template</code> ファイル等に適用</td><td>システムデフォルトの文字コード</td></tr>
-    <tr><td>templateGroup</td><td>StringTemplate グループファイル（<code>.stg</code>）のパス。共通マクロ（サブテンプレート）を別ファイルにまとめて読み込みます。ワークスペースの <code>template/</code> ディレクトリを基準に解決</td><td>空（グループなし）</td></tr>
-    <tr><td>templateParameterAttribute</td><td>テンプレート内で入力行にアクセスする属性名。例えば <code>param</code> を指定すると、テンプレートに渡されたレコードは <code>$param.columnName$</code> で参照できます。空文字を指定した場合は属性でラップせず、カラム名で直接参照します</td><td>param</td></tr>
+    <tr><td>templateGroup</td><td>StringTemplate グループファイル（<code>.stg</code>）のパス。共通マクロ（サブテンプレート）を別ファイルにまとめて読み込む。Workspace の <code>resources/template/</code> を基準に探す</td><td>空（グループなし）</td></tr>
+    <tr><td>templateParameterAttribute</td><td>テンプレート内で入力行にアクセスする属性名。例えば <code>param</code> を指定すると、渡された行は <code>$param.columnName$</code> で参照する。空にするとカラム名で直接参照する</td><td>param</td></tr>
     <tr><td>templateVarStart</td><td>テンプレート式の開始文字（1 文字）</td><td>$</td></tr>
     <tr><td>templateVarStop</td><td>テンプレート式の終了文字（1 文字）</td><td>$</td></tr>
   </table>
@@ -99,5 +99,12 @@
     <tr><td>escapeSql</td><td>拡張</td><td>SQL 文字列リテラルとして安全にエスケープ（CLOB 対応）</td></tr>
     <tr><td>jexlExp / ST4Exp</td><td>拡張</td><td>JEXL / ST4 の式記法をそのまま出力</td></tr>
   </table>
+
+  <h2 id="section-related">関連</h2>
+  <ul>
+    <li><a href="../reference/st4.html">StringTemplate 4 書式リファレンス</a> — 構文と書式指定子の詳細</li>
+    <li><a href="../dialogs/parameters.html">Parameters (-P)</a> — テンプレートで -P 値を参照する</li>
+    <li><a href="jxls.html">Jxls</a> — Excel テンプレートの設定</li>
+  </ul>
 </body>
 </html>

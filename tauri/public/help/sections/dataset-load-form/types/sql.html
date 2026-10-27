@@ -22,14 +22,24 @@
 <body>
   <p><a href="../../dataset-load-form.html">&larr; Dataset Load Form に戻る</a></p>
   <h1>srcType: sql</h1>
-  <p><strong>src の意味:</strong> SQL クエリを記述したファイル、または複数 SQL を含むディレクトリ。<code>jdbcProperties</code>（JDBC 接続設定）が必須です。</p>
-  <p><strong>テーブル名:</strong> SQL ファイル名（拡張子除く）。</p>
-  <p><strong>固有オプション:</strong></p>
-  <ul>
-    <li><code>useJdbcMetaData</code> — 意味は <a href="table.html">table</a> と同じ。DBUnit のメタデータ取得経路を切り替えます。詳細は table の節を参照してください。</li>
-  </ul>
-  <p><strong>注:</strong> <code>headerName</code> / <code>startRow</code> / <code>addFileInfo</code> は SQL 実行結果には適用されず無効です。</p>
-  <p><strong>データイメージ例:</strong></p>
+  <p>SQL ファイルを接続先のデータベースで実行し、結果をテーブルとして読み込みます。</p>
+
+  <h2 id="section-target">読み込み対象</h2>
+  <table>
+    <tr><th>項目</th><th>内容</th></tr>
+    <tr><td>src</td><td>SELECT 文を書いた SQL ファイル、またはファイルを置いたディレクトリ</td></tr>
+    <tr><td>テーブル名</td><td>SQL ファイル名（拡張子を除く）</td></tr>
+    <tr><td>接続先</td><td><a href="../../jdbc.html">JDBC</a> の設定が必須</td></tr>
+  </table>
+
+  <h2 id="section-options">固有オプション</h2>
+  <table>
+    <tr><th>項目</th><th>説明</th><th>デフォルト</th></tr>
+    <tr><td>useJdbcMetaData</td><td>ON にすると、カラムの型と主キーを接続先のスキーマ全体から調べる。<a href="table.html">srcType: table</a> と同じ</td><td>OFF</td></tr>
+  </table>
+
+  <h2 id="section-example">入出力例</h2>
+  <p>SELECT の結果を読み込む例:</p>
   <pre>入力 (active_users.sql):
   SELECT id, name FROM USERS WHERE active = 1
 
@@ -42,5 +52,11 @@ JDBC 実行結果:
 データ行:
   [1, Alice]
   [3, Carol]</pre>
+
+  <h2 id="section-notes">注意</h2>
+  <ul>
+    <li><a href="../../data-load.html">Data Load</a> の <code>headerName</code> / <code>startRow</code> / <code>addFileInfo</code> は効きません</li>
+    <li>SQL の中で -P 値を参照できます（<a href="../../../dialogs/parameters.html">Parameters (-P)</a>）</li>
+  </ul>
 </body>
 </html>

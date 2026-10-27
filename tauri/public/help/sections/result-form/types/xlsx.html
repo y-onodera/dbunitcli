@@ -22,12 +22,24 @@
 <body>
   <p><a href="../../result-form.html">&larr; Result Form に戻る</a></p>
   <h1>resultType: xls / xlsx</h1>
-  <p>テーブルを Excel ファイルとして出力します。<code>xls</code> は Excel 97-2003 形式（<code>.xls</code>）、<code>xlsx</code> は Excel 2007 以降の形式（<code>.xlsx</code>）で出力します。固有オプションは両形式で共通で、<code>excelTable</code> の設定により、テーブルをどのシートに書き込むかを制御します。</p>
-  <p><strong>共通項目:</strong> <code>result</code> / <code>resultPath</code> / <code>exportEmptyTable</code> / <code>exportHeader</code> は <a href="../../result-form.html#section-common">Result Form の共通項目</a>を参照してください。</p>
-  <h2>固有オプション</h2>
+  <p>テーブルを Excel ファイルとして出力します。<code>xls</code> は Excel 97-2003 形式、<code>xlsx</code> は Excel 2007 以降の形式です。</p>
+
+  <h2 id="section-target">出力先</h2>
   <table>
-    <tr><th>項目</th><th>説明</th></tr>
-    <tr><td>excelTable</td><td>Excel 出力時のブック構成モード（デフォルト: <code>SHEET</code>）。<code>SHEET</code>: 全テーブルを 1 ブック（ファイル）にまとめ、テーブルごとに 1 シート、<code>BOOK</code>: 1 テーブル = 1 ブック（ファイル）。入力候補から選べるほか、環境変数などで値を渡せるよう自由入力もできる。<code>SHEET</code> かどうかが変わるとフォームが再構成される（<code>SHEET</code> のときは並列読込の <code>parallel</code> を表示しない）</td></tr>
+    <tr><th>項目</th><th>内容</th></tr>
+    <tr><td>ファイル</td><td><code>excelTable</code> で決まる（下記を参照）</td></tr>
   </table>
+  <p>共通項目（<code>result</code> / <code>resultPath</code> / <code>exportEmptyTable</code> / <code>exportHeader</code> / <code>parallel</code>）は <a href="../../result-form.html">Result Form</a> を参照してください。</p>
+
+  <h2 id="section-options">固有オプション</h2>
+  <table>
+    <tr><th>項目</th><th>説明</th><th>デフォルト</th></tr>
+    <tr><td>excelTable</td><td>ブックの作り方。<code>SHEET</code>: すべてのテーブルを 1 ブックにまとめ、テーブルごとに 1 シート。<code>BOOK</code>: テーブルごとに 1 ブック。候補から選ぶほか、Env の値などを渡せるよう自由に入力もできる</td><td><code>SHEET</code></td></tr>
+  </table>
+
+  <h2 id="section-notes">注意</h2>
+  <ul>
+    <li><code>excelTable</code> が <code>SHEET</code> のときは、並列読込の <code>parallel</code> は表示されません。<code>SHEET</code> かどうかを変えるとフォームの表示が切り替わります</li>
+  </ul>
 </body>
 </html>
