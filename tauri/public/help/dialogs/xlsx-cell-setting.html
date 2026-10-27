@@ -24,20 +24,23 @@
   <h1>Xlsx Cell Setting</h1>
   <p>Excel シート上の任意のセル位置から値を拾い集めてテーブルを構成するための設定を編集するダイアログです。帳票・フォーマット化された Excel など、行方向に整列していないデータの抽出に利用します。全体構成は <a href="xlsx-schema.html">Xlsx Schema</a> を参照してください。</p>
 
-  <h2>設定項目</h2>
+  <h2 id="section-open">開き方</h2>
+  <p><a href="xlsx-schema.html">Xlsx Schema</a> の Random Cell Mapping Tables で、行の編集ボタンから開きます。</p>
+
+  <h2 id="section-content">設定項目</h2>
   <table>
-    <tr><th>フィールド</th><th>説明</th></tr>
-    <tr><td>sheetName</td><td>抽出対象の Excel シート名。データセットがロード済みの場合、候補がデータリストから選択できます。</td></tr>
+    <tr><th>項目</th><th>説明</th></tr>
+    <tr><td>sheetName</td><td>抽出対象の Excel シート名。データセットがロード済みの場合、候補がデータリストから選択できる。</td></tr>
     <tr><td>tableName</td><td>抽出結果に付与する論理テーブル名</td></tr>
-    <tr><td>header</td><td>カラム名の並び。カンマ区切りで指定します。各レコードのセルアドレスと同じ順序で対応させます。</td></tr>
-    <tr><td>rows</td><td>1 レコード分のセルアドレスをカンマ区切りで指定します。行を追加することで複数レコードを定義できます。</td></tr>
+    <tr><td>header</td><td>カラム名の並び。カンマ区切りで指定する。各レコードのセルアドレスと同じ順序で対応させる。</td></tr>
+    <tr><td>rows</td><td>1 レコード分のセルアドレスをカンマ区切りで指定する。行を追加することで複数レコードを定義できる。</td></tr>
     <tr><td>addFileInfo</td><td>元ファイル名などのファイル情報カラムを結果に追加するかどうか</td></tr>
   </table>
 
-  <h2>記述例</h2>
+  <h2 id="section-example">記述例</h2>
   <p><strong>帳票の見出しセルから 1 レコードを抽出</strong></p>
   <table>
-    <tr><th>フィールド</th><th>値</th></tr>
+    <tr><th>項目</th><th>値</th></tr>
     <tr><td>sheetName</td><td>Invoice</td></tr>
     <tr><td>tableName</td><td>invoice_header</td></tr>
     <tr><td>header</td><td><code>invoice_no,issue_date,customer_name,total</code></td></tr>
@@ -45,11 +48,17 @@
   </table>
   <p>複数の帳票が 1 シートに並ぶ場合は <code>rows</code> に行を追加し、それぞれの帳票のセルアドレスをカンマ区切りで指定します。</p>
 
-  <h2>注意事項</h2>
+  <h2 id="section-notes">注意</h2>
   <ol>
     <li><code>sheetName</code> と <code>tableName</code> の両方が入力されていない行は保存対象から除外されます。</li>
     <li><code>header</code> と各 <code>rows</code> のセルアドレス数は一致させてください。</li>
     <li>セルアドレスは Excel の <code>A1</code> 形式で指定します。</li>
   </ol>
+
+  <h2 id="section-related">関連</h2>
+  <ul>
+    <li><a href="xlsx-schema.html">Xlsx Schema</a> — スキーマ全体の構成</li>
+    <li><a href="../sections/dataset-load-form/types/xlsx.html">srcType: xls / xlsx</a> — Excel の読み込み</li>
+  </ul>
 </body>
 </html>

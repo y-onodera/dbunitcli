@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8" />
-  <title>ヘルプ - Generate: unitSetting</title>
+  <title>ヘルプ - unitSetting</title>
   <style>
     body { font-family: system-ui, sans-serif; margin: 2rem; color: #1f2937; line-height: 1.6; }
     h1 { font-size: 1.5rem; border-bottom: 2px solid #4f46e5; padding-bottom: 0.5rem; }
@@ -90,7 +90,7 @@
   </table>
 
   <h2 id="section-builtin">組み込み設定</h2>
-  <p><code>ddl</code> / <code>xlsxSchema</code> / <code>javaBean</code> は、次のような unitSetting を内蔵しています（<a href="../../dialogs/txt-template-generate.html">Scaffold</a> でワークスペースへ書き出せます）。上の考え方をそのまま使っており、自分でテンプレートを書くときの手本になります。</p>
+  <p><code>ddl</code> / <code>xlsxSchema</code> / <code>javaBean</code> は、次のような unitSetting を内蔵しています（<a href="../../dialogs/txt-template-generate.html">Scaffold</a> で Workspace へ書き出せます）。上の考え方をそのまま使っており、自分でテンプレートを書くときの手本になります。</p>
   <table>
     <tr><th>generateType</th><th>組み込みの設定ファイル</th><th>条件別ループとしての使われ方</th></tr>
     <tr><td>ddl</td><td><code>sql/ddlSettings.json</code></td><td>全カラムを <code>rows</code> で繰り返して列定義を出し、<code>filter: ["IS_PK"]</code> で作った <code>PK</code> サブテーブルを <code>subTable.PK.rows</code> で繰り返して <code>PRIMARY KEY (...)</code> を出す（<strong>全行ループと主キーのみループの 2 回</strong>）。あわせて空欄の null 化と <code>NULLABLE</code> / <code>IS_PK</code> の真偽値化も行う</td></tr>
@@ -149,7 +149,7 @@ $rows:{row | $row.ID$: $row.NAME$ ($row.STATUS$)}; separator="\n"$</pre>
   <p>設定の <code>pattern</code> が <code>.*</code> のときの重複に注意してください（「注意」を参照）。</p>
 
   <h3>例 1: ddl の組み込み設定とテンプレートを読み解く</h3>
-  <p><a href="types/ddl.html">ddl</a> の組み込み設定（<code>sql/ddlSettings.json</code>）とテンプレート（<code>sql/ddlTemplate.stg</code>）で、unitSetting の有無によるテンプレートの動きの違いを示します。どちらも <a href="../../dialogs/txt-template-generate.html">Scaffold</a> ダイアログ（<code>generateType=txt</code> のとき unit の上の Scaffold ボタンから開く）でワークスペースに書き出して編集でき、フォームの <code>unitSetting</code> / <code>template</code> に指定して使います。</p>
+  <p><a href="types/ddl.html">ddl</a> の組み込み設定（<code>sql/ddlSettings.json</code>）とテンプレート（<code>sql/ddlTemplate.stg</code>）で、unitSetting の有無によるテンプレートの動きの違いを示します。どちらも <a href="../../dialogs/txt-template-generate.html">Scaffold</a> ダイアログ（<code>generateType=txt</code> のとき unit の上の Scaffold ボタンから開く）で Workspace に書き出して編集でき、フォームの <code>unitSetting</code> / <code>template</code> に指定して使います。</p>
 
   <p><strong>1. 入力（記述子データセット）</strong> — 1 カラム = 1 行で、テーブルごとに渡されます（例: <code>EMPLOYEE</code>）。以降の出力例は、この入力を CSV にして実際に生成した結果です。</p>
   <table>

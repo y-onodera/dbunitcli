@@ -23,22 +23,32 @@
   <p><a href="../index.html">&larr; ヘルプ一覧に戻る</a></p>
   <h1>Xlsx Schema Generate</h1>
   <p>既存データセット（CSV / Excel / DB など）のテーブル・カラム構成から、<a href="xlsx-schema.html">Xlsx Schema</a> の雛型を自動生成します。xlsxSchema テキストボックス横のメニューの generate ボタンから開きます。</p>
-  <p><strong>できること</strong></p>
+
+  <h2 id="toc">目次</h2>
+  <ol>
+    <li><a href="#section-overview">できること</a></li>
+    <li><a href="#section-input">入力</a></li>
+    <li><a href="#section-flow">操作の流れ</a></li>
+    <li><a href="#section-example">生成例</a></li>
+    <li><a href="#section-notes">注意</a></li>
+    <li><a href="#section-related">関連</a></li>
+  </ol>
+  <h2 id="section-overview">できること</h2>
   <ul>
-    <li>テーブルごとに、Rows Mapping（行形式）と Random Cell Mapping（セル指定形式）の設定を一括で作成する。</li>
-    <li>カラム名・カラムの並び順・主キー（<code>breakKey</code>）・先頭データ行・セル位置を、元データセットから引き継ぐ。</li>
-    <li>生成結果を Xlsx Schema の編集ダイアログで確認・修正し、名前を付けて保存する。</li>
+    <li>テーブルごとに、Rows Mapping（行形式）と Random Cell Mapping（セル指定形式）の設定を一括で作成する</li>
+    <li>カラム名・カラムの並び順・主キー（<code>breakKey</code>）・先頭データ行・セル位置を、元データセットから引き継ぐ</li>
+    <li>生成結果を Xlsx Schema の編集ダイアログで確認・修正し、名前を付けて保存する</li>
   </ul>
   <p>一から手入力する代わりに、生成した雛型を実際の Excel に合わせて手直しする使い方を想定しています（特に <code>sheetName</code> はテーブル名が入るため、実際のシート名への修正が必要です）。</p>
 
-  <h2>入力</h2>
+  <h2 id="section-input">入力</h2>
   <p>雛型の元にするデータセットを、共通の <a href="../sections/dataset-load-form.html">Dataset Load Form</a> で指定します。<code>srcType</code> の選択に応じて入力項目が切り替わります（CSV / Excel / テーブル / SQL など）。各 <code>srcType</code> の詳細は Dataset Load Form のページを参照してください。</p>
   <table>
     <tr><th>項目</th><th>説明</th></tr>
-    <tr><td>srcData</td><td>雛型の元にするデータセット。<code>srcType</code>・パス・文字コード・ヘッダ指定などを <a href="../sections/dataset-load-form.html">Dataset Load Form</a> と同じ要領で指定します。</td></tr>
+    <tr><td>srcData</td><td>雛型の元にするデータセット。<code>srcType</code>・パス・文字コード・ヘッダ指定などを <a href="../sections/dataset-load-form.html">Dataset Load Form</a> と同じ要領で指定する。</td></tr>
   </table>
 
-  <h2>操作の流れ</h2>
+  <h2 id="section-flow">操作の流れ</h2>
   <ol>
     <li>元にするデータセットを指定します。</li>
     <li>Execute を押すと、テーブルごとのカラム構成から Rows Mapping / Random Cell Mapping の設定が生成されます。</li>
@@ -46,7 +56,7 @@
     <li>ファイル名を指定して保存すると、その名前が xlsxSchema テキストボックスに設定されます。</li>
   </ol>
 
-  <h2>生成例</h2>
+  <h2 id="section-example">生成例</h2>
   <p>たとえば <code>USERS</code> テーブル（カラム <code>ID</code> / <code>NAME</code> / <code>EMAIL</code>、主キーは <code>ID</code>）を含むデータセットを指定して Execute すると、次のようなスキーマが生成されます。</p>
   <pre>{
   "rows": [
@@ -68,10 +78,10 @@
     }
   ]
 }</pre>
-  <h3>生成ルール</h3>
+  <h3 id="section-rules">生成ルール</h3>
   <table>
     <tr><th>項目</th><th>生成される値</th></tr>
-    <tr><td>sheetName</td><td>テーブル名と同じ値。実際の Excel のシート名に合わせて編集してください。</td></tr>
+    <tr><td>sheetName</td><td>テーブル名と同じ値。実際の Excel のシート名に合わせて編集する。</td></tr>
     <tr><td>tableName</td><td>元データセットのテーブル名</td></tr>
     <tr><td>header</td><td>元テーブルのカラム名を並び順どおりに設定</td></tr>
     <tr><td>dataStart</td><td>常に <code>1</code>（ヘッダ行の次の行から、0 始まり）</td></tr>
@@ -81,7 +91,7 @@
   </table>
   <p>テーブルごとに <a href="xlsx-schema.html">Xlsx Schema</a> の Rows Mapping Tables と Random Cell Mapping Tables の両方に 1 件ずつ生成されます。不要な側の行は編集ダイアログで削除してください。</p>
 
-  <h2>対象となる Excel のイメージ</h2>
+  <h3 id="section-image">対象となる Excel のイメージ</h3>
   <p>上の生成例のスキーマは、次のようなシートを持つ Excel ファイルを読み込むための定義です。シート名は <code>sheetName</code> の値（この例では <code>USERS</code>）で、1 行目にカラム名、2 行目以降にデータが並ぶ一般的な表形式を想定しています。</p>
   <table>
     <tr><th>シート: USERS</th><th>A</th><th>B</th><th>C</th></tr>
@@ -96,10 +106,16 @@
   </ul>
   <p>実際のシートの行・列の位置が生成結果と異なる場合は、<a href="xlsx-schema.html">Xlsx Schema</a> の編集ダイアログで <code>sheetName</code>・<code>dataStart</code>・<code>columnIndex</code>・<code>cellAddress</code> を修正してください。</p>
 
-  <h2>注意</h2>
+  <h2 id="section-notes">注意</h2>
   <ul>
     <li>Execute が失敗した場合は、ダイアログ内にエラーメッセージが表示されます。入力内容を見直して再度実行してください。</li>
     <li>Close を押すと、生成せずにダイアログを閉じます（xlsxSchema テキストボックスは変更されません）。</li>
+  </ul>
+
+  <h2 id="section-related">関連</h2>
+  <ul>
+    <li><a href="xlsx-schema.html">Xlsx Schema</a> — スキーマの書式と編集</li>
+    <li><a href="../commands/generate/types/xlsxSchema.html">generateType: xlsxSchema</a> — Generate で雛型を作る</li>
   </ul>
 </body>
 </html>

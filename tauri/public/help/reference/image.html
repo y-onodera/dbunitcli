@@ -22,8 +22,8 @@
 <body>
   <p><a href="../index.html">&larr; ヘルプ一覧に戻る</a></p>
   <h1>Image Option</h1>
-  <p><a href="../commands/compare.html">Compare</a> で <code>targetType</code> に <strong>image</strong> または <strong>pdf</strong> を選択した場合に表示される、画像差分オプションです。比較エンジンには <a href="https://github.com/romankh3/image-comparison">image-comparison</a> ライブラリを使用します。</p>
-  <p>入力には <a href="../sections/dataset-load-form.html">Dataset Load Form</a> の <code>srcType</code> = file を用いてディレクトリを走査し、拡張子フィルタ（例: <code>.png</code>、<code>.pdf</code>）で対象ファイルを絞り込みます。Compare は <code>oldData</code> と <code>newData</code> のファイルを 1 対 1 で突き合わせ、差分画像と判定結果を出力します。</p>
+  <p><a href="../commands/compare.html">Compare</a> で <code>targetType</code> に <code>image</code> または <code>pdf</code> を選んだときに表示される、画像比較の設定です。比較エンジンには <a href="https://github.com/romankh3/image-comparison">image-comparison</a> ライブラリを使用します。</p>
+  <p><code>oldData</code> / <code>newData</code> の指定方法と比較結果の形式は <a href="../commands/compare/types/image.html">targetType: image</a> / <a href="../commands/compare/types/pdf.html">targetType: pdf</a> を参照してください。</p>
 
   <h2 id="section-fields">設定項目</h2>
   <p>フォームの <code>image</code> セクションに表示される項目の一覧です。すべて任意で、未指定時は以下のデフォルト値が使われます。</p>
@@ -76,6 +76,11 @@
     <li><strong>差分矩形</strong> — 実際にピクセルが異なる領域（デフォルト: 赤枠）</li>
     <li><strong>除外矩形</strong> — <code>excludedAreas</code> で指定した無視領域（デフォルト: 緑枠）</li>
     <li>各矩形は <code>fill*Rectangles</code> と <code>percentOpacity*</code> の組み合わせで半透明に塗りつぶし可能</li>
+  </ul>
+
+  <h2 id="section-related">関連</h2>
+  <ul>
+    <li><a href="../commands/compare/types/image.html">targetType: image</a> / <a href="../commands/compare/types/pdf.html">targetType: pdf</a> — 比較結果の形式</li>
   </ul>
 </body>
 </html>

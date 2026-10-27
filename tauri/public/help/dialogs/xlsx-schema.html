@@ -24,32 +24,40 @@
   <h1>Xlsx Schema</h1>
   <p>Excel ファイルをデータセットとして読み込む際のマッピング定義を編集するダイアログです。1 つの Excel ファイルから複数の論理テーブルを抽出するための設定を、2 種類のマッピング形式で記述します。</p>
 
-  <h2>Rows Mapping Tables</h2>
+  <h2 id="section-structure">全体構造</h2>
+  <p>スキーマは次の 2 種類の定義を持ちます。どちらも 1 行が 1 つの論理テーブルの定義です。</p>
+  <h3 id="section-rows">Rows Mapping Tables</h3>
   <p>シート上に行方向に整列したデータ（ヘッダ行 + 連続するデータ行）をテーブルとして抽出します。通常の表形式データはこちらで定義します。</p>
   <p>1 行が 1 レコードとなるテーブルを定義します。各行の編集ダイアログの詳細は <a href="xlsx-row-setting.html">Xlsx Row Setting</a> を参照してください。</p>
 
-  <h2>Random Cell Mapping Tables</h2>
+  <h3 id="section-cells">Random Cell Mapping Tables</h3>
   <p>シート上の任意のセル位置から値を拾い集めてテーブルを構成します。帳票やフォーマット化された Excel など、行方向に整列していないデータの抽出に利用します。</p>
   <p>指定したセルアドレスごとに 1 レコードを生成します。各行の編集ダイアログの詳細は <a href="xlsx-cell-setting.html">Xlsx Cell Setting</a> を参照してください。</p>
 
-  <h2>共通の考え方</h2>
+  <h2 id="section-fields">共通の項目</h2>
   <table>
     <tr><th>項目</th><th>説明</th></tr>
     <tr><td>sheetName</td><td>抽出対象となる Excel のシート名</td></tr>
-    <tr><td>tableName</td><td>抽出結果に付与する論理テーブル名。<code>DatasetSetting</code> 等から参照する名前になります。</td></tr>
-    <tr><td>header</td><td>カラム名の並び。1 行 1 カラム定義で、Excel 上のカラム並びと対応させます。</td></tr>
+    <tr><td>tableName</td><td>抽出結果に付与する論理テーブル名。<code>DatasetSetting</code> 等から参照する名前になる。</td></tr>
+    <tr><td>header</td><td>カラム名の並び。1 行 1 カラム定義で、Excel 上のカラム並びと対応させる。</td></tr>
     <tr><td>addFileInfo</td><td>抽出結果に元ファイル情報のカラムを追加するかどうか</td></tr>
   </table>
 
-  <h2>雛型の生成</h2>
-  <p>xlsxSchema テキストボックス横のメニューの generate ボタンから、既存データセットのカラム構成をもとにスキーマの雛型を生成できます。</p>
+  <h2 id="section-generate">雛型の生成</h2>
+  <p><code>xlsxSchema</code> の横のメニューの generate ボタンから、既存データセットのカラム構成をもとにスキーマの雛型を生成できます。</p>
   <ol>
     <li>データセット指定ダイアログで元にするデータセット（CSV / Excel / DB など）を指定し、Execute を押します。</li>
     <li>テーブルごとのカラム構成から Rows Mapping / Random Cell Mapping の設定が生成され、このダイアログに反映された状態で開きます。</li>
-    <li>内容を確認・編集し、ファイル名を指定して保存すると、その名前が xlsxSchema テキストボックスに設定されます。</li>
+    <li>内容を確認・編集し、ファイル名を指定して保存すると、その名前が <code>xlsxSchema</code> に設定されます（<a href="xlsx-schema-generate.html">Xlsx Schema Generate</a>）。</li>
   </ol>
 
-  <h2>保存</h2>
+  <h2 id="section-save">保存</h2>
   <p>ダイアログ下部のファイル名を指定して保存すると、設定内容が JSON ファイルとして書き出されます。<code>sheetName</code> と <code>tableName</code> が共に入力されている行のみが保存対象です。</p>
+
+  <h2 id="section-related">関連</h2>
+  <ul>
+    <li><a href="../sections/dataset-load-form/types/xlsx.html">srcType: xls / xlsx</a> — スキーマを使って Excel を読み込む</li>
+    <li><a href="../commands/generate/types/xlsxSchema.html">generateType: xlsxSchema</a> — Generate で雛型を作る</li>
+  </ul>
 </body>
 </html>

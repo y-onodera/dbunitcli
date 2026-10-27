@@ -24,13 +24,24 @@
   <h1>Dataset Setting</h1>
   <p>個別テーブルに対するメタデータ設定を編集するダイアログです。対象指定、分割・リネーム、派生テーブルの分離、追加カラム、フィルタ／並び順を構成します。ファイル全体の構造（<code>settings</code> / <code>commonSettings</code> / <code>import</code>）については <a href="dataset-settings.html">Dataset Settings</a> を参照してください。</p>
 
-  <h2>Target</h2>
+  <h2 id="toc">目次</h2>
+  <ol>
+    <li><a href="#section-target">Target</a></li>
+    <li><a href="#section-split">Split / Rename</a></li>
+    <li><a href="#section-separate">Separate</a></li>
+    <li><a href="#section-additional">Additional Columns</a></li>
+    <li><a href="#section-filter">Filter / Order</a></li>
+    <li><a href="#section-jexl">JEXL 式の書き方</a></li>
+    <li><a href="#section-related">関連</a></li>
+  </ol>
+
+  <h2 id="section-target">Target</h2>
   <p>処理対象のテーブルをどのように特定するかを選択します。</p>
   <table>
-    <tr><th>種別</th><th>説明</th></tr>
-    <tr><td>name</td><td>テーブル名を1件以上列挙して指定します。<code>filePath</code> で設定ファイルからの相対パスを指定することも可能です。</td></tr>
-    <tr><td>pattern</td><td>テーブル名のマッチで対象を特定します。<code>pattern</code> オブジェクトには部分一致用の <code>string</code> または正規表現用の <code>regex</code> を指定し、<code>exclude</code> 配列で除外パターンを追加できます。<code>filePath</code>（正規表現）を指定すると、そのパスに一致するファイル由来のテーブルのみが対象になります。</td></tr>
-    <tr><td>outerJoin / innerJoin / fullJoin</td><td>2テーブルを結合して1つの論理テーブルとして扱います。<code>left</code> と <code>right</code> に結合対象のテーブル名、条件は <code>on</code>（JEXL 式）か <code>column</code>（共通カラム名）で指定します。<code>filePath</code>（正規表現）を指定すると、left / right ともそのパスに一致するファイル由来のテーブルのみを結合対象にします。right だけ別のパスにしたい場合は <code>rightFilePath</code> を指定します（指定した場合 right は <code>filePath</code> より優先されます）。</td></tr>
+    <tr><th>項目</th><th>説明</th></tr>
+    <tr><td>name</td><td>テーブル名を1件以上列挙して指定する。<code>filePath</code> で設定ファイルからの相対パスを指定することも可能。</td></tr>
+    <tr><td>pattern</td><td>テーブル名のマッチで対象を特定する。<code>pattern</code> オブジェクトには部分一致用の <code>string</code> または正規表現用の <code>regex</code> を指定し、<code>exclude</code> 配列で除外パターンを追加できる。<code>filePath</code>（正規表現）を指定すると、そのパスに一致するファイル由来のテーブルのみが対象になる。</td></tr>
+    <tr><td>outerJoin / innerJoin / fullJoin</td><td>2テーブルを結合して1つの論理テーブルとして扱う。<code>left</code> と <code>right</code> に結合対象のテーブル名、条件は <code>on</code>（JEXL 式）か <code>column</code>（共通カラム名）で指定する。<code>filePath</code>（正規表現）を指定すると、left / right ともそのパスに一致するファイル由来のテーブルのみを結合対象にする。right だけ別のパスにしたい場合は <code>rightFilePath</code> を指定する（指定した場合 right は <code>filePath</code> より優先される）。</td></tr>
   </table>
 
   <h3>変化の例</h3>
@@ -63,10 +74,10 @@ orders_order_id | orders_item_id | orders_qty | items_id | items_name
 </code></pre>
   <p><code>outerJoin</code> は左側（orders）の全行を残し、一致しない右側カラムは NULL になります。<code>fullJoin</code> は両側の未一致行も残します。</p>
 
-  <h2>Split / Rename</h2>
+  <h2 id="section-split">Split / Rename</h2>
   <p><code>split</code> を有効にすると、1つの入力から複数テーブルを派生させることができます。無効時はリネーム設定として機能します。</p>
   <table>
-    <tr><th>フィールド</th><th>説明</th></tr>
+    <tr><th>項目</th><th>説明</th></tr>
     <tr><td>prefix</td><td>出力テーブル名に付与する接頭辞</td></tr>
     <tr><td>tableName</td><td>出力テーブル名のベース名</td></tr>
     <tr><td>suffix</td><td>出力テーブル名に付与する接尾辞</td></tr>
@@ -124,11 +135,11 @@ id | type | amount
 </code></pre>
   <p>breakKey を指定しない場合、<code>limit</code> は「1 出力テーブルあたりの行数」として扱われ、<code>limit</code> 行ごとに新しい出力テーブルへ切り替わります。</p>
 
-  <h2>Separate</h2>
+  <h2 id="section-separate">Separate</h2>
   <p><code>separate</code> は配列で、各要素が 1 つの派生テーブル定義となり、1 つの入力から複数の派生テーブルを並列に生成します。<code>split</code> が <code>breakKey</code> / <code>limit</code> で連番テーブルを自動生成するのに対し、<code>separate</code> は派生テーブルごとに列・行・並び順などを明示的に自由定義できる点が異なります。</p>
   <p>各派生テーブルでは、通常のテーブル設定と同じフィールドを指定できます。<code>include</code> / <code>exclude</code> による<strong>列方向の切り出し</strong>と、<code>filter</code> / <code>distinct</code> による<strong>行方向の切り出し</strong>の両方に利用でき、1 要素の中で同時に指定することも可能です。</p>
   <table>
-    <tr><th>フィールド</th><th>説明</th></tr>
+    <tr><th>項目</th><th>説明</th></tr>
     <tr><td>name</td><td>派生テーブルの出力テーブル名</td></tr>
     <tr><td>keys</td><td>派生テーブルの主キーとなるカラム</td></tr>
     <tr><td>include</td><td>派生テーブルに残すカラム（列の切り出し）。指定すると include 以外は除外される。</td></tr>
@@ -201,14 +212,14 @@ id | amount
 3  | 2000
 </code></pre>
 
-  <h2>Additional Columns</h2>
+  <h2 id="section-additional">Additional Columns</h2>
   <p>元データに存在しないカラムを追加します。値には JEXL 式を記述できます。</p>
   <table>
     <tr><th>型</th><th>説明</th></tr>
-    <tr><td>string</td><td>文字列型カラム。既存カラムの連結や <code>substring</code> による抽出に利用します。</td></tr>
-    <tr><td>number</td><td>数値型カラム。算術演算で集計値や派生値を定義します。</td></tr>
-    <tr><td>boolean</td><td>真偽値型カラム。条件式で判定結果を持たせます。</td></tr>
-    <tr><td>sqlFunction</td><td>関数表現によるカラム。複雑なロジックを JEXL 関数として定義します。</td></tr>
+    <tr><td>string</td><td>文字列型カラム。既存カラムの連結や <code>substring</code> による抽出に利用する。</td></tr>
+    <tr><td>number</td><td>数値型カラム。算術演算で集計値や派生値を定義する。</td></tr>
+    <tr><td>boolean</td><td>真偽値型カラム。条件式で判定結果を持たせる。</td></tr>
+    <tr><td>sqlFunction</td><td>関数表現によるカラム。複雑なロジックを JEXL 関数として定義する。</td></tr>
   </table>
 
   <h3>変化の例</h3>
@@ -271,9 +282,9 @@ id | status   | mark
 3  | PENDING  | HOLD
 </code></pre>
 
-  <h2>Filter / Order</h2>
+  <h2 id="section-filter">Filter / Order</h2>
   <table>
-    <tr><th>フィールド</th><th>説明</th></tr>
+    <tr><th>項目</th><th>説明</th></tr>
     <tr><td>exclude</td><td>処理から除外するカラム</td></tr>
     <tr><td>include</td><td>処理対象にするカラム（指定すると include 以外は除外）</td></tr>
     <tr><td>keys</td><td>主キーのカラム名</td></tr>
@@ -358,7 +369,7 @@ id | name
 3  | Carol
 </code></pre>
 
-  <h2>JEXL 式の書き方</h2>
+  <h2 id="section-jexl">JEXL 式の書き方</h2>
   <p><code>filter</code>、追加カラム（<code>string</code> / <code>number</code> / <code>boolean</code> / <code>sqlFunction</code>）、結合条件 <code>on</code> では Apache Commons JEXL3 の式を利用できます。</p>
 
   <h3>演算子</h3>
@@ -412,12 +423,18 @@ id | name
 <pre><code>orders_item_id == items_id</code></pre>
   <p>結合時のカラム参照は <code>&lt;テーブル名&gt;_&lt;カラム名&gt;</code> の形式を使用します。</p>
 
-  <h3>注意事項</h3>
+  <h3>注意</h3>
   <ol>
     <li>文字列比較は大文字・小文字を区別します</li>
     <li>日付比較は文字列として行われます（必要ならフォーマットを揃えてから比較）</li>
     <li>NULL との比較は必ず <code>== null</code> / <code>!= null</code> を使用</li>
     <li>複雑な条件は <code>filter</code> を複数行に分割して AND 合成することを推奨</li>
   </ol>
+
+  <h2 id="section-related">関連</h2>
+  <ul>
+    <li><a href="dataset-settings.html">Dataset Settings</a> — 設定ファイル全体の構造と commonSettings / import</li>
+    <li><a href="dataset-setting-generate.html">Dataset Setting Generate</a> — 雛型を作る</li>
+  </ul>
 </body>
 </html>

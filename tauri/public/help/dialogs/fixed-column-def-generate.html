@@ -23,21 +23,31 @@
   <p><a href="../index.html">&larr; ヘルプ一覧に戻る</a></p>
   <h1>Fixed Column Def Generate</h1>
   <p>既存データセット（CSV / Excel / DB など）のカラム構成から、固定長ファイル出力用のカラム幅定義（Fixed Column Def）の雛型を自動生成します。fixedColumnDef テキストボックス横のメニューの generate ボタンから開きます。</p>
-  <p><strong>できること</strong></p>
+
+  <h2 id="toc">目次</h2>
+  <ol>
+    <li><a href="#section-overview">できること</a></li>
+    <li><a href="#section-input">入力</a></li>
+    <li><a href="#section-flow">操作の流れ</a></li>
+    <li><a href="#section-example">生成例</a></li>
+    <li><a href="#section-notes">注意</a></li>
+    <li><a href="#section-related">関連</a></li>
+  </ol>
+  <h2 id="section-overview">できること</h2>
   <ul>
-    <li>元データセットのカラム名を並び順どおりに取り込み、カラムごとの幅・寄せ方向・パディング文字の定義を一括で作成する。</li>
-    <li>生成結果を編集ダイアログで確認し、カラムごとの幅などを修正して名前を付けて保存する。</li>
+    <li>元データセットのカラム名を並び順どおりに取り込み、カラムごとの幅・寄せ方向・パディング文字の定義を一括で作成する</li>
+    <li>生成結果を編集ダイアログで確認し、カラムごとの幅などを修正して名前を付けて保存する</li>
   </ul>
   <p>生成直後は全カラムが同じデフォルト値（幅 10・左寄せ・空白パディング）になるため、実際の固定長レイアウトに合わせて各カラムの幅を手直しする使い方を想定しています。</p>
 
-  <h2>入力</h2>
+  <h2 id="section-input">入力</h2>
   <p>雛型の元にするデータセットを、共通の <a href="../sections/dataset-load-form.html">Dataset Load Form</a> で指定します。<code>srcType</code> の選択に応じて入力項目が切り替わります。データ行は読み込まず、カラム名のみを利用します。</p>
   <table>
     <tr><th>項目</th><th>説明</th></tr>
-    <tr><td>srcData</td><td>雛型の元にするデータセット。<code>srcType</code>・パス・文字コード・ヘッダ指定などを <a href="../sections/dataset-load-form.html">Dataset Load Form</a> と同じ要領で指定します。</td></tr>
+    <tr><td>srcData</td><td>雛型の元にするデータセット。<code>srcType</code>・パス・文字コード・ヘッダ指定などを <a href="../sections/dataset-load-form.html">Dataset Load Form</a> と同じ要領で指定する。</td></tr>
   </table>
 
-  <h2>操作の流れ</h2>
+  <h2 id="section-flow">操作の流れ</h2>
   <ol>
     <li>元にするデータセットを指定します。</li>
     <li>Execute を押すと、カラム構成から固定長の幅定義が生成されます。</li>
@@ -45,24 +55,24 @@
     <li>ファイル名を指定して保存すると、その名前が fixedColumnDef テキストボックスに設定されます。</li>
   </ol>
 
-  <h2>生成例</h2>
+  <h2 id="section-example">生成例</h2>
   <p>たとえば <code>USERS</code> テーブル（カラム <code>ID</code> / <code>NAME</code> / <code>EMAIL</code>）を含むデータセットを指定して Execute すると、次のような定義が生成されます。</p>
   <pre>{
   "columns": [
 {"name": "ID", "length": 10, "align": "left", "pad": " "},{"name": "NAME", "length": 10, "align": "left", "pad": " "},{"name": "EMAIL", "length": 10, "align": "left", "pad": " "}
   ]
 }</pre>
-  <h3>生成ルール</h3>
+  <h3 id="section-rules">生成ルール</h3>
   <table>
     <tr><th>項目</th><th>生成される値</th></tr>
-    <tr><td>name</td><td>元データセットのカラム名。並び順がそのまま固定長ファイル上のカラム順になります。</td></tr>
-    <tr><td>length</td><td>常に <code>10</code>。実際のレイアウトに合わせて編集してください。</td></tr>
-    <tr><td>align</td><td>常に <code>left</code>（左寄せ）。数値などを右寄せにしたいカラムは <code>right</code> に変更します。</td></tr>
-    <tr><td>pad</td><td>常に半角スペース。値が幅に満たない部分を埋める文字です。</td></tr>
+    <tr><td>name</td><td>元データセットのカラム名。並び順がそのまま固定長ファイル上のカラム順になる。</td></tr>
+    <tr><td>length</td><td>常に <code>10</code>。実際のレイアウトに合わせて編集する。</td></tr>
+    <tr><td>align</td><td>常に <code>left</code>（左寄せ）。数値などを右寄せにしたいカラムは <code>right</code> に変更する。</td></tr>
+    <tr><td>pad</td><td>常に半角スペース。値が幅に満たない部分を埋める文字。</td></tr>
   </table>
   <p>データセットに複数のテーブルがある場合、全テーブルのカラムが 1 つの定義に連結されます。テーブルごとに別の定義が必要な場合は、テーブルを 1 つずつ指定して生成してください。</p>
 
-  <h2>この定義で出力される固定長ファイルのイメージ</h2>
+  <h3 id="section-image">この定義で出力される固定長ファイルのイメージ</h3>
   <p>この定義を固定長出力の <code>fixedColumnDef</code> に指定すると、各行は定義したカラムの順に、幅ぴったりに揃えて出力されます。上の生成例（全カラム幅 10・左寄せ）で、次の 2 行を出力した場合の例です。</p>
   <table>
     <tr><th>ID</th><th>NAME</th><th>EMAIL</th></tr>
@@ -77,10 +87,16 @@
     <li>定義に無いカラムは出力されません。</li>
   </ul>
 
-  <h2>注意</h2>
+  <h2 id="section-notes">注意</h2>
   <ul>
     <li>Execute が失敗した場合は、ダイアログ内にエラーメッセージが表示されます。入力内容を見直して再度実行してください。</li>
     <li>Close を押すと、生成せずにダイアログを閉じます（fixedColumnDef テキストボックスは変更されません）。</li>
+  </ul>
+
+  <h2 id="section-related">関連</h2>
+  <ul>
+    <li><a href="../sections/result-form/types/fixed.html">resultType: fixed</a> — 定義ファイルを使って固定長で出力する</li>
+    <li><a href="../commands/generate/types/fixedColumnDef.html">generateType: fixedColumnDef</a> — Generate で雛型を作る</li>
   </ul>
 </body>
 </html>

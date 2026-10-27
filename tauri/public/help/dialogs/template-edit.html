@@ -24,15 +24,17 @@
   <h1>Template File Edit</h1>
   <p>Generate などで使用するテンプレートファイル（<a href="../sections/template.html">StringTemplate 4</a>）を作成・編集するダイアログです。</p>
 
-  <h2>開き方</h2>
-  <p>テンプレートのテキストボックス横の編集ボタンから開きます。テキストボックスにワークスペースのテンプレートとして存在するファイル名が入力されている場合はその内容が読み込まれ、空または存在しない名前の場合は空のエディタが開きます。</p>
+  <h2 id="section-open">開き方</h2>
+  <p>テンプレートのテキストボックス横の編集ボタンから開きます。テキストボックスに Workspace のテンプレートとして存在するファイル名が入力されている場合はその内容が読み込まれ、空または存在しない名前の場合は空のエディタが開きます。</p>
 
-  <h2>保存</h2>
+  <h2 id="section-content">記述内容</h2>
+  <p>StringTemplate 4 のテンプレートを書きます。参照できる変数は <a href="../commands/generate/types/txt.html">generateType: txt</a>、書き方は <a href="../reference/st4.html">StringTemplate 4 書式リファレンス</a> を参照してください。</p>
+  <h2 id="section-save">保存</h2>
   <p>ダイアログ下部の name に保存先のファイル名を指定して Save を押すと、内容がファイルとして書き出され、元のテキストボックスにそのファイル名が設定されます。存在しない名前を指定すると新規ファイルとして作成され、既存のファイル名を指定すると上書きされます。</p>
 
-  <h2>関連</h2>
+  <h2 id="section-related">関連</h2>
   <ul>
-    <li><a href="../commands/generate.html">Generate</a> — <code>template</code> オプション</li>
+    <li><a href="../sections/template.html">Template</a> — テンプレート処理の設定</li>
     <li><a href="parameterize-template-edit.html">Edit Parameterize Template</a> — Parameterize 用テンプレートの編集</li>
   </ul>
 </body>
