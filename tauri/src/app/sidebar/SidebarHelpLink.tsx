@@ -6,6 +6,11 @@ import { openHelpWindow } from "../../utils/helpWindow";
 
 const helpCommands = [
 	{
+		command: "guide/getting-started",
+		label: "Getting Started",
+		description: "Basic workflow from Workspace to reuse",
+	},
+	{
 		command: "commands/convert",
 		label: "Convert",
 		description: "Convert data between formats",
