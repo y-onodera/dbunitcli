@@ -22,6 +22,6 @@ DO NOT TRIGGER when: 見た目のみの変更（CSS/クラス名）、タイプ�
 2. **対応するヘルプを特定する** — 上の対応表から更新対象の `.html` を決める
 3. **ヘルプを更新する** — 表の行の追加・削除、説明・デフォルト値の更新。挙動はコードで確かめてから書く。文体・用語・章立ては `references/style-guide.md` に従う
 4. **クロスページリンクにアンカーを付けない** — 他ページへは相対パスの `page.html`（例: `../sections/jdbc.html`）のみ
-5. **ディレクトリ構成を守る** — `commands/`（`commands/<cmd>/types/` に固有type）、`sections/`（`dataset-load-form/types/`=srcType、`result-form/types/`=resultType）、`dialogs/`、`reference/`、`guide/`（使い方）、ルートは `index.html` のみ。アプリ側の呼び出しは `helpCommand`/`command` に `public/help` からの拡張子なしパス（例: `sections/jdbc`）を指定する
+5. **ディレクトリ構成を守る** — `commands/`（`commands/<cmd>/types/` に固有type）、`sections/`（`dataset-load-form/types/`=srcType、`result-form/types/`=resultType）、`dialogs/`、`reference/`、`guide/`（使い方）、ルートは `index.html` と `help.css` のみ。アプリ側の呼び出しは `helpCommand`/`command` に `public/help` からの拡張子なしパス（例: `sections/jdbc`）を指定する
 6. **同一ページ内アンカーはそのまま維持する** — `<h2 id="...">` と `href="#..."` の対応を壊さない
 7. **スタイルは `help.css` に集約する** — ページに `<style>` を書かず、`<link rel="stylesheet" href="（相対パス）help.css" />` で読み込む
