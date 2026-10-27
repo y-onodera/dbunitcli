@@ -23,11 +23,20 @@
 </head>
 <body>
   <p><a href="../../generate.html">&larr; Generate に戻る</a></p>
-  <h1>generateType: txt（テキストファイル生成）</h1>
-  <p>StringTemplate 4 テンプレートファイルを使い、テキストファイルを生成します。<code>template</code> オプションでテンプレートファイルを指定します。テンプレートエンジンの詳細設定は <code>template option</code> の展開ボタンから設定します（<a href="../../../sections/template.html">Template</a> 参照）。SQL・CSV・任意フォーマットのテキストなど、テンプレート次第で自由な成果物を作成できます。</p>
+  <h1>generateType: txt</h1>
+  <p>StringTemplate 4 のテンプレートファイル（<code>template</code>）にデータを埋め込み、テキストファイルを生成します。SQL・CSV・任意の形式のテキストなど、テンプレート次第で自由に作れます。テンプレート処理の設定は <code>template option</code> から行います（<a href="../../../sections/template.html">Template</a>）。</p>
 
-  <h2>テンプレート変数</h2>
-  <p>unit の選択によってテンプレート内で使用できる変数が異なります。</p>
+  <h2 id="section-options">固有オプション</h2>
+  <table>
+    <tr><th>項目</th><th>説明</th><th>デフォルト</th></tr>
+    <tr><td>template（必須）</td><td>テンプレートファイルのパス</td><td>—</td></tr>
+    <tr><td>outputEncoding</td><td>出力ファイルの文字コード</td><td>UTF-8</td></tr>
+    <tr><td>unitSetting</td><td>テンプレートに渡す前にテーブルを分割・整形する設定ファイル（<a href="../unitSetting.html">unitSetting</a>）。<code>unit=table</code> のときだけ表示</td><td>（空）</td></tr>
+  </table>
+  <p><code>generateType=txt</code> を選ぶと、<code>unit</code> の上に Scaffold ボタンが表示されます。固定成果物タイプの組み込みテンプレートを書き出し、カスタマイズの出発点にできます（<a href="../../../dialogs/txt-template-generate.html">Scaffold</a>）。</p>
+
+  <h2 id="section-variables">テンプレート変数</h2>
+  <p>テンプレートの中で参照できる変数は <code>unit</code> によって変わります。</p>
   <table>
     <tr><th>変数名</th><th>説明</th><th class="center">record</th><th class="center">table</th><th class="center">dataset</th></tr>
     <tr><td>rowNumber</td><td>record はテーブルごとの行番号（テーブルごとに 0 始まり）、table はテーブルのインデックス（0 始まり）、dataset は常に 0</td><td class="center">○</td><td class="center">○</td><td class="center">○</td></tr>
@@ -40,8 +49,11 @@
     <tr><td>dataSet</td><td>テーブル名をキーとする Map。各値は table スコープと同じ構造</td><td class="center">—</td><td class="center">—</td><td class="center">○</td></tr>
   </table>
 
-  <h2>template の generate</h2>
-  <p><code>generateType=txt</code> を選択すると、<code>unit</code> の上に <strong>Scaffold</strong> ボタンが表示されます。固定成果物タイプの組み込みテンプレートをカスタマイズ生成の出発点として書き出し、その結果をこのフォームへ反映します。詳細は <a href="../../../dialogs/txt-template-generate.html">Scaffold</a> を参照してください。</p>
-  <p><code>unit=table</code> のときは、テンプレートに渡すデータを整える <a href="../unitSetting.html">unitSetting</a> も指定できます。</p>
+  <h2 id="section-related">関連</h2>
+  <ul>
+    <li><a href="../../../reference/st4.html">StringTemplate 4 書式リファレンス</a> — テンプレートの書き方</li>
+    <li><a href="../unitSetting.html">unitSetting</a> — <code>unit=table</code> でテーブルを分割・整形する</li>
+    <li><a href="../../../dialogs/template-edit.html">Template File Edit</a> — テンプレートの編集</li>
+  </ul>
 </body>
 </html>

@@ -18,24 +18,34 @@
 <body>
   <p><a href="../../run.html">&larr; Run に戻る</a></p>
   <h1>scriptType: sql</h1>
-  <p>SQL ファイルをテンプレートエンジンで加工してからデータベースに対して実行します。パラメータは <code>srcData</code> で渡したデータセットの各行がテンプレート変数として展開されます。</p>
-  <h2>固有オプション</h2>
+  <p>SQL ファイルをテンプレートとして処理してから、接続先のデータベースで実行します。<code>srcData</code> にディレクトリを指定した場合は、配下の <code>.sql</code> ファイルを 1 ファイルずつ実行します。</p>
+
+  <h2 id="section-options">固有オプション</h2>
   <table>
-    <tr><th>オプション</th><th>説明</th></tr>
-    <tr><td>srcData</td><td>実行対象ファイル（拡張子は <code>.sql</code> に自動設定）</td></tr>
-    <tr><td>templateOption</td><td>テンプレートエンジンのオプション（<code>sql</code> のみ有効。<a href="../../../sections/template.html">Template</a> 参照）</td></tr>
-    <tr><td>jdbcOption</td><td>JDBC 接続設定（<code>sql</code> のみ有効。<a href="../../../sections/jdbc.html">JDBC</a> 参照）</td></tr>
+    <tr><th>項目</th><th>説明</th></tr>
+    <tr><td>templateOption</td><td>SQL をテンプレートとして処理するときの設定（<a href="../../../sections/template.html">Template</a>）</td></tr>
+    <tr><td>jdbcOption</td><td>接続先データベース（<a href="../../../sections/jdbc.html">JDBC</a>）</td></tr>
   </table>
-  <p><code>srcData</code> の入力フォーム詳細は <a href="../../../sections/dataset-load-form.html">Dataset Load Form</a> を参照してください。</p>
-  <h2>設定例</h2>
-  <table>
-    <tr><th>設定項目</th><th>値の例</th></tr>
-    <tr><td>scriptType</td><td>sql</td></tr>
-    <tr><td>srcData.src</td><td>params/run_params.csv（実行パラメータを格納した CSV）</td></tr>
-    <tr><td>templateOption.templateRender</td><td>st4（StringTemplate 4 を使用）</td></tr>
-    <tr><td>jdbcOption.url</td><td>jdbc:h2:./db/testdb</td></tr>
-    <tr><td>jdbcOption.user</td><td>sa</td></tr>
-  </table>
-  <p>SQL ファイル内では <code>&lt;param.COLUMN_NAME&gt;</code> の形式でパラメータを参照できます。<code>srcData</code> の行数分だけ SQL が繰り返し実行されます。</p>
+
+  <h2 id="section-example">設定例</h2>
+  <p>実行のたびに対象日を変えて、注文データを削除する例です。</p>
+  <pre>SQL ファイル (sql/delete_orders.sql):
+  DELETE FROM ORDERS WHERE ORDER_DATE = '$param.orderDate$';
+
+指定:
+  scriptType        = sql
+  srcData の src    = sql/delete_orders.sql
+  jdbcOption        = 接続先の .properties ファイル
+  -P 値             = orderDate=2026-10-01
+
+実行される SQL:
+  DELETE FROM ORDERS WHERE ORDER_DATE = '2026-10-01';</pre>
+  <p>-P 値は <code>$param.キー$</code> で参照します（Template の <code>templateParameterAttribute</code> がデフォルトの <code>param</code> の場合）。参照の書き方は <a href="../../../dialogs/parameters.html">Parameters (-P)</a> を参照してください。</p>
+
+  <h2 id="section-related">関連</h2>
+  <ul>
+    <li><a href="../../../dialogs/parameters.html">Parameters (-P)</a> — 実行時に SQL へ値を渡す</li>
+    <li><a href="../../../reference/st4.html">StringTemplate 4 書式リファレンス</a> — 条件分岐などテンプレートの書き方</li>
+  </ul>
 </body>
 </html>

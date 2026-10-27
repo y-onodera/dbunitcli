@@ -18,28 +18,43 @@
 <body>
   <p><a href="../index.html">&larr; ヘルプ一覧に戻る</a></p>
   <h1>Run</h1>
-  <p>SQL やスクリプトを実行します。データソースに対して SQL 文・ANT スクリプト・バッチファイルを実行します。</p>
+  <p>SQL ファイル・Ant のビルドファイル・Windows バッチファイルを実行します。実行するファイルは <code>srcData</code> で指定し、種類は <code>scriptType</code> で選びます。</p>
 
-  <h2>オプション</h2>
+  <h2 id="section-options">オプション</h2>
   <table>
-    <tr><th>オプション</th><th>説明</th></tr>
-    <tr><td>scriptType</td><td>実行するスクリプトの種類。<code>sql</code> / <code>ant</code> / <code>bat</code> / <code>cmd</code> から選択（デフォルト: <code>sql</code>）</td></tr>
-    <tr><td>parallel</td><td>同時に実行するスクリプト数。<code>2</code> 以上で srcData の各ファイルを並列に実行する（実行順は不定。いずれかが失敗したら未着手のスクリプトは始めず、実行中のスクリプトが終わるのを待ってから失敗する）。空欄または <code>1</code> なら見つかった順に 1 ファイルずつ実行（デフォルト: 空欄＝逐次）。DDL→DML のように実行順に依存するスクリプトは並列にしないこと</td></tr>
-    <tr><td>srcData</td><td>実行対象ファイルの指定。拡張子は scriptType に応じて自動設定（sql→.sql, ant→.xml, bat→.bat, cmd→.cmd）</td></tr>
-    <tr><td>templateOption</td><td>テンプレートエンジンのオプション（<code>sql</code> のみ有効）</td></tr>
-    <tr><td>jdbcOption</td><td>JDBC 接続設定（<code>sql</code> のみ有効）</td></tr>
-    <tr><td>baseDir</td><td>スクリプトの作業ディレクトリ（<code>ant</code> / <code>bat</code> / <code>cmd</code> のみ有効）</td></tr>
-    <tr><td>antTarget</td><td>実行する ANT ターゲット名（<code>ant</code> のみ有効）</td></tr>
+    <tr><th>項目</th><th>説明</th><th>デフォルト</th></tr>
+    <tr><td>scriptType</td><td>実行するファイルの種類（下記「scriptType 一覧」を参照）</td><td><code>sql</code></td></tr>
+    <tr><td>parallel</td><td>同時に実行するファイル数（下記「並列実行」を参照）</td><td>（空）＝ 逐次</td></tr>
+    <tr><td>srcData</td><td>実行するファイル、またはファイルを置いたディレクトリ。拡張子は <code>scriptType</code> に応じて決まる（<code>sql</code>→<code>.sql</code>、<code>ant</code>→<code>.xml</code>、<code>bat</code>→<code>.bat</code>、<code>cmd</code>→<code>.cmd</code>）</td><td>—</td></tr>
+    <tr><td>templateOption</td><td>SQL をテンプレートとして処理するときの設定（<a href="../sections/template.html">Template</a>）。<code>sql</code> のときだけ使う</td><td>—</td></tr>
+    <tr><td>jdbcOption</td><td>接続先データベース（<a href="../sections/jdbc.html">JDBC</a>）。<code>sql</code> のときだけ使う</td><td>—</td></tr>
+    <tr><td>baseDir</td><td>実行時の作業ディレクトリ。<code>ant</code> / <code>bat</code> / <code>cmd</code> のときだけ使う</td><td>—</td></tr>
+    <tr><td>antTarget</td><td>実行する Ant のターゲット名。<code>ant</code> のときだけ使う</td><td>（空）＝ デフォルトターゲット</td></tr>
   </table>
-  <p><code>srcData</code> の入力フォーム詳細は <a href="../sections/dataset-load-form.html">Dataset Load Form</a> を参照してください。</p>
+  <p><code>srcData</code> の指定方法は <a href="../sections/dataset-load-form.html">Dataset Load Form</a> を参照してください。</p>
 
-  <h2>scriptType 一覧</h2>
-  <p>各 scriptType の詳細（固有オプション・設定例）は、種類名のリンク先の個別ページを参照してください。</p>
+  <h2 id="section-script-type">scriptType 一覧</h2>
+  <p>実行時に渡す値（<a href="../dialogs/parameters.html">-P 値</a>）の受け取り方は種類ごとに異なります。詳細は各値のページを参照してください。</p>
   <table>
     <tr><th>値</th><th>説明</th></tr>
-    <tr><td><a href="run/types/sql.html">sql</a></td><td>SQL ファイルをテンプレートエンジンで加工し、JDBC 接続先のデータベースに対して実行（デフォルト）</td></tr>
-    <tr><td><a href="run/types/ant.html">ant</a></td><td>Apache ANT の build.xml を実行。パラメータは ANT プロパティとして渡される</td></tr>
-    <tr><td><a href="run/types/bat.html">bat / cmd</a></td><td>Windows バッチファイルを実行。パラメータは環境変数として渡される</td></tr>
+    <tr><td><a href="run/types/sql.html">sql</a></td><td>SQL ファイルをテンプレートとして処理してから、接続先のデータベースで実行。-P 値はテンプレートの変数として参照する</td></tr>
+    <tr><td><a href="run/types/ant.html">ant</a></td><td>Ant のビルドファイルを実行。-P 値は Ant のプロパティとして渡される</td></tr>
+    <tr><td><a href="run/types/bat.html">bat / cmd</a></td><td>Windows バッチファイルを実行。-P 値は環境変数として渡される</td></tr>
   </table>
+
+  <h2 id="section-parallel">並列実行（parallel）</h2>
+  <ul>
+    <li><code>2</code> 以上を指定すると、<code>srcData</code> の各ファイルを指定した数まで同時に実行します。実行順は決まりません</li>
+    <li>空欄または <code>1</code> のときは、見つかった順に 1 ファイルずつ実行します</li>
+    <li>並列実行中にいずれかが失敗すると、まだ始めていないファイルは実行せず、実行中のファイルが終わるのを待ってからエラーになります</li>
+  </ul>
+  <p>DDL を実行してから DML を実行するなど、実行順に依存するファイルは並列にしないでください。</p>
+
+  <h2 id="section-related">関連</h2>
+  <ul>
+    <li><a href="../dialogs/parameters.html">Parameters (-P)</a> — 実行時に SQL やスクリプトへ値を渡す</li>
+    <li><a href="../sections/jdbc.html">JDBC</a> — 接続先データベースの設定</li>
+    <li><a href="../sections/template.html">Template</a> — SQL のテンプレート処理の設定</li>
+  </ul>
 </body>
 </html>

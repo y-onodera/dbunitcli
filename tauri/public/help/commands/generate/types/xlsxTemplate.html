@@ -24,12 +24,20 @@
 <body>
   <p><a href="../../generate.html">&larr; Generate に戻る</a></p>
   <h1>generateType: xlsxTemplate</h1>
-  <p>jxls テンプレートの雛型となる <code>.xlsx</code> ファイルを生成します。<code>unit</code> は <code>dataset</code> に固定です。<code>template</code> は使用しません。テーブルごとに 1 シートを作成し、1 行目にヘッダ（カラム名）、2 行目に jxls の埋め込み式を配置したうえで、jxls の繰り返し範囲をセルコメントとして付与します。生成された <code>.xlsx</code> はそのまま <a href="xlsx.html">xlsx / xls タイプ</a>の <code>template</code> として利用できます。</p>
-  <p><strong>生成イメージ（テーブル <code>Test1</code>、カラム <code>Key, Column1, Column2, Column3</code>）:</strong></p>
+  <p>jxls の Excel テンプレートの雛型（<code>.xlsx</code>）を生成します。<code>unit</code> は <code>dataset</code> 固定で、<code>template</code> は使いません。テーブルごとに 1 シートを作り、1 行目にカラム名、2 行目に jxls の埋め込み式を置き、繰り返し範囲をセルコメントで設定します。生成したファイルは、そのまま <a href="xlsx.html">generateType: xlsx / xls</a> の <code>template</code> に使えます。</p>
+
+  <h2 id="section-example">出力例</h2>
+  <p>テーブル <code>Test1</code>（カラム <code>Key, Column1, Column2, Column3</code>）の場合:</p>
   <pre>シート "Test1"
   A1: Key                 B1: Column1             C1: Column2             D1: Column3
       （A1セルコメント: jx:area(lastCell="D2")）
   A2: ${row.get('Key')}   B2: ${row.get('Column1')}  C2: ${row.get('Column2')}  D2: ${row.get('Column3')}
       （A2セルコメント: jx:each(items="param.dataSet.get('Test1').rows" var="row" varIndex="index" lastCell="D2")）</pre>
+
+  <h2 id="section-related">関連</h2>
+  <ul>
+    <li><a href="../../../dialogs/xlsx-template-generate.html">Xlsx Template Generate</a> — 画面から雛型を作る</li>
+    <li><a href="../../../sections/jxls.html">Jxls</a> — テンプレートの書き方</li>
+  </ul>
 </body>
 </html>

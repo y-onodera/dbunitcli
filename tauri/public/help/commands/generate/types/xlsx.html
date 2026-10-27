@@ -23,11 +23,22 @@
 </head>
 <body>
   <p><a href="../../generate.html">&larr; Generate に戻る</a></p>
-  <h1>generateType: xlsx / xls（Excelファイル生成）</h1>
-  <p>jxls テンプレートファイルを使い、Excel ファイルを生成します。<code>template</code> オプションでテンプレートファイルを指定します。<code>template</code> テキストボックス横のメニューの generate ボタンから、データセットのカラム情報を元にしたテンプレートを生成できます（<a href="../../../dialogs/xlsx-template-generate.html">Xlsx Template Generate</a> 参照）。jxls 固有の設定は <code>jxls option</code> の展開ボタンから設定します（<a href="../../../sections/jxls.html">Jxls</a> 参照）。<code>xlsx</code> は Excel 2007 以降形式、<code>xls</code> は Excel 97-2003 形式で出力します。</p>
+  <h1>generateType: xlsx / xls</h1>
+  <p>jxls の Excel テンプレート（<code>template</code>）にデータを埋め込み、Excel ファイルを生成します。<code>xlsx</code> は Excel 2007 以降の形式、<code>xls</code> は Excel 97-2003 形式で出力します。jxls の設定は <code>jxls option</code> から行います（<a href="../../../sections/jxls.html">Jxls</a>）。</p>
+
+  <h2 id="section-options">固有オプション</h2>
   <table>
     <tr><th>項目</th><th>説明</th><th>デフォルト</th></tr>
-    <tr><td>lazyLoad</td><td>Excel データを遅延ロードする（大規模データセット向け）</td><td>false</td></tr>
+    <tr><td>template（必須）</td><td>Excel テンプレートファイルのパス</td><td>—</td></tr>
+    <tr><td>lazyLoad</td><td>データを少しずつ読み込みながら出力する。OFF にすると全件を読み込んでから出力する</td><td>ON</td></tr>
   </table>
+  <p><code>template</code> の横のメニューの generate ボタンから、データセットのカラム情報をもとにテンプレートの雛型を作れます（<a href="../../../dialogs/xlsx-template-generate.html">Xlsx Template Generate</a>）。</p>
+
+  <h2 id="section-related">関連</h2>
+  <ul>
+    <li><a href="../../../sections/jxls.html">Jxls</a> — テンプレートの書き方と jxls の設定</li>
+    <li><a href="../../../dialogs/xlsx-template-generate.html">Xlsx Template Generate</a> — テンプレートの雛型を作る</li>
+    <li><a href="xlsxTemplate.html">generateType: xlsxTemplate</a> — テンプレートの雛型を Generate で作る</li>
+  </ul>
 </body>
 </html>

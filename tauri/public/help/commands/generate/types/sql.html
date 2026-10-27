@@ -24,22 +24,31 @@
 <body>
   <p><a href="../../generate.html">&larr; Generate に戻る</a></p>
   <h1>generateType: sql</h1>
-  <p>テーブルのカラム情報から SQL ファイルを自動生成します。<code>unit</code> は <code>table</code> に固定です。<code>template</code> は使用しません。ファイル名は <code>{sqlFilePrefix}{テーブル名}{sqlFileSuffix}.sql</code> になります。</p>
+  <p>入力データの行から、テーブルごとに INSERT / UPDATE / DELETE などの SQL ファイルを生成します。<code>unit</code> は <code>table</code> 固定で、<code>template</code> は使いません。ファイル名は <code>{sqlFilePrefix}{テーブル名}{sqlFileSuffix}.sql</code> です。</p>
+
+  <h2 id="section-options">固有オプション</h2>
   <table>
     <tr><th>項目</th><th>説明</th><th>デフォルト</th></tr>
-    <tr><td>commit</td><td>生成した SQL の末尾に <code>commit;</code> を付与するかどうか</td><td>false</td></tr>
-    <tr><td>op</td><td>生成する SQL の種別: <code>INSERT</code> / <code>UPDATE</code> / <code>DELETE</code> / <code>REFRESH</code> / <code>CLEAN_INSERT</code></td><td>（必須）</td></tr>
-    <tr><td>sqlFilePrefix</td><td>生成 SQL ファイル名のプレフィックス</td><td>（空）</td></tr>
-    <tr><td>sqlFileSuffix</td><td>生成 SQL ファイル名のサフィックス</td><td>（空）</td></tr>
+    <tr><td>op（必須）</td><td>生成する SQL の種類: <code>INSERT</code> / <code>UPDATE</code> / <code>DELETE</code> / <code>REFRESH</code> / <code>CLEAN_INSERT</code></td><td>—</td></tr>
+    <tr><td>commit</td><td>SQL の末尾に <code>commit;</code> を付ける</td><td>ON</td></tr>
+    <tr><td>sqlFilePrefix</td><td>ファイル名の先頭に付ける文字列</td><td>（空）</td></tr>
+    <tr><td>sqlFileSuffix</td><td>ファイル名の末尾（拡張子の前）に付ける文字列</td><td>（空）</td></tr>
   </table>
-  <p><strong>生成イメージ（<code>op=INSERT</code>, ファイル名: <code>Test1.sql</code>）:</strong></p>
+
+  <h2 id="section-example">出力例</h2>
+  <p><code>op=INSERT</code> の場合（ファイル名: <code>Test1.sql</code>）:</p>
   <pre>insert into Test1 (Key ,Column1 ,Column2 ,Column3 ) values ('1' ,'ああ' ,10000 ,'false' );
 insert into Test1 (Key ,Column1 ,Column2 ,Column3 ) values ('15' ,'テスト' ,null ,'true' );
 commit;</pre>
-  <p><strong>生成イメージ（<code>op=CLEAN_INSERT</code>）:</strong></p>
+  <p><code>op=CLEAN_INSERT</code> の場合:</p>
   <pre>delete from Test1;
 
 insert into Test1 (Key ,Column1 ,Column2 ,Column3 ) values ('1' ,'ああ' ,10000 ,'false' );
 commit;</pre>
+
+  <h2 id="section-related">関連</h2>
+  <ul>
+    <li><a href="../../run/types/sql.html">scriptType: sql</a> — 生成した SQL を Run で実行する</li>
+  </ul>
 </body>
 </html>

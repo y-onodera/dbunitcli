@@ -24,8 +24,10 @@
 <body>
   <p><a href="../../generate.html">&larr; Generate に戻る</a></p>
   <h1>generateType: javaBean</h1>
-  <p>データソースのメタデータ（テーブルのカラム情報）から JavaBean の <code>.java</code> ソースファイルを自動生成します。<code>unit</code> は <code>table</code> に固定です。<code>template</code> は使用しません（組み込み JavaBean テンプレートのみ使用されます）。ファイル名はテーブル名をアッパーキャメルケースに変換したものになります（例: <code>EMPLOYEE</code> → <code>Employee.java</code>）。カラムの型（javaType 変換元）や PK・NULL制約はソースのメタデータから取得します（JDBC ソースで <code>useJdbcMetaData</code> を ON にした場合に実値が入ります。CSV 等メタデータの無いソースではカラム名のみになります）。コメントやパッケージ名などメタデータに存在しない情報を含む完全なソースを生成したい場合は、<a href="../../../dialogs/txt-template-generate.html">Scaffold</a>（scaffold コマンド）で書き出した記述子データセットを編集し、<code>generateType=txt</code> と <code>unitSetting</code>（デフォルトは <code>javabean/javaBeanSettings.json</code>）で生成してください。</p>
-  <p><strong>生成イメージ（コメント等をすべて与えた場合。ファイル名: <code>Employee.java</code>）:</strong></p>
+  <p>入力データのカラム情報から、テーブルごとに JavaBean の <code>.java</code> ファイルを生成します。<code>unit</code> は <code>table</code> 固定で、<code>template</code> は使いません。ファイル名はテーブル名をアッパーキャメルケースにしたものです（例: <code>EMPLOYEE</code> → <code>Employee.java</code>）。</p>
+
+  <h2 id="section-example">出力例</h2>
+  <p>コメントなどをすべて与えた場合の出力です（ファイル名: <code>Employee.java</code>）。</p>
   <pre>/** 社員マスタ */
 public class Employee {
     /** 社員ID */
@@ -57,5 +59,16 @@ public class Employee {
         this.salary = salary;
     }
 }</pre>
+
+  <h2 id="section-notes">注意</h2>
+  <ul>
+    <li>フィールドの型・主キー・NULL 制約は入力データから取得します。値が入るのは、<code>srcType</code> が <code>table</code> / <code>sql</code> で <code>useJdbcMetaData</code> を ON にした場合です。CSV など型情報のない入力では、カラム名だけになります</li>
+    <li>コメントやパッケージ名など入力データにない情報を含めたい場合は、<a href="../../../dialogs/txt-template-generate.html">Scaffold</a> で書き出した記述子データセットを編集し、<code>generateType=txt</code> で生成してください</li>
+  </ul>
+
+  <h2 id="section-related">関連</h2>
+  <ul>
+    <li><a href="../../../dialogs/txt-template-generate.html">Scaffold</a> — 組み込みテンプレートを書き出してカスタマイズする</li>
+  </ul>
 </body>
 </html>

@@ -29,12 +29,19 @@
     <li><code>setting</code> を省略するとすべてのカラムを対象に順序比較します</li>
   </ul>
 
-  <h2 id="section-setting">setting による比較内容の変更（data モード）</h2>
-  <p><code>targetType=data</code> のとき、<code>setting</code> に <a href="../../../dialogs/dataset-settings.html">Dataset Settings</a> 形式の JSON ファイルを指定することで、テーブルごとに比較内容を細かく制御できます。</p>
-
-  <h3>主な制御項目</h3>
+  <h2 id="section-options">固有オプション</h2>
   <table>
-    <tr><th>設定フィールド</th><th>比較への影響</th></tr>
+    <tr><th>項目</th><th>説明</th><th>デフォルト</th></tr>
+    <tr><td>setting</td><td>比較の設定ファイル（<a href="../../../dialogs/dataset-settings.html">Dataset Settings</a> 形式）。主キー・比較するカラム・並び順などをテーブルごとに指定する（下記「setting による比較の制御」を参照）</td><td>（空）</td></tr>
+    <tr><td>createPatchSql</td><td>ON にすると、旧データを新データへ補正するパッチ SQL を出力する（下記「createPatchSql によるパッチ SQL の出力」を参照）</td><td>OFF</td></tr>
+  </table>
+
+  <h2 id="section-setting">setting による比較の制御</h2>
+  <p><code>setting</code> に <a href="../../../dialogs/dataset-settings.html">Dataset Settings</a> 形式の JSON ファイルを指定することで、テーブルごとに比較内容を細かく制御できます。</p>
+
+  <h3>主な項目</h3>
+  <table>
+    <tr><th>項目</th><th>比較への影響</th></tr>
     <tr><td>keys</td><td>比較の主キーとなるカラムを指定。指定がない場合は行順序で比較</td></tr>
     <tr><td>include</td><td>比較対象に含めるカラムを限定</td></tr>
     <tr><td>exclude</td><td>比較対象から除外するカラム（タイムスタンプ列など差分を無視したい列に使用）</td></tr>
@@ -98,7 +105,7 @@
     <tr><th>カラム</th><th>説明</th></tr>
     <tr><td>OLD_PATH</td><td>旧データのソースパス（ディレクトリまたは DB 接続先）</td></tr>
     <tr><td>NEW_PATH</td><td>新データのソースパス</td></tr>
-    <tr><td>TARGET_NAME</td><td>差分が検出されたテーブル名（image/pdf モードではファイル名）</td></tr>
+    <tr><td>TARGET_NAME</td><td>差分が検出されたテーブル名（<code>image</code> / <code>pdf</code> ではファイル名）</td></tr>
     <tr><td>DIFF</td><td>差分の種類（下表参照）</td></tr>
     <tr><td>OLD_VALUE</td><td>旧データ側の値・件数・カラム名</td></tr>
     <tr><td>NEW_VALUE</td><td>新データ側の値・件数・カラム名</td></tr>
@@ -160,5 +167,11 @@
     <li><code>KEY_ADD</code>（新データにのみ存在する行）→ <code>INSERT</code> 文</li>
   </ul>
   <p>比較の結果が既に一致している行、およびテーブル・カラムの差分（<code>TABLE_ADD</code> 等）は SQL 生成の対象外です。</p>
+  <h2 id="section-related">関連</h2>
+  <ul>
+    <li><a href="../../../dialogs/dataset-settings.html">Dataset Settings</a> — <code>setting</code> の書式</li>
+    <li><a href="../../../dialogs/dataset-setting.html">Dataset Setting</a> — 各項目と JEXL 式の詳細</li>
+    <li><a href="../../../sections/result-form.html">Result Form</a> — 比較結果の出力形式と出力先</li>
+  </ul>
 </body>
 </html>

@@ -24,19 +24,29 @@
 <body>
   <p><a href="../../generate.html">&larr; Generate に戻る</a></p>
   <h1>generateType: fixedColumnDef</h1>
-  <p>固定長出力（<a href="../../../sections/result-form.html">Result Form</a> の fixed 形式）で使用するカラム幅定義ファイルを JSON 形式で生成します。<code>unit</code> は <code>table</code> に固定です。ファイル名は <code>{テーブル名}.json</code> になります。</p>
+  <p>固定長出力（<a href="../../../sections/result-form/types/fixed.html">resultType: fixed</a>）で使うカラム幅定義ファイル（JSON）を、テーブルごとに生成します。<code>unit</code> は <code>table</code> 固定です。ファイル名は <code>{テーブル名}.json</code> です。</p>
+
+  <h2 id="section-options">固有オプション</h2>
   <table>
-    <tr><th>項目</th><th>説明</th></tr>
-    <tr><td>fixedLength</td><td>各カラムの幅をカンマ区切りで指定（例: <code>4,10,20</code>）。カラム数より少ない場合、残りのカラムには <code>defaultLength</code> が使われる</td></tr>
-    <tr><td>defaultLength</td><td><code>fixedLength</code> で幅が指定されなかったカラムに適用するデフォルト幅（数値）</td></tr>
-    <tr><td>align</td><td>パディングの方向: <code>left</code>（右余白）/ <code>right</code>（左余白）</td></tr>
+    <tr><th>項目</th><th>説明</th><th>デフォルト</th></tr>
+    <tr><td>fixedLength</td><td>各カラムの幅をカンマ区切りで指定（例: <code>4,10,20</code>）。カラム数より少ない場合、残りのカラムは <code>defaultLength</code> になる</td><td>（空）</td></tr>
+    <tr><td>defaultLength</td><td><code>fixedLength</code> で幅を指定しなかったカラムの幅</td><td><code>10</code></td></tr>
+    <tr><td>align</td><td>寄せ方向: <code>left</code>（右側を埋める）/ <code>right</code>（左側を埋める）</td><td><code>left</code></td></tr>
   </table>
-  <p><strong>生成イメージ（<code>fixedLength=5,10</code>, <code>align=left</code>, ファイル名: <code>Test1.json</code>）:</strong></p>
+
+  <h2 id="section-example">出力例</h2>
+  <p><code>fixedLength=5,10</code>、<code>align=left</code> の場合（ファイル名: <code>Test1.json</code>）:</p>
   <pre>{
   "columns": [
     {"name": "key", "length": 5, "align": "left", "pad": " "},
     {"name": "value", "length": 10, "align": "left", "pad": " "}
   ]
 }</pre>
+
+  <h2 id="section-related">関連</h2>
+  <ul>
+    <li><a href="../../../dialogs/fixed-column-def-generate.html">Fixed Column Def Generate</a> — 画面から雛型を作る</li>
+    <li><a href="../../../sections/result-form/types/fixed.html">resultType: fixed</a> — 定義ファイルを使って固定長で出力する</li>
+  </ul>
 </body>
 </html>

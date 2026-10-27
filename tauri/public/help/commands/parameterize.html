@@ -22,103 +22,106 @@
 <body>
   <p><a href="../index.html">&larr; ヘルプ一覧に戻る</a></p>
   <h1>Parameterize</h1>
-  <p>パラメータでバッチ処理します。パラメータデータセットの各行を入力として、対象コマンドを繰り返し実行します。</p>
+  <p>パラメータデータ（<code>paramData</code>）の行ごとに、対象のコマンド（<code>cmd</code>）を繰り返し実行します。コマンドに渡すオプションはテンプレートに書き、パラメータデータの値を埋め込みます。保存済みオプションから作る手順は <a href="../guide/getting-started.html">基本的な使い方</a> の「6. Parameterize で繰り返し実行する」を参照してください。</p>
 
-  <h2>オプション</h2>
+  <h2 id="section-options">オプション</h2>
   <table>
-    <tr><th>オプション</th><th>説明</th></tr>
-    <tr><td>unit</td><td>テンプレートへのパラメータ受け渡し単位（行・テーブル・データセット）</td></tr>
-    <tr><td>parameterize</td><td>cmdParam をパラメータで展開するテンプレートとして扱うかどうか</td></tr>
-    <tr><td>ignoreFail</td><td>compare で想定外の差分が出た場合も他のコマンドを続行する</td></tr>
-    <tr><td>parallel</td><td>同時に実行するコマンド数。<code>2</code> 以上でパラメータ（unit の単位）ごとのコマンドを並列に実行する（実行順は不定）。空欄または <code>1</code> なら 1 件ずつ順に実行（デフォルト: 空欄＝逐次）。詳細は下記「並列実行」を参照</td></tr>
-    <tr><td>cmd</td><td>（必須）データ駆動で実行する対象コマンド（<a href="compare.html">Compare</a> / <a href="convert.html">Convert</a> / <a href="generate.html">Generate</a> など）</td></tr>
-    <tr><td>cmdParam</td><td>コマンド用パラメータファイル。ファイル名はパラメータデータセットから動的に決定</td></tr>
-    <tr><td>template</td><td>デフォルトのテンプレートファイル。cmdParam とは同時に指定できない（両方指定すると実行時にエラー）</td></tr>
-    <tr><td>paramData</td><td>パラメータデータセットのソース</td></tr>
-    <tr><td>templateOption</td><td><a href="../sections/template.html">テンプレートエンジン</a>のオプション</td></tr>
+    <tr><th>項目</th><th>説明</th><th>デフォルト</th></tr>
+    <tr><td>unit</td><td>コマンドを 1 回実行する単位（下記「unit 一覧」を参照）</td><td><code>record</code></td></tr>
+    <tr><td>parameterize</td><td>ON のとき、<code>template</code> / <code>cmdParam</code> のファイルの中身をテンプレートとして展開する。OFF のときは書かれたまま使う</td><td>ON</td></tr>
+    <tr><td>ignoreFail</td><td>ON のとき、コマンドが失敗しても（Compare で想定外の差分が出た場合を含む）残りを続けて実行し、最後に失敗件数があればエラーにする</td><td>OFF</td></tr>
+    <tr><td>parallel</td><td>同時に実行するコマンド数（下記「並列実行」を参照）</td><td>（空）＝ 逐次</td></tr>
+    <tr><td>cmd（必須）</td><td>実行するコマンド（<a href="compare.html">Compare</a> / <a href="convert.html">Convert</a> / <a href="generate.html">Generate</a> / <a href="run.html">Run</a>）。<code>$param.列名$</code> で行ごとに切り替えることもできる</td><td>—</td></tr>
+    <tr><td>cmdParam</td><td>コマンドのオプションを書いたファイルのパス。パスに <code>$param.列名$</code> を書くと行ごとに別のファイルを使える。<code>template</code> と同時には指定できない</td><td>（空）</td></tr>
+    <tr><td>template</td><td>コマンドのオプションを書いたテンプレートファイル（<a href="../dialogs/parameterize-template-edit.html">Edit Parameterize Template</a> で編集）。<code>cmdParam</code> と同時には指定できない</td><td>（空）</td></tr>
+    <tr><td>paramData</td><td>パラメータデータ（<a href="../sections/dataset-load-form.html">Dataset Load Form</a>）</td><td>—</td></tr>
+    <tr><td>templateOption</td><td>テンプレート処理の設定（<a href="../sections/template.html">Template</a>）</td><td>—</td></tr>
   </table>
-  <p><code>paramData</code> の入力フォーム詳細は <a href="../sections/dataset-load-form.html">Dataset Load Form</a> を参照してください。</p>
+
+  <h2 id="section-unit">unit 一覧</h2>
+  <table>
+    <tr><th>値</th><th>説明</th></tr>
+    <tr><td>record</td><td>パラメータデータの行ごとに 1 回実行。列の値のほか、<code>tableName</code>（行の属するテーブル名）と <code>rowNumber</code>（テーブルごとに 0 始まりの行番号）を参照できる（Generate の <code>unit=record</code> と同じ）</td></tr>
+    <tr><td>table</td><td>パラメータデータのテーブルごとに 1 回実行</td></tr>
+    <tr><td>dataset</td><td>パラメータデータ全体で 1 回実行</td></tr>
+  </table>
 
   <h2 id="section-parallel">並列実行（parallel）</h2>
   <ul>
-    <li>テーブル作成→データ投入のように実行順に依存するコマンドは並列にしないこと。</li>
-    <li><code>ignoreFail</code> が false のときは、1 件失敗すると未着手のコマンドは始めず、実行中のコマンドが終わるのを待ってから失敗します（実行中のコマンドは途中で止めません）。true のときは全件を実行し、最後に失敗件数があれば失敗します。</li>
-    <li>並列実行中のコマンドの中では、compare / convert / generate の並列数（generate は <code>-parallel</code>、compare / convert は <code>-result.parallel</code>）が空欄なら逐次になります（CPU コア数で並列化せず、parameterize の並列数と掛け合わせた数のスレッドが動かないようにする）。値を書いた場合はその並列数で動きます。</li>
-    <li>複数のパラメータが同じ出力先へ書くテンプレートでは、最後に残る内容は不定です。</li>
+    <li><code>2</code> 以上を指定すると、<code>unit</code> の単位ごとのコマンドを指定した数まで同時に実行します。実行順は決まりません</li>
+    <li>空欄または <code>1</code> のときは、1 件ずつ順に実行します</li>
+    <li><code>ignoreFail</code> が OFF のときは、1 件失敗すると未着手のコマンドは始めず、実行中のコマンドが終わるのを待ってからエラーになります。ON のときは全件を実行し、最後に失敗件数があればエラーになります</li>
+    <li>並列実行中のコマンドでは、Compare / Convert / Generate の並列数（Generate は <code>parallel</code>、Compare / Convert は <code>convertResult</code> の <code>parallel</code>）が空欄なら逐次になります。値を書いた場合はその並列数で動きます</li>
   </ul>
+  <p>テーブルの作成とデータの投入のように実行順に依存するコマンドは、並列にしないでください。複数の行が同じ出力先へ書く場合、最後に残る内容は決まりません。</p>
 
-  <h2 id="section-unit">unit の動作</h2>
-  <p><code>unit</code> はテンプレートへのパラメータ受け渡し単位を指定します。</p>
-  <table>
-    <tr><th>値</th><th>説明</th></tr>
-    <tr><td>row</td><td><code>paramData</code> の行ごとに 1 回コマンドを実行。列の値のほか、<code>tableName</code>（行の属するテーブル名）と <code>rowNumber</code>（テーブルごとに 0 始まりの行番号）を参照できます（Generate の <code>unit=record</code> と同じ）</td></tr>
-    <tr><td>table</td><td><code>paramData</code> のテーブルごとに 1 回コマンドを実行</td></tr>
-    <tr><td>dataset</td><td><code>paramData</code> 全体を 1 つとして 1 回コマンドを実行</td></tr>
-  </table>
+  <h2 id="section-example">使用例</h2>
 
-  <h2 id="section-examples">具体例</h2>
-
-  <h3 id="example-compare">Compare をパラメータ駆動で繰り返す</h3>
-  <p>比較対象のディレクトリパスをパラメータ CSV で管理し、複数の比較を一括実行する例です。</p>
-  <p><code>paramData</code> に読み込む CSV（例: <code>params/compare_params.csv</code>）:</p>
-  <pre>OLD_DIR,NEW_DIR,SETTING
+  <h3>Compare を繰り返す</h3>
+  <p>比較するディレクトリの組をパラメータデータで管理し、まとめて比較します。</p>
+  <pre>パラメータデータ (params/compare_params.csv):
+OLD_DIR,NEW_DIR,SETTING
 data/old/orders,data/new/orders,settings/orders.json
-data/old/products,data/new/products,settings/products.json</pre>
-  <p><code>template</code> に指定する Compare パラメータファイルのテンプレート（例: <code>templates/compare_param.txt</code>）:</p>
-  <pre>-oldData.src=$param.OLD_DIR$
--oldData.srcType=file
+data/old/products,data/new/products,settings/products.json
+
+テンプレート (compare_param.txt):
+-oldData.src=$param.OLD_DIR$
+-oldData.srcType=csv
 -newData.src=$param.NEW_DIR$
--newData.srcType=file
+-newData.srcType=csv
 -setting=$param.SETTING$
 -convertResult.resultType=csv
--convertResult.result=result/compare</pre>
-  <table>
-    <tr><th>設定項目</th><th>値の例</th></tr>
-    <tr><td>unit</td><td>row</td></tr>
-    <tr><td>parameterize</td><td>false</td></tr>
-    <tr><td>ignoreFail</td><td>true（差分があっても次の行を処理する）</td></tr>
-    <tr><td>cmd</td><td>compare</td></tr>
-    <tr><td>template</td><td>templates/compare_param.txt</td></tr>
-    <tr><td>paramData.src</td><td>params/compare_params.csv</td></tr>
-  </table>
-  <p><code>paramData</code> の各行（<code>OLD_DIR</code>・<code>NEW_DIR</code>・<code>SETTING</code>）が <code>$param.列名$</code> としてテンプレートに展開され、行数分だけ Compare が実行されます。</p>
+-convertResult.result=result/compare
 
-  <h3 id="example-cmdparam">cmdParam でパラメータファイルを動的に切り替える</h3>
-  <p>パラメータ CSV の列値でコマンドパラメータファイルのパスを動的に決定する例です。<code>parameterize</code> を ON にすると <code>cmdParam</code> の文字列もテンプレートとして展開されます。</p>
-  <p><code>paramData</code> に読み込む CSV（例: <code>params/targets.csv</code>）:</p>
-  <pre>TARGET
+指定:
+  unit            = record
+  parameterize    = ON
+  ignoreFail      = ON      (差分があっても次の行を処理する)
+  cmd             = compare
+  template        = compare_param.txt
+  paramData の src = params/compare_params.csv</pre>
+  <p>パラメータデータの行ごとに <code>$param.列名$</code> が展開され、行数分だけ Compare が実行されます。</p>
+
+  <h3>cmdParam でオプションファイルを切り替える</h3>
+  <p>パラメータデータの値で、使うオプションファイルを行ごとに切り替えます。</p>
+  <pre>パラメータデータ (params/targets.csv):
+TARGET
 orders
 products
-customers</pre>
-  <table>
-    <tr><th>設定項目</th><th>値の例</th></tr>
-    <tr><td>unit</td><td>row</td></tr>
-    <tr><td>parameterize</td><td>true</td></tr>
-    <tr><td>cmd</td><td>convert</td></tr>
-    <tr><td>cmdParam</td><td>params/$param.TARGET$.txt</td></tr>
-    <tr><td>paramData.src</td><td>params/targets.csv</td></tr>
-  </table>
-  <p>1 行目では <code>cmdParam</code> が <code>params/orders.txt</code> に展開され Convert が実行されます。2 行目では <code>params/products.txt</code>、3 行目では <code>params/customers.txt</code> が使われます。各 .txt ファイルはコマンドライン引数を記述したパラメータファイルです。</p>
+customers
 
-  <h3 id="example-generate">Generate をパラメータ駆動で繰り返す</h3>
-  <p>データソースとテーブル名の一覧から SQL ファイルを一括生成する例です。</p>
-  <p><code>paramData</code> に読み込む CSV（例: <code>params/tables.csv</code>）:</p>
-  <pre>SRC,SRC_TYPE,RESULT
+指定:
+  unit            = record
+  cmd             = convert
+  cmdParam        = params/$param.TARGET$.txt
+  paramData の src = params/targets.csv</pre>
+  <p>1 行目では <code>params/orders.txt</code>、2 行目では <code>params/products.txt</code>、3 行目では <code>params/customers.txt</code> に書かれたオプションで Convert が実行されます。</p>
+
+  <h3>Generate を繰り返す</h3>
+  <p>データソースの一覧から SQL ファイルをまとめて生成します。</p>
+  <pre>パラメータデータ (params/tables.csv):
+SRC,SRC_TYPE,RESULT
 data/orders,csv,result/orders
-data/products,csv,result/products</pre>
-  <p><code>template</code> に指定する Generate パラメータファイルのテンプレート（例: <code>templates/generate_param.txt</code>）:</p>
-  <pre>-generateType=sql
+data/products,csv,result/products
+
+テンプレート (generate_param.txt):
+-generateType=sql
+-op=INSERT
 -srcData.src=$param.SRC$
 -srcData.srcType=$param.SRC_TYPE$
--result=$param.RESULT$</pre>
-  <table>
-    <tr><th>設定項目</th><th>値の例</th></tr>
-    <tr><td>unit</td><td>row</td></tr>
-    <tr><td>parameterize</td><td>false</td></tr>
-    <tr><td>cmd</td><td>generate</td></tr>
-    <tr><td>template</td><td>templates/generate_param.txt</td></tr>
-    <tr><td>paramData.src</td><td>params/tables.csv</td></tr>
-  </table>
-  <p>各行の <code>SRC</code>・<code>SRC_TYPE</code>・<code>RESULT</code> がテンプレートに渡され、テーブルごとに Generate が実行されます。</p>
+-result=$param.RESULT$
+
+指定:
+  unit            = record
+  cmd             = generate
+  template        = generate_param.txt
+  paramData の src = params/tables.csv</pre>
+
+  <h2 id="section-related">関連</h2>
+  <ul>
+    <li><a href="../guide/getting-started.html">基本的な使い方</a> — 保存済みオプションから Parameterize を作る手順</li>
+    <li><a href="../dialogs/parameterize-template-edit.html">Edit Parameterize Template</a> — テンプレートの編集</li>
+    <li><a href="../sections/template.html">Template</a> — テンプレート処理の設定</li>
+  </ul>
 </body>
 </html>

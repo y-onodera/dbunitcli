@@ -24,69 +24,80 @@
 <body>
   <p><a href="../index.html">&larr; ヘルプ一覧に戻る</a></p>
   <h1>Generate</h1>
-  <p>テンプレートまたは組み込み定義からファイルを生成します。入力データ（<code>srcData</code>）は <a href="../sections/dataset-load-form.html">Dataset Load Form</a> で指定します。<code>generateType</code> は大きく 2 系統に分かれます。</p>
+  <p>入力データ（<code>srcData</code>）からファイルを生成します。<code>generateType</code> は次の 2 系統に分かれます。</p>
   <ul>
-    <li><strong>テンプレート指定タイプ</strong>（<code>txt</code> / <code>xlsx</code> / <code>xls</code>）: <code>template</code> オプションで指定した任意のテンプレートファイルにデータを埋め込みます。出力内容はテンプレート次第で自由に設計できます。</li>
-    <li><strong>固定成果物タイプ</strong>（<code>settings</code> / <code>sql</code> / <code>ddl</code> / <code>xlsxTemplate</code> / <code>xlsxSchema</code> / <code>javaBean</code> / <code>fixedColumnDef</code>）: テーブルのカラム情報等から、決まった形式の成果物ファイルを自動生成します。<code>template</code> は使用しません。組み込みテンプレート以外の出力形式にしたい場合は、<code>generateType=txt</code> と <a href="generate/unitSetting.html">unitSetting</a> を組み合わせて同等の内容を再現してください。</li>
+    <li><strong>テンプレート指定タイプ</strong>（<code>txt</code> / <code>xlsx</code> / <code>xls</code>）: <code>template</code> に指定したテンプレートにデータを埋め込みます。出力内容はテンプレート次第で自由に作れます</li>
+    <li><strong>固定成果物タイプ</strong>（<code>settings</code> / <code>sql</code> / <code>ddl</code> / <code>xlsxTemplate</code> / <code>xlsxSchema</code> / <code>javaBean</code> / <code>fixedColumnDef</code>）: テーブルのカラム情報などから、決まった形式のファイルを生成します。<code>template</code> は使いません</li>
   </ul>
+  <p>固定成果物タイプの出力を変えたい場合は、<a href="../dialogs/txt-template-generate.html">Scaffold</a> で組み込みテンプレートを書き出し、<code>generateType=txt</code> で生成してください。</p>
 
-  <h2>generateType 一覧</h2>
-  <table>
-    <tr><th>値</th><th>分類</th><th>説明</th><th>unit</th></tr>
-    <tr><td><a href="generate/types/txt.html">txt</a></td><td>テンプレート指定 / テキスト</td><td><a href="../sections/template.html">StringTemplate 4</a> を使ったテキストファイル生成（SQL・CSV・任意テキスト等）</td><td>record / table / dataset</td></tr>
-    <tr><td><a href="generate/types/xlsx.html">xlsx</a></td><td>テンプレート指定 / Excel</td><td><a href="../sections/jxls.html">jxls</a> を使った <code>.xlsx</code> テンプレートへのデータ埋め込み</td><td>record / table / dataset</td></tr>
-    <tr><td><a href="generate/types/xlsx.html">xls</a></td><td>テンプレート指定 / Excel</td><td>jxls を使った <code>.xls</code> テンプレートへのデータ埋め込み</td><td>record / table / dataset</td></tr>
-    <tr><td><a href="generate/types/settings.html">settings</a></td><td>固定成果物 / JSON</td><td><a href="../dialogs/dataset-settings.html">Dataset Settings</a> ファイルの雛型を生成</td><td>dataset（固定）</td></tr>
-    <tr><td><a href="generate/types/sql.html">sql</a></td><td>固定成果物 / テキスト</td><td>INSERT / UPDATE / DELETE / CLEAN_INSERT SQL ファイルを生成</td><td>table（固定）</td></tr>
-    <tr><td><a href="generate/types/ddl.html">ddl</a></td><td>固定成果物 / テキスト</td><td>テーブルのカラム情報から CREATE TABLE 用の DDL ファイルを生成</td><td>table（固定）</td></tr>
-    <tr><td><a href="generate/types/xlsxSchema.html">xlsxSchema</a></td><td>固定成果物 / JSON</td><td>データセットのカラム情報から <a href="../dialogs/xlsx-schema.html">Xlsx Schema</a> 設定ファイルの雛型を生成</td><td>table（固定）</td></tr>
-    <tr><td><a href="generate/types/javaBean.html">javaBean</a></td><td>固定成果物 / テキスト</td><td>テーブルのカラム情報から JavaBean の <code>.java</code> ソースを生成</td><td>table（固定）</td></tr>
-    <tr><td><a href="generate/types/fixedColumnDef.html">fixedColumnDef</a></td><td>固定成果物 / JSON</td><td>固定長出力用のカラム幅定義ファイルを生成</td><td>table（固定）</td></tr>
-    <tr><td><a href="generate/types/xlsxTemplate.html">xlsxTemplate</a></td><td>固定成果物 / Excel</td><td>jxls テンプレートの雛型 <code>.xlsx</code> を生成</td><td>dataset（固定）</td></tr>
-  </table>
-
-  <h2>unit</h2>
-  <p>生成の単位を指定します。デフォルトは <code>record</code> です。<br>
-  <code>settings</code> / <code>xlsxTemplate</code> は <code>dataset</code>、<code>sql</code> / <code>ddl</code> / <code>xlsxSchema</code> / <code>javaBean</code> / <code>fixedColumnDef</code> は <code>table</code> に固定されます。</p>
-  <table>
-    <tr><th>値</th><th>説明</th></tr>
-    <tr><td>record</td><td>行ごとに 1 ファイルを出力</td></tr>
-    <tr><td>table</td><td>テーブルごとに 1 ファイルを出力</td></tr>
-    <tr><td>dataset</td><td>データセット全体から 1 ファイルを出力</td></tr>
-  </table>
-
-  <h2>unitSetting</h2>
-  <p><code>unit=table</code> でテンプレート指定タイプ（<code>txt</code> など。<code>xlsx</code> / <code>xls</code> を除く）を使うときに表示されます。テンプレートに渡す前に、1 つのテーブルから条件別のサブテーブルを作ったり、列の値を整形したりするための設定ファイルです。固定成果物タイプでは組み込み設定が使われ、指定できません。</p>
+  <h2 id="section-options">オプション</h2>
+  <p><code>generateType</code> ごとの固有オプションは、各値のページを参照してください。</p>
   <table>
     <tr><th>項目</th><th>説明</th><th>デフォルト</th></tr>
-    <tr><td>unitSetting</td><td>サブテーブル設定ファイルのパス</td><td>（空、組み込み設定を使用）</td></tr>
-    <tr><td>unitSettingEncoding</td><td>unitSetting ファイルの文字コード</td><td>システムデフォルト</td></tr>
+    <tr><td>generateType</td><td>生成するファイルの種類（下記「generateType 一覧」を参照）</td><td>—</td></tr>
+    <tr><td>unit</td><td>生成の単位（下記「unit 一覧」を参照）。固定成果物タイプでは固定</td><td><code>record</code></td></tr>
+    <tr><td>unitSetting</td><td>テンプレートに渡す前にテーブルを分割・整形する設定ファイル（<a href="generate/unitSetting.html">unitSetting</a>）。<code>unit=table</code> の <code>txt</code> のときだけ表示</td><td>（空）</td></tr>
+    <tr><td>unitSettingEncoding</td><td><code>unitSetting</code> の文字コード</td><td>システムデフォルト</td></tr>
+    <tr><td>template</td><td>テンプレートファイルのパス。<code>txt</code> / <code>xlsx</code> / <code>xls</code> のときだけ使う</td><td>—</td></tr>
+    <tr><td>parallel</td><td>並列処理のスレッド数。並列化できる組み合わせのときだけ表示（下記「並列処理」を参照）</td><td>（空）＝ CPU コア数</td></tr>
+    <tr><td>srcData</td><td>入力データセット（<a href="../sections/dataset-load-form.html">Dataset Load Form</a>）</td><td>—</td></tr>
+    <tr><td>result</td><td>生成したファイルを置くディレクトリ</td><td>—</td></tr>
+    <tr><td>resultPath</td><td><code>result</code> からの相対パス。テンプレート変数（<code>$tableName$</code> など）を使える</td><td>—</td></tr>
+    <tr><td>outputEncoding</td><td>出力ファイルの文字コード。<code>txt</code> のときだけ使う</td><td>UTF-8</td></tr>
   </table>
-  <p>書式・使い方・例は <a href="generate/unitSetting.html">unitSetting</a> のページを参照してください。</p>
 
-  <h2>共通オプション</h2>
+  <h2 id="section-generate-type">generateType 一覧</h2>
   <table>
-    <tr><th>項目</th><th>説明</th></tr>
-    <tr><td>template</td><td><a href="../sections/template.html">テンプレート</a>ファイルのパス（<code>txt</code> / <code>xlsx</code> / <code>xls</code> タイプで使用）</td></tr>
-    <tr><td>parallel</td><td>並列処理のスレッド数（並列化できる組み合わせのときだけ表示）。<code>1</code> で逐次処理。空欄なら、並列化できる場合に CPU コア数で並列化する（parameterize の並列実行の中では逐次）（デフォルト: 空欄）。詳細は下記「並列処理」を参照</td></tr>
-    <tr><td>result</td><td>生成結果ファイルを配置するディレクトリ</td></tr>
-    <tr><td>resultPath</td><td><code>result</code> ディレクトリからの相対パス（テンプレート変数を使用可能）</td></tr>
-    <tr><td>outputEncoding</td><td>出力ファイルの文字コード（<code>txt</code> タイプのみ、デフォルト: <code>UTF-8</code>）</td></tr>
+    <tr><th>値</th><th>分類</th><th>説明</th><th>unit</th></tr>
+    <tr><td><a href="generate/types/txt.html">txt</a></td><td>テンプレート指定</td><td>StringTemplate 4 のテンプレートからテキストファイル（SQL・CSV・任意のテキスト）を生成</td><td><code>record</code> / <code>table</code> / <code>dataset</code></td></tr>
+    <tr><td><a href="generate/types/xlsx.html">xlsx / xls</a></td><td>テンプレート指定</td><td>jxls の Excel テンプレートにデータを埋め込んで Excel ファイルを生成</td><td><code>record</code> / <code>table</code> / <code>dataset</code></td></tr>
+    <tr><td><a href="generate/types/settings.html">settings</a></td><td>固定成果物</td><td><a href="../dialogs/dataset-settings.html">Dataset Settings</a> ファイルの雛型（JSON）を生成</td><td><code>dataset</code>（固定）</td></tr>
+    <tr><td><a href="generate/types/sql.html">sql</a></td><td>固定成果物</td><td>データから INSERT / UPDATE / DELETE などの SQL ファイルを生成</td><td><code>table</code>（固定）</td></tr>
+    <tr><td><a href="generate/types/ddl.html">ddl</a></td><td>固定成果物</td><td>カラム情報から CREATE TABLE の DDL ファイルを生成</td><td><code>table</code>（固定）</td></tr>
+    <tr><td><a href="generate/types/xlsxSchema.html">xlsxSchema</a></td><td>固定成果物</td><td><a href="../dialogs/xlsx-schema.html">Xlsx Schema</a> ファイルの雛型（JSON）を生成</td><td><code>table</code>（固定）</td></tr>
+    <tr><td><a href="generate/types/javaBean.html">javaBean</a></td><td>固定成果物</td><td>カラム情報から JavaBean の <code>.java</code> ファイルを生成</td><td><code>table</code>（固定）</td></tr>
+    <tr><td><a href="generate/types/fixedColumnDef.html">fixedColumnDef</a></td><td>固定成果物</td><td>固定長出力のカラム幅定義ファイル（JSON）を生成</td><td><code>table</code>（固定）</td></tr>
+    <tr><td><a href="generate/types/xlsxTemplate.html">xlsxTemplate</a></td><td>固定成果物</td><td>jxls の Excel テンプレートの雛型（<code>.xlsx</code>）を生成</td><td><code>dataset</code>（固定）</td></tr>
   </table>
+
+  <h2 id="section-unit">unit 一覧</h2>
+  <table>
+    <tr><th>値</th><th>説明</th></tr>
+    <tr><td>record</td><td>行ごとに 1 回テンプレートを処理して出力</td></tr>
+    <tr><td>table</td><td>テーブルごとに 1 回テンプレートを処理して出力</td></tr>
+    <tr><td>dataset</td><td>データセット全体で 1 回テンプレートを処理して出力</td></tr>
+  </table>
+  <p>テンプレートの中で参照できる変数は <code>unit</code> によって変わります。詳細は <a href="generate/types/txt.html">generateType: txt</a> を参照してください。</p>
 
   <h2 id="section-parallel">並列処理（parallel）</h2>
-  <p><code>parallel</code> は、src の srcType が <code>file</code> / <code>dir</code> / <code>none</code> 以外のとき、または <code>unit=record</code> のとき（srcType が <code>none</code> の場合を除く）に表示されます。指定したスレッド数は次のすべてに使われます。</p>
+  <p><code>parallel</code> は、<code>srcData</code> の <code>srcType</code> が <code>file</code> / <code>dir</code> / <code>none</code> 以外のとき、または <code>unit=record</code> のとき（<code>srcType</code> が <code>none</code> の場合を除く）に表示されます。指定したスレッド数で次の処理を並列にします。</p>
+  <table>
+    <tr><th>処理</th><th>並列の仕方</th></tr>
+    <tr><td>srcData の読み込み</td><td>ソース（ファイル・SQL など）ごとに並列に読み込む。条件は Convert の並列読込と同じ（<a href="../sections/result-form.html">Result Form</a> を参照）</td></tr>
+    <tr><td><code>unit=record</code> の出力</td><td>行ごとの出力を並列にする。データセット全体をメモリに読み込まずに出力するため、1 行ごとに 1 ブックを作る <code>xlsx</code> / <code>xls</code> で特に効果がある</td></tr>
+    <tr><td><code>unit=table</code> の出力</td><td>テーブルごとの出力を並列にする（<code>txt</code> / <code>xlsx</code> / <code>xls</code> と、<code>unit</code> が <code>table</code> 固定の固定成果物タイプ）。<code>xlsx</code> / <code>xls</code> で <code>lazyLoad</code> が OFF のときは、全件を読み込んでから出力だけを並列にする</td></tr>
+  </table>
+  <p>次の場合は、<code>unit=table</code> の出力を逐次で処理します。</p>
   <ul>
-    <li><strong>src の読み込み</strong>: Convert の <a href="../sections/result-form.html">並列読込</a> と同じ条件・方法で、ソースごとに別スレッドで読み込みます</li>
-    <li><strong><code>unit=record</code> の出力</strong>: 読み込んだ行をその場で出力し、データセット全体はメモリに保持しません（<code>-src.includeMetaData</code> が ON の場合は、各行にテーブル全体を渡すため、読み込みを終えるまで読み込んだテーブルを保持します）。src の読み込みは上記の並列読込と同じくソースごとに並列にし、行ごとの描画・書き込みも並列にします（<code>txt</code> / <code>xlsx</code> / <code>xls</code>）。行番号（<code>rowNumber</code>）はテーブルごとに 0 から振り、テーブル名は <code>tableName</code> で参照できます。1 行ごとに 1 ブックを作る <code>xlsx</code> / <code>xls</code> で特に効果があります</li>
-    <li><strong><code>unit=table</code> の出力</strong>: テーブルごとに別スレッドで出力します（<code>txt</code> / <code>xlsx</code> / <code>xls</code> と、<code>unit=table</code> 固定の固定成果物タイプ）。<code>ddl</code> / <code>javaBean</code> / <code>xlsxSchema</code> / <code>fixedColumnDef</code> は、カラム情報の取得（src が <code>table</code> / <code>sql</code> なら DB のメタデータ照会）をテーブルごとの出力の中で行うため、その部分も並列になります。<code>txt</code> と、<code>lazyLoad</code> を ON にした <code>xlsx</code> / <code>xls</code> では、テーブルごとの読み込みから出力までを並列に行います。<code>lazyLoad</code> が OFF の <code>xlsx</code> / <code>xls</code> は、全件を読み込んでから出力だけを並列にします</li>
+    <li>出力するテーブルが 1 つだけの場合</li>
+    <li><code>srcData</code> の設定ファイルで join または件数分割（split）を使っている場合（<code>lazyLoad</code> が OFF の <code>xlsx</code> / <code>xls</code> を除く）</li>
   </ul>
-  <p>出力ファイルは並列に書かれるため、書き込まれる順番は不定です（各ファイルの内容は逐次処理と同じです）。<code>resultPath</code> に行やテーブルを区別する値が含まれておらず、複数の行・テーブルが同じファイルへ出力される場合、同じテーブル（<code>unit=record</code>）または同じソースを読むテーブル（<code>unit=table</code>）同士は同じスレッドで元の順に書くため最後の内容が残ります。それ以外（別のソースから同じファイルへ出力する場合）は、どの内容が残るかは不定です（制限事項）。</p>
-  <p><code>unit=table</code> の出力は、次の場合に逐次処理します。</p>
+  <p>注意:</p>
   <ul>
-    <li>出力するテーブルが 1 つだけ</li>
-    <li>src の設定ファイルで join または件数分割（split）を使っている（<code>lazyLoad</code> が OFF の <code>xlsx</code> / <code>xls</code> を除く）</li>
+    <li>ファイルは並列に書かれるため、書き込まれる順番は決まりません。各ファイルの内容は逐次処理と同じです</li>
+    <li><code>resultPath</code> に行やテーブルを区別する値がなく、複数の行・テーブルが同じファイルに出力される場合、別のソースから来た内容のどれが残るかは決まりません</li>
+    <li><code>srcType</code> が <code>table</code> / <code>sql</code> の場合は、並列数まで DB 接続を同時に使います</li>
+    <li>並列数を増やすと、同時に処理する行・テーブルの分だけメモリ使用量も増えます。<code>srcData</code> の <code>includeMetaData</code> が ON の <code>unit=record</code> では、テーブル全体を保持します</li>
+    <li>Parameterize の並列実行の中では、空欄のときは逐次になります</li>
   </ul>
-  <p>1 つのソースから複数のテーブルを作る場合（サブテーブルへの分割など）、それらのテーブルは同じスレッドで元の順に処理します。src の srcType が <code>table</code> / <code>sql</code> の場合は、スレッドごとに DB 接続を張って読み込みます（接続数は最大で並列数）。出力を並列にすると、同時に描画・保持する行やテーブルの数だけメモリ使用量も増えます。</p>
+
+  <h2 id="section-related">関連</h2>
+  <ul>
+    <li><a href="generate/unitSetting.html">unitSetting</a> — テンプレートに渡す前にテーブルを分割・整形する</li>
+    <li><a href="../sections/template.html">Template</a> — テキストテンプレートの設定</li>
+    <li><a href="../sections/jxls.html">Jxls</a> — Excel テンプレートの設定</li>
+    <li><a href="../dialogs/txt-template-generate.html">Scaffold</a> — 組み込みテンプレートを書き出してカスタマイズする</li>
+  </ul>
 </body>
 </html>

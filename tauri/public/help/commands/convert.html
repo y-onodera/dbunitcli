@@ -18,15 +18,19 @@
 <body>
   <p><a href="../index.html">&larr; ヘルプ一覧に戻る</a></p>
   <h1>Convert</h1>
-  <p>データ形式を変換します。ソースとなるデータセットを読み込み、指定した出力形式（CSV・Excel・SQL など）で書き出します。</p>
+  <p>データセットを読み込み、指定した出力形式（CSV・Excel・DB テーブルなど）で書き出します。</p>
 
-  <h2>オプション</h2>
+  <h2 id="section-options">オプション</h2>
   <table>
-    <tr><th>オプション</th><th>説明</th></tr>
-    <tr><td>srcData</td><td>変換元のデータセット</td></tr>
-    <tr><td>convertResult</td><td>出力形式と出力先の設定</td></tr>
+    <tr><th>項目</th><th>説明</th></tr>
+    <tr><td>srcData</td><td>変換元のデータセット（<a href="../sections/dataset-load-form.html">Dataset Load Form</a>）</td></tr>
+    <tr><td>convertResult</td><td>出力形式と出力先（<a href="../sections/result-form.html">Result Form</a>）</td></tr>
   </table>
-  <p><code>srcData</code> の入力フォーム詳細は <a href="../sections/dataset-load-form.html">Dataset Load Form</a> を参照してください。</p>
-  <p><code>convertResult</code> の出力フォーム詳細は <a href="../sections/result-form.html">Result Form</a> を参照してください。</p>
+
+  <h2 id="section-related">関連</h2>
+  <ul>
+    <li><a href="../sections/dataset-load-form.html">Dataset Load Form</a> — 変換元のデータセットの指定</li>
+    <li><a href="../sections/result-form.html">Result Form</a> — 出力形式と出力先、並列読込</li>
+  </ul>
 </body>
 </html>
