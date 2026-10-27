@@ -12,6 +12,7 @@ import {
 } from "../../../../components/dialog";
 import { BlueButton, WhiteButton } from "../../../../components/element/Button";
 import { PreviewButton } from "../../../../components/element/ButtonIcon";
+import { JobProgress } from "../../../../components/element/JobProgress";
 import { useDatasetSrcInfo } from "../../../../context/DatasetSrcInfoProvider";
 import {
 	useDatasetTableNames,
@@ -52,12 +53,21 @@ function DatasetTableNamesPreviewDialog({
 	datasetSrcInfo: DatasetSrcInfo;
 	handleDialogClose: () => void;
 }) {
-	const { tableNames, loading } = useDatasetTableNames(datasetSrcInfo);
+	const { tableNames, loading, logs } = useDatasetTableNames(
+		datasetSrcInfo,
+		true,
+	);
 	const [previewTable, setPreviewTable] = useState<string | null>(null);
 
 	function renderContent() {
 		if (loading) {
-			return <StatusMessage kind="loading">Loading...</StatusMessage>;
+			return (
+				<JobProgress
+					title="Loading..."
+					lines={logs}
+					onAbandon={handleDialogClose}
+				/>
+			);
 		}
 		if (tableNames.length === 0) {
 			return <StatusMessage kind="empty">No tables found.</StatusMessage>;
@@ -106,14 +116,16 @@ function TableDataPreviewDialog({
 	tableName: string;
 	handleClose: () => void;
 }) {
-	const { preview, loading } = useDatasetTablePreview(
+	const { preview, loading, logs } = useDatasetTablePreview(
 		datasetSrcInfo,
 		tableName,
 	);
 
 	function renderContent() {
 		if (loading) {
-			return <StatusMessage kind="loading">Loading...</StatusMessage>;
+			return (
+				<JobProgress title="Loading..." lines={logs} onAbandon={handleClose} />
+			);
 		}
 		if (!preview?.headers || preview.headers.length === 0) {
 			return <StatusMessage kind="empty">No data found.</StatusMessage>;

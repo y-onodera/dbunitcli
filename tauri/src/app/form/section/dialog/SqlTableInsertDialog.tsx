@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import {
 	DialogActions,
 	DialogField,
@@ -12,8 +12,14 @@ import {
 	InputLabel,
 	SelectBox,
 } from "../../../../components/element/Input";
+import { JobProgress } from "../../../../components/element/JobProgress";
 import { useAbortSignalRef } from "../../../../hooks/useAbortSignalRef";
-import { useJdbcColumns, useJdbcTables } from "../../../../hooks/useJdbc";
+import {
+	type JdbcFetchOptions,
+	useJdbcColumns,
+	useJdbcTables,
+} from "../../../../hooks/useJdbc";
+import { useJobLog } from "../../../../hooks/useJobLog";
 import { useTableSelection } from "../../../../hooks/useTableSelection";
 import { decorateLines, qualifyColumn } from "../../../../utils/textInsert";
 import SelectableTable from "./SelectableTable";
@@ -46,32 +52,42 @@ export default function SqlTableInsertDialog({
 }: SqlTableInsertDialogProps) {
 	const [tables, setTables] = useState<string[] | null>(null);
 	const [loading, setLoading] = useState(false);
+	const jobLog = useJobLog();
+	const abortControllerRef = useAbortSignalRef();
 	const getJdbcTables = useJdbcTables();
 	const getJdbcColumns = useJdbcColumns();
 
+	// 閉じると（アンマウントでabort）sidecar側の読込も中断する
 	const handleLoad = () => {
 		if (loading) {
 			return;
 		}
 		setLoading(true);
-		getJdbcTables(jdbcValues).then((result) => {
-			setTables(result);
-			setLoading(false);
+		jobLog.reset();
+		getJdbcTables(jdbcValues, {
+			signal: abortControllerRef.current?.signal,
+			onLog: jobLog.append,
+		}).then((result) => {
+			if (!abortControllerRef.current?.signal.aborted) {
+				setTables(result);
+				setLoading(false);
+			}
 		});
 	};
 
-	const queryColumns = (table: string): Promise<string[]> =>
-		getJdbcColumns(jdbcValues, table);
+	const queryColumns = (
+		table: string,
+		fetchOptions?: JdbcFetchOptions,
+	): Promise<string[]> => getJdbcColumns(jdbcValues, table, fetchOptions);
 
 	function renderBody() {
 		if (loading) {
 			return (
-				<>
-					<StatusMessage kind="loading">Loading...</StatusMessage>
-					<DialogActions>
-						<WhiteButton title="Cancel" handleClick={onClose} />
-					</DialogActions>
-				</>
+				<JobProgress
+					title="Loading..."
+					lines={jobLog.logs}
+					onAbandon={onClose}
+				/>
 			);
 		}
 		if (tables !== null) {
@@ -116,7 +132,10 @@ function TablesContent({
 	onInsert: (tables: string[]) => void;
 	onInsertColumn?: (columns: string[]) => void;
 	plain: boolean;
-	onQueryColumns?: (table: string) => Promise<string[]>;
+	onQueryColumns?: (
+		table: string,
+		fetchOptions?: JdbcFetchOptions,
+	) => Promise<string[]>;
 	onClose: () => void;
 }) {
 	const { selected, toggle, toggleAll } = useTableSelection();
@@ -125,6 +144,9 @@ function TablesContent({
 		data: string[] | "loading";
 	} | null>(null);
 	const abortControllerRef = useAbortSignalRef();
+	// 列の読込1回分。閉じたら中断する（ダイアログ全体のアンマウントでも中断される）
+	const columnAbortRef = useRef<AbortController | null>(null);
+	const columnLog = useJobLog();
 	const [prefix, setPrefix] = useState("");
 	const [suffix, setSuffix] = useState("");
 
@@ -137,21 +159,37 @@ function TablesContent({
 		if (columnDialog?.table === table && columnDialog.data === "loading") {
 			return;
 		}
+		if (!abortControllerRef.current) {
+			return;
+		}
+		columnAbortRef.current?.abort();
+		const controller = new AbortController();
+		columnAbortRef.current = controller;
+		const signal = AbortSignal.any([
+			abortControllerRef.current.signal,
+			controller.signal,
+		]);
 		setColumnDialog({ table, data: "loading" });
-		onQueryColumns?.(table).then(
+		columnLog.reset();
+		onQueryColumns?.(table, { signal, onLog: columnLog.append }).then(
 			(columns) => {
-				if (!abortControllerRef.current?.signal.aborted) {
+				if (!signal.aborted) {
 					setColumnDialog((prev) =>
 						prev?.table === table ? { table, data: columns } : prev,
 					);
 				}
 			},
 			() => {
-				if (!abortControllerRef.current?.signal.aborted) {
+				if (!signal.aborted) {
 					setColumnDialog(null);
 				}
 			},
 		);
+	};
+
+	const closeColumnDialog = () => {
+		columnAbortRef.current?.abort();
+		setColumnDialog(null);
 	};
 
 	return (
@@ -191,12 +229,13 @@ function TablesContent({
 				<ColumnSelectDialog
 					table={columnDialog.table}
 					columnData={columnDialog.data}
+					logs={columnLog.logs}
 					plain={plain}
 					onInsert={(columns) => {
 						onInsertColumn(columns);
 						setColumnDialog(null);
 					}}
-					onClose={() => setColumnDialog(null)}
+					onClose={closeColumnDialog}
 				/>
 			)}
 		</>
@@ -206,12 +245,14 @@ function TablesContent({
 function ColumnSelectDialog({
 	table,
 	columnData,
+	logs,
 	plain,
 	onInsert,
 	onClose,
 }: {
 	table: string;
 	columnData: string[] | "loading";
+	logs: string[];
 	plain: boolean;
 	onInsert: (columns: string[]) => void;
 	onClose: () => void;
@@ -224,10 +265,7 @@ function ColumnSelectDialog({
 	if (columnData === "loading") {
 		return (
 			<ModalOverlay width="w-80" zClass="z-modal-nested">
-				<StatusMessage kind="loading">Loading...</StatusMessage>
-				<DialogActions>
-					<WhiteButton title="Cancel" handleClick={onClose} />
-				</DialogActions>
+				<JobProgress title="Loading..." lines={logs} onAbandon={onClose} />
 			</ModalOverlay>
 		);
 	}

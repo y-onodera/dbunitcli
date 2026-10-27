@@ -1,5 +1,6 @@
 import type { Dispatch, ReactNode, SetStateAction } from "react";
 import { createContext, Suspense, use, useState } from "react";
+import SidecarLoading from "../app/startup/SidecarLoading";
 import {
 	ParameterList,
 	ResourcesSettings,
@@ -45,7 +46,7 @@ export default function WorkspaceResourcesProvider(props: {
 			.catch((ex) => handleFetchError(getErrorMessage(ex), fetchParams));
 	};
 	return (
-		<Suspense fallback={<div>Loading...</div>}>
+		<Suspense fallback={<SidecarLoading />}>
 			<CreateContext promise={workspaceReload()}>
 				{props.children}
 			</CreateContext>
