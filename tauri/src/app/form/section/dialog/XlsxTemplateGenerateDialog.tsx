@@ -51,7 +51,6 @@ function FileNameField() {
 	);
 }
 
-// useSetResourcesSettingsをダイアログ表示時にのみ呼ぶため、生成処理はフックとして渡す
 function useGenerateXlsxTemplate() {
 	const setResourcesSettings = useSetResourcesSettings();
 	return async (
@@ -72,12 +71,13 @@ function useGenerateXlsxTemplate() {
 export function XlsxTemplateGenerateButton({
 	setPath,
 }: Pick<ResourceEditButtonProp, "setPath">) {
+	const generate = useGenerateXlsxTemplate();
 	return (
 		<FileGenerateButton
 			setPath={setPath}
 			config={dialogConfig}
 			leading={<FileNameField />}
-			useGenerate={useGenerateXlsxTemplate}
+			generate={generate}
 		/>
 	);
 }

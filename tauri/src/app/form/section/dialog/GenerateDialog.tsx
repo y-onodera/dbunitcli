@@ -201,17 +201,16 @@ type FileGenerate = (
 function FileGenerateDialog({
 	config,
 	leading,
-	useGenerate,
+	generate,
 	handleDialogClose,
 	handleSave,
 }: {
 	config: GenerateDialogConfig;
 	leading?: ReactNode;
-	useGenerate: () => FileGenerate;
+	generate: FileGenerate;
 	handleDialogClose: () => void;
 	handleSave: (fileName: string) => void;
 }) {
-	const generate = useGenerate();
 	return (
 		<GenerateFormDialog
 			config={config}
@@ -228,16 +227,16 @@ function FileGenerateDialog({
 }
 
 // 生成のみで完結しパスを返す形式（XlsxTemplate）。
-// useGenerateはダイアログ表示時にのみ呼ばれ、中断された場合はnull・成功時は保存したファイル名を返す関数を返す
+// generateは中断された場合はnull・成功時は保存したファイル名を返す
 export function FileGenerateButton({
 	setPath,
 	config,
 	leading,
-	useGenerate,
+	generate,
 }: GenerateButtonProps & {
 	config: GenerateDialogConfig;
 	leading?: ReactNode;
-	useGenerate: () => FileGenerate;
+	generate: FileGenerate;
 }) {
 	return (
 		<GenerateButton setPath={setPath}>
@@ -245,7 +244,7 @@ export function FileGenerateButton({
 				<FileGenerateDialog
 					config={config}
 					leading={leading}
-					useGenerate={useGenerate}
+					generate={generate}
 					handleDialogClose={handleDialogClose}
 					handleSave={handleSave}
 				/>

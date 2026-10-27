@@ -122,17 +122,19 @@ function JdbcConnectionTestButton({
 	const handleTest = async () => {
 		setTesting(true);
 		setResult(null);
-		try {
-			const testResult = await jdbcConnectionTest(jdbcValues);
-			setResult(testResult);
-			if (testResult?.success) {
-				onConnectionOk(jdbcValues);
-			} else {
-				onConnectionFail();
-			}
-		} finally {
-			setTesting(false);
-		}
+		// catchの無いtry/finallyはReact Compilerが未対応のため、Promiseのfinallyで書く
+		await jdbcConnectionTest(jdbcValues)
+			.then((testResult) => {
+				setResult(testResult);
+				if (testResult?.success) {
+					onConnectionOk(jdbcValues);
+				} else {
+					onConnectionFail();
+				}
+			})
+			.finally(() => {
+				setTesting(false);
+			});
 	};
 
 	return (

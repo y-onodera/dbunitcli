@@ -161,7 +161,10 @@ export function PreviewField({
 		</div>
 	);
 }
-export function TextArea(props: {
+export function TextArea({
+	ref,
+	...props
+}: {
 	id?: string;
 	ref?: React.Ref<HTMLTextAreaElement>;
 	value: string;
@@ -173,7 +176,7 @@ export function TextArea(props: {
 	return (
 		<textarea
 			id={props.id}
-			ref={props.ref}
+			ref={ref}
 			className="p-2.5
                        w-full h-96
                        text-sm text-content
