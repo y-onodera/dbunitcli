@@ -118,73 +118,79 @@ function GenerateButton({
 }
 
 // 既存の呼び出し元はpathも渡すため、編集ボタンと同じpropsを受け付ける（pathは未使用）
-type GenerateButtonProps = Partial<ResourceEditButtonProp> &
+export type GenerateButtonProps = Partial<ResourceEditButtonProp> &
 	Pick<ResourceEditButtonProp, "setPath">;
 
-// 生成結果を既存の編集ダイアログで確認・命名保存する形式（Settings・XlsxSchema・FixedColumnDef）
-export function createModelGenerateButton<BUILDER, MODEL>(
-	config: GenerateDialogConfig & {
-		endpoint: string;
-		build: (builder: BUILDER) => MODEL;
-		renderEditDialog: (
-			model: MODEL,
-			props: {
-				fileName: string;
-				handleDialogClose: () => void;
-				handleSave: (fileName: string) => void;
-			},
-		) => ReactElement;
-	},
-) {
-	function ModelGenerateDialog({
-		handleSave,
-		handleDialogClose,
-	}: {
-		handleSave: (fileName: string) => void;
-		handleDialogClose: () => void;
-	}) {
-		const [generated, setGenerated] = useState<MODEL | null>(null);
-		if (generated) {
-			return config.renderEditDialog(generated, {
-				fileName: "",
-				handleDialogClose,
-				handleSave,
-			});
-		}
-		return (
-			<GenerateFormDialog
-				config={config}
-				onClose={handleDialogClose}
-				onExecute={async (
-					values,
-					{ apiUrl, isAborted, withGenerateType, fetchOptions },
-				) => {
-					const builder = await postDialogForm<BUILDER>(
-						apiUrl,
-						config.endpoint,
-						withGenerateType(values),
-						fetchOptions,
-					);
-					if (!isAborted()) {
-						setGenerated(config.build(builder));
-					}
-				}}
-			/>
-		);
-	}
+export type ModelGenerateConfig<BUILDER, MODEL> = GenerateDialogConfig & {
+	endpoint: string;
+	build: (builder: BUILDER) => MODEL;
+	renderEditDialog: (
+		model: MODEL,
+		props: {
+			fileName: string;
+			handleDialogClose: () => void;
+			handleSave: (fileName: string) => void;
+		},
+	) => ReactElement;
+};
 
-	return function ModelGenerate({ setPath }: GenerateButtonProps) {
-		return (
-			<GenerateButton setPath={setPath}>
-				{(handleDialogClose, handleSave) => (
-					<ModelGenerateDialog
-						handleDialogClose={handleDialogClose}
-						handleSave={handleSave}
-					/>
-				)}
-			</GenerateButton>
-		);
-	};
+function ModelGenerateDialog<BUILDER, MODEL>({
+	config,
+	handleSave,
+	handleDialogClose,
+}: {
+	config: ModelGenerateConfig<BUILDER, MODEL>;
+	handleSave: (fileName: string) => void;
+	handleDialogClose: () => void;
+}) {
+	const [generated, setGenerated] = useState<MODEL | null>(null);
+	if (generated) {
+		return config.renderEditDialog(generated, {
+			fileName: "",
+			handleDialogClose,
+			handleSave,
+		});
+	}
+	return (
+		<GenerateFormDialog
+			config={config}
+			onClose={handleDialogClose}
+			onExecute={async (
+				values,
+				{ apiUrl, isAborted, withGenerateType, fetchOptions },
+			) => {
+				const builder = await postDialogForm<BUILDER>(
+					apiUrl,
+					config.endpoint,
+					withGenerateType(values),
+					fetchOptions,
+				);
+				if (!isAborted()) {
+					setGenerated(config.build(builder));
+				}
+			}}
+		/>
+	);
+}
+
+// 生成結果を既存の編集ダイアログで確認・命名保存する形式（Settings・XlsxSchema・FixedColumnDef）
+export function ModelGenerateButton<BUILDER, MODEL>({
+	config,
+	setPath,
+}: {
+	config: ModelGenerateConfig<BUILDER, MODEL>;
+} & Pick<ResourceEditButtonProp, "setPath">) {
+	return (
+		<GenerateButton setPath={setPath}>
+			{(handleDialogClose, handleSave) => (
+				<ModelGenerateDialog
+					config={config}
+					handleDialogClose={handleDialogClose}
+					handleSave={handleSave}
+				/>
+			)}
+		</GenerateButton>
+	);
 }
 
 type FileGenerate = (
@@ -192,56 +198,31 @@ type FileGenerate = (
 	context: GenerateExecuteContext,
 ) => Promise<string | null>;
 
-function FileGenerateDialog({
-	config,
-	leading,
-	useGenerate,
-	handleDialogClose,
-	handleSave,
-}: {
-	config: GenerateDialogConfig;
-	leading?: ReactNode;
-	useGenerate: () => FileGenerate;
-	handleDialogClose: () => void;
-	handleSave: (fileName: string) => void;
-}) {
-	const generate = useGenerate();
-	return (
-		<GenerateFormDialog
-			config={config}
-			leading={leading}
-			onClose={handleDialogClose}
-			onExecute={async (values, context) => {
-				const fileName = await generate(values, context);
-				if (fileName !== null) {
-					handleSave(fileName);
-				}
-			}}
-		/>
-	);
-}
-
 // 生成のみで完結しパスを返す形式（XlsxTemplate）。
-// useGenerateはダイアログ表示時にのみ呼ばれ、中断された場合はnull・成功時は保存したファイル名を返す関数を返す
+// generateは中断された場合はnull・成功時は保存したファイル名を返す
 export function FileGenerateButton({
 	setPath,
 	config,
 	leading,
-	useGenerate,
+	generate,
 }: GenerateButtonProps & {
 	config: GenerateDialogConfig;
 	leading?: ReactNode;
-	useGenerate: () => FileGenerate;
+	generate: FileGenerate;
 }) {
 	return (
 		<GenerateButton setPath={setPath}>
 			{(handleDialogClose, handleSave) => (
-				<FileGenerateDialog
+				<GenerateFormDialog
 					config={config}
 					leading={leading}
-					useGenerate={useGenerate}
-					handleDialogClose={handleDialogClose}
-					handleSave={handleSave}
+					onClose={handleDialogClose}
+					onExecute={async (values, context) => {
+						const fileName = await generate(values, context);
+						if (fileName !== null) {
+							handleSave(fileName);
+						}
+					}}
 				/>
 			)}
 		</GenerateButton>

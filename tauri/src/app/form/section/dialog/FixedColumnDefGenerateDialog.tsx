@@ -3,12 +3,16 @@ import {
 	type FixedColumnDefBuilder,
 } from "../../../../model/FixedColumnDef";
 import { FixedColumnDefEditDialog } from "./FixedColumnDefDialog";
-import { createModelGenerateButton } from "./GenerateDialog";
+import {
+	type GenerateButtonProps,
+	ModelGenerateButton,
+	type ModelGenerateConfig,
+} from "./GenerateDialog";
 
-export const FixedColumnDefGenerateButton = createModelGenerateButton<
+const fixedColumnDefGenerateConfig: ModelGenerateConfig<
 	FixedColumnDefBuilder,
 	FixedColumnDef
->({
+> = {
 	generateType: "fixedColumnDef",
 	formId: "fixedColumnDefGenerateForm",
 	name: "fixedColumnDefGenerate",
@@ -21,4 +25,13 @@ export const FixedColumnDefGenerateButton = createModelGenerateButton<
 	renderEditDialog: (def, props) => (
 		<FixedColumnDefEditDialog def={def} {...props} />
 	),
-});
+};
+
+export function FixedColumnDefGenerateButton({ setPath }: GenerateButtonProps) {
+	return (
+		<ModelGenerateButton
+			config={fixedColumnDefGenerateConfig}
+			setPath={setPath}
+		/>
+	);
+}

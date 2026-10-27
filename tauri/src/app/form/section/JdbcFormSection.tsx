@@ -8,7 +8,7 @@ import { BlueButton } from "../../../components/element/Button";
 import { useSetJdbcConnectionState } from "../../../context/JdbcConnectionProvider";
 import {
 	useJdbcConnectionTest,
-	useJdbcSaveProperties,
+	useSaveJdbcProperties,
 } from "../../../hooks/useJdbc";
 import type { JdbcOption } from "../../../model/CommandOption";
 import JdbcSavePropertiesDialog from "./dialog/JdbcSavePropertiesDialog";
@@ -122,17 +122,19 @@ function JdbcConnectionTestButton({
 	const handleTest = async () => {
 		setTesting(true);
 		setResult(null);
-		try {
-			const testResult = await jdbcConnectionTest(jdbcValues);
-			setResult(testResult);
-			if (testResult?.success) {
-				onConnectionOk(jdbcValues);
-			} else {
-				onConnectionFail();
-			}
-		} finally {
-			setTesting(false);
-		}
+		// catchの無いtry/finallyはReact Compilerが未対応のため、Promiseのfinallyで書く
+		await jdbcConnectionTest(jdbcValues)
+			.then((testResult) => {
+				setResult(testResult);
+				if (testResult?.success) {
+					onConnectionOk(jdbcValues);
+				} else {
+					onConnectionFail();
+				}
+			})
+			.finally(() => {
+				setTesting(false);
+			});
 	};
 
 	return (
@@ -162,7 +164,7 @@ function JdbcSavePropertiesButton({
 	prefix: string;
 	jdbcValues: Record<string, string>;
 }) {
-	const jdbcSaveProperties = useJdbcSaveProperties();
+	const saveJdbcProperties = useSaveJdbcProperties();
 	const [showDialog, setShowDialog] = useState(false);
 
 	const hasAnyValue =
@@ -181,7 +183,7 @@ function JdbcSavePropertiesButton({
 					jdbcValues={jdbcValues}
 					handleDialogClose={() => setShowDialog(false)}
 					handleSave={async (name) => {
-						await jdbcSaveProperties(name, jdbcValues);
+						await saveJdbcProperties(name, jdbcValues);
 						setShowDialog(false);
 					}}
 				/>

@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { useEnvironment } from "../context/EnvironmentProvider";
-import { useSetResourcesSettings } from "../context/WorkspaceResourcesProvider";
 import {
 	fetchAndUpdate,
 	fetchData,
@@ -8,6 +7,7 @@ import {
 	handleFetchError,
 	type OperationResult,
 } from "../utils/fetchUtils";
+import { useUpdateResourceFiles } from "./useResourceFiles";
 
 export const useTemplateData = (name: string) =>
 	useResourceContent("template", name);
@@ -45,28 +45,8 @@ const useResourceContent = (
 	return { content, loading };
 };
 
-export const useDeleteTemplate = () => {
-	const { apiUrl } = useEnvironment();
-	const setResourcesSettings = useSetResourcesSettings();
-	return async (name: string): Promise<OperationResult> =>
-		fetchAndUpdate<string[]>(
-			{
-				endpoint: `${apiUrl}template/delete`,
-				options: {
-					method: "POST",
-					headers: { "Content-Type": "text/plain" },
-					body: name,
-				},
-			},
-			(settings) =>
-				setResourcesSettings((current) =>
-					current.with({ templateFiles: settings }),
-				),
-		);
-};
-
 // parameterize/template の保存応答(ファイル一覧)は画面状態に保持しないため反映しない
-export const useParameterizeTemplateSaveContent = () => {
+export const useSaveParameterizeTemplate = () => {
 	const { apiUrl } = useEnvironment();
 	return async (name: string, content: string): Promise<OperationResult> =>
 		fetchAndUpdate<string[]>(
@@ -82,24 +62,10 @@ export const useParameterizeTemplateSaveContent = () => {
 		);
 };
 
-export const useTemplateSaveContent = () => {
-	const { apiUrl } = useEnvironment();
-	const setResourcesSettings = useSetResourcesSettings();
-	return async (name: string, content: string): Promise<OperationResult> =>
-		fetchAndUpdate<string[]>(
-			{
-				endpoint: `${apiUrl}template/save`,
-				options: {
-					method: "POST",
-					headers: { "Content-Type": "application/json" },
-					body: JSON.stringify({ name, input: { content } }),
-				},
-			},
-			(settings) =>
-				setResourcesSettings((current) =>
-					current.with({ templateFiles: settings }),
-				),
-		);
+export const useSaveTemplate = () => {
+	const updateResourceFiles = useUpdateResourceFiles("template");
+	return (name: string, content: string) =>
+		updateResourceFiles("save", JSON.stringify({ name, input: { content } }));
 };
 
 async function loadTemplateContent(

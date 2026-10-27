@@ -5,8 +5,6 @@ import {
 	SettingDialog,
 } from "../../../../components/dialog";
 import { PreviewField } from "../../../../components/element/Input";
-import { useDeleteJdbcProperties } from "../../../../hooks/useJdbc";
-import { createRemoveButton } from "./ResourceEditButton";
 
 type JdbcSavePropertiesDialogProps = {
 	jdbcValues: Record<string, string>;
@@ -69,6 +67,3 @@ export default function JdbcSavePropertiesDialog({
 		</SettingDialog>
 	);
 }
-export const RemoveJdbcPropertiesButton = createRemoveButton(
-	useDeleteJdbcProperties,
-);

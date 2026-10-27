@@ -7,6 +7,7 @@ import {
 	ResourceDatalist,
 } from "../../../../components/element/Input";
 import {
+	type FieldErrors,
 	useFieldErrors,
 	useRegisterVisibleField,
 	useSetFieldErrors,
@@ -15,6 +16,12 @@ import { useWorkspaceContext } from "../../../../context/WorkspaceResourcesProvi
 import { DirectoryChooser, FileChooser, OpenInOS } from "./Chooser";
 import type { FileProp, TextProp } from "./FormElementProp";
 import { getId, getName } from "./FormElementProp";
+
+// 計算されたキーの分割代入はReact Compilerが未対応のため、コンポーネント外で行う
+function omitFieldErrors(errors: FieldErrors, name: string): FieldErrors {
+	const { [name]: _, ...rest } = errors;
+	return rest;
+}
 
 export default function Text({
 	prefix,
@@ -48,7 +55,7 @@ export default function Text({
 		onValueChange?.(newValue);
 		// 入力し直したら、この欄の検証エラーは消す
 		if (fieldErrors.length > 0) {
-			setFieldErrors(({ [fieldName]: _, ...rest }) => rest);
+			setFieldErrors((current) => omitFieldErrors(current, fieldName));
 		}
 	};
 

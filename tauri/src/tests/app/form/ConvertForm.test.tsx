@@ -32,8 +32,7 @@ vi.mock("../../../context/EnvironmentProvider", () => ({
 // JDBC API フックのモック（クリック時のみ API を呼ぶ）
 vi.mock("../../../hooks/useJdbc", () => ({
 	useJdbcConnectionTest: () => vi.fn(),
-	useJdbcSaveProperties: () => vi.fn(),
-	useDeleteJdbcProperties: () => vi.fn(),
+	useSaveJdbcProperties: () => vi.fn(),
 }));
 
 function makeConvertProps(

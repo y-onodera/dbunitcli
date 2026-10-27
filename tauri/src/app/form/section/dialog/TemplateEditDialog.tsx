@@ -7,12 +7,10 @@ import {
 import { EditButton } from "../../../../components/element/ButtonIcon";
 import { TextArea } from "../../../../components/element/Input";
 import {
-	useDeleteTemplate,
+	useSaveTemplate,
 	useTemplateData,
-	useTemplateSaveContent,
 } from "../../../../hooks/useTemplate";
 import { saveOnSuccess } from "../../../../utils/fetchUtils";
-import { createRemoveButton } from "./ResourceEditButton";
 
 export default function TemplateEditDialog({
 	name,
@@ -49,7 +47,7 @@ function Dialog({
 	handleDialogClose: () => void;
 }) {
 	const [content, setContent] = useState<string>(initialContent);
-	const saveContent = useTemplateSaveContent();
+	const saveContent = useSaveTemplate();
 
 	const handleSave = (path: string) =>
 		saveOnSuccess(
@@ -99,4 +97,3 @@ export function TemplateEditButton({
 		</>
 	);
 }
-export const RemoveTemplateButton = createRemoveButton(useDeleteTemplate);

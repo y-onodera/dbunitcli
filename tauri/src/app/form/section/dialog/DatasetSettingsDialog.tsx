@@ -14,7 +14,6 @@ import {
 } from "../../../../components/element/ButtonIcon";
 import {
 	useDatasetSettingsData,
-	useDeleteDatasetSettings,
 	useSaveDatasetSettings,
 } from "../../../../hooks/useDatasetSettings";
 import type {
@@ -28,7 +27,6 @@ import {
 } from "../../../../model/DatasetSettings";
 import { saveOnSuccess } from "../../../../utils/fetchUtils";
 import DatasetSettingDialog from "./DatasetSettingDialog";
-import { createEditButton, createRemoveButton } from "./ResourceEditButton";
 
 export default function DatasetSettingsDialog(props: {
 	fileName: string;
@@ -269,8 +267,3 @@ function replaceAt(array: string[], text: string, index: number): string[] {
 	result[index] = text;
 	return result;
 }
-
-export const DatasetSettingEditButton = createEditButton(DatasetSettingsDialog);
-export const RemoveDatasetSettingButton = createRemoveButton(
-	useDeleteDatasetSettings,
-);

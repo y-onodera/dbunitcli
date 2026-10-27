@@ -39,8 +39,7 @@ vi.mock("../../../../../context/EnvironmentProvider", () => ({
 // JDBC API フックのモック
 vi.mock("../../../../../hooks/useJdbc", () => ({
 	useJdbcConnectionTest: () => vi.fn(),
-	useJdbcSaveProperties: () => vi.fn(),
-	useDeleteJdbcProperties: () => vi.fn(),
+	useSaveJdbcProperties: () => vi.fn(),
 }));
 
 vi.mock("../../../../../hooks/useWorkspaceResources", () => ({
@@ -55,7 +54,6 @@ const { mockSaveSettings } = vi.hoisted(() => ({
 }));
 vi.mock("../../../../../hooks/useDatasetSettings", () => ({
 	useSaveDatasetSettings: () => mockSaveSettings,
-	useDeleteDatasetSettings: () => vi.fn(),
 	useDatasetSettingsData: () => ({ settings: null, loading: true }),
 	useDatasetTableNames: () => ({ tableNames: [], loading: false }),
 	useDatasetTablePreview: () => ({ preview: null, loading: false }),

@@ -1,13 +1,11 @@
 import { useEnvironment } from "../context/EnvironmentProvider";
-import { useSetResourcesSettings } from "../context/WorkspaceResourcesProvider";
 import {
 	type FetchParams,
-	fetchAndUpdate,
 	fetchData,
 	getErrorMessage,
 	handleFetchError,
-	type OperationResult,
 } from "../utils/fetchUtils";
+import { useUpdateResourceFiles } from "./useResourceFiles";
 
 // タイムアウト時はsidecarへcancelも送られ、sidecar側の処理も中断する
 const JDBC_TIMEOUT_MS = 60_000;
@@ -20,24 +18,6 @@ function toJdbcRequestBody(jdbcValues: Record<string, string>) {
 		properties: jdbcValues.jdbcProperties ?? "",
 	};
 }
-
-export const useDeleteJdbcProperties = () => {
-	const { apiUrl } = useEnvironment();
-	const setResourcesSettings = useSetResourcesSettings();
-	return async (name: string): Promise<OperationResult> =>
-		fetchAndUpdate<string[]>(
-			{
-				endpoint: `${apiUrl}jdbc/delete`,
-				options: {
-					method: "POST",
-					headers: { "Content-Type": "text/plain" },
-					body: name,
-				},
-			},
-			(files) =>
-				setResourcesSettings((current) => current.with({ jdbcFiles: files })),
-		);
-};
 
 // 一覧の取得を中断する（自分で中断したときはエラー表示しない）signalと、実行中のログの受け取り先
 export type JdbcFetchOptions = Pick<FetchParams, "signal" | "onLog">;
@@ -123,23 +103,11 @@ export const useJdbcConnectionTest = () => {
 	};
 };
 
-export const useJdbcSaveProperties = () => {
-	const { apiUrl } = useEnvironment();
-	const setResourcesSettings = useSetResourcesSettings();
-	return async (
-		name: string,
-		jdbcValues: Record<string, string>,
-	): Promise<OperationResult> =>
-		fetchAndUpdate<string[]>(
-			{
-				endpoint: `${apiUrl}jdbc/save-properties`,
-				options: {
-					method: "POST",
-					headers: { "Content-Type": "application/json" },
-					body: JSON.stringify({ name, input: toJdbcRequestBody(jdbcValues) }),
-				},
-			},
-			(files) =>
-				setResourcesSettings((current) => current.with({ jdbcFiles: files })),
+export const useSaveJdbcProperties = () => {
+	const updateResourceFiles = useUpdateResourceFiles("jdbc");
+	return (name: string, jdbcValues: Record<string, string>) =>
+		updateResourceFiles(
+			"save-properties",
+			JSON.stringify({ name, input: toJdbcRequestBody(jdbcValues) }),
 		);
 };

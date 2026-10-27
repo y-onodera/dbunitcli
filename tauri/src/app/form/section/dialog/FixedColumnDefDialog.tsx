@@ -5,7 +5,6 @@ import {
 	StatusMessage,
 } from "../../../../components/dialog";
 import {
-	useDeleteFixedColumnDef,
 	useFixedColumnDefData,
 	useSaveFixedColumnDef,
 } from "../../../../hooks/useFixedColumnDef";
@@ -16,7 +15,6 @@ import {
 } from "../../../../model/FixedColumnDef";
 import { saveOnSuccess } from "../../../../utils/fetchUtils";
 import ColumnDefSettingDialog from "./ColumnDefSettingDialog";
-import { createEditButton, createRemoveButton } from "./ResourceEditButton";
 
 export default function FixedColumnDefDialog(props: {
 	fileName: string;
@@ -69,8 +67,3 @@ export function FixedColumnDefEditDialog(props: {
 		</SettingDialog>
 	);
 }
-
-export const FixedColumnDefEditButton = createEditButton(FixedColumnDefDialog);
-export const RemoveFixedColumnDefButton = createRemoveButton(
-	useDeleteFixedColumnDef,
-);

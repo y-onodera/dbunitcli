@@ -1,54 +1,18 @@
 import { useEffect, useState } from "react";
 import { useEnvironment } from "../context/EnvironmentProvider";
-import { useSetResourcesSettings } from "../context/WorkspaceResourcesProvider";
 import type { SrcInfo } from "../model/CommandOption";
 import { XlsxSchema, type XlsxSchemaBuilder } from "../model/XlsxSchema";
 import {
-	fetchAndUpdate,
 	fetchData,
 	getErrorMessage,
 	handleFetchError,
-	type OperationResult,
 } from "../utils/fetchUtils";
-
-export const useDeleteXlsxSchema = () => {
-	const { apiUrl } = useEnvironment();
-	const setResourcesSettings = useSetResourcesSettings();
-	return async (name: string): Promise<OperationResult> =>
-		fetchAndUpdate<string[]>(
-			{
-				endpoint: `${apiUrl}xlsx-schema/delete`,
-				options: {
-					method: "POST",
-					headers: { "Content-Type": "text/plain" },
-					body: name,
-				},
-			},
-			(schemas) =>
-				setResourcesSettings((current) =>
-					current.with({ xlsxSchemas: schemas }),
-				),
-		);
-};
+import { useUpdateResourceFiles } from "./useResourceFiles";
 
 export const useSaveXlsxSchema = () => {
-	const { apiUrl } = useEnvironment();
-	const setResourcesSettings = useSetResourcesSettings();
-	return async (name: string, input: XlsxSchema): Promise<OperationResult> =>
-		fetchAndUpdate<string[]>(
-			{
-				endpoint: `${apiUrl}xlsx-schema/save`,
-				options: {
-					method: "POST",
-					headers: { "Content-Type": "application/json" },
-					body: JSON.stringify({ name, input }),
-				},
-			},
-			(schemas) =>
-				setResourcesSettings((current) =>
-					current.with({ xlsxSchemas: schemas }),
-				),
-		);
+	const updateResourceFiles = useUpdateResourceFiles("xlsxSchema");
+	return (name: string, input: XlsxSchema) =>
+		updateResourceFiles("save", JSON.stringify({ name, input }));
 };
 
 export const useXlsxSchemaData = (

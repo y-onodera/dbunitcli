@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useEnvironment } from "../../../../context/EnvironmentProvider";
 import { useJobLog } from "../../../../hooks/useJobLog";
 import { getErrorMessage } from "../../../../utils/fetchUtils";
@@ -13,6 +13,14 @@ import {
 } from "./refreshableDialogForm";
 
 const EMPTY_VALUES: FormValues = {};
+
+// useEffect内から呼ぶため、依存配列に関数を含めずに済むようモジュールレベルで定義する
+function addGenerateType(
+	values: FormValues,
+	generateType: string | undefined,
+): FormValues {
+	return generateType ? { ...values, "-generateType": generateType } : values;
+}
 
 type RefreshableDialogOptions = {
 	refreshEndpoint: string;
@@ -39,26 +47,23 @@ export function useRefreshableDialog<OPTIONS>({
 	const jobLog = useJobLog();
 	const abortControllerRef = useRef<AbortController | null>(null);
 
-	const withGenerateType = useCallback(
-		(values: FormValues): FormValues =>
-			generateType ? { ...values, "-generateType": generateType } : values,
-		[generateType],
-	);
-
 	useEffect(() => {
 		const controller = new AbortController();
 		abortControllerRef.current = controller;
 		refreshDialogOptions(
 			apiUrl,
 			refreshEndpoint,
-			withGenerateType(initialValues),
+			addGenerateType(initialValues, generateType),
 			controller.signal,
 			setLoadState,
 		);
 		return () => {
 			controller.abort();
 		};
-	}, [apiUrl, refreshEndpoint, withGenerateType, initialValues]);
+	}, [apiUrl, refreshEndpoint, generateType, initialValues]);
+
+	const withGenerateType = (values: FormValues): FormValues =>
+		addGenerateType(values, generateType);
 
 	const isAborted = () => abortControllerRef.current?.signal.aborted ?? false;
 

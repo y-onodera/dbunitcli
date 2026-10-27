@@ -15,25 +15,28 @@
     "@tauri-apps/plugin-cli": "^2.4.1",
     "@tauri-apps/plugin-dialog": "^2.6.0",
     "@tauri-apps/plugin-http": "^2.5.7",
-    "react": "^19.2.4",
-    "react-dom": "^19.2.4"
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.3.15",
+    "@babel/core": "^7.29.7",
+    "@biomejs/biome": "^2.6.3",
+    "@rolldown/plugin-babel": "^0.2.4",
     "@tailwindcss/cli": "^4.1.18",
     "@tauri-apps/cli": "^2.10.0",
     "@testing-library/dom": "^10.4.1",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
     "@testing-library/user-event": "^14.6.1",
-    "@types/react": "^19.2.14",
-    "@types/react-dom": "^19.2.3",
-    "@vitejs/plugin-react": "^6.0.1",
-    "babel-plugin-react-compiler": "^19.1.0-rc.1-rc-af1b7da-20250421",
+    "@types/babel__core": "^7.20.5",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.1.2",
+    "babel-plugin-react-compiler": "^1.0.0",
     "jsdom": "^26.1.0",
     "tailwindcss": "^4.1.18",
-    "typescript": "^5.9.3",
-    "vite": "^8.0.5",
-    "vitest": "^4.1.2"
+    "typescript": "^7.0.2",
+    "vite": "^8.3.5",
+    "vitest": "^4.1.12"
   }
 }

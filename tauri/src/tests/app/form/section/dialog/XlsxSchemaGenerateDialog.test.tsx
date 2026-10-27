@@ -39,8 +39,7 @@ vi.mock("../../../../../context/EnvironmentProvider", () => ({
 // JDBC API フックのモック
 vi.mock("../../../../../hooks/useJdbc", () => ({
 	useJdbcConnectionTest: () => vi.fn(),
-	useJdbcSaveProperties: () => vi.fn(),
-	useDeleteJdbcProperties: () => vi.fn(),
+	useSaveJdbcProperties: () => vi.fn(),
 }));
 
 vi.mock("../../../../../hooks/useWorkspaceResources", () => ({
@@ -55,7 +54,6 @@ const { mockSaveSchema } = vi.hoisted(() => ({
 }));
 vi.mock("../../../../../hooks/useXlsxSchema", () => ({
 	useSaveXlsxSchema: () => mockSaveSchema,
-	useDeleteXlsxSchema: () => vi.fn(),
 	useXlsxSchemaData: () => ({ schema: null, loading: true }),
 	useSrcInfoSheets: () => [],
 }));

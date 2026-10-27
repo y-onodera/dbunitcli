@@ -1,7 +1,8 @@
 /// <reference types="vitest" />
 import { existsSync } from "node:fs";
 import { dirname, resolve } from "node:path";
-import react from "@vitejs/plugin-react";
+import babel from "@rolldown/plugin-babel";
+import react, { reactCompilerPreset } from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
 
 // テスト実行時に存在しない CSS ファイル（App.css など生成ファイル）を空モジュールとして扱うプラグイン
@@ -27,12 +28,16 @@ const missingCssFallback = {
 };
 
 // https://vitejs.dev/config/
-export default defineConfig(async () => ({
+export default defineConfig(async ({ mode }) => ({
 	plugins: [
-		react({
-			babel: {
-				plugins: [["babel-plugin-react-compiler"]],
-			},
+		react(),
+		babel({
+			presets: [
+				// テスト時はコンパイルできない関数があれば失敗させる（黙ってメモ化されないのを防ぐ）
+				reactCompilerPreset(
+					mode === "test" ? { panicThreshold: "all_errors" } : {},
+				),
+			],
 		}),
 		missingCssFallback,
 	],

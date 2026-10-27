@@ -3,6 +3,10 @@ import {
 	DeleteButton,
 	EditButton,
 } from "../../../../components/element/ButtonIcon";
+import {
+	type ResourceKind,
+	useDeleteResource,
+} from "../../../../hooks/useResourceFiles";
 
 export type ResourceEditButtonProp = {
 	path: string;
@@ -75,52 +79,48 @@ export default function ResourceEditButton({
 	);
 }
 
-// ファイル名で開く編集ダイアログ（保存したらパスを反映して閉じる）を持つ編集ボタンを生成する
-export function createEditButton(
-	DialogComponent: ComponentType<{
+// ファイル名で開く編集ダイアログ（保存したらパスを反映して閉じる）を持つ編集ボタン
+export function EditResourceButton({
+	dialog: DialogComponent,
+	path,
+	setPath,
+}: ResourceEditButtonProp & {
+	dialog: ComponentType<{
 		fileName: string;
 		handleDialogClose: () => void;
 		handleSave: (path: string) => void;
-	}>,
-) {
-	return function EditResourceButton({
-		path,
-		setPath,
-	}: ResourceEditButtonProp) {
-		const renderDialog = (open: boolean, closeDialog: () => void) => {
-			if (!open) {
-				return null;
-			}
-			return (
-				<DialogComponent
-					fileName={path}
-					handleDialogClose={closeDialog}
-					handleSave={(newPath: string) => {
-						setPath(newPath);
-						closeDialog();
-					}}
-				/>
-			);
-		};
-		return <ResourceEditButton renderDialog={renderDialog} />;
-	};
-}
-
-// 削除用フックからRemoveResourceを使う削除ボタンを生成する
-export function createRemoveButton(
-	useDeleteResource: () => (path: string) => Promise<string>,
-) {
-	return function RemoveResourceButton({
-		path,
-		setPath,
-	}: ResourceEditButtonProp) {
-		const deleteResource = useDeleteResource();
+	}>;
+}) {
+	const renderDialog = (open: boolean, closeDialog: () => void) => {
+		if (!open) {
+			return null;
+		}
 		return (
-			<RemoveResource
-				path={path}
-				setPath={setPath}
-				deleteResource={deleteResource}
+			<DialogComponent
+				fileName={path}
+				handleDialogClose={closeDialog}
+				handleSave={(newPath: string) => {
+					setPath(newPath);
+					closeDialog();
+				}}
 			/>
 		);
 	};
+	return <ResourceEditButton renderDialog={renderDialog} />;
+}
+
+// 種類ごとの削除APIでRemoveResourceを使う削除ボタン
+export function RemoveResourceButton({
+	kind,
+	path,
+	setPath,
+}: ResourceEditButtonProp & { kind: ResourceKind }) {
+	const deleteResource = useDeleteResource(kind);
+	return (
+		<RemoveResource
+			path={path}
+			setPath={setPath}
+			deleteResource={deleteResource}
+		/>
+	);
 }

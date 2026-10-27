@@ -24,6 +24,7 @@ vi.mock("@tauri-apps/api/path", () => ({
 vi.mock("../../../context/WorkspaceResourcesProvider", () => ({
 	useWorkspaceContext: () => workspaceResourcesFixture.context,
 	useResourcesSettings: () => workspaceResourcesFixture.resources,
+	useSetResourcesSettings: () => vi.fn(),
 }));
 vi.mock("../../../context/EnvironmentProvider", () => ({
 	useEnvironment: () => environmentFixture,
@@ -32,8 +33,7 @@ vi.mock("../../../context/EnvironmentProvider", () => ({
 // JDBC API フックのモック
 vi.mock("../../../hooks/useJdbc", () => ({
 	useJdbcConnectionTest: () => vi.fn(),
-	useJdbcSaveProperties: () => vi.fn(),
-	useDeleteJdbcProperties: () => vi.fn(),
+	useSaveJdbcProperties: () => vi.fn(),
 }));
 
 function makeGenerateProps(

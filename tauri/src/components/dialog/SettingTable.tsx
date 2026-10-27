@@ -29,18 +29,31 @@ interface SettingTableProps<T extends Displayable> {
 	getKey?: (setting: T) => string | number;
 }
 
+// 引数の既定値にアロー関数を書くとReact Compilerが未対応のため、モジュールレベルで定義する
+function appendSetting<T>(current: T[], item: T): T[] {
+	return [...current, item];
+}
+function replaceSetting<T>(current: T[], before: T, after: T): T[] {
+	return current.map((s) => (s === before ? after : s));
+}
+function removeSetting<T>(current: T[], item: T): T[] {
+	return current.filter((s) => s !== item);
+}
+function displayNameOf(setting: Displayable): string {
+	return setting.displayName();
+}
+
 export default function SettingTable<T extends Displayable>({
 	caption,
 	settings,
 	setSettings,
-	addSettings = (current, item) => [...current, item],
-	updateSettings = (current, before, after) =>
-		current.map((s) => (s === before ? after : s)),
-	deleteSettings = (current, item) => current.filter((s) => s !== item),
-	renderSetting = (setting) => setting.displayName(),
+	addSettings = appendSetting,
+	updateSettings = replaceSetting,
+	deleteSettings = removeSetting,
+	renderSetting = displayNameOf,
 	SettingDialogComponent,
 	newSetting,
-	getKey = (setting) => setting.displayName(),
+	getKey = displayNameOf,
 }: SettingTableProps<T>) {
 	const defaultState = { setting: newSetting(), action: "" };
 	const [selectSettings, setSelectSettings] = useState(defaultState);

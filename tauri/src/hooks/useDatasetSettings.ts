@@ -2,20 +2,18 @@ import { useEffect, useState } from "react";
 import { useEnvironment } from "../context/EnvironmentProvider";
 import { useJdbcConnectionState } from "../context/JdbcConnectionProvider";
 import { useParamInputs } from "../context/ParameterInputProvider";
-import { useSetResourcesSettings } from "../context/WorkspaceResourcesProvider";
 import type { DatasetSrcInfo } from "../model/CommandOption";
 import {
 	DatasetSettings,
 	type DatasetSettingsBuilder,
 } from "../model/DatasetSettings";
 import {
-	fetchAndUpdate,
 	fetchData,
 	getErrorMessage,
 	handleFetchError,
-	type OperationResult,
 } from "../utils/fetchUtils";
 import { appendLogLines } from "./useJobLog";
+import { useUpdateResourceFiles } from "./useResourceFiles";
 
 function buildDatasetRequestBody(
 	info: DatasetSrcInfo,
@@ -213,47 +211,10 @@ export const useDatasetTablePreview = (
 	return { preview, loading, logs };
 };
 
-export const useDeleteDatasetSettings = () => {
-	const { apiUrl } = useEnvironment();
-	const setResourcesSettings = useSetResourcesSettings();
-	return async (name: string): Promise<OperationResult> =>
-		fetchAndUpdate<string[]>(
-			{
-				endpoint: `${apiUrl}dataset-setting/delete`,
-				options: {
-					method: "POST",
-					headers: { "Content-Type": "text/plain" },
-					body: name,
-				},
-			},
-			(settings) =>
-				setResourcesSettings((current) =>
-					current.with({ datasetSettings: settings }),
-				),
-		);
-};
-
 export const useSaveDatasetSettings = () => {
-	const { apiUrl } = useEnvironment();
-	const setResourcesSettings = useSetResourcesSettings();
-	return async (
-		name: string,
-		input: DatasetSettings,
-	): Promise<OperationResult> =>
-		fetchAndUpdate<string[]>(
-			{
-				endpoint: `${apiUrl}dataset-setting/save`,
-				options: {
-					method: "POST",
-					headers: { "Content-Type": "application/json" },
-					body: JSON.stringify({ name, input }),
-				},
-			},
-			(settings) =>
-				setResourcesSettings((current) =>
-					current.with({ datasetSettings: settings }),
-				),
-		);
+	const updateResourceFiles = useUpdateResourceFiles("datasetSetting");
+	return (name: string, input: DatasetSettings) =>
+		updateResourceFiles("save", JSON.stringify({ name, input }));
 };
 
 export const useDatasetSettingsData = (
