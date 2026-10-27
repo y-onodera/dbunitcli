@@ -10,9 +10,11 @@ import {
 	Tr,
 } from "../../../../components/dialog";
 import { BlueButton, WhiteButton } from "../../../../components/element/Button";
+import { JobProgress } from "../../../../components/element/JobProgress";
 import { useDatasetSrcInfo } from "../../../../context/DatasetSrcInfoProvider";
 import { useAbortSignalRef } from "../../../../hooks/useAbortSignalRef";
 import { useColumnNamesFetcher } from "../../../../hooks/useDatasetSettings";
+import { useJobLog } from "../../../../hooks/useJobLog";
 import type { DatasetSetting } from "../../../../model/DatasetSettings";
 
 export default function ColumnDatalistDialog({
@@ -31,7 +33,9 @@ export default function ColumnDatalistDialog({
 	const srcInfo = useDatasetSrcInfo();
 	const fetchColumnNames = useColumnNamesFetcher();
 	const abortControllerRef = useAbortSignalRef();
+	const jobLog = useJobLog();
 
+	// 閉じると（アンマウントでabort）sidecar側の読込も中断する
 	const handleLoadColumns = (tableName: string) => {
 		if (loadingTable !== null) {
 			return;
@@ -40,13 +44,16 @@ export default function ColumnDatalistDialog({
 			return;
 		}
 		setLoadingTable(tableName);
+		jobLog.reset();
 		const { signal } = abortControllerRef.current;
-		fetchColumnNames(srcInfo, tableName, signal).then((columns) => {
-			if (!abortControllerRef.current?.signal.aborted) {
-				onLoad(columns);
-				onClose();
-			}
-		});
+		fetchColumnNames(srcInfo, tableName, signal, jobLog.append).then(
+			(columns) => {
+				if (!abortControllerRef.current?.signal.aborted) {
+					onLoad(columns);
+					onClose();
+				}
+			},
+		);
 	};
 
 	function renderRow(name: string) {
@@ -55,8 +62,7 @@ export default function ColumnDatalistDialog({
 				<Td>{name}</Td>
 				<Td align="right">
 					<BlueButton
-						title={loadingTable === name ? "Loading..." : "Load Columns"}
-						disabled={loadingTable !== null}
+						title="Load Columns"
 						handleClick={() => handleLoadColumns(name)}
 					/>
 				</Td>
@@ -78,10 +84,20 @@ export default function ColumnDatalistDialog({
 	return (
 		<ModalOverlay width="w-lg" zClass="z-modal-nested">
 			<DialogTitle>Load Column Datalist</DialogTitle>
-			{renderBody()}
-			<DialogActions>
-				<WhiteButton title="Close" handleClick={onClose} />
-			</DialogActions>
+			{loadingTable !== null ? (
+				<JobProgress
+					title={`Loading ${loadingTable}...`}
+					lines={jobLog.logs}
+					onAbandon={onClose}
+				/>
+			) : (
+				<>
+					{renderBody()}
+					<DialogActions>
+						<WhiteButton title="Close" handleClick={onClose} />
+					</DialogActions>
+				</>
+			)}
 		</ModalOverlay>
 	);
 }

@@ -1,6 +1,7 @@
 import { getMatches } from "@tauri-apps/plugin-cli";
 import type { ReactNode } from "react";
 import { createContext, Suspense, use } from "react";
+import SidecarLoading from "../app/startup/SidecarLoading";
 import { API_CONTEXT_PATH } from "../utils/apiPath";
 
 export type Environment = {
@@ -31,7 +32,7 @@ export default function EnvironmentProvider(props: { children: ReactNode }) {
 		};
 	};
 	return (
-		<Suspense fallback={<div>Loading...</div>}>
+		<Suspense fallback={<SidecarLoading />}>
 			<CreateContext promise={getEnvironment()}>{props.children}</CreateContext>
 		</Suspense>
 	);

@@ -8,7 +8,7 @@ import {
 	StatusMessage,
 } from "../../../../components/dialog";
 import { BlueButton, WhiteButton } from "../../../../components/element/Button";
-import { JobLog } from "../../../../components/element/JobLog";
+import { JobProgress } from "../../../../components/element/JobProgress";
 import type { DialogLoadState } from "./refreshableDialogForm";
 
 // refresh系ダイアログ（Generate・Scaffold）共通の枠: タイトル・読込/エラー表示・form・Execute/Closeフッタ
@@ -61,7 +61,9 @@ export function RefreshableDialogShell<OPTIONS>({
 						{children(loadState.options)}
 					</form>
 				)}
-				{executing && <JobLog lines={logs} />}
+				{executing && (
+					<JobProgress title="Now Execution" lines={logs} onAbandon={onClose} />
+				)}
 				{executeError && (
 					<StatusMessage kind="error">Error: {executeError}</StatusMessage>
 				)}

@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { SectionHelpButton } from "../../components/dialog";
 import { BlueButton, WhiteButton } from "../../components/element/Button";
 import { BlueEditButton } from "../../components/element/ButtonIcon";
-import { JobLog } from "../../components/element/JobLog";
+import { JobProgress } from "../../components/element/JobProgress";
 import {
 	useParamInputs,
 	useSetParamInputs,
@@ -102,16 +102,11 @@ export default function Footer(prop: {
 	if (isLoading) {
 		return (
 			<ResultDialog hidden={false}>
-				<div className="p-4 md:p-5 flex flex-col justify-center items-center">
-					<h3 className="mb-5 text-lg font-normal text-content-muted ">
-						Now Execution
-					</h3>
-					<div className="block animate-spin h-10 w-10 border-4 border-primary rounded-full border-t-transparent" />
-					<JobLog lines={jobLog.logs} className="mt-4" />
-					<div className="mt-4">
-						<WhiteButton title="Abandoned" handleClick={handleCancel} />
-					</div>
-				</div>
+				<JobProgress
+					title="Now Execution"
+					lines={jobLog.logs}
+					onAbandon={handleCancel}
+				/>
 			</ResultDialog>
 		);
 	}

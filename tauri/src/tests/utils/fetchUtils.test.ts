@@ -171,6 +171,18 @@ describe("fetchData（ジョブのSSE）", () => {
 		expect(mockFetch).toHaveBeenCalledTimes(1);
 	});
 
+	it("signalとtimeoutMsの両方があれば、タイムアウトでも中断する", async () => {
+		mockFetch.mockResolvedValue(sseResponse(sseStream([], false)));
+
+		const error = await fetchData({
+			...execParams,
+			signal: new AbortController().signal,
+			timeoutMs: 10,
+		}).catch((ex) => ex);
+
+		expect(isAbortError(error)).toBe(true);
+	});
+
 	it("resultが届かずに閉じた場合はエラーにする", async () => {
 		mockFetch.mockResolvedValue(sseResponse(sseStream([sseLog("only log")])));
 

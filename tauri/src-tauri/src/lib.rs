@@ -1,3 +1,6 @@
+mod sidecar_log;
+
+use sidecar_log::SidecarLog;
 use std::{
     env, io,
     os::windows::{
@@ -5,7 +8,7 @@ use std::{
         process::CommandExt,
     },
     process::{Child, Command, Stdio},
-    sync::Mutex,
+    sync::{Arc, Mutex},
 };
 use tauri::{Manager, WindowEvent};
 use tauri_plugin_cli::CliExt;
@@ -29,6 +32,11 @@ fn open_directory(path: String) -> Result<(), String> {
         .spawn()
         .map(|_| ())
         .map_err(|e| e.to_string())
+}
+/// sidecarの出力のうち、通し番号がsince以降の行と次に渡すsinceを返す（起動中の表示が差分を読む）
+#[tauri::command]
+fn sidecar_logs(since: usize, log: tauri::State<Arc<SidecarLog>>) -> (usize, Vec<String>) {
+    log.since(since)
 }
 pub fn run() {
     tauri::Builder::default()
@@ -81,22 +89,22 @@ pub fn run() {
                     .unwrap_or_default(),
             );
 
-            // 読まないパイプにするとバッファが埋まった時点でsidecarのログ出力がブロックし、処理全体が止まる。
-            // devはコンソールへそのまま出し、配布版は捨てる（ログはsidecarのログファイルに残る）
-            let output = || {
-                if cfg!(debug_assertions) {
-                    Stdio::inherit()
-                } else {
-                    Stdio::null()
-                }
-            };
-            let child = Command::new(backend.join("dbunit-cli-sidecar.exe"))
+            // 出力は画面へ出すために溜める。devはコンソールへもそのまま出す
+            let mut child = Command::new(backend.join("dbunit-cli-sidecar.exe"))
                 .creation_flags(CREATE_NO_WINDOW)
                 .args(args)
-                .stdout(output())
-                .stderr(output())
+                .stdout(Stdio::piped())
+                .stderr(Stdio::piped())
                 .spawn()
                 .expect("Failed to spawn child process");
+            let log = Arc::new(SidecarLog::default());
+            if let Some(stdout) = child.stdout.take() {
+                sidecar_log::forward(stdout, cfg!(debug_assertions).then(io::stdout), log.clone());
+            }
+            if let Some(stderr) = child.stderr.take() {
+                sidecar_log::forward(stderr, cfg!(debug_assertions).then(io::stderr), log.clone());
+            }
+            app.manage(log);
             // 本体がクラッシュ・強制終了しても、ジョブのハンドルが閉じられるとOSがsidecarを終了させる
             let job = kill_on_close_job(&child)
                 .inspect_err(|e| eprintln!("Failed to assign sidecar to job object: {e}"))
@@ -112,7 +120,7 @@ pub fn run() {
                 stop_sidecar(window.app_handle());
             }
         })
-        .invoke_handler(tauri::generate_handler![open_directory])
+        .invoke_handler(tauri::generate_handler![open_directory, sidecar_logs])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

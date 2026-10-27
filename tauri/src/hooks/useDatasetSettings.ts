@@ -15,6 +15,7 @@ import {
 	handleFetchError,
 	type OperationResult,
 } from "../utils/fetchUtils";
+import { appendLogLines } from "./useJobLog";
 
 function buildDatasetRequestBody(
 	info: DatasetSrcInfo,
@@ -65,6 +66,7 @@ async function fetchTableNames(
 	jdbcValues: Record<string, string>,
 	paramInputs: Record<string, string>,
 	signal?: AbortSignal,
+	onLog?: (line: string) => void,
 ): Promise<string[]> {
 	if (!info.srcPath) {
 		return [];
@@ -79,17 +81,21 @@ async function fetchTableNames(
 			}),
 		},
 		signal,
+		onLog,
 	};
 	return fetchData(fetchParams)
 		.then((r) => r.json())
 		.catch(() => []);
 }
 
+// withLogs: 読込中のログも受け取る（読込中の表示に使う場合）
 export const useDatasetTableNames = (
 	srcInfo: DatasetSrcInfo,
-): { tableNames: string[]; loading: boolean } => {
+	withLogs = false,
+): { tableNames: string[]; loading: boolean; logs: string[] } => {
 	const [tableNames, setTableNames] = useState<string[]>([]);
 	const [loading, setLoading] = useState(false);
+	const [logs, setLogs] = useState<string[]>([]);
 	const { apiUrl } = useEnvironment();
 	const { jdbcValues, connectionOk } = useJdbcConnectionState();
 	const paramInputs = useParamInputs();
@@ -104,12 +110,16 @@ export const useDatasetTableNames = (
 		}
 		const controller = new AbortController();
 		setLoading(true);
+		setLogs([]);
 		fetchTableNames(
 			apiUrl,
 			srcInfo,
 			jdbcValues,
 			paramInputs,
 			controller.signal,
+			withLogs
+				? (line) => setLogs((current) => appendLogLines(current, [line]))
+				: undefined,
 		).then((names) => {
 			if (!controller.signal.aborted) {
 				setTableNames(names);
@@ -119,9 +129,9 @@ export const useDatasetTableNames = (
 		return () => {
 			controller.abort();
 		};
-	}, [apiUrl, srcInfo, srcReady, jdbcValues, paramInputs]);
+	}, [apiUrl, srcInfo, srcReady, jdbcValues, paramInputs, withLogs]);
 
-	return { tableNames, loading };
+	return { tableNames, loading, logs };
 };
 
 export type TablePreview = {
@@ -136,6 +146,7 @@ async function fetchTablePreview(
 	jdbcValues: Record<string, string>,
 	paramInputs: Record<string, string>,
 	signal?: AbortSignal,
+	onLog?: (line: string) => void,
 ): Promise<TablePreview> {
 	if (!info.srcPath || !tableName) {
 		return { headers: [], rows: [] };
@@ -151,6 +162,7 @@ async function fetchTablePreview(
 			}),
 		},
 		signal,
+		onLog,
 	};
 	return fetchData(fetchParams)
 		.then((r) => r.json())
@@ -160,9 +172,10 @@ async function fetchTablePreview(
 export const useDatasetTablePreview = (
 	srcInfo: DatasetSrcInfo,
 	tableName: string,
-): { preview: TablePreview | null; loading: boolean } => {
+): { preview: TablePreview | null; loading: boolean; logs: string[] } => {
 	const [preview, setPreview] = useState<TablePreview | null>(null);
 	const [loading, setLoading] = useState(false);
+	const [logs, setLogs] = useState<string[]>([]);
 	const { apiUrl } = useEnvironment();
 	const { jdbcValues, connectionOk } = useJdbcConnectionState();
 	const paramInputs = useParamInputs();
@@ -177,6 +190,7 @@ export const useDatasetTablePreview = (
 		}
 		const controller = new AbortController();
 		setLoading(true);
+		setLogs([]);
 		fetchTablePreview(
 			apiUrl,
 			srcInfo,
@@ -184,6 +198,7 @@ export const useDatasetTablePreview = (
 			jdbcValues,
 			paramInputs,
 			controller.signal,
+			(line) => setLogs((current) => appendLogLines(current, [line])),
 		).then((result) => {
 			if (!controller.signal.aborted) {
 				setPreview(result);
@@ -195,7 +210,7 @@ export const useDatasetTablePreview = (
 		};
 	}, [apiUrl, srcInfo, srcReady, jdbcValues, tableName, paramInputs]);
 
-	return { preview, loading };
+	return { preview, loading, logs };
 };
 
 export const useDeleteDatasetSettings = () => {
@@ -350,6 +365,7 @@ export const useColumnNamesFetcher = () => {
 		srcInfo: DatasetSrcInfo,
 		tableName: string,
 		signal: AbortSignal,
+		onLog?: (line: string) => void,
 	): Promise<string[]> => {
 		if (signal.aborted) {
 			return [];
@@ -361,6 +377,7 @@ export const useColumnNamesFetcher = () => {
 			jdbcValues,
 			paramInputs,
 			signal,
+			onLog,
 		);
 		return preview.headers;
 	};

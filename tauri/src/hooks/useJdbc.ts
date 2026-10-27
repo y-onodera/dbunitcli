@@ -1,6 +1,7 @@
 import { useEnvironment } from "../context/EnvironmentProvider";
 import { useSetResourcesSettings } from "../context/WorkspaceResourcesProvider";
 import {
+	type FetchParams,
 	fetchAndUpdate,
 	fetchData,
 	getErrorMessage,
@@ -38,9 +39,15 @@ export const useDeleteJdbcProperties = () => {
 		);
 };
 
+// 一覧の取得を中断する（自分で中断したときはエラー表示しない）signalと、実行中のログの受け取り先
+export type JdbcFetchOptions = Pick<FetchParams, "signal" | "onLog">;
+
 export const useJdbcTables = () => {
 	const { apiUrl } = useEnvironment();
-	return async (jdbcValues: Record<string, string>): Promise<string[]> => {
+	return async (
+		jdbcValues: Record<string, string>,
+		fetchOptions?: JdbcFetchOptions,
+	): Promise<string[]> => {
 		const params = {
 			endpoint: `${apiUrl}jdbc/tables`,
 			options: {
@@ -49,12 +56,15 @@ export const useJdbcTables = () => {
 				body: JSON.stringify(toJdbcRequestBody(jdbcValues)),
 			},
 			timeoutMs: JDBC_TIMEOUT_MS,
+			...fetchOptions,
 		};
 		try {
 			const response = await fetchData(params);
 			return (await response.json()) as string[];
 		} catch (e) {
-			handleFetchError(getErrorMessage(e), params);
+			if (!fetchOptions?.signal?.aborted) {
+				handleFetchError(getErrorMessage(e), params);
+			}
 			return [];
 		}
 	};
@@ -65,6 +75,7 @@ export const useJdbcColumns = () => {
 	return async (
 		jdbcValues: Record<string, string>,
 		table: string,
+		fetchOptions?: JdbcFetchOptions,
 	): Promise<string[]> => {
 		const params = {
 			endpoint: `${apiUrl}jdbc/columns`,
@@ -74,12 +85,15 @@ export const useJdbcColumns = () => {
 				body: JSON.stringify({ ...toJdbcRequestBody(jdbcValues), table }),
 			},
 			timeoutMs: JDBC_TIMEOUT_MS,
+			...fetchOptions,
 		};
 		try {
 			const response = await fetchData(params);
 			return (await response.json()) as string[];
 		} catch (e) {
-			handleFetchError(getErrorMessage(e), params);
+			if (!fetchOptions?.signal?.aborted) {
+				handleFetchError(getErrorMessage(e), params);
+			}
 			return [];
 		}
 	};
