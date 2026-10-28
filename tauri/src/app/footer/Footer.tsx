@@ -140,7 +140,7 @@ export default function Footer(prop: {
 				<div
 					className="fixed bottom-0 right-1
                                 w-full z-modal
-								bg-surface-muted
+								bg-pane-footer border-t border-pane-footer-border
                                 flex items-center p-4 gap-2"
 				>
 					<div className="ml-auto flex items-center gap-2">

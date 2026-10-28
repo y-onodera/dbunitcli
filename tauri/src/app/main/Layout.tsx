@@ -9,18 +9,21 @@ export default function Layout() {
 
 	return (
 		<SelectParameterProvider>
-			<nav className="fixed top-0 w-full z-modal bg-surface-muted border-b border-border-subtle">
+			<nav className="fixed top-0 w-full z-modal bg-pane-header border-b border-pane-header-border">
 				<Header />
 			</nav>
 			<aside
 				id="logo-sidebar"
-				className="fixed top-0 left-0 z-sidebar h-screen pt-16 transition-transform -translate-x-full sm:translate-x-0"
+				className="fixed top-0 left-0 z-sidebar h-screen pt-16 bg-pane-sidebar transition-transform -translate-x-full sm:translate-x-0"
 				aria-label="Sidebar"
 				style={{ width: `${sidebarWidth}px` }}
 			>
 				<Sidebar setSidebarWidth={setSidebarWidth} />
 			</aside>
-			<div className="p-2" style={{ marginLeft: `${sidebarWidth}px` }}>
+			<div
+				className="p-2 min-h-screen bg-pane-form"
+				style={{ marginLeft: `${sidebarWidth}px` }}
+			>
 				<Form />
 			</div>
 		</SelectParameterProvider>
