@@ -95,11 +95,14 @@
   <table>
     <tr><th>項目</th><th>説明</th></tr>
     <tr><td>name</td><td>出力するテーブル名（完全一致）。単一文字列または配列。<code>{ "any": [...] }</code> 形式も可</td></tr>
-    <tr><td>pattern</td><td><code>{ string, regex, exclude }</code> 形式で指定する。<code>string</code> はテーブル名の部分一致、<code>regex</code> は正規表現（両方あれば <code>regex</code> を使う）。<code>exclude</code> に除外するテーブル名を指定できる</td></tr>
+    <tr><td>pattern</td><td>テーブル名の部分一致。単一文字列・配列（いずれかを含めば一致）、または <code>{ string, regex, exclude }</code> 形式で指定する。<code>string</code> は部分一致、<code>regex</code> はテーブル名全体に一致する正規表現（両方あれば <code>regex</code> を使う）。<code>exclude</code> に除外するテーブル名（完全一致）を指定できる。</td></tr>
   </table>
   <ul>
     <li><code>name</code> と <code>pattern</code> はどちらか一方だけ指定する（両方あれば <code>name</code> を使う）</li>
+    <li><code>pattern</code> に <code>"*"</code> を指定すると、すべてのテーブルに一致する</li>
+    <li><code>regex</code> は部分一致しない。<code>T_</code> で始まるテーブルなら <code>^T_.*</code> のように、名前全体に一致させる</li>
     <li><code>settings</code> の <code>name</code> と違い、<code>filePath</code> によるテーブル名リストの読み込みは使えない</li>
+    <li><code>"outputFilter": {}</code> のように <code>name</code> も <code>pattern</code> もない場合はエラーになる。絞り込まない場合は <code>outputFilter</code> 自体を書かない（ダイアログでは <code>none</code> を選ぶ）</li>
   </ul>
   <pre>{
   "settings": [
