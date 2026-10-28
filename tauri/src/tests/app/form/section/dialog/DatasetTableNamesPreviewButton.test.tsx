@@ -4,7 +4,6 @@ import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import DatasetTableNamesPreviewButton from "../../../../../app/form/section/dialog/DatasetTableNamesPreviewButton";
 import type { TablePreview } from "../../../../../hooks/useDatasetSettings";
-import type { FetchParams } from "../../../../../utils/fetchUtils";
 import {
 	environmentFixture,
 	workspaceResourcesFixture,
@@ -57,15 +56,13 @@ vi.mock("../../../../../hooks/useDatasetSettings", () => ({
 	useDatasetTableConvert: () => mockConvert,
 }));
 
+// convert自体はuseDatasetTableConvertのモックで受けるため、fetchDataに届くのはconvert/refreshだけ
 const { mockFetchData } = vi.hoisted(() => ({
-	mockFetchData: vi.fn((params: FetchParams) => {
-		if (params.endpoint.includes("convert/refresh")) {
-			return Promise.resolve(
-				new Response(JSON.stringify(convertRefreshSrcTypeXlsxResponseFixture)),
-			);
-		}
-		return Promise.resolve(new Response("{}"));
-	}),
+	mockFetchData: vi.fn(() =>
+		Promise.resolve(
+			new Response(JSON.stringify(convertRefreshSrcTypeXlsxResponseFixture)),
+		),
+	),
 }));
 vi.mock("../../../../../utils/fetchUtils", async (importOriginal) => {
 	const actual =

@@ -27,7 +27,6 @@ import yo.dbunitcli.dataset.ComparableDataSetProducer;
 import yo.dbunitcli.dataset.ComparableTable;
 import yo.dbunitcli.dataset.ComparableTableJoin;
 import yo.dbunitcli.dataset.IDataSetConverter;
-import yo.dbunitcli.dataset.ResultType;
 import yo.dbunitcli.dataset.TableSeparators;
 import yo.dbunitcli.dataset.producer.ComparableDataSetLoader;
 import yo.dbunitcli.resource.FileResources;
@@ -127,7 +126,7 @@ public class DatasetSettingsController extends AbstractResourceFileController<Da
 
     /**
      * 選んだテーブルだけをresultフォームの指定でconvertし、出力先ディレクトリを返す（DB出力なら空文字）。
-     * 読込条件はプレビューと同じ。出力テーブル名での絞り込み（outputFilter）はプレビューと同様にjoin・split時は行わず、
+     * 読込条件はプレビューと同じ。出力を読み直せないため、絞り込みは対象を取りこぼさない範囲に留め（{@link Narrow#singlePass}）、
      * 出力する側で対象テーブル以外を捨てる（{@link TargetTableConverter}）
      */
     @Interruptible
@@ -148,21 +147,14 @@ public class DatasetSettingsController extends AbstractResourceFileController<Da
             }
             final ComparableDataSetParam.Builder param = this.toParam(request, "true");
             final TableSeparators separators = param.getTableSeparators();
-            if (separators.joinConditions().isEmpty() && !separators.hasSplitter()) {
-                param.setTableSeparators(separators.builder()
-                                                   .addFilter(tableName::equals, TableSeparators.FilterCombine.AND)
-                                                   .build());
-            }
+            Narrow.singlePass(separators).applyTo(param, separators, tableName);
             FileResources.runInContext(() -> {
                 try (final IDataSetConverter converter = new TargetTableConverter(tableName,
                         result.converter(it -> it.setResultPath(result.getResultPath())))) {
                     new ComparableDataSetLoader(this.buildParameter(request)).loadDataSet(param.setConverter(converter).build());
                 }
             });
-            if (result.convertResult().resultType() == ResultType.table) {
-                return "";
-            }
-            return result.convertResult().getResultDir().getAbsoluteFile().getPath();
+            return result.resultDir();
         } catch (final OptionValidationException ex) {
             throw ex;
         } catch (final Throwable th) {
@@ -179,20 +171,13 @@ public class DatasetSettingsController extends AbstractResourceFileController<Da
                                                                  final TableSeparators separators) throws Exception {
         final String tableName = request.getTableName();
         final ComparableDataSetParam.Builder param = this.toParam(request, "true");
-        if (narrow == Narrow.SOURCE_AND_OUTPUT) {
-            param.setRegTableInclude("(?i)^" + Pattern.quote(tableName) + "$");
-        }
-        if (narrow != Narrow.NONE) {
-            param.setTableSeparators(separators.builder()
-                                               .addFilter(tableName::equals, TableSeparators.FilterCombine.AND)
-                                               .build());
-        }
-        final TargetTableHandler handler = new TargetTableHandler(tableName);
+        narrow.applyTo(param, separators, tableName);
+        final PreviewCollector collector = new PreviewCollector();
         try (final ComparableDataSetProducer producer = new ComparableDataSetLoader(this.buildParameter(request))
-                .getComparableDataSetProducer(param.setConverter(handler).build())) {
+                .getComparableDataSetProducer(param.setConverter(new TargetTableConverter(tableName, collector)).build())) {
             producer.produce();
         }
-        return handler.toResponse();
+        return collector.toResponse();
     }
 
     /**
@@ -229,6 +214,24 @@ public class DatasetSettingsController extends AbstractResourceFileController<Da
                 result.add(NONE);
             }
             return result;
+        }
+
+        /**
+         * 読み直さずに済む（対象を取りこぼさない）最も強い絞り込み。元テーブル名での絞り込みは名前が変わると見つからないため使わない
+         */
+        static Narrow singlePass(final TableSeparators separators) {
+            return separators.joinConditions().isEmpty() && !separators.hasSplitter() ? OUTPUT : NONE;
+        }
+
+        void applyTo(final ComparableDataSetParam.Builder param, final TableSeparators separators, final String tableName) {
+            if (this == SOURCE_AND_OUTPUT) {
+                param.setRegTableInclude("(?i)^" + Pattern.quote(tableName) + "$");
+            }
+            if (this != NONE) {
+                param.setTableSeparators(separators.builder()
+                                                   .addFilter(tableName::equals, TableSeparators.FilterCombine.AND)
+                                                   .build());
+            }
         }
     }
 
@@ -276,7 +279,7 @@ public class DatasetSettingsController extends AbstractResourceFileController<Da
     }
 
     /**
-     * 対象テーブルのイベントだけを出力先へ渡す
+     * 対象テーブルのイベントだけを出力先へ渡す（プレビュー・convertで共通）
      */
     private static class TargetTableConverter implements IDataSetConverter {
         private final String tableName;
@@ -310,8 +313,7 @@ public class DatasetSettingsController extends AbstractResourceFileController<Da
 
         @Override
         public void reStartTable(final AddSettingTableMetaData tableMetaData, final Integer writeRows) {
-            this.processTarget = tableMetaData.getTableName().equals(this.tableName);
-            if (this.processTarget) {
+            if (this.target(tableMetaData)) {
                 this.delegate.reStartTable(tableMetaData, writeRows);
             }
         }
@@ -338,8 +340,7 @@ public class DatasetSettingsController extends AbstractResourceFileController<Da
 
         @Override
         public void startTable(final ITableMetaData metaData) throws DataSetException {
-            this.processTarget = metaData.getTableName().equals(this.tableName);
-            if (this.processTarget) {
+            if (this.target(metaData)) {
                 this.delegate.startTable(metaData);
             }
         }
@@ -349,7 +350,6 @@ public class DatasetSettingsController extends AbstractResourceFileController<Da
             if (this.processTarget) {
                 this.delegate.endTable();
             }
-            this.processTarget = false;
         }
 
         @Override
@@ -358,17 +358,19 @@ public class DatasetSettingsController extends AbstractResourceFileController<Da
                 this.delegate.row(values);
             }
         }
+
+        private boolean target(final ITableMetaData metaData) {
+            this.processTarget = metaData.getTableName().equals(this.tableName);
+            return this.processTarget;
+        }
     }
 
-    private static class TargetTableHandler implements IDataSetConverter {
-        private final String tableName;
+    /**
+     * 渡されたテーブル（{@link TargetTableConverter}で対象だけに絞られる）の先頭{@link #PREVIEW_ROW_LIMIT}行と全行数を集める
+     */
+    private static class PreviewCollector implements IDataSetConverter {
         private ComparableTable.Builder builder;
-        private boolean processTarget;
         private int totalRows;
-
-        TargetTableHandler(final String tableName) {
-            this.tableName = tableName;
-        }
 
         Optional<DatasetTablePreviewResponseDto> toResponse() {
             if (this.builder == null) {
@@ -398,25 +400,22 @@ public class DatasetSettingsController extends AbstractResourceFileController<Da
 
         @Override
         public void startTable(final ITableMetaData metaData) {
-            this.processTarget = metaData.getTableName().equals(this.tableName);
-            if (this.processTarget && this.builder == null) {
+            if (this.builder == null) {
                 this.builder = new ComparableTable.Builder(metaData);
             }
         }
 
         @Override
         public void endTable() {
-            this.processTarget = false;
+            // nothing
         }
 
         @Override
         public void row(final Object[] values) {
-            if (this.processTarget) {
-                if (this.totalRows < PREVIEW_ROW_LIMIT) {
-                    this.builder.addRow(values);
-                }
-                this.totalRows++;
+            if (this.totalRows < PREVIEW_ROW_LIMIT) {
+                this.builder.addRow(values);
             }
+            this.totalRows++;
         }
     }
 }

@@ -22,6 +22,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 @MicronautTest
 @Property(name = FileResources.PROPERTY_WORKSPACE, value = "target/test-temp/workspace/sample")
@@ -215,11 +218,8 @@ class DatasetSettingsControllerTest {
     @Test
     void testTablePreview_設定でテーブル名を変えても変更後の名前で読み込む() throws IOException {
         this.createPreviewSrc();
-        Files.writeString(SETTING_DIR.resolve("previewRenameSetting.json"),
-                "{\"settings\":[{\"name\":[\"big\"],\"tableName\":\"renamed\"}]}");
-
         final DatasetTablePreviewResponseDto actual = this.tablePreview(
-                SETTING_DIR.resolve("previewRenameSetting.json").toAbsolutePath().toString(), "renamed");
+                this.writeRenameSetting(), "renamed");
 
         Assertions.assertArrayEquals(new String[]{"key", "value"}, actual.getHeaders());
         Assertions.assertEquals(BIG_ROWS, actual.getTotalRows());
@@ -228,11 +228,8 @@ class DatasetSettingsControllerTest {
     @Test
     void testTablePreview_joinした結果も読み込む() throws IOException {
         this.createPreviewSrc();
-        Files.writeString(SETTING_DIR.resolve("previewJoinSetting.json"),
-                "{\"settings\":[{\"innerJoin\":{\"left\":\"big\",\"right\":\"small\",\"column\":[\"key\"]},\"tableName\":\"joined\"}]}");
-
         final DatasetTablePreviewResponseDto actual = this.tablePreview(
-                SETTING_DIR.resolve("previewJoinSetting.json").toAbsolutePath().toString(), "joined");
+                this.writeJoinSetting(), "joined");
 
         Assertions.assertEquals(3, actual.getTotalRows());
         Assertions.assertEquals(3, actual.getRows().size());
@@ -257,7 +254,7 @@ class DatasetSettingsControllerTest {
 
         final Path resultDir = Paths.get(actual);
         Assertions.assertEquals(CONVERT_RESULT_DIR.toAbsolutePath().normalize(), resultDir.toAbsolutePath().normalize());
-        Assertions.assertEquals(java.util.List.of("\"key\",\"other\"", "\"1\",\"a\"", "\"2\",\"b\"", "\"3\",\"c\""),
+        Assertions.assertEquals(List.of("\"key\",\"other\"", "\"1\",\"a\"", "\"2\",\"b\"", "\"3\",\"c\""),
                 Files.readAllLines(resultDir.resolve("small.csv")));
         Assertions.assertFalse(Files.exists(resultDir.resolve("big.csv")));
     }
@@ -265,11 +262,8 @@ class DatasetSettingsControllerTest {
     @Test
     void testTableConvert_設定でテーブル名を変えても変更後の名前で出力する() throws IOException {
         this.createPreviewSrc();
-        Files.writeString(SETTING_DIR.resolve("previewRenameSetting.json"),
-                "{\"settings\":[{\"name\":[\"big\"],\"tableName\":\"renamed\"}]}");
-
         final Path resultDir = Paths.get(this.tableConvert(
-                SETTING_DIR.resolve("previewRenameSetting.json").toAbsolutePath().toString(), "renamed"));
+                this.writeRenameSetting(), "renamed"));
 
         Assertions.assertEquals(BIG_ROWS + 1, Files.readAllLines(resultDir.resolve("renamed.csv")).size());
         Assertions.assertFalse(Files.exists(resultDir.resolve("small.csv")));
@@ -278,11 +272,8 @@ class DatasetSettingsControllerTest {
     @Test
     void testTableConvert_joinした結果を出力する() throws IOException {
         this.createPreviewSrc();
-        Files.writeString(SETTING_DIR.resolve("previewJoinSetting.json"),
-                "{\"settings\":[{\"innerJoin\":{\"left\":\"big\",\"right\":\"small\",\"column\":[\"key\"]},\"tableName\":\"joined\"}]}");
-
         final Path resultDir = Paths.get(this.tableConvert(
-                SETTING_DIR.resolve("previewJoinSetting.json").toAbsolutePath().toString(), "joined"));
+                this.writeJoinSetting(), "joined"));
 
         Assertions.assertEquals(4, Files.readAllLines(resultDir.resolve("joined.csv")).size());
         Assertions.assertFalse(Files.exists(resultDir.resolve("big.csv")));
@@ -295,24 +286,47 @@ class DatasetSettingsControllerTest {
 
         final HttpClientResponseException ex = Assertions.assertThrows(HttpClientResponseException.class,
                 () -> this.client.toBlocking().retrieve(HttpRequest.POST("dbunit-cli/dataset-setting/table-convert",
-                        this.tableConvertBody("", "small", "\"-result.resultType\":\"csv\",\"-result.outputEncoding\":\"NO-SUCH-ENCODING\""))));
+                        this.tableRequestBody("", "small",
+                                Map.of("-result.resultType", "csv", "-result.outputEncoding", "NO-SUCH-ENCODING")))));
 
         Assertions.assertEquals(HttpStatus.BAD_REQUEST, ex.getStatus());
         Assertions.assertTrue(ex.getMessage().contains("-result.outputEncoding"), ex.getMessage());
     }
 
-    private String tableConvert(final String setting, final String tableName) {
-        return this.client.toBlocking().retrieve(
-                HttpRequest.POST("dbunit-cli/dataset-setting/table-convert",
-                        this.tableConvertBody(setting, tableName, "\"-result.resultType\":\"csv\",\"-result.result\":\""
-                                + CONVERT_RESULT_DIR.toAbsolutePath().toString().replace("\\", "/")
-                                + "\",\"-result.outputEncoding\":\"UTF-8\"")));
+    private String tableConvert(final String setting, final String tableName) throws IOException {
+        return this.client.toBlocking().retrieve(HttpRequest.POST("dbunit-cli/dataset-setting/table-convert",
+                this.tableRequestBody(setting, tableName, Map.of("-result.resultType", "csv",
+                        "-result.result", CONVERT_RESULT_DIR.toAbsolutePath().toString(),
+                        "-result.outputEncoding", "UTF-8"))));
     }
 
-    private String tableConvertBody(final String setting, final String tableName, final String result) {
-        return "{\"setting\":\"" + setting.replace("\\", "/") + "\",\"srcType\":\"csv\",\"src\":\""
-                + PREVIEW_SRC_DIR.toAbsolutePath().toString().replace("\\", "/")
-                + "\",\"encoding\":\"UTF-8\",\"tableName\":\"" + tableName + "\",\"result\":{" + result + "}}";
+    private String tableRequestBody(final String setting, final String tableName, final Map<String, String> result) throws IOException {
+        final Map<String, Object> body = new LinkedHashMap<>();
+        body.put("setting", setting);
+        body.put("srcType", "csv");
+        body.put("src", PREVIEW_SRC_DIR.toAbsolutePath().toString());
+        body.put("encoding", "UTF-8");
+        body.put("tableName", tableName);
+        if (result != null) {
+            body.put("result", result);
+        }
+        return ObjectMapper.getDefault().writeValueAsString(body);
+    }
+
+    private String writeRenameSetting() throws IOException {
+        return this.writeSetting("previewRenameSetting.json",
+                "{\"settings\":[{\"name\":[\"big\"],\"tableName\":\"renamed\"}]}");
+    }
+
+    private String writeJoinSetting() throws IOException {
+        return this.writeSetting("previewJoinSetting.json",
+                "{\"settings\":[{\"innerJoin\":{\"left\":\"big\",\"right\":\"small\",\"column\":[\"key\"]},\"tableName\":\"joined\"}]}");
+    }
+
+    private String writeSetting(final String fileName, final String content) throws IOException {
+        final Path file = SETTING_DIR.resolve(fileName);
+        Files.writeString(file, content);
+        return file.toAbsolutePath().toString();
     }
 
     private void createPreviewSrc() throws IOException {
@@ -327,10 +341,7 @@ class DatasetSettingsControllerTest {
 
     private DatasetTablePreviewResponseDto tablePreview(final String setting, final String tableName) throws IOException {
         final String response = this.client.toBlocking().retrieve(
-                HttpRequest.POST("dbunit-cli/dataset-setting/table-preview",
-                        "{\"setting\":\"" + setting.replace("\\", "/") + "\",\"srcType\":\"csv\",\"src\":\""
-                                + PREVIEW_SRC_DIR.toAbsolutePath().toString().replace("\\", "/")
-                                + "\",\"encoding\":\"UTF-8\",\"tableName\":\"" + tableName + "\"}"));
+                HttpRequest.POST("dbunit-cli/dataset-setting/table-preview", this.tableRequestBody(setting, tableName, null)));
         return ObjectMapper.getDefault().readValue(response, DatasetTablePreviewResponseDto.class);
     }
 }

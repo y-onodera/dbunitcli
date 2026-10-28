@@ -3,6 +3,7 @@ package yo.dbunitcli.application.option;
 import yo.dbunitcli.application.dto.DataSetConverterDto;
 import yo.dbunitcli.dataset.DataSetConverterParam;
 import yo.dbunitcli.dataset.IDataSetConverter;
+import yo.dbunitcli.dataset.ResultType;
 import yo.dbunitcli.dataset.converter.DataSetConverterLoader;
 
 import java.util.Optional;
@@ -21,6 +22,16 @@ public record ResultOption(String resultFile
 
     public IDataSetConverter converter(final UnaryOperator<DataSetConverterParam.Builder> customizer) {
         return new DataSetConverterLoader().get(customizer.apply(this.convertResult.getParam()).build());
+    }
+
+    /**
+     * 出力先ディレクトリの絶対パス（DB出力なら空文字）
+     */
+    public String resultDir() {
+        if (this.convertResult.resultType() == ResultType.table) {
+            return "";
+        }
+        return this.convertResult.getResultDir().getAbsoluteFile().getPath();
     }
 
     public String getResultPath() {
