@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { type CSSProperties, useState } from "react";
 import SelectParameterProvider from "../../context/SelectParameterProvider";
 import Form from "./Form";
 import Header from "./Header";
@@ -20,9 +20,10 @@ export default function Layout() {
 			>
 				<Sidebar setSidebarWidth={setSidebarWidth} />
 			</aside>
+			{/* --sidebar-width は fixed 配置の Footer の左端合わせにも使う */}
 			<div
-				className="p-2 min-h-screen bg-pane-form"
-				style={{ marginLeft: `${sidebarWidth}px` }}
+				className="p-2 min-h-screen bg-pane-form ml-(--sidebar-width)"
+				style={{ "--sidebar-width": `${sidebarWidth}px` } as CSSProperties}
 			>
 				<Form />
 			</div>

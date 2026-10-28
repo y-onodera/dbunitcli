@@ -138,8 +138,8 @@ export default function Footer(prop: {
 			</ResultDialog>
 			{parameter.command && (
 				<div
-					className="fixed bottom-0 right-1
-                                w-full z-modal
+					className="fixed bottom-0 right-0 left-(--sidebar-width)
+                                z-modal
 								bg-pane-footer border-t border-pane-footer-border
                                 flex items-center p-4 gap-2"
 				>
