@@ -68,7 +68,7 @@ export function SettingDialog<T>(props: SettingDialogProps<T>) {
 							id="fileNameLabel"
 							text="name"
 							required={false}
-							wStyle="p-2.5 w-1/5"
+							wStyle="p-2.5"
 						/>
 						<ControllTextBox
 							name="fileName"
