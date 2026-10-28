@@ -66,7 +66,7 @@ public record ComparableCSVQueryDataSetProducer(ComparableDataSetParam param,
                             .toArray(Column[]::new);
                     final ComparableTableMapper mapper = context.createMapper(this.source.createMetaData(columns));
                     mapper.startTable();
-                    if (this.param.loadData()) {
+                    if (this.param.loadData() && mapper.hasOutput()) {
                         int readRows = 0;
                         while (rst.next()) {
                             mapper.addRow(IntStream.rangeClosed(1, metaData.getColumnCount())

@@ -132,9 +132,11 @@ export const useDatasetTableNames = (
 	return { tableNames, loading, logs };
 };
 
+// rowsは先頭の一部だけ（sidecarが件数を制限する）。totalRowsが対象テーブルの全行数
 export type TablePreview = {
 	headers: string[];
 	rows: string[][];
+	totalRows: number;
 };
 
 async function fetchTablePreview(
@@ -147,7 +149,7 @@ async function fetchTablePreview(
 	onLog?: (line: string) => void,
 ): Promise<TablePreview> {
 	if (!info.srcPath || !tableName) {
-		return { headers: [], rows: [] };
+		return { headers: [], rows: [], totalRows: 0 };
 	}
 	const fetchParams = {
 		endpoint: `${apiUrl}dataset-setting/table-preview`,
@@ -164,7 +166,7 @@ async function fetchTablePreview(
 	};
 	return fetchData(fetchParams)
 		.then((r) => r.json())
-		.catch(() => ({ headers: [], rows: [] }));
+		.catch(() => ({ headers: [], rows: [], totalRows: 0 }));
 }
 
 export const useDatasetTablePreview = (

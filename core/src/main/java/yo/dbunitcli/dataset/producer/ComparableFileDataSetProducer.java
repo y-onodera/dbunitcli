@@ -56,7 +56,7 @@ public class ComparableFileDataSetProducer implements ComparableDataSetProducer 
                     .wrap(new ComparableFileTableMetaData(this.getTableName())));
             mapper.startTable();
             ComparableFileDataSetProducer.LOGGER.info("produce - start fileName={}", this.src);
-            if (this.param.loadData()) {
+            if (this.param.loadData() && mapper.hasOutput()) {
                 final int[] rows = {0};
                 try {
                     this.param.getWalk()

@@ -77,7 +77,7 @@ public record ComparableRegexSplitDataSetProducer(ComparableDataSetParam param) 
                         mapper = context.createMapper(this.source.createMetaData(this.headerSplitPattern.split(header)));
                     }
                     mapper.startTable();
-                    for (; ; ) {
+                    while (mapper.hasOutput()) {
                         final String s = reader.readLine();
                         if (s == null) {
                             break;
