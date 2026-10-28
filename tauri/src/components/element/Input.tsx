@@ -13,7 +13,7 @@ export function InputLabel(props: {
 			style={props.hidden ? { display: "none" } : {}}
 			className={`block
                    ${props.wStyle ? props.wStyle : "w-full"}
-                   font-medium text-sm text-content
+                   font-medium text-sm text-content wrap-anywhere
                    `}
 		>
 			{props.text}
