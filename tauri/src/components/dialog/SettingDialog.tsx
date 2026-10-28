@@ -123,7 +123,7 @@ export function Check(props: {
 				id={props.name}
 				text={props.name}
 				required={false}
-				wStyle="p-2.5 w=1/5"
+				wStyle="p-2.5"
 			/>
 			<div className="p-2.5">
 				<CheckBox
@@ -152,7 +152,7 @@ export function Text(props: {
 					id={props.name}
 					text={props.name}
 					required={false}
-					wStyle="p-2.5 w=1/5"
+					wStyle="p-2.5"
 				/>
 			)}
 			<ControllTextBox
@@ -181,7 +181,7 @@ export function Select(props: {
 				id={props.name}
 				text={props.name}
 				required={false}
-				wStyle="p-2.5 w=1/5"
+				wStyle="p-2.5"
 			/>
 			<SelectBox
 				name={props.name}
@@ -284,7 +284,7 @@ export function ArraysText(props: {
 						id={props.name}
 						text={props.name}
 						required={false}
-						wStyle="p-2.5 w=1/5"
+						wStyle="p-2.5"
 					/>
 				)}
 				<ControllTextBox
@@ -395,14 +395,14 @@ export function KeyValueText(props: {
 						id={props.name}
 						text={props.name}
 						required={false}
-						wStyle="p-2.5 w=1/5"
+						wStyle="p-2.5"
 					/>
 				)}
 				<ControllTextBox
 					name={props.name}
 					id={props.name}
 					required={true}
-					wStyle="col-start-2 p-2.5 w=1/5"
+					wStyle="col-start-2 p-2.5"
 					value={key}
 					handleChange={(ev) => setKey(ev.target.value)}
 					handleBlur={handleKeyBlur}
