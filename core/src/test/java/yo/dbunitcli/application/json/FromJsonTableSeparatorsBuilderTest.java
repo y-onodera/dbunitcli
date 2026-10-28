@@ -391,4 +391,29 @@ public class FromJsonTableSeparatorsBuilderTest {
         assertEquals(1, outputCount(or, "C"));
         assertEquals(0, outputCount(or, "D"));
     }
+
+    @Test
+    public void importShouldResolveAbsolutePath(@org.junit.jupiter.api.io.TempDir final java.nio.file.Path dir) throws java.io.IOException {
+        final java.nio.file.Path child = java.nio.file.Files.createDirectories(dir.resolve("common")).resolve("child.json");
+        java.nio.file.Files.writeString(child, "{\"outputFilter\": {\"name\": \"A\"}}");
+        final java.nio.file.Path parent = java.nio.file.Files.createDirectories(dir.resolve("conf")).resolve("parent.json");
+        java.nio.file.Files.writeString(parent, jakarta.json.Json.createObjectBuilder()
+                .add("import", jakarta.json.Json.createArrayBuilder().add(jakarta.json.Json.createObjectBuilder().add("path", child.toAbsolutePath().toString())))
+                .build().toString());
+
+        final TableSeparators separators = new FromJsonTableSeparatorsBuilder("UTF-8").build(parent.toFile());
+        assertEquals(1, outputCount(separators, "A"));
+        assertEquals(0, outputCount(separators, "B"));
+    }
+
+    @Test
+    public void importShouldFallbackToCurrentDirectory(@org.junit.jupiter.api.io.TempDir final java.nio.file.Path dir) throws java.io.IOException {
+        final java.nio.file.Path child = java.nio.file.Files.createDirectories(java.nio.file.Path.of("target", "import-cwd-test")).resolve("child.json");
+        java.nio.file.Files.writeString(child, "{\"outputFilter\": {\"name\": \"A\"}}");
+        java.nio.file.Files.writeString(dir.resolve("parent.json"), "{\"import\": [{\"path\": \"target/import-cwd-test/child.json\"}]}");
+
+        final TableSeparators separators = new FromJsonTableSeparatorsBuilder("UTF-8").build(dir.resolve("parent.json").toFile());
+        assertEquals(1, outputCount(separators, "A"));
+        assertEquals(0, outputCount(separators, "B"));
+    }
 }

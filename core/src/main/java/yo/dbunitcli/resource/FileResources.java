@@ -112,6 +112,11 @@ public record FileResources() {
         return FileResources.searchInOrder(settingPath, settingDir().toPath().normalize().toString(), FileResources::searchWorkspace);
     }
 
+    // 設定ファイルのimport先は、絶対パス→取り込み元の設定ファイルのディレクトリ→カレントディレクトリの順に探す
+    public static File searchImportSetting(final String importPath, final File importer) {
+        return FileResources.searchInOrder(importPath, importer.getParent(), File::new);
+    }
+
     public static File searchTemplate(final String templatePath) {
         if (Strings.isEmpty(templatePath)) {
             return null;

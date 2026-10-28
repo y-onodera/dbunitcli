@@ -99,7 +99,7 @@ public class FromJsonTableSeparatorsBuilder extends TableSeparators.Builder {
         if (setting.containsKey("import")) {
             setting.getJsonArray("import").forEach(v -> {
                 final JsonObject importJson = v.asJsonObject();
-                new FromJsonTableSeparatorsBuilder(this.settingEncoding).load(new File(file.getParent(), importJson.getString("path")))
+                new FromJsonTableSeparatorsBuilder(this.settingEncoding).load(FileResources.searchImportSetting(importJson.getString("path"), file))
                         .appendTo(this, TableSeparators.FilterCombine.of(importJson.getString("outputFilterCombine", "and")));
             });
         }
