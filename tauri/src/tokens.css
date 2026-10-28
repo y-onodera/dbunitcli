@@ -45,6 +45,15 @@
 	--color-surface-hover: oklch(0.872 0 0); /* gray-300 */
 	--color-overlay: oklch(0 0 0 / 0.5); /* black/50 */
 
+	/* Pane (レイアウト各領域の背景・境界。領域ごとに色を変えて区別する) */
+	--color-pane-header: oklch(0.93 0.034 272.788); /* indigo-100 */
+	--color-pane-header-border: oklch(0.87 0.065 274.039); /* indigo-200 */
+	--color-pane-sidebar: oklch(0.929 0.013 255.508); /* slate-200 */
+	--color-pane-sidebar-border: oklch(0.869 0.022 252.894); /* slate-300 */
+	--color-pane-form: oklch(1 0 0); /* white */
+	--color-pane-footer: oklch(0.962 0.018 272.314); /* indigo-50 */
+	--color-pane-footer-border: oklch(0.87 0.065 274.039); /* indigo-200 */
+
 	/* Input */
 	--color-input: oklch(0.985 0 0); /* gray-50 */
 	--color-input-disabled: oklch(0.872 0 0); /* gray-300 */

@@ -45,13 +45,13 @@ export default function Sidebar({ setSidebarWidth }: SidebarProps) {
 		<div
 			ref={sidebarRef}
 			style={{ width: `${width}px` }}
-			className="flex flex-col h-full border-r border-border-subtle"
+			className="flex flex-col h-full border-r border-pane-sidebar-border"
 		>
 			<div className="flex-1 overflow-y-auto px-3 pt-4 pb-2">
 				<NameEditMenu editName={editName} setEditName={setEditName} />
 				<NamedParameters setEditName={setEditName} />
 			</div>
-			<div className="border-t border-border-subtle px-3 py-2">
+			<div className="border-t border-pane-sidebar-border px-3 py-2">
 				<SidebarHelpLink />
 			</div>
 			<div
