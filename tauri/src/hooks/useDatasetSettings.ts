@@ -8,10 +8,12 @@ import {
 	type DatasetSettingsBuilder,
 } from "../model/DatasetSettings";
 import {
+	type FetchParams,
 	fetchData,
 	getErrorMessage,
 	handleFetchError,
 } from "../utils/fetchUtils";
+import type { FormValues } from "../utils/formValues";
 import { appendLogLines } from "./useJobLog";
 import { useUpdateResourceFiles } from "./useResourceFiles";
 
@@ -213,6 +215,35 @@ export const useDatasetTablePreview = (
 	}, [apiUrl, srcInfo, srcReady, jdbcValues, tableName, paramInputs]);
 
 	return { preview, loading, logs };
+};
+
+// 選んだテーブルだけをresultフォームの値（-result.*）でconvertし、出力先ディレクトリを返す（DB出力なら空文字）。
+// 読込条件はプレビューと同じ。失敗時は例外を投げる（呼び出し側のダイアログで表示する）
+export const useDatasetTableConvert = () => {
+	const { apiUrl } = useEnvironment();
+	const { jdbcValues } = useJdbcConnectionState();
+	const paramInputs = useParamInputs();
+	return async (
+		srcInfo: DatasetSrcInfo,
+		tableName: string,
+		result: FormValues,
+		fetchOptions?: Pick<FetchParams, "signal" | "onLog">,
+	): Promise<string> => {
+		const response = await fetchData({
+			endpoint: `${apiUrl}dataset-setting/table-convert`,
+			options: {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: buildDatasetRequestBody(srcInfo, jdbcValues, {
+					tableName,
+					parameters: paramInputs,
+					result,
+				}),
+			},
+			...fetchOptions,
+		});
+		return response.text();
+	};
 };
 
 export const useSaveDatasetSettings = () => {

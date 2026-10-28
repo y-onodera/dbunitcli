@@ -6,29 +6,40 @@ import io.micronaut.http.annotation.Controller;
 import io.micronaut.http.annotation.Post;
 import io.micronaut.serde.ObjectMapper;
 import org.dbunit.dataset.Column;
+import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.ITableMetaData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import yo.dbunitcli.Strings;
+import yo.dbunitcli.application.CommandParameters;
+import yo.dbunitcli.application.Option;
+import yo.dbunitcli.application.OptionValidationException;
+import yo.dbunitcli.application.command.Convert;
 import yo.dbunitcli.application.command.GenerateType;
+import yo.dbunitcli.application.command.Type;
 import yo.dbunitcli.application.dto.DataSetLoadDto;
 import yo.dbunitcli.application.option.DataSetLoadOption;
+import yo.dbunitcli.application.option.ResultOption;
 import yo.dbunitcli.common.Parameter;
 import yo.dbunitcli.dataset.AddSettingTableMetaData;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.dataset.ComparableDataSetProducer;
 import yo.dbunitcli.dataset.ComparableTable;
+import yo.dbunitcli.dataset.ComparableTableJoin;
 import yo.dbunitcli.dataset.IDataSetConverter;
 import yo.dbunitcli.dataset.TableSeparators;
 import yo.dbunitcli.dataset.producer.ComparableDataSetLoader;
+import yo.dbunitcli.resource.FileResources;
 import yo.dbunitcli.sidecar.domain.project.ResourceFile;
 import yo.dbunitcli.sidecar.domain.project.Workspace;
 import yo.dbunitcli.sidecar.dto.DatasetRequestDto;
+import yo.dbunitcli.sidecar.dto.DatasetTableConvertRequestDto;
 import yo.dbunitcli.sidecar.dto.DatasetTableNamesRequestDto;
 import yo.dbunitcli.sidecar.dto.DatasetTablePreviewRequestDto;
 import yo.dbunitcli.sidecar.dto.DatasetTablePreviewResponseDto;
 import yo.dbunitcli.sidecar.job.Interruptible;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -114,6 +125,45 @@ public class DatasetSettingsController extends AbstractResourceFileController<Da
     }
 
     /**
+     * 選んだテーブルだけをresultフォームの指定でconvertし、出力先ディレクトリを返す（DB出力なら空文字）。
+     * 読込条件はプレビューと同じ。出力を読み直せないため、絞り込みは対象を取りこぼさない範囲に留め（{@link Narrow#singlePass}）、
+     * 出力する側で対象テーブル以外を捨てる（{@link TargetTableConverter}）
+     */
+    @Interruptible
+    @Post(uri = "table-convert", produces = MediaType.TEXT_PLAIN)
+    public String tableConvert(@Body final DatasetTableConvertRequestDto request) {
+        try {
+            final String tableName = request.getTableName();
+            if (Strings.isEmpty(tableName)) {
+                throw new IllegalArgumentException("tableName is required");
+            }
+            final ResultOption result = new Convert().parseOption(tableName,
+                    AbstractCommandController.resolveSidecarFilePaths(new CommandParameters(Type.convert,
+                            Optional.ofNullable(request.getResult()).orElse(Map.of()))).args(),
+                    Parameter.none()).result();
+            final List<Option.Violation> violations = result.convertResult().validate();
+            if (!violations.isEmpty()) {
+                throw new OptionValidationException(violations);
+            }
+            final ComparableDataSetParam.Builder param = this.toParam(request, "true");
+            final TableSeparators separators = param.getTableSeparators();
+            Narrow.singlePass(separators).applyTo(param, separators, tableName);
+            FileResources.runInContext(() -> {
+                try (final IDataSetConverter converter = new TargetTableConverter(tableName,
+                        result.converter(it -> it.setResultPath(result.getResultPath())))) {
+                    new ComparableDataSetLoader(this.buildParameter(request)).loadDataSet(param.setConverter(converter).build());
+                }
+            });
+            return result.resultDir();
+        } catch (final OptionValidationException ex) {
+            throw ex;
+        } catch (final Throwable th) {
+            LOGGER.error("cause:", th);
+            throw new ApplicationException(th);
+        }
+    }
+
+    /**
      * 対象テーブルが読み込まれなければemptyを返す
      */
     private Optional<DatasetTablePreviewResponseDto> loadPreview(final DatasetTablePreviewRequestDto request,
@@ -121,20 +171,13 @@ public class DatasetSettingsController extends AbstractResourceFileController<Da
                                                                  final TableSeparators separators) throws Exception {
         final String tableName = request.getTableName();
         final ComparableDataSetParam.Builder param = this.toParam(request, "true");
-        if (narrow == Narrow.SOURCE_AND_OUTPUT) {
-            param.setRegTableInclude("(?i)^" + Pattern.quote(tableName) + "$");
-        }
-        if (narrow != Narrow.NONE) {
-            param.setTableSeparators(separators.builder()
-                                               .addFilter(tableName::equals, TableSeparators.FilterCombine.AND)
-                                               .build());
-        }
-        final TargetTableHandler handler = new TargetTableHandler(tableName);
+        narrow.applyTo(param, separators, tableName);
+        final PreviewCollector collector = new PreviewCollector();
         try (final ComparableDataSetProducer producer = new ComparableDataSetLoader(this.buildParameter(request))
-                .getComparableDataSetProducer(param.setConverter(handler).build())) {
+                .getComparableDataSetProducer(param.setConverter(new TargetTableConverter(tableName, collector)).build())) {
             producer.produce();
         }
-        return handler.toResponse();
+        return collector.toResponse();
     }
 
     /**
@@ -171,6 +214,24 @@ public class DatasetSettingsController extends AbstractResourceFileController<Da
                 result.add(NONE);
             }
             return result;
+        }
+
+        /**
+         * 読み直さずに済む（対象を取りこぼさない）最も強い絞り込み。元テーブル名での絞り込みは名前が変わると見つからないため使わない
+         */
+        static Narrow singlePass(final TableSeparators separators) {
+            return separators.joinConditions().isEmpty() && !separators.hasSplitter() ? OUTPUT : NONE;
+        }
+
+        void applyTo(final ComparableDataSetParam.Builder param, final TableSeparators separators, final String tableName) {
+            if (this == SOURCE_AND_OUTPUT) {
+                param.setRegTableInclude("(?i)^" + Pattern.quote(tableName) + "$");
+            }
+            if (this != NONE) {
+                param.setTableSeparators(separators.builder()
+                                                   .addFilter(tableName::equals, TableSeparators.FilterCombine.AND)
+                                                   .build());
+            }
         }
     }
 
@@ -217,15 +278,99 @@ public class DatasetSettingsController extends AbstractResourceFileController<Da
         return new DataSetLoadOption("", dto).getParam();
     }
 
-    private static class TargetTableHandler implements IDataSetConverter {
+    /**
+     * 対象テーブルのイベントだけを出力先へ渡す（プレビュー・convertで共通）
+     */
+    private static class TargetTableConverter implements IDataSetConverter {
         private final String tableName;
-        private ComparableTable.Builder builder;
+        private final IDataSetConverter delegate;
         private boolean processTarget;
-        private int totalRows;
 
-        TargetTableHandler(final String tableName) {
+        TargetTableConverter(final String tableName, final IDataSetConverter delegate) {
             this.tableName = tableName;
+            this.delegate = delegate;
         }
+
+        @Override
+        public boolean isExportEmptyTable() {
+            return this.delegate.isExportEmptyTable();
+        }
+
+        @Override
+        public void startDataSet() {
+            this.delegate.startDataSet();
+        }
+
+        @Override
+        public void endDataSet() {
+            this.delegate.endDataSet();
+        }
+
+        @Override
+        public void close() {
+            this.delegate.close();
+        }
+
+        @Override
+        public void reStartTable(final AddSettingTableMetaData tableMetaData, final Integer writeRows) {
+            if (this.target(tableMetaData)) {
+                this.delegate.reStartTable(tableMetaData, writeRows);
+            }
+        }
+
+        @Override
+        public IDataSetConverter split() {
+            return new TargetTableConverter(this.tableName, this.delegate.split());
+        }
+
+        @Override
+        public boolean isSplittable() {
+            return this.delegate.isSplittable();
+        }
+
+        @Override
+        public File getDir() {
+            return this.delegate.getDir();
+        }
+
+        @Override
+        public boolean isEnableRowProcessing(final AddSettingTableMetaData metaData, final List<ComparableTableJoin> joins) {
+            return this.delegate.isEnableRowProcessing(metaData, joins);
+        }
+
+        @Override
+        public void startTable(final ITableMetaData metaData) throws DataSetException {
+            if (this.target(metaData)) {
+                this.delegate.startTable(metaData);
+            }
+        }
+
+        @Override
+        public void endTable() throws DataSetException {
+            if (this.processTarget) {
+                this.delegate.endTable();
+            }
+        }
+
+        @Override
+        public void row(final Object[] values) throws DataSetException {
+            if (this.processTarget) {
+                this.delegate.row(values);
+            }
+        }
+
+        private boolean target(final ITableMetaData metaData) {
+            this.processTarget = metaData.getTableName().equals(this.tableName);
+            return this.processTarget;
+        }
+    }
+
+    /**
+     * 渡されたテーブル（{@link TargetTableConverter}で対象だけに絞られる）の先頭{@link #PREVIEW_ROW_LIMIT}行と全行数を集める
+     */
+    private static class PreviewCollector implements IDataSetConverter {
+        private ComparableTable.Builder builder;
+        private int totalRows;
 
         Optional<DatasetTablePreviewResponseDto> toResponse() {
             if (this.builder == null) {
@@ -255,25 +400,22 @@ public class DatasetSettingsController extends AbstractResourceFileController<Da
 
         @Override
         public void startTable(final ITableMetaData metaData) {
-            this.processTarget = metaData.getTableName().equals(this.tableName);
-            if (this.processTarget && this.builder == null) {
+            if (this.builder == null) {
                 this.builder = new ComparableTable.Builder(metaData);
             }
         }
 
         @Override
         public void endTable() {
-            this.processTarget = false;
+            // nothing
         }
 
         @Override
         public void row(final Object[] values) {
-            if (this.processTarget) {
-                if (this.totalRows < PREVIEW_ROW_LIMIT) {
-                    this.builder.addRow(values);
-                }
-                this.totalRows++;
+            if (this.totalRows < PREVIEW_ROW_LIMIT) {
+                this.builder.addRow(values);
             }
+            this.totalRows++;
         }
     }
 }

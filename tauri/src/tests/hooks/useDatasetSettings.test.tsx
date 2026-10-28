@@ -7,6 +7,7 @@ import {
 import WorkspaceResourcesProvider from "../../context/WorkspaceResourcesProvider";
 import {
 	useDatasetSettingsData,
+	useDatasetTableConvert,
 	useSrcInfoColumnNames,
 } from "../../hooks/useDatasetSettings";
 import type { DatasetSrcInfo } from "../../model/CommandOption";
@@ -55,6 +56,9 @@ const { mockFetchData, mockFetchAndUpdate } = vi.hoisted(() => {
 		if (params.endpoint.includes("/dataset-setting/table-names")) {
 			return Promise.resolve(new Response(JSON.stringify(["t1", "t2"])));
 		}
+		if (params.endpoint.includes("/dataset-setting/table-convert")) {
+			return Promise.resolve(new Response("/work/result"));
+		}
 		if (params.endpoint.includes("/dataset-setting/table-preview")) {
 			const { tableName } = JSON.parse(String(params.options.body));
 			const headers = tableName === "t1" ? ["id", "name"] : ["id", "age"];
@@ -79,6 +83,30 @@ vi.mock("../../utils/fetchUtils", () => ({
 	fetchData: mockFetchData,
 	fetchAndUpdate: mockFetchAndUpdate,
 }));
+
+const srcInfo: DatasetSrcInfo = {
+	srcPath: "data/src",
+	srcType: "csv",
+	setting: "",
+	settingEncoding: "",
+	encoding: "UTF-8",
+	regInclude: "",
+	regExclude: "",
+	recursive: "false",
+	extension: "",
+	regTableInclude: "",
+	regTableExclude: "",
+	xlsxSchema: "",
+	fixedLength: "",
+	fixedLengthType: "",
+	regHeaderSplit: "",
+	regDataSplit: "",
+	delimiter: ",",
+	ignoreQuoted: false,
+	headerName: "",
+	startRow: "",
+	addFileInfo: false,
+};
 
 describe("DatasetSettingsProviderのテスト", () => {
 	describe("useDatasetSettingsDataのテスト", () => {
@@ -110,29 +138,6 @@ describe("DatasetSettingsProviderのテスト", () => {
 	});
 
 	describe("useSrcInfoColumnNamesのテスト", () => {
-		const srcInfo: DatasetSrcInfo = {
-			srcPath: "data/src",
-			srcType: "csv",
-			setting: "",
-			settingEncoding: "",
-			encoding: "UTF-8",
-			regInclude: "",
-			regExclude: "",
-			recursive: "false",
-			extension: "",
-			regTableInclude: "",
-			regTableExclude: "",
-			xlsxSchema: "",
-			fixedLength: "",
-			fixedLengthType: "",
-			regHeaderSplit: "",
-			regDataSplit: "",
-			delimiter: ",",
-			ignoreQuoted: false,
-			headerName: "",
-			startRow: "",
-			addFileInfo: false,
-		};
 		const callsTo = (endpoint: string) =>
 			mockFetchData.mock.calls.filter(([params]) =>
 				params.endpoint.includes(endpoint),
@@ -186,6 +191,32 @@ describe("DatasetSettingsProviderのテスト", () => {
 			const [lastParams] = callsTo("/dataset-setting/table-names")[1];
 			expect(JSON.parse(String(lastParams.options.body))).toMatchObject({
 				regTableInclude: "^t1$",
+			});
+		});
+	});
+
+	describe("useDatasetTableConvertのテスト", () => {
+		it("読込元・テーブル名・resultの値を送り、出力先ディレクトリを返すことを確認", async () => {
+			const { result } = renderHook(() => useDatasetTableConvert(), {
+				wrapper: ({ children }: { children: React.ReactNode }) => (
+					<environmentContext.Provider value={mockEnvironment}>
+						{children}
+					</environmentContext.Provider>
+				),
+			});
+			const resultDir = await result.current(srcInfo, "t1", {
+				"-result.resultType": "csv",
+			});
+
+			expect(resultDir).toBe("/work/result");
+			const [params] = mockFetchData.mock.calls.filter(([p]) =>
+				p.endpoint.includes("/dataset-setting/table-convert"),
+			)[0];
+			expect(JSON.parse(String(params.options.body))).toMatchObject({
+				src: "data/src",
+				srcType: "csv",
+				tableName: "t1",
+				result: { "-result.resultType": "csv" },
 			});
 		});
 	});
