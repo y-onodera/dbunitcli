@@ -131,7 +131,7 @@ function TableDataPreviewDialog({
 			return <StatusMessage kind="empty">No data found.</StatusMessage>;
 		}
 		const shownRows = preview.rows?.length ?? 0;
-		const totalRows = preview.totalRows ?? shownRows;
+		const { totalRows } = preview;
 		return (
 			<>
 				<p className="text-sm text-content-muted mb-2">

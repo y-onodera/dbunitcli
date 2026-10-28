@@ -32,7 +32,9 @@ import yo.dbunitcli.sidecar.job.Interruptible;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.regex.Pattern;
@@ -87,29 +89,20 @@ public class DatasetSettingsController extends AbstractResourceFileController<Da
 
     /**
      * 選んだテーブルの先頭{@link #PREVIEW_ROW_LIMIT}行と全行数を返す。対象外のテーブルはなるべく読まないよう、
-     * 絞り込みの強い順に試し、対象が見つからなければ絞り込みを緩めて読み直す。
-     * <ol>
-     * <li>設定未適用なら元テーブル名でも絞る（対象外のソースを開かない）。xlsxSchema等で名前が変わると見つからない</li>
-     * <li>出力テーブル名をoutputFilterで絞る（対象外のテーブルは行を読まない）。joinは元テーブルも残す必要があるため使わない。
-     * 分割（split）後の名前では見つからない</li>
-     * <li>絞らずに読む</li>
-     * </ol>
+     * 絞り込みの強い順に試し、対象が見つからなければ絞り込みを緩めて読み直す（{@link Narrow}）。
      */
     @Interruptible
     @Post(uri = "table-preview", produces = MediaType.APPLICATION_JSON)
     public String tablePreview(@Body final DatasetTablePreviewRequestDto request) {
         try {
-            final boolean narrowSource = Strings.isEmpty(request.getSetting());
-            Optional<DatasetTablePreviewResponseDto> preview = narrowSource
-                    ? this.loadPreview(request, true, true)
-                    : Optional.empty();
-            if (preview.isEmpty()) {
-                preview = this.loadPreview(request, false, true);
+            final TableSeparators separators = this.toParam(request, "true").getTableSeparators();
+            for (final Narrow narrow : Narrow.attempts(Strings.isEmpty(request.getSetting()), separators)) {
+                final Optional<DatasetTablePreviewResponseDto> preview = this.loadPreview(request, narrow, separators);
+                if (preview.isPresent()) {
+                    return ObjectMapper.getDefault().writeValueAsString(preview.get());
+                }
             }
-            if (preview.isEmpty()) {
-                preview = this.loadPreview(request, false, false);
-            }
-            return ObjectMapper.getDefault().writeValueAsString(preview.orElseGet(DatasetTablePreviewResponseDto::empty));
+            return ObjectMapper.getDefault().writeValueAsString(DatasetTablePreviewResponseDto.empty());
         } catch (final Throwable th) {
             LOGGER.warn("Could not get table preview", th);
             try {
@@ -121,21 +114,17 @@ public class DatasetSettingsController extends AbstractResourceFileController<Da
     }
 
     /**
-     * 対象テーブルが読み込まれなければemptyを返す。outputFilterが使えない（joinがある）場合もemptyを返す
+     * 対象テーブルが読み込まれなければemptyを返す
      */
     private Optional<DatasetTablePreviewResponseDto> loadPreview(final DatasetTablePreviewRequestDto request,
-                                                                 final boolean narrowSource,
-                                                                 final boolean narrowOutput) throws Exception {
+                                                                 final Narrow narrow,
+                                                                 final TableSeparators separators) throws Exception {
         final String tableName = request.getTableName();
         final ComparableDataSetParam.Builder param = this.toParam(request, "true");
-        if (narrowSource) {
+        if (narrow == Narrow.SOURCE_AND_OUTPUT) {
             param.setRegTableInclude("(?i)^" + Pattern.quote(tableName) + "$");
         }
-        if (narrowOutput) {
-            final TableSeparators separators = param.getTableSeparators();
-            if (!separators.joinConditions().isEmpty()) {
-                return Optional.empty();
-            }
+        if (narrow != Narrow.NONE) {
             param.setTableSeparators(separators.builder()
                                                .addFilter(tableName::equals, TableSeparators.FilterCombine.AND)
                                                .build());
@@ -146,6 +135,43 @@ public class DatasetSettingsController extends AbstractResourceFileController<Da
             producer.produce();
         }
         return handler.toResponse();
+    }
+
+    /**
+     * プレビューでの読込の絞り込み方
+     */
+    private enum Narrow {
+        /**
+         * 元テーブル名でも絞る（対象外のソースを開かない）。設定未適用時のみ。xlsxSchema等で名前が変わると見つからない
+         */
+        SOURCE_AND_OUTPUT,
+        /**
+         * 出力テーブル名をoutputFilterで絞る（対象外のテーブルは行を読まない）。分割（split）後の名前では見つからない
+         */
+        OUTPUT,
+        /**
+         * 絞らずに読む
+         */
+        NONE;
+
+        /**
+         * joinは元テーブルも出力として残す必要があるため、outputFilterで絞らない。
+         * 絞らずに読み直すのは、outputFilterで見つからない名前（split後）がありうる場合だけ
+         */
+        static List<Narrow> attempts(final boolean settingEmpty, final TableSeparators separators) {
+            if (!separators.joinConditions().isEmpty()) {
+                return List.of(NONE);
+            }
+            final List<Narrow> result = new ArrayList<>();
+            if (settingEmpty) {
+                result.add(SOURCE_AND_OUTPUT);
+            }
+            result.add(OUTPUT);
+            if (separators.hasSplitter()) {
+                result.add(NONE);
+            }
+            return result;
+        }
     }
 
     @Override

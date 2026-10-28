@@ -44,7 +44,7 @@ class DatasetSettingsControllerTest {
     HttpClient client;
 
     @AfterEach
-    void tearDown() throws IOException {
+    void tearDown() {
         this.tryDelete("savedSetting.json");
         this.tryDelete("deleteSetting.json");
         this.tryDelete("sqlFunctionSetting.json");
@@ -55,14 +55,9 @@ class DatasetSettingsControllerTest {
         this.deletePreviewSrc();
     }
 
-    private void deletePreviewSrc() throws IOException {
+    private void deletePreviewSrc() {
         if (Files.exists(PREVIEW_SRC_DIR)) {
-            try (final var files = Files.list(PREVIEW_SRC_DIR)) {
-                for (final Path file : files.toList()) {
-                    Files.delete(file);
-                }
-            }
-            Files.delete(PREVIEW_SRC_DIR);
+            GenerateTemplateSupport.deleteRecursively(PREVIEW_SRC_DIR);
         }
     }
 
