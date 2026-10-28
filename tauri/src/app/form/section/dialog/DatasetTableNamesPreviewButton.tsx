@@ -15,10 +15,12 @@ import { PreviewButton } from "../../../../components/element/ButtonIcon";
 import { JobProgress } from "../../../../components/element/JobProgress";
 import { useDatasetSrcInfo } from "../../../../context/DatasetSrcInfoProvider";
 import {
+	useDatasetTableConvert,
 	useDatasetTableNames,
 	useDatasetTablePreview,
 } from "../../../../hooks/useDatasetSettings";
 import type { DatasetSrcInfo } from "../../../../model/CommandOption";
+import TableConvertDialog from "./TableConvertDialog";
 
 export default function DatasetTableNamesPreviewButton({
 	title,
@@ -120,6 +122,8 @@ function TableDataPreviewDialog({
 		datasetSrcInfo,
 		tableName,
 	);
+	const convertTable = useDatasetTableConvert();
+	const [showExport, setShowExport] = useState(false);
 
 	function renderContent() {
 		if (loading) {
@@ -167,8 +171,22 @@ function TableDataPreviewDialog({
 				{renderContent()}
 			</DialogBody>
 			<DialogFooter>
+				<BlueButton
+					title="Export"
+					handleClick={() => setShowExport(true)}
+					disabled={loading}
+				/>
 				<WhiteButton title="Close" handleClick={handleClose} />
 			</DialogFooter>
+			{showExport && (
+				<TableConvertDialog
+					tableName={tableName}
+					convert={(result, fetchOptions) =>
+						convertTable(datasetSrcInfo, tableName, result, fetchOptions)
+					}
+					onClose={() => setShowExport(false)}
+				/>
+			)}
 		</FullDialog>
 	);
 }

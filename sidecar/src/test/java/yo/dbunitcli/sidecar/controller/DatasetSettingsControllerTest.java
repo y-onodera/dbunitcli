@@ -33,6 +33,9 @@ class DatasetSettingsControllerTest {
     private static final Path PREVIEW_SRC_DIR =
             Paths.get("target/test-temp/workspace/sample/resources/src/preview");
 
+    private static final Path CONVERT_RESULT_DIR =
+            Paths.get("target/test-temp/workspace/sample/result/tableConvert");
+
     private static final int BIG_ROWS = DatasetSettingsController.PREVIEW_ROW_LIMIT + 50;
 
 
@@ -58,6 +61,9 @@ class DatasetSettingsControllerTest {
     private void deletePreviewSrc() {
         if (Files.exists(PREVIEW_SRC_DIR)) {
             GenerateTemplateSupport.deleteRecursively(PREVIEW_SRC_DIR);
+        }
+        if (Files.exists(CONVERT_RESULT_DIR)) {
+            GenerateTemplateSupport.deleteRecursively(CONVERT_RESULT_DIR);
         }
     }
 
@@ -241,6 +247,72 @@ class DatasetSettingsControllerTest {
         // 空の配列はJSONで省略される
         Assertions.assertNull(actual.getHeaders());
         Assertions.assertEquals(0, actual.getTotalRows());
+    }
+
+    @Test
+    void testTableConvert_選んだテーブルだけを出力して出力先を返す() throws IOException {
+        this.createPreviewSrc();
+
+        final String actual = this.tableConvert("", "small");
+
+        final Path resultDir = Paths.get(actual);
+        Assertions.assertEquals(CONVERT_RESULT_DIR.toAbsolutePath().normalize(), resultDir.toAbsolutePath().normalize());
+        Assertions.assertEquals(java.util.List.of("\"key\",\"other\"", "\"1\",\"a\"", "\"2\",\"b\"", "\"3\",\"c\""),
+                Files.readAllLines(resultDir.resolve("small.csv")));
+        Assertions.assertFalse(Files.exists(resultDir.resolve("big.csv")));
+    }
+
+    @Test
+    void testTableConvert_設定でテーブル名を変えても変更後の名前で出力する() throws IOException {
+        this.createPreviewSrc();
+        Files.writeString(SETTING_DIR.resolve("previewRenameSetting.json"),
+                "{\"settings\":[{\"name\":[\"big\"],\"tableName\":\"renamed\"}]}");
+
+        final Path resultDir = Paths.get(this.tableConvert(
+                SETTING_DIR.resolve("previewRenameSetting.json").toAbsolutePath().toString(), "renamed"));
+
+        Assertions.assertEquals(BIG_ROWS + 1, Files.readAllLines(resultDir.resolve("renamed.csv")).size());
+        Assertions.assertFalse(Files.exists(resultDir.resolve("small.csv")));
+    }
+
+    @Test
+    void testTableConvert_joinした結果を出力する() throws IOException {
+        this.createPreviewSrc();
+        Files.writeString(SETTING_DIR.resolve("previewJoinSetting.json"),
+                "{\"settings\":[{\"innerJoin\":{\"left\":\"big\",\"right\":\"small\",\"column\":[\"key\"]},\"tableName\":\"joined\"}]}");
+
+        final Path resultDir = Paths.get(this.tableConvert(
+                SETTING_DIR.resolve("previewJoinSetting.json").toAbsolutePath().toString(), "joined"));
+
+        Assertions.assertEquals(4, Files.readAllLines(resultDir.resolve("joined.csv")).size());
+        Assertions.assertFalse(Files.exists(resultDir.resolve("big.csv")));
+        Assertions.assertFalse(Files.exists(resultDir.resolve("small.csv")));
+    }
+
+    @Test
+    void testTableConvert_resultの検証エラーは400を返す() throws IOException {
+        this.createPreviewSrc();
+
+        final HttpClientResponseException ex = Assertions.assertThrows(HttpClientResponseException.class,
+                () -> this.client.toBlocking().retrieve(HttpRequest.POST("dbunit-cli/dataset-setting/table-convert",
+                        this.tableConvertBody("", "small", "\"-result.resultType\":\"csv\",\"-result.outputEncoding\":\"NO-SUCH-ENCODING\""))));
+
+        Assertions.assertEquals(HttpStatus.BAD_REQUEST, ex.getStatus());
+        Assertions.assertTrue(ex.getMessage().contains("-result.outputEncoding"), ex.getMessage());
+    }
+
+    private String tableConvert(final String setting, final String tableName) {
+        return this.client.toBlocking().retrieve(
+                HttpRequest.POST("dbunit-cli/dataset-setting/table-convert",
+                        this.tableConvertBody(setting, tableName, "\"-result.resultType\":\"csv\",\"-result.result\":\""
+                                + CONVERT_RESULT_DIR.toAbsolutePath().toString().replace("\\", "/")
+                                + "\",\"-result.outputEncoding\":\"UTF-8\"")));
+    }
+
+    private String tableConvertBody(final String setting, final String tableName, final String result) {
+        return "{\"setting\":\"" + setting.replace("\\", "/") + "\",\"srcType\":\"csv\",\"src\":\""
+                + PREVIEW_SRC_DIR.toAbsolutePath().toString().replace("\\", "/")
+                + "\",\"encoding\":\"UTF-8\",\"tableName\":\"" + tableName + "\",\"result\":{" + result + "}}";
     }
 
     private void createPreviewSrc() throws IOException {
