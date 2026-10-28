@@ -130,24 +130,33 @@ function TableDataPreviewDialog({
 		if (!preview?.headers || preview.headers.length === 0) {
 			return <StatusMessage kind="empty">No data found.</StatusMessage>;
 		}
+		const shownRows = preview.rows?.length ?? 0;
+		const { totalRows } = preview;
 		return (
-			<DataTable
-				head={preview.headers.map((header) => (
-					<Th key={header} nowrap>
-						{header}
-					</Th>
-				))}
-			>
-				{preview.rows?.map((row) => (
-					<Tr key={row.join("\x00")}>
-						{preview.headers.map((header, i) => (
-							<Td key={header} nowrap>
-								{row[i] ?? ""}
-							</Td>
-						))}
-					</Tr>
-				))}
-			</DataTable>
+			<>
+				<p className="text-sm text-content-muted mb-2">
+					{shownRows < totalRows
+						? `Showing first ${shownRows} of ${totalRows} rows (partial preview)`
+						: `${totalRows} rows`}
+				</p>
+				<DataTable
+					head={preview.headers.map((header) => (
+						<Th key={header} nowrap>
+							{header}
+						</Th>
+					))}
+				>
+					{preview.rows?.map((row) => (
+						<Tr key={row.join("\x00")}>
+							{preview.headers.map((header, i) => (
+								<Td key={header} nowrap>
+									{row[i] ?? ""}
+								</Td>
+							))}
+						</Tr>
+					))}
+				</DataTable>
+			</>
 		);
 	}
 

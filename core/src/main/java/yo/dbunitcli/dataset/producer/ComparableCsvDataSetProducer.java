@@ -62,7 +62,7 @@ public record ComparableCsvDataSetProducer(ComparableDataSetParam param) impleme
                 final TableMetaDataWithSource metaData = this.source.createMetaData(headerName);
                 final ComparableTableMapper mapper = context.createMapper(metaData);
                 mapper.startTable();
-                if (this.param.loadData()) {
+                if (this.param.loadData() && mapper.hasOutput()) {
                     int rows = 0;
                     List<Object> columns;
                     while ((columns = this.collectExpectedNumberOfColumns(headerName.length, lineNumberReader)) != null) {

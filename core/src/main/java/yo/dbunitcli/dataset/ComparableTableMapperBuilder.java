@@ -64,6 +64,9 @@ public class ComparableTableMapperBuilder {
                 })
                 .peek(it -> count[0]++)
                 .toList();
+        if (results.isEmpty()) {
+            return ComparableTableMapper.NONE;
+        }
         if (results.size() == 1) {
             return results.getFirst();
         }

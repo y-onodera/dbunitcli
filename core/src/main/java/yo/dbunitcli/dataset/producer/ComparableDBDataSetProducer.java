@@ -164,7 +164,7 @@ public class ComparableDBDataSetProducer implements ComparableDataSetProducer {
                     }
                     final ComparableTableMapper mapper = context.createMapper(source.wrap(tableMetaData));
                     mapper.startTable();
-                    if (this.param.loadData()) {
+                    if (this.param.loadData() && mapper.hasOutput()) {
                         final Column[] columns = table.getTableMetaData().getColumns();
                         int row = 0;
                         for (; true; row++) {

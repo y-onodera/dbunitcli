@@ -49,7 +49,7 @@ public record ComparableFixedFileDataSetProducer(ComparableDataSetParam param,
                 final ComparableTableMapper mapper = context.createMapper(metaData);
                 mapper.startTable();
                 int rows = 0;
-                if (this.param.loadData()) {
+                if (this.param.loadData() && mapper.hasOutput()) {
                     try (final BufferedReader reader = Files.newBufferedReader(Path.of(this.source.filePath()), Charset.forName(this.param.encoding()))) {
                         for (; ; ) {
                             final String s = reader.readLine();

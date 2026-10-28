@@ -10,6 +10,7 @@ import yo.dbunitcli.dataset.ComparableDataSet;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.dataset.ComparableTable;
 import yo.dbunitcli.dataset.DataSourceType;
+import yo.dbunitcli.dataset.TableSeparators;
 
 import java.io.File;
 import java.io.UnsupportedEncodingException;
@@ -224,5 +225,23 @@ public class ComparableCsvDataSetProducerTest {
         Assertions.assertEquals("4", actualTable.getValue(0, "column3"));
         Assertions.assertEquals("5", actualTable.getValue(1, "column3"));
         Assertions.assertEquals("", actualTable.getValue(2, "column3"));
+    }
+
+    @Test
+    public void createDataSetFromDirectoryWithOutputFilter() throws DataSetException {
+        final File src = new File(this.resource, "multifile");
+        final ComparableDataSet actual = new ComparableCsvDataSetProducer(
+                ComparableDataSetParam.builder()
+                        .setSource(DataSourceType.csv)
+                        .setSrc(src)
+                        .setEncoding("UTF8")
+                        .setTableSeparators(TableSeparators.NONE.builder()
+                                .addFilter("multi1"::equals, TableSeparators.FilterCombine.AND)
+                                .build())
+                        .build()).loadDataSet();
+        Assertions.assertEquals(1, actual.getTables().length);
+        final ComparableTable actualTable = actual.getTable("multi1");
+        Assertions.assertEquals(3, actualTable.getRowCount());
+        Assertions.assertEquals("3", actualTable.getValue(2, "key"));
     }
 }

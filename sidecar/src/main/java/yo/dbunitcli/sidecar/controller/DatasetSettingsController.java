@@ -19,6 +19,7 @@ import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.dataset.ComparableDataSetProducer;
 import yo.dbunitcli.dataset.ComparableTable;
 import yo.dbunitcli.dataset.IDataSetConverter;
+import yo.dbunitcli.dataset.TableSeparators;
 import yo.dbunitcli.dataset.producer.ComparableDataSetLoader;
 import yo.dbunitcli.sidecar.domain.project.ResourceFile;
 import yo.dbunitcli.sidecar.domain.project.Workspace;
@@ -35,10 +36,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.regex.Pattern;
 
 @Controller("dataset-setting")
 public class DatasetSettingsController extends AbstractResourceFileController<DatasetRequestDto> {
     private static final Logger LOGGER = LoggerFactory.getLogger(DatasetSettingsController.class);
+    static final int PREVIEW_ROW_LIMIT = 100;
 
     public DatasetSettingsController(final Workspace workspace) {
         super(workspace);
@@ -83,34 +87,90 @@ public class DatasetSettingsController extends AbstractResourceFileController<Da
         }
     }
 
+    /**
+     * 選んだテーブルの先頭{@link #PREVIEW_ROW_LIMIT}行と全行数を返す。対象外のテーブルはなるべく読まないよう、
+     * 絞り込みの強い順に試し、対象が見つからなければ絞り込みを緩めて読み直す（{@link Narrow}）。
+     */
     @Interruptible
     @Post(uri = "table-preview", produces = MediaType.APPLICATION_JSON)
     public String tablePreview(@Body final DatasetTablePreviewRequestDto request) {
         try {
-            List<ComparableTable.Builder> metaDataBuilder = new ArrayList<>();
-            try (final ComparableDataSetProducer producer = new ComparableDataSetLoader(this.buildParameter(request))
-                    .getComparableDataSetProducer(this.toParam(request, "true")
-                                                      .setConverter(new TargetTableHandler(request, metaDataBuilder))
-                                                      .build())) {
-                producer.produce();
+            final TableSeparators separators = this.toParam(request, "true").getTableSeparators();
+            for (final Narrow narrow : Narrow.attempts(Strings.isEmpty(request.getSetting()), separators)) {
+                final Optional<DatasetTablePreviewResponseDto> preview = this.loadPreview(request, narrow, separators);
+                if (preview.isPresent()) {
+                    return ObjectMapper.getDefault().writeValueAsString(preview.get());
+                }
             }
-            if (metaDataBuilder.isEmpty()) {
-                return ObjectMapper.getDefault()
-                                   .writeValueAsString(new DatasetTablePreviewResponseDto(new String[0], List.of()));
-            }
-            ComparableTable table = metaDataBuilder.getFirst().build();
-            final Column[] columns = table.getTableMetaData().getColumns();
-            final String[] headers = Arrays.stream(columns).map(Column::getColumnName).toArray(String[]::new);
-            final List<Object[]> rows = table.rows().rows();
-            return ObjectMapper.getDefault().writeValueAsString(new DatasetTablePreviewResponseDto(headers, rows));
+            return ObjectMapper.getDefault().writeValueAsString(DatasetTablePreviewResponseDto.empty());
         } catch (final Throwable th) {
             LOGGER.warn("Could not get table preview", th);
             try {
-                return ObjectMapper.getDefault()
-                                   .writeValueAsString(new DatasetTablePreviewResponseDto(new String[0], List.of()));
+                return ObjectMapper.getDefault().writeValueAsString(DatasetTablePreviewResponseDto.empty());
             } catch (final Exception ex) {
-                return "{\"headers\":[],\"rows\":[]}";
+                return "{\"headers\":[],\"rows\":[],\"totalRows\":0}";
             }
+        }
+    }
+
+    /**
+     * 対象テーブルが読み込まれなければemptyを返す
+     */
+    private Optional<DatasetTablePreviewResponseDto> loadPreview(final DatasetTablePreviewRequestDto request,
+                                                                 final Narrow narrow,
+                                                                 final TableSeparators separators) throws Exception {
+        final String tableName = request.getTableName();
+        final ComparableDataSetParam.Builder param = this.toParam(request, "true");
+        if (narrow == Narrow.SOURCE_AND_OUTPUT) {
+            param.setRegTableInclude("(?i)^" + Pattern.quote(tableName) + "$");
+        }
+        if (narrow != Narrow.NONE) {
+            param.setTableSeparators(separators.builder()
+                                               .addFilter(tableName::equals, TableSeparators.FilterCombine.AND)
+                                               .build());
+        }
+        final TargetTableHandler handler = new TargetTableHandler(tableName);
+        try (final ComparableDataSetProducer producer = new ComparableDataSetLoader(this.buildParameter(request))
+                .getComparableDataSetProducer(param.setConverter(handler).build())) {
+            producer.produce();
+        }
+        return handler.toResponse();
+    }
+
+    /**
+     * プレビューでの読込の絞り込み方
+     */
+    private enum Narrow {
+        /**
+         * 元テーブル名でも絞る（対象外のソースを開かない）。設定未適用時のみ。xlsxSchema等で名前が変わると見つからない
+         */
+        SOURCE_AND_OUTPUT,
+        /**
+         * 出力テーブル名をoutputFilterで絞る（対象外のテーブルは行を読まない）。分割（split）後の名前では見つからない
+         */
+        OUTPUT,
+        /**
+         * 絞らずに読む
+         */
+        NONE;
+
+        /**
+         * joinは元テーブルも出力として残す必要があるため、outputFilterで絞らない。
+         * 絞らずに読み直すのは、outputFilterで見つからない名前（split後）がありうる場合だけ
+         */
+        static List<Narrow> attempts(final boolean settingEmpty, final TableSeparators separators) {
+            if (!separators.joinConditions().isEmpty()) {
+                return List.of(NONE);
+            }
+            final List<Narrow> result = new ArrayList<>();
+            if (settingEmpty) {
+                result.add(SOURCE_AND_OUTPUT);
+            }
+            result.add(OUTPUT);
+            if (separators.hasSplitter()) {
+                result.add(NONE);
+            }
+            return result;
         }
     }
 
@@ -158,17 +218,24 @@ public class DatasetSettingsController extends AbstractResourceFileController<Da
     }
 
     private static class TargetTableHandler implements IDataSetConverter {
-        private final DatasetTablePreviewRequestDto request;
-        private final List<ComparableTable.Builder> metaDataBuilder;
-        boolean processTarget;
-        int handleRows;
+        private final String tableName;
+        private ComparableTable.Builder builder;
+        private boolean processTarget;
+        private int totalRows;
 
-        public TargetTableHandler(DatasetTablePreviewRequestDto request,
-                                  List<ComparableTable.Builder> metaDataBuilder) {
-            this.request = request;
-            this.metaDataBuilder = metaDataBuilder;
-            this.processTarget = false;
-            this.handleRows = 0;
+        TargetTableHandler(final String tableName) {
+            this.tableName = tableName;
+        }
+
+        Optional<DatasetTablePreviewResponseDto> toResponse() {
+            if (this.builder == null) {
+                return Optional.empty();
+            }
+            final ComparableTable table = this.builder.build();
+            final String[] headers = Arrays.stream(table.getTableMetaData().getColumns())
+                                           .map(Column::getColumnName)
+                                           .toArray(String[]::new);
+            return Optional.of(new DatasetTablePreviewResponseDto(headers, table.rows().rows(), this.totalRows));
         }
 
         @Override
@@ -177,8 +244,8 @@ public class DatasetSettingsController extends AbstractResourceFileController<Da
         }
 
         @Override
-        public void reStartTable(AddSettingTableMetaData tableMetaData, Integer writeRows) {
-
+        public void reStartTable(final AddSettingTableMetaData tableMetaData, final Integer writeRows) {
+            this.startTable(tableMetaData);
         }
 
         @Override
@@ -187,10 +254,10 @@ public class DatasetSettingsController extends AbstractResourceFileController<Da
         }
 
         @Override
-        public void startTable(ITableMetaData metaData) {
-            if (metaData.getTableName().equals(this.request.getTableName())) {
-                this.metaDataBuilder.add(new ComparableTable.Builder(metaData));
-                this.processTarget = this.handleRows <= 5;
+        public void startTable(final ITableMetaData metaData) {
+            this.processTarget = metaData.getTableName().equals(this.tableName);
+            if (this.processTarget && this.builder == null) {
+                this.builder = new ComparableTable.Builder(metaData);
             }
         }
 
@@ -200,10 +267,12 @@ public class DatasetSettingsController extends AbstractResourceFileController<Da
         }
 
         @Override
-        public void row(Object[] values) {
+        public void row(final Object[] values) {
             if (this.processTarget) {
-                this.metaDataBuilder.getFirst().addRow(values);
-                this.handleRows++;
+                if (this.totalRows < PREVIEW_ROW_LIMIT) {
+                    this.builder.addRow(values);
+                }
+                this.totalRows++;
             }
         }
     }
