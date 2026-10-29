@@ -3,6 +3,8 @@ import userEvent from "@testing-library/user-event";
 import { type ReactNode, useEffect } from "react";
 import { describe, expect, it, vi } from "vitest";
 import Footer from "../../../app/footer/Footer";
+import Check from "../../../app/form/section/element/Check";
+import Select from "../../../app/form/section/element/Select";
 import Text from "../../../app/form/section/element/Text";
 import {
 	type Environment,
@@ -203,7 +205,7 @@ describe("Execのオプション検証エラー", () => {
 		optional: false,
 	});
 
-	const renderWithFields = () => {
+	const renderWithFields = (fields?: ReactNode) => {
 		const wrapper = ({ children }: { children: ReactNode }) => (
 			<environmentContext.Provider value={mockEnvironment}>
 				<WorkspaceResourcesProvider>
@@ -218,8 +220,12 @@ describe("Execのオプション検証エラー", () => {
 		);
 		return render(
 			<>
-				<Text prefix="src" element={textOption("src")} />
-				<Text prefix="src" element={textOption("setting")} hidden />
+				{fields ?? (
+					<>
+						<Text prefix="src" element={textOption("src")} />
+						<Text prefix="src" element={textOption("setting")} hidden />
+					</>
+				)}
 				<Footer formData={() => ({ values: {}, validationError: false })} />
 			</>,
 			{ wrapper },
@@ -251,5 +257,55 @@ describe("Execのオプション検証エラー", () => {
 		await userEvent.type(screen.getByLabelText("-src.src"), "a");
 		expect(screen.queryByText("src not found")).not.toBeInTheDocument();
 		alertSpy.mockRestore();
+	});
+
+	it("チェックボックスとセレクトの違反も欄の下に出し、入力し直すと消す", async () => {
+		const handleTypeSelect = vi.fn(() => Promise.resolve());
+		await act(async () => {
+			renderWithFields(
+				<>
+					<Check
+						prefix="result"
+						element={{
+							...textOption("exportHeader"),
+							value: "true",
+							attribute: { ...textOption("").attribute, type: "FLG" },
+						}}
+					/>
+					<Select
+						prefix="result"
+						handleTypeSelect={handleTypeSelect}
+						element={{
+							...textOption("resultType"),
+							value: "csv",
+							attribute: {
+								...textOption("").attribute,
+								type: "ENUM",
+								selectOption: ["csv", "xlsx"],
+							},
+						}}
+					/>
+				</>,
+			);
+		});
+		mockFetchData.mockRejectedValueOnce(
+			new OptionValidationError("invalid", [
+				{ options: ["-result.exportHeader"], message: "not a boolean" },
+				{ options: ["-result.resultType"], message: "bad type" },
+			]),
+		);
+		await userEvent.click(screen.getByText("Exec"));
+
+		expect(screen.getByText("not a boolean")).toBeInTheDocument();
+		expect(screen.getByText("bad type")).toBeInTheDocument();
+
+		await userEvent.click(screen.getByLabelText("-result.exportHeader"));
+		expect(screen.queryByText("not a boolean")).not.toBeInTheDocument();
+		await userEvent.selectOptions(
+			screen.getByLabelText("-result.resultType"),
+			"xlsx",
+		);
+		expect(screen.queryByText("bad type")).not.toBeInTheDocument();
+		expect(handleTypeSelect).toHaveBeenCalledWith("xlsx");
 	});
 });

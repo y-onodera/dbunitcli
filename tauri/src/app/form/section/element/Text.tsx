@@ -5,22 +5,12 @@ import {
 	InputLabel,
 	ResourceDatalist,
 } from "../../../../components/element/Input";
-import {
-	type FieldErrors,
-	useFieldErrors,
-	useRegisterVisibleField,
-	useSetFieldErrors,
-} from "../../../../context/FieldErrorProvider";
+import { useFieldErrorTarget } from "../../../../context/FieldErrorProvider";
 import { useWorkspaceContext } from "../../../../context/WorkspaceResourcesProvider";
 import { DirectoryChooser, FileChooser, OpenInOS } from "./Chooser";
+import FieldErrorMessages from "./FieldErrorMessages";
 import type { FileProp, TextProp } from "./FormElementProp";
 import { getId, getName } from "./FormElementProp";
-
-// 計算されたキーの分割代入はReact Compilerが未対応のため、コンポーネント外で行う
-function omitFieldErrors(errors: FieldErrors, name: string): FieldErrors {
-	const { [name]: _, ...rest } = errors;
-	return rest;
-}
 
 export default function Text({
 	prefix,
@@ -44,18 +34,17 @@ export default function Text({
 	const workspacePath = context.workspace;
 	const showWorkspaceAsSecondary =
 		showDefaulePath && workspacePath !== "" && workspacePath !== basePath;
-	const fieldErrors = useFieldErrors(fieldName);
-	const setFieldErrors = useSetFieldErrors();
-	useRegisterVisibleField(fieldName, !hidden);
+	const { fieldErrors, clearFieldErrors } = useFieldErrorTarget(
+		fieldName,
+		!hidden,
+	);
 
 	const handleChange = (ev: React.ChangeEvent<HTMLInputElement>) => {
 		const newValue = ev.target.value;
 		setPath(newValue);
 		onValueChange?.(newValue);
 		// 入力し直したら、この欄の検証エラーは消す
-		if (fieldErrors.length > 0) {
-			setFieldErrors((current) => omitFieldErrors(current, fieldName));
-		}
+		clearFieldErrors();
 	};
 
 	return (
@@ -91,12 +80,7 @@ export default function Text({
 								{workspacePath}
 							</p>
 						)}
-						{!hidden &&
-							fieldErrors.map((message) => (
-								<p key={message} className="text-xs text-error">
-									{message}
-								</p>
-							))}
+						<FieldErrorMessages messages={fieldErrors} hidden={hidden} />
 					</div>
 					{!hidden &&
 						children &&

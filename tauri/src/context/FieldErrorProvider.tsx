@@ -35,7 +35,7 @@ export const useSetFieldErrors = () => use(setFieldErrorsContext);
 export const useVisibleFields = () => use(visibleFieldsContext);
 
 // 表示中のあいだ、入力欄をエラーの表示先として登録する
-export const useRegisterVisibleField = (name: string, visible: boolean) => {
+const useRegisterVisibleField = (name: string, visible: boolean) => {
 	const visibleFields = use(visibleFieldsContext);
 	useEffect(() => {
 		if (!visible) {
@@ -46,4 +46,23 @@ export const useRegisterVisibleField = (name: string, visible: boolean) => {
 			visibleFields.delete(name);
 		};
 	}, [visibleFields, name, visible]);
+};
+
+// 計算されたキーの分割代入はReact Compilerが未対応のため、コンポーネント外で行う
+function omitFieldErrors(errors: FieldErrors, name: string): FieldErrors {
+	const { [name]: _, ...rest } = errors;
+	return rest;
+}
+
+// 入力欄をエラーの表示先として登録し、その欄のエラーと、入力し直したときにエラーを消す関数を返す
+export const useFieldErrorTarget = (name: string, visible: boolean) => {
+	const fieldErrors = useFieldErrors(name);
+	const setFieldErrors = use(setFieldErrorsContext);
+	useRegisterVisibleField(name, visible);
+	const clearFieldErrors = () => {
+		if (fieldErrors.length > 0) {
+			setFieldErrors((current) => omitFieldErrors(current, name));
+		}
+	};
+	return { fieldErrors, clearFieldErrors };
 };
