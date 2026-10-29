@@ -52,16 +52,6 @@ vi.mock("../../../utils/helpWindow", () => ({
 	openHelpWindow: mockOpenHelpWindow,
 }));
 
-// jsdomにはshowModal/closeが未実装のためモック
-HTMLDialogElement.prototype.showModal = vi.fn(function (
-	this: HTMLDialogElement,
-) {
-	this.setAttribute("open", "");
-});
-HTMLDialogElement.prototype.close = vi.fn(function (this: HTMLDialogElement) {
-	this.removeAttribute("open");
-});
-
 describe("Headerのテスト", () => {
 	it("タイトル「DBunit CLI」が表示される", async () => {
 		const { rerender } = render(<Header />, { wrapper });

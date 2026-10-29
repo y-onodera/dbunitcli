@@ -7,6 +7,7 @@ import {
 } from "../../../../components/dialog";
 import { BlueButton } from "../../../../components/element/Button";
 import { TextArea } from "../../../../components/element/Input";
+import { useDatasetSrcInfo } from "../../../../context/DatasetSrcInfoProvider";
 import { useJdbcConnectionState } from "../../../../context/JdbcConnectionProvider";
 import {
 	useResourceContent,
@@ -15,6 +16,7 @@ import {
 import type { QueryDatasourceType } from "../../../../model/QueryDatasource";
 import { saveOnSuccess } from "../../../../utils/fetchUtils";
 import { insertAtCursor } from "../../../../utils/textInsert";
+import { DatasetTableNamesPreviewDialog } from "./DatasetTableNamesPreviewButton";
 import type { EditResourceDialogProps } from "./ResourceEditButton";
 import SqlTableInsertDialog from "./SqlTableInsertDialog";
 
@@ -53,10 +55,13 @@ function Dialog(props: SqlEditorDialogProps & { value: string }) {
 	const saveDataSource = useSaveResourceContent(props.type);
 	const { jdbcValues, connectionOk } = useJdbcConnectionState();
 
-	const handleCommit = (path: string) =>
+	const datasetSrcInfo = useDatasetSrcInfo();
+	const [previewPath, setPreviewPath] = useState<string | null>(null);
+
+	const saveThen = (onSaved: (path: string) => void) => (path: string) =>
 		saveOnSuccess(
 			() => saveDataSource(path, content),
-			() => props.handleSave(path),
+			() => onSaved(path),
 		);
 
 	const insertToContent = (text: string) => {
@@ -93,7 +98,14 @@ function Dialog(props: SqlEditorDialogProps & { value: string }) {
 			helpLabel="SQL Editor"
 			handleDialogClose={props.handleDialogClose}
 			fileName={props.fileName}
-			handleSave={handleCommit}
+			handleSave={saveThen(props.handleSave)}
+			footerActions={(fileName) => (
+				// 保存したファイルをsrcにしてテーブル一覧をプレビューする（settingは適用しない）。編集ダイアログは開いたまま
+				<BlueButton
+					title="Save and Preview"
+					handleClick={() => saveThen(setPreviewPath)(fileName)}
+				/>
+			)}
 		>
 			<DialogBody size="md">
 				{connectionOk && (
@@ -124,6 +136,17 @@ function Dialog(props: SqlEditorDialogProps & { value: string }) {
 					onInsertColumn={handleInsertColumn}
 					plain={props.type === "table"}
 					onClose={() => setShowTableSelector(false)}
+				/>
+			)}
+			{previewPath !== null && (
+				<DatasetTableNamesPreviewDialog
+					datasetSrcInfo={{
+						...datasetSrcInfo,
+						srcType: props.type,
+						srcPath: previewPath,
+						setting: "",
+					}}
+					handleDialogClose={() => setPreviewPath(null)}
 				/>
 			)}
 		</SettingDialog>

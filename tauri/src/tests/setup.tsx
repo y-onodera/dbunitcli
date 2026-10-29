@@ -61,6 +61,16 @@ export const environmentFixture: Environment = {
 	result_base: "",
 };
 
+// jsdomにはshowModal/closeが未実装のためモック（mockReset後もこの実装に戻る）
+HTMLDialogElement.prototype.showModal = vi.fn(function (
+	this: HTMLDialogElement,
+) {
+	this.setAttribute("open", "");
+});
+HTMLDialogElement.prototype.close = vi.fn(function (this: HTMLDialogElement) {
+	this.removeAttribute("open");
+});
+
 // テスト後のクリーンアップ
 afterEach(() => {
 	cleanup();
