@@ -9,16 +9,6 @@ import {
 } from "../../../../setup";
 import { generateRefreshSettingsResponseFixture } from "../../fixtures";
 
-// jsdomにはshowModal/closeが未実装のためモック
-HTMLDialogElement.prototype.showModal = vi.fn(function (
-	this: HTMLDialogElement,
-) {
-	this.setAttribute("open", "");
-});
-HTMLDialogElement.prototype.close = vi.fn(function (this: HTMLDialogElement) {
-	this.removeAttribute("open");
-});
-
 // Tauri API モック
 vi.mock("@tauri-apps/plugin-dialog", () => ({ open: vi.fn() }));
 vi.mock("@tauri-apps/api", () => ({ core: { invoke: vi.fn() } }));

@@ -4,13 +4,6 @@ import { describe, expect, it, vi } from "vitest";
 import SqlEditorDialog from "../../../../../app/form/section/dialog/SqlEditorDialog";
 import type { DatasetSrcInfo } from "../../../../../model/CommandOption";
 
-// jsdomにはshowModalが未実装のためモック
-HTMLDialogElement.prototype.showModal = vi.fn(function (
-	this: HTMLDialogElement,
-) {
-	this.setAttribute("open", "");
-});
-
 // （mockReset:trueで実装が毎回リセットされるため、resolve値は各テスト内で設定する）
 const { mockSave, mockTableNames } = vi.hoisted(() => ({
 	mockSave: vi.fn(),

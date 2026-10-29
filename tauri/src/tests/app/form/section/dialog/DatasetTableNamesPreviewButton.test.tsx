@@ -10,13 +10,6 @@ import {
 } from "../../../../setup";
 import { convertRefreshSrcTypeXlsxResponseFixture } from "../../fixtures";
 
-// jsdomにはshowModalが未実装のためモック
-HTMLDialogElement.prototype.showModal = vi.fn(function (
-	this: HTMLDialogElement,
-) {
-	this.setAttribute("open", "");
-});
-
 // Tauri API モック
 vi.mock("@tauri-apps/plugin-dialog", () => ({ open: vi.fn() }));
 vi.mock("@tauri-apps/api", () => ({ core: { invoke: vi.fn() } }));
