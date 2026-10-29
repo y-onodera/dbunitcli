@@ -18,6 +18,7 @@
     <li><a href="#section-additional">Additional Columns</a></li>
     <li><a href="#section-filter">Filter / Order</a></li>
     <li><a href="#section-jexl">JEXL 式の書き方</a></li>
+    <li><a href="#section-preview">Preview</a></li>
     <li><a href="#section-related">関連</a></li>
   </ol>
 
@@ -416,6 +417,14 @@ id | name
     <li>NULL との比較は必ず <code>== null</code> / <code>!= null</code> を使用</li>
     <li>複雑な条件は <code>filter</code> を複数行に分割して AND 合成することを推奨</li>
   </ol>
+
+  <h2 id="section-preview">Preview</h2>
+  <p>ダイアログ下部の Preview を押すと、編集中のこの設定を適用して読み込まれるテーブルの一覧を表示します（<a href="../sections/dataset-load-form.html">Dataset Load Form</a> の Preview Apply Settings と同じ表示です）。一覧の preview ボタンを押すと、そのテーブルのデータを表示します。</p>
+  <ul>
+    <li>適用するのはこのダイアログで編集中の設定 1 件だけです。同じファイルのほかの <code>settings</code>・<code>commonSettings</code>・<code>outputFilter</code>・<code>import</code> や、フォームの <code>setting</code> に指定したファイルは適用しません。</li>
+    <li>Save を押す前の内容でも確認でき、プレビューしても設定ファイルは保存されません。</li>
+    <li>Preview はフォームで <code>srcType</code> を指定しているときだけ表示されます。</li>
+  </ul>
 
   <h2 id="section-related">関連</h2>
   <ul>

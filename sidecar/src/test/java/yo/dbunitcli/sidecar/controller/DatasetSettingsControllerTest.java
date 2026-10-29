@@ -246,6 +246,33 @@ class DatasetSettingsControllerTest {
     }
 
     @Test
+    void testTableNames_inlineSettingはsettingより優先して適用する() throws IOException {
+        this.createPreviewSrc();
+        final Map<String, Object> body = this.tableBody("csv", this.writeJoinSetting(), "");
+        body.put("inlineSetting", Map.of("name", Map.of("any", List.of("big")), "tableName", "renamed"));
+
+        final String response = this.client.toBlocking().retrieve(
+                HttpRequest.POST("dbunit-cli/dataset-setting/table-names", ObjectMapper.getDefault().writeValueAsString(body)));
+
+        Assertions.assertEquals(List.of("renamed", "small"),
+                List.of(ObjectMapper.getDefault().readValue(response, String[].class)).stream().sorted().toList());
+    }
+
+    @Test
+    void testTablePreview_inlineSettingで変えたテーブル名で読み込む() throws IOException {
+        this.createPreviewSrc();
+        final Map<String, Object> body = this.tableBody("csv", "", "renamed");
+        body.put("inlineSetting", Map.of("name", Map.of("any", List.of("big")), "tableName", "renamed"));
+
+        final String response = this.client.toBlocking().retrieve(
+                HttpRequest.POST("dbunit-cli/dataset-setting/table-preview", ObjectMapper.getDefault().writeValueAsString(body)));
+        final DatasetTablePreviewResponseDto actual = ObjectMapper.getDefault().readValue(response, DatasetTablePreviewResponseDto.class);
+
+        Assertions.assertArrayEquals(new String[]{"key", "value"}, actual.getHeaders());
+        Assertions.assertEquals(BIG_ROWS, actual.getTotalRows());
+    }
+
+    @Test
     void testTablePreview_存在しないテーブルは空を返す() throws IOException {
         this.createPreviewSrc();
 
@@ -382,16 +409,21 @@ class DatasetSettingsControllerTest {
 
     private String tableRequestBody(final String srcType, final String setting, final String tableName,
                                     final Map<String, String> result) throws IOException {
+        final Map<String, Object> body = this.tableBody(srcType, setting, tableName);
+        if (result != null) {
+            body.put("result", result);
+        }
+        return ObjectMapper.getDefault().writeValueAsString(body);
+    }
+
+    private Map<String, Object> tableBody(final String srcType, final String setting, final String tableName) {
         final Map<String, Object> body = new LinkedHashMap<>();
         body.put("setting", setting);
         body.put("srcType", srcType);
         body.put("src", PREVIEW_SRC_DIR.toAbsolutePath().toString());
         body.put("encoding", "UTF-8");
         body.put("tableName", tableName);
-        if (result != null) {
-            body.put("result", result);
-        }
-        return ObjectMapper.getDefault().writeValueAsString(body);
+        return body;
     }
 
     /**

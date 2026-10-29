@@ -24,6 +24,7 @@ function buildDatasetRequestBody(
 ): string {
 	return JSON.stringify({
 		setting: info.setting ?? "",
+		inlineSetting: info.inlineSetting,
 		srcType: info.srcType,
 		src: info.srcPath,
 		regTableInclude: info.regTableInclude,

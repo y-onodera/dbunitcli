@@ -36,6 +36,10 @@ public class DatasetTableNamesRequestDto {
 
     private String setting;
     private String settingEncoding;
+    /**
+     * 未保存の設定1件。指定時はsettingより優先し、この設定だけを適用して読み込む（設定ダイアログのプレビュー用）
+     */
+    private DatasetSettingDto inlineSetting;
 
     private String jdbcUrl;
     private String jdbcUser;
@@ -240,5 +244,13 @@ public class DatasetTableNamesRequestDto {
 
     public void setSettingEncoding(final String settingEncoding) {
         this.settingEncoding = settingEncoding;
+    }
+
+    public DatasetSettingDto getInlineSetting() {
+        return this.inlineSetting;
+    }
+
+    public void setInlineSetting(final DatasetSettingDto inlineSetting) {
+        this.inlineSetting = inlineSetting;
     }
 }

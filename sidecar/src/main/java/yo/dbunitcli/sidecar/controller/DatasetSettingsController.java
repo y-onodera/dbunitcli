@@ -4,7 +4,10 @@ import io.micronaut.http.MediaType;
 import io.micronaut.http.annotation.Body;
 import io.micronaut.http.annotation.Controller;
 import io.micronaut.http.annotation.Post;
+import io.micronaut.json.JsonMapper;
 import io.micronaut.serde.ObjectMapper;
+import jakarta.json.Json;
+import jakarta.json.JsonReader;
 import org.dbunit.dataset.Column;
 import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.ITableMetaData;
@@ -18,6 +21,7 @@ import yo.dbunitcli.application.command.Convert;
 import yo.dbunitcli.application.command.GenerateType;
 import yo.dbunitcli.application.command.Type;
 import yo.dbunitcli.application.dto.DataSetLoadDto;
+import yo.dbunitcli.application.json.FromJsonTableSeparatorsBuilder;
 import yo.dbunitcli.application.option.DataSetLoadOption;
 import yo.dbunitcli.application.option.ResultOption;
 import yo.dbunitcli.common.Parameter;
@@ -34,6 +38,7 @@ import yo.dbunitcli.resource.FileResources;
 import yo.dbunitcli.sidecar.domain.project.ResourceFile;
 import yo.dbunitcli.sidecar.domain.project.Workspace;
 import yo.dbunitcli.sidecar.dto.DatasetRequestDto;
+import yo.dbunitcli.sidecar.dto.DatasetSettingDto;
 import yo.dbunitcli.sidecar.dto.DatasetTableConvertRequestDto;
 import yo.dbunitcli.sidecar.dto.DatasetTableNamesRequestDto;
 import yo.dbunitcli.sidecar.dto.DatasetTablePreviewRequestDto;
@@ -42,6 +47,8 @@ import yo.dbunitcli.sidecar.job.Interruptible;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.StringReader;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
@@ -234,7 +241,7 @@ public class DatasetSettingsController extends AbstractResourceFileController<Da
         return Parameter.none().addAll(params);
     }
 
-    private ComparableDataSetParam.Builder toParam(final DatasetTableNamesRequestDto request, final String loadData) {
+    private ComparableDataSetParam.Builder toParam(final DatasetTableNamesRequestDto request, final String loadData) throws IOException {
         final DataSetLoadDto dto = new DataSetLoadDto();
         dto.setSrc(request.getSrc());
         dto.setSrcType(DataSourceType.valueOf(request.getSrcType()));
@@ -259,9 +266,25 @@ public class DatasetSettingsController extends AbstractResourceFileController<Da
         dto.getJdbc().setJdbcUser(request.getJdbcUser());
         dto.getJdbc().setJdbcPass(request.getJdbcPass());
         dto.getJdbc().setJdbcProperties(request.getJdbcProperties());
+        if (request.getInlineSetting() != null) {
+            return new DataSetLoadOption("", dto).getParam()
+                                                 .setTableSeparators(this.inlineTableSeparators(request.getInlineSetting()));
+        }
         dto.setSetting(request.getSetting());
         dto.setSettingEncoding(request.getSettingEncoding());
         return new DataSetLoadOption("", dto).getParam();
+    }
+
+    /**
+     * 保存時と同じ形式のJSONにして、settingsにこの1件だけを持つ設定として読む
+     */
+    private TableSeparators inlineTableSeparators(final DatasetSettingDto setting) throws IOException {
+        final String json = "{\"settings\":[" + JsonMapper.createDefault().writeValueAsString(setting) + "]}";
+        try (final JsonReader reader = Json.createReader(new StringReader(json))) {
+            return new FromJsonTableSeparatorsBuilder(StandardCharsets.UTF_8.name())
+                    .configureSetting(reader.readObject())
+                    .build();
+        }
     }
 
     /**

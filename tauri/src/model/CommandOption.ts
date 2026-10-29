@@ -1,3 +1,4 @@
+import type { DatasetSetting } from "./DatasetSettings";
 import type { DefaultPath } from "./WorkspaceResources";
 
 export type Attribute = {
@@ -119,6 +120,8 @@ export type SrcInfo = {
 export type DatasetSrcInfo = SrcInfo & {
 	srcType?: SrcType;
 	setting?: string;
+	// 未保存の設定1件。指定時はsettingより優先してこの設定だけを適用する
+	inlineSetting?: DatasetSetting;
 	settingEncoding: string;
 	xlsxSchema: string;
 	fixedLength: string;
