@@ -112,6 +112,7 @@ export default function Footer(prop: {
 	}
 
 	const paramCount = Object.keys(paramInputs).length;
+	const resultDetails = running.resultDetails ?? [];
 
 	return (
 		<>
@@ -120,9 +121,9 @@ export default function Footer(prop: {
 					<h3 className="mb-5 text-lg font-normal text-content-muted">
 						{running.resultMessage}
 					</h3>
-					{running.resultDetails && (
+					{resultDetails.length > 0 && (
 						<ul className="mb-5 max-h-60 overflow-y-auto list-disc pl-5 text-sm text-error">
-							{running.resultDetails.map((detail) => (
+							{resultDetails.map((detail) => (
 								<li key={detail}>{detail}</li>
 							))}
 						</ul>

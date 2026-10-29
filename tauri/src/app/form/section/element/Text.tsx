@@ -5,7 +5,7 @@ import {
 	InputLabel,
 	ResourceDatalist,
 } from "../../../../components/element/Input";
-import { useFieldErrorTarget } from "../../../../context/FieldErrorProvider";
+import { useFieldErrors } from "../../../../context/FieldErrorProvider";
 import { useWorkspaceContext } from "../../../../context/WorkspaceResourcesProvider";
 import { DirectoryChooser, FileChooser, OpenInOS } from "./Chooser";
 import FieldErrorMessages from "./FieldErrorMessages";
@@ -34,17 +34,12 @@ export default function Text({
 	const workspacePath = context.workspace;
 	const showWorkspaceAsSecondary =
 		showDefaulePath && workspacePath !== "" && workspacePath !== basePath;
-	const { fieldErrors, clearFieldErrors } = useFieldErrorTarget(
-		fieldName,
-		!hidden,
-	);
+	const fieldErrors = useFieldErrors(fieldName, !hidden);
 
 	const handleChange = (ev: React.ChangeEvent<HTMLInputElement>) => {
 		const newValue = ev.target.value;
 		setPath(newValue);
 		onValueChange?.(newValue);
-		// 入力し直したら、この欄の検証エラーは消す
-		clearFieldErrors();
 	};
 
 	return (

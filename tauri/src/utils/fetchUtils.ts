@@ -36,21 +36,18 @@ Request Body: ${errorInfo.requestBody}
     `.trim();
 };
 
-export const handleFetchError = (
-	message: string,
-	{ endpoint, options }: FetchParams,
-) => {
-	const errorInfo = createErrorInfo(message, endpoint, options);
-	alert(createErrorMessage(errorInfo));
-	console.error("Fetch Error:", errorInfo);
-};
-
 // 呼び出し元が画面にエラーを表示する場合に、詳細をコンソールにだけ残す
 export const logFetchError = (
 	message: string,
 	{ endpoint, options }: FetchParams,
 ) => {
 	console.error("Fetch Error:", createErrorInfo(message, endpoint, options));
+};
+
+export const handleFetchError = (message: string, fetchParams: FetchParams) => {
+	const { endpoint, options } = fetchParams;
+	alert(createErrorMessage(createErrorInfo(message, endpoint, options)));
+	logFetchError(message, fetchParams);
 };
 
 export const getErrorMessage = (error: unknown): string =>

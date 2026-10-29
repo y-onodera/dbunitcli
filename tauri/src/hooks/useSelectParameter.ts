@@ -265,7 +265,7 @@ const useParameterAction = () => {
 				return {
 					resultMessage: INVALID_OPTION_MESSAGE,
 					resultDir: "",
-					...(unmatched.length > 0 && { resultDetails: unmatched }),
+					resultDetails: unmatched,
 				};
 			}
 			// 結果ダイアログにメッセージを出すので、alertは出さない
