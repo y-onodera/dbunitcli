@@ -88,28 +88,29 @@ public record TableSeparators(List<TableSeparator> settings
      * 後段（next）の設定も含めて見る
      */
     public boolean isIndependentTables() {
-        TableSeparators target = this;
-        while (target != null && target != NONE) {
-            if (!target.joinConditions().isEmpty() || target.hasSplitter()) {
-                return false;
-            }
-            target = target.next();
-        }
-        return true;
+        return this.chain().allMatch(it -> it.joinConditions().isEmpty() && !it.hasSplitter());
     }
 
     /**
-     * 出力テーブルの絞り込み（outputFilter）があるか。後段（next）の設定も含めて見る
+     * 読込前に求めた出力テーブルの候補で、読まずに除外できるソースがありうるか
+     * （出力テーブル名が読込前に決まり、出力の絞り込み（outputFilter）がある）
      */
-    public boolean hasOutputFilter() {
-        TableSeparators target = this;
-        while (target != null && target != NONE) {
-            if (!(target.filter() instanceof final AlwaysFilter always && always.result())) {
-                return true;
-            }
-            target = target.next();
-        }
-        return false;
+    public boolean canExcludeBeforeRead() {
+        return this.isIndependentTables() && this.chain().anyMatch(it -> !Builder.isUnset(it.filter()));
+    }
+
+    /**
+     * 出力テーブルの候補がすべて出力の絞り込み（outputFilter）で除かれるか。{@link #canExcludeBeforeRead()}がtrueの場合に使う
+     */
+    public boolean excludesAll(final Stream<? extends ITableMetaData> candidates) {
+        return candidates.flatMap(this::getAddSettingTableMetaData).findAny().isEmpty();
+    }
+
+    /**
+     * この設定と後段（next）の設定
+     */
+    private Stream<TableSeparators> chain() {
+        return Stream.iterate(this, it -> it != null && it != NONE, TableSeparators::next);
     }
 
     public Stream<AddSettingTableMetaData> getAddSettingTableMetaData(final ComparableTableJoin join) {

@@ -195,24 +195,21 @@ public class DatasetSettingsController extends AbstractResourceFileController<Da
         NONE;
 
         /**
-         * joinは元テーブルも出力として残す必要があるため、outputFilterで絞らない。
-         * 絞らずに読み直すのは、outputFilterで見つからない名前（split後）がありうる場合だけ
+         * 出力テーブル名が読込前に決まれば（join・splitが無い）絞って読むだけでよい。
+         * joinは元テーブルも出力として残す必要があるため絞らない。splitはoutputFilterで見つからなければ絞らずに読み直す
          */
         static List<Narrow> attempts(final TableSeparators separators) {
-            if (!separators.joinConditions().isEmpty()) {
-                return List.of(NONE);
+            if (separators.isIndependentTables()) {
+                return List.of(OUTPUT);
             }
-            if (separators.hasSplitter()) {
-                return List.of(OUTPUT, NONE);
-            }
-            return List.of(OUTPUT);
+            return separators.joinConditions().isEmpty() ? List.of(OUTPUT, NONE) : List.of(NONE);
         }
 
         /**
          * 読み直さずに済む（対象を取りこぼさない）最も強い絞り込み
          */
         static Narrow singlePass(final TableSeparators separators) {
-            return separators.joinConditions().isEmpty() && !separators.hasSplitter() ? OUTPUT : NONE;
+            return separators.isIndependentTables() ? OUTPUT : NONE;
         }
 
         void applyTo(final ComparableDataSetParam.Builder param, final TableSeparators separators, final String tableName) {

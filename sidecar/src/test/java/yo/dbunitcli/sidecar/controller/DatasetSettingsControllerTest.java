@@ -273,11 +273,7 @@ class DatasetSettingsControllerTest {
     void testTableConvert_設定なしは対象外のソースを開かない() throws IOException {
         this.createPreviewSrc();
 
-        final List<String> opened = this.produceStartLogs(ComparableCsvDataSetProducer.class,
-                () -> this.tableConvert("", "small"));
-
-        Assertions.assertEquals(1, opened.size(), opened.toString());
-        Assertions.assertTrue(opened.getFirst().endsWith("small.csv"), opened.toString());
+        this.assertOpensOnly("small.csv", () -> this.tableConvert("", "small"));
     }
 
     @Test
@@ -285,11 +281,7 @@ class DatasetSettingsControllerTest {
         this.createPreviewSrc();
         final String setting = this.writeKeysSetting();
 
-        final List<String> opened = this.produceStartLogs(ComparableCsvDataSetProducer.class,
-                () -> this.tableConvert(setting, "small"));
-
-        Assertions.assertEquals(1, opened.size(), opened.toString());
-        Assertions.assertTrue(opened.getFirst().endsWith("small.csv"), opened.toString());
+        this.assertOpensOnly("small.csv", () -> this.tableConvert(setting, "small"));
     }
 
     @Test
@@ -297,11 +289,7 @@ class DatasetSettingsControllerTest {
         this.createPreviewSrc();
         final String setting = this.writeKeysSetting();
 
-        final List<String> opened = this.produceStartLogs(ComparableCsvDataSetProducer.class,
-                () -> this.tablePreview(setting, "small"));
-
-        Assertions.assertEquals(1, opened.size(), opened.toString());
-        Assertions.assertTrue(opened.getFirst().endsWith("small.csv"), opened.toString());
+        this.assertOpensOnly("small.csv", () -> this.tablePreview(setting, "small"));
     }
 
     @Test
@@ -309,11 +297,7 @@ class DatasetSettingsControllerTest {
         this.createPreviewSrc();
         final String setting = this.writeRenameSetting();
 
-        final List<String> opened = this.produceStartLogs(ComparableCsvDataSetProducer.class,
-                () -> this.tableConvert(setting, "renamed"));
-
-        Assertions.assertEquals(1, opened.size(), opened.toString());
-        Assertions.assertTrue(opened.getFirst().endsWith("big.csv"), opened.toString());
+        this.assertOpensOnly("big.csv", () -> this.tableConvert(setting, "renamed"));
     }
 
     @Test
@@ -321,11 +305,7 @@ class DatasetSettingsControllerTest {
         this.createPreviewSrc();
         final String setting = this.writeRenameSetting();
 
-        final List<String> opened = this.produceStartLogs(ComparableCsvDataSetProducer.class,
-                () -> this.tablePreview(setting, "renamed"));
-
-        Assertions.assertEquals(1, opened.size(), opened.toString());
-        Assertions.assertTrue(opened.getFirst().endsWith("big.csv"), opened.toString());
+        this.assertOpensOnly("big.csv", () -> this.tablePreview(setting, "renamed"));
     }
 
     @Test
@@ -412,6 +392,15 @@ class DatasetSettingsControllerTest {
             body.put("result", result);
         }
         return ObjectMapper.getDefault().writeValueAsString(body);
+    }
+
+    /**
+     * actionの実行中に開いたcsvファイルがexpectedFileだけであること
+     */
+    private void assertOpensOnly(final String expectedFile, final IOAction action) throws IOException {
+        final List<String> opened = this.produceStartLogs(ComparableCsvDataSetProducer.class, action);
+        Assertions.assertEquals(1, opened.size(), opened.toString());
+        Assertions.assertTrue(opened.getFirst().endsWith(expectedFile), opened.toString());
     }
 
     /**

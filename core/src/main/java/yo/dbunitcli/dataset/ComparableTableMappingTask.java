@@ -30,17 +30,6 @@ public interface ComparableTableMappingTask {
     }
 
     /**
-     * 読込前に求めた出力テーブルの候補が、すべて出力の絞り込み（outputFilter）で除かれるか。除かれるソース・シートは読まずに済む。
-     * 出力テーブル名が読込前に決まらない設定（join・件数分割）や、絞り込みが無い場合は常にfalse
-     */
-    default boolean isFilteredOut(final Stream<TableMetaDataWithSource> candidates) {
-        final TableSeparators separators = this.targetTableSeparators();
-        return separators.hasOutputFilter()
-                && separators.isIndependentTables()
-                && candidates.flatMap(separators::getAddSettingTableMetaData).findAny().isEmpty();
-    }
-
-    /**
      * 並列実行で2つ目以降の作業スレッドが使うタスクを返す。スレッド間で共有できない資源（DB接続など）は
      * resourcesからそのスレッド専用のものを取得して差し替える
      */
