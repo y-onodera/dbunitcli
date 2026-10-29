@@ -291,6 +291,24 @@ describe("Execのオプション検証エラー", () => {
 		alertSpy.mockRestore();
 	});
 
+	it("同じ文言の違反は一度だけ出す", async () => {
+		await act(async () => {
+			renderWithFields();
+		});
+		mockFetchData.mockRejectedValueOnce(
+			new OptionValidationError("invalid", [
+				{ options: ["-src.src"], message: "file not found" },
+				{ options: ["-src.src"], message: "file not found" },
+				{ options: ["-cmd"], message: "cmd is required" },
+				{ options: ["-cmdParam"], message: "cmd is required" },
+			]),
+		);
+		await userEvent.click(screen.getByText("Exec"));
+
+		expect(screen.getAllByText("file not found")).toHaveLength(1);
+		expect(screen.getAllByText("cmd is required")).toHaveLength(1);
+	});
+
 	it("ファイル選択等のボタンから値を変えても違反を消す", async () => {
 		await act(async () => {
 			renderWithFields(
