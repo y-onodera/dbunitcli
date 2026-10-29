@@ -41,10 +41,16 @@ export const handleFetchError = (
 	{ endpoint, options }: FetchParams,
 ) => {
 	const errorInfo = createErrorInfo(message, endpoint, options);
-	const errorMessage = createErrorMessage(errorInfo);
-
-	alert(errorMessage);
+	alert(createErrorMessage(errorInfo));
 	console.error("Fetch Error:", errorInfo);
+};
+
+// 呼び出し元が画面にエラーを表示する場合に、詳細をコンソールにだけ残す
+export const logFetchError = (
+	message: string,
+	{ endpoint, options }: FetchParams,
+) => {
+	console.error("Fetch Error:", createErrorInfo(message, endpoint, options));
 };
 
 export const getErrorMessage = (error: unknown): string =>

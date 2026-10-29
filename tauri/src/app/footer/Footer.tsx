@@ -120,6 +120,13 @@ export default function Footer(prop: {
 					<h3 className="mb-5 text-lg font-normal text-content-muted">
 						{running.resultMessage}
 					</h3>
+					{running.resultDetails && (
+						<ul className="mb-5 max-h-60 overflow-y-auto list-disc pl-5 text-sm text-error">
+							{running.resultDetails.map((detail) => (
+								<li key={detail}>{detail}</li>
+							))}
+						</ul>
+					)}
 					<div className="flex items-center justify-end gap-2">
 						{running.resultDir && (
 							<BlueButton

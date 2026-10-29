@@ -21,6 +21,7 @@ import {
 	getErrorMessage,
 	handleFetchError,
 	isAbortError,
+	logFetchError,
 	OptionValidationError,
 	type OptionViolation,
 } from "../utils/fetchUtils";
@@ -28,6 +29,8 @@ import {
 export type Running = {
 	resultMessage: string;
 	resultDir: string;
+	// 入力欄に表示できなかった検証エラー
+	resultDetails?: string[];
 };
 
 export const useAddParameter = (command: string) => {
@@ -203,7 +206,7 @@ const parseResponse = async (
 
 const INVALID_OPTION_MESSAGE = "Invalid Option";
 
-// 表示中の入力欄に関わる違反はその欄に表示し、どの欄にも出せない違反（折りたたんだ欄など）はalertでまとめて知らせる
+// 表示中の入力欄に関わる違反はその欄に表示し、どの欄にも出せない違反（折りたたんだ欄など）は結果ダイアログにまとめて出す
 const toFieldErrors = (
 	violations: OptionViolation[],
 	visibleFields: Set<string>,
@@ -259,13 +262,15 @@ const useParameterAction = () => {
 					visibleFields,
 				);
 				setFieldErrors(fieldErrors);
-				if (unmatched.length > 0) {
-					alert(unmatched.join("\n"));
-				}
-				return { resultMessage: INVALID_OPTION_MESSAGE, resultDir: "" };
+				return {
+					resultMessage: INVALID_OPTION_MESSAGE,
+					resultDir: "",
+					...(unmatched.length > 0 && { resultDetails: unmatched }),
+				};
 			}
+			// 結果ダイアログにメッセージを出すので、alertは出さない
 			const errorMessage = getErrorMessage(ex);
-			handleFetchError(errorMessage, fetchParams);
+			logFetchError(errorMessage, fetchParams);
 			return { resultMessage: errorMessage, resultDir: "" };
 		}
 	};

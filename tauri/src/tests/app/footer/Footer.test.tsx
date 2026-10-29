@@ -226,7 +226,7 @@ describe("Execのオプション検証エラー", () => {
 		);
 	};
 
-	it("表示中の欄の違反は欄の下に出し、出せない違反はalertで知らせ、入力し直すと消す", async () => {
+	it("表示中の欄の違反は欄の下に出し、出せない違反は結果ダイアログに出し、入力し直すと消す", async () => {
 		const alertSpy = vi.spyOn(window, "alert").mockImplementation(() => {});
 		await act(async () => {
 			renderWithFields();
@@ -243,8 +243,10 @@ describe("Execのオプション検証エラー", () => {
 
 		expect(screen.getByText("Invalid Option")).toBeInTheDocument();
 		expect(screen.getByText("src not found")).toBeInTheDocument();
-		expect(screen.queryByText("setting not found")).not.toBeInTheDocument();
-		expect(alertSpy).toHaveBeenCalledWith("setting not found\ncmd is required");
+		// 非表示の欄の下には出さず、ダイアログにだけ出す
+		expect(screen.getAllByText("setting not found")).toHaveLength(1);
+		expect(screen.getByText("cmd is required")).toBeInTheDocument();
+		expect(alertSpy).not.toHaveBeenCalled();
 
 		await userEvent.type(screen.getByLabelText("-src.src"), "a");
 		expect(screen.queryByText("src not found")).not.toBeInTheDocument();
