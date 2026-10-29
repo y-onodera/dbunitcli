@@ -3,8 +3,11 @@ import { SectionLegend } from "../../components/dialog/SectionFieldset";
 import { useResourcesSettings } from "../../context/WorkspaceResourcesProvider";
 import type { ParameterizeOptions } from "../../model/SelectParameter";
 import { DatasetLoadForm } from "./section/DatasetLoadForm";
-import { RemoveResourceButton } from "./section/dialog/ResourceEditButton";
-import { TemplateCommandButton } from "./section/dialog/TemplateCommandDialog";
+import ParameterizeTemplateDialog from "./section/dialog/ParameterizeTemplateDialog";
+import {
+	EditResourceButton,
+	RemoveResourceButton,
+} from "./section/dialog/ResourceEditButton";
 import Check from "./section/element/Check";
 import PlainText from "./section/element/PlainText";
 import Select from "./section/element/Select";
@@ -55,9 +58,10 @@ export function ParameterizeForm(prop: {
 							element={parameterize.template}
 							isValueInDatalist={isValueInDatalist}
 							editButtons={[
-								<TemplateCommandButton
-									key="open-cmd"
-									name={path}
+								<EditResourceButton
+									key="edit"
+									dialog={ParameterizeTemplateDialog}
+									path={path}
 									setPath={setPath}
 								/>,
 							]}

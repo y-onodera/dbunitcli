@@ -4,64 +4,51 @@ import {
 	SettingDialog,
 	StatusMessage,
 } from "../../../../components/dialog";
-import { EditButton } from "../../../../components/element/ButtonIcon";
 import { TextArea } from "../../../../components/element/Input";
 import {
 	useParameterizeTemplateData,
 	useSaveParameterizeTemplate,
 } from "../../../../hooks/useTemplate";
 import { saveOnSuccess } from "../../../../utils/fetchUtils";
+import type { EditResourceDialogProps } from "./ResourceEditButton";
 
 function extractFileNameFromTemplatePath(templatePath: string): string {
 	return templatePath.replace(/\\/g, "/").split("/").pop() ?? templatePath;
 }
 
-function ParameterizeTemplateDialog({
-	name,
-	loadName,
-	setPath,
+export default function ParameterizeTemplateDialog({
+	fileName,
 	handleDialogClose,
-}: {
-	name: string;
-	loadName: string;
-	setPath: (path: string) => void;
-	handleDialogClose: () => void;
-}) {
-	const { content, loading } = useParameterizeTemplateData(loadName);
+	handleSave,
+}: EditResourceDialogProps) {
+	const name = extractFileNameFromTemplatePath(fileName);
+	const { content, loading } = useParameterizeTemplateData(name);
 	if (loading) {
 		return <StatusMessage kind="loading">Loading...</StatusMessage>;
 	}
 	return (
 		<Dialog
 			content={content}
-			name={name}
-			setPath={setPath}
+			fileName={name}
 			handleDialogClose={handleDialogClose}
+			handleSave={handleSave}
 		/>
 	);
 }
 
 function Dialog({
 	content: initialContent,
-	name,
-	setPath,
+	fileName,
 	handleDialogClose,
-}: {
-	content: string;
-	name: string;
-	setPath: (path: string) => void;
-	handleDialogClose: () => void;
-}) {
+	handleSave: onSaved,
+}: EditResourceDialogProps & { content: string }) {
 	const [content, setContent] = useState<string>(initialContent);
 	const saveContent = useSaveParameterizeTemplate();
 
 	const handleSave = (path: string) =>
 		saveOnSuccess(
 			() => saveContent(path, content),
-			() => {
-				setPath(path);
-				handleDialogClose();
-			},
+			() => onSaved(path),
 		);
 
 	return (
@@ -69,7 +56,7 @@ function Dialog({
 			title="Edit Parameterize Template"
 			helpCommand="dialogs/parameterize-template-edit"
 			helpLabel="Edit Parameterize Template"
-			fileName={name}
+			fileName={fileName}
 			handleDialogClose={handleDialogClose}
 			handleSave={handleSave}
 		>
@@ -83,29 +70,5 @@ function Dialog({
 				/>
 			</DialogBody>
 		</SettingDialog>
-	);
-}
-
-export function TemplateCommandButton({
-	name,
-	setPath,
-}: {
-	name: string;
-	setPath: (path: string) => void;
-}) {
-	const [showDialog, setShowDialog] = useState(false);
-	const fileName = extractFileNameFromTemplatePath(name);
-	return (
-		<>
-			<EditButton handleClick={() => setShowDialog(true)} />
-			{showDialog && (
-				<ParameterizeTemplateDialog
-					name={fileName}
-					loadName={fileName}
-					setPath={setPath}
-					handleDialogClose={() => setShowDialog(false)}
-				/>
-			)}
-		</>
 	);
 }

@@ -1,8 +1,9 @@
 import type { ReactNode } from "react";
 import type { QueryDatasourceType } from "../../../../model/QueryDatasource";
+import { EditResourceButton } from "../dialog/ResourceEditButton";
 import {
 	RemoveSqlEditorButton,
-	SqlEditorButton,
+	sqlEditorDialogs,
 } from "../dialog/SqlEditorDialog";
 import type { FileProp, TextProp } from "./FormElementProp";
 import Text, { TextDropDownMenu } from "./Text";
@@ -44,15 +45,14 @@ function SqlSrcDropDownMenu({
 }: Props) {
 	const isSqlOrTable = srcType === "sql" || srcType === "table";
 
-	const editButtons: ReactNode[] = [];
-	editButtons.push(
-		<SqlEditorButton
+	const editButtons: ReactNode[] = [
+		<EditResourceButton
 			key="edit"
-			type={srcType as QueryDatasourceType}
+			dialog={sqlEditorDialogs[srcType as QueryDatasourceType]}
 			path={path}
 			setPath={setPath}
 		/>,
-	);
+	];
 
 	return (
 		<TextDropDownMenu

@@ -5,8 +5,11 @@ import { useResourcesSettings } from "../../context/WorkspaceResourcesProvider";
 import type { CommandOption } from "../../model/CommandOption";
 import type { GenerateOptions } from "../../model/SelectParameter";
 import { DatasetLoadForm } from "./section/DatasetLoadForm";
-import { RemoveResourceButton } from "./section/dialog/ResourceEditButton";
-import { TemplateEditButton } from "./section/dialog/TemplateEditDialog";
+import {
+	EditResourceButton,
+	RemoveResourceButton,
+} from "./section/dialog/ResourceEditButton";
+import TemplateEditDialog from "./section/dialog/TemplateEditDialog";
 import {
 	TxtTemplateGenerateButton,
 	type TxtTemplateGenerateFormValues,
@@ -81,7 +84,14 @@ export function GenerateForm(prop: {
 		if (isExcelGenerate) {
 			return [<XlsxTemplateGenerateButton key="generate" setPath={setPath} />];
 		}
-		return [<TemplateEditButton key="edit" path={path} setPath={setPath} />];
+		return [
+			<EditResourceButton
+				key="edit"
+				dialog={TemplateEditDialog}
+				path={path}
+				setPath={setPath}
+			/>,
+		];
 	};
 	return (
 		<>

@@ -92,17 +92,20 @@ export default function ResourceEditButton({
 	);
 }
 
+// EditResourceButtonから開く編集ダイアログのprops。保存に成功したら保存先のパスでhandleSaveを呼ぶ
+export type EditResourceDialogProps = {
+	fileName: string;
+	handleDialogClose: () => void;
+	handleSave: (path: string) => void;
+};
+
 // ファイル名で開く編集ダイアログ（保存したらパスを反映して閉じる）を持つ編集ボタン
 export function EditResourceButton({
 	dialog: DialogComponent,
 	path,
 	setPath,
 }: ResourceEditButtonProp & {
-	dialog: ComponentType<{
-		fileName: string;
-		handleDialogClose: () => void;
-		handleSave: (path: string) => void;
-	}>;
+	dialog: ComponentType<EditResourceDialogProps>;
 }) {
 	const renderDialog = (open: boolean, closeDialog: () => void) => {
 		if (!open) {

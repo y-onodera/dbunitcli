@@ -1,12 +1,12 @@
-import { act, renderHook } from "@testing-library/react";
+import { act, renderHook, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import {
 	type Environment,
 	environmentContext,
 } from "../../context/EnvironmentProvider";
 import {
+	useDataSourceContent,
 	useDeleteDataSource,
-	useLoadDataSource,
 	useSaveDataSource,
 } from "../../hooks/useQueryDatasource";
 import type { QueryDatasource } from "../../model/QueryDatasource";
@@ -52,12 +52,32 @@ vi.mock("../../utils/fetchUtils", () => ({
 }));
 
 describe("QueryDatasourceProviderのテスト", () => {
-	describe("useLoadDataSource", () => {
-		it("正常なロードが行われることを確認", async () => {
-			const { result } = renderHook(() => useLoadDataSource(), { wrapper });
-			expect(result.current).toBeTypeOf("function");
-			const res = await result.current("test-query");
-			expect(res).toBe(mockLoadedContents);
+	describe("useDataSourceContent", () => {
+		it("名前を指定するとその内容を読み込む", async () => {
+			const { result } = renderHook(() => useDataSourceContent("test-query"), {
+				wrapper,
+			});
+			expect(result.current.loading).toBe(true);
+
+			await waitFor(() => expect(result.current.loading).toBe(false));
+			expect(result.current.content).toBe(mockLoadedContents);
+			expect(mockFetchData).toHaveBeenCalledWith({
+				endpoint: `${mockEnvironment.apiUrl}query-datasource/load`,
+				options: {
+					method: "POST",
+					headers: { "Content-Type": "application/json" },
+					body: JSON.stringify({ name: "test-query" }),
+				},
+			});
+		});
+
+		it("名前が空なら読み込まず空の内容を返す", () => {
+			const { result } = renderHook(() => useDataSourceContent(""), {
+				wrapper,
+			});
+
+			expect(result.current).toStrictEqual({ content: "", loading: false });
+			expect(mockFetchData).not.toHaveBeenCalled();
 		});
 	});
 

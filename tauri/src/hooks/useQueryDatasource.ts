@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { useEnvironment } from "../context/EnvironmentProvider";
 import type {
 	QueryDatasource,
@@ -25,11 +26,33 @@ export const useSaveDataSource = () => {
 		return postDataSource(environment.apiUrl, "query-datasource/save", input);
 	};
 };
-export const useLoadDataSource = () => {
-	const environment = useEnvironment();
-	return async (name: string) => {
-		return loadDataSource(environment.apiUrl, name);
-	};
+export const useDataSourceContent = (
+	name: string,
+): { content: string; loading: boolean } => {
+	const { apiUrl } = useEnvironment();
+	const [content, setContent] = useState("");
+	const [loading, setLoading] = useState(name !== "");
+
+	useEffect(() => {
+		if (!name) {
+			setContent("");
+			setLoading(false);
+			return;
+		}
+		const controller = new AbortController();
+		setLoading(true);
+		loadDataSource(apiUrl, name).then((result) => {
+			if (!controller.signal.aborted) {
+				setContent(result);
+				setLoading(false);
+			}
+		});
+		return () => {
+			controller.abort();
+		};
+	}, [name, apiUrl]);
+
+	return { content, loading };
 };
 async function loadDataSource(apiUrl: string, name: string): Promise<string> {
 	const fetchParams = {

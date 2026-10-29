@@ -1,37 +1,60 @@
-import { useLayoutEffect, useRef, useState } from "react";
+import { type ComponentType, useLayoutEffect, useRef, useState } from "react";
 import {
 	DialogBody,
 	DialogField,
 	SettingDialog,
+	StatusMessage,
 } from "../../../../components/dialog";
 import { BlueButton } from "../../../../components/element/Button";
-import { EditButton } from "../../../../components/element/ButtonIcon";
 import { TextArea } from "../../../../components/element/Input";
 import { useJdbcConnectionState } from "../../../../context/JdbcConnectionProvider";
 import {
+	useDataSourceContent,
 	useDeleteDataSource,
-	useLoadDataSource,
 	useSaveDataSource,
 } from "../../../../hooks/useQueryDatasource";
 import type { QueryDatasourceType } from "../../../../model/QueryDatasource";
 import { saveOnSuccess } from "../../../../utils/fetchUtils";
 import { insertAtCursor } from "../../../../utils/textInsert";
 import {
+	type EditResourceDialogProps,
 	RemoveResource,
 	type RemoveResourceButtonProp,
-	type ResourceEditButtonProp,
 } from "./ResourceEditButton";
 import SqlTableInsertDialog from "./SqlTableInsertDialog";
 
-type SqlEditorDialogProps = {
+type SqlEditorDialogProps = EditResourceDialogProps & {
 	type: QueryDatasourceType;
-	fileName: string;
-	handleDialogClose: () => void;
-	handleSave: (path: string) => void;
-	value: string;
 };
 
 export default function SqlEditorDialog(props: SqlEditorDialogProps) {
+	const { content, loading } = useDataSourceContent(props.fileName);
+	if (loading) {
+		return <StatusMessage kind="loading">Loading...</StatusMessage>;
+	}
+	return <Dialog {...props} value={content} />;
+}
+
+// EditResourceButtonへ渡すため、srcTypeごとに種類を固定した編集ダイアログ
+function SqlFileEditDialog(props: EditResourceDialogProps) {
+	return <SqlEditorDialog type="sql" {...props} />;
+}
+function TableFileEditDialog(props: EditResourceDialogProps) {
+	return <SqlEditorDialog type="table" {...props} />;
+}
+function CsvqFileEditDialog(props: EditResourceDialogProps) {
+	return <SqlEditorDialog type="csvq" {...props} />;
+}
+export const sqlEditorDialogs: Record<
+	QueryDatasourceType,
+	ComponentType<EditResourceDialogProps>
+> = {
+	sql: SqlFileEditDialog,
+	table: TableFileEditDialog,
+	csvq: CsvqFileEditDialog,
+};
+
+function Dialog(props: SqlEditorDialogProps & { value: string }) {
 	const [content, setContent] = useState<string>(props.value);
 	const [showTableSelector, setShowTableSelector] = useState(false);
 	const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -113,51 +136,6 @@ export default function SqlEditorDialog(props: SqlEditorDialogProps) {
 				/>
 			)}
 		</SettingDialog>
-	);
-}
-type SqlEditorButtonProps = ResourceEditButtonProp & {
-	type: QueryDatasourceType;
-};
-export function SqlEditorButton({ path, setPath, type }: SqlEditorButtonProps) {
-	const [showDialog, setShowDialog] = useState(false);
-	const [content, setContent] = useState("");
-	const loadDataSource = useLoadDataSource();
-	const handleOpen = async () => {
-		try {
-			if (path) {
-				const result = await loadDataSource(path);
-				setContent(result);
-			}
-			setShowDialog(true);
-		} catch (ex) {
-			alert(ex);
-		}
-	};
-
-	const handleClose = () => {
-		setShowDialog(false);
-		setContent("");
-	};
-
-	const handleSave = (path: string) => {
-		setPath(path);
-		setShowDialog(false);
-		setContent("");
-	};
-
-	return (
-		<>
-			<EditButton handleClick={handleOpen} />
-			{showDialog && (
-				<SqlEditorDialog
-					type={type}
-					fileName={path}
-					value={content}
-					handleDialogClose={handleClose}
-					handleSave={handleSave}
-				/>
-			)}
-		</>
 	);
 }
 export function RemoveSqlEditorButton({
