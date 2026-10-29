@@ -112,14 +112,25 @@ export default function Footer(prop: {
 	}
 
 	const paramCount = Object.keys(paramInputs).length;
+	const resultDetails = running.resultDetails ?? [];
 
 	return (
 		<>
 			<ResultDialog hidden={running.resultMessage === ""}>
 				<div className="p-4 md:p-5">
-					<h3 className="mb-5 text-lg font-normal text-content-muted">
+					{/* sidecarの例外メッセージは長く複数行になりうるため、改行を残して折り返し、長ければスクロールさせる */}
+					<h3
+						className={`mb-5 max-h-60 overflow-y-auto whitespace-pre-wrap break-all text-lg font-normal ${running.failed ? "text-error" : "text-content-muted"}`}
+					>
 						{running.resultMessage}
 					</h3>
+					{resultDetails.length > 0 && (
+						<ul className="mb-5 max-h-60 overflow-y-auto list-disc pl-5 text-sm text-error">
+							{resultDetails.map((detail) => (
+								<li key={detail}>{detail}</li>
+							))}
+						</ul>
+					)}
 					<div className="flex items-center justify-end gap-2">
 						{running.resultDir && (
 							<BlueButton

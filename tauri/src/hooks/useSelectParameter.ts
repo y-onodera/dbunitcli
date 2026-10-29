@@ -21,6 +21,7 @@ import {
 	getErrorMessage,
 	handleFetchError,
 	isAbortError,
+	logFetchError,
 	OptionValidationError,
 	type OptionViolation,
 } from "../utils/fetchUtils";
@@ -28,6 +29,10 @@ import {
 export type Running = {
 	resultMessage: string;
 	resultDir: string;
+	// 入力欄に表示できなかった検証エラー
+	resultDetails?: string[];
+	// 失敗したとき（resultMessageはエラーメッセージ）
+	failed?: boolean;
 };
 
 export const useAddParameter = (command: string) => {
@@ -203,7 +208,14 @@ const parseResponse = async (
 
 const INVALID_OPTION_MESSAGE = "Invalid Option";
 
-// 表示中の入力欄に関わる違反はその欄に表示し、どの欄にも出せない違反（折りたたんだ欄など）はalertでまとめて知らせる
+// 同じ文言は一度だけ出す（表示時のkeyにも使う）
+const addUnique = (messages: string[], message: string) => {
+	if (!messages.includes(message)) {
+		messages.push(message);
+	}
+};
+
+// 違反は関わる全ての入力欄に持たせ、折りたたんだ欄も展開すれば欄の下に出す。表示中の欄が無い違反は結果ダイアログにもまとめて出す
 const toFieldErrors = (
 	violations: OptionViolation[],
 	visibleFields: Set<string>,
@@ -211,12 +223,12 @@ const toFieldErrors = (
 	const fieldErrors: FieldErrors = {};
 	const unmatched: string[] = [];
 	for (const violation of violations) {
-		const names = violation.options.filter((name) => visibleFields.has(name));
-		if (names.length === 0) {
-			unmatched.push(violation.message);
+		if (!violation.options.some((name) => visibleFields.has(name))) {
+			addUnique(unmatched, violation.message);
 		}
-		for (const name of names) {
-			fieldErrors[name] = [...(fieldErrors[name] ?? []), violation.message];
+		for (const name of violation.options) {
+			fieldErrors[name] ??= [];
+			addUnique(fieldErrors[name], violation.message);
 		}
 	}
 	return { fieldErrors, unmatched };
@@ -259,14 +271,17 @@ const useParameterAction = () => {
 					visibleFields,
 				);
 				setFieldErrors(fieldErrors);
-				if (unmatched.length > 0) {
-					alert(unmatched.join("\n"));
-				}
-				return { resultMessage: INVALID_OPTION_MESSAGE, resultDir: "" };
+				return {
+					resultMessage: INVALID_OPTION_MESSAGE,
+					resultDir: "",
+					resultDetails: unmatched,
+					failed: true,
+				};
 			}
+			// 結果ダイアログにメッセージを出すので、alertは出さない
 			const errorMessage = getErrorMessage(ex);
-			handleFetchError(errorMessage, fetchParams);
-			return { resultMessage: errorMessage, resultDir: "" };
+			logFetchError(errorMessage, fetchParams);
+			return { resultMessage: errorMessage, resultDir: "", failed: true };
 		}
 	};
 };

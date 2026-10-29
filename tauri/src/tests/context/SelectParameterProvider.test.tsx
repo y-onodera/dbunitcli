@@ -31,6 +31,7 @@ import {
 	type FetchParams,
 	handleFetchError,
 	isAbortError,
+	logFetchError,
 } from "../../utils/fetchUtils";
 import {
 	environmentFixture,
@@ -157,6 +158,7 @@ vi.mock("../../utils/fetchUtils", async (importOriginal) => ({
 	...(await importOriginal<typeof import("../../utils/fetchUtils")>()),
 	fetchData: mockFetchData,
 	handleFetchError: vi.fn(),
+	logFetchError: vi.fn(),
 	getErrorMessage: vi.fn((error: unknown) =>
 		error instanceof Error ? error.message : String(error),
 	),
@@ -334,6 +336,7 @@ describe("SelectParameterProviderのテスト", () => {
 			expect(await result.current.saveParameter(mockInput)).toStrictEqual({
 				resultMessage: mockError.message,
 				resultDir: "",
+				failed: true,
 			});
 		});
 	});
@@ -384,7 +387,16 @@ describe("SelectParameterProviderのテスト", () => {
 			expect(await result.current.execParameter(mockInput)).toStrictEqual({
 				resultMessage: mockError.message,
 				resultDir: "",
+				failed: true,
 			});
+			// メッセージは結果ダイアログに出すので、alertは出さずログだけ残す
+			expect(handleFetchError).not.toHaveBeenCalled();
+			expect(logFetchError).toHaveBeenCalledWith(
+				mockError.message,
+				expect.objectContaining({
+					endpoint: expect.stringContaining("/exec"),
+				}),
+			);
 		});
 	});
 

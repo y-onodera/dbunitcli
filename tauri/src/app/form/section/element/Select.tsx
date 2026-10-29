@@ -1,10 +1,13 @@
 import { InputLabel, SelectBox } from "../../../../components/element/Input";
+import { useFieldErrors } from "../../../../context/FieldErrorProvider";
+import FieldErrorMessages from "./FieldErrorMessages";
 import type { SelectProp } from "./FormElementProp";
 import { getId, getName } from "./FormElementProp";
 
 export default function Select(prop: SelectProp) {
 	const id = getId(prop.prefix, prop.element.name);
 	const name = getName(prop.prefix, prop.element.name);
+	const fieldErrors = useFieldErrors(name, !prop.hidden);
 	return (
 		<div>
 			<InputLabel
@@ -27,6 +30,7 @@ export default function Select(prop: SelectProp) {
 					</option>
 				))}
 			</SelectBox>
+			<FieldErrorMessages messages={fieldErrors} hidden={prop.hidden} />
 		</div>
 	);
 }

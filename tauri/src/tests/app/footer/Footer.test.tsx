@@ -1,8 +1,10 @@
 import { act, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { type ReactNode, useEffect } from "react";
+import { type ReactNode, useEffect, useState } from "react";
 import { describe, expect, it, vi } from "vitest";
 import Footer from "../../../app/footer/Footer";
+import Check from "../../../app/form/section/element/Check";
+import Select from "../../../app/form/section/element/Select";
 import Text from "../../../app/form/section/element/Text";
 import {
 	type Environment,
@@ -39,7 +41,7 @@ vi.mock("../../../utils/fetchUtils", async (importOriginal) => ({
 	...(await importOriginal<typeof import("../../../utils/fetchUtils")>()),
 	fetchData: mockFetchData,
 	handleFetchError: vi.fn(),
-	getErrorMessage: vi.fn(),
+	logFetchError: vi.fn(),
 }));
 
 function SelectConvert({
@@ -58,6 +60,17 @@ function SelectConvert({
 		);
 	}, [setParameter, inputParam]);
 	return null;
+}
+
+// 任意項目の折りたたみと同じく、ボタンで欄の表示を切り替える
+function Collapsible({ element }: { element: CommandOption }) {
+	const [hidden, setHidden] = useState(true);
+	return (
+		<>
+			<input type="button" value="toggle" onClick={() => setHidden(!hidden)} />
+			<Text prefix="src" element={element} hidden={hidden} />
+		</>
+	);
 }
 
 function renderFooter(
@@ -121,7 +134,7 @@ describe("Footerの実行ボタン", () => {
 			name: "test",
 			input: { "-src": "data", "-Pid": "1" },
 		});
-		expect(screen.getByText("Execution Success")).toBeInTheDocument();
+		expect(screen.getByText("Execution Success")).not.toHaveClass("text-error");
 		expect(screen.getByText("Open Directory")).toBeInTheDocument();
 	});
 
@@ -163,6 +176,26 @@ describe("Footerの実行ボタン", () => {
 		expect(screen.getByText("Save Shell Success")).toBeInTheDocument();
 	});
 
+	it.each(["Exec", "Save", "Save Shell"])(
+		"%sが失敗したらalertを出さず結果ダイアログにメッセージを出す",
+		async (button) => {
+			const alertSpy = vi.spyOn(window, "alert").mockImplementation(() => {});
+			await act(async () => {
+				renderFooter();
+			});
+			mockFetchData.mockRejectedValueOnce(new Error("line1\nline2"));
+			await userEvent.click(screen.getByText(button));
+
+			// 改行を含むメッセージもそのまま出す
+			expect(
+				screen.getByText((_, el) => el?.textContent === "line1\nline2"),
+			).toHaveClass("text-error");
+			expect(screen.queryByText("Open Directory")).not.toBeInTheDocument();
+			expect(alertSpy).not.toHaveBeenCalled();
+			alertSpy.mockRestore();
+		},
+	);
+
 	it("Abandonedで中断すると実行中の結果を表示しない", async () => {
 		await act(async () => {
 			renderFooter();
@@ -203,7 +236,7 @@ describe("Execのオプション検証エラー", () => {
 		optional: false,
 	});
 
-	const renderWithFields = () => {
+	const renderWithFields = (fields?: ReactNode) => {
 		const wrapper = ({ children }: { children: ReactNode }) => (
 			<environmentContext.Provider value={mockEnvironment}>
 				<WorkspaceResourcesProvider>
@@ -218,15 +251,19 @@ describe("Execのオプション検証エラー", () => {
 		);
 		return render(
 			<>
-				<Text prefix="src" element={textOption("src")} />
-				<Text prefix="src" element={textOption("setting")} hidden />
+				{fields ?? (
+					<>
+						<Text prefix="src" element={textOption("src")} />
+						<Text prefix="src" element={textOption("setting")} hidden />
+					</>
+				)}
 				<Footer formData={() => ({ values: {}, validationError: false })} />
 			</>,
 			{ wrapper },
 		);
 	};
 
-	it("表示中の欄の違反は欄の下に出し、出せない違反はalertで知らせ、入力し直すと消す", async () => {
+	it("表示中の欄の違反は欄の下に出し、出せない違反は結果ダイアログに出し、入力し直すと消す", async () => {
 		const alertSpy = vi.spyOn(window, "alert").mockImplementation(() => {});
 		await act(async () => {
 			renderWithFields();
@@ -241,13 +278,130 @@ describe("Execのオプション検証エラー", () => {
 		);
 		await userEvent.click(screen.getByText("Exec"));
 
-		expect(screen.getByText("Invalid Option")).toBeInTheDocument();
+		// 失敗は成功と区別して赤字で出す
+		expect(screen.getByText("Invalid Option")).toHaveClass("text-error");
 		expect(screen.getByText("src not found")).toBeInTheDocument();
-		expect(screen.queryByText("setting not found")).not.toBeInTheDocument();
-		expect(alertSpy).toHaveBeenCalledWith("setting not found\ncmd is required");
+		// 非表示の欄の下には出さず、ダイアログにだけ出す
+		expect(screen.getAllByText("setting not found")).toHaveLength(1);
+		expect(screen.getByText("cmd is required")).toBeInTheDocument();
+		expect(alertSpy).not.toHaveBeenCalled();
 
 		await userEvent.type(screen.getByLabelText("-src.src"), "a");
 		expect(screen.queryByText("src not found")).not.toBeInTheDocument();
 		alertSpy.mockRestore();
+	});
+
+	it("同じ文言の違反は一度だけ出す", async () => {
+		await act(async () => {
+			renderWithFields();
+		});
+		mockFetchData.mockRejectedValueOnce(
+			new OptionValidationError("invalid", [
+				{ options: ["-src.src"], message: "file not found" },
+				{ options: ["-src.src"], message: "file not found" },
+				{ options: ["-cmd"], message: "cmd is required" },
+				{ options: ["-cmdParam"], message: "cmd is required" },
+			]),
+		);
+		await userEvent.click(screen.getByText("Exec"));
+
+		expect(screen.getAllByText("file not found")).toHaveLength(1);
+		expect(screen.getAllByText("cmd is required")).toHaveLength(1);
+	});
+
+	it("ファイル選択等のボタンから値を変えても違反を消す", async () => {
+		await act(async () => {
+			renderWithFields(
+				<Text prefix="src" element={textOption("src")}>
+					{({ setPath }) => (
+						<input
+							type="button"
+							value="choose"
+							onClick={() => setPath("chosen.csv")}
+						/>
+					)}
+				</Text>,
+			);
+		});
+		mockFetchData.mockRejectedValueOnce(
+			new OptionValidationError("invalid", [
+				{ options: ["-src.src"], message: "src not found" },
+			]),
+		);
+		await userEvent.click(screen.getByText("Exec"));
+		expect(screen.getByText("src not found")).toBeInTheDocument();
+
+		await userEvent.click(screen.getByText("Close"));
+		await userEvent.click(screen.getByDisplayValue("choose"));
+		expect(screen.getByLabelText("-src.src")).toHaveValue("chosen.csv");
+		expect(screen.queryByText("src not found")).not.toBeInTheDocument();
+	});
+
+	it("折りたたんだ欄の違反は、展開すると欄の下に出す", async () => {
+		await act(async () => {
+			renderWithFields(<Collapsible element={textOption("setting")} />);
+		});
+		mockFetchData.mockRejectedValueOnce(
+			new OptionValidationError("invalid", [
+				{ options: ["-src.setting"], message: "setting not found" },
+			]),
+		);
+		await userEvent.click(screen.getByText("Exec"));
+		// 折りたたみ中はダイアログにだけ出す
+		expect(screen.getAllByText("setting not found")).toHaveLength(1);
+
+		await userEvent.click(screen.getByText("Close"));
+		await userEvent.click(screen.getByDisplayValue("toggle"));
+		expect(screen.getByText("setting not found")).toBeInTheDocument();
+	});
+
+	it("チェックボックスとセレクトの違反も欄の下に出し、入力し直すと消す", async () => {
+		const handleTypeSelect = vi.fn(() => Promise.resolve());
+		await act(async () => {
+			renderWithFields(
+				<>
+					<Check
+						prefix="result"
+						element={{
+							...textOption("exportHeader"),
+							value: "true",
+							attribute: { ...textOption("").attribute, type: "FLG" },
+						}}
+					/>
+					<Select
+						prefix="result"
+						handleTypeSelect={handleTypeSelect}
+						element={{
+							...textOption("resultType"),
+							value: "csv",
+							attribute: {
+								...textOption("").attribute,
+								type: "ENUM",
+								selectOption: ["csv", "xlsx"],
+							},
+						}}
+					/>
+				</>,
+			);
+		});
+		mockFetchData.mockRejectedValueOnce(
+			new OptionValidationError("invalid", [
+				{ options: ["-result.exportHeader"], message: "not a boolean" },
+				{ options: ["-result.resultType"], message: "bad type" },
+			]),
+		);
+		await userEvent.click(screen.getByText("Exec"));
+
+		expect(screen.getByText("not a boolean")).toBeInTheDocument();
+		expect(screen.getByText("bad type")).toBeInTheDocument();
+
+		await userEvent.click(screen.getByLabelText("-result.exportHeader"));
+		expect(screen.queryByText("not a boolean")).not.toBeInTheDocument();
+		await userEvent.selectOptions(
+			screen.getByLabelText("-result.resultType"),
+			"xlsx",
+		);
+		expect(screen.queryByText("bad type")).not.toBeInTheDocument();
+		expect(handleTypeSelect).toHaveBeenCalledWith("xlsx");
 	});
 });
