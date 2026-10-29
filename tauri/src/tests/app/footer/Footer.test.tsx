@@ -41,7 +41,7 @@ vi.mock("../../../utils/fetchUtils", async (importOriginal) => ({
 	...(await importOriginal<typeof import("../../../utils/fetchUtils")>()),
 	fetchData: mockFetchData,
 	handleFetchError: vi.fn(),
-	getErrorMessage: vi.fn(),
+	logFetchError: vi.fn(),
 }));
 
 function SelectConvert({
@@ -175,6 +175,26 @@ describe("Footerの実行ボタン", () => {
 		expect(bodyOf(callsTo("shell")[0][0])).toStrictEqual({ name: "test" });
 		expect(screen.getByText("Save Shell Success")).toBeInTheDocument();
 	});
+
+	it.each(["Exec", "Save", "Save Shell"])(
+		"%sが失敗したらalertを出さず結果ダイアログにメッセージを出す",
+		async (button) => {
+			const alertSpy = vi.spyOn(window, "alert").mockImplementation(() => {});
+			await act(async () => {
+				renderFooter();
+			});
+			mockFetchData.mockRejectedValueOnce(new Error("line1\nline2"));
+			await userEvent.click(screen.getByText(button));
+
+			// 改行を含むメッセージもそのまま出す
+			expect(
+				screen.getByText((_, el) => el?.textContent === "line1\nline2"),
+			).toHaveClass("text-error");
+			expect(screen.queryByText("Open Directory")).not.toBeInTheDocument();
+			expect(alertSpy).not.toHaveBeenCalled();
+			alertSpy.mockRestore();
+		},
+	);
 
 	it("Abandonedで中断すると実行中の結果を表示しない", async () => {
 		await act(async () => {
