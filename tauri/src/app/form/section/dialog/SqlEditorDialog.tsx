@@ -58,17 +58,10 @@ function Dialog(props: SqlEditorDialogProps & { value: string }) {
 	const datasetSrcInfo = useDatasetSrcInfo();
 	const [previewPath, setPreviewPath] = useState<string | null>(null);
 
-	const handleCommit = (path: string) =>
+	const saveThen = (onSaved: (path: string) => void) => (path: string) =>
 		saveOnSuccess(
 			() => saveDataSource(path, content),
-			() => props.handleSave(path),
-		);
-
-	// 保存したファイルをsrcにしてテーブル一覧をプレビューする（settingは適用しない）。編集ダイアログは開いたまま
-	const handleSaveAndPreview = (path: string) =>
-		saveOnSuccess(
-			() => saveDataSource(path, content),
-			() => setPreviewPath(path),
+			() => onSaved(path),
 		);
 
 	const insertToContent = (text: string) => {
@@ -105,11 +98,14 @@ function Dialog(props: SqlEditorDialogProps & { value: string }) {
 			helpLabel="SQL Editor"
 			handleDialogClose={props.handleDialogClose}
 			fileName={props.fileName}
-			handleSave={handleCommit}
-			extraSave={{
-				title: "Save and Preview",
-				handleSave: handleSaveAndPreview,
-			}}
+			handleSave={saveThen(props.handleSave)}
+			footerActions={(fileName) => (
+				// 保存したファイルをsrcにしてテーブル一覧をプレビューする（settingは適用しない）。編集ダイアログは開いたまま
+				<BlueButton
+					title="Save and Preview"
+					handleClick={() => saveThen(setPreviewPath)(fileName)}
+				/>
+			)}
 		>
 			<DialogBody size="md">
 				{connectionOk && (
@@ -146,6 +142,7 @@ function Dialog(props: SqlEditorDialogProps & { value: string }) {
 				<DatasetTableNamesPreviewDialog
 					datasetSrcInfo={{
 						...datasetSrcInfo,
+						srcType: props.type,
 						srcPath: previewPath,
 						setting: "",
 					}}
