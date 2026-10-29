@@ -30,6 +30,7 @@ type SettingMode<T> = {
 	handleCommit: (newSettings: T) => void;
 	fileName?: never;
 	handleSave?: never;
+	extraSave?: never;
 };
 
 type FileMode = {
@@ -37,6 +38,8 @@ type FileMode = {
 	handleCommit?: never;
 	fileName: string;
 	handleSave: (path: string) => void;
+	// Saveの右に並べる、入力中のファイル名で保存する追加ボタン（Save and Preview等）
+	extraSave?: { title: string; handleSave: (path: string) => void };
 };
 
 export type SettingDialogProps<T> = CommonProps & (SettingMode<T> | FileMode);
@@ -93,6 +96,12 @@ export function SettingDialog<T>(props: SettingDialogProps<T>) {
 						}
 					}}
 				/>
+				{props.extraSave && (
+					<BlueButton
+						title={props.extraSave.title}
+						handleClick={() => props.extraSave?.handleSave(fileNameValue)}
+					/>
+				)}
 				<WhiteButton title="Close" handleClick={props.handleDialogClose} />
 			</DialogFooter>
 		</FullDialog>

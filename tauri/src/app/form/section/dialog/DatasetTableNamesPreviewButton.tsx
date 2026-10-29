@@ -48,7 +48,7 @@ export default function DatasetTableNamesPreviewButton({
 	);
 }
 
-function DatasetTableNamesPreviewDialog({
+export function DatasetTableNamesPreviewDialog({
 	datasetSrcInfo,
 	handleDialogClose,
 }: {

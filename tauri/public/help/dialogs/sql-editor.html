@@ -32,6 +32,8 @@
 
   <h2 id="section-save">保存</h2>
   <p>ダイアログ下部の name に保存先のファイル名を指定して Save を押すと、内容がファイルとして書き出され、元のテキストボックスにそのファイル名が設定されます。保存先は <code>srcType</code> ごとに Workspace の <code>resources/sql</code> / <code>resources/table</code> / <code>resources/csvq</code> です。</p>
+  <p>Save and Preview を押すと、同じように保存したうえで、保存したファイルを <code>src</code> として読み込まれるテーブルの一覧を表示します（<a href="../sections/dataset-load-form.html">Dataset Load Form</a> の Preview Before Settings と同じ表示です）。<code>setting</code> は指定していても適用しません。一覧の preview ボタンを押すと、そのテーブルのデータを表示します。</p>
+  <p>Save and Preview では SQL Editor は閉じず、元のテキストボックスのファイル名も変わりません。続けて編集でき、ファイル名を反映するには Save を押してください。</p>
 
   <h2 id="section-related">関連</h2>
   <ul>
