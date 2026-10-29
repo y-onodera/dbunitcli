@@ -67,6 +67,7 @@ class DatasetSettingsControllerTest {
         this.tryDelete("importSetting.json");
         this.tryDelete("previewRenameSetting.json");
         this.tryDelete("previewJoinSetting.json");
+        this.tryDelete("previewKeysSetting.json");
         this.deletePreviewSrc();
     }
 
@@ -280,6 +281,30 @@ class DatasetSettingsControllerTest {
     }
 
     @Test
+    void testTableConvert_テーブル名を変えない設定なら対象外のソースを開かない() throws IOException {
+        this.createPreviewSrc();
+        final String setting = this.writeKeysSetting();
+
+        final List<String> opened = this.produceStartLogs(ComparableCsvDataSetProducer.class,
+                () -> this.tableConvert(setting, "small"));
+
+        Assertions.assertEquals(1, opened.size(), opened.toString());
+        Assertions.assertTrue(opened.getFirst().endsWith("small.csv"), opened.toString());
+    }
+
+    @Test
+    void testTablePreview_テーブル名を変えない設定なら対象外のソースを開かない() throws IOException {
+        this.createPreviewSrc();
+        final String setting = this.writeKeysSetting();
+
+        final List<String> opened = this.produceStartLogs(ComparableCsvDataSetProducer.class,
+                () -> this.tablePreview(setting, "small"));
+
+        Assertions.assertEquals(1, opened.size(), opened.toString());
+        Assertions.assertTrue(opened.getFirst().endsWith("small.csv"), opened.toString());
+    }
+
+    @Test
     void testTableConvert_xlsxSchemaなしのxlsxは対象外のシートを読まない() throws IOException {
         Files.createDirectories(PREVIEW_SRC_DIR);
         try (final XSSFWorkbook book = new XSSFWorkbook();
@@ -391,6 +416,11 @@ class DatasetSettingsControllerTest {
     private String writeRenameSetting() throws IOException {
         return this.writeSetting("previewRenameSetting.json",
                 "{\"settings\":[{\"name\":[\"big\"],\"tableName\":\"renamed\"}]}");
+    }
+
+    private String writeKeysSetting() throws IOException {
+        return this.writeSetting("previewKeysSetting.json",
+                "{\"settings\":[{\"name\":[\"small\"],\"keys\":[\"key\"]}]}");
     }
 
     private String writeJoinSetting() throws IOException {

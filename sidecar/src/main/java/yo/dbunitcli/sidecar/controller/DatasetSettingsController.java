@@ -110,7 +110,7 @@ public class DatasetSettingsController extends AbstractResourceFileController<Da
     public String tablePreview(@Body final DatasetTablePreviewRequestDto request) {
         try {
             final TableSeparators separators = this.toParam(request, "true").getTableSeparators();
-            for (final Narrow narrow : Narrow.attempts(Strings.isEmpty(request.getSetting()), separators)) {
+            for (final Narrow narrow : Narrow.attempts(Narrow.keepsSourceName(request, separators), separators)) {
                 final Optional<DatasetTablePreviewResponseDto> preview = this.loadPreview(request, narrow, separators);
                 if (preview.isPresent()) {
                     return ObjectMapper.getDefault().writeValueAsString(preview.get());
@@ -150,9 +150,7 @@ public class DatasetSettingsController extends AbstractResourceFileController<Da
             }
             final ComparableDataSetParam.Builder param = this.toParam(request, "true");
             final TableSeparators separators = param.getTableSeparators();
-            Narrow.singlePass(Strings.isEmpty(request.getSetting())
-                                      && Narrow.keepsSourceName(DataSourceType.valueOf(request.getSrcType()),
-                                                                Strings.isEmpty(request.getXlsxSchema())), separators)
+            Narrow.singlePass(Narrow.keepsSourceName(request, separators), separators)
                   .applyTo(param, separators, tableName);
             FileResources.runInContext(() -> {
                 try (final IDataSetConverter converter = new TargetTableConverter(tableName,
@@ -187,11 +185,11 @@ public class DatasetSettingsController extends AbstractResourceFileController<Da
     }
 
     /**
-     * プレビューでの読込の絞り込み方
+     * プレビュー・convertでの読込の絞り込み方
      */
     private enum Narrow {
         /**
-         * 元テーブル名でも絞る（対象外のソースを開かない）。設定未適用時のみ。xlsxSchema等で名前が変わると見つからない
+         * 元テーブル名でも絞る（対象外のソースを開かない）。元テーブル名がそのまま出力テーブル名になる場合（{@link #keepsSourceName}）のみ
          */
         SOURCE_AND_OUTPUT,
         /**
@@ -207,12 +205,12 @@ public class DatasetSettingsController extends AbstractResourceFileController<Da
          * joinは元テーブルも出力として残す必要があるため、outputFilterで絞らない。
          * 絞らずに読み直すのは、outputFilterで見つからない名前（split後）がありうる場合だけ
          */
-        static List<Narrow> attempts(final boolean settingEmpty, final TableSeparators separators) {
+        static List<Narrow> attempts(final boolean sourceNameKept, final TableSeparators separators) {
             if (!separators.joinConditions().isEmpty()) {
                 return List.of(NONE);
             }
             final List<Narrow> result = new ArrayList<>();
-            if (settingEmpty) {
+            if (sourceNameKept) {
                 result.add(SOURCE_AND_OUTPUT);
             }
             result.add(OUTPUT);
@@ -234,10 +232,14 @@ public class DatasetSettingsController extends AbstractResourceFileController<Da
         private static final Set<DataSourceType> SHEET_NAME_KEPT = EnumSet.of(DataSourceType.xls, DataSourceType.xlsx);
 
         /**
-         * 設定未適用のとき、元テーブル名で絞っても出力テーブル名で探す対象を取りこぼさないか
+         * 元テーブル名で絞っても、出力テーブル名で探す対象を取りこぼさないか（元テーブル名がそのまま出力テーブル名になるか）。
+         * 読込形式で名前が変わらず、設定にもテーブル名を変えるもの（名前の付け替え・分割・join）が無い場合だけ
          */
-        static boolean keepsSourceName(final DataSourceType srcType, final boolean xlsxSchemaEmpty) {
-            return SOURCE_NAME_KEPT.contains(srcType) || (SHEET_NAME_KEPT.contains(srcType) && xlsxSchemaEmpty);
+        static boolean keepsSourceName(final DatasetTableNamesRequestDto request, final TableSeparators separators) {
+            final DataSourceType srcType = DataSourceType.valueOf(request.getSrcType());
+            return (SOURCE_NAME_KEPT.contains(srcType)
+                    || (SHEET_NAME_KEPT.contains(srcType) && Strings.isEmpty(request.getXlsxSchema())))
+                    && separators.keepsTableName();
         }
 
         /**

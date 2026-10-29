@@ -83,6 +83,16 @@ public record TableSeparators(List<TableSeparator> settings
                        .anyMatch(it -> it.splitter().isSplit());
     }
 
+    /**
+     * テーブル名を変える設定（名前の付け替え・分割・join）が無いか。後段（next）の設定も含めて見る
+     */
+    public boolean keepsTableName() {
+        return this.joinConditions().isEmpty()
+                && Stream.concat(this.settings().stream(), this.commonSettings().stream())
+                         .allMatch(it -> it.splitter().equals(TableSplitter.NONE))
+                && (this.next() == null || this.next() == NONE || this.next().keepsTableName());
+    }
+
     public Stream<AddSettingTableMetaData> getAddSettingTableMetaData(final ComparableTableJoin join) {
         return this.chainNext(this.addNewNameSetting(join.getCondition().tableSeparators()
                                                          .stream()
