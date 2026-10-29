@@ -39,16 +39,28 @@ public interface ComparableDataSetProducer extends AutoCloseable {
         final Stream<ComparableTableMappingTask> tasks = this.getSourceStream().map(this::createTableMappingTask);
         final TreeMap<String, ComparableTable> result;
         if (ParallelTableMapping.isParallelizable(this)) {
-            // レーン分けには全タスクが要るため、並列化の余地があるときだけ先に列挙する
-            final List<ComparableTableMappingTask> taskList = tasks.collect(Collectors.toList());
-            result = ParallelTableMapping.lanes(this, taskList)
+            // レーン分けには全タスクが要るため、並列化の余地があるときだけ先に列挙する。除外もレーン分けと同じ候補で行う
+            final ParallelTableMapping.Plan plan = ParallelTableMapping.plan(this, tasks.collect(Collectors.toList()));
+            result = plan.lanes()
                     .map(lanes -> ParallelTableMapping.run(this.param(), lanes))
-                    .orElseGet(() -> this.produceSequential(taskList.stream()));
+                    .orElseGet(() -> this.produceSequential(plan.tasks().stream()));
         } else {
-            result = this.produceSequential(tasks);
+            result = this.produceSequential(this.excludeFilteredOut(tasks));
         }
         LOGGER.info("produce() - end");
         return result;
+    }
+
+    /**
+     * 出力テーブル名が読込前に決まる形式（{@link #isParallelizableSource()}）で、そのすべてが出力の絞り込み（outputFilter）で
+     * 除かれるソースは読まずに除外する（対象外のファイルを開かない・DBにクエリを発行しない）
+     */
+    private Stream<ComparableTableMappingTask> excludeFilteredOut(final Stream<ComparableTableMappingTask> tasks) {
+        final TableSeparators tableSeparators = this.param().tableSeparators();
+        if (!this.isParallelizableSource() || !tableSeparators.canExcludeBeforeRead()) {
+            return tasks;
+        }
+        return tasks.filter(task -> !tableSeparators.excludesAll(task.outputTableCandidates()));
     }
 
     private TreeMap<String, ComparableTable> produceSequential(final Stream<ComparableTableMappingTask> tasks) {
@@ -69,7 +81,7 @@ public interface ComparableDataSetProducer extends AutoCloseable {
     default Map<String, Object> lazyLoad(final boolean includeMetaData) {
         final Map<String, Object> result = new LinkedHashMap<>();
         LOGGER.info("lazyLoad() - start, includeMetaData={}", includeMetaData);
-        LazyloadTaskMapper.mappingFrom(this.param(), this.getSourceStream().map(this::createTableMappingTask))
+        LazyloadTaskMapper.mappingFrom(this.param(), this.excludeFilteredOut(this.getSourceStream().map(this::createTableMappingTask)))
                 .forEach(it -> {
                     LOGGER.info("lazyLoad() - processing tableName={}", it.getTableName());
                     if (includeMetaData) {

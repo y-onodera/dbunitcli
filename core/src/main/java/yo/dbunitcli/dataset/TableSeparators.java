@@ -83,6 +83,36 @@ public record TableSeparators(List<TableSeparator> settings
                        .anyMatch(it -> it.splitter().isSplit());
     }
 
+    /**
+     * 出力テーブル名がソースごとに読込前に決まるか（joinはソースをまたぎ、件数分割は分割後の名前が行数で決まるため決まらない）。
+     * 後段（next）の設定も含めて見る
+     */
+    public boolean isIndependentTables() {
+        return this.chain().allMatch(it -> it.joinConditions().isEmpty() && !it.hasSplitter());
+    }
+
+    /**
+     * 読込前に求めた出力テーブルの候補で、読まずに除外できるソースがありうるか
+     * （出力テーブル名が読込前に決まり、出力の絞り込み（outputFilter）がある）
+     */
+    public boolean canExcludeBeforeRead() {
+        return this.isIndependentTables() && this.chain().anyMatch(it -> !Builder.isUnset(it.filter()));
+    }
+
+    /**
+     * 出力テーブルの候補がすべて出力の絞り込み（outputFilter）で除かれるか。{@link #canExcludeBeforeRead()}がtrueの場合に使う
+     */
+    public boolean excludesAll(final Stream<? extends ITableMetaData> candidates) {
+        return candidates.flatMap(this::getAddSettingTableMetaData).findAny().isEmpty();
+    }
+
+    /**
+     * この設定と後段（next）の設定
+     */
+    private Stream<TableSeparators> chain() {
+        return Stream.iterate(this, it -> it != null && it != NONE, TableSeparators::next);
+    }
+
     public Stream<AddSettingTableMetaData> getAddSettingTableMetaData(final ComparableTableJoin join) {
         return this.chainNext(this.addNewNameSetting(join.getCondition().tableSeparators()
                                                          .stream()

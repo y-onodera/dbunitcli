@@ -26,6 +26,7 @@ import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.dataset.ComparableDataSetProducer;
 import yo.dbunitcli.dataset.ComparableTable;
 import yo.dbunitcli.dataset.ComparableTableJoin;
+import yo.dbunitcli.dataset.DataSourceType;
 import yo.dbunitcli.dataset.IDataSetConverter;
 import yo.dbunitcli.dataset.TableSeparators;
 import yo.dbunitcli.dataset.producer.ComparableDataSetLoader;
@@ -43,12 +44,11 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.regex.Pattern;
+import java.util.Set;
 
 @Controller("dataset-setting")
 public class DatasetSettingsController extends AbstractResourceFileController<DatasetRequestDto> {
@@ -107,7 +107,7 @@ public class DatasetSettingsController extends AbstractResourceFileController<Da
     public String tablePreview(@Body final DatasetTablePreviewRequestDto request) {
         try {
             final TableSeparators separators = this.toParam(request, "true").getTableSeparators();
-            for (final Narrow narrow : Narrow.attempts(Strings.isEmpty(request.getSetting()), separators)) {
+            for (final Narrow narrow : Narrow.attempts(separators)) {
                 final Optional<DatasetTablePreviewResponseDto> preview = this.loadPreview(request, narrow, separators);
                 if (preview.isPresent()) {
                     return ObjectMapper.getDefault().writeValueAsString(preview.get());
@@ -181,15 +181,12 @@ public class DatasetSettingsController extends AbstractResourceFileController<Da
     }
 
     /**
-     * プレビューでの読込の絞り込み方
+     * プレビュー・convertでの読込の絞り込み方。出力テーブル名で絞ると、読込前に出力テーブル名が決まるソースのうち
+     * 対象外のものは開かない（ComparableDataSetProducer#produce）。それ以外も対象外のテーブルは行を読まない
      */
     private enum Narrow {
         /**
-         * 元テーブル名でも絞る（対象外のソースを開かない）。設定未適用時のみ。xlsxSchema等で名前が変わると見つからない
-         */
-        SOURCE_AND_OUTPUT,
-        /**
-         * 出力テーブル名をoutputFilterで絞る（対象外のテーブルは行を読まない）。分割（split）後の名前では見つからない
+         * 出力テーブル名をoutputFilterで絞る。分割（split）後の名前では見つからない
          */
         OUTPUT,
         /**
@@ -198,36 +195,25 @@ public class DatasetSettingsController extends AbstractResourceFileController<Da
         NONE;
 
         /**
-         * joinは元テーブルも出力として残す必要があるため、outputFilterで絞らない。
-         * 絞らずに読み直すのは、outputFilterで見つからない名前（split後）がありうる場合だけ
+         * 出力テーブル名が読込前に決まれば（join・splitが無い）絞って読むだけでよい。
+         * joinは元テーブルも出力として残す必要があるため絞らない。splitはoutputFilterで見つからなければ絞らずに読み直す
          */
-        static List<Narrow> attempts(final boolean settingEmpty, final TableSeparators separators) {
-            if (!separators.joinConditions().isEmpty()) {
-                return List.of(NONE);
+        static List<Narrow> attempts(final TableSeparators separators) {
+            if (separators.isIndependentTables()) {
+                return List.of(OUTPUT);
             }
-            final List<Narrow> result = new ArrayList<>();
-            if (settingEmpty) {
-                result.add(SOURCE_AND_OUTPUT);
-            }
-            result.add(OUTPUT);
-            if (separators.hasSplitter()) {
-                result.add(NONE);
-            }
-            return result;
+            return separators.joinConditions().isEmpty() ? List.of(OUTPUT, NONE) : List.of(NONE);
         }
 
         /**
-         * 読み直さずに済む（対象を取りこぼさない）最も強い絞り込み。元テーブル名での絞り込みは名前が変わると見つからないため使わない
+         * 読み直さずに済む（対象を取りこぼさない）最も強い絞り込み
          */
         static Narrow singlePass(final TableSeparators separators) {
-            return separators.joinConditions().isEmpty() && !separators.hasSplitter() ? OUTPUT : NONE;
+            return separators.isIndependentTables() ? OUTPUT : NONE;
         }
 
         void applyTo(final ComparableDataSetParam.Builder param, final TableSeparators separators, final String tableName) {
-            if (this == SOURCE_AND_OUTPUT) {
-                param.setRegTableInclude("(?i)^" + Pattern.quote(tableName) + "$");
-            }
-            if (this != NONE) {
+            if (this == OUTPUT) {
                 param.setTableSeparators(separators.builder()
                                                    .addFilter(tableName::equals, TableSeparators.FilterCombine.AND)
                                                    .build());
@@ -251,7 +237,7 @@ public class DatasetSettingsController extends AbstractResourceFileController<Da
     private ComparableDataSetParam.Builder toParam(final DatasetTableNamesRequestDto request, final String loadData) {
         final DataSetLoadDto dto = new DataSetLoadDto();
         dto.setSrc(request.getSrc());
-        dto.setSrcType(yo.dbunitcli.dataset.DataSourceType.valueOf(request.getSrcType()));
+        dto.setSrcType(DataSourceType.valueOf(request.getSrcType()));
         dto.setRegTableInclude(request.getRegTableInclude());
         dto.setRegTableExclude(request.getRegTableExclude());
         dto.setRecursive(String.valueOf(request.isRecursive()));

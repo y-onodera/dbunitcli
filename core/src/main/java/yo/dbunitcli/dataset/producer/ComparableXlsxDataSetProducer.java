@@ -61,18 +61,22 @@ public record ComparableXlsxDataSetProducer(ComparableDataSetParam param) implem
                 final XSSFReader xssfReader = new XSSFReader(pkg);
                 final StylesTable styles = xssfReader.getStylesTable();
                 final XSSFReader.SheetIterator iterator = (XSSFReader.SheetIterator) xssfReader.getSheetsData();
+                final TableSeparators tableSeparators = this.targetTableSeparators();
+                final boolean excludable = tableSeparators.canExcludeBeforeRead();
                 int index = 0;
                 while (iterator.hasNext()) {
                     try (final InputStream stream = iterator.next()) {
                         final String sheetName = iterator.getSheetName();
-                        if (this.sheetNameFilter.predicate(sheetName) && this.schema.contains(sheetName)) {
+                        final Source sheet = this.source.sheetName(sheetName);
+                        if (this.isTargetSheet(sheetName)
+                                && !(excludable && tableSeparators.excludesAll(this.sheetCandidates(sheet)))) {
                             ComparableXlsxDataSetProducer.LOGGER.info("produce - start sheetName={},index={}", sheetName, index++);
                             this.processSheet(styles, strings, new XlsxSchemaHandler(context
                                             , this.schema
                                             , this.param.startRow()
                                             , this.param.headerNames()
                                             , this.param.loadData()
-                                            , this.source.sheetName(sheetName))
+                                            , sheet)
                                     , stream);
                             ComparableXlsxDataSetProducer.LOGGER.info("produce - end   sheetName={},index={}", sheetName, index - 1);
                         }
@@ -101,9 +105,19 @@ public record ComparableXlsxDataSetProducer(ComparableDataSetParam param) implem
                 throw new AssertionError(e);
             }
             return sheetNames.stream()
-                    .filter(sheetName -> this.sheetNameFilter.predicate(sheetName) && this.schema.contains(sheetName))
-                    .flatMap(sheetName -> this.schema.getTableCandidates(this.param.startRow(), this.param.headerNames()
-                            , this.source.sheetName(sheetName)));
+                    .filter(this::isTargetSheet)
+                    .flatMap(sheetName -> this.sheetCandidates(this.source.sheetName(sheetName)));
+        }
+
+        private boolean isTargetSheet(final String sheetName) {
+            return this.sheetNameFilter.predicate(sheetName) && this.schema.contains(sheetName);
+        }
+
+        /**
+         * シートから作るテーブルの候補（シートの中身は読まない）
+         */
+        private Stream<TableMetaDataWithSource> sheetCandidates(final Source sheet) {
+            return this.schema.getTableCandidates(this.param.startRow(), this.param.headerNames(), sheet);
         }
 
         @Override

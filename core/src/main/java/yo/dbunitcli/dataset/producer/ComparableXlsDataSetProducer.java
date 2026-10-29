@@ -54,12 +54,17 @@ public record ComparableXlsDataSetProducer(ComparableDataSetParam param) impleme
         private int nextRow;
         private int nextColumn;
         private boolean outputNextStringRecord;
+        /**
+         * 出力の絞り込みで除かれるシートを読まずに済ませられるか（タスクごとに1回だけ求める）
+         */
+        private final boolean excludable;
 
         XlsTableExecutor(final Source source, final ComparableDataSetParam param, final NameFilter sheetNameFilter) {
             super(param.xlsxSchema(), param.startRow(), param.headerNames(), param.loadData(), param.addFileInfo());
             this.source = source;
             this.param = param;
             this.sheetNameFilter = sheetNameFilter;
+            this.excludable = param.tableSeparators().canExcludeBeforeRead();
         }
 
         @Override
@@ -125,8 +130,14 @@ public record ComparableXlsDataSetProducer(ComparableDataSetParam param) impleme
             }
             return sheetNames.stream()
                     .filter(this.sheetNameFilter::predicate)
-                    .flatMap(sheetName -> this.param.xlsxSchema().getTableCandidates(this.param.startRow(), this.headerNames
-                            , new Source(file, this.addFileInfo).sheetName(sheetName)));
+                    .flatMap(sheetName -> this.sheetCandidates(new Source(file, this.addFileInfo).sheetName(sheetName)));
+        }
+
+        /**
+         * シートから作るテーブルの候補（シートの中身は読まない）
+         */
+        private Stream<TableMetaDataWithSource> sheetCandidates(final Source sheet) {
+            return this.param.xlsxSchema().getTableCandidates(this.param.startRow(), this.headerNames, sheet);
         }
 
         @Override
@@ -159,9 +170,10 @@ public record ComparableXlsDataSetProducer(ComparableDataSetParam param) impleme
                             ComparableXlsDataSetProducer.LOGGER.info("produce - end   sheetName={},index={}", this.orderedBSRs[this.sheetIndex - 1].getSheetname(), this.sheetIndex - 1);
                         }
                         final String tableName = this.orderedBSRs[this.sheetIndex].getSheetname();
-                        if (this.sheetNameFilter.predicate(tableName)) {
-                            this.handleSheetStart(this.headerNames
-                                    , new Source(this.sourceFile, this.addFileInfo).sheetName(tableName));
+                        final Source sheet = new Source(this.sourceFile, this.addFileInfo).sheetName(tableName);
+                        if (this.sheetNameFilter.predicate(tableName)
+                                && !(this.excludable && this.targetTableSeparators().excludesAll(this.sheetCandidates(sheet)))) {
+                            this.handleSheetStart(this.headerNames, sheet);
                             ComparableXlsDataSetProducer.LOGGER.info("produce - start sheetName={},index={}", tableName, this.sheetIndex);
                         }
                     }

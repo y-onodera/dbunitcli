@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import yo.dbunitcli.resource.Workers;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Queue;
@@ -31,7 +32,48 @@ public final class ParallelTableMapping {
         return ParallelTableMapping.parallelism(param) > 1
                 && producer.isParallelizableSource()
                 && (param.converter() == null || param.converter().isParallelizable())
-                && ParallelTableMapping.isIndependentTables(param.tableSeparators());
+                && param.tableSeparators().isIndependentTables();
+    }
+
+    /**
+     * 並列に読み込むレーンと、読込前に除外したあとのタスク
+     *
+     * @param tasks 除外したあとのタスク（レーンに分けない場合に逐次で読む）
+     * @param lanes 並列化できる場合はレーンの一覧（2つ以上）。できない場合はempty
+     */
+    public record Plan(List<ComparableTableMappingTask> tasks, Optional<List<List<ComparableTableMappingTask>>> lanes) {
+    }
+
+    /**
+     * 出力テーブルの候補をタスクごとに1回だけ求め、出力の絞り込み（outputFilter）ですべて除かれるタスクを除いてからレーンに分ける。
+     * 候補はxls/xlsxでファイルを開くため、タスクごとに並列に求める
+     */
+    public static Plan plan(final ComparableDataSetProducer producer, final List<ComparableTableMappingTask> tasks) {
+        if (!ParallelTableMapping.isParallelizable(producer)) {
+            return new Plan(tasks, Optional.empty());
+        }
+        final TableSeparators tableSeparators = producer.param().tableSeparators();
+        final List<List<String>> outputTables = tasks.parallelStream()
+                .map(task -> task.outputTableCandidates()
+                        .flatMap(tableSeparators::getAddSettingTableMetaData)
+                        .map(AddSettingTableMetaData::getTableName)
+                        .toList())
+                .toList();
+        final boolean exclude = tableSeparators.canExcludeBeforeRead();
+        final List<ComparableTableMappingTask> keptTasks = new ArrayList<>();
+        final List<List<String>> keptTables = new ArrayList<>();
+        for (int i = 0; i < tasks.size(); i++) {
+            if (!exclude || !outputTables.get(i).isEmpty()) {
+                keptTasks.add(tasks.get(i));
+                keptTables.add(outputTables.get(i));
+            }
+        }
+        if (keptTasks.size() < 2) {
+            return new Plan(keptTasks, Optional.empty());
+        }
+        // 出力テーブル名を1つでも共有するソースを同じレーンにまとめる（連結成分）。レーン内・レーン間とも元の順を保つ
+        final List<List<ComparableTableMappingTask>> lanes = Workers.groupByShared(keptTasks, keptTables);
+        return new Plan(keptTasks, lanes.size() < 2 ? Optional.empty() : Optional.of(lanes));
     }
 
     /**
@@ -39,14 +81,7 @@ public final class ParallelTableMapping {
      */
     public static Optional<List<List<ComparableTableMappingTask>>> lanes(final ComparableDataSetProducer producer
             , final List<ComparableTableMappingTask> tasks) {
-        if (tasks.size() < 2 || !ParallelTableMapping.isParallelizable(producer)) {
-            return Optional.empty();
-        }
-        final List<List<ComparableTableMappingTask>> result = ParallelTableMapping.groupBySharedTable(producer.param().tableSeparators(), tasks);
-        if (result.size() < 2) {
-            return Optional.empty();
-        }
-        return Optional.of(result);
+        return ParallelTableMapping.plan(producer, tasks).lanes();
     }
 
     public static TreeMap<String, ComparableTable> run(final ComparableDataSetParam param
@@ -65,35 +100,6 @@ public final class ParallelTableMapping {
      */
     public static int parallelism(final ComparableDataSetParam param) {
         return Workers.parallelism(param.parallel());
-    }
-
-    /**
-     * joinはレーンをまたいで結果を共有し、件数分割は分割後の名前を事前に決められないため並列化しない
-     */
-    private static boolean isIndependentTables(final TableSeparators tableSeparators) {
-        TableSeparators target = tableSeparators;
-        while (target != null && target != TableSeparators.NONE) {
-            if (!target.joinConditions().isEmpty() || target.hasSplitter()) {
-                return false;
-            }
-            target = target.next();
-        }
-        return true;
-    }
-
-    /**
-     * 出力テーブル名を1つでも共有するソースを同じレーンにまとめる（連結成分）。レーン内・レーン間とも元の順を保つ。
-     * 出力テーブルの候補はxls/xlsxでファイルを開くため、タスクごとに並列に求める
-     */
-    private static List<List<ComparableTableMappingTask>> groupBySharedTable(final TableSeparators tableSeparators
-            , final List<ComparableTableMappingTask> tasks) {
-        final List<List<String>> outputTables = tasks.parallelStream()
-                .map(task -> task.outputTableCandidates()
-                        .flatMap(tableSeparators::getAddSettingTableMetaData)
-                        .map(AddSettingTableMetaData::getTableName)
-                        .toList())
-                .toList();
-        return Workers.groupByShared(tasks, outputTables);
     }
 
     /**
