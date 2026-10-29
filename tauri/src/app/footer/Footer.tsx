@@ -118,7 +118,8 @@ export default function Footer(prop: {
 		<>
 			<ResultDialog hidden={running.resultMessage === ""}>
 				<div className="p-4 md:p-5">
-					<h3 className="mb-5 text-lg font-normal text-content-muted">
+					{/* sidecarの例外メッセージは長く複数行になりうるため、改行を残して折り返し、長ければスクロールさせる */}
+					<h3 className="mb-5 max-h-60 overflow-y-auto whitespace-pre-wrap break-all text-lg font-normal text-content-muted">
 						{running.resultMessage}
 					</h3>
 					{resultDetails.length > 0 && (
