@@ -1,11 +1,20 @@
-import { Children, type ReactNode, useState } from "react";
+import {
+	Children,
+	type Dispatch,
+	type ReactNode,
+	type SetStateAction,
+	useState,
+} from "react";
 import DropDownMenu from "../../../../components/element/DropDownMenu";
 import {
 	ControllTextBox,
 	InputLabel,
 	ResourceDatalist,
 } from "../../../../components/element/Input";
-import { useFieldErrors } from "../../../../context/FieldErrorProvider";
+import {
+	useClearFieldErrors,
+	useFieldErrors,
+} from "../../../../context/FieldErrorProvider";
 import { useWorkspaceContext } from "../../../../context/WorkspaceResourcesProvider";
 import { DirectoryChooser, FileChooser, OpenInOS } from "./Chooser";
 import FieldErrorMessages from "./FieldErrorMessages";
@@ -35,6 +44,12 @@ export default function Text({
 	const showWorkspaceAsSecondary =
 		showDefaulePath && workspacePath !== "" && workspacePath !== basePath;
 	const fieldErrors = useFieldErrors(fieldName, !hidden);
+	const clearFieldErrors = useClearFieldErrors();
+	// ボタン等から値を変えたときはchangeが起きないため、ここで検証エラーを消す
+	const updatePath: Dispatch<SetStateAction<string>> = (value) => {
+		setPath(value);
+		clearFieldErrors(fieldName);
+	};
 
 	const handleChange = (ev: React.ChangeEvent<HTMLInputElement>) => {
 		const newValue = ev.target.value;
@@ -79,7 +94,7 @@ export default function Text({
 					</div>
 					{!hidden &&
 						children &&
-						children({ path, setPath, isValueInDatalist })}
+						children({ path, setPath: updatePath, isValueInDatalist })}
 				</div>
 			</div>
 			{afterContent?.({ path })}

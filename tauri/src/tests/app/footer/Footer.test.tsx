@@ -291,6 +291,34 @@ describe("Execのオプション検証エラー", () => {
 		alertSpy.mockRestore();
 	});
 
+	it("ファイル選択等のボタンから値を変えても違反を消す", async () => {
+		await act(async () => {
+			renderWithFields(
+				<Text prefix="src" element={textOption("src")}>
+					{({ setPath }) => (
+						<input
+							type="button"
+							value="choose"
+							onClick={() => setPath("chosen.csv")}
+						/>
+					)}
+				</Text>,
+			);
+		});
+		mockFetchData.mockRejectedValueOnce(
+			new OptionValidationError("invalid", [
+				{ options: ["-src.src"], message: "src not found" },
+			]),
+		);
+		await userEvent.click(screen.getByText("Exec"));
+		expect(screen.getByText("src not found")).toBeInTheDocument();
+
+		await userEvent.click(screen.getByText("Close"));
+		await userEvent.click(screen.getByDisplayValue("choose"));
+		expect(screen.getByLabelText("-src.src")).toHaveValue("chosen.csv");
+		expect(screen.queryByText("src not found")).not.toBeInTheDocument();
+	});
+
 	it("折りたたんだ欄の違反は、展開すると欄の下に出す", async () => {
 		await act(async () => {
 			renderWithFields(<Collapsible element={textOption("setting")} />);
