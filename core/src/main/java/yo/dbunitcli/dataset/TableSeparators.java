@@ -84,13 +84,32 @@ public record TableSeparators(List<TableSeparator> settings
     }
 
     /**
-     * テーブル名を変える設定（名前の付け替え・分割・join）が無いか。後段（next）の設定も含めて見る
+     * 出力テーブル名がソースごとに読込前に決まるか（joinはソースをまたぎ、件数分割は分割後の名前が行数で決まるため決まらない）。
+     * 後段（next）の設定も含めて見る
      */
-    public boolean keepsTableName() {
-        return this.joinConditions().isEmpty()
-                && Stream.concat(this.settings().stream(), this.commonSettings().stream())
-                         .allMatch(it -> it.splitter().equals(TableSplitter.NONE))
-                && (this.next() == null || this.next() == NONE || this.next().keepsTableName());
+    public boolean isIndependentTables() {
+        TableSeparators target = this;
+        while (target != null && target != NONE) {
+            if (!target.joinConditions().isEmpty() || target.hasSplitter()) {
+                return false;
+            }
+            target = target.next();
+        }
+        return true;
+    }
+
+    /**
+     * 出力テーブルの絞り込み（outputFilter）があるか。後段（next）の設定も含めて見る
+     */
+    public boolean hasOutputFilter() {
+        TableSeparators target = this;
+        while (target != null && target != NONE) {
+            if (!(target.filter() instanceof final AlwaysFilter always && always.result())) {
+                return true;
+            }
+            target = target.next();
+        }
+        return false;
     }
 
     public Stream<AddSettingTableMetaData> getAddSettingTableMetaData(final ComparableTableJoin join) {

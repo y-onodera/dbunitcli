@@ -44,14 +44,11 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.regex.Pattern;
 
 @Controller("dataset-setting")
 public class DatasetSettingsController extends AbstractResourceFileController<DatasetRequestDto> {
@@ -110,7 +107,7 @@ public class DatasetSettingsController extends AbstractResourceFileController<Da
     public String tablePreview(@Body final DatasetTablePreviewRequestDto request) {
         try {
             final TableSeparators separators = this.toParam(request, "true").getTableSeparators();
-            for (final Narrow narrow : Narrow.attempts(Narrow.keepsSourceName(request, separators), separators)) {
+            for (final Narrow narrow : Narrow.attempts(separators)) {
                 final Optional<DatasetTablePreviewResponseDto> preview = this.loadPreview(request, narrow, separators);
                 if (preview.isPresent()) {
                     return ObjectMapper.getDefault().writeValueAsString(preview.get());
@@ -150,8 +147,7 @@ public class DatasetSettingsController extends AbstractResourceFileController<Da
             }
             final ComparableDataSetParam.Builder param = this.toParam(request, "true");
             final TableSeparators separators = param.getTableSeparators();
-            Narrow.singlePass(Narrow.keepsSourceName(request, separators), separators)
-                  .applyTo(param, separators, tableName);
+            Narrow.singlePass(separators).applyTo(param, separators, tableName);
             FileResources.runInContext(() -> {
                 try (final IDataSetConverter converter = new TargetTableConverter(tableName,
                         result.converter(it -> it.setResultPath(result.getResultPath())))) {
@@ -185,15 +181,12 @@ public class DatasetSettingsController extends AbstractResourceFileController<Da
     }
 
     /**
-     * プレビュー・convertでの読込の絞り込み方
+     * プレビュー・convertでの読込の絞り込み方。出力テーブル名で絞ると、読込前に出力テーブル名が決まるソースのうち
+     * 対象外のものは開かない（ComparableDataSetProducer#produce）。それ以外も対象外のテーブルは行を読まない
      */
     private enum Narrow {
         /**
-         * 元テーブル名でも絞る（対象外のソースを開かない）。元テーブル名がそのまま出力テーブル名になる場合（{@link #keepsSourceName}）のみ
-         */
-        SOURCE_AND_OUTPUT,
-        /**
-         * 出力テーブル名をoutputFilterで絞る（対象外のテーブルは行を読まない）。分割（split）後の名前では見つからない
+         * 出力テーブル名をoutputFilterで絞る。分割（split）後の名前では見つからない
          */
         OUTPUT,
         /**
@@ -205,58 +198,25 @@ public class DatasetSettingsController extends AbstractResourceFileController<Da
          * joinは元テーブルも出力として残す必要があるため、outputFilterで絞らない。
          * 絞らずに読み直すのは、outputFilterで見つからない名前（split後）がありうる場合だけ
          */
-        static List<Narrow> attempts(final boolean sourceNameKept, final TableSeparators separators) {
+        static List<Narrow> attempts(final TableSeparators separators) {
             if (!separators.joinConditions().isEmpty()) {
                 return List.of(NONE);
             }
-            final List<Narrow> result = new ArrayList<>();
-            if (sourceNameKept) {
-                result.add(SOURCE_AND_OUTPUT);
-            }
-            result.add(OUTPUT);
             if (separators.hasSplitter()) {
-                result.add(NONE);
+                return List.of(OUTPUT, NONE);
             }
-            return result;
+            return List.of(OUTPUT);
         }
 
         /**
-         * 元テーブル名（ファイル名・テーブル名）がそのまま出力テーブル名になる形式。file・dirは元テーブル名で絞らないため含めない
+         * 読み直さずに済む（対象を取りこぼさない）最も強い絞り込み
          */
-        private static final Set<DataSourceType> SOURCE_NAME_KEPT = EnumSet.of(DataSourceType.table, DataSourceType.sql,
-                DataSourceType.csv, DataSourceType.csvq, DataSourceType.reg, DataSourceType.fixed);
-
-        /**
-         * シート名で絞る形式。xlsxSchemaが無ければシート名がそのまま出力テーブル名になる
-         */
-        private static final Set<DataSourceType> SHEET_NAME_KEPT = EnumSet.of(DataSourceType.xls, DataSourceType.xlsx);
-
-        /**
-         * 元テーブル名で絞っても、出力テーブル名で探す対象を取りこぼさないか（元テーブル名がそのまま出力テーブル名になるか）。
-         * 読込形式で名前が変わらず、設定にもテーブル名を変えるもの（名前の付け替え・分割・join）が無い場合だけ
-         */
-        static boolean keepsSourceName(final DatasetTableNamesRequestDto request, final TableSeparators separators) {
-            final DataSourceType srcType = DataSourceType.valueOf(request.getSrcType());
-            return (SOURCE_NAME_KEPT.contains(srcType)
-                    || (SHEET_NAME_KEPT.contains(srcType) && Strings.isEmpty(request.getXlsxSchema())))
-                    && separators.keepsTableName();
-        }
-
-        /**
-         * 読み直さずに済む（対象を取りこぼさない）最も強い絞り込み。元テーブル名で絞るのは、名前が変わらないと分かっている場合だけ
-         */
-        static Narrow singlePass(final boolean sourceNameKept, final TableSeparators separators) {
-            if (!separators.joinConditions().isEmpty() || separators.hasSplitter()) {
-                return NONE;
-            }
-            return sourceNameKept ? SOURCE_AND_OUTPUT : OUTPUT;
+        static Narrow singlePass(final TableSeparators separators) {
+            return separators.joinConditions().isEmpty() && !separators.hasSplitter() ? OUTPUT : NONE;
         }
 
         void applyTo(final ComparableDataSetParam.Builder param, final TableSeparators separators, final String tableName) {
-            if (this == SOURCE_AND_OUTPUT) {
-                param.setRegTableInclude("(?i)^" + Pattern.quote(tableName) + "$");
-            }
-            if (this != NONE) {
+            if (this == OUTPUT) {
                 param.setTableSeparators(separators.builder()
                                                    .addFilter(tableName::equals, TableSeparators.FilterCombine.AND)
                                                    .build());

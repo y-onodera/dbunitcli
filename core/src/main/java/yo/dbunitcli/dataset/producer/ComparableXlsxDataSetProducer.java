@@ -65,7 +65,9 @@ public record ComparableXlsxDataSetProducer(ComparableDataSetParam param) implem
                 while (iterator.hasNext()) {
                     try (final InputStream stream = iterator.next()) {
                         final String sheetName = iterator.getSheetName();
-                        if (this.sheetNameFilter.predicate(sheetName) && this.schema.contains(sheetName)) {
+                        if (this.sheetNameFilter.predicate(sheetName) && this.schema.contains(sheetName)
+                                && !this.isFilteredOut(this.schema.getTableCandidates(this.param.startRow(), this.param.headerNames()
+                                , this.source.sheetName(sheetName)))) {
                             ComparableXlsxDataSetProducer.LOGGER.info("produce - start sheetName={},index={}", sheetName, index++);
                             this.processSheet(styles, strings, new XlsxSchemaHandler(context
                                             , this.schema

@@ -31,7 +31,7 @@ public final class ParallelTableMapping {
         return ParallelTableMapping.parallelism(param) > 1
                 && producer.isParallelizableSource()
                 && (param.converter() == null || param.converter().isParallelizable())
-                && ParallelTableMapping.isIndependentTables(param.tableSeparators());
+                && param.tableSeparators().isIndependentTables();
     }
 
     /**
@@ -65,20 +65,6 @@ public final class ParallelTableMapping {
      */
     public static int parallelism(final ComparableDataSetParam param) {
         return Workers.parallelism(param.parallel());
-    }
-
-    /**
-     * joinはレーンをまたいで結果を共有し、件数分割は分割後の名前を事前に決められないため並列化しない
-     */
-    private static boolean isIndependentTables(final TableSeparators tableSeparators) {
-        TableSeparators target = tableSeparators;
-        while (target != null && target != TableSeparators.NONE) {
-            if (!target.joinConditions().isEmpty() || target.hasSplitter()) {
-                return false;
-            }
-            target = target.next();
-        }
-        return true;
     }
 
     /**

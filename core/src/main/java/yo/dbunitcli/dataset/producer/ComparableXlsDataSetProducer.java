@@ -159,9 +159,10 @@ public record ComparableXlsDataSetProducer(ComparableDataSetParam param) impleme
                             ComparableXlsDataSetProducer.LOGGER.info("produce - end   sheetName={},index={}", this.orderedBSRs[this.sheetIndex - 1].getSheetname(), this.sheetIndex - 1);
                         }
                         final String tableName = this.orderedBSRs[this.sheetIndex].getSheetname();
-                        if (this.sheetNameFilter.predicate(tableName)) {
-                            this.handleSheetStart(this.headerNames
-                                    , new Source(this.sourceFile, this.addFileInfo).sheetName(tableName));
+                        final Source sheet = new Source(this.sourceFile, this.addFileInfo).sheetName(tableName);
+                        if (this.sheetNameFilter.predicate(tableName)
+                                && !this.isFilteredOut(this.param.xlsxSchema().getTableCandidates(this.param.startRow(), this.headerNames, sheet))) {
+                            this.handleSheetStart(this.headerNames, sheet);
                             ComparableXlsDataSetProducer.LOGGER.info("produce - start sheetName={},index={}", tableName, this.sheetIndex);
                         }
                     }

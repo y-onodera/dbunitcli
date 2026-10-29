@@ -36,7 +36,8 @@ public interface ComparableDataSetProducer extends AutoCloseable {
 
     default TreeMap<String, ComparableTable> produce() {
         LOGGER.info("produce() - start");
-        final Stream<ComparableTableMappingTask> tasks = this.getSourceStream().map(this::createTableMappingTask);
+        final Stream<ComparableTableMappingTask> tasks = this.excludeFilteredOut(
+                this.getSourceStream().map(this::createTableMappingTask));
         final TreeMap<String, ComparableTable> result;
         if (ParallelTableMapping.isParallelizable(this)) {
             // レーン分けには全タスクが要るため、並列化の余地があるときだけ先に列挙する
@@ -49,6 +50,17 @@ public interface ComparableDataSetProducer extends AutoCloseable {
         }
         LOGGER.info("produce() - end");
         return result;
+    }
+
+    /**
+     * 出力テーブル名が読込前に決まる形式（{@link #isParallelizableSource()}）で、そのすべてが出力の絞り込み（outputFilter）で
+     * 除かれるソースは読まずに除外する（対象外のファイルを開かない・DBにクエリを発行しない）
+     */
+    private Stream<ComparableTableMappingTask> excludeFilteredOut(final Stream<ComparableTableMappingTask> tasks) {
+        if (!this.isParallelizableSource()) {
+            return tasks;
+        }
+        return tasks.filter(task -> !task.isFilteredOut(task.outputTableCandidates()));
     }
 
     private TreeMap<String, ComparableTable> produceSequential(final Stream<ComparableTableMappingTask> tasks) {

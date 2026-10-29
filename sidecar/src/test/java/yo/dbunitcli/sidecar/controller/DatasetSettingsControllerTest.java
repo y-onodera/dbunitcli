@@ -305,6 +305,30 @@ class DatasetSettingsControllerTest {
     }
 
     @Test
+    void testTableConvert_テーブル名を変える設定でも対象外のソースを開かない() throws IOException {
+        this.createPreviewSrc();
+        final String setting = this.writeRenameSetting();
+
+        final List<String> opened = this.produceStartLogs(ComparableCsvDataSetProducer.class,
+                () -> this.tableConvert(setting, "renamed"));
+
+        Assertions.assertEquals(1, opened.size(), opened.toString());
+        Assertions.assertTrue(opened.getFirst().endsWith("big.csv"), opened.toString());
+    }
+
+    @Test
+    void testTablePreview_テーブル名を変える設定でも対象外のソースを開かない() throws IOException {
+        this.createPreviewSrc();
+        final String setting = this.writeRenameSetting();
+
+        final List<String> opened = this.produceStartLogs(ComparableCsvDataSetProducer.class,
+                () -> this.tablePreview(setting, "renamed"));
+
+        Assertions.assertEquals(1, opened.size(), opened.toString());
+        Assertions.assertTrue(opened.getFirst().endsWith("big.csv"), opened.toString());
+    }
+
+    @Test
     void testTableConvert_xlsxSchemaなしのxlsxは対象外のシートを読まない() throws IOException {
         Files.createDirectories(PREVIEW_SRC_DIR);
         try (final XSSFWorkbook book = new XSSFWorkbook();
