@@ -26,6 +26,7 @@ import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.dataset.ComparableDataSetProducer;
 import yo.dbunitcli.dataset.ComparableTable;
 import yo.dbunitcli.dataset.ComparableTableJoin;
+import yo.dbunitcli.dataset.DataSourceType;
 import yo.dbunitcli.dataset.IDataSetConverter;
 import yo.dbunitcli.dataset.TableSeparators;
 import yo.dbunitcli.dataset.producer.ComparableDataSetLoader;
@@ -45,9 +46,11 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 @Controller("dataset-setting")
@@ -147,7 +150,8 @@ public class DatasetSettingsController extends AbstractResourceFileController<Da
             }
             final ComparableDataSetParam.Builder param = this.toParam(request, "true");
             final TableSeparators separators = param.getTableSeparators();
-            Narrow.singlePass(separators).applyTo(param, separators, tableName);
+            Narrow.singlePass(Strings.isEmpty(request.getSetting()), DataSourceType.valueOf(request.getSrcType()), separators)
+                  .applyTo(param, separators, tableName);
             FileResources.runInContext(() -> {
                 try (final IDataSetConverter converter = new TargetTableConverter(tableName,
                         result.converter(it -> it.setResultPath(result.getResultPath())))) {
@@ -217,10 +221,18 @@ public class DatasetSettingsController extends AbstractResourceFileController<Da
         }
 
         /**
-         * 読み直さずに済む（対象を取りこぼさない）最も強い絞り込み。元テーブル名での絞り込みは名前が変わると見つからないため使わない
+         * 元テーブル名がそのまま出力テーブル名になる形式（xlsx・xlsのxlsxSchemaなどで名前が変わりうるものは含めない）
          */
-        static Narrow singlePass(final TableSeparators separators) {
-            return separators.joinConditions().isEmpty() && !separators.hasSplitter() ? OUTPUT : NONE;
+        private static final Set<DataSourceType> SOURCE_NAME_KEPT = EnumSet.of(DataSourceType.table, DataSourceType.sql, DataSourceType.csv);
+
+        /**
+         * 読み直さずに済む（対象を取りこぼさない）最も強い絞り込み。元テーブル名で絞るのは、設定未適用で名前が変わらない形式だけ
+         */
+        static Narrow singlePass(final boolean settingEmpty, final DataSourceType srcType, final TableSeparators separators) {
+            if (!separators.joinConditions().isEmpty() || separators.hasSplitter()) {
+                return NONE;
+            }
+            return settingEmpty && SOURCE_NAME_KEPT.contains(srcType) ? SOURCE_AND_OUTPUT : OUTPUT;
         }
 
         void applyTo(final ComparableDataSetParam.Builder param, final TableSeparators separators, final String tableName) {
@@ -251,7 +263,7 @@ public class DatasetSettingsController extends AbstractResourceFileController<Da
     private ComparableDataSetParam.Builder toParam(final DatasetTableNamesRequestDto request, final String loadData) {
         final DataSetLoadDto dto = new DataSetLoadDto();
         dto.setSrc(request.getSrc());
-        dto.setSrcType(yo.dbunitcli.dataset.DataSourceType.valueOf(request.getSrcType()));
+        dto.setSrcType(DataSourceType.valueOf(request.getSrcType()));
         dto.setRegTableInclude(request.getRegTableInclude());
         dto.setRegTableExclude(request.getRegTableExclude());
         dto.setRecursive(String.valueOf(request.isRecursive()));

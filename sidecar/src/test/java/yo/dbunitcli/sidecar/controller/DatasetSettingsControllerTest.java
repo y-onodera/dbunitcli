@@ -1,5 +1,8 @@
 package yo.dbunitcli.sidecar.controller;
 
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
 import io.micronaut.context.annotation.Property;
 import io.micronaut.http.HttpRequest;
 import io.micronaut.http.HttpStatus;
@@ -13,6 +16,8 @@ import io.micronaut.serde.ObjectMapper;
 import jakarta.inject.Inject;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.slf4j.LoggerFactory;
+import yo.dbunitcli.dataset.producer.ComparableCsvDataSetProducer;
 import yo.dbunitcli.resource.FileResources;
 import yo.dbunitcli.sidecar.dto.DatasetTablePreviewResponseDto;
 
@@ -257,6 +262,27 @@ class DatasetSettingsControllerTest {
         Assertions.assertEquals(List.of("\"key\",\"other\"", "\"1\",\"a\"", "\"2\",\"b\"", "\"3\",\"c\""),
                 Files.readAllLines(resultDir.resolve("small.csv")));
         Assertions.assertFalse(Files.exists(resultDir.resolve("big.csv")));
+    }
+
+    @Test
+    void testTableConvert_設定なしは対象外のソースを開かない() throws IOException {
+        this.createPreviewSrc();
+        final Logger csvLogger = (Logger) LoggerFactory.getLogger(ComparableCsvDataSetProducer.class);
+        final ListAppender<ILoggingEvent> appender = new ListAppender<>();
+        appender.start();
+        csvLogger.addAppender(appender);
+        try {
+            this.tableConvert("", "small");
+        } finally {
+            csvLogger.detachAppender(appender);
+        }
+
+        final List<String> opened = appender.list.stream()
+                                                 .map(ILoggingEvent::getFormattedMessage)
+                                                 .filter(it -> it.startsWith("produce - start"))
+                                                 .toList();
+        Assertions.assertEquals(1, opened.size(), opened.toString());
+        Assertions.assertTrue(opened.getFirst().endsWith("small.csv"), opened.toString());
     }
 
     @Test
