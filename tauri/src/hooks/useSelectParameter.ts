@@ -206,7 +206,7 @@ const parseResponse = async (
 
 const INVALID_OPTION_MESSAGE = "Invalid Option";
 
-// 表示中の入力欄に関わる違反はその欄に表示し、どの欄にも出せない違反（折りたたんだ欄など）は結果ダイアログにまとめて出す
+// 違反は関わる全ての入力欄に持たせ、折りたたんだ欄も展開すれば欄の下に出す。表示中の欄が無い違反は結果ダイアログにもまとめて出す
 const toFieldErrors = (
 	violations: OptionViolation[],
 	visibleFields: Set<string>,
@@ -214,11 +214,10 @@ const toFieldErrors = (
 	const fieldErrors: FieldErrors = {};
 	const unmatched: string[] = [];
 	for (const violation of violations) {
-		const names = violation.options.filter((name) => visibleFields.has(name));
-		if (names.length === 0) {
+		if (!violation.options.some((name) => visibleFields.has(name))) {
 			unmatched.push(violation.message);
 		}
-		for (const name of names) {
+		for (const name of violation.options) {
 			fieldErrors[name] = [...(fieldErrors[name] ?? []), violation.message];
 		}
 	}

@@ -1,6 +1,6 @@
 import { act, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { type ReactNode, useEffect } from "react";
+import { type ReactNode, useEffect, useState } from "react";
 import { describe, expect, it, vi } from "vitest";
 import Footer from "../../../app/footer/Footer";
 import Check from "../../../app/form/section/element/Check";
@@ -60,6 +60,17 @@ function SelectConvert({
 		);
 	}, [setParameter, inputParam]);
 	return null;
+}
+
+// 任意項目の折りたたみと同じく、ボタンで欄の表示を切り替える
+function Collapsible({ element }: { element: CommandOption }) {
+	const [hidden, setHidden] = useState(true);
+	return (
+		<>
+			<input type="button" value="toggle" onClick={() => setHidden(!hidden)} />
+			<Text prefix="src" element={element} hidden={hidden} />
+		</>
+	);
 }
 
 function renderFooter(
@@ -257,6 +268,24 @@ describe("Execのオプション検証エラー", () => {
 		await userEvent.type(screen.getByLabelText("-src.src"), "a");
 		expect(screen.queryByText("src not found")).not.toBeInTheDocument();
 		alertSpy.mockRestore();
+	});
+
+	it("折りたたんだ欄の違反は、展開すると欄の下に出す", async () => {
+		await act(async () => {
+			renderWithFields(<Collapsible element={textOption("setting")} />);
+		});
+		mockFetchData.mockRejectedValueOnce(
+			new OptionValidationError("invalid", [
+				{ options: ["-src.setting"], message: "setting not found" },
+			]),
+		);
+		await userEvent.click(screen.getByText("Exec"));
+		// 折りたたみ中はダイアログにだけ出す
+		expect(screen.getAllByText("setting not found")).toHaveLength(1);
+
+		await userEvent.click(screen.getByText("Close"));
+		await userEvent.click(screen.getByDisplayValue("toggle"));
+		expect(screen.getByText("setting not found")).toBeInTheDocument();
 	});
 
 	it("チェックボックスとセレクトの違反も欄の下に出し、入力し直すと消す", async () => {
