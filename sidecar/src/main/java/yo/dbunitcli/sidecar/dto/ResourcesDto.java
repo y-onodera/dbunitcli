@@ -16,6 +16,8 @@ public class ResourcesDto {
 
     private List<String> templateFiles = new ArrayList<>();
 
+    private List<String> parameterizeTemplateFiles = new ArrayList<>();
+
     private List<String> fixedColumnDefs = new ArrayList<>();
 
     public List<String> getDatasetSettings() {
@@ -48,6 +50,14 @@ public class ResourcesDto {
 
     public void setTemplateFiles(final List<String> templateFiles) {
         this.templateFiles = templateFiles;
+    }
+
+    public List<String> getParameterizeTemplateFiles() {
+        return this.parameterizeTemplateFiles;
+    }
+
+    public void setParameterizeTemplateFiles(final List<String> parameterizeTemplateFiles) {
+        this.parameterizeTemplateFiles = parameterizeTemplateFiles;
     }
 
     public List<String> getFixedColumnDefs() {

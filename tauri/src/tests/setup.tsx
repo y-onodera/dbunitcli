@@ -47,6 +47,7 @@ export const workspaceResourcesFixture: WorkspaceResources = {
 		xlsxSchemas: ["schema1"],
 		jdbcFiles: ["jdbc1"],
 		templateFiles: ["template1"],
+		parameterizeTemplateFiles: ["parameterizeTemplate1"],
 	}),
 };
 

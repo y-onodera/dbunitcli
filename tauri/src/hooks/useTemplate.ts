@@ -1,11 +1,9 @@
 import { useEffect, useState } from "react";
 import { useEnvironment } from "../context/EnvironmentProvider";
 import {
-	fetchAndUpdate,
 	fetchData,
 	getErrorMessage,
 	handleFetchError,
-	type OperationResult,
 } from "../utils/fetchUtils";
 import { useUpdateResourceFiles } from "./useResourceFiles";
 
@@ -45,21 +43,10 @@ const useResourceContent = (
 	return { content, loading };
 };
 
-// parameterize/template の保存応答(ファイル一覧)は画面状態に保持しないため反映しない
 export const useSaveParameterizeTemplate = () => {
-	const { apiUrl } = useEnvironment();
-	return async (name: string, content: string): Promise<OperationResult> =>
-		fetchAndUpdate<string[]>(
-			{
-				endpoint: `${apiUrl}parameterize/template/save`,
-				options: {
-					method: "POST",
-					headers: { "Content-Type": "application/json" },
-					body: JSON.stringify({ name, input: { content } }),
-				},
-			},
-			() => {},
-		);
+	const updateResourceFiles = useUpdateResourceFiles("parameterizeTemplate");
+	return (name: string, content: string) =>
+		updateResourceFiles("save", JSON.stringify({ name, input: { content } }));
 };
 
 export const useSaveTemplate = () => {

@@ -14,6 +14,7 @@ import yo.dbunitcli.dataset.converter.CsvConverter;
 import yo.dbunitcli.resource.FileResources;
 import yo.dbunitcli.sidecar.dto.ContextDto;
 import yo.dbunitcli.sidecar.dto.ParametersDto;
+import yo.dbunitcli.sidecar.dto.ResourcesDto;
 import yo.dbunitcli.sidecar.dto.WorkspaceDto;
 
 import java.io.File;
@@ -129,7 +130,9 @@ public class Workspace {
         parameters.setRun(this.options().names(Type.run).toList());
         parameters.setParameterize(this.options().names(Type.parameterize).toList());
         result.setParameterList(parameters);
-        result.setResources(this.resources().toDto());
+        final ResourcesDto resources = this.resources().toDto();
+        resources.setParameterizeTemplateFiles(this.options().templates().list());
+        result.setResources(resources);
 
         final ContextDto context = new ContextDto();
         result.setContext(context);

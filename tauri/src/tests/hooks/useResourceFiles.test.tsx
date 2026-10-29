@@ -11,7 +11,10 @@ import {
 	type ResourceKind,
 	useDeleteResource,
 } from "../../hooks/useResourceFiles";
-import { useSaveTemplate } from "../../hooks/useTemplate";
+import {
+	useSaveParameterizeTemplate,
+	useSaveTemplate,
+} from "../../hooks/useTemplate";
 import { useSaveXlsxSchema } from "../../hooks/useXlsxSchema";
 import { DatasetSettings } from "../../model/DatasetSettings";
 import { FixedColumnDef } from "../../model/FixedColumnDef";
@@ -89,6 +92,11 @@ describe("useDeleteResourceのテスト", () => {
 		{ kind: "jdbc", endpoint: "jdbc/delete", key: "jdbcFiles" },
 		{ kind: "template", endpoint: "template/delete", key: "templateFiles" },
 		{
+			kind: "parameterizeTemplate",
+			endpoint: "parameterize/template/delete",
+			key: "parameterizeTemplateFiles",
+		},
+		{
 			kind: "fixedColumnDef",
 			endpoint: "fixed-column-def/delete",
 			key: "fixedColumnDefs",
@@ -165,6 +173,16 @@ describe("保存フックのテスト", () => {
 			endpoint: "template/save",
 			input: { content: "template content" },
 			key: "templateFiles",
+		},
+		{
+			name: "useSaveParameterizeTemplate",
+			useSave: () => {
+				const save = useSaveParameterizeTemplate();
+				return (name) => save(name, "template content");
+			},
+			endpoint: "parameterize/template/save",
+			input: { content: "template content" },
+			key: "parameterizeTemplateFiles",
 		},
 		{
 			name: "useSaveJdbcProperties",

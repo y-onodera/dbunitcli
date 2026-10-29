@@ -10,14 +10,7 @@ import {
 	useParameterizeTemplateData,
 	useSaveParameterizeTemplate,
 } from "../../../../hooks/useTemplate";
-import type { Command } from "../../../../model/SelectParameter";
-import { COMMANDS } from "../../../../model/SelectParameter";
 import { saveOnSuccess } from "../../../../utils/fetchUtils";
-
-export function resolveCommand(cmdValue: string): Command | null {
-	const lower = cmdValue.trim().toLowerCase() as Command;
-	return COMMANDS.includes(lower) ? lower : null;
-}
 
 function extractFileNameFromTemplatePath(templatePath: string): string {
 	return templatePath.replace(/\\/g, "/").split("/").pop() ?? templatePath;

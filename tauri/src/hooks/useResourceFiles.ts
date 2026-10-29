@@ -9,6 +9,10 @@ const resourceTargets = {
 	xlsxSchema: { base: "xlsx-schema", key: "xlsxSchemas" },
 	jdbc: { base: "jdbc", key: "jdbcFiles" },
 	template: { base: "template", key: "templateFiles" },
+	parameterizeTemplate: {
+		base: "parameterize/template",
+		key: "parameterizeTemplateFiles",
+	},
 	fixedColumnDef: { base: "fixed-column-def", key: "fixedColumnDefs" },
 } as const satisfies Record<
 	string,

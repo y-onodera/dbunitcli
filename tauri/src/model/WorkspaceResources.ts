@@ -166,6 +166,7 @@ export type ResourcesSettingsBuilder = {
 	xlsxSchemas?: string[];
 	jdbcFiles?: string[];
 	templateFiles?: string[];
+	parameterizeTemplateFiles?: string[];
 	fixedColumnDefs?: string[];
 };
 export class ResourcesSettings {
@@ -179,12 +180,14 @@ export class ResourcesSettings {
 	readonly xlsxSchemas: string[];
 	readonly jdbcFiles: string[];
 	readonly templateFiles: string[];
+	readonly parameterizeTemplateFiles: string[];
 	readonly fixedColumnDefs: string[];
 	constructor(builder: ResourcesSettingsBuilder) {
 		this.datasetSettings = builder.datasetSettings ?? [];
 		this.xlsxSchemas = builder.xlsxSchemas ?? [];
 		this.jdbcFiles = builder.jdbcFiles ?? [];
 		this.templateFiles = builder.templateFiles ?? [];
+		this.parameterizeTemplateFiles = builder.parameterizeTemplateFiles ?? [];
 		this.fixedColumnDefs = builder.fixedColumnDefs ?? [];
 	}
 	with(builder: ResourcesSettingsBuilder): ResourcesSettings {

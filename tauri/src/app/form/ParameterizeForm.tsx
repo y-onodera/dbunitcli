@@ -1,13 +1,10 @@
-import { useState } from "react";
 import { SectionFieldset } from "../../components/dialog";
 import { SectionLegend } from "../../components/dialog/SectionFieldset";
-import { useParameterList } from "../../context/WorkspaceResourcesProvider";
+import { useResourcesSettings } from "../../context/WorkspaceResourcesProvider";
 import type { ParameterizeOptions } from "../../model/SelectParameter";
 import { DatasetLoadForm } from "./section/DatasetLoadForm";
-import {
-	resolveCommand,
-	TemplateCommandButton,
-} from "./section/dialog/TemplateCommandDialog";
+import { RemoveResourceButton } from "./section/dialog/ResourceEditButton";
+import { TemplateCommandButton } from "./section/dialog/TemplateCommandDialog";
 import Check from "./section/element/Check";
 import PlainText from "./section/element/PlainText";
 import Select from "./section/element/Select";
@@ -22,11 +19,7 @@ export function ParameterizeForm(prop: {
 	const parameterize = prop.parameterize;
 	const paramData = parameterize.paramData;
 	const templateOption = parameterize.templateOption;
-	const [cmdValue, setCmdValue] = useState(parameterize.cmd.value);
-	const parameterList = useParameterList();
-
-	const resolved = resolveCommand(cmdValue);
-	const templateDataList = resolved ? parameterList[resolved] : [];
+	const settings = useResourcesSettings();
 
 	return (
 		<>
@@ -46,17 +39,13 @@ export function ParameterizeForm(prop: {
 				{parameterize.parallel && (
 					<PlainText prefix="" element={parameterize.parallel} />
 				)}
-				<PlainText
-					prefix=""
-					element={parameterize.cmd}
-					handleValueChange={setCmdValue}
-				/>
+				<PlainText prefix="" element={parameterize.cmd} />
 				<PlainText prefix="" element={parameterize.cmdParam} />
 				<Text
 					prefix=""
 					element={parameterize.template}
 					showDefaulePath={true}
-					resourceFiles={templateDataList}
+					resourceFiles={settings.parameterizeTemplateFiles}
 				>
 					{({ path, setPath, isValueInDatalist }) => (
 						<TextDropDownMenu
@@ -72,6 +61,13 @@ export function ParameterizeForm(prop: {
 									setPath={setPath}
 								/>,
 							]}
+							removeButton={() => (
+								<RemoveResourceButton
+									kind="parameterizeTemplate"
+									path={path}
+									setPath={setPath}
+								/>
+							)}
 						/>
 					)}
 				</Text>

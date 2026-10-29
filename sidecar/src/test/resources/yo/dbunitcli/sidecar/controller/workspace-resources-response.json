@@ -11,6 +11,7 @@
     "xlsxSchemas": ["schema.json"],
     "jdbcFiles": ["sample.properties"],
     "templateFiles": ["sample.json"],
+    "parameterizeTemplateFiles": ["sample.json"],
     "fixedColumnDefs": ["sample.json"]
   },
   "context": {
