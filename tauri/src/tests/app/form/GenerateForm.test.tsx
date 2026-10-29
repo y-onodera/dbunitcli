@@ -54,8 +54,8 @@ function makeGenerateProps(
 	};
 }
 
-// template欄のdropdownを開き、generate項目の有無を返す
-async function templateGenerateMenuItem(): Promise<HTMLElement | null> {
+// template欄のdropdownを開き、指定した項目の有無を返す
+async function templateMenuItem(name: string): Promise<HTMLElement | null> {
 	const templateInput = document.querySelector('input[name="-template"]');
 	const menuButton = templateInput
 		?.closest("div.flex")
@@ -64,7 +64,7 @@ async function templateGenerateMenuItem(): Promise<HTMLElement | null> {
 		return null;
 	}
 	await userEvent.setup().click(menuButton);
-	return screen.queryByRole("button", { name: "generate" });
+	return screen.queryByRole("button", { name });
 }
 
 describe("GenerateFormの描画テスト", () => {
@@ -160,6 +160,13 @@ describe("GenerateFormの描画テスト", () => {
 			expect(
 				document.querySelector('input[type="text"][name="-src.delimiter"]'),
 			).toBeVisible();
+		});
+
+		it("generateType=txtのときtemplateのdropdownにedit項目が表示され、generate項目は表示されない", async () => {
+			render(<GenerateForm {...makeGenerateProps()} />);
+
+			expect(await templateMenuItem("edit")).toBeInTheDocument();
+			expect(screen.queryByRole("button", { name: "generate" })).toBeNull();
 		});
 
 		it("generateType=txtのときunitの上にScaffoldボタンが表示される", () => {
@@ -264,7 +271,8 @@ describe("GenerateFormの描画テスト", () => {
 				/>,
 			);
 
-			expect(await templateGenerateMenuItem()).toBeInTheDocument();
+			expect(await templateMenuItem("generate")).toBeInTheDocument();
+			expect(screen.queryByRole("button", { name: "edit" })).toBeNull();
 		});
 	});
 
@@ -361,7 +369,7 @@ describe("GenerateFormの描画テスト", () => {
 				/>,
 			);
 
-			expect(await templateGenerateMenuItem()).not.toBeInTheDocument();
+			expect(await templateMenuItem("generate")).not.toBeInTheDocument();
 		});
 	});
 });

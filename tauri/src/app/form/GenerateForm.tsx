@@ -1,9 +1,12 @@
 import type { ReactNode } from "react";
 import { SectionFieldset } from "../../components/dialog";
 import { SectionLegend } from "../../components/dialog/SectionFieldset";
+import { useResourcesSettings } from "../../context/WorkspaceResourcesProvider";
 import type { CommandOption } from "../../model/CommandOption";
 import type { GenerateOptions } from "../../model/SelectParameter";
 import { DatasetLoadForm } from "./section/DatasetLoadForm";
+import { RemoveResourceButton } from "./section/dialog/ResourceEditButton";
+import { TemplateEditButton } from "./section/dialog/TemplateEditDialog";
 import {
 	TxtTemplateGenerateButton,
 	type TxtTemplateGenerateFormValues,
@@ -23,17 +26,34 @@ function TemplateFileText({
 	editButtons,
 }: {
 	element: CommandOption;
-	editButtons: (setPath: (value: string) => void) => ReactNode[] | undefined;
+	editButtons: (
+		path: string,
+		setPath: (value: string) => void,
+	) => ReactNode[] | undefined;
 }) {
+	const settings = useResourcesSettings();
 	return (
-		<Text prefix="" element={element} showDefaulePath={true}>
-			{({ path, setPath }) => (
+		<Text
+			prefix=""
+			element={element}
+			showDefaulePath={true}
+			resourceFiles={settings.templateFiles}
+		>
+			{({ path, setPath, isValueInDatalist }) => (
 				<TextDropDownMenu
 					path={path}
 					setPath={setPath}
 					prefix=""
 					element={element}
-					editButtons={editButtons(setPath)}
+					isValueInDatalist={isValueInDatalist}
+					editButtons={editButtons(path, setPath)}
+					removeButton={() => (
+						<RemoveResourceButton
+							kind="template"
+							path={path}
+							setPath={setPath}
+						/>
+					)}
 				/>
 			)}
 		</Text>
@@ -52,12 +72,15 @@ export function GenerateForm(prop: {
 	const generateTypeValue = generate.generateType.value;
 	const isExcelGenerate =
 		generateTypeValue === "xlsx" || generateTypeValue === "xls";
-	// template欄のdropdownに出すgenerate: xlsx/xlsはxlsxTemplate生成
-	const templateGenerateButtons = (setPath: (value: string) => void) => {
+	// template欄のdropdown: xlsx/xlsはxlsxTemplate生成、txtはテキストとして編集
+	const templateEditButtons = (
+		path: string,
+		setPath: (value: string) => void,
+	) => {
 		if (isExcelGenerate) {
 			return [<XlsxTemplateGenerateButton key="generate" setPath={setPath} />];
 		}
-		return undefined;
+		return [<TemplateEditButton key="edit" path={path} setPath={setPath} />];
 	};
 	return (
 		<>
@@ -94,7 +117,7 @@ export function GenerateForm(prop: {
 				{generate.template && (
 					<TemplateFileText
 						element={generate.template}
-						editButtons={templateGenerateButtons}
+						editButtons={templateEditButtons}
 					/>
 				)}
 				{prop.generate.templateOption && generateTypeValue === "txt" && (
