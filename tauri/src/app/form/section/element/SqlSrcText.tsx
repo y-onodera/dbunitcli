@@ -1,4 +1,5 @@
 import { useResourcesSettings } from "../../../../context/WorkspaceResourcesProvider";
+import { resourceFilesOf } from "../../../../hooks/useResourceFiles";
 import type { QueryDatasourceType } from "../../../../model/QueryDatasource";
 import {
 	EditResourceButton,
@@ -7,12 +8,6 @@ import {
 import { sqlEditorDialogs } from "../dialog/SqlEditorDialog";
 import type { TextProp } from "./FormElementProp";
 import Text, { TextDropDownMenu } from "./Text";
-
-const resourceFilesKey = {
-	sql: "sqlFiles",
-	table: "tableFiles",
-	csvq: "csvqFiles",
-} as const satisfies Record<QueryDatasourceType, string>;
 
 export default function SqlSrcText({
 	prefix,
@@ -29,7 +24,7 @@ export default function SqlSrcText({
 			prefix={prefix}
 			element={element}
 			hidden={hidden}
-			resourceFiles={settings[resourceFilesKey[type]]}
+			resourceFiles={resourceFilesOf(settings, type)}
 			showDefaulePath={true}
 			handleValueChange={handleValueChange}
 		>

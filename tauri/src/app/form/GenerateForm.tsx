@@ -1,15 +1,7 @@
-import type { ReactNode } from "react";
 import { SectionFieldset } from "../../components/dialog";
 import { SectionLegend } from "../../components/dialog/SectionFieldset";
-import { useResourcesSettings } from "../../context/WorkspaceResourcesProvider";
-import type { CommandOption } from "../../model/CommandOption";
 import type { GenerateOptions } from "../../model/SelectParameter";
 import { DatasetLoadForm } from "./section/DatasetLoadForm";
-import {
-	EditResourceButton,
-	RemoveResourceButton,
-} from "./section/dialog/ResourceEditButton";
-import TemplateEditDialog from "./section/dialog/TemplateEditDialog";
 import {
 	TxtTemplateGenerateButton,
 	type TxtTemplateGenerateFormValues,
@@ -20,49 +12,9 @@ import EncodingText from "./section/element/EncodingText";
 import FileText from "./section/element/FileText";
 import PlainText from "./section/element/PlainText";
 import Select from "./section/element/Select";
-import Text, { TextDropDownMenu } from "./section/element/Text";
+import TemplateText from "./section/element/TemplateText";
 import JxlsFormSection from "./section/JxlsFormSection";
 import TemplateFormSection from "./section/TemplateFormSection";
-
-function TemplateFileText({
-	element,
-	editButtons,
-}: {
-	element: CommandOption;
-	editButtons: (
-		path: string,
-		setPath: (value: string) => void,
-	) => ReactNode[] | undefined;
-}) {
-	const settings = useResourcesSettings();
-	return (
-		<Text
-			prefix=""
-			element={element}
-			showDefaulePath={true}
-			resourceFiles={settings.templateFiles}
-		>
-			{({ path, setPath, isValueInDatalist }) => (
-				<TextDropDownMenu
-					path={path}
-					setPath={setPath}
-					prefix=""
-					element={element}
-					isValueInDatalist={isValueInDatalist}
-					editButtons={editButtons(path, setPath)}
-					removeButton={(closeMenu) => (
-						<RemoveResourceButton
-							kind="template"
-							path={path}
-							setPath={setPath}
-							onRemoved={closeMenu}
-						/>
-					)}
-				/>
-			)}
-		</Text>
-	);
-}
 
 export function GenerateForm(prop: {
 	handleTypeSelect: () => Promise<void>;
@@ -76,23 +28,12 @@ export function GenerateForm(prop: {
 	const generateTypeValue = generate.generateType.value;
 	const isExcelGenerate =
 		generateTypeValue === "xlsx" || generateTypeValue === "xls";
-	// template欄のdropdown: xlsx/xlsはxlsxTemplate生成、txtはテキストとして編集
-	const templateEditButtons = (
-		path: string,
-		setPath: (value: string) => void,
-	) => {
-		if (isExcelGenerate) {
-			return [<XlsxTemplateGenerateButton key="generate" setPath={setPath} />];
-		}
-		return [
-			<EditResourceButton
-				key="edit"
-				dialog={TemplateEditDialog}
-				path={path}
-				setPath={setPath}
-			/>,
-		];
-	};
+	// template欄のdropdown: xlsx/xlsはテキスト編集の代わりにxlsxTemplate生成を出す
+	const templateEditButtons = isExcelGenerate
+		? (_: string, setPath: (value: string) => void) => [
+				<XlsxTemplateGenerateButton key="generate" setPath={setPath} />,
+			]
+		: undefined;
 	return (
 		<>
 			<SectionFieldset>
@@ -126,7 +67,8 @@ export function GenerateForm(prop: {
 					<EncodingText prefix="" element={generate.unitSettingEncoding} />
 				)}
 				{generate.template && (
-					<TemplateFileText
+					<TemplateText
+						prefix=""
 						element={generate.template}
 						editButtons={templateEditButtons}
 					/>

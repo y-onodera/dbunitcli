@@ -110,7 +110,6 @@ export default function Text({
 type Props = Omit<FileProp, "onSelect" | "hidden"> & {
 	isValueInDatalist?: boolean;
 	editButtons?: ReactNode[];
-	showOpenButton?: boolean;
 	removeButton?: (closeMenu: () => void) => ReactNode;
 	className?: string;
 };
@@ -122,13 +121,12 @@ export function TextDropDownMenu({
 	srcType,
 	isValueInDatalist,
 	editButtons,
-	showOpenButton = true,
 	removeButton,
 	className,
 }: Props) {
 	const isFileType = element.attribute.type.includes("FILE");
 	const isDirType = element.attribute.type.includes("DIR");
-	const showOpen = showOpenButton && (isFileType || isDirType);
+	const showOpen = isFileType || isDirType;
 	return (
 		<DropDownMenu className={className}>
 			{(closeMenu) => (

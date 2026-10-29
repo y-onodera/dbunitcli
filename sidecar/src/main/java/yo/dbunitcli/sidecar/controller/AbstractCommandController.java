@@ -55,7 +55,7 @@ public abstract class AbstractCommandController implements ControllerExceptionHa
     // GUIのファイル選択は基準ディレクトリ外のworkspace配下をworkspaceからの相対パスにするため、
     // 基準ディレクトリ→workspaceの順に探す
     private static File resolveSidecarFilePath(final Option.BaseDir baseDir, final String value) {
-        final File fromBaseDir = new File(Workspace.resolveBaseDir(baseDir), value);
+        final File fromBaseDir = new File(baseDir.dir(), value);
         if (fromBaseDir.exists()) {
             return fromBaseDir;
         }

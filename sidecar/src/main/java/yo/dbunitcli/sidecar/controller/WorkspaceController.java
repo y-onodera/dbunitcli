@@ -8,6 +8,7 @@ import io.micronaut.http.annotation.Post;
 import io.micronaut.serde.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import yo.dbunitcli.application.Option;
 import yo.dbunitcli.resource.FileResources;
 import yo.dbunitcli.sidecar.domain.project.Workspace;
 import yo.dbunitcli.sidecar.dto.ContextDto;
@@ -15,12 +16,10 @@ import yo.dbunitcli.sidecar.dto.ResolvePathRequestDto;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Set;
 
 @Controller("/workspace")
 public class WorkspaceController implements ControllerExceptionHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(WorkspaceController.class);
-    private static final Set<String> QUERY_RESOURCES = Set.of("SQL", "TABLE", "CSVQ");
     private final Workspace workspace;
 
     public WorkspaceController(final Workspace workspace) {
@@ -59,19 +58,13 @@ public class WorkspaceController implements ControllerExceptionHandler {
             if (absolute.isAbsolute() && absolute.exists()) {
                 return absolute.getAbsolutePath();
             }
-            for (final File root : new File[]{
-                    Workspace.resolveBaseDir(request.getDefaultPath()),
-                    // sql/table/csvqは以前dataset直下に保存していたため、coreと同じくdatasetも探す
-                    request.getDefaultPath() != null && QUERY_RESOURCES.contains(request.getDefaultPath())
-                            ? FileResources.datasetDir() : null,
-                    FileResources.baseDir(),
-                    new File(System.getProperty("user.dir"))
+            // 実行時と同じ順に探し、見つからなければworkspace・起動ディレクトリからの相対パスも試す
+            for (final File candidate : new File[]{
+                    toBaseDir(request.getDefaultPath()).search(path),
+                    new File(FileResources.baseDir(), path),
+                    new File(System.getProperty("user.dir"), path)
             }) {
-                if (root == null) {
-                    continue;
-                }
-                final File candidate = new File(root, path);
-                if (candidate.exists()) {
+                if (candidate != null && candidate.exists()) {
                     return candidate.getAbsolutePath();
                 }
             }
@@ -88,4 +81,14 @@ public class WorkspaceController implements ControllerExceptionHandler {
                 .writeValueAsString(this.workspace.toDto());
     }
 
+    private static Option.BaseDir toBaseDir(final String defaultPath) {
+        if (defaultPath == null) {
+            return Option.BaseDir.WORKSPACE;
+        }
+        try {
+            return Option.BaseDir.valueOf(defaultPath);
+        } catch (final IllegalArgumentException e) {
+            return Option.BaseDir.WORKSPACE;
+        }
+    }
 }

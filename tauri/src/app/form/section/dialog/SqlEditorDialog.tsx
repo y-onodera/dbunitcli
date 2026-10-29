@@ -9,9 +9,9 @@ import { BlueButton } from "../../../../components/element/Button";
 import { TextArea } from "../../../../components/element/Input";
 import { useJdbcConnectionState } from "../../../../context/JdbcConnectionProvider";
 import {
-	useQueryDatasourceData,
-	useSaveQueryDatasource,
-} from "../../../../hooks/useQueryDatasource";
+	useResourceContent,
+	useSaveResourceContent,
+} from "../../../../hooks/useResourceFiles";
 import type { QueryDatasourceType } from "../../../../model/QueryDatasource";
 import { saveOnSuccess } from "../../../../utils/fetchUtils";
 import { insertAtCursor } from "../../../../utils/textInsert";
@@ -23,33 +23,26 @@ type SqlEditorDialogProps = EditResourceDialogProps & {
 };
 
 export default function SqlEditorDialog(props: SqlEditorDialogProps) {
-	const { content, loading } = useQueryDatasourceData(
-		props.type,
-		props.fileName,
-	);
+	const { content, loading } = useResourceContent(props.type, props.fileName);
 	if (loading) {
 		return <StatusMessage kind="loading">Loading...</StatusMessage>;
 	}
 	return <Dialog {...props} value={content} />;
 }
 
-// EditResourceButtonへ渡すため、srcTypeごとに種類を固定した編集ダイアログ
-function SqlFileEditDialog(props: EditResourceDialogProps) {
-	return <SqlEditorDialog type="sql" {...props} />;
-}
-function TableFileEditDialog(props: EditResourceDialogProps) {
-	return <SqlEditorDialog type="table" {...props} />;
-}
-function CsvqFileEditDialog(props: EditResourceDialogProps) {
-	return <SqlEditorDialog type="csvq" {...props} />;
+// EditResourceButtonへ渡すため、srcTypeごとに種類を固定した編集ダイアログ（モジュールで1度だけ作り、再マウントを防ぐ）
+function sqlEditorDialogOf(
+	type: QueryDatasourceType,
+): ComponentType<EditResourceDialogProps> {
+	return (props) => <SqlEditorDialog type={type} {...props} />;
 }
 export const sqlEditorDialogs: Record<
 	QueryDatasourceType,
 	ComponentType<EditResourceDialogProps>
 > = {
-	sql: SqlFileEditDialog,
-	table: TableFileEditDialog,
-	csvq: CsvqFileEditDialog,
+	sql: sqlEditorDialogOf("sql"),
+	table: sqlEditorDialogOf("table"),
+	csvq: sqlEditorDialogOf("csvq"),
 };
 
 function Dialog(props: SqlEditorDialogProps & { value: string }) {
@@ -57,7 +50,7 @@ function Dialog(props: SqlEditorDialogProps & { value: string }) {
 	const [showTableSelector, setShowTableSelector] = useState(false);
 	const textareaRef = useRef<HTMLTextAreaElement>(null);
 	const pendingCursorRef = useRef<number | null>(null);
-	const saveDataSource = useSaveQueryDatasource(props.type);
+	const saveDataSource = useSaveResourceContent(props.type);
 	const { jdbcValues, connectionOk } = useJdbcConnectionState();
 
 	const handleCommit = (path: string) =>

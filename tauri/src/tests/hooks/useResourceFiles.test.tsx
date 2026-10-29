@@ -7,15 +7,11 @@ import WorkspaceResourcesProvider, {
 import { useSaveDatasetSettings } from "../../hooks/useDatasetSettings";
 import { useSaveFixedColumnDef } from "../../hooks/useFixedColumnDef";
 import { useSaveJdbcProperties } from "../../hooks/useJdbc";
-import { useSaveQueryDatasource } from "../../hooks/useQueryDatasource";
 import {
 	type ResourceKind,
 	useDeleteResource,
+	useSaveResourceContent,
 } from "../../hooks/useResourceFiles";
-import {
-	useSaveParameterizeTemplate,
-	useSaveTemplate,
-} from "../../hooks/useTemplate";
 import { useSaveXlsxSchema } from "../../hooks/useXlsxSchema";
 import { DatasetSettings } from "../../model/DatasetSettings";
 import { FixedColumnDef } from "../../model/FixedColumnDef";
@@ -168,35 +164,27 @@ describe("保存フックのテスト", () => {
 			input: datasetSettings,
 			key: "datasetSettings",
 		},
-		{
-			name: "useSaveTemplate",
+		...(
+			[
+				{ kind: "template", endpoint: "template/save", key: "templateFiles" },
+				{
+					kind: "parameterizeTemplate",
+					endpoint: "parameterize/template/save",
+					key: "parameterizeTemplateFiles",
+				},
+				{ kind: "sql", endpoint: "sql/save", key: "sqlFiles" },
+				{ kind: "table", endpoint: "table/save", key: "tableFiles" },
+				{ kind: "csvq", endpoint: "csvq/save", key: "csvqFiles" },
+			] as const
+		).map(({ kind, endpoint, key }) => ({
+			name: `useSaveResourceContent(${kind})`,
 			useSave: () => {
-				const save = useSaveTemplate();
-				return (name) => save(name, "template content");
+				const save = useSaveResourceContent(kind);
+				return (name: string) => save(name, "content");
 			},
-			endpoint: "template/save",
-			input: { content: "template content" },
-			key: "templateFiles",
-		},
-		{
-			name: "useSaveParameterizeTemplate",
-			useSave: () => {
-				const save = useSaveParameterizeTemplate();
-				return (name) => save(name, "template content");
-			},
-			endpoint: "parameterize/template/save",
-			input: { content: "template content" },
-			key: "parameterizeTemplateFiles",
-		},
-		...(["sql", "table", "csvq"] as const).map((type) => ({
-			name: `useSaveQueryDatasource(${type})`,
-			useSave: () => {
-				const save = useSaveQueryDatasource(type);
-				return (name: string) => save(name, "select 1");
-			},
-			endpoint: `${type}/save`,
-			input: { content: "select 1" },
-			key: `${type}Files` as keyof ResourcesSettingsBuilder,
+			endpoint,
+			input: { content: "content" },
+			key,
 		})),
 		{
 			name: "useSaveJdbcProperties",

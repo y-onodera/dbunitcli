@@ -6,9 +6,9 @@ import {
 } from "../../../../components/dialog";
 import { TextArea } from "../../../../components/element/Input";
 import {
-	useParameterizeTemplateData,
-	useSaveParameterizeTemplate,
-} from "../../../../hooks/useTemplate";
+	useResourceContent,
+	useSaveResourceContent,
+} from "../../../../hooks/useResourceFiles";
 import { saveOnSuccess } from "../../../../utils/fetchUtils";
 import type { EditResourceDialogProps } from "./ResourceEditButton";
 
@@ -22,7 +22,7 @@ export default function ParameterizeTemplateDialog({
 	handleSave,
 }: EditResourceDialogProps) {
 	const name = extractFileNameFromTemplatePath(fileName);
-	const { content, loading } = useParameterizeTemplateData(name);
+	const { content, loading } = useResourceContent("parameterizeTemplate", name);
 	if (loading) {
 		return <StatusMessage kind="loading">Loading...</StatusMessage>;
 	}
@@ -43,7 +43,7 @@ function Dialog({
 	handleSave: onSaved,
 }: EditResourceDialogProps & { content: string }) {
 	const [content, setContent] = useState<string>(initialContent);
-	const saveContent = useSaveParameterizeTemplate();
+	const saveContent = useSaveResourceContent("parameterizeTemplate");
 
 	const handleSave = (path: string) =>
 		saveOnSuccess(

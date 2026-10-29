@@ -6,9 +6,9 @@ import {
 } from "../../../../components/dialog";
 import { TextArea } from "../../../../components/element/Input";
 import {
-	useSaveTemplate,
-	useTemplateData,
-} from "../../../../hooks/useTemplate";
+	useResourceContent,
+	useSaveResourceContent,
+} from "../../../../hooks/useResourceFiles";
 import { saveOnSuccess } from "../../../../utils/fetchUtils";
 import type { EditResourceDialogProps } from "./ResourceEditButton";
 
@@ -17,7 +17,7 @@ export default function TemplateEditDialog({
 	handleDialogClose,
 	handleSave,
 }: EditResourceDialogProps) {
-	const { content, loading } = useTemplateData(fileName);
+	const { content, loading } = useResourceContent("template", fileName);
 	if (loading) {
 		return <StatusMessage kind="loading">Loading...</StatusMessage>;
 	}
@@ -38,7 +38,7 @@ function Dialog({
 	handleSave: onSaved,
 }: EditResourceDialogProps & { content: string }) {
 	const [content, setContent] = useState<string>(initialContent);
-	const saveContent = useSaveTemplate();
+	const saveContent = useSaveResourceContent("template");
 
 	const handleSave = (path: string) =>
 		saveOnSuccess(
