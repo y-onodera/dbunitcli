@@ -8,6 +8,7 @@ import io.micronaut.http.annotation.Post;
 import io.micronaut.serde.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import yo.dbunitcli.application.Option;
 import yo.dbunitcli.resource.FileResources;
 import yo.dbunitcli.sidecar.domain.project.Workspace;
 import yo.dbunitcli.sidecar.dto.ContextDto;
@@ -57,13 +58,13 @@ public class WorkspaceController implements ControllerExceptionHandler {
             if (absolute.isAbsolute() && absolute.exists()) {
                 return absolute.getAbsolutePath();
             }
-            for (final File root : new File[]{
-                    Workspace.resolveBaseDir(request.getDefaultPath()),
-                    FileResources.baseDir(),
-                    new File(System.getProperty("user.dir"))
+            // 実行時と同じ順に探し、見つからなければworkspace・起動ディレクトリからの相対パスも試す
+            for (final File candidate : new File[]{
+                    toBaseDir(request.getDefaultPath()).search(path),
+                    new File(FileResources.baseDir(), path),
+                    new File(System.getProperty("user.dir"), path)
             }) {
-                final File candidate = new File(root, path);
-                if (candidate.exists()) {
+                if (candidate != null && candidate.exists()) {
                     return candidate.getAbsolutePath();
                 }
             }
@@ -80,4 +81,14 @@ public class WorkspaceController implements ControllerExceptionHandler {
                 .writeValueAsString(this.workspace.toDto());
     }
 
+    private static Option.BaseDir toBaseDir(final String defaultPath) {
+        if (defaultPath == null) {
+            return Option.BaseDir.WORKSPACE;
+        }
+        try {
+            return Option.BaseDir.valueOf(defaultPath);
+        } catch (final IllegalArgumentException e) {
+            return Option.BaseDir.WORKSPACE;
+        }
+    }
 }

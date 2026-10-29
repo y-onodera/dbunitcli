@@ -251,7 +251,27 @@ public interface Option {
     }
 
     enum BaseDir {
-        WORKSPACE, COMMAND_PARAM, DATASET, RESULT, SETTING, TEMPLATE, PARAMETERIZE_TEMPLATE, JDBC, XLSX_SCHEMA, FIXED_COLUMN_DEF;
+        WORKSPACE, COMMAND_PARAM, DATASET, RESULT, SETTING, TEMPLATE, PARAMETERIZE_TEMPLATE, JDBC, XLSX_SCHEMA, FIXED_COLUMN_DEF, SQL, TABLE, CSVQ;
+
+        /**
+         * 相対パスの基準ディレクトリ
+         */
+        public File dir() {
+            return switch (this) {
+                case WORKSPACE, COMMAND_PARAM -> FileResources.baseDir();
+                case DATASET -> FileResources.datasetDir();
+                case RESULT -> FileResources.resultDir();
+                case SETTING -> FileResources.settingDir();
+                case TEMPLATE -> FileResources.templateFileDir();
+                case PARAMETERIZE_TEMPLATE -> FileResources.parameterizeTemplateDir();
+                case JDBC -> FileResources.jdbcPropDir();
+                case XLSX_SCHEMA -> FileResources.xlsxSchemaDir();
+                case FIXED_COLUMN_DEF -> FileResources.fixedColumnDefDir();
+                case SQL -> FileResources.sqlDir();
+                case TABLE -> FileResources.tableDir();
+                case CSVQ -> FileResources.csvqDir();
+            };
+        }
 
         /**
          * 各オプションが実行時に探すのと同じ順でpathを解決する
@@ -267,6 +287,9 @@ public interface Option {
                 case JDBC -> FileResources.searchJdbc(path);
                 case XLSX_SCHEMA -> FileResources.searchXlsxSchema(path);
                 case FIXED_COLUMN_DEF -> FileResources.searchFixedColumnDef(path);
+                case SQL -> FileResources.searchSql(path);
+                case TABLE -> FileResources.searchTable(path);
+                case CSVQ -> FileResources.searchCsvq(path);
             };
         }
     }

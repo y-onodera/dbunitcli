@@ -14,6 +14,9 @@ public class ContextDto {
     private String jdbcBase;
     private String xlsxSchemaBase;
     private String fixedColumnDefBase;
+    private String sqlBase;
+    private String tableBase;
+    private String csvqBase;
 
     public String getWorkspace() {
         return this.workspace;
@@ -94,4 +97,29 @@ public class ContextDto {
     public void setFixedColumnDefBase(final String fixedColumnDefBase) {
         this.fixedColumnDefBase = fixedColumnDefBase;
     }
+
+    public String getSqlBase() {
+        return this.sqlBase;
+    }
+
+    public void setSqlBase(final String sqlBase) {
+        this.sqlBase = sqlBase;
+    }
+
+    public String getTableBase() {
+        return this.tableBase;
+    }
+
+    public void setTableBase(final String tableBase) {
+        this.tableBase = tableBase;
+    }
+
+    public String getCsvqBase() {
+        return this.csvqBase;
+    }
+
+    public void setCsvqBase(final String csvqBase) {
+        this.csvqBase = csvqBase;
+    }
+
 }

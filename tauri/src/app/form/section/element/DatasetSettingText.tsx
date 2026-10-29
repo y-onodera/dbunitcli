@@ -78,11 +78,12 @@ export default function DatasetSettingText({
 									]
 								: undefined
 						}
-						removeButton={() => (
+						removeButton={(closeMenu) => (
 							<RemoveResourceButton
 								kind="datasetSetting"
 								path={path}
 								setPath={handleSetPath}
+								onRemoved={closeMenu}
 							/>
 						)}
 					/>

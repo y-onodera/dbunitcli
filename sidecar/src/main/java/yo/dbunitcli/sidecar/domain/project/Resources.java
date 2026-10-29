@@ -11,7 +11,10 @@ public record Resources(
         , ResourceFile datasetSetting
         , ResourceFile template
         , ResourceFile xlsxSchema
-        , ResourceFile fixedColumnDef) {
+        , ResourceFile fixedColumnDef
+        , ResourceFile sql
+        , ResourceFile table
+        , ResourceFile csvq) {
 
     public static Builder builder() {
         return new Builder();
@@ -24,6 +27,9 @@ public record Resources(
         result.setTemplateFiles(this.template().list());
         result.setXlsxSchemas(this.xlsxSchema().list());
         result.setFixedColumnDefs(this.fixedColumnDef().list());
+        result.setSqlFiles(this.sql().list());
+        result.setTableFiles(this.table().list());
+        result.setCsvqFiles(this.csvq().list());
         return result;
     }
 
@@ -37,7 +43,10 @@ public record Resources(
                     new ResourceFile(new File(this.baseDir, "setting"), FileResources::searchSetting),
                     new ResourceFile(new File(this.baseDir, "template"), FileResources::searchTemplate),
                     new ResourceFile(new File(this.baseDir, "xlsx-schema"), FileResources::searchXlsxSchema),
-                    new ResourceFile(new File(this.baseDir, "fixed-column-def"), FileResources::searchFixedColumnDef)
+                    new ResourceFile(new File(this.baseDir, "fixed-column-def"), FileResources::searchFixedColumnDef),
+                    new ResourceFile(new File(this.baseDir, "sql"), FileResources::searchSql),
+                    new ResourceFile(new File(this.baseDir, "table"), FileResources::searchTable),
+                    new ResourceFile(new File(this.baseDir, "csvq"), FileResources::searchCsvq)
             );
         }
 

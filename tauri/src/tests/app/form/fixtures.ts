@@ -250,7 +250,7 @@ function makeTableSrcData(prefix: string) {
 			false,
 			SRC_TYPE_OPTIONS,
 		),
-		src: makeElement("src", "FILE_OR_DIR", "", "DATASET", true),
+		src: makeElement("src", "FILE_OR_DIR", "", "TABLE", true),
 		encoding: makeElement("encoding", "TEXT", "UTF-8", "WORKSPACE", false),
 		recursive: makeElement("recursive", "FLG", "false", "WORKSPACE", false),
 		regInclude: makeElement("regInclude", "TEXT", "", "WORKSPACE", false),

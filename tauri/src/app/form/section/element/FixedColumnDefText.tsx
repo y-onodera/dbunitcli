@@ -45,11 +45,12 @@ export default function FixedColumnDefText({
 							setPath={setPath}
 						/>,
 					]}
-					removeButton={() => (
+					removeButton={(closeMenu) => (
 						<RemoveResourceButton
 							kind="fixedColumnDef"
 							path={path}
 							setPath={setPath}
+							onRemoved={closeMenu}
 						/>
 					)}
 				/>

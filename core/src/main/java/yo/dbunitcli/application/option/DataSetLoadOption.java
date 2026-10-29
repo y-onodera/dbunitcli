@@ -7,7 +7,6 @@ import yo.dbunitcli.application.json.FromJsonTableSeparatorsBuilder;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.dataset.DataSourceType;
 import yo.dbunitcli.dataset.TableSeparators;
-import yo.dbunitcli.resource.FileResources;
 
 import java.io.File;
 import java.io.IOException;
@@ -69,7 +68,7 @@ public record DataSetLoadOption(
         if (this.srcType == null || this.srcType == DataSourceType.none) {
             return result;
         }
-        return result.putFileOrDir("-src", this.src, true, BaseDir.DATASET)
+        return result.putFileOrDir("-src", this.src, true, this.srcBaseDir())
                 .putAll(this.dataSetParam.toParameters())
                 .putFile("-setting", this.setting, BaseDir.SETTING)
                 .put("-settingEncoding", this.settingEncoding)
@@ -87,7 +86,7 @@ public record DataSetLoadOption(
         if (this.srcType == null || this.srcType == DataSourceType.none) {
             return List.of();
         }
-        return Option.concat(this.validateFileExists("-src", this.src, BaseDir.DATASET)
+        return Option.concat(this.validateFileExists("-src", this.src, this.srcBaseDir())
                 , this.validateFilesExist("-setting", this.setting, BaseDir.SETTING)
                 , this.validateEncoding("-settingEncoding", this.settingEncoding)
                 , this.validatePattern("-regTableInclude", this.regTableInclude)
@@ -98,7 +97,7 @@ public record DataSetLoadOption(
     }
 
     public ComparableDataSetParam.Builder getParam() {
-        final File srcFile = Strings.isNotEmpty(this.src) ? FileResources.searchDatasetBase(this.src) : new File(".");
+        final File srcFile = Strings.isNotEmpty(this.src) ? this.srcBaseDir().search(this.src) : new File(".");
         if (this.srcType != DataSourceType.none) {
             this.assertFileExists(srcFile);
         }
@@ -112,6 +111,16 @@ public record DataSetLoadOption(
                 .setLoadData(Boolean.parseBoolean(this.loadData))
                 .setMapIncludeMetaData(Boolean.parseBoolean(this.includeMetaData))
         );
+    }
+
+    // sql/table/csvqの-srcはworkspaceのresources配下に置くリソースファイル。それ以外はデータセット
+    private BaseDir srcBaseDir() {
+        return switch (this.srcType) {
+            case sql -> BaseDir.SQL;
+            case table -> BaseDir.TABLE;
+            case csvq -> BaseDir.CSVQ;
+            case null, default -> BaseDir.DATASET;
+        };
     }
 
     public void assertFileExists(final File file) {

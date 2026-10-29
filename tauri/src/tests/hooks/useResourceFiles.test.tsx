@@ -10,8 +10,8 @@ import { useSaveJdbcProperties } from "../../hooks/useJdbc";
 import {
 	type ResourceKind,
 	useDeleteResource,
+	useSaveResourceContent,
 } from "../../hooks/useResourceFiles";
-import { useSaveTemplate } from "../../hooks/useTemplate";
 import { useSaveXlsxSchema } from "../../hooks/useXlsxSchema";
 import { DatasetSettings } from "../../model/DatasetSettings";
 import { FixedColumnDef } from "../../model/FixedColumnDef";
@@ -89,10 +89,18 @@ describe("useDeleteResourceのテスト", () => {
 		{ kind: "jdbc", endpoint: "jdbc/delete", key: "jdbcFiles" },
 		{ kind: "template", endpoint: "template/delete", key: "templateFiles" },
 		{
+			kind: "parameterizeTemplate",
+			endpoint: "parameterize/template/delete",
+			key: "parameterizeTemplateFiles",
+		},
+		{
 			kind: "fixedColumnDef",
 			endpoint: "fixed-column-def/delete",
 			key: "fixedColumnDefs",
 		},
+		{ kind: "sql", endpoint: "sql/delete", key: "sqlFiles" },
+		{ kind: "table", endpoint: "table/delete", key: "tableFiles" },
+		{ kind: "csvq", endpoint: "csvq/delete", key: "csvqFiles" },
 	])(
 		"kind=$kindのとき、$endpointへ名前を送り、応答で$keyを更新する",
 		async ({ kind, endpoint, key }) => {
@@ -156,16 +164,28 @@ describe("保存フックのテスト", () => {
 			input: datasetSettings,
 			key: "datasetSettings",
 		},
-		{
-			name: "useSaveTemplate",
+		...(
+			[
+				{ kind: "template", endpoint: "template/save", key: "templateFiles" },
+				{
+					kind: "parameterizeTemplate",
+					endpoint: "parameterize/template/save",
+					key: "parameterizeTemplateFiles",
+				},
+				{ kind: "sql", endpoint: "sql/save", key: "sqlFiles" },
+				{ kind: "table", endpoint: "table/save", key: "tableFiles" },
+				{ kind: "csvq", endpoint: "csvq/save", key: "csvqFiles" },
+			] as const
+		).map(({ kind, endpoint, key }) => ({
+			name: `useSaveResourceContent(${kind})`,
 			useSave: () => {
-				const save = useSaveTemplate();
-				return (name) => save(name, "template content");
+				const save = useSaveResourceContent(kind);
+				return (name: string) => save(name, "content");
 			},
-			endpoint: "template/save",
-			input: { content: "template content" },
-			key: "templateFiles",
-		},
+			endpoint,
+			input: { content: "content" },
+			key,
+		})),
 		{
 			name: "useSaveJdbcProperties",
 			useSave: () => {

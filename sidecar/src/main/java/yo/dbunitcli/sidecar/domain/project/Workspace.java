@@ -14,6 +14,7 @@ import yo.dbunitcli.dataset.converter.CsvConverter;
 import yo.dbunitcli.resource.FileResources;
 import yo.dbunitcli.sidecar.dto.ContextDto;
 import yo.dbunitcli.sidecar.dto.ParametersDto;
+import yo.dbunitcli.sidecar.dto.ResourcesDto;
 import yo.dbunitcli.sidecar.dto.WorkspaceDto;
 
 import java.io.File;
@@ -23,29 +24,12 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 public class Workspace {
     private static final Logger LOGGER = LoggerFactory.getLogger(Workspace.class);
-
-    public static File resolveBaseDir(final Option.BaseDir baseDir) {
-        return resolveBaseDir(baseDir.name());
-    }
-
-    public static File resolveBaseDir(final String defaultPath) {
-        return switch (defaultPath) {
-            case "DATASET" -> FileResources.datasetDir();
-            case "RESULT" -> FileResources.resultDir();
-            case "SETTING" -> FileResources.settingDir();
-            case "TEMPLATE" -> FileResources.templateFileDir();
-            case "PARAMETERIZE_TEMPLATE" -> FileResources.parameterizeTemplateDir();
-            case "JDBC" -> FileResources.jdbcPropDir();
-            case "XLSX_SCHEMA" -> FileResources.xlsxSchemaDir();
-            case "FIXED_COLUMN_DEF" -> FileResources.fixedColumnDefDir();
-            default -> FileResources.baseDir();
-        };
-    }
 
     public static Builder builder() {
         return new Builder();
@@ -129,7 +113,9 @@ public class Workspace {
         parameters.setRun(this.options().names(Type.run).toList());
         parameters.setParameterize(this.options().names(Type.parameterize).toList());
         result.setParameterList(parameters);
-        result.setResources(this.resources().toDto());
+        final ResourcesDto resources = this.resources().toDto();
+        resources.setParameterizeTemplateFiles(this.options().templates().list());
+        result.setResources(resources);
 
         final ContextDto context = new ContextDto();
         result.setContext(context);
@@ -142,24 +128,17 @@ public class Workspace {
         context.setResultBase(rawOrAbsolute(FileResources.PROPERTY_RESULT_BASE,
                 () -> FileResources.resultDir().toPath()));
         context.setEnv(Optional.ofNullable(System.getProperty(FileResources.PROPERTY_ENV)).orElse(""));
-        context.setSettingBase(withRawWorkspacePrefix(
-                FileResources.settingDir().toPath().toAbsolutePath().normalize().toString(),
-                expandedWorkspace, rawWorkspace));
-        context.setTemplateBase(withRawWorkspacePrefix(
-                FileResources.templateFileDir().toPath().toAbsolutePath().normalize().toString(),
-                expandedWorkspace, rawWorkspace));
-        context.setParameterizeTemplateBase(withRawWorkspacePrefix(
-                FileResources.parameterizeTemplateDir().toPath().toAbsolutePath().normalize().toString(),
-                expandedWorkspace, rawWorkspace));
-        context.setJdbcBase(withRawWorkspacePrefix(
-                FileResources.jdbcPropDir().toPath().toAbsolutePath().normalize().toString(),
-                expandedWorkspace, rawWorkspace));
-        context.setXlsxSchemaBase(withRawWorkspacePrefix(
-                FileResources.xlsxSchemaDir().toPath().toAbsolutePath().normalize().toString(),
-                expandedWorkspace, rawWorkspace));
-        context.setFixedColumnDefBase(withRawWorkspacePrefix(
-                FileResources.fixedColumnDefDir().toPath().toAbsolutePath().normalize().toString(),
-                expandedWorkspace, rawWorkspace));
+        final Function<Option.BaseDir, String> base = baseDir -> withRawWorkspacePrefix(
+                baseDir.dir().toPath().toAbsolutePath().normalize().toString(), expandedWorkspace, rawWorkspace);
+        context.setSettingBase(base.apply(Option.BaseDir.SETTING));
+        context.setTemplateBase(base.apply(Option.BaseDir.TEMPLATE));
+        context.setParameterizeTemplateBase(base.apply(Option.BaseDir.PARAMETERIZE_TEMPLATE));
+        context.setJdbcBase(base.apply(Option.BaseDir.JDBC));
+        context.setXlsxSchemaBase(base.apply(Option.BaseDir.XLSX_SCHEMA));
+        context.setFixedColumnDefBase(base.apply(Option.BaseDir.FIXED_COLUMN_DEF));
+        context.setSqlBase(base.apply(Option.BaseDir.SQL));
+        context.setTableBase(base.apply(Option.BaseDir.TABLE));
+        context.setCsvqBase(base.apply(Option.BaseDir.CSVQ));
         return result;
     }
 

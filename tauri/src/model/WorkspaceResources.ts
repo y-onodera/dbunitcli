@@ -7,7 +7,10 @@ export type DefaultPath =
 	| "PARAMETERIZE_TEMPLATE"
 	| "JDBC"
 	| "XLSX_SCHEMA"
-	| "FIXED_COLUMN_DEF";
+	| "FIXED_COLUMN_DEF"
+	| "SQL"
+	| "TABLE"
+	| "CSVQ";
 export type WorkspaceResources = {
 	parameterList: ParameterListBuilder;
 	resources: ResourcesSettings;
@@ -23,47 +26,46 @@ export type WorkspaceContextBuilder = {
 	jdbcBase: string;
 	xlsxSchemaBase: string;
 	fixedColumnDefBase?: string;
+	sqlBase?: string;
+	tableBase?: string;
+	csvqBase?: string;
 	env?: string;
+};
+// 基準ディレクトリごとのWorkspaceContextの項目（WORKSPACEと未定義のものはworkspace）
+const basePathKeys: Partial<
+	Record<DefaultPath, keyof WorkspaceContextBuilder>
+> = {
+	DATASET: "datasetBase",
+	RESULT: "resultBase",
+	SETTING: "settingBase",
+	TEMPLATE: "templateBase",
+	PARAMETERIZE_TEMPLATE: "parameterizeTemplateBase",
+	JDBC: "jdbcBase",
+	XLSX_SCHEMA: "xlsxSchemaBase",
+	FIXED_COLUMN_DEF: "fixedColumnDefBase",
+	SQL: "sqlBase",
+	TABLE: "tableBase",
+	CSVQ: "csvqBase",
 };
 export class WorkspaceContext {
 	getPath(defaultPath: DefaultPath): string {
-		switch (defaultPath) {
-			case "DATASET":
-				return this.datasetBase;
-			case "RESULT":
-				return this.resultBase;
-			case "SETTING":
-				return this.settingBase;
-			case "TEMPLATE":
-				return this.templateBase;
-			case "PARAMETERIZE_TEMPLATE":
-				return this.parameterizeTemplateBase;
-			case "JDBC":
-				return this.jdbcBase;
-			case "XLSX_SCHEMA":
-				return this.xlsxSchemaBase;
-			case "FIXED_COLUMN_DEF":
-				return this.fixedColumnDefBase;
-			default:
-				return this.workspace;
-		}
+		const key = basePathKeys[defaultPath];
+		return key ? this[key] : this.workspace;
 	}
 	static create(): WorkspaceContext {
-		return new WorkspaceContext("", "", "", "", "", "", "", "", "", "");
+		return new WorkspaceContext({
+			workspace: "",
+			datasetBase: "",
+			resultBase: "",
+			settingBase: "",
+			templateBase: "",
+			parameterizeTemplateBase: "",
+			jdbcBase: "",
+			xlsxSchemaBase: "",
+		});
 	}
 	static from(builder: WorkspaceContextBuilder): WorkspaceContext {
-		return new WorkspaceContext(
-			builder.workspace,
-			builder.datasetBase,
-			builder.resultBase,
-			builder.settingBase,
-			builder.templateBase,
-			builder.parameterizeTemplateBase,
-			builder.jdbcBase,
-			builder.xlsxSchemaBase,
-			builder.fixedColumnDefBase ?? "",
-			builder.env ?? "",
-		);
+		return new WorkspaceContext(builder);
 	}
 	readonly workspace: string;
 	readonly datasetBase: string;
@@ -74,43 +76,31 @@ export class WorkspaceContext {
 	readonly jdbcBase: string;
 	readonly xlsxSchemaBase: string;
 	readonly fixedColumnDefBase: string;
+	readonly sqlBase: string;
+	readonly tableBase: string;
+	readonly csvqBase: string;
 	readonly env: string;
-	constructor(
-		workspace: string,
-		datasetBase: string,
-		resultBase: string,
-		settingBase: string,
-		templateBase: string,
-		parameterizeTemplateBase: string,
-		jdbcBase: string,
-		xlsxSchemaBase: string,
-		fixedColumnDefBase: string,
-		env: string,
-	) {
-		this.workspace = workspace;
-		this.datasetBase = datasetBase;
-		this.resultBase = resultBase;
-		this.settingBase = settingBase;
-		this.templateBase = templateBase;
-		this.parameterizeTemplateBase = parameterizeTemplateBase;
-		this.jdbcBase = jdbcBase;
-		this.xlsxSchemaBase = xlsxSchemaBase;
-		this.fixedColumnDefBase = fixedColumnDefBase;
-		this.env = env;
+	constructor(builder: WorkspaceContextBuilder) {
+		this.workspace = builder.workspace;
+		this.datasetBase = builder.datasetBase;
+		this.resultBase = builder.resultBase;
+		this.settingBase = builder.settingBase;
+		this.templateBase = builder.templateBase;
+		this.parameterizeTemplateBase = builder.parameterizeTemplateBase;
+		this.jdbcBase = builder.jdbcBase;
+		this.xlsxSchemaBase = builder.xlsxSchemaBase;
+		this.fixedColumnDefBase = builder.fixedColumnDefBase ?? "";
+		this.sqlBase = builder.sqlBase ?? "";
+		this.tableBase = builder.tableBase ?? "";
+		this.csvqBase = builder.csvqBase ?? "";
+		this.env = builder.env ?? "";
 	}
+	// undefinedの項目は今の値を残す
 	with(overrides: Partial<WorkspaceContextBuilder>): WorkspaceContext {
-		return new WorkspaceContext(
-			overrides.workspace ?? this.workspace,
-			overrides.datasetBase ?? this.datasetBase,
-			overrides.resultBase ?? this.resultBase,
-			overrides.settingBase ?? this.settingBase,
-			overrides.templateBase ?? this.templateBase,
-			overrides.parameterizeTemplateBase ?? this.parameterizeTemplateBase,
-			overrides.jdbcBase ?? this.jdbcBase,
-			overrides.xlsxSchemaBase ?? this.xlsxSchemaBase,
-			overrides.fixedColumnDefBase ?? this.fixedColumnDefBase,
-			overrides.env ?? this.env,
+		const defined = Object.fromEntries(
+			Object.entries(overrides).filter(([, value]) => value !== undefined),
 		);
+		return new WorkspaceContext({ ...this, ...defined });
 	}
 }
 export type ParameterListBuilder = {
@@ -166,7 +156,11 @@ export type ResourcesSettingsBuilder = {
 	xlsxSchemas?: string[];
 	jdbcFiles?: string[];
 	templateFiles?: string[];
+	parameterizeTemplateFiles?: string[];
 	fixedColumnDefs?: string[];
+	sqlFiles?: string[];
+	tableFiles?: string[];
+	csvqFiles?: string[];
 };
 export class ResourcesSettings {
 	static create(): ResourcesSettings {
@@ -179,13 +173,21 @@ export class ResourcesSettings {
 	readonly xlsxSchemas: string[];
 	readonly jdbcFiles: string[];
 	readonly templateFiles: string[];
+	readonly parameterizeTemplateFiles: string[];
 	readonly fixedColumnDefs: string[];
+	readonly sqlFiles: string[];
+	readonly tableFiles: string[];
+	readonly csvqFiles: string[];
 	constructor(builder: ResourcesSettingsBuilder) {
 		this.datasetSettings = builder.datasetSettings ?? [];
 		this.xlsxSchemas = builder.xlsxSchemas ?? [];
 		this.jdbcFiles = builder.jdbcFiles ?? [];
 		this.templateFiles = builder.templateFiles ?? [];
+		this.parameterizeTemplateFiles = builder.parameterizeTemplateFiles ?? [];
 		this.fixedColumnDefs = builder.fixedColumnDefs ?? [];
+		this.sqlFiles = builder.sqlFiles ?? [];
+		this.tableFiles = builder.tableFiles ?? [];
+		this.csvqFiles = builder.csvqFiles ?? [];
 	}
 	with(builder: ResourcesSettingsBuilder): ResourcesSettings {
 		return new ResourcesSettings({

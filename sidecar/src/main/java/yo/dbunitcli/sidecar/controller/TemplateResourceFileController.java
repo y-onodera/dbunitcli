@@ -5,24 +5,20 @@ import io.micronaut.http.annotation.Body;
 import io.micronaut.http.annotation.Controller;
 import io.micronaut.http.annotation.Post;
 import jakarta.inject.Inject;
-import jakarta.json.Json;
-import jakarta.json.JsonWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import yo.dbunitcli.Strings;
 import yo.dbunitcli.application.command.GenerateType;
 import yo.dbunitcli.sidecar.domain.project.ResourceFile;
 import yo.dbunitcli.sidecar.domain.project.Workspace;
-import yo.dbunitcli.sidecar.dto.TemplateRequestDto;
 import yo.dbunitcli.sidecar.job.Interruptible;
 
 import java.io.IOException;
-import java.io.StringWriter;
 import java.nio.file.Path;
 import java.util.Map;
 
 @Controller("template")
-public class TemplateResourceFileController extends AbstractResourceFileController<TemplateRequestDto> {
+public class TemplateResourceFileController extends AbstractTextResourceFileController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TemplateResourceFileController.class);
     private static final String GENERATED_FILE = "template.xlsx";
@@ -36,41 +32,6 @@ public class TemplateResourceFileController extends AbstractResourceFileControll
     @Override
     protected ResourceFile getResourceFile() {
         return this.workspace.resources().template();
-    }
-
-    /**
-     * templateはscaffold等で書き出された生のテキスト（.stg/.txt）や既存のjsonファイルを含むため、
-     * エディタが期待する{"content": ...}形式へ包んで返す（生テキストをそのまま返すとJSONとして解釈できない）。
-     */
-    @Post(uri = "load", consumes = MediaType.TEXT_PLAIN, produces = MediaType.APPLICATION_JSON)
-    @Override
-    public String load(@Body final String name) {
-        try {
-            final String content = this.getResourceFile().read(name).orElse("");
-            final StringWriter sw = new StringWriter();
-            try (final JsonWriter writer = Json.createWriter(sw)) {
-                writer.writeObject(Json.createObjectBuilder().add("content", content).build());
-            }
-            return sw.toString();
-        } catch (final Throwable th) {
-            LOGGER.error("cause:", th);
-            throw new ApplicationException(th);
-        }
-    }
-
-    /** テンプレートは生のテキストとして保存する（loadの{"content": ...}形式とは非対称）。応答は更新後のファイル一覧 */
-    @Post(uri = "save", produces = MediaType.APPLICATION_JSON)
-    @Override
-    public String save(@Body final TemplateRequestDto body) throws IOException {
-        try {
-            this.getResourceFile().update(body.getName(), body.getInput().getContent());
-        } catch (final IOException e) {
-            throw e;
-        } catch (final Throwable th) {
-            LOGGER.error("cause:", th);
-            throw new ApplicationException(th);
-        }
-        return this.currentFileList();
     }
 
     /**
