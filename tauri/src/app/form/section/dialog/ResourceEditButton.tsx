@@ -13,7 +13,12 @@ export type ResourceEditButtonProp = {
 	setPath: (value: string) => void;
 };
 
-type RemoveResourceProp = ResourceEditButtonProp & {
+// onRemovedは削除に成功したときだけ呼ぶ（ドロップダウンを閉じる等）
+export type RemoveResourceButtonProp = ResourceEditButtonProp & {
+	onRemoved?: () => void;
+};
+
+type RemoveResourceProp = RemoveResourceButtonProp & {
 	deleteResource: (path: string) => Promise<string>;
 };
 
@@ -25,28 +30,36 @@ type ResourcesEditButtonProps = {
 	renderTrigger?: (openDialog: () => void) => ReactElement;
 };
 
+// 確認のうえ削除し、成功したかを返す。try/catch内の分岐はReact Compilerが未対応のため、コンポーネント外で行う
+async function confirmAndDelete(
+	path: string,
+	deleteResource: (path: string) => Promise<string>,
+): Promise<boolean> {
+	const confirmed = await window.confirm(`${path}を削除してもよろしいですか？`);
+	if (!confirmed) {
+		return false;
+	}
+	try {
+		if ((await deleteResource(path)) === "success") {
+			return true;
+		}
+		alert("削除に失敗しました");
+	} catch (ex) {
+		alert(ex);
+	}
+	return false;
+}
+
 export function RemoveResource({
 	deleteResource,
 	path,
 	setPath,
+	onRemoved,
 }: RemoveResourceProp) {
 	const handleRemove = async () => {
-		const confirmed = await window.confirm(
-			`${path}を削除してもよろしいですか？`,
-		);
-		if (!confirmed) {
-			return;
-		}
-
-		try {
-			const result = await deleteResource(path);
-			if (result === "success") {
-				setPath("");
-			} else {
-				alert("削除に失敗しました");
-			}
-		} catch (ex) {
-			alert(ex);
+		if (await confirmAndDelete(path, deleteResource)) {
+			setPath("");
+			onRemoved?.();
 		}
 	};
 
@@ -114,12 +127,14 @@ export function RemoveResourceButton({
 	kind,
 	path,
 	setPath,
-}: ResourceEditButtonProp & { kind: ResourceKind }) {
+	onRemoved,
+}: RemoveResourceButtonProp & { kind: ResourceKind }) {
 	const deleteResource = useDeleteResource(kind);
 	return (
 		<RemoveResource
 			path={path}
 			setPath={setPath}
+			onRemoved={onRemoved}
 			deleteResource={deleteResource}
 		/>
 	);

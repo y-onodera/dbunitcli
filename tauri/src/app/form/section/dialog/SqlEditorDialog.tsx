@@ -18,6 +18,7 @@ import { saveOnSuccess } from "../../../../utils/fetchUtils";
 import { insertAtCursor } from "../../../../utils/textInsert";
 import {
 	RemoveResource,
+	type RemoveResourceButtonProp,
 	type ResourceEditButtonProp,
 } from "./ResourceEditButton";
 import SqlTableInsertDialog from "./SqlTableInsertDialog";
@@ -162,14 +163,16 @@ export function SqlEditorButton({ path, setPath, type }: SqlEditorButtonProps) {
 export function RemoveSqlEditorButton({
 	path,
 	setPath,
+	onRemoved,
 	type,
-}: SqlEditorButtonProps) {
+}: RemoveResourceButtonProp & { type: QueryDatasourceType }) {
 	const deleteDataSource = useDeleteDataSource(type);
 
 	return (
 		<RemoveResource
 			path={path}
 			setPath={setPath}
+			onRemoved={onRemoved}
 			deleteResource={deleteDataSource}
 		/>
 	);

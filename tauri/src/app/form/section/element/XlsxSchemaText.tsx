@@ -45,11 +45,12 @@ export default function XlsxSchemaText({
 							setPath={setPath}
 						/>,
 					]}
-					removeButton={() => (
+					removeButton={(closeMenu) => (
 						<RemoveResourceButton
 							kind="xlsxSchema"
 							path={path}
 							setPath={setPath}
+							onRemoved={closeMenu}
 						/>
 					)}
 				/>

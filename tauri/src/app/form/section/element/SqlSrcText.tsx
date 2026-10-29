@@ -65,10 +65,11 @@ function SqlSrcDropDownMenu({
 			showOpenButton={false}
 			removeButton={
 				isSqlOrTable
-					? () => (
+					? (closeMenu: () => void) => (
 							<RemoveSqlEditorButton
 								path={path}
 								setPath={setPath}
+								onRemoved={closeMenu}
 								type={srcType as QueryDatasourceType}
 							/>
 						)

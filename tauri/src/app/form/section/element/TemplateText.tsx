@@ -31,11 +31,12 @@ export default function TemplateText({
 					editButtons={[
 						<TemplateEditButton key="edit" path={path} setPath={setPath} />,
 					]}
-					removeButton={() => (
+					removeButton={(closeMenu) => (
 						<RemoveResourceButton
 							kind="template"
 							path={path}
 							setPath={setPath}
+							onRemoved={closeMenu}
 						/>
 					)}
 				/>

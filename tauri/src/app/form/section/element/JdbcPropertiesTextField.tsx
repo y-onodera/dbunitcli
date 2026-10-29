@@ -42,10 +42,8 @@ export default function JdbcPropertiesTextField({
 							<RemoveResourceButton
 								kind="jdbc"
 								path={path}
-								setPath={(value) => {
-									wrappedSetPath(value);
-									closeMenu();
-								}}
+								setPath={wrappedSetPath}
+								onRemoved={closeMenu}
 							/>
 						)}
 						className="mr-24"

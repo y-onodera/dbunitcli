@@ -61,11 +61,12 @@ export function ParameterizeForm(prop: {
 									setPath={setPath}
 								/>,
 							]}
-							removeButton={() => (
+							removeButton={(closeMenu) => (
 								<RemoveResourceButton
 									kind="parameterizeTemplate"
 									path={path}
 									setPath={setPath}
+									onRemoved={closeMenu}
 								/>
 							)}
 						/>

@@ -47,11 +47,12 @@ function TemplateFileText({
 					element={element}
 					isValueInDatalist={isValueInDatalist}
 					editButtons={editButtons(path, setPath)}
-					removeButton={() => (
+					removeButton={(closeMenu) => (
 						<RemoveResourceButton
 							kind="template"
 							path={path}
 							setPath={setPath}
+							onRemoved={closeMenu}
 						/>
 					)}
 				/>
