@@ -101,6 +101,7 @@ export type SrcElements = CommandOptions & {
 	regTableExclude: CommandOption;
 	setting: CommandOption;
 	settingEncoding: CommandOption;
+	settingTargetOnly: CommandOption;
 };
 export type DatasetSource = CommandOptions &
 	SrcElements &

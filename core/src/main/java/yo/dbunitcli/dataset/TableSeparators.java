@@ -40,13 +40,14 @@ public record TableSeparators(List<TableSeparator> settings
     }
 
     /**
-     * settingsの対象（name/pattern）とjoinの対象（left/right）のソーステーブルだけを読み込む。
-     * 対象外のテーブルは出力しないため、設定を適用した結果だけを確認できる
+     * settingsの対象（name/pattern）、joinの対象（left/right）、中身のあるcommonSettingsの対象のソーステーブルだけを読み込む。
+     * 対象外のテーブルは出力しないため、設定を適用した結果だけを確認できる。設定が無ければ何も読み込まない
      */
     public TableSeparators onlySettingTargets() {
-        final TableMetaDataFilter settingTargets = this.settings.stream()
-                                                                .map(TableSeparator::sourceFilter)
-                                                                .reduce(new AlwaysFilter(false), TableMetaDataFilter::or);
+        final TableMetaDataFilter settingTargets = Stream.concat(this.settings.stream()
+                                                                 , this.commonSettings.stream().filter(TableSeparator::hasSettings))
+                                                         .map(TableSeparator::sourceFilter)
+                                                         .reduce(new AlwaysFilter(false), TableMetaDataFilter::or);
         final TableMetaDataFilter joinTargets = tableName -> this.joinConditions.stream()
                                                                                 .anyMatch(it -> it.hasRelation(tableName));
         return this.builder().addSourceFilter(settingTargets.or(joinTargets)).build();
