@@ -336,6 +336,7 @@ describe("SelectParameterProviderのテスト", () => {
 			expect(await result.current.saveParameter(mockInput)).toStrictEqual({
 				resultMessage: mockError.message,
 				resultDir: "",
+				failed: true,
 			});
 		});
 	});
@@ -386,6 +387,7 @@ describe("SelectParameterProviderのテスト", () => {
 			expect(await result.current.execParameter(mockInput)).toStrictEqual({
 				resultMessage: mockError.message,
 				resultDir: "",
+				failed: true,
 			});
 			// メッセージは結果ダイアログに出すので、alertは出さずログだけ残す
 			expect(handleFetchError).not.toHaveBeenCalled();

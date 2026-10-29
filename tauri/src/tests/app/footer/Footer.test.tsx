@@ -134,7 +134,7 @@ describe("Footerの実行ボタン", () => {
 			name: "test",
 			input: { "-src": "data", "-Pid": "1" },
 		});
-		expect(screen.getByText("Execution Success")).toBeInTheDocument();
+		expect(screen.getByText("Execution Success")).not.toHaveClass("text-error");
 		expect(screen.getByText("Open Directory")).toBeInTheDocument();
 	});
 
@@ -258,7 +258,8 @@ describe("Execのオプション検証エラー", () => {
 		);
 		await userEvent.click(screen.getByText("Exec"));
 
-		expect(screen.getByText("Invalid Option")).toBeInTheDocument();
+		// 失敗は成功と区別して赤字で出す
+		expect(screen.getByText("Invalid Option")).toHaveClass("text-error");
 		expect(screen.getByText("src not found")).toBeInTheDocument();
 		// 非表示の欄の下には出さず、ダイアログにだけ出す
 		expect(screen.getAllByText("setting not found")).toHaveLength(1);

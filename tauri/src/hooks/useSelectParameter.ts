@@ -31,6 +31,8 @@ export type Running = {
 	resultDir: string;
 	// 入力欄に表示できなかった検証エラー
 	resultDetails?: string[];
+	// 失敗したとき（resultMessageはエラーメッセージ）
+	failed?: boolean;
 };
 
 export const useAddParameter = (command: string) => {
@@ -265,12 +267,13 @@ const useParameterAction = () => {
 					resultMessage: INVALID_OPTION_MESSAGE,
 					resultDir: "",
 					resultDetails: unmatched,
+					failed: true,
 				};
 			}
 			// 結果ダイアログにメッセージを出すので、alertは出さない
 			const errorMessage = getErrorMessage(ex);
 			logFetchError(errorMessage, fetchParams);
-			return { resultMessage: errorMessage, resultDir: "" };
+			return { resultMessage: errorMessage, resultDir: "", failed: true };
 		}
 	};
 };
