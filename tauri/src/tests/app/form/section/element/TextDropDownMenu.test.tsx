@@ -2,7 +2,10 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import { TextDropDownMenu } from "../../../../../app/form/section/element/Text";
-import { DeleteButton } from "../../../../../components/element/ButtonIcon";
+import {
+	DeleteButton,
+	EditButton,
+} from "../../../../../components/element/ButtonIcon";
 import { makeMinimalParam } from "../../../../setup";
 
 vi.mock("@tauri-apps/plugin-dialog", () => ({ open: vi.fn() }));
@@ -60,5 +63,32 @@ describe("TextDropDownMenuの削除ボタン表示", () => {
 		} else {
 			expect(screen.queryByTitle("delete")).not.toBeInTheDocument();
 		}
+	});
+});
+
+describe("TextDropDownMenuの編集系ボタン", () => {
+	it("複数のボタンを渡してもkey重複の警告を出さずにすべて表示する", async () => {
+		const consoleError = vi
+			.spyOn(console, "error")
+			.mockImplementation(() => {});
+		render(
+			<TextDropDownMenu
+				path=""
+				setPath={vi.fn()}
+				prefix=""
+				element={element}
+				editButtons={[
+					<EditButton key="edit" handleClick={vi.fn()} />,
+					<EditButton key="generate" title="generate" handleClick={vi.fn()} />,
+				]}
+			/>,
+		);
+		await openMenu();
+
+		expect(screen.getByTitle("edit")).toBeInTheDocument();
+		expect(screen.getByTitle("generate")).toBeInTheDocument();
+		const messages = consoleError.mock.calls.map((call) => String(call[0]));
+		expect(messages.filter((m) => m.includes("same key"))).toStrictEqual([]);
+		consoleError.mockRestore();
 	});
 });

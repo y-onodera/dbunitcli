@@ -1,5 +1,4 @@
-import type { ReactNode } from "react";
-import { useState } from "react";
+import { Children, type ReactNode, useState } from "react";
 import DropDownMenu from "../../../../components/element/DropDownMenu";
 import {
 	ControllTextBox,
@@ -136,8 +135,9 @@ export function TextDropDownMenu({
 		<DropDownMenu className={className}>
 			{(closeMenu) => (
 				<>
-					{editButtons?.map((btn) => (
-						<li key={btn?.toString()}>{btn}</li>
+					{/* Children.mapは各要素のkeyを引き継いだkeyを<li>へ付ける */}
+					{Children.map(editButtons, (btn) => (
+						<li>{btn}</li>
 					))}
 					{showOpen && path && (
 						<li>

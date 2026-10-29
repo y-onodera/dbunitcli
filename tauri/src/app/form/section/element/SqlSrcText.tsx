@@ -47,6 +47,7 @@ function SqlSrcDropDownMenu({
 	const editButtons: ReactNode[] = [];
 	editButtons.push(
 		<SqlEditorButton
+			key="edit"
 			type={srcType as QueryDatasourceType}
 			path={path}
 			setPath={setPath}
