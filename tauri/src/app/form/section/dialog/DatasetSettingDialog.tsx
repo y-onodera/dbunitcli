@@ -39,7 +39,7 @@ export default function DatasetSettingDialog(props: {
 			handleDialogClose={props.handleDialogClose}
 			handleCommit={props.handleCommit}
 			footerActions={() =>
-				// 編集中のこの設定1件だけを適用してテーブル一覧をプレビューする（保存はしない）
+				// 編集中のこの設定1件の対象テーブルだけを、設定を適用してプレビューする（保存はしない）
 				datasetSrcInfo.srcType && (
 					<BlueButton
 						title="Preview"

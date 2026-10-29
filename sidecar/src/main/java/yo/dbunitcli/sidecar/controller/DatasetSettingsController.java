@@ -276,14 +276,16 @@ public class DatasetSettingsController extends AbstractResourceFileController<Da
     }
 
     /**
-     * 保存時と同じ形式のJSONにして、settingsにこの1件だけを持つ設定として読む
+     * 保存時と同じ形式のJSONにして、settingsにこの1件だけを持つ設定として読む。
+     * 設定の対象外のテーブルは読み込まず、設定を適用した結果だけを返す
      */
     private TableSeparators inlineTableSeparators(final DatasetSettingDto setting) throws IOException {
         final String json = "{\"settings\":[" + JsonMapper.createDefault().writeValueAsString(setting) + "]}";
         try (final JsonReader reader = Json.createReader(new StringReader(json))) {
             return new FromJsonTableSeparatorsBuilder(StandardCharsets.UTF_8.name())
                     .configureSetting(reader.readObject())
-                    .build();
+                    .build()
+                    .onlySettingTargets();
         }
     }
 

@@ -246,16 +246,35 @@ class DatasetSettingsControllerTest {
     }
 
     @Test
-    void testTableNames_inlineSettingはsettingより優先して適用する() throws IOException {
+    void testTableNames_inlineSettingはsettingより優先し対象のテーブルだけを適用後の名前で返す() throws IOException {
         this.createPreviewSrc();
-        final Map<String, Object> body = this.tableBody("csv", this.writeJoinSetting(), "");
-        body.put("inlineSetting", Map.of("name", Map.of("any", List.of("big")), "tableName", "renamed"));
 
-        final String response = this.client.toBlocking().retrieve(
-                HttpRequest.POST("dbunit-cli/dataset-setting/table-names", ObjectMapper.getDefault().writeValueAsString(body)));
+        Assertions.assertEquals(List.of("renamed"), this.inlineTableNames(this.writeJoinSetting(),
+                Map.of("name", Map.of("any", List.of("big")), "tableName", "renamed")));
+    }
 
-        Assertions.assertEquals(List.of("renamed", "small"),
-                List.of(ObjectMapper.getDefault().readValue(response, String[].class)).stream().sorted().toList());
+    @Test
+    void testTableNames_inlineSettingは変換の無い設定でも対象のテーブルを返す() throws IOException {
+        this.createPreviewSrc();
+
+        Assertions.assertEquals(List.of("small"), this.inlineTableNames("",
+                Map.of("name", Map.of("any", List.of("small")), "keys", List.of("key"))));
+    }
+
+    @Test
+    void testTableNames_inlineSettingのjoinは結合結果だけを返す() throws IOException {
+        this.createPreviewSrc();
+
+        Assertions.assertEquals(List.of("joined"), this.inlineTableNames("",
+                Map.of("innerJoin", Map.of("left", "big", "right", "small", "column", List.of("key")), "tableName", "joined")));
+    }
+
+    @Test
+    void testTableNames_inlineSettingに一致するテーブルが無ければ空を返す() throws IOException {
+        this.createPreviewSrc();
+
+        Assertions.assertEquals(List.of(), this.inlineTableNames("",
+                Map.of("name", Map.of("any", List.of("nothing")), "tableName", "renamed")));
     }
 
     @Test
@@ -487,6 +506,14 @@ class DatasetSettingsControllerTest {
         }
         Files.writeString(PREVIEW_SRC_DIR.resolve("big.csv"), big.toString());
         Files.writeString(PREVIEW_SRC_DIR.resolve("small.csv"), "key,other\n1,a\n2,b\n3,c\n");
+    }
+
+    private List<String> inlineTableNames(final String setting, final Map<String, Object> inlineSetting) throws IOException {
+        final Map<String, Object> body = this.tableBody("csv", setting, "");
+        body.put("inlineSetting", inlineSetting);
+        final String response = this.client.toBlocking().retrieve(
+                HttpRequest.POST("dbunit-cli/dataset-setting/table-names", ObjectMapper.getDefault().writeValueAsString(body)));
+        return List.of(ObjectMapper.getDefault().readValue(response, String[].class)).stream().sorted().toList();
     }
 
     private DatasetTablePreviewResponseDto tablePreview(final String setting, final String tableName) throws IOException {
