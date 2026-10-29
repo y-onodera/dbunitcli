@@ -1,10 +1,4 @@
-import {
-	Children,
-	type Dispatch,
-	type ReactNode,
-	type SetStateAction,
-	useState,
-} from "react";
+import { Children, type ReactNode, useState } from "react";
 import DropDownMenu from "../../../../components/element/DropDownMenu";
 import {
 	ControllTextBox,
@@ -45,11 +39,6 @@ export default function Text({
 		showDefaulePath && workspacePath !== "" && workspacePath !== basePath;
 	const fieldErrors = useFieldErrors(fieldName, !hidden);
 	const clearFieldErrors = useClearFieldErrors();
-	// ボタン等から値を変えたときはchangeが起きないため、ここで検証エラーを消す
-	const updatePath: Dispatch<SetStateAction<string>> = (value) => {
-		setPath(value);
-		clearFieldErrors(fieldName);
-	};
 
 	const handleChange = (ev: React.ChangeEvent<HTMLInputElement>) => {
 		const newValue = ev.target.value;
@@ -94,7 +83,15 @@ export default function Text({
 					</div>
 					{!hidden &&
 						children &&
-						children({ path, setPath: updatePath, isValueInDatalist })}
+						children({
+							path,
+							// ボタン等から値を変えたときはchangeが起きないため、ここで検証エラーを消す
+							setPath: (value) => {
+								setPath(value);
+								clearFieldErrors(fieldName);
+							},
+							isValueInDatalist,
+						})}
 				</div>
 			</div>
 			{afterContent?.({ path })}

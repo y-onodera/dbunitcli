@@ -213,7 +213,6 @@ const addUnique = (messages: string[], message: string) => {
 	if (!messages.includes(message)) {
 		messages.push(message);
 	}
-	return messages;
 };
 
 // 違反は関わる全ての入力欄に持たせ、折りたたんだ欄も展開すれば欄の下に出す。表示中の欄が無い違反は結果ダイアログにもまとめて出す
@@ -228,7 +227,8 @@ const toFieldErrors = (
 			addUnique(unmatched, violation.message);
 		}
 		for (const name of violation.options) {
-			fieldErrors[name] = addUnique(fieldErrors[name] ?? [], violation.message);
+			fieldErrors[name] ??= [];
+			addUnique(fieldErrors[name], violation.message);
 		}
 	}
 	return { fieldErrors, unmatched };

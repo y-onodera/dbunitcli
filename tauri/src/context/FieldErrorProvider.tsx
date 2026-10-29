@@ -22,13 +22,6 @@ function omitFieldErrors(errors: FieldErrors, name: string): FieldErrors {
 	return rest;
 }
 
-function clearFieldErrors(
-	setFieldErrors: Dispatch<SetStateAction<FieldErrors>>,
-	name: string,
-) {
-	setFieldErrors((current) => omitFieldErrors(current, name));
-}
-
 export default function FieldErrorProvider({
 	children,
 }: {
@@ -40,7 +33,7 @@ export default function FieldErrorProvider({
 	const handleChange = (ev: FormEvent<HTMLDivElement>) => {
 		const { name } = ev.target as HTMLInputElement;
 		if (name) {
-			clearFieldErrors(setFieldErrors, name);
+			setFieldErrors((current) => omitFieldErrors(current, name));
 		}
 	};
 	return (
@@ -62,7 +55,8 @@ export const useVisibleFields = () => use(visibleFieldsContext);
 // changeを起こさずに値を変えたとき（ファイル選択等）に、その欄の検証エラーを消す
 export const useClearFieldErrors = () => {
 	const setFieldErrors = use(setFieldErrorsContext);
-	return (name: string) => clearFieldErrors(setFieldErrors, name);
+	return (name: string) =>
+		setFieldErrors((current) => omitFieldErrors(current, name));
 };
 
 // 表示中のあいだ入力欄をエラーの表示先として登録し、その欄のエラーを返す
