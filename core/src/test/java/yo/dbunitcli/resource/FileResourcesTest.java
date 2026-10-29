@@ -464,6 +464,55 @@ class FileResourcesTest {
     }
 
     @Nested
+    class SearchQueryResourceTest {
+        @TempDir
+        Path workspace;
+
+        @BeforeEach
+        void setProperty() throws IOException {
+            final Properties newProperty = new Properties();
+            newProperty.putAll(FileResourcesTest.backup);
+            newProperty.put(FileResources.PROPERTY_WORKSPACE, this.workspace.toString());
+            newProperty.put(FileResources.PROPERTY_DATASET_BASE, this.workspace.resolve("dataset").toString());
+            System.setProperties(newProperty);
+            Files.createDirectories(this.workspace.resolve("dataset"));
+            Files.createDirectories(this.workspace.resolve(FileResources.RESOURCES_SQL_PATH));
+            Files.createDirectories(this.workspace.resolve(FileResources.RESOURCES_TABLE_PATH));
+            Files.createDirectories(this.workspace.resolve(FileResources.RESOURCES_CSVQ_PATH));
+        }
+
+        @AfterEach
+        void restore() {
+            FileResourcesTest.restore();
+        }
+
+        @Test
+        void searchResourcesDir() throws IOException {
+            Files.createFile(this.workspace.resolve("dataset").resolve("q.sql"));
+            final Path sql = Files.createFile(this.workspace.resolve(FileResources.RESOURCES_SQL_PATH).resolve("q.sql"));
+            final Path table = Files.createFile(this.workspace.resolve(FileResources.RESOURCES_TABLE_PATH).resolve("q.sql"));
+            final Path csvq = Files.createFile(this.workspace.resolve(FileResources.RESOURCES_CSVQ_PATH).resolve("q.sql"));
+            Assertions.assertEquals(sql.toFile(), FileResources.searchSql("q.sql"));
+            Assertions.assertEquals(table.toFile(), FileResources.searchTable("q.sql"));
+            Assertions.assertEquals(csvq.toFile(), FileResources.searchCsvq("q.sql"));
+        }
+
+        @Test
+        void searchDatasetIfNotFoundResourcesDir() throws IOException {
+            final Path expected = Files.createFile(this.workspace.resolve("dataset").resolve("q.sql"));
+            Assertions.assertEquals(expected.toFile(), FileResources.searchSql("q.sql"));
+            Assertions.assertEquals(expected.toFile(), FileResources.searchTable("q.sql"));
+            Assertions.assertEquals(expected.toFile(), FileResources.searchCsvq("q.sql"));
+        }
+
+        @Test
+        void searchWorkspaceIfNotFoundDataset() throws IOException {
+            final Path expected = Files.createFile(this.workspace.resolve("q.sql"));
+            Assertions.assertEquals(expected.toFile(), FileResources.searchSql("q.sql"));
+        }
+    }
+
+    @Nested
     class RunInContextTest {
         @BeforeEach
         void setProperty() {

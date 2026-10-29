@@ -44,6 +44,9 @@ public class Workspace {
             case "JDBC" -> FileResources.jdbcPropDir();
             case "XLSX_SCHEMA" -> FileResources.xlsxSchemaDir();
             case "FIXED_COLUMN_DEF" -> FileResources.fixedColumnDefDir();
+            case "SQL" -> FileResources.sqlDir();
+            case "TABLE" -> FileResources.tableDir();
+            case "CSVQ" -> FileResources.csvqDir();
             default -> FileResources.baseDir();
         };
     }
@@ -162,6 +165,15 @@ public class Workspace {
                 expandedWorkspace, rawWorkspace));
         context.setFixedColumnDefBase(withRawWorkspacePrefix(
                 FileResources.fixedColumnDefDir().toPath().toAbsolutePath().normalize().toString(),
+                expandedWorkspace, rawWorkspace));
+        context.setSqlBase(withRawWorkspacePrefix(
+                FileResources.sqlDir().toPath().toAbsolutePath().normalize().toString(),
+                expandedWorkspace, rawWorkspace));
+        context.setTableBase(withRawWorkspacePrefix(
+                FileResources.tableDir().toPath().toAbsolutePath().normalize().toString(),
+                expandedWorkspace, rawWorkspace));
+        context.setCsvqBase(withRawWorkspacePrefix(
+                FileResources.csvqDir().toPath().toAbsolutePath().normalize().toString(),
                 expandedWorkspace, rawWorkspace));
         return result;
     }

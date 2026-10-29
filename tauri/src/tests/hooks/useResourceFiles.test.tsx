@@ -7,6 +7,7 @@ import WorkspaceResourcesProvider, {
 import { useSaveDatasetSettings } from "../../hooks/useDatasetSettings";
 import { useSaveFixedColumnDef } from "../../hooks/useFixedColumnDef";
 import { useSaveJdbcProperties } from "../../hooks/useJdbc";
+import { useSaveQueryDatasource } from "../../hooks/useQueryDatasource";
 import {
 	type ResourceKind,
 	useDeleteResource,
@@ -101,6 +102,9 @@ describe("useDeleteResourceのテスト", () => {
 			endpoint: "fixed-column-def/delete",
 			key: "fixedColumnDefs",
 		},
+		{ kind: "sql", endpoint: "sql/delete", key: "sqlFiles" },
+		{ kind: "table", endpoint: "table/delete", key: "tableFiles" },
+		{ kind: "csvq", endpoint: "csvq/delete", key: "csvqFiles" },
 	])(
 		"kind=$kindのとき、$endpointへ名前を送り、応答で$keyを更新する",
 		async ({ kind, endpoint, key }) => {
@@ -184,6 +188,16 @@ describe("保存フックのテスト", () => {
 			input: { content: "template content" },
 			key: "parameterizeTemplateFiles",
 		},
+		...(["sql", "table", "csvq"] as const).map((type) => ({
+			name: `useSaveQueryDatasource(${type})`,
+			useSave: () => {
+				const save = useSaveQueryDatasource(type);
+				return (name: string) => save(name, "select 1");
+			},
+			endpoint: `${type}/save`,
+			input: { content: "select 1" },
+			key: `${type}Files` as keyof ResourcesSettingsBuilder,
+		})),
 		{
 			name: "useSaveJdbcProperties",
 			useSave: () => {

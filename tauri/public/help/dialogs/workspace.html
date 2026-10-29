@@ -43,7 +43,10 @@
     ├── template/              テンプレート
     ├── jdbc/                  JDBC 接続設定
     ├── xlsxSchema/            Xlsx Schema
-    └── fixed-column-def/      固定長カラム定義</pre>
+    ├── fixed-column-def/      固定長カラム定義
+    ├── sql/                   srcType=sql の SQL ファイル
+    ├── table/                 srcType=table のテーブル名一覧ファイル
+    └── csvq/                  srcType=csvq の SQL ファイル</pre>
   <p>各入力欄でファイル名だけ指定した場合は、対応するディレクトリ、Workspace の順に探します。</p>
 
   <h2 id="scope">Workspace の影響範囲</h2>
@@ -51,7 +54,7 @@
   <table>
     <tr><th>画面要素</th><th>読み書きする場所</th></tr>
     <tr><td>サイドバー</td><td><code>option/&lt;command&gt;/*.txt</code>（保存済みオプションの一覧）</td></tr>
-    <tr><td>フォームの各設定ダイアログ</td><td><code>resources/</code> 配下（Dataset Settings・テンプレート・JDBC・Xlsx Schema・固定長カラム定義）</td></tr>
+    <tr><td>フォームの各設定ダイアログ</td><td><code>resources/</code> 配下（Dataset Settings・テンプレート・JDBC・Xlsx Schema・固定長カラム定義・SQL Editor で編集する SQL / テーブル名一覧）</td></tr>
     <tr><td>フォームの相対パス</td><td>入力ファイルは Dataset Base、出力先は Result Base、それ以外は Workspace を基準に解決</td></tr>
     <tr><td>Exec / Save Shell</td><td>Env ファイル（<code>${env.変数名}</code> の置き換え）</td></tr>
   </table>
@@ -63,6 +66,7 @@
   <table>
     <tr><th>項目</th><th>基準ディレクトリ</th></tr>
     <tr><td>-src（入力データ）</td><td>Dataset Base</td></tr>
+    <tr><td>-src（<code>srcType</code> が <code>sql</code> / <code>table</code> / <code>csvq</code>）</td><td><code>&lt;workspace&gt;/resources/sql</code> / <code>table</code> / <code>csvq</code></td></tr>
     <tr><td>-result（出力先）</td><td>Result Base</td></tr>
     <tr><td>-setting / -unitSetting</td><td><code>&lt;workspace&gt;/resources/setting</code></td></tr>
     <tr><td>-template（Generate）/ -templateGroup</td><td><code>&lt;workspace&gt;/resources/template</code></td></tr>
@@ -92,6 +96,7 @@
   <table>
     <tr><th>オプションの種類</th><th>相対パスの解決方法</th></tr>
     <tr><td>入力データ（-src）</td><td>Dataset Base、Workspace、起動ディレクトリの順に探す</td></tr>
+    <tr><td>SQL / テーブル名一覧（<code>srcType</code> が <code>sql</code> / <code>table</code> / <code>csvq</code> の -src）</td><td>基準ディレクトリ、Dataset Base、Workspace、起動ディレクトリの順に探す。Dataset Base 直下に置いた以前のファイルもそのまま使える</td></tr>
     <tr><td>出力先（-result）</td><td>常に Result Base の下に出力する</td></tr>
     <tr><td>設定・テンプレート・JDBC など（<code>resources/</code> 系）</td><td>基準ディレクトリ、Workspace の順に探す（GUI の Exec と Save Shell で作った .bat で同じ）</td></tr>
   </table>

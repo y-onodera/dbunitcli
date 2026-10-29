@@ -21,6 +21,9 @@ public record FileResources() {
     public static final String RESOURCES_TEMPLATE_PATH = "resources/template";
     public static final String RESOURCES_JDBC_PATH = "resources/jdbc";
     public static final String RESOURCES_XLSX_SCHEMA_PATH = "resources/xlsxSchema";
+    public static final String RESOURCES_SQL_PATH = "resources/sql";
+    public static final String RESOURCES_TABLE_PATH = "resources/table";
+    public static final String RESOURCES_CSVQ_PATH = "resources/csvq";
     public static final String OPTION_PARAMETERIZE_TEMPLATE_PATH = "option/parameterize/template";
 
     private static final ScopedValue<Context> CONTEXT = ScopedValue.newInstance();
@@ -143,6 +146,19 @@ public record FileResources() {
         return FileResources.searchInOrder(xlsxSchemaPath, xlsxSchemaDir().toPath().normalize().toString(), FileResources::searchWorkspace);
     }
 
+    // 以前はdataset直下に保存していたため、resources配下→dataset→workspaceの順に探す
+    public static File searchSql(final String path) {
+        return FileResources.searchInOrder(path, sqlDir().toPath().normalize().toString(), FileResources::searchDatasetBase);
+    }
+
+    public static File searchTable(final String path) {
+        return FileResources.searchInOrder(path, tableDir().toPath().normalize().toString(), FileResources::searchDatasetBase);
+    }
+
+    public static File searchCsvq(final String path) {
+        return FileResources.searchInOrder(path, csvqDir().toPath().normalize().toString(), FileResources::searchDatasetBase);
+    }
+
     public static File fixedColumnDefDir() {
         return new File(baseDir(), "resources/fixed-column-def");
     }
@@ -226,6 +242,18 @@ public record FileResources() {
 
     public static File xlsxSchemaDir() {
         return new File(baseDir(), RESOURCES_XLSX_SCHEMA_PATH);
+    }
+
+    public static File sqlDir() {
+        return new File(baseDir(), RESOURCES_SQL_PATH);
+    }
+
+    public static File tableDir() {
+        return new File(baseDir(), RESOURCES_TABLE_PATH);
+    }
+
+    public static File csvqDir() {
+        return new File(baseDir(), RESOURCES_CSVQ_PATH);
     }
 
     public static File parameterizeTemplateDir() {

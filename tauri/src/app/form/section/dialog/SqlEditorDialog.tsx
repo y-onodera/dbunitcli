@@ -9,18 +9,13 @@ import { BlueButton } from "../../../../components/element/Button";
 import { TextArea } from "../../../../components/element/Input";
 import { useJdbcConnectionState } from "../../../../context/JdbcConnectionProvider";
 import {
-	useDataSourceContent,
-	useDeleteDataSource,
-	useSaveDataSource,
+	useQueryDatasourceData,
+	useSaveQueryDatasource,
 } from "../../../../hooks/useQueryDatasource";
 import type { QueryDatasourceType } from "../../../../model/QueryDatasource";
 import { saveOnSuccess } from "../../../../utils/fetchUtils";
 import { insertAtCursor } from "../../../../utils/textInsert";
-import {
-	type EditResourceDialogProps,
-	RemoveResource,
-	type RemoveResourceButtonProp,
-} from "./ResourceEditButton";
+import type { EditResourceDialogProps } from "./ResourceEditButton";
 import SqlTableInsertDialog from "./SqlTableInsertDialog";
 
 type SqlEditorDialogProps = EditResourceDialogProps & {
@@ -28,7 +23,10 @@ type SqlEditorDialogProps = EditResourceDialogProps & {
 };
 
 export default function SqlEditorDialog(props: SqlEditorDialogProps) {
-	const { content, loading } = useDataSourceContent(props.fileName);
+	const { content, loading } = useQueryDatasourceData(
+		props.type,
+		props.fileName,
+	);
 	if (loading) {
 		return <StatusMessage kind="loading">Loading...</StatusMessage>;
 	}
@@ -59,12 +57,12 @@ function Dialog(props: SqlEditorDialogProps & { value: string }) {
 	const [showTableSelector, setShowTableSelector] = useState(false);
 	const textareaRef = useRef<HTMLTextAreaElement>(null);
 	const pendingCursorRef = useRef<number | null>(null);
-	const saveDataSource = useSaveDataSource();
+	const saveDataSource = useSaveQueryDatasource(props.type);
 	const { jdbcValues, connectionOk } = useJdbcConnectionState();
 
 	const handleCommit = (path: string) =>
 		saveOnSuccess(
-			() => saveDataSource({ name: path, contents: content }),
+			() => saveDataSource(path, content),
 			() => props.handleSave(path),
 		);
 
@@ -136,22 +134,5 @@ function Dialog(props: SqlEditorDialogProps & { value: string }) {
 				/>
 			)}
 		</SettingDialog>
-	);
-}
-export function RemoveSqlEditorButton({
-	path,
-	setPath,
-	onRemoved,
-	type,
-}: RemoveResourceButtonProp & { type: QueryDatasourceType }) {
-	const deleteDataSource = useDeleteDataSource(type);
-
-	return (
-		<RemoveResource
-			path={path}
-			setPath={setPath}
-			onRemoved={onRemoved}
-			deleteResource={deleteDataSource}
-		/>
 	);
 }

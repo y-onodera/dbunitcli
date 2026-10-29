@@ -108,7 +108,7 @@
       "attribute": {
         "type": "FILE_OR_DIR",
         "required": true,
-        "defaultPath": "DATASET"
+        "defaultPath": "TABLE"
       },
       "value": ""
     },

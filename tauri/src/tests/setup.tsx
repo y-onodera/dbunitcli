@@ -48,6 +48,9 @@ export const workspaceResourcesFixture: WorkspaceResources = {
 		jdbcFiles: ["jdbc1"],
 		templateFiles: ["template1"],
 		parameterizeTemplateFiles: ["parameterizeTemplate1"],
+		sqlFiles: ["query1.sql"],
+		tableFiles: ["tables1.txt"],
+		csvqFiles: ["csvq1.sql"],
 	}),
 };
 

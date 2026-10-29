@@ -8,18 +8,19 @@
 <body>
   <p><a href="../index.html">&larr; ヘルプ一覧に戻る</a></p>
   <h1>SQL Editor</h1>
-  <p><code>srcType</code> が <code>sql</code> または <code>table</code> のときに、SQL ファイル・テーブル名の一覧ファイルを編集するダイアログです。</p>
+  <p><code>srcType</code> が <code>sql</code> / <code>table</code> / <code>csvq</code> のときに、SQL ファイル・テーブル名の一覧ファイルを編集するダイアログです。</p>
 
   <h2 id="section-open">開き方</h2>
-  <p><a href="../sections/dataset-load-form.html">Dataset Load Form</a> の <code>src</code> の横のメニューにある編集ボタンから開きます。同じメニューの削除ボタンでは、<code>src</code> に入力したファイルを削除できます。</p>
+  <p><a href="../sections/dataset-load-form.html">Dataset Load Form</a> の <code>src</code> の横のメニューにある編集ボタンから開きます。<code>src</code> の候補には、保存先のディレクトリにあるファイルが表示されます。同じメニューの削除ボタンでは、候補にあるファイルを削除できます。</p>
 
   <h2 id="section-content">記述内容</h2>
   <table>
     <tr><th>srcType</th><th>ダイアログ名</th><th>記述内容</th></tr>
     <tr><td>sql</td><td>Edit SQL</td><td>実行する SQL クエリ</td></tr>
     <tr><td>table</td><td>Edit Table Definition</td><td>読み込み対象のテーブル名（1 行 1 テーブル）</td></tr>
+    <tr><td>csvq</td><td>Edit SQL</td><td>CSV に対して実行する SQL クエリ</td></tr>
   </table>
-  <p>各 <code>srcType</code> の詳細は <a href="../sections/dataset-load-form/types/sql.html">sql</a> / <a href="../sections/dataset-load-form/types/table.html">table</a> を参照してください。</p>
+  <p>各 <code>srcType</code> の詳細は <a href="../sections/dataset-load-form/types/sql.html">sql</a> / <a href="../sections/dataset-load-form/types/table.html">table</a> / <a href="../sections/dataset-load-form/types/csvq.html">csvq</a> を参照してください。</p>
 
   <h2 id="section-select-tables">Select Tables</h2>
   <p>JDBC 接続が確認済み（<a href="../sections/jdbc.html">JDBC</a> セクションの接続テスト成功）のときのみ、Select Tables ボタンが表示されます。</p>
@@ -30,7 +31,7 @@
   </ol>
 
   <h2 id="section-save">保存</h2>
-  <p>ダイアログ下部の name に保存先のファイル名を指定して Save を押すと、内容がファイルとして書き出され、元のテキストボックスにそのファイル名が設定されます。</p>
+  <p>ダイアログ下部の name に保存先のファイル名を指定して Save を押すと、内容がファイルとして書き出され、元のテキストボックスにそのファイル名が設定されます。保存先は <code>srcType</code> ごとに Workspace の <code>resources/sql</code> / <code>resources/table</code> / <code>resources/csvq</code> です。</p>
 
   <h2 id="section-related">関連</h2>
   <ul>

@@ -13,7 +13,7 @@
   <h2 id="section-target">読み込み対象</h2>
   <table>
     <tr><th>項目</th><th>内容</th></tr>
-    <tr><td>src</td><td>実行する SQL ファイル。読み込む CSV は SQL の中の <code>CSVREAD()</code> で指定する（<code>src</code> は CSV を置いたディレクトリではない）</td></tr>
+    <tr><td>src</td><td>実行する SQL ファイル。読み込む CSV は SQL の中の <code>CSVREAD()</code> で指定する（<code>src</code> は CSV を置いたディレクトリではない）。相対パスは Workspace の <code>resources/csvq</code>、Dataset Base、Workspace の順に探す（<a href="../../../dialogs/sql-editor.html">SQL Editor</a> で作ると <code>resources/csvq</code> に保存される）</td></tr>
     <tr><td>テーブル名</td><td>SQL ファイル名（拡張子を除く）</td></tr>
   </table>
 

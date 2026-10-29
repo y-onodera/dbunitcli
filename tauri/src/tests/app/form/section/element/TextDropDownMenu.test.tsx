@@ -52,8 +52,6 @@ describe("TextDropDownMenuの削除ボタン表示", () => {
 			isValueInDatalist: false,
 			shown: false,
 		},
-		{ case: "候補一覧なし・値あり", path: "a.sql", shown: true },
-		{ case: "候補一覧なし・値なし", path: "", shown: false },
 	])("$caseのとき表示=$shown", async ({ path, isValueInDatalist, shown }) => {
 		renderMenu({ path, isValueInDatalist });
 		await openMenu();

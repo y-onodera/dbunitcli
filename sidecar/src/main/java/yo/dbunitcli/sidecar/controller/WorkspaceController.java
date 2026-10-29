@@ -15,10 +15,12 @@ import yo.dbunitcli.sidecar.dto.ResolvePathRequestDto;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Set;
 
 @Controller("/workspace")
 public class WorkspaceController implements ControllerExceptionHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(WorkspaceController.class);
+    private static final Set<String> QUERY_RESOURCES = Set.of("SQL", "TABLE", "CSVQ");
     private final Workspace workspace;
 
     public WorkspaceController(final Workspace workspace) {
@@ -59,9 +61,15 @@ public class WorkspaceController implements ControllerExceptionHandler {
             }
             for (final File root : new File[]{
                     Workspace.resolveBaseDir(request.getDefaultPath()),
+                    // sql/table/csvqは以前dataset直下に保存していたため、coreと同じくdatasetも探す
+                    request.getDefaultPath() != null && QUERY_RESOURCES.contains(request.getDefaultPath())
+                            ? FileResources.datasetDir() : null,
                     FileResources.baseDir(),
                     new File(System.getProperty("user.dir"))
             }) {
+                if (root == null) {
+                    continue;
+                }
                 final File candidate = new File(root, path);
                 if (candidate.exists()) {
                     return candidate.getAbsolutePath();

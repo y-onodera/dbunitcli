@@ -1,92 +1,13 @@
-import { useEffect, useState } from "react";
-import { useEnvironment } from "../context/EnvironmentProvider";
-import type {
-	QueryDatasource,
-	QueryDatasourceType,
-} from "../model/QueryDatasource";
-import {
-	fetchData,
-	getErrorMessage,
-	handleFetchError,
-	type OperationResult,
-} from "../utils/fetchUtils";
+import type { QueryDatasourceType } from "../model/QueryDatasource";
+import { useResourceContent, useUpdateResourceFiles } from "./useResourceFiles";
 
-export const useDeleteDataSource = (type: QueryDatasourceType) => {
-	const environment = useEnvironment();
-	return async (name: string) => {
-		return postDataSource(environment.apiUrl, "query-datasource/delete", {
-			type,
-			name,
-		});
-	};
-};
-export const useSaveDataSource = () => {
-	const environment = useEnvironment();
-	return async (input: QueryDatasource) => {
-		return postDataSource(environment.apiUrl, "query-datasource/save", input);
-	};
-};
-export const useDataSourceContent = (
+export const useQueryDatasourceData = (
+	type: QueryDatasourceType,
 	name: string,
-): { content: string; loading: boolean } => {
-	const { apiUrl } = useEnvironment();
-	const [content, setContent] = useState("");
-	const [loading, setLoading] = useState(name !== "");
+) => useResourceContent(type, name);
 
-	useEffect(() => {
-		if (!name) {
-			setContent("");
-			setLoading(false);
-			return;
-		}
-		const controller = new AbortController();
-		setLoading(true);
-		loadDataSource(apiUrl, name).then((result) => {
-			if (!controller.signal.aborted) {
-				setContent(result);
-				setLoading(false);
-			}
-		});
-		return () => {
-			controller.abort();
-		};
-	}, [name, apiUrl]);
-
-	return { content, loading };
+export const useSaveQueryDatasource = (type: QueryDatasourceType) => {
+	const updateResourceFiles = useUpdateResourceFiles(type);
+	return (name: string, content: string) =>
+		updateResourceFiles("save", JSON.stringify({ name, input: { content } }));
 };
-async function loadDataSource(apiUrl: string, name: string): Promise<string> {
-	const fetchParams = {
-		endpoint: `${apiUrl}query-datasource/load`,
-		options: {
-			method: "POST",
-			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify({ name }),
-		},
-	};
-	return await fetchData(fetchParams)
-		.then((response) => response.text())
-		.catch((ex) => {
-			handleFetchError(getErrorMessage(ex), fetchParams);
-			return "";
-		});
-}
-async function postDataSource(
-	apiUrl: string,
-	path: string,
-	body: unknown,
-): Promise<OperationResult> {
-	const fetchParams = {
-		endpoint: `${apiUrl}${path}`,
-		options: {
-			method: "POST",
-			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify(body),
-		},
-	};
-	return await fetchData(fetchParams)
-		.then(() => "success" as OperationResult)
-		.catch((ex) => {
-			handleFetchError(getErrorMessage(ex), fetchParams);
-			return "failed" as OperationResult;
-		});
-}

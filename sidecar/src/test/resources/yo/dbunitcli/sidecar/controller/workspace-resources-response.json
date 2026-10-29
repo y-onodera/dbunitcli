@@ -23,6 +23,9 @@
     "parameterizeTemplateBase": "%s",
     "jdbcBase": "%s",
     "xlsxSchemaBase": "%s",
-    "fixedColumnDefBase": "%s"
+    "fixedColumnDefBase": "%s",
+    "sqlBase": "%s",
+    "tableBase": "%s",
+    "csvqBase": "%s"
   }
 }

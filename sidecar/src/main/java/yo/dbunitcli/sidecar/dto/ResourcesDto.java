@@ -20,6 +20,12 @@ public class ResourcesDto {
 
     private List<String> fixedColumnDefs = new ArrayList<>();
 
+    private List<String> sqlFiles = new ArrayList<>();
+
+    private List<String> tableFiles = new ArrayList<>();
+
+    private List<String> csvqFiles = new ArrayList<>();
+
     public List<String> getDatasetSettings() {
         return this.datasetSettings;
     }
@@ -66,6 +72,30 @@ public class ResourcesDto {
 
     public void setFixedColumnDefs(final List<String> fixedColumnDefs) {
         this.fixedColumnDefs = fixedColumnDefs;
+    }
+
+    public List<String> getSqlFiles() {
+        return this.sqlFiles;
+    }
+
+    public void setSqlFiles(final List<String> sqlFiles) {
+        this.sqlFiles = sqlFiles;
+    }
+
+    public List<String> getTableFiles() {
+        return this.tableFiles;
+    }
+
+    public void setTableFiles(final List<String> tableFiles) {
+        this.tableFiles = tableFiles;
+    }
+
+    public List<String> getCsvqFiles() {
+        return this.csvqFiles;
+    }
+
+    public void setCsvqFiles(final List<String> csvqFiles) {
+        this.csvqFiles = csvqFiles;
     }
 
 }

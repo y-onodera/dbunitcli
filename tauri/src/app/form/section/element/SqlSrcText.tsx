@@ -1,14 +1,19 @@
-import type { ReactNode } from "react";
+import { useResourcesSettings } from "../../../../context/WorkspaceResourcesProvider";
 import type { QueryDatasourceType } from "../../../../model/QueryDatasource";
-import { EditResourceButton } from "../dialog/ResourceEditButton";
 import {
-	RemoveSqlEditorButton,
-	sqlEditorDialogs,
-} from "../dialog/SqlEditorDialog";
-import type { FileProp, TextProp } from "./FormElementProp";
+	EditResourceButton,
+	RemoveResourceButton,
+} from "../dialog/ResourceEditButton";
+import { sqlEditorDialogs } from "../dialog/SqlEditorDialog";
+import type { TextProp } from "./FormElementProp";
 import Text, { TextDropDownMenu } from "./Text";
 
-type Props = Omit<FileProp, "onSelect" | "hidden">;
+const resourceFilesKey = {
+	sql: "sqlFiles",
+	table: "tableFiles",
+	csvq: "csvqFiles",
+} as const satisfies Record<QueryDatasourceType, string>;
+
 export default function SqlSrcText({
 	prefix,
 	element,
@@ -16,65 +21,44 @@ export default function SqlSrcText({
 	srcType,
 	handleValueChange,
 }: TextProp) {
+	const settings = useResourcesSettings();
+	const type = srcType as QueryDatasourceType;
+
 	return (
 		<Text
 			prefix={prefix}
 			element={element}
 			hidden={hidden}
+			resourceFiles={settings[resourceFilesKey[type]]}
 			showDefaulePath={true}
 			handleValueChange={handleValueChange}
 		>
-			{({ path, setPath }) => (
-				<SqlSrcDropDownMenu
+			{({ path, setPath, isValueInDatalist }) => (
+				<TextDropDownMenu
 					path={path}
 					setPath={setPath}
 					prefix={prefix}
 					element={element}
 					srcType={srcType}
+					isValueInDatalist={isValueInDatalist}
+					editButtons={[
+						<EditResourceButton
+							key="edit"
+							dialog={sqlEditorDialogs[type]}
+							path={path}
+							setPath={setPath}
+						/>,
+					]}
+					removeButton={(closeMenu) => (
+						<RemoveResourceButton
+							kind={type}
+							path={path}
+							setPath={setPath}
+							onRemoved={closeMenu}
+						/>
+					)}
 				/>
 			)}
 		</Text>
-	);
-}
-function SqlSrcDropDownMenu({
-	path,
-	setPath,
-	prefix,
-	element,
-	srcType,
-}: Props) {
-	const isSqlOrTable = srcType === "sql" || srcType === "table";
-
-	const editButtons: ReactNode[] = [
-		<EditResourceButton
-			key="edit"
-			dialog={sqlEditorDialogs[srcType as QueryDatasourceType]}
-			path={path}
-			setPath={setPath}
-		/>,
-	];
-
-	return (
-		<TextDropDownMenu
-			path={path}
-			setPath={setPath}
-			prefix={prefix}
-			element={element}
-			srcType={srcType}
-			editButtons={editButtons}
-			showOpenButton={false}
-			removeButton={
-				isSqlOrTable
-					? (closeMenu: () => void) => (
-							<RemoveSqlEditorButton
-								path={path}
-								setPath={setPath}
-								onRemoved={closeMenu}
-								type={srcType as QueryDatasourceType}
-							/>
-						)
-					: undefined
-			}
-		/>
 	);
 }

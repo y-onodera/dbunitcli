@@ -129,8 +129,6 @@ export function TextDropDownMenu({
 	const isFileType = element.attribute.type.includes("FILE");
 	const isDirType = element.attribute.type.includes("DIR");
 	const showOpen = showOpenButton && (isFileType || isDirType);
-	// 候補一覧を持たない欄（isValueInDatalist未指定）は値があれば削除できる
-	const showRemove = removeButton && (isValueInDatalist ?? path !== "");
 	return (
 		<DropDownMenu className={className}>
 			{(closeMenu) => (
@@ -150,7 +148,9 @@ export function TextDropDownMenu({
 							/>
 						</li>
 					)}
-					{showRemove && <li>{removeButton(closeMenu)}</li>}
+					{isValueInDatalist && removeButton && (
+						<li>{removeButton(closeMenu)}</li>
+					)}
 					{isFileType && (
 						<li>
 							<FileChooser
