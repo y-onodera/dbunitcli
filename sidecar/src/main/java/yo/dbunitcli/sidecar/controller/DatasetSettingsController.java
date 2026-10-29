@@ -150,7 +150,9 @@ public class DatasetSettingsController extends AbstractResourceFileController<Da
             }
             final ComparableDataSetParam.Builder param = this.toParam(request, "true");
             final TableSeparators separators = param.getTableSeparators();
-            Narrow.singlePass(Strings.isEmpty(request.getSetting()), DataSourceType.valueOf(request.getSrcType()), separators)
+            Narrow.singlePass(Strings.isEmpty(request.getSetting())
+                                      && Narrow.keepsSourceName(DataSourceType.valueOf(request.getSrcType()),
+                                                                Strings.isEmpty(request.getXlsxSchema())), separators)
                   .applyTo(param, separators, tableName);
             FileResources.runInContext(() -> {
                 try (final IDataSetConverter converter = new TargetTableConverter(tableName,
@@ -221,18 +223,31 @@ public class DatasetSettingsController extends AbstractResourceFileController<Da
         }
 
         /**
-         * 元テーブル名がそのまま出力テーブル名になる形式（xlsx・xlsのxlsxSchemaなどで名前が変わりうるものは含めない）
+         * 元テーブル名（ファイル名・テーブル名）がそのまま出力テーブル名になる形式。file・dirは元テーブル名で絞らないため含めない
          */
-        private static final Set<DataSourceType> SOURCE_NAME_KEPT = EnumSet.of(DataSourceType.table, DataSourceType.sql, DataSourceType.csv);
+        private static final Set<DataSourceType> SOURCE_NAME_KEPT = EnumSet.of(DataSourceType.table, DataSourceType.sql,
+                DataSourceType.csv, DataSourceType.csvq, DataSourceType.reg, DataSourceType.fixed);
 
         /**
-         * 読み直さずに済む（対象を取りこぼさない）最も強い絞り込み。元テーブル名で絞るのは、設定未適用で名前が変わらない形式だけ
+         * シート名で絞る形式。xlsxSchemaが無ければシート名がそのまま出力テーブル名になる
          */
-        static Narrow singlePass(final boolean settingEmpty, final DataSourceType srcType, final TableSeparators separators) {
+        private static final Set<DataSourceType> SHEET_NAME_KEPT = EnumSet.of(DataSourceType.xls, DataSourceType.xlsx);
+
+        /**
+         * 設定未適用のとき、元テーブル名で絞っても出力テーブル名で探す対象を取りこぼさないか
+         */
+        static boolean keepsSourceName(final DataSourceType srcType, final boolean xlsxSchemaEmpty) {
+            return SOURCE_NAME_KEPT.contains(srcType) || (SHEET_NAME_KEPT.contains(srcType) && xlsxSchemaEmpty);
+        }
+
+        /**
+         * 読み直さずに済む（対象を取りこぼさない）最も強い絞り込み。元テーブル名で絞るのは、名前が変わらないと分かっている場合だけ
+         */
+        static Narrow singlePass(final boolean sourceNameKept, final TableSeparators separators) {
             if (!separators.joinConditions().isEmpty() || separators.hasSplitter()) {
                 return NONE;
             }
-            return settingEmpty && SOURCE_NAME_KEPT.contains(srcType) ? SOURCE_AND_OUTPUT : OUTPUT;
+            return sourceNameKept ? SOURCE_AND_OUTPUT : OUTPUT;
         }
 
         void applyTo(final ComparableDataSetParam.Builder param, final TableSeparators separators, final String tableName) {

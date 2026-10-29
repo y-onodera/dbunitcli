@@ -14,16 +14,20 @@ import io.micronaut.runtime.server.EmbeddedServer;
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
 import io.micronaut.serde.ObjectMapper;
 import jakarta.inject.Inject;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.LoggerFactory;
 import yo.dbunitcli.dataset.producer.ComparableCsvDataSetProducer;
+import yo.dbunitcli.dataset.producer.ComparableXlsxDataSetProducer;
 import yo.dbunitcli.resource.FileResources;
 import yo.dbunitcli.sidecar.dto.DatasetTablePreviewResponseDto;
 
 import org.junit.jupiter.api.Assertions;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -267,22 +271,35 @@ class DatasetSettingsControllerTest {
     @Test
     void testTableConvert_設定なしは対象外のソースを開かない() throws IOException {
         this.createPreviewSrc();
-        final Logger csvLogger = (Logger) LoggerFactory.getLogger(ComparableCsvDataSetProducer.class);
-        final ListAppender<ILoggingEvent> appender = new ListAppender<>();
-        appender.start();
-        csvLogger.addAppender(appender);
-        try {
-            this.tableConvert("", "small");
-        } finally {
-            csvLogger.detachAppender(appender);
-        }
 
-        final List<String> opened = appender.list.stream()
-                                                 .map(ILoggingEvent::getFormattedMessage)
-                                                 .filter(it -> it.startsWith("produce - start"))
-                                                 .toList();
+        final List<String> opened = this.produceStartLogs(ComparableCsvDataSetProducer.class,
+                () -> this.tableConvert("", "small"));
+
         Assertions.assertEquals(1, opened.size(), opened.toString());
         Assertions.assertTrue(opened.getFirst().endsWith("small.csv"), opened.toString());
+    }
+
+    @Test
+    void testTableConvert_xlsxSchemaなしのxlsxは対象外のシートを読まない() throws IOException {
+        Files.createDirectories(PREVIEW_SRC_DIR);
+        try (final XSSFWorkbook book = new XSSFWorkbook();
+             final OutputStream out = Files.newOutputStream(PREVIEW_SRC_DIR.resolve("book.xlsx"))) {
+            for (final String sheetName : List.of("big", "small")) {
+                final Sheet sheet = book.createSheet(sheetName);
+                sheet.createRow(0).createCell(0).setCellValue("key");
+                sheet.createRow(1).createCell(0).setCellValue(sheetName);
+            }
+            book.write(out);
+        }
+
+        final List<String> opened = this.produceStartLogs(ComparableXlsxDataSetProducer.class,
+                () -> this.tableConvert("xlsx", "", "small"));
+
+        Assertions.assertEquals(List.of("small"), opened.stream()
+                                                       .filter(it -> it.contains("sheetName="))
+                                                       .map(it -> it.replaceAll(".*sheetName=([^,]*),.*", "$1"))
+                                                       .toList(), opened.toString());
+        Assertions.assertEquals(2, Files.readAllLines(CONVERT_RESULT_DIR.resolve("small.csv")).size());
     }
 
     @Test
@@ -320,16 +337,25 @@ class DatasetSettingsControllerTest {
     }
 
     private String tableConvert(final String setting, final String tableName) throws IOException {
+        return this.tableConvert("csv", setting, tableName);
+    }
+
+    private String tableConvert(final String srcType, final String setting, final String tableName) throws IOException {
         return this.client.toBlocking().retrieve(HttpRequest.POST("dbunit-cli/dataset-setting/table-convert",
-                this.tableRequestBody(setting, tableName, Map.of("-result.resultType", "csv",
+                this.tableRequestBody(srcType, setting, tableName, Map.of("-result.resultType", "csv",
                         "-result.result", CONVERT_RESULT_DIR.toAbsolutePath().toString(),
                         "-result.outputEncoding", "UTF-8"))));
     }
 
     private String tableRequestBody(final String setting, final String tableName, final Map<String, String> result) throws IOException {
+        return this.tableRequestBody("csv", setting, tableName, result);
+    }
+
+    private String tableRequestBody(final String srcType, final String setting, final String tableName,
+                                    final Map<String, String> result) throws IOException {
         final Map<String, Object> body = new LinkedHashMap<>();
         body.put("setting", setting);
-        body.put("srcType", "csv");
+        body.put("srcType", srcType);
         body.put("src", PREVIEW_SRC_DIR.toAbsolutePath().toString());
         body.put("encoding", "UTF-8");
         body.put("tableName", tableName);
@@ -337,6 +363,29 @@ class DatasetSettingsControllerTest {
             body.put("result", result);
         }
         return ObjectMapper.getDefault().writeValueAsString(body);
+    }
+
+    /**
+     * actionの実行中にproducerが出した読込開始のログ（読み込んだソース・シート）
+     */
+    private List<String> produceStartLogs(final Class<?> producer, final IOAction action) throws IOException {
+        final Logger logger = (Logger) LoggerFactory.getLogger(producer);
+        final ListAppender<ILoggingEvent> appender = new ListAppender<>();
+        appender.start();
+        logger.addAppender(appender);
+        try {
+            action.run();
+        } finally {
+            logger.detachAppender(appender);
+        }
+        return appender.list.stream()
+                            .map(ILoggingEvent::getFormattedMessage)
+                            .filter(it -> it.startsWith("produce - start"))
+                            .toList();
+    }
+
+    private interface IOAction {
+        void run() throws IOException;
     }
 
     private String writeRenameSetting() throws IOException {
