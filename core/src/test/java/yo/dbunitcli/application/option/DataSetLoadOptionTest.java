@@ -72,12 +72,28 @@ class DataSetLoadOptionTest {
     }
 
     @Test
-    void settingTargetOnlyで設定が無ければ何も読み込まない() {
+    void settingTargetOnlyでもsettingが無ければ絞らない() {
         this.src.setSettingTargetOnly("true");
 
         final TableSeparators separators = new DataSetLoadOption("test", this.src).getTableSeparators();
 
-        Assertions.assertEquals(List.of(), outputNames(separators, "small"));
+        Assertions.assertEquals(List.of("small"), outputNames(separators, "small"));
+    }
+
+    @Test
+    void settingTargetOnlyでsettingが無ければsettingTargetOnlyとsettingの両方を違反にする() {
+        this.src.setSettingTargetOnly("true");
+
+        Assertions.assertEquals(List.of(List.of("-test.settingTargetOnly", "-test.setting")),
+                this.settingTargetOnlyViolations());
+    }
+
+    @Test
+    void settingTargetOnlyでsettingがあれば違反にしない() throws IOException {
+        this.src.setSetting(this.writeSetting("{\"settings\":[{\"name\":[\"big\"]}]}"));
+        this.src.setSettingTargetOnly("true");
+
+        Assertions.assertEquals(List.of(), this.settingTargetOnlyViolations());
     }
 
     @Test
@@ -97,6 +113,13 @@ class DataSetLoadOptionTest {
 
         Assertions.assertTrue(new DataSetLoadOption("test", this.src).validate().stream()
                                                                     .anyMatch(it -> it.options().contains("-test.settingTargetOnly")));
+    }
+
+    private List<List<String>> settingTargetOnlyViolations() {
+        return new DataSetLoadOption("test", this.src).validate().stream()
+                                                      .map(Option.Violation::options)
+                                                      .filter(it -> it.contains("-test.settingTargetOnly"))
+                                                      .toList();
     }
 
     private String writeSetting(final String content) throws IOException {

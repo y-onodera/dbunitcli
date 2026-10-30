@@ -235,9 +235,9 @@ export function withValues(
 	return { ...info, values: { ...info.values, ...values } };
 }
 
-// settingを適用せずに読む。対象だけに絞ると何も読まないため、settingTargetOnlyも無効にする
+// settingを適用せずに読む（settingが無ければsettingTargetOnlyでは絞らない）
 export function withoutSetting(info: DatasetSrcInfo): DatasetSrcInfo {
-	return withValues(info, { setting: "", settingTargetOnly: "false" });
+	return withValues(info, { setting: "" });
 }
 
 // 入力候補（テーブル名・カラム名）の取得用。settingの対象外のテーブルも候補にする

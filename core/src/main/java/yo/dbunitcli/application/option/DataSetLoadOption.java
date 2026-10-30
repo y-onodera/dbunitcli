@@ -93,6 +93,7 @@ public record DataSetLoadOption(
                 , this.validateFilesExist("-setting", this.setting, BaseDir.SETTING)
                 , this.validateEncoding("-settingEncoding", this.settingEncoding)
                 , this.validateBoolean("-settingTargetOnly", this.settingTargetOnly)
+                , this.validateRequiredByFlag("-settingTargetOnly", this.settingTargetOnly, "-setting", this.setting)
                 , this.validatePattern("-regTableInclude", this.regTableInclude)
                 , this.validatePattern("-regTableExclude", this.regTableExclude)
                 , this.validateBoolean("-loadData", this.loadData)
@@ -134,18 +135,19 @@ public record DataSetLoadOption(
     }
 
     /**
-     * -settingTargetOnly=trueなら設定の対象のテーブルだけを読み込む（設定が無ければ何も読み込まない）
+     * -settingTargetOnly=trueなら設定の対象のテーブルだけを読み込む。
+     * settingが無ければ絞らない（コマンド実行時はvalidateで弾くため、ここに来るのはプレビュー等でsettingを外して読む場合）
      */
     public TableSeparators getTableSeparators() {
         try {
             final TableSeparators result = new FromJsonTableSeparatorsBuilder(this.settingEncoding).build(this.setting);
-            return this.isSettingTargetOnly() ? result.onlySettingTargets() : result;
+            return this.isSettingTargetOnly() && Strings.isNotEmpty(this.setting) ? result.onlySettingTargets() : result;
         } catch (final IOException e) {
             throw new AssertionError(e);
         }
     }
 
-    public boolean isSettingTargetOnly() {
+    private boolean isSettingTargetOnly() {
         return Boolean.parseBoolean(this.settingTargetOnly);
     }
 

@@ -56,7 +56,7 @@
     <li>join の left / right のテーブル（出力は join した結果だけ）</li>
     <li>中身のある <code>commonSettings</code> の対象のテーブル。name / pattern の無い <code>commonSettings</code> があれば全テーブルが対象</li>
   </ul>
-  <p>テーブル名は設定を適用した後の名前で出力します。<code>setting</code> を指定していなければ何も読み込みません。</p>
+  <p>テーブル名は設定を適用した後の名前で出力します。settingTargetOnly を ON にするときは <code>setting</code> も指定してください。<code>setting</code> が空のまま実行すると、settingTargetOnly と <code>setting</code> の両方に入力エラーが表示されます。</p>
   <p><code>setting</code> の横の編集ボタンから、テーブルごとの設定を画面で編集できます（<a href="../dialogs/dataset-setting.html">Dataset Setting</a>）。generate ボタンからは、既存のデータセットのテーブル・カラム構成をもとに雛型を作れます（<a href="../dialogs/dataset-setting-generate.html">Dataset Setting Generate</a>）。</p>
   <p>Preview Before Settings（設定を適用する前）と Preview Apply Settings（<code>setting</code> を適用した後）では、読み込まれるテーブルの一覧を確認できます。一覧の preview ボタンを押すと、そのテーブルのデータを表示します。</p>
   <ul>

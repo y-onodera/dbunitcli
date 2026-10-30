@@ -129,7 +129,7 @@ describe("DatasetTableNamesPreviewButtonのテスト", () => {
 		expect(mockConvert).toHaveBeenCalledTimes(1);
 		const [srcInfo, tableName, result] = mockConvert.mock.calls[0];
 		expect(srcInfo).toEqual({
-			values: { setting: "", settingTargetOnly: "false" },
+			values: { setting: "" },
 		});
 		expect(tableName).toBe("big");
 		expect(result).toHaveProperty("-result.resultType");

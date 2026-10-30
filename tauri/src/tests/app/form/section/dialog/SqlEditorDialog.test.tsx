@@ -63,7 +63,7 @@ describe("SqlEditorDialogのテスト", () => {
 				srcType: "sql",
 				src: "query.sql",
 				setting: "",
-				settingTargetOnly: "false",
+				settingTargetOnly: "true",
 			},
 		});
 		expect(screen.getByText("result")).toBeInTheDocument();

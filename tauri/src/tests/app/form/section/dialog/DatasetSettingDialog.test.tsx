@@ -53,7 +53,7 @@ describe("DatasetSettingDialogのテスト", () => {
 				srcType: "csv",
 				src: "src",
 				setting: "",
-				settingTargetOnly: "false",
+				settingTargetOnly: "true",
 			},
 			inlineSetting: setting,
 		});

@@ -327,7 +327,7 @@ public record GenerateOption(Parameter parameter, String resultDir, String resul
 
     public ComparableDataSetParam dataSetParam() {
         final ComparableDataSetParam.Builder builder = this.srcData.getParam();
-        if (this.generateType().loadData() && Strings.isEmpty(this.srcData.getSetting()) && !this.srcData.isSettingTargetOnly()) {
+        if (this.generateType().loadData() && Strings.isEmpty(this.srcData.getSetting())) {
             final TableSeparators defaultTableSeparators = this.classpathDefaultTableSeparators();
             if (defaultTableSeparators != null) {
                 builder.setTableSeparators(defaultTableSeparators);

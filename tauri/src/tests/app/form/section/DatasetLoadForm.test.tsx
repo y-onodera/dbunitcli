@@ -67,7 +67,8 @@ describe("DatasetLoadFormのテスト", () => {
 		);
 	});
 
-	it("Preview Before Settingsはsettingを適用せずsettingTargetOnlyも無効にする", async () => {
+	// settingが無ければsettingTargetOnlyでは絞られない（sidecar側で判断する）
+	it("Preview Before Settingsはsettingを外し、ほかの値はフォームのまま渡す", async () => {
 		const user = renderForm();
 		await user.click(
 			document.getElementById("src_settingTargetOnly") as Element,
@@ -80,7 +81,7 @@ describe("DatasetLoadFormのテスト", () => {
 			expect.objectContaining({
 				values: expect.objectContaining({
 					setting: "",
-					settingTargetOnly: "false",
+					settingTargetOnly: "true",
 				}),
 			}),
 		);

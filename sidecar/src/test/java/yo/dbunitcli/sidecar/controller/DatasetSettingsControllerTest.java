@@ -286,6 +286,14 @@ class DatasetSettingsControllerTest {
     }
 
     @Test
+    void testTableNames_settingTargetOnlyでもsettingが無ければ絞らない() throws IOException {
+        this.createPreviewSrc();
+
+        Assertions.assertEquals(List.of("big", "small"), this.tableNames(
+                this.tableBody("csv", "", "", Map.of("settingTargetOnly", "true"))));
+    }
+
+    @Test
     void testTableNames_settingTargetOnlyでなければsettingの対象外のテーブルも返す() throws IOException {
         this.createPreviewSrc();
 
