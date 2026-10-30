@@ -105,4 +105,19 @@ public class FromJsonXlsxSchemaBuilderTest implements TestResourceLoader {
         assertEquals("Table2", simpleSchema.cellsTableDefMap().get("Sheet2").getFirst().tableName(), "Sheet2のテーブル名が正しく設定されていること");
     }
 
+    @Test
+    @DisplayName("buildメソッドは配列の項目が省かれていれば空として扱うこと")
+    public void buildWhenArraysOmittedShouldTreatAsEmpty() {
+        // 準備
+        final String json = "{\"rows\":[{\"sheetName\":\"Sheet1\",\"tableName\":\"Table1\",\"header\":[\"id\"],\"dataStart\":1,\"columnIndex\":[0]}]"
+                + ",\"cells\":[{\"sheetName\":\"Sheet2\",\"tableName\":\"Table2\",\"header\":[\"id\"]}]}";
+
+        // 実行
+        final XlsxSchema.SimpleImpl simpleSchema = (XlsxSchema.SimpleImpl) this.builder.build(json);
+
+        // 検証
+        assertEquals(0, simpleSchema.rowsTableDefMap().get("Sheet1").getFirst().breakKey().length, "breakKeyが空であること");
+        assertEquals("Table2", simpleSchema.cellsTableDefMap().get("Sheet2").getFirst().tableName(), "rowsの無いセル定義も読み込めること");
+    }
+
 }

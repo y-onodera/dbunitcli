@@ -133,7 +133,13 @@ public class FromJsonXlsxSchemaBuilder implements XlsxSchema.Builder {
         return this.jsonArrayToStream(array, it -> it::getString);
     }
 
+    /**
+     * 項目が無い（空配列を省いて保存されたJSON）ときは空として扱う
+     */
     protected <T> Stream<T> jsonArrayToStream(final JsonArray array, final Function<JsonArray, Function<Integer, T>> function) {
+        if (array == null) {
+            return Stream.empty();
+        }
         return Stream.iterate(0, i -> i + 1)
                 .limit(array.size())
                 .map(function.apply(array));
