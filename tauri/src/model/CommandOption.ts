@@ -108,33 +108,11 @@ export type DatasetSource = CommandOptions &
 	SrcTypeOptions &
 	(JdbcOption | undefined) &
 	(TemplateOption | undefined);
-export type SrcInfo = {
-	srcPath: string;
-	encoding?: string;
-	regTableInclude: string;
-	regTableExclude: string;
-	recursive: string;
-	regInclude: string;
-	regExclude: string;
-	extension: string;
-};
-export type DatasetSrcInfo = SrcInfo & {
-	srcType?: SrcType;
-	setting?: string;
+// データセット読込フォームのsrc要素の値（オプション名→値）。sidecarへはそのまま-src.<オプション名>として渡す
+export type DatasetSrcInfo = {
+	values: Record<string, string>;
 	// 未保存の設定1件。指定時はsettingより優先してこの設定だけを適用する
 	inlineSetting?: DatasetSetting;
-	settingEncoding: string;
-	xlsxSchema: string;
-	fixedLength: string;
-	fixedLengthType: string;
-	regHeaderSplit: string;
-	regDataSplit: string;
-	encoding: string;
-	delimiter: string;
-	ignoreQuoted: boolean;
-	headerName: string;
-	startRow: string;
-	addFileInfo: boolean;
 };
 export type JdbcOption = CommandOptions & {
 	jdbcProperties: CommandOption;
@@ -232,36 +210,35 @@ export function isTableType(options: SrcTypeOptions): options is TableOptions {
 	return options.srcType?.value === "table";
 }
 export function buildDatasetSrcInfo(datasrc: DatasetSource): DatasetSrcInfo {
-	const xlsxSchema =
-		isXlsType(datasrc) || isXlsxType(datasrc) ? datasrc.xlsxSchema.value : "";
-	const isFixed = isFixedType(datasrc);
-	const fixedLength = isFixed ? datasrc.fixedLength.value : "";
-	const fixedLengthType = isFixed ? datasrc.fixedLengthType.value : "";
-	const regHeaderSplit = isRegType(datasrc) ? datasrc.regHeaderSplit.value : "";
-	const regDataSplit = isRegType(datasrc) ? datasrc.regDataSplit.value : "";
-	const delimiter = isCsvType(datasrc) ? datasrc.delimiter.value : "";
-	const ignoreQuoted = isCsvType(datasrc) ? datasrc.ignoreQuoted.value : "";
+	const values: Record<string, string> = {};
+	for (const element of Object.values(datasrc)) {
+		if (isCommandOption(element)) {
+			values[element.name] = element.value;
+		}
+	}
+	return { values };
+}
+
+function isCommandOption(value: unknown): value is CommandOption {
+	return typeof value === "object" && value !== null && "name" in value;
+}
+
+export function srcTypeOf(info: DatasetSrcInfo): SrcType | undefined {
+	return info.values.srcType as SrcType | undefined;
+}
+
+// settingを適用せずに読む。対象だけに絞ると何も読まないため、settingTargetOnlyも無効にする
+export function withoutSetting(info: DatasetSrcInfo): DatasetSrcInfo {
 	return {
-		srcPath: datasrc.src.value,
-		encoding: datasrc.encoding?.value || "",
-		regInclude: datasrc.regInclude.value,
-		regExclude: datasrc.regExclude.value,
-		recursive: datasrc.recursive.value,
-		extension: datasrc.extension?.value || "",
-		regTableInclude: datasrc.regTableInclude.value,
-		regTableExclude: datasrc.regTableExclude.value,
-		srcType: datasrc.srcType?.value,
-		setting: datasrc.setting.value,
-		settingEncoding: datasrc.settingEncoding.value,
-		headerName: datasrc.headerName ? datasrc.headerName.value : "",
-		startRow: datasrc.startRow ? datasrc.startRow.value : "",
-		addFileInfo: datasrc.addFileInfo?.value === "true",
-		xlsxSchema: xlsxSchema,
-		fixedLength: fixedLength,
-		fixedLengthType: fixedLengthType,
-		regHeaderSplit: regHeaderSplit,
-		regDataSplit: regDataSplit,
-		delimiter: delimiter,
-		ignoreQuoted: ignoreQuoted === "true",
+		...info,
+		values: { ...info.values, setting: "", settingTargetOnly: "false" },
+	};
+}
+
+// 入力候補（テーブル名・カラム名）の取得用。settingの対象外のテーブルも候補にする
+export function withAllTables(info: DatasetSrcInfo): DatasetSrcInfo {
+	return {
+		...info,
+		values: { ...info.values, settingTargetOnly: "false" },
 	};
 }

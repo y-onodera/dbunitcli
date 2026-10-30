@@ -7,6 +7,7 @@ import {
 } from "../../../../components/dialog";
 import { useDatasetSrcInfo } from "../../../../context/DatasetSrcInfoProvider";
 import { useSrcInfoColumnNames } from "../../../../hooks/useDatasetSettings";
+import { withAllTables } from "../../../../model/CommandOption";
 import type { ColumnDef } from "../../../../model/FixedColumnDef";
 import { TextWithDatalist } from "./DialogFields";
 
@@ -17,7 +18,7 @@ export default function ColumnDefSettingDialog(props: {
 }) {
 	const [target, setTarget] = useState(props.setting);
 	const datasetSrcInfo = useDatasetSrcInfo();
-	const columnNames = useSrcInfoColumnNames(datasetSrcInfo);
+	const columnNames = useSrcInfoColumnNames(withAllTables(datasetSrcInfo));
 
 	return (
 		<SettingDialog

@@ -8,7 +8,7 @@ type DatasetSrcInfoContextValue = {
 };
 
 const DatasetSrcInfoContext = createContext<DatasetSrcInfoContextValue>({
-	state: {} as DatasetSrcInfo,
+	state: { values: {} },
 	setState: () => {},
 });
 

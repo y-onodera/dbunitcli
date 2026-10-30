@@ -3,7 +3,12 @@ import { SettingDialog } from "../../../../components/dialog";
 import { BlueButton } from "../../../../components/element/Button";
 import { useDatasetSrcInfo } from "../../../../context/DatasetSrcInfoProvider";
 import { useDatasetTableNames } from "../../../../hooks/useDatasetSettings";
-import type { DatasetSrcInfo } from "../../../../model/CommandOption";
+import {
+	type DatasetSrcInfo,
+	srcTypeOf,
+	withAllTables,
+	withoutSetting,
+} from "../../../../model/CommandOption";
 import type { DatasetSetting } from "../../../../model/DatasetSettings";
 import ColumnDatalistDialog from "./ColumnDatalistDialog";
 import {
@@ -28,7 +33,7 @@ export default function DatasetSettingDialog(props: {
 	const columnList =
 		columnDatalist.length > 0 ? "column_datalist_list" : undefined;
 	const datasetSrcInfo = useDatasetSrcInfo();
-	const { tableNames } = useDatasetTableNames(datasetSrcInfo);
+	const { tableNames } = useDatasetTableNames(withAllTables(datasetSrcInfo));
 
 	return (
 		<SettingDialog
@@ -40,13 +45,12 @@ export default function DatasetSettingDialog(props: {
 			handleCommit={props.handleCommit}
 			footerActions={() =>
 				// 編集中のこの設定1件の対象テーブルだけを、設定を適用してプレビューする（保存はしない）
-				datasetSrcInfo.srcType && (
+				srcTypeOf(datasetSrcInfo) && (
 					<BlueButton
 						title="Preview"
 						handleClick={() =>
 							setPreviewSrcInfo({
-								...datasetSrcInfo,
-								setting: "",
+								...withoutSetting(datasetSrcInfo),
 								inlineSetting: target,
 							})
 						}

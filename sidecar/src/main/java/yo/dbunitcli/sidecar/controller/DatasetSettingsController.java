@@ -18,6 +18,7 @@ import yo.dbunitcli.application.CommandParameters;
 import yo.dbunitcli.application.Option;
 import yo.dbunitcli.application.OptionValidationException;
 import yo.dbunitcli.application.command.Convert;
+import yo.dbunitcli.application.command.ConvertOption;
 import yo.dbunitcli.application.command.GenerateType;
 import yo.dbunitcli.application.command.Type;
 import yo.dbunitcli.application.dto.DataSetLoadDto;
@@ -30,7 +31,6 @@ import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.dataset.ComparableDataSetProducer;
 import yo.dbunitcli.dataset.ComparableTable;
 import yo.dbunitcli.dataset.ComparableTableJoin;
-import yo.dbunitcli.dataset.DataSourceType;
 import yo.dbunitcli.dataset.IDataSetConverter;
 import yo.dbunitcli.dataset.TableSeparators;
 import yo.dbunitcli.dataset.producer.ComparableDataSetLoader;
@@ -52,6 +52,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -242,37 +243,24 @@ public class DatasetSettingsController extends AbstractResourceFileController<Da
     }
 
     private ComparableDataSetParam.Builder toParam(final DatasetTableNamesRequestDto request, final String loadData) throws IOException {
-        final DataSetLoadDto dto = new DataSetLoadDto();
-        dto.setSrc(request.getSrc());
-        dto.setSrcType(DataSourceType.valueOf(request.getSrcType()));
-        dto.setRegTableInclude(request.getRegTableInclude());
-        dto.setRegTableExclude(request.getRegTableExclude());
-        dto.setRecursive(String.valueOf(request.isRecursive()));
-        dto.setRegInclude(request.getRegInclude());
-        dto.setRegExclude(request.getRegExclude());
-        dto.setExtension(request.getExtension());
+        final DataSetLoadDto dto = toLoadDto(request.getSrcOptions());
         dto.setLoadData(loadData);
-        dto.setXlsxSchemaSource(request.getXlsxSchema());
-        dto.setFixedLength(request.getFixedLength());
-        dto.setRegHeaderSplit(request.getRegHeaderSplit());
-        dto.setRegDataSplit(request.getRegDataSplit());
-        dto.setEncoding(request.getEncoding());
-        dto.setDelimiter(request.getDelimiter());
-        dto.setIgnoreQuoted(request.isIgnoreQuoted());
-        dto.setHeaderName(request.getHeaderName());
-        dto.setStartRow(request.getStartRow());
-        dto.setAddFileInfo(request.isAddFileInfo());
-        dto.getJdbc().setJdbcUrl(request.getJdbcUrl());
-        dto.getJdbc().setJdbcUser(request.getJdbcUser());
-        dto.getJdbc().setJdbcPass(request.getJdbcPass());
-        dto.getJdbc().setJdbcProperties(request.getJdbcProperties());
         if (request.getInlineSetting() != null) {
+            dto.setSetting("");
             return new DataSetLoadOption("", dto).getParam()
                                                  .setTableSeparators(this.inlineTableSeparators(request.getInlineSetting()));
         }
-        dto.setSetting(request.getSetting());
-        dto.setSettingEncoding(request.getSettingEncoding());
         return new DataSetLoadOption("", dto).getParam();
+    }
+
+    /**
+     * フォームの値をコマンド実行時と同じく-src.&lt;オプション名&gt;の引数として解釈する（ファイルパスの解決も同じ）
+     */
+    static DataSetLoadDto toLoadDto(final Map<String, String> srcOptions) {
+        final Map<String, String> args = new LinkedHashMap<>();
+        Optional.ofNullable(srcOptions).orElse(Map.of()).forEach((key, value) -> args.put("-src." + key, value));
+        return ConvertOption.toDto(AbstractCommandController.resolveSidecarFilePaths(
+                new CommandParameters(Type.convert, args)).args()).getSrcData();
     }
 
     /**

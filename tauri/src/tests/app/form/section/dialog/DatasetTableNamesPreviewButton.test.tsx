@@ -123,7 +123,7 @@ describe("DatasetTableNamesPreviewButtonのテスト", () => {
 		expect(await screen.findByText("Export completed.")).toBeInTheDocument();
 		expect(mockConvert).toHaveBeenCalledTimes(1);
 		const [srcInfo, tableName, result] = mockConvert.mock.calls[0];
-		expect(srcInfo).toEqual({});
+		expect(srcInfo).toEqual({ values: {} });
 		expect(tableName).toBe("big");
 		expect(result).toHaveProperty("-result.resultType");
 

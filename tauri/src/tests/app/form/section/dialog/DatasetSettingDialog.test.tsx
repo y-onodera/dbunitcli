@@ -9,10 +9,13 @@ const { mockTableNames, srcInfoFixture } = vi.hoisted(() => ({
 	mockTableNames: vi.fn(),
 	srcInfoFixture: {
 		current: {
-			srcType: "csv",
-			srcPath: "src",
-			setting: "setting.json",
-		} as Partial<DatasetSrcInfo>,
+			values: {
+				srcType: "csv",
+				src: "src",
+				setting: "setting.json",
+				settingTargetOnly: "true",
+			},
+		} as DatasetSrcInfo,
 	},
 }));
 vi.mock("../../../../../hooks/useDatasetSettings", () => ({
@@ -42,26 +45,51 @@ function renderDialog() {
 describe("DatasetSettingDialogのテスト", () => {
 	it("Previewで編集中の設定だけを適用し、settingファイルなしでテーブル一覧をプレビューする", async () => {
 		srcInfoFixture.current = {
-			srcType: "csv",
-			srcPath: "src",
-			setting: "setting.json",
+			values: {
+				srcType: "csv",
+				src: "src",
+				setting: "setting.json",
+				settingTargetOnly: "true",
+			},
 		};
 		const { user, setting } = renderDialog();
 		await user.click(screen.getByRole("button", { name: "Preview" }));
 
 		expect(screen.getByText("Table List Preview")).toBeInTheDocument();
-		expect(mockTableNames).toHaveBeenLastCalledWith(
-			expect.objectContaining({
+		expect(mockTableNames).toHaveBeenLastCalledWith({
+			values: {
 				srcType: "csv",
-				srcPath: "src",
+				src: "src",
 				setting: "",
-				inlineSetting: setting,
-			}),
-		);
+				settingTargetOnly: "false",
+			},
+			inlineSetting: setting,
+		});
+	});
+
+	it("Targetのテーブル名候補はsettingTargetOnlyで絞らずに取得する", () => {
+		srcInfoFixture.current = {
+			values: {
+				srcType: "csv",
+				src: "src",
+				setting: "setting.json",
+				settingTargetOnly: "true",
+			},
+		};
+		renderDialog();
+
+		expect(mockTableNames).toHaveBeenCalledWith({
+			values: {
+				srcType: "csv",
+				src: "src",
+				setting: "setting.json",
+				settingTargetOnly: "false",
+			},
+		});
 	});
 
 	it("srcTypeが未指定ならPreviewボタンを出さない", () => {
-		srcInfoFixture.current = { srcPath: "src" };
+		srcInfoFixture.current = { values: { src: "src" } };
 		renderDialog();
 
 		expect(

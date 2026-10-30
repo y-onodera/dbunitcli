@@ -278,6 +278,29 @@ class DatasetSettingsControllerTest {
     }
 
     @Test
+    void testTableNames_settingTargetOnlyならsettingの対象のテーブルだけを返す() throws IOException {
+        this.createPreviewSrc();
+        final Map<String, Object> body = this.tableBody("csv", this.writeRenameSetting(), "", Map.of("settingTargetOnly", "true"));
+
+        final String response = this.client.toBlocking().retrieve(
+                HttpRequest.POST("dbunit-cli/dataset-setting/table-names", ObjectMapper.getDefault().writeValueAsString(body)));
+
+        Assertions.assertEquals(List.of("renamed"), List.of(ObjectMapper.getDefault().readValue(response, String[].class)));
+    }
+
+    @Test
+    void testTableNames_settingTargetOnlyでなければsettingの対象外のテーブルも返す() throws IOException {
+        this.createPreviewSrc();
+        final Map<String, Object> body = this.tableBody("csv", this.writeRenameSetting(), "", Map.of("settingTargetOnly", "false"));
+
+        final String response = this.client.toBlocking().retrieve(
+                HttpRequest.POST("dbunit-cli/dataset-setting/table-names", ObjectMapper.getDefault().writeValueAsString(body)));
+
+        Assertions.assertEquals(List.of("renamed", "small"),
+                List.of(ObjectMapper.getDefault().readValue(response, String[].class)).stream().sorted().toList());
+    }
+
+    @Test
     void testTablePreview_inlineSettingで変えたテーブル名で読み込む() throws IOException {
         this.createPreviewSrc();
         final Map<String, Object> body = this.tableBody("csv", "", "renamed");
@@ -436,11 +459,18 @@ class DatasetSettingsControllerTest {
     }
 
     private Map<String, Object> tableBody(final String srcType, final String setting, final String tableName) {
+        return this.tableBody(srcType, setting, tableName, Map.of());
+    }
+
+    private Map<String, Object> tableBody(final String srcType, final String setting, final String tableName,
+                                          final Map<String, String> otherSrcOptions) {
+        final Map<String, String> srcOptions = new LinkedHashMap<>(otherSrcOptions);
+        srcOptions.put("setting", setting);
+        srcOptions.put("srcType", srcType);
+        srcOptions.put("src", PREVIEW_SRC_DIR.toAbsolutePath().toString());
+        srcOptions.put("encoding", "UTF-8");
         final Map<String, Object> body = new LinkedHashMap<>();
-        body.put("setting", setting);
-        body.put("srcType", srcType);
-        body.put("src", PREVIEW_SRC_DIR.toAbsolutePath().toString());
-        body.put("encoding", "UTF-8");
+        body.put("srcOptions", srcOptions);
         body.put("tableName", tableName);
         return body;
     }

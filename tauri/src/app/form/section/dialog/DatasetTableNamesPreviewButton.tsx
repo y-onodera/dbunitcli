@@ -19,7 +19,10 @@ import {
 	useDatasetTableNames,
 	useDatasetTablePreview,
 } from "../../../../hooks/useDatasetSettings";
-import type { DatasetSrcInfo } from "../../../../model/CommandOption";
+import {
+	type DatasetSrcInfo,
+	withoutSetting,
+} from "../../../../model/CommandOption";
 import TableConvertDialog from "./TableConvertDialog";
 
 export default function DatasetTableNamesPreviewButton({
@@ -36,16 +39,26 @@ export default function DatasetTableNamesPreviewButton({
 			<BlueButton title={title} handleClick={() => setShowDialog(true)} />
 			{showDialog && (
 				<DatasetTableNamesPreviewDialog
-					datasetSrcInfo={
-						setting !== undefined
-							? { ...datasetSrcInfo, setting }
-							: datasetSrcInfo
-					}
+					datasetSrcInfo={withPreviewSetting(datasetSrcInfo, setting)}
 					handleDialogClose={() => setShowDialog(false)}
 				/>
 			)}
 		</>
 	);
+}
+
+// settingが空ならsettingを適用せず、指定があればそのファイルを適用して読む（それ以外のsrc要素はフォームのまま）
+function withPreviewSetting(
+	info: DatasetSrcInfo,
+	setting: string | undefined,
+): DatasetSrcInfo {
+	if (setting === undefined) {
+		return info;
+	}
+	if (setting === "") {
+		return withoutSetting(info);
+	}
+	return { ...info, values: { ...info.values, setting } };
 }
 
 export function DatasetTableNamesPreviewDialog({

@@ -15,6 +15,7 @@ import { useDatasetSrcInfo } from "../../../../context/DatasetSrcInfoProvider";
 import { useAbortSignalRef } from "../../../../hooks/useAbortSignalRef";
 import { useColumnNamesFetcher } from "../../../../hooks/useDatasetSettings";
 import { useJobLog } from "../../../../hooks/useJobLog";
+import { withAllTables } from "../../../../model/CommandOption";
 import type { DatasetSetting } from "../../../../model/DatasetSettings";
 
 export default function ColumnDatalistDialog({
@@ -30,7 +31,7 @@ export default function ColumnDatalistDialog({
 }) {
 	const filteredTables = filterTablesByTarget(tableNames, target);
 	const [loadingTable, setLoadingTable] = useState<string | null>(null);
-	const srcInfo = useDatasetSrcInfo();
+	const srcInfo = withAllTables(useDatasetSrcInfo());
 	const fetchColumnNames = useColumnNamesFetcher();
 	const abortControllerRef = useAbortSignalRef();
 	const jobLog = useJobLog();
