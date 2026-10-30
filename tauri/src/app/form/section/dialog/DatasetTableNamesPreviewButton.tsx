@@ -5,6 +5,7 @@ import {
 	DialogFooter,
 	DialogTitle,
 	FullDialog,
+	type SaveThen,
 	StatusMessage,
 	Td,
 	Th,
@@ -61,7 +62,7 @@ export function SaveAndPreviewButton({
 	saveThen,
 	toSrcInfo,
 }: {
-	saveThen: (onSaved: (path: string) => void) => void;
+	saveThen: SaveThen;
 	toSrcInfo: (savedPath: string) => DatasetSrcInfo;
 }) {
 	const [savedPath, setSavedPath] = useState<string | null>(null);

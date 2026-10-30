@@ -26,6 +26,9 @@ type CommonProps = {
 	helpLabel?: string;
 };
 
+// 入力中のファイル名へ保存し、成功したらonSaved(保存先)を呼ぶ
+export type SaveThen = (onSaved: (path: string) => void) => void;
+
 type SettingMode<T> = {
 	setting: T;
 	handleCommit: (newSettings: T) => void;
@@ -43,10 +46,8 @@ type FileMode = {
 	// 入力中のファイル名へ保存する。成功したときだけhandleSaveを呼ぶ（失敗時はダイアログを開いたまま）
 	save: (path: string) => Promise<OperationResult>;
 	handleSave: (path: string) => void;
-	// Saveの右に並べる追加ボタン。saveThen(onSaved)で入力中のファイル名へ保存し、成功したらonSaved(path)を呼ぶ
-	footerActions?: (
-		saveThen: (onSaved: (path: string) => void) => void,
-	) => ReactNode;
+	// Saveの右に並べる追加ボタン。保存が必要ならsaveThenを使う
+	footerActions?: (saveThen: SaveThen) => ReactNode;
 };
 
 export type SettingDialogProps<T> = CommonProps & (SettingMode<T> | FileMode);
@@ -54,12 +55,11 @@ export type SettingDialogProps<T> = CommonProps & (SettingMode<T> | FileMode);
 export function SettingDialog<T>(props: SettingDialogProps<T>) {
 	const [fileNameValue, setFileNameValue] = useState(props.fileName ?? "");
 	const isFileMode = props.fileName !== undefined;
-	const saveThen = (onSaved: (path: string) => void) => {
+	const saveThen: SaveThen = (onSaved) => {
 		if (isFileMode) {
-			const path = fileNameValue;
 			saveOnSuccess(
-				() => props.save(path),
-				() => onSaved(path),
+				() => props.save(fileNameValue),
+				() => onSaved(fileNameValue),
 			);
 		}
 	};

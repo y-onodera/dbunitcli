@@ -18,7 +18,7 @@ export {
 	SectionLegend,
 	SectionOptionHeader,
 } from "./SectionFieldset";
-export type { SettingDialogProps } from "./SettingDialog";
+export type { SaveThen, SettingDialogProps } from "./SettingDialog";
 export {
 	Arrays,
 	ArraysText,
