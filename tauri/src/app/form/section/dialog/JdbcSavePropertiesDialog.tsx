@@ -5,22 +5,26 @@ import {
 	SettingDialog,
 } from "../../../../components/dialog";
 import { PreviewField } from "../../../../components/element/Input";
+import type { OperationResult } from "../../../../utils/fetchUtils";
 
 type JdbcSavePropertiesDialogProps = {
 	jdbcValues: Record<string, string>;
 	handleDialogClose: () => void;
+	save: (name: string) => Promise<OperationResult>;
 	handleSave: (name: string) => void;
 };
 
 export default function JdbcSavePropertiesDialog({
 	jdbcValues,
 	handleDialogClose,
+	save,
 	handleSave,
 }: JdbcSavePropertiesDialogProps) {
 	return (
 		<SettingDialog
 			fileName=""
 			handleDialogClose={handleDialogClose}
+			save={save}
 			handleSave={handleSave}
 		>
 			<DialogBody size="sm">

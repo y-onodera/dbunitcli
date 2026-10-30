@@ -13,7 +13,6 @@ import {
 	createColumnDef,
 	FixedColumnDef,
 } from "../../../../model/FixedColumnDef";
-import { saveOnSuccess } from "../../../../utils/fetchUtils";
 import ColumnDefSettingDialog from "./ColumnDefSettingDialog";
 
 export default function FixedColumnDefDialog(props: {
@@ -48,12 +47,8 @@ export function FixedColumnDefEditDialog(props: {
 		<SettingDialog
 			handleDialogClose={props.handleDialogClose}
 			fileName={props.fileName}
-			handleSave={(fileName) =>
-				saveOnSuccess(
-					() => saveDef(fileName, fixedColumnDef),
-					() => props.handleSave(fileName),
-				)
-			}
+			save={(fileName) => saveDef(fileName, fixedColumnDef)}
+			handleSave={props.handleSave}
 		>
 			<SettingTable<ColumnDef>
 				caption="Column Definitions"

@@ -1,4 +1,5 @@
 import { type ReactNode, useState } from "react";
+import { type OperationResult, saveOnSuccess } from "../../utils/fetchUtils";
 import { BlueButton, WhiteButton } from "../element/Button";
 import {
 	AddButton,
@@ -31,6 +32,7 @@ type SettingMode<T> = {
 	setting: T;
 	handleCommit: (newSettings: T) => void;
 	fileName?: never;
+	save?: never;
 	handleSave?: never;
 };
 
@@ -38,6 +40,8 @@ type FileMode = {
 	setting?: never;
 	handleCommit?: never;
 	fileName: string;
+	// 入力中のファイル名へ保存する。成功したときだけhandleSaveを呼ぶ（失敗時はダイアログを開いたまま）
+	save: (path: string) => Promise<OperationResult>;
 	handleSave: (path: string) => void;
 };
 
@@ -89,7 +93,10 @@ export function SettingDialog<T>(props: SettingDialogProps<T>) {
 					disabled={props.commitDisabled}
 					handleClick={() => {
 						if (isFileMode) {
-							props.handleSave(fileNameValue);
+							saveOnSuccess(
+								() => props.save(fileNameValue),
+								() => props.handleSave(fileNameValue),
+							);
 						} else {
 							props.handleCommit(props.setting as T);
 						}

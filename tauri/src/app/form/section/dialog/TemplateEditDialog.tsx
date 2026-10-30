@@ -9,7 +9,6 @@ import {
 	useResourceContent,
 	useSaveResourceContent,
 } from "../../../../hooks/useResourceFiles";
-import { saveOnSuccess } from "../../../../utils/fetchUtils";
 import type { EditResourceDialogProps } from "./ResourceEditButton";
 
 export default function TemplateEditDialog({
@@ -35,16 +34,10 @@ function Dialog({
 	content: initialContent,
 	fileName,
 	handleDialogClose,
-	handleSave: onSaved,
+	handleSave,
 }: EditResourceDialogProps & { content: string }) {
 	const [content, setContent] = useState<string>(initialContent);
 	const saveContent = useSaveResourceContent("template");
-
-	const handleSave = (path: string) =>
-		saveOnSuccess(
-			() => saveContent(path, content),
-			() => onSaved(path),
-		);
 
 	return (
 		<SettingDialog
@@ -53,6 +46,7 @@ function Dialog({
 			helpLabel="Template File Edit"
 			fileName={fileName}
 			handleDialogClose={handleDialogClose}
+			save={(path) => saveContent(path, content)}
 			handleSave={handleSave}
 		>
 			<DialogBody size="md">

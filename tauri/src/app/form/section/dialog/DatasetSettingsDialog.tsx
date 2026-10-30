@@ -27,7 +27,6 @@ import {
 	type DatasetSettings,
 	newDatasetSetting,
 } from "../../../../model/DatasetSettings";
-import { saveOnSuccess } from "../../../../utils/fetchUtils";
 import DatasetSettingDialog from "./DatasetSettingDialog";
 import { SaveAndPreviewButton } from "./DatasetTableNamesPreviewButton";
 
@@ -68,12 +67,8 @@ export function DatasetSettingsEditDialog(props: {
 			helpLabel="Dataset Settings"
 			handleDialogClose={props.handleDialogClose}
 			fileName={props.fileName}
-			handleSave={(fileName) =>
-				saveOnSuccess(
-					() => save(fileName),
-					() => props.handleSave(fileName),
-				)
-			}
+			save={save}
+			handleSave={props.handleSave}
 			footerActions={(fileName) =>
 				// 保存したファイルをsettingに適用してプレビューする（それ以外のsrc要素はフォームのまま）
 				srcTypeOf(datasetSrcInfo) && (

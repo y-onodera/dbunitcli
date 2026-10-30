@@ -15,7 +15,6 @@ import {
 } from "../../../../hooks/useResourceFiles";
 import { withoutSetting, withValues } from "../../../../model/CommandOption";
 import type { QueryDatasourceType } from "../../../../model/QueryDatasource";
-import { saveOnSuccess } from "../../../../utils/fetchUtils";
 import { insertAtCursor } from "../../../../utils/textInsert";
 import { SaveAndPreviewButton } from "./DatasetTableNamesPreviewButton";
 import type { EditResourceDialogProps } from "./ResourceEditButton";
@@ -93,12 +92,8 @@ function Dialog(props: SqlEditorDialogProps & { value: string }) {
 			helpLabel="SQL Editor"
 			handleDialogClose={props.handleDialogClose}
 			fileName={props.fileName}
-			handleSave={(fileName) =>
-				saveOnSuccess(
-					() => save(fileName),
-					() => props.handleSave(fileName),
-				)
-			}
+			save={save}
+			handleSave={props.handleSave}
 			footerActions={(fileName) => (
 				// 保存したファイルをsrcにしてプレビューする（settingは適用しない）
 				<SaveAndPreviewButton
