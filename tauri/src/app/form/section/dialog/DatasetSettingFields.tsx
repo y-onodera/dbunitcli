@@ -194,20 +194,23 @@ export function FilterOrderFields({
 		field: (typeof filterOrderFields)[number];
 		index: number;
 	} | null>(null);
-	// 先頭の選択項目をクリックした行に設定し、残りは既存値と重複しないものを末尾に追加する
+	// 他の行に既にある項目を除き、先頭をクリックした行に設定して残りを末尾に追加する
 	const applySelected = (selected: string[]) => {
 		if (!selecting) {
 			return;
 		}
 		const { field, index } = selecting;
 		setTarget((cur) => {
-			const [first, ...rest] = selected;
+			const values = cur[field.name];
+			const [first, ...rest] = selected.filter(
+				(column) => !values.some((v, i) => i !== index && v === column),
+			);
+			if (first === undefined) {
+				return cur;
+			}
 			let next = field.replace(cur, first, index);
 			for (const column of rest) {
-				const values = next[field.name];
-				if (!values.includes(column)) {
-					next = field.replace(next, column, values.length);
-				}
+				next = field.replace(next, column, next[field.name].length);
 			}
 			return next;
 		});

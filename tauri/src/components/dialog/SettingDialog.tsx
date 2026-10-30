@@ -217,6 +217,13 @@ export function Select(props: {
 	);
 }
 
+const NEW_ITEM = "new item";
+
+// index以外の行に同じ値があるか
+function isDuplicated(values: string[], text: string, index: number): boolean {
+	return values.some((v, i) => i !== index && v === text);
+}
+
 export function Arrays(props: {
 	name: string;
 	values: string[];
@@ -227,6 +234,9 @@ export function Arrays(props: {
 	list?: string;
 	handleSelect?: (index: number) => void;
 }) {
+	const lastValue = props.values[props.values.length - 1];
+	// 末尾が空、または追加済みの未編集行があるときは追加させない（同じ値の行を増やさない）
+	const canAdd = !!lastValue && !props.values.includes(NEW_ITEM);
 	return (
 		<>
 			{props.values.length === 0 ? (
@@ -246,12 +256,14 @@ export function Arrays(props: {
 				props.values.map((val, index) => {
 					return (
 						<ArraysText
-							key={val ?? index}
+							// biome-ignore lint/suspicious/noArrayIndexKey: 読込んだ設定に同じ値が重複していても一意にし、位置か値が変われば入力中のstateを作り直す
+							key={`${index}:${val}`}
 							name={props.name}
 							val={val}
 							index={index}
 							handleChange={props.handleChange}
 							handleRemove={props.handleRemove}
+							isDuplicated={(text) => isDuplicated(props.values, text, index)}
 							ignoreLabel={props.ignoreLabel}
 							showCaption={props.showCaption}
 							list={props.list}
@@ -261,11 +273,11 @@ export function Arrays(props: {
 				})
 			)}
 			<div className="grid grid-cols-5 justify-center pb-2">
-				{props.values.length > 0 && props.values[props.values.length - 1] && (
+				{canAdd && (
 					<div className="col-start-2">
 						<AddButton
 							handleClick={() =>
-								props.handleChange("new item", props.values.length + 1)
+								props.handleChange(NEW_ITEM, props.values.length + 1)
 							}
 						/>
 					</div>
@@ -281,14 +293,21 @@ export function ArraysText(props: {
 	index: number;
 	handleChange: (text: string, index: number) => void;
 	handleRemove: (index: number) => void;
+	isDuplicated?: (text: string) => boolean;
 	ignoreLabel?: boolean;
 	showCaption?: boolean;
 	list?: string;
 	handleSelect?: (index: number) => void;
 }) {
 	const [text, setText] = useState(props.val);
-	const handleBlur = (newVal: React.FocusEvent<HTMLInputElement>) =>
+	// 他の行と同じ値は確定させず、入力前の値に戻す
+	const handleBlur = (newVal: React.FocusEvent<HTMLInputElement>) => {
+		if (props.isDuplicated?.(newVal.target.value)) {
+			setText(props.val);
+			return;
+		}
 		props.handleChange(newVal.target.value, props.index);
+	};
 	const handleRemove = () => props.handleRemove(props.index);
 	const showLabel = !props.ignoreLabel && props.index === 0;
 	return (
