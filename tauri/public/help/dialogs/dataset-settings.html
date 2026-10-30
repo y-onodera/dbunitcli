@@ -18,6 +18,7 @@
     <li><a href="#section-output-filter">outputFilter</a></li>
     <li><a href="#section-import">import</a></li>
     <li><a href="#section-example">記述例</a></li>
+    <li><a href="#section-save">保存とプレビュー</a></li>
     <li><a href="#section-generate">雛型の生成</a></li>
     <li><a href="#section-related">関連</a></li>
   </ol>
@@ -149,6 +150,15 @@
     }
   ]
 }</pre>
+
+  <h2 id="section-save">保存とプレビュー</h2>
+  <p>ダイアログ下部の name に保存先のファイル名を指定して Save を押すと、内容がファイルとして書き出され、setting テキストボックスにそのファイル名が設定されます。</p>
+  <p>Save and Preview を押すと、同じように保存したうえで、保存したファイルを <code>setting</code> に適用して読み込まれるテーブルの一覧を表示します（<a href="../sections/dataset-load-form.html">Dataset Load Form</a> の Preview Apply Settings と同じ表示です）。一覧の preview ボタンを押すと、そのテーブルのデータを表示します。</p>
+  <ul>
+    <li><code>setting</code> 以外の項目（<code>src</code> など）はフォームに入力した値を使う</li>
+    <li>Save and Preview では Dataset Settings は閉じず、setting テキストボックスのファイル名も変わらない。ファイル名を反映するには Save を押す。</li>
+    <li>Save and Preview はフォームで <code>srcType</code> を指定しているときだけ表示される</li>
+  </ul>
 
   <h2 id="section-generate">雛型の生成</h2>
   <p>setting テキストボックス横のメニューの generate ボタンから、既存データセットのテーブル・カラム構成をもとに設定の雛型を生成できます。</p>

@@ -8,14 +8,17 @@ import {
 	StatusMessage,
 	Text,
 } from "../../../../components/dialog";
+import { BlueButton } from "../../../../components/element/Button";
 import {
 	AddButton,
 	RemoveButton,
 } from "../../../../components/element/ButtonIcon";
+import { useDatasetSrcInfo } from "../../../../context/DatasetSrcInfoProvider";
 import {
 	useDatasetSettingsData,
 	useSaveDatasetSettings,
 } from "../../../../hooks/useDatasetSettings";
+import { srcTypeOf, withValues } from "../../../../model/CommandOption";
 import type {
 	DatasetSetting,
 	ImportSetting,
@@ -27,6 +30,7 @@ import {
 } from "../../../../model/DatasetSettings";
 import { saveOnSuccess } from "../../../../utils/fetchUtils";
 import DatasetSettingDialog from "./DatasetSettingDialog";
+import { DatasetTableNamesPreviewDialog } from "./DatasetTableNamesPreviewButton";
 
 export default function DatasetSettingsDialog(props: {
 	fileName: string;
@@ -56,6 +60,13 @@ export function DatasetSettingsEditDialog(props: {
 	const [dataSettings, setDataSettings] = useState<DatasetSettings>(
 		props.settings,
 	);
+	const datasetSrcInfo = useDatasetSrcInfo();
+	const [previewPath, setPreviewPath] = useState<string | null>(null);
+	const saveThen = (onSaved: (path: string) => void) => (path: string) =>
+		saveOnSuccess(
+			() => saveSettings(path, dataSettings),
+			() => onSaved(path),
+		);
 	return (
 		<SettingDialog
 			title="Dataset Settings"
@@ -63,10 +74,14 @@ export function DatasetSettingsEditDialog(props: {
 			helpLabel="Dataset Settings"
 			handleDialogClose={props.handleDialogClose}
 			fileName={props.fileName}
-			handleSave={(fileName) =>
-				saveOnSuccess(
-					() => saveSettings(fileName, dataSettings),
-					() => props.handleSave(fileName),
+			handleSave={saveThen(props.handleSave)}
+			footerActions={(fileName) =>
+				// 保存したファイルをsettingに適用してテーブル一覧をプレビューする（それ以外のsrc要素はフォームのまま）。編集ダイアログは開いたまま
+				srcTypeOf(datasetSrcInfo) && (
+					<BlueButton
+						title="Save and Preview"
+						handleClick={() => saveThen(setPreviewPath)(fileName)}
+					/>
 				)
 			}
 		>
@@ -106,6 +121,12 @@ export function DatasetSettingsEditDialog(props: {
 					setDataSettings((cur) => cur.replaceImports(imports))
 				}
 			/>
+			{previewPath !== null && (
+				<DatasetTableNamesPreviewDialog
+					datasetSrcInfo={withValues(datasetSrcInfo, { setting: previewPath })}
+					handleDialogClose={() => setPreviewPath(null)}
+				/>
+			)}
 		</SettingDialog>
 	);
 }
