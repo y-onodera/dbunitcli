@@ -19,9 +19,9 @@
     <tr><td>sheetName</td><td>抽出対象の Excel シート名。データセットがロード済みの場合、候補がデータリストから選択できる。</td></tr>
     <tr><td>tableName</td><td>抽出結果に付与する論理テーブル名</td></tr>
     <tr><td>header</td><td>カラム名の並び。カンマ区切りで指定し、<code>columnIndex</code> で指定した列の順序と対応させる。</td></tr>
-    <tr><td>dataStart</td><td>データ開始位置をセルアドレスで指定する（例: <code>A2</code>）。ヘッダ行の直下など、最初のレコードがあるセルを指定する。</td></tr>
-    <tr><td>columnIndex</td><td>各カラムが格納されている列をカンマ区切りで指定する（例: <code>A,B,D</code>）。<code>header</code> と同じ並びで対応させる。</td></tr>
-    <tr><td>breakKey</td><td>連続データの区切り判定に利用するカラム名をカンマ区切りで指定する。指定したキーで値が変わったタイミングをレコード境界とみなする。</td></tr>
+    <tr><td>dataStart</td><td>最初のレコードがある行の番号。1 行目を <code>0</code> として数える（例: 2 行目なら <code>1</code>）。</td></tr>
+    <tr><td>columnIndex</td><td>各カラムが格納されている列の番号をカンマ区切りで指定する。A 列を <code>0</code> として数える（例: A・B・D 列なら <code>0,1,3</code>）。<code>header</code> と同じ並びで対応させる。</td></tr>
+    <tr><td>breakKey</td><td>レコードとして読む行を判定するカラム名をカンマ区切りで指定する。<code>dataStart</code> 以降で、指定したカラムのどれかに値がある行だけをレコードにする。</td></tr>
     <tr><td>addFileInfo</td><td>元ファイル名などのファイル情報カラムを結果に追加するかどうか</td></tr>
   </table>
 
@@ -32,15 +32,26 @@
     <tr><td>sheetName</td><td>Orders</td></tr>
     <tr><td>tableName</td><td>orders</td></tr>
     <tr><td>header</td><td><code>order_id,customer,item,amount</code></td></tr>
-    <tr><td>dataStart</td><td><code>A2</code></td></tr>
-    <tr><td>columnIndex</td><td><code>A,B,C,D</code></td></tr>
+    <tr><td>dataStart</td><td><code>1</code></td></tr>
+    <tr><td>columnIndex</td><td><code>0,1,2,3</code></td></tr>
+    <tr><td>breakKey</td><td><code>order_id</code></td></tr>
   </table>
+  <p>1 行目が見出し、2 行目以降が明細の表です。<code>order_id</code> が空の行（合計行・空行など）はレコードになりません。</p>
+
+  <h2 id="section-preview">Preview</h2>
+  <p>ダイアログ下部の Preview を押すと、編集中のこの定義で読み込まれるテーブルの一覧を表示します（<a href="../sections/dataset-load-form.html">Dataset Load Form</a> の Preview Apply Settings と同じ表示です）。一覧の preview ボタンを押すと、そのテーブルのデータを表示します。</p>
+  <ul>
+    <li>適用するのはこのダイアログで編集中の定義 1 件だけです。Xlsx Schema のほかの行や、フォームの <code>xlsxSchema</code>・<code>setting</code> に指定したファイルは適用しません。</li>
+    <li>Save を押す前の内容でも確認でき、プレビューしてもスキーマファイルは保存されません。</li>
+    <li>Preview はフォームで <code>srcType</code> を指定しているときだけ表示されます。</li>
+  </ul>
 
   <h2 id="section-notes">注意</h2>
   <ol>
     <li><code>sheetName</code> と <code>tableName</code> の両方が入力されていない行は保存対象から除外されます。</li>
     <li><code>header</code> と <code>columnIndex</code> は要素数を一致させてください。</li>
-    <li><code>dataStart</code> は Excel のセルアドレス表記（<code>A1</code> 形式）で指定します。</li>
+    <li><code>dataStart</code> と <code>columnIndex</code> は 0 から数えた番号で指定します（Excel の行番号・列名ではありません）。</li>
+    <li><code>breakKey</code> が空のときはレコードを読みません（テーブルは作られますが、行は 0 件になります）。</li>
   </ol>
 
   <h2 id="section-related">関連</h2>

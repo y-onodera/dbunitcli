@@ -1,14 +1,8 @@
 import { useState } from "react";
 import { SettingDialog } from "../../../../components/dialog";
-import { BlueButton } from "../../../../components/element/Button";
 import { useDatasetSrcInfo } from "../../../../context/DatasetSrcInfoProvider";
 import { useDatasetTableNames } from "../../../../hooks/useDatasetSettings";
-import {
-	type DatasetSrcInfo,
-	srcTypeOf,
-	withAllTables,
-	withoutSetting,
-} from "../../../../model/CommandOption";
+import { withAllTables } from "../../../../model/CommandOption";
 import type { DatasetSetting } from "../../../../model/DatasetSettings";
 import ColumnDatalistDialog from "./ColumnDatalistDialog";
 import {
@@ -17,7 +11,7 @@ import {
 	ModeFields,
 	TargetFields,
 } from "./DatasetSettingFields";
-import { DatasetTableNamesPreviewDialog } from "./DatasetTableNamesPreviewButton";
+import { InlinePreviewButton } from "./DatasetTableNamesPreviewButton";
 
 export default function DatasetSettingDialog(props: {
 	setting: DatasetSetting;
@@ -27,9 +21,6 @@ export default function DatasetSettingDialog(props: {
 	const [target, setTarget] = useState(props.setting);
 	const [columnDatalist, setColumnDatalist] = useState<string[]>([]);
 	const [showColumnDialog, setShowColumnDialog] = useState(false);
-	const [previewSrcInfo, setPreviewSrcInfo] = useState<DatasetSrcInfo | null>(
-		null,
-	);
 	const columnList =
 		columnDatalist.length > 0 ? "column_datalist_list" : undefined;
 	const datasetSrcInfo = useDatasetSrcInfo();
@@ -43,20 +34,10 @@ export default function DatasetSettingDialog(props: {
 			setting={target}
 			handleDialogClose={props.handleDialogClose}
 			handleCommit={props.handleCommit}
-			footerActions={() =>
-				// 編集中のこの設定1件の対象テーブルだけを、設定を適用してプレビューする（保存はしない）
-				srcTypeOf(datasetSrcInfo) && (
-					<BlueButton
-						title="Preview"
-						handleClick={() =>
-							setPreviewSrcInfo({
-								...withoutSetting(datasetSrcInfo),
-								inlineSetting: target,
-							})
-						}
-					/>
-				)
-			}
+			footerActions={() => (
+				// 編集中のこの設定1件の対象テーブルだけを、設定を適用してプレビューする
+				<InlinePreviewButton toInline={() => ({ inlineSetting: target })} />
+			)}
 		>
 			<TargetFields
 				target={target}
@@ -83,12 +64,6 @@ export default function DatasetSettingDialog(props: {
 					target={target}
 					onLoad={(columns) => setColumnDatalist(columns)}
 					onClose={() => setShowColumnDialog(false)}
-				/>
-			)}
-			{previewSrcInfo !== null && (
-				<DatasetTableNamesPreviewDialog
-					datasetSrcInfo={previewSrcInfo}
-					handleDialogClose={() => setPreviewSrcInfo(null)}
 				/>
 			)}
 		</SettingDialog>

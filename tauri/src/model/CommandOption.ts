@@ -1,5 +1,6 @@
 import type { DatasetSetting } from "./DatasetSettings";
 import type { DefaultPath } from "./WorkspaceResources";
+import type { XlsxSchema } from "./XlsxSchema";
 
 export type Attribute = {
 	type: string;
@@ -113,6 +114,8 @@ export type DatasetSrcInfo = {
 	values: Record<string, string>;
 	// 未保存の設定1件。指定時はsettingより優先してこの設定だけを適用する
 	inlineSetting?: DatasetSetting;
+	// 未保存のxlsxスキーマ。指定時はxlsxSchemaより優先してこのスキーマの対象だけを読む
+	inlineXlsxSchema?: XlsxSchema;
 };
 export type JdbcOption = CommandOptions & {
 	jdbcProperties: CommandOption;

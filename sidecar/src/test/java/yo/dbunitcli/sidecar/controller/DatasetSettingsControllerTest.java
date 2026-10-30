@@ -14,6 +14,7 @@ import io.micronaut.runtime.server.EmbeddedServer;
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
 import io.micronaut.serde.ObjectMapper;
 import jakarta.inject.Inject;
+import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.junit.jupiter.api.AfterEach;
@@ -278,6 +279,44 @@ class DatasetSettingsControllerTest {
     }
 
     @Test
+    void testTableNames_inlineXlsxSchemaはxlsxSchemaより優先し対象のテーブルだけを返す() throws IOException {
+        this.createPreviewBook();
+        final Map<String, Object> body = this.tableBody("xlsx", "", "", Map.of("xlsxSchema", "schema.json"));
+        body.put("inlineXlsxSchema", Map.of("rows", List.of(this.inlineRowSetting(List.of()))));
+
+        Assertions.assertEquals(List.of("renamed"), this.tableNames(body));
+    }
+
+    @Test
+    void testTablePreview_inlineXlsxSchemaのrowsで読み込む() throws IOException {
+        this.createPreviewBook();
+        final Map<String, Object> body = this.tableBody("xlsx", "", "renamed");
+        body.put("inlineXlsxSchema", Map.of("rows", List.of(this.inlineRowSetting(List.of("id")))));
+
+        final DatasetTablePreviewResponseDto actual = this.tablePreview(body);
+
+        Assertions.assertArrayEquals(new String[]{"id", "name"}, actual.getHeaders());
+        Assertions.assertEquals(List.of(List.of("1", "a"), List.of("2", "b")), this.rows(actual));
+    }
+
+    @Test
+    void testTablePreview_inlineXlsxSchemaのcellsで読み込む() throws IOException {
+        this.createPreviewBook();
+        final Map<String, Object> body = this.tableBody("xlsx", "", "cell");
+        body.put("inlineXlsxSchema", Map.of("cells", List.of(Map.of(
+                "sheetName", "small",
+                "tableName", "cell",
+                "header", List.of("first", "second"),
+                "rows", List.of(Map.of("cellAddress", List.of("A2", "B3"))),
+                "addFileInfo", false))));
+
+        final DatasetTablePreviewResponseDto actual = this.tablePreview(body);
+
+        Assertions.assertArrayEquals(new String[]{"first", "second"}, actual.getHeaders());
+        Assertions.assertEquals(List.of(List.of("1", "b")), this.rows(actual));
+    }
+
+    @Test
     void testTableNames_settingTargetOnlyならsettingの対象のテーブルだけを返す() throws IOException {
         this.createPreviewSrc();
 
@@ -307,9 +346,7 @@ class DatasetSettingsControllerTest {
         final Map<String, Object> body = this.tableBody("csv", "", "renamed");
         body.put("inlineSetting", Map.of("name", Map.of("any", List.of("big")), "tableName", "renamed"));
 
-        final String response = this.client.toBlocking().retrieve(
-                HttpRequest.POST("dbunit-cli/dataset-setting/table-preview", ObjectMapper.getDefault().writeValueAsString(body)));
-        final DatasetTablePreviewResponseDto actual = ObjectMapper.getDefault().readValue(response, DatasetTablePreviewResponseDto.class);
+        final DatasetTablePreviewResponseDto actual = this.tablePreview(body);
 
         Assertions.assertArrayEquals(new String[]{"key", "value"}, actual.getHeaders());
         Assertions.assertEquals(BIG_ROWS, actual.getTotalRows());
@@ -539,6 +576,53 @@ class DatasetSettingsControllerTest {
         Files.writeString(PREVIEW_SRC_DIR.resolve("small.csv"), "key,other\n1,a\n2,b\n3,c\n");
     }
 
+    /**
+     * big・smallの2シートのxlsx。smallはA1:B1が見出し、2行目からデータ
+     */
+    private void createPreviewBook() throws IOException {
+        Files.createDirectories(PREVIEW_SRC_DIR);
+        try (final XSSFWorkbook book = new XSSFWorkbook();
+             final OutputStream out = Files.newOutputStream(PREVIEW_SRC_DIR.resolve("book.xlsx"))) {
+            book.createSheet("big").createRow(0).createCell(0).setCellValue("key");
+            final Sheet small = book.createSheet("small");
+            this.writeRow(small, 0, "id", "name");
+            this.writeRow(small, 1, "1", "a");
+            this.writeRow(small, 2, "2", "b");
+            book.write(out);
+        }
+    }
+
+    private void writeRow(final Sheet sheet, final int rowNum, final String... values) {
+        final Row row = sheet.createRow(rowNum);
+        for (int i = 0; i < values.length; i++) {
+            row.createCell(i).setCellValue(values[i]);
+        }
+    }
+
+    /**
+     * 空のbreakKeyはJSONから省かれる（読込時は空として扱う）。行を読むにはbreakKeyが要る
+     */
+    private Map<String, Object> inlineRowSetting(final List<String> breakKey) {
+        return Map.of(
+                "sheetName", "small",
+                "tableName", "renamed",
+                "header", List.of("id", "name"),
+                "dataStart", 1,
+                "columnIndex", List.of(0, 1),
+                "breakKey", breakKey,
+                "addFileInfo", false);
+    }
+
+    private List<List<Object>> rows(final DatasetTablePreviewResponseDto preview) {
+        return preview.getRows().stream().map(List::of).toList();
+    }
+
+    private DatasetTablePreviewResponseDto tablePreview(final Map<String, Object> body) throws IOException {
+        final String response = this.client.toBlocking().retrieve(
+                HttpRequest.POST("dbunit-cli/dataset-setting/table-preview", ObjectMapper.getDefault().writeValueAsString(body)));
+        return ObjectMapper.getDefault().readValue(response, DatasetTablePreviewResponseDto.class);
+    }
+
     private List<String> inlineTableNames(final String setting, final Map<String, Object> inlineSetting) throws IOException {
         final Map<String, Object> body = this.tableBody("csv", setting, "");
         body.put("inlineSetting", inlineSetting);
@@ -555,8 +639,6 @@ class DatasetSettingsControllerTest {
     }
 
     private DatasetTablePreviewResponseDto tablePreview(final String setting, final String tableName) throws IOException {
-        final String response = this.client.toBlocking().retrieve(
-                HttpRequest.POST("dbunit-cli/dataset-setting/table-preview", this.tableRequestBody(setting, tableName, null)));
-        return ObjectMapper.getDefault().readValue(response, DatasetTablePreviewResponseDto.class);
+        return this.tablePreview(this.tableBody("csv", setting, tableName));
     }
 }

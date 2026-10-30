@@ -37,8 +37,15 @@
     <li>内容を確認・編集し、ファイル名を指定して保存すると、その名前が <code>xlsxSchema</code> に設定されます（<a href="xlsx-schema-generate.html">Xlsx Schema Generate</a>）。</li>
   </ol>
 
-  <h2 id="section-save">保存</h2>
+  <h2 id="section-save">保存とプレビュー</h2>
   <p>ダイアログ下部のファイル名を指定して保存すると、設定内容が JSON ファイルとして書き出されます。<code>sheetName</code> と <code>tableName</code> が共に入力されている行のみが保存対象です。</p>
+  <p>Save and Preview を押すと、同じように保存したうえで、保存したファイルを <code>xlsxSchema</code> に適用して読み込まれるテーブルの一覧を表示します（<a href="../sections/dataset-load-form.html">Dataset Load Form</a> の Preview Apply Settings と同じ表示です）。一覧の preview ボタンを押すと、そのテーブルのデータを表示します。</p>
+  <ul>
+    <li><code>xlsxSchema</code> 以外の項目（<code>src</code>・<code>setting</code> など）はフォームに入力した値を使う</li>
+    <li>Save and Preview では Xlsx Schema は閉じず、<code>xlsxSchema</code> のファイル名も変わらない。ファイル名を反映するには Save を押す。</li>
+    <li>Save and Preview はフォームで <code>srcType</code> を指定しているときだけ表示される</li>
+  </ul>
+  <p>1 行分の定義だけを保存せずに確かめるには、<a href="xlsx-row-setting.html">Xlsx Row Setting</a> / <a href="xlsx-cell-setting.html">Xlsx Cell Setting</a> の Preview を使います。</p>
 
   <h2 id="section-related">関連</h2>
   <ul>

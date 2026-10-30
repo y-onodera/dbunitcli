@@ -30,6 +30,7 @@ function buildDatasetRequestBody(
 	return JSON.stringify({
 		srcOptions: { ...info.values, ...jdbcValues },
 		inlineSetting: info.inlineSetting,
+		inlineXlsxSchema: info.inlineXlsxSchema,
 		...extra,
 	});
 }
