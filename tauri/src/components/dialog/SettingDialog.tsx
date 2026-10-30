@@ -24,8 +24,6 @@ type CommonProps = {
 	title?: string;
 	helpCommand?: string;
 	helpLabel?: string;
-	// Saveの右に並べる追加ボタン。ファイルモードでは入力中のファイル名を受け取る（設定モードは空文字）
-	footerActions?: (fileName: string) => ReactNode;
 };
 
 type SettingMode<T> = {
@@ -34,6 +32,8 @@ type SettingMode<T> = {
 	fileName?: never;
 	save?: never;
 	handleSave?: never;
+	// Commitの右に並べる追加ボタン
+	footerActions?: () => ReactNode;
 };
 
 type FileMode = {
@@ -43,6 +43,10 @@ type FileMode = {
 	// 入力中のファイル名へ保存する。成功したときだけhandleSaveを呼ぶ（失敗時はダイアログを開いたまま）
 	save: (path: string) => Promise<OperationResult>;
 	handleSave: (path: string) => void;
+	// Saveの右に並べる追加ボタン。saveThen(onSaved)で入力中のファイル名へ保存し、成功したらonSaved(path)を呼ぶ
+	footerActions?: (
+		saveThen: (onSaved: (path: string) => void) => void,
+	) => ReactNode;
 };
 
 export type SettingDialogProps<T> = CommonProps & (SettingMode<T> | FileMode);
@@ -50,6 +54,15 @@ export type SettingDialogProps<T> = CommonProps & (SettingMode<T> | FileMode);
 export function SettingDialog<T>(props: SettingDialogProps<T>) {
 	const [fileNameValue, setFileNameValue] = useState(props.fileName ?? "");
 	const isFileMode = props.fileName !== undefined;
+	const saveThen = (onSaved: (path: string) => void) => {
+		if (isFileMode) {
+			const path = fileNameValue;
+			saveOnSuccess(
+				() => props.save(path),
+				() => onSaved(path),
+			);
+		}
+	};
 
 	return (
 		<FullDialog onClose={props.handleDialogClose}>
@@ -93,16 +106,13 @@ export function SettingDialog<T>(props: SettingDialogProps<T>) {
 					disabled={props.commitDisabled}
 					handleClick={() => {
 						if (isFileMode) {
-							saveOnSuccess(
-								() => props.save(fileNameValue),
-								() => props.handleSave(fileNameValue),
-							);
+							saveThen(props.handleSave);
 						} else {
 							props.handleCommit(props.setting as T);
 						}
 					}}
 				/>
-				{props.footerActions?.(fileNameValue)}
+				{isFileMode ? props.footerActions?.(saveThen) : props.footerActions?.()}
 				<WhiteButton title="Close" handleClick={props.handleDialogClose} />
 			</DialogFooter>
 		</FullDialog>

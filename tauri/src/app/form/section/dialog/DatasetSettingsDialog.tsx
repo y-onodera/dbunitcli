@@ -59,7 +59,6 @@ export function DatasetSettingsEditDialog(props: {
 		props.settings,
 	);
 	const datasetSrcInfo = useDatasetSrcInfo();
-	const save = (path: string) => saveSettings(path, dataSettings);
 	return (
 		<SettingDialog
 			title="Dataset Settings"
@@ -67,14 +66,13 @@ export function DatasetSettingsEditDialog(props: {
 			helpLabel="Dataset Settings"
 			handleDialogClose={props.handleDialogClose}
 			fileName={props.fileName}
-			save={save}
+			save={(path) => saveSettings(path, dataSettings)}
 			handleSave={props.handleSave}
-			footerActions={(fileName) =>
+			footerActions={(saveThen) =>
 				// 保存したファイルをsettingに適用してプレビューする（それ以外のsrc要素はフォームのまま）
 				srcTypeOf(datasetSrcInfo) && (
 					<SaveAndPreviewButton
-						path={fileName}
-						save={save}
+						saveThen={saveThen}
 						toSrcInfo={(path) => withValues(datasetSrcInfo, { setting: path })}
 					/>
 				)

@@ -56,7 +56,6 @@ function Dialog(props: SqlEditorDialogProps & { value: string }) {
 	const { jdbcValues, connectionOk } = useJdbcConnectionState();
 
 	const datasetSrcInfo = useDatasetSrcInfo();
-	const save = (path: string) => saveDataSource(path, content);
 
 	const insertToContent = (text: string) => {
 		const textarea = textareaRef.current;
@@ -92,13 +91,12 @@ function Dialog(props: SqlEditorDialogProps & { value: string }) {
 			helpLabel="SQL Editor"
 			handleDialogClose={props.handleDialogClose}
 			fileName={props.fileName}
-			save={save}
+			save={(path) => saveDataSource(path, content)}
 			handleSave={props.handleSave}
-			footerActions={(fileName) => (
+			footerActions={(saveThen) => (
 				// 保存したファイルをsrcにしてプレビューする（settingは適用しない）
 				<SaveAndPreviewButton
-					path={fileName}
-					save={save}
+					saveThen={saveThen}
 					toSrcInfo={(path) =>
 						withValues(withoutSetting(datasetSrcInfo), {
 							srcType: props.type,
