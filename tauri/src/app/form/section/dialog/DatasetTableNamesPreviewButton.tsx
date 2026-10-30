@@ -5,6 +5,7 @@ import {
 	DialogFooter,
 	DialogTitle,
 	FullDialog,
+	type SaveThen,
 	StatusMessage,
 	Td,
 	Th,
@@ -54,6 +55,31 @@ function withPreviewSetting(
 	setting: string,
 ): DatasetSrcInfo {
 	return setting === "" ? withoutSetting(info) : withValues(info, { setting });
+}
+
+// SettingDialogのfooterActionsに置き、編集中の内容を保存できたらtoSrcInfo(保存先)で読み込まれるテーブル一覧をプレビューする（編集ダイアログは開いたまま）
+export function SaveAndPreviewButton({
+	saveThen,
+	toSrcInfo,
+}: {
+	saveThen: SaveThen;
+	toSrcInfo: (savedPath: string) => DatasetSrcInfo;
+}) {
+	const [savedPath, setSavedPath] = useState<string | null>(null);
+	return (
+		<>
+			<BlueButton
+				title="Save and Preview"
+				handleClick={() => saveThen(setSavedPath)}
+			/>
+			{savedPath !== null && (
+				<DatasetTableNamesPreviewDialog
+					datasetSrcInfo={toSrcInfo(savedPath)}
+					handleDialogClose={() => setSavedPath(null)}
+				/>
+			)}
+		</>
+	);
 }
 
 export function DatasetTableNamesPreviewDialog({

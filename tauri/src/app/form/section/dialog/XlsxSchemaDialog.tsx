@@ -14,7 +14,6 @@ import {
 	createRowSetting,
 	XlsxSchema,
 } from "../../../../model/XlsxSchema";
-import { saveOnSuccess } from "../../../../utils/fetchUtils";
 import XlsxCellSettingDialog from "./XlsxCellSettingDialog";
 import XlsxRowSettingDialog from "./XlsxRowSettingDialog";
 
@@ -52,12 +51,8 @@ export function XlsxSchemaEditDialog(props: {
 			helpLabel="Xlsx Schema"
 			handleDialogClose={props.handleDialogClose}
 			fileName={props.fileName}
-			handleSave={(fileName) =>
-				saveOnSuccess(
-					() => saveSchema(fileName, xlsxSchema),
-					() => props.handleSave(fileName),
-				)
-			}
+			save={(fileName) => saveSchema(fileName, xlsxSchema)}
+			handleSave={props.handleSave}
 		>
 			<SettingTable<RowSetting>
 				caption="Rows Mapping Tables"

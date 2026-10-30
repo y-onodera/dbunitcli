@@ -182,10 +182,8 @@ function JdbcSavePropertiesButton({
 				<JdbcSavePropertiesDialog
 					jdbcValues={jdbcValues}
 					handleDialogClose={() => setShowDialog(false)}
-					handleSave={async (name) => {
-						await saveJdbcProperties(name, jdbcValues);
-						setShowDialog(false);
-					}}
+					save={(name) => saveJdbcProperties(name, jdbcValues)}
+					handleSave={() => setShowDialog(false)}
 				/>
 			)}
 		</>

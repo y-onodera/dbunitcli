@@ -12,10 +12,12 @@ import {
 	AddButton,
 	RemoveButton,
 } from "../../../../components/element/ButtonIcon";
+import { useDatasetSrcInfo } from "../../../../context/DatasetSrcInfoProvider";
 import {
 	useDatasetSettingsData,
 	useSaveDatasetSettings,
 } from "../../../../hooks/useDatasetSettings";
+import { srcTypeOf, withValues } from "../../../../model/CommandOption";
 import type {
 	DatasetSetting,
 	ImportSetting,
@@ -25,8 +27,8 @@ import {
 	type DatasetSettings,
 	newDatasetSetting,
 } from "../../../../model/DatasetSettings";
-import { saveOnSuccess } from "../../../../utils/fetchUtils";
 import DatasetSettingDialog from "./DatasetSettingDialog";
+import { SaveAndPreviewButton } from "./DatasetTableNamesPreviewButton";
 
 export default function DatasetSettingsDialog(props: {
 	fileName: string;
@@ -56,6 +58,7 @@ export function DatasetSettingsEditDialog(props: {
 	const [dataSettings, setDataSettings] = useState<DatasetSettings>(
 		props.settings,
 	);
+	const datasetSrcInfo = useDatasetSrcInfo();
 	return (
 		<SettingDialog
 			title="Dataset Settings"
@@ -63,10 +66,15 @@ export function DatasetSettingsEditDialog(props: {
 			helpLabel="Dataset Settings"
 			handleDialogClose={props.handleDialogClose}
 			fileName={props.fileName}
-			handleSave={(fileName) =>
-				saveOnSuccess(
-					() => saveSettings(fileName, dataSettings),
-					() => props.handleSave(fileName),
+			save={(path) => saveSettings(path, dataSettings)}
+			handleSave={props.handleSave}
+			footerActions={(saveThen) =>
+				// 保存したファイルをsettingに適用してプレビューする（それ以外のsrc要素はフォームのまま）
+				srcTypeOf(datasetSrcInfo) && (
+					<SaveAndPreviewButton
+						saveThen={saveThen}
+						toSrcInfo={(path) => withValues(datasetSrcInfo, { setting: path })}
+					/>
 				)
 			}
 		>

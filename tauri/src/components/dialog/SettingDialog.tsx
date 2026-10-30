@@ -1,4 +1,5 @@
 import { type ReactNode, useState } from "react";
+import { type OperationResult, saveOnSuccess } from "../../utils/fetchUtils";
 import { BlueButton, WhiteButton } from "../element/Button";
 import {
 	AddButton,
@@ -23,22 +24,30 @@ type CommonProps = {
 	title?: string;
 	helpCommand?: string;
 	helpLabel?: string;
-	// Saveの右に並べる追加ボタン。ファイルモードでは入力中のファイル名を受け取る（設定モードは空文字）
-	footerActions?: (fileName: string) => ReactNode;
 };
+
+// 入力中のファイル名へ保存し、成功したらonSaved(保存先)を呼ぶ
+export type SaveThen = (onSaved: (path: string) => void) => void;
 
 type SettingMode<T> = {
 	setting: T;
 	handleCommit: (newSettings: T) => void;
 	fileName?: never;
+	save?: never;
 	handleSave?: never;
+	// Commitの右に並べる追加ボタン
+	footerActions?: () => ReactNode;
 };
 
 type FileMode = {
 	setting?: never;
 	handleCommit?: never;
 	fileName: string;
+	// 入力中のファイル名へ保存する。成功したときだけhandleSaveを呼ぶ（失敗時はダイアログを開いたまま）
+	save: (path: string) => Promise<OperationResult>;
 	handleSave: (path: string) => void;
+	// Saveの右に並べる追加ボタン。保存が必要ならsaveThenを使う
+	footerActions?: (saveThen: SaveThen) => ReactNode;
 };
 
 export type SettingDialogProps<T> = CommonProps & (SettingMode<T> | FileMode);
@@ -46,6 +55,14 @@ export type SettingDialogProps<T> = CommonProps & (SettingMode<T> | FileMode);
 export function SettingDialog<T>(props: SettingDialogProps<T>) {
 	const [fileNameValue, setFileNameValue] = useState(props.fileName ?? "");
 	const isFileMode = props.fileName !== undefined;
+	const saveThen: SaveThen = (onSaved) => {
+		if (isFileMode) {
+			saveOnSuccess(
+				() => props.save(fileNameValue),
+				() => onSaved(fileNameValue),
+			);
+		}
+	};
 
 	return (
 		<FullDialog onClose={props.handleDialogClose}>
@@ -89,13 +106,13 @@ export function SettingDialog<T>(props: SettingDialogProps<T>) {
 					disabled={props.commitDisabled}
 					handleClick={() => {
 						if (isFileMode) {
-							props.handleSave(fileNameValue);
+							saveThen(props.handleSave);
 						} else {
 							props.handleCommit(props.setting as T);
 						}
 					}}
 				/>
-				{props.footerActions?.(fileNameValue)}
+				{isFileMode ? props.footerActions?.(saveThen) : props.footerActions?.()}
 				<WhiteButton title="Close" handleClick={props.handleDialogClose} />
 			</DialogFooter>
 		</FullDialog>
