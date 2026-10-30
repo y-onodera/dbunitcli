@@ -22,6 +22,7 @@ import {
 } from "../../../../hooks/useDatasetSettings";
 import {
 	type DatasetSrcInfo,
+	srcTypeOf,
 	withoutSetting,
 	withValues,
 } from "../../../../model/CommandOption";
@@ -76,6 +77,40 @@ export function SaveAndPreviewButton({
 				<DatasetTableNamesPreviewDialog
 					datasetSrcInfo={toSrcInfo(savedPath)}
 					handleDialogClose={() => setSavedPath(null)}
+				/>
+			)}
+		</>
+	);
+}
+
+// SettingDialogのfooterActionsに置き、編集中の未保存の設定（inline）だけをsettingなしで適用して読み込まれるテーブル一覧をプレビューする（保存はしない）
+export function InlinePreviewButton({
+	toInline,
+}: {
+	toInline: () => Omit<DatasetSrcInfo, "values">;
+}) {
+	const datasetSrcInfo = useDatasetSrcInfo();
+	const [previewSrcInfo, setPreviewSrcInfo] = useState<DatasetSrcInfo | null>(
+		null,
+	);
+	if (!srcTypeOf(datasetSrcInfo)) {
+		return null;
+	}
+	return (
+		<>
+			<BlueButton
+				title="Preview"
+				handleClick={() =>
+					setPreviewSrcInfo({
+						...withoutSetting(datasetSrcInfo),
+						...toInline(),
+					})
+				}
+			/>
+			{previewSrcInfo !== null && (
+				<DatasetTableNamesPreviewDialog
+					datasetSrcInfo={previewSrcInfo}
+					handleDialogClose={() => setPreviewSrcInfo(null)}
 				/>
 			)}
 		</>

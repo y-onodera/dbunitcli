@@ -1,11 +1,8 @@
 import { useState } from "react";
 import { Arrays, Fieldset, SettingDialog } from "../../../../components/dialog";
 import { type CellSetting, XlsxSchema } from "../../../../model/XlsxSchema";
-import {
-	AddFileInfoCheck,
-	XlsxSettingPreviewButton,
-	XlsxTableFields,
-} from "./XlsxSettingFields";
+import { InlinePreviewButton } from "./DatasetTableNamesPreviewButton";
+import { AddFileInfoCheck, XlsxTableFields } from "./XlsxSettingFields";
 
 export default function XlsxCellSettingDialog(props: {
 	setting: CellSetting;
@@ -23,9 +20,9 @@ export default function XlsxCellSettingDialog(props: {
 			handleDialogClose={props.handleDialogClose}
 			handleCommit={props.handleCommit}
 			footerActions={() => (
-				// 編集中のこの設定1件だけのスキーマで読み込む（保存はしない）
-				<XlsxSettingPreviewButton
-					toSchema={() => new XlsxSchema([], [target])}
+				// 編集中のこの設定1件だけのスキーマで読み込む
+				<InlinePreviewButton
+					toInline={() => ({ inlineXlsxSchema: new XlsxSchema([], [target]) })}
 				/>
 			)}
 		>

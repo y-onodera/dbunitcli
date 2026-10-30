@@ -14,6 +14,7 @@ import io.micronaut.runtime.server.EmbeddedServer;
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
 import io.micronaut.serde.ObjectMapper;
 import jakarta.inject.Inject;
+import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.junit.jupiter.api.AfterEach;
@@ -345,9 +346,7 @@ class DatasetSettingsControllerTest {
         final Map<String, Object> body = this.tableBody("csv", "", "renamed");
         body.put("inlineSetting", Map.of("name", Map.of("any", List.of("big")), "tableName", "renamed"));
 
-        final String response = this.client.toBlocking().retrieve(
-                HttpRequest.POST("dbunit-cli/dataset-setting/table-preview", ObjectMapper.getDefault().writeValueAsString(body)));
-        final DatasetTablePreviewResponseDto actual = ObjectMapper.getDefault().readValue(response, DatasetTablePreviewResponseDto.class);
+        final DatasetTablePreviewResponseDto actual = this.tablePreview(body);
 
         Assertions.assertArrayEquals(new String[]{"key", "value"}, actual.getHeaders());
         Assertions.assertEquals(BIG_ROWS, actual.getTotalRows());
@@ -586,14 +585,17 @@ class DatasetSettingsControllerTest {
              final OutputStream out = Files.newOutputStream(PREVIEW_SRC_DIR.resolve("book.xlsx"))) {
             book.createSheet("big").createRow(0).createCell(0).setCellValue("key");
             final Sheet small = book.createSheet("small");
-            final List<List<String>> rows = List.of(List.of("id", "name"), List.of("1", "a"), List.of("2", "b"));
-            for (int i = 0; i < rows.size(); i++) {
-                final org.apache.poi.ss.usermodel.Row row = small.createRow(i);
-                for (int j = 0; j < rows.get(i).size(); j++) {
-                    row.createCell(j).setCellValue(rows.get(i).get(j));
-                }
-            }
+            this.writeRow(small, 0, "id", "name");
+            this.writeRow(small, 1, "1", "a");
+            this.writeRow(small, 2, "2", "b");
             book.write(out);
+        }
+    }
+
+    private void writeRow(final Sheet sheet, final int rowNum, final String... values) {
+        final Row row = sheet.createRow(rowNum);
+        for (int i = 0; i < values.length; i++) {
+            row.createCell(i).setCellValue(values[i]);
         }
     }
 
@@ -637,8 +639,6 @@ class DatasetSettingsControllerTest {
     }
 
     private DatasetTablePreviewResponseDto tablePreview(final String setting, final String tableName) throws IOException {
-        final String response = this.client.toBlocking().retrieve(
-                HttpRequest.POST("dbunit-cli/dataset-setting/table-preview", this.tableRequestBody(setting, tableName, null)));
-        return ObjectMapper.getDefault().readValue(response, DatasetTablePreviewResponseDto.class);
+        return this.tablePreview(this.tableBody("csv", setting, tableName));
     }
 }

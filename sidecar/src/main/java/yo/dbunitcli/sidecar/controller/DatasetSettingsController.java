@@ -61,6 +61,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
+import java.util.function.UnaryOperator;
 
 @Controller("dataset-setting")
 public class DatasetSettingsController extends AbstractResourceFileController<DatasetRequestDto> {
@@ -253,25 +254,33 @@ public class DatasetSettingsController extends AbstractResourceFileController<Da
     private Supplier<ComparableDataSetParam.Builder> toParam(final DatasetTableNamesRequestDto request, final String loadData) throws IOException {
         final DataSetLoadDto dto = this.toLoadDto(request.getSrcOptions());
         dto.setLoadData(loadData);
-        final Supplier<ComparableDataSetParam.Builder> param = this.withInlineXlsxSchema(dto, request.getInlineXlsxSchema());
-        if (request.getInlineSetting() == null) {
-            return param;
+        final UnaryOperator<ComparableDataSetParam.Builder> inlineXlsxSchema = this.inlineXlsxSchema(dto, request.getInlineXlsxSchema());
+        final UnaryOperator<ComparableDataSetParam.Builder> inlineSetting = this.inlineSetting(dto, request.getInlineSetting());
+        return () -> inlineSetting.apply(inlineXlsxSchema.apply(new DataSetLoadOption("", dto).getParam()));
+    }
+
+    /**
+     * inlineの設定があれば、settingのファイルの代わりに使う
+     */
+    private UnaryOperator<ComparableDataSetParam.Builder> inlineSetting(final DataSetLoadDto dto, final DatasetSettingDto setting) throws IOException {
+        if (setting == null) {
+            return UnaryOperator.identity();
         }
         dto.setSetting("");
-        final TableSeparators inline = this.inlineTableSeparators(request.getInlineSetting());
-        return () -> param.get().setTableSeparators(inline);
+        final TableSeparators inline = this.inlineTableSeparators(setting);
+        return param -> param.setTableSeparators(inline);
     }
 
     /**
      * inlineのxlsxスキーマがあれば、xlsxSchemaのファイルの代わりに使う
      */
-    private Supplier<ComparableDataSetParam.Builder> withInlineXlsxSchema(final DataSetLoadDto dto, final JsonXlsxSchemaDto schema) throws IOException {
+    private UnaryOperator<ComparableDataSetParam.Builder> inlineXlsxSchema(final DataSetLoadDto dto, final JsonXlsxSchemaDto schema) throws IOException {
         if (schema == null) {
-            return () -> new DataSetLoadOption("", dto).getParam();
+            return UnaryOperator.identity();
         }
         dto.setXlsxSchemaSource("");
         final XlsxSchema inline = new FromJsonXlsxSchemaBuilder().build(JsonMapper.createDefault().writeValueAsString(schema));
-        return () -> new DataSetLoadOption("", dto).getParam().setXlsxSchema(inline);
+        return param -> param.setXlsxSchema(inline);
     }
 
     /**
