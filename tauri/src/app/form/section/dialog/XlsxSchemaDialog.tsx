@@ -4,16 +4,19 @@ import {
 	SettingTable,
 	StatusMessage,
 } from "../../../../components/dialog";
+import { useDatasetSrcInfo } from "../../../../context/DatasetSrcInfoProvider";
 import {
 	useSaveXlsxSchema,
 	useXlsxSchemaData,
 } from "../../../../hooks/useXlsxSchema";
+import { srcTypeOf, withValues } from "../../../../model/CommandOption";
 import type { CellSetting, RowSetting } from "../../../../model/XlsxSchema";
 import {
 	createCellSetting,
 	createRowSetting,
 	XlsxSchema,
 } from "../../../../model/XlsxSchema";
+import { SaveAndPreviewButton } from "./DatasetTableNamesPreviewButton";
 import XlsxCellSettingDialog from "./XlsxCellSettingDialog";
 import XlsxRowSettingDialog from "./XlsxRowSettingDialog";
 
@@ -43,6 +46,7 @@ export function XlsxSchemaEditDialog(props: {
 }) {
 	const saveSchema = useSaveXlsxSchema();
 	const [xlsxSchema, setXlsxSchema] = useState(props.schema);
+	const datasetSrcInfo = useDatasetSrcInfo();
 
 	return (
 		<SettingDialog
@@ -53,6 +57,17 @@ export function XlsxSchemaEditDialog(props: {
 			fileName={props.fileName}
 			save={(fileName) => saveSchema(fileName, xlsxSchema)}
 			handleSave={props.handleSave}
+			footerActions={(saveThen) =>
+				// 保存したファイルをxlsxSchemaに適用してプレビューする（それ以外のsrc要素はフォームのまま）
+				srcTypeOf(datasetSrcInfo) && (
+					<SaveAndPreviewButton
+						saveThen={saveThen}
+						toSrcInfo={(path) =>
+							withValues(datasetSrcInfo, { xlsxSchema: path })
+						}
+					/>
+				)
+			}
 		>
 			<SettingTable<RowSetting>
 				caption="Rows Mapping Tables"
