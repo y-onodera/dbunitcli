@@ -1,8 +1,12 @@
 import { useState } from "react";
 import { Fieldset, SettingDialog, Text } from "../../../../components/dialog";
-import type { RowSetting } from "../../../../model/XlsxSchema";
+import { type RowSetting, XlsxSchema } from "../../../../model/XlsxSchema";
 import { CommaSeparatedText } from "./DialogFields";
-import { AddFileInfoCheck, XlsxTableFields } from "./XlsxSettingFields";
+import {
+	AddFileInfoCheck,
+	XlsxSettingPreviewButton,
+	XlsxTableFields,
+} from "./XlsxSettingFields";
 
 export default function XlsxRowSettingDialog(props: {
 	setting: RowSetting;
@@ -19,6 +23,12 @@ export default function XlsxRowSettingDialog(props: {
 			setting={target}
 			handleDialogClose={props.handleDialogClose}
 			handleCommit={props.handleCommit}
+			footerActions={() => (
+				// 編集中のこの設定1件だけのスキーマで読み込む（保存はしない）
+				<XlsxSettingPreviewButton
+					toSchema={() => new XlsxSchema([target], [])}
+				/>
+			)}
 		>
 			<Fieldset>
 				<XlsxTableFields target={target} setTarget={setTarget} />

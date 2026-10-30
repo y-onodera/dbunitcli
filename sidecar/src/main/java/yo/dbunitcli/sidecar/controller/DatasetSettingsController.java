@@ -23,6 +23,7 @@ import yo.dbunitcli.application.command.GenerateType;
 import yo.dbunitcli.application.command.Type;
 import yo.dbunitcli.application.dto.DataSetLoadDto;
 import yo.dbunitcli.application.json.FromJsonTableSeparatorsBuilder;
+import yo.dbunitcli.application.json.FromJsonXlsxSchemaBuilder;
 import yo.dbunitcli.application.option.DataSetLoadOption;
 import yo.dbunitcli.application.option.ResultOption;
 import yo.dbunitcli.common.Parameter;
@@ -35,6 +36,7 @@ import yo.dbunitcli.dataset.IDataSetConverter;
 import yo.dbunitcli.dataset.TableSeparators;
 import yo.dbunitcli.dataset.producer.ComparableDataSetLoader;
 import yo.dbunitcli.resource.FileResources;
+import yo.dbunitcli.resource.poi.XlsxSchema;
 import yo.dbunitcli.sidecar.domain.project.ResourceFile;
 import yo.dbunitcli.sidecar.domain.project.Workspace;
 import yo.dbunitcli.sidecar.dto.DatasetRequestDto;
@@ -43,6 +45,7 @@ import yo.dbunitcli.sidecar.dto.DatasetTableConvertRequestDto;
 import yo.dbunitcli.sidecar.dto.DatasetTableNamesRequestDto;
 import yo.dbunitcli.sidecar.dto.DatasetTablePreviewRequestDto;
 import yo.dbunitcli.sidecar.dto.DatasetTablePreviewResponseDto;
+import yo.dbunitcli.sidecar.dto.JsonXlsxSchemaDto;
 import yo.dbunitcli.sidecar.job.Interruptible;
 
 import java.io.File;
@@ -250,12 +253,25 @@ public class DatasetSettingsController extends AbstractResourceFileController<Da
     private Supplier<ComparableDataSetParam.Builder> toParam(final DatasetTableNamesRequestDto request, final String loadData) throws IOException {
         final DataSetLoadDto dto = this.toLoadDto(request.getSrcOptions());
         dto.setLoadData(loadData);
+        final Supplier<ComparableDataSetParam.Builder> param = this.withInlineXlsxSchema(dto, request.getInlineXlsxSchema());
         if (request.getInlineSetting() == null) {
-            return () -> new DataSetLoadOption("", dto).getParam();
+            return param;
         }
         dto.setSetting("");
         final TableSeparators inline = this.inlineTableSeparators(request.getInlineSetting());
-        return () -> new DataSetLoadOption("", dto).getParam().setTableSeparators(inline);
+        return () -> param.get().setTableSeparators(inline);
+    }
+
+    /**
+     * inlineのxlsxスキーマがあれば、xlsxSchemaのファイルの代わりに使う
+     */
+    private Supplier<ComparableDataSetParam.Builder> withInlineXlsxSchema(final DataSetLoadDto dto, final JsonXlsxSchemaDto schema) throws IOException {
+        if (schema == null) {
+            return () -> new DataSetLoadOption("", dto).getParam();
+        }
+        dto.setXlsxSchemaSource("");
+        final XlsxSchema inline = new FromJsonXlsxSchemaBuilder().build(JsonMapper.createDefault().writeValueAsString(schema));
+        return () -> new DataSetLoadOption("", dto).getParam().setXlsxSchema(inline);
     }
 
     /**

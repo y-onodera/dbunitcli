@@ -1,7 +1,11 @@
 import { useState } from "react";
 import { Arrays, Fieldset, SettingDialog } from "../../../../components/dialog";
-import type { CellSetting } from "../../../../model/XlsxSchema";
-import { AddFileInfoCheck, XlsxTableFields } from "./XlsxSettingFields";
+import { type CellSetting, XlsxSchema } from "../../../../model/XlsxSchema";
+import {
+	AddFileInfoCheck,
+	XlsxSettingPreviewButton,
+	XlsxTableFields,
+} from "./XlsxSettingFields";
 
 export default function XlsxCellSettingDialog(props: {
 	setting: CellSetting;
@@ -18,6 +22,12 @@ export default function XlsxCellSettingDialog(props: {
 			setting={target}
 			handleDialogClose={props.handleDialogClose}
 			handleCommit={props.handleCommit}
+			footerActions={() => (
+				// 編集中のこの設定1件だけのスキーマで読み込む（保存はしない）
+				<XlsxSettingPreviewButton
+					toSchema={() => new XlsxSchema([], [target])}
+				/>
+			)}
 		>
 			<Fieldset>
 				<XlsxTableFields target={target} setTarget={setTarget} />

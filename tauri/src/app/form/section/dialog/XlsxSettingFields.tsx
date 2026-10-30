@@ -1,7 +1,15 @@
-import type { Dispatch, SetStateAction } from "react";
+import { type Dispatch, type SetStateAction, useState } from "react";
 import { Check, Text } from "../../../../components/dialog";
+import { BlueButton } from "../../../../components/element/Button";
 import { useDatasetSrcInfo } from "../../../../context/DatasetSrcInfoProvider";
 import { useSrcInfoSheets } from "../../../../hooks/useXlsxSchema";
+import {
+	type DatasetSrcInfo,
+	srcTypeOf,
+	withoutSetting,
+} from "../../../../model/CommandOption";
+import type { XlsxSchema } from "../../../../model/XlsxSchema";
+import { DatasetTableNamesPreviewDialog } from "./DatasetTableNamesPreviewButton";
 import { CommaSeparatedText, TextWithDatalist } from "./DialogFields";
 
 // RowSetting・CellSettingが共通で持つ項目
@@ -65,5 +73,39 @@ export function AddFileInfoCheck<T extends XlsxCommonSetting<T>>({
 				setTarget((cur) => cur.with({ addFileInfo: checked }))
 			}
 		/>
+	);
+}
+
+// SettingDialogのfooterActionsに置き、編集中の設定1件だけのスキーマで読み込まれるテーブルをプレビューする（保存はしない）
+export function XlsxSettingPreviewButton({
+	toSchema,
+}: {
+	toSchema: () => XlsxSchema;
+}) {
+	const datasetSrcInfo = useDatasetSrcInfo();
+	const [previewSrcInfo, setPreviewSrcInfo] = useState<DatasetSrcInfo | null>(
+		null,
+	);
+	if (!srcTypeOf(datasetSrcInfo)) {
+		return null;
+	}
+	return (
+		<>
+			<BlueButton
+				title="Preview"
+				handleClick={() =>
+					setPreviewSrcInfo({
+						...withoutSetting(datasetSrcInfo),
+						inlineXlsxSchema: toSchema(),
+					})
+				}
+			/>
+			{previewSrcInfo !== null && (
+				<DatasetTableNamesPreviewDialog
+					datasetSrcInfo={previewSrcInfo}
+					handleDialogClose={() => setPreviewSrcInfo(null)}
+				/>
+			)}
+		</>
 	);
 }

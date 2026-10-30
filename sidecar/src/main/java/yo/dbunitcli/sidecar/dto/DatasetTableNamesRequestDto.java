@@ -19,6 +19,11 @@ public class DatasetTableNamesRequestDto {
      */
     private DatasetSettingDto inlineSetting;
 
+    /**
+     * 未保存のxlsxスキーマ。指定時はxlsxSchemaより優先し、このスキーマの対象のシート・テーブルだけを読み込む（xlsxスキーマの設定ダイアログのプレビュー用）
+     */
+    private JsonXlsxSchemaDto inlineXlsxSchema;
+
     public Map<String, String> getParameters() {
         return this.parameters;
     }
@@ -41,5 +46,13 @@ public class DatasetTableNamesRequestDto {
 
     public void setInlineSetting(final DatasetSettingDto inlineSetting) {
         this.inlineSetting = inlineSetting;
+    }
+
+    public JsonXlsxSchemaDto getInlineXlsxSchema() {
+        return this.inlineXlsxSchema;
+    }
+
+    public void setInlineXlsxSchema(final JsonXlsxSchemaDto inlineXlsxSchema) {
+        this.inlineXlsxSchema = inlineXlsxSchema;
     }
 }
