@@ -5,6 +5,7 @@ import {
 	Arrays,
 	DialogField,
 	Fieldset,
+	isDuplicated,
 	KeyValues,
 	Select,
 	SettingTable,
@@ -203,7 +204,7 @@ export function FilterOrderFields({
 		setTarget((cur) => {
 			const values = cur[field.name];
 			const [first, ...rest] = selected.filter(
-				(column) => !values.some((v, i) => i !== index && v === column),
+				(column) => !isDuplicated(values, column, index),
 			);
 			if (first === undefined) {
 				return cur;

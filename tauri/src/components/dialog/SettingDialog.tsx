@@ -220,7 +220,11 @@ export function Select(props: {
 const NEW_ITEM = "new item";
 
 // index以外の行に同じ値があるか
-function isDuplicated(values: string[], text: string, index: number): boolean {
+export function isDuplicated(
+	values: string[],
+	text: string,
+	index: number,
+): boolean {
 	return values.some((v, i) => i !== index && v === text);
 }
 
@@ -390,7 +394,7 @@ export function KeyValues(props: {
 					<div className="col-start-2">
 						<AddButton
 							handleClick={() =>
-								props.handleChange(entries.length, { "new item": "" })
+								props.handleChange(entries.length, { [NEW_ITEM]: "" })
 							}
 						/>
 					</div>
