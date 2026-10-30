@@ -166,6 +166,15 @@
       },
       "value": "UTF-8"
     },
+    "settingTargetOnly": {
+      "name": "settingTargetOnly",
+      "attribute": {
+        "type": "FLG",
+        "required": false,
+        "defaultPath": "WORKSPACE"
+      },
+      "value": "false"
+    },
     "regTableInclude": {
       "name": "regTableInclude",
       "attribute": {

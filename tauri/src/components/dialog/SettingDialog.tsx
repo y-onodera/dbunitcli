@@ -23,6 +23,8 @@ type CommonProps = {
 	title?: string;
 	helpCommand?: string;
 	helpLabel?: string;
+	// Saveの右に並べる追加ボタン。ファイルモードでは入力中のファイル名を受け取る（設定モードは空文字）
+	footerActions?: (fileName: string) => ReactNode;
 };
 
 type SettingMode<T> = {
@@ -30,7 +32,6 @@ type SettingMode<T> = {
 	handleCommit: (newSettings: T) => void;
 	fileName?: never;
 	handleSave?: never;
-	footerActions?: never;
 };
 
 type FileMode = {
@@ -38,8 +39,6 @@ type FileMode = {
 	handleCommit?: never;
 	fileName: string;
 	handleSave: (path: string) => void;
-	// Saveの右に並べる追加ボタン。入力中のファイル名を受け取る
-	footerActions?: (fileName: string) => ReactNode;
 };
 
 export type SettingDialogProps<T> = CommonProps & (SettingMode<T> | FileMode);

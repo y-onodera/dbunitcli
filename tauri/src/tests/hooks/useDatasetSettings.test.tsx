@@ -85,27 +85,14 @@ vi.mock("../../utils/fetchUtils", () => ({
 }));
 
 const srcInfo: DatasetSrcInfo = {
-	srcPath: "data/src",
-	srcType: "csv",
-	setting: "",
-	settingEncoding: "",
-	encoding: "UTF-8",
-	regInclude: "",
-	regExclude: "",
-	recursive: "false",
-	extension: "",
-	regTableInclude: "",
-	regTableExclude: "",
-	xlsxSchema: "",
-	fixedLength: "",
-	fixedLengthType: "",
-	regHeaderSplit: "",
-	regDataSplit: "",
-	delimiter: ",",
-	ignoreQuoted: false,
-	headerName: "",
-	startRow: "",
-	addFileInfo: false,
+	values: {
+		src: "data/src",
+		srcType: "csv",
+		setting: "",
+		encoding: "UTF-8",
+		recursive: "false",
+		regTableInclude: "",
+	},
 };
 
 describe("DatasetSettingsProviderのテスト", () => {
@@ -162,8 +149,11 @@ describe("DatasetSettingsProviderのテスト", () => {
 
 		// 入力は毎レンダー同一参照にする（新規オブジェクトだとeffectが再発火し続ける）
 		it.each<[string, DatasetSrcInfo]>([
-			["srcPathが空", { ...srcInfo, srcPath: "" }],
-			["JDBC未接続のsqlソース", { ...srcInfo, srcType: "sql" }],
+			["srcが空", { values: { ...srcInfo.values, src: "" } }],
+			[
+				"JDBC未接続のsqlソース",
+				{ values: { ...srcInfo.values, srcType: "sql" } },
+			],
 		])("%sのときは取得せず空配列を返すことを確認", async (_, info) => {
 			const { result, rerender } = renderHook(
 				() => useSrcInfoColumnNames(info),
@@ -176,7 +166,7 @@ describe("DatasetSettingsProviderのテスト", () => {
 			expect(callsTo("/dataset-setting/table-names")).toHaveLength(0);
 		});
 
-		it("srcPath・srcType以外の項目が変わっても再取得されることを確認", async () => {
+		it("src・srcType以外の項目が変わっても再取得されることを確認", async () => {
 			const { rerender } = renderHook(
 				(info: DatasetSrcInfo) => useSrcInfoColumnNames(info),
 				{ wrapper: envWrapper, initialProps: srcInfo },
@@ -184,13 +174,13 @@ describe("DatasetSettingsProviderのテスト", () => {
 			await waitFor(() => {
 				expect(callsTo("/dataset-setting/table-names")).toHaveLength(1);
 			});
-			rerender({ ...srcInfo, regTableInclude: "^t1$" });
+			rerender({ values: { ...srcInfo.values, regTableInclude: "^t1$" } });
 			await waitFor(() => {
 				expect(callsTo("/dataset-setting/table-names")).toHaveLength(2);
 			});
 			const [lastParams] = callsTo("/dataset-setting/table-names")[1];
 			expect(JSON.parse(String(lastParams.options.body))).toMatchObject({
-				regTableInclude: "^t1$",
+				srcOptions: { regTableInclude: "^t1$" },
 			});
 		});
 	});
@@ -213,8 +203,7 @@ describe("DatasetSettingsProviderのテスト", () => {
 				p.endpoint.includes("/dataset-setting/table-convert"),
 			)[0];
 			expect(JSON.parse(String(params.options.body))).toMatchObject({
-				src: "data/src",
-				srcType: "csv",
+				srcOptions: { src: "data/src", srcType: "csv" },
 				tableName: "t1",
 				result: { "-result.resultType": "csv" },
 			});

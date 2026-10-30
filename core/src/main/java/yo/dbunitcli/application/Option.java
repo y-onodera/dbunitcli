@@ -62,6 +62,18 @@ public interface Option {
                 + this.optionLabel(key1) + " | " + this.optionLabel(key2) + ")"));
     }
 
+    /**
+     * フラグがtrueのときに必須の項目。違反はフラグと必須の項目の両方に付ける
+     */
+    default List<Violation> validateRequiredByFlag(final String flagKey, final String flagValue
+            , final String requiredKey, final String requiredValue) {
+        if (!Boolean.parseBoolean(flagValue) || Strings.isNotEmpty(requiredValue)) {
+            return List.of();
+        }
+        return List.of(new Violation(List.of(this.optionName(flagKey), this.optionName(requiredKey))
+                , "Error: " + this.optionLabel(flagKey) + "=true requires " + this.optionLabel(requiredKey)));
+    }
+
     default List<Violation> validateOneOf(final String key, final String value, final Collection<String> candidates) {
         if (Strings.isEmpty(value) || candidates.contains(value)) {
             return List.of();

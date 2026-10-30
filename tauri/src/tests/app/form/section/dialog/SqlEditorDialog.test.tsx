@@ -23,9 +23,12 @@ vi.mock("../../../../../hooks/useDatasetSettings", () => ({
 }));
 vi.mock("../../../../../context/DatasetSrcInfoProvider", () => ({
 	useDatasetSrcInfo: () => ({
-		srcType: "sql",
-		srcPath: "old.sql",
-		setting: "setting.json",
+		values: {
+			srcType: "sql",
+			src: "old.sql",
+			setting: "setting.json",
+			settingTargetOnly: "true",
+		},
 	}),
 }));
 vi.mock("../../../../../context/JdbcConnectionProvider", () => ({
@@ -55,13 +58,14 @@ describe("SqlEditorDialogのテスト", () => {
 			expect(screen.getByText("Table List Preview")).toBeInTheDocument();
 		});
 		expect(mockSave).toHaveBeenCalledWith("query.sql", "select 1");
-		expect(mockTableNames).toHaveBeenLastCalledWith(
-			expect.objectContaining({
+		expect(mockTableNames).toHaveBeenLastCalledWith({
+			values: {
 				srcType: "sql",
-				srcPath: "query.sql",
+				src: "query.sql",
 				setting: "",
-			}),
-		);
+				settingTargetOnly: "true",
+			},
+		});
 		expect(screen.getByText("result")).toBeInTheDocument();
 		// 編集ダイアログは開いたまま（保存後に閉じるhandleSaveは呼ばない）
 		expect(handleSave).not.toHaveBeenCalled();

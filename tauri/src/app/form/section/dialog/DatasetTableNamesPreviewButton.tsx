@@ -19,7 +19,11 @@ import {
 	useDatasetTableNames,
 	useDatasetTablePreview,
 } from "../../../../hooks/useDatasetSettings";
-import type { DatasetSrcInfo } from "../../../../model/CommandOption";
+import {
+	type DatasetSrcInfo,
+	withoutSetting,
+	withValues,
+} from "../../../../model/CommandOption";
 import TableConvertDialog from "./TableConvertDialog";
 
 export default function DatasetTableNamesPreviewButton({
@@ -27,7 +31,7 @@ export default function DatasetTableNamesPreviewButton({
 	setting,
 }: {
 	title: string;
-	setting?: string;
+	setting: string;
 }) {
 	const [showDialog, setShowDialog] = useState(false);
 	const datasetSrcInfo = useDatasetSrcInfo();
@@ -36,16 +40,20 @@ export default function DatasetTableNamesPreviewButton({
 			<BlueButton title={title} handleClick={() => setShowDialog(true)} />
 			{showDialog && (
 				<DatasetTableNamesPreviewDialog
-					datasetSrcInfo={
-						setting !== undefined
-							? { ...datasetSrcInfo, setting }
-							: datasetSrcInfo
-					}
+					datasetSrcInfo={withPreviewSetting(datasetSrcInfo, setting)}
 					handleDialogClose={() => setShowDialog(false)}
 				/>
 			)}
 		</>
 	);
+}
+
+// settingが空ならsettingを適用せず、指定があればそのファイルを適用して読む（それ以外のsrc要素はフォームのまま）
+function withPreviewSetting(
+	info: DatasetSrcInfo,
+	setting: string,
+): DatasetSrcInfo {
+	return setting === "" ? withoutSetting(info) : withValues(info, { setting });
 }
 
 export function DatasetTableNamesPreviewDialog({

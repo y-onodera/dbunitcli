@@ -2,7 +2,11 @@ import { useEffect, useState } from "react";
 import { useEnvironment } from "../context/EnvironmentProvider";
 import { useJdbcConnectionState } from "../context/JdbcConnectionProvider";
 import { useParamInputs } from "../context/ParameterInputProvider";
-import type { DatasetSrcInfo } from "../model/CommandOption";
+import {
+	type DatasetSrcInfo,
+	srcTypeOf,
+	withAllTables,
+} from "../model/CommandOption";
 import {
 	DatasetSettings,
 	type DatasetSettingsBuilder,
@@ -17,47 +21,26 @@ import type { FormValues } from "../utils/formValues";
 import { appendLogLines } from "./useJobLog";
 import { useUpdateResourceFiles } from "./useResourceFiles";
 
+// jdbcは接続テストに成功した値を優先する
 function buildDatasetRequestBody(
 	info: DatasetSrcInfo,
 	jdbcValues: Record<string, string>,
 	extra?: Record<string, unknown>,
 ): string {
 	return JSON.stringify({
-		setting: info.setting ?? "",
-		srcType: info.srcType,
-		src: info.srcPath,
-		regTableInclude: info.regTableInclude,
-		regTableExclude: info.regTableExclude,
-		recursive: info.recursive === "true",
-		regInclude: info.regInclude,
-		regExclude: info.regExclude,
-		extension: info.extension,
-		xlsxSchema: info.xlsxSchema,
-		fixedLength: info.fixedLength,
-		fixedLengthType: info.fixedLengthType,
-		regHeaderSplit: info.regHeaderSplit,
-		regDataSplit: info.regDataSplit,
-		encoding: info.encoding,
-		settingEncoding: info.settingEncoding,
-		delimiter: info.delimiter,
-		ignoreQuoted: info.ignoreQuoted,
-		headerName: info.headerName,
-		startRow: info.startRow,
-		addFileInfo: info.addFileInfo,
-		jdbcUrl: jdbcValues.jdbcUrl ?? "",
-		jdbcUser: jdbcValues.jdbcUser ?? "",
-		jdbcPass: jdbcValues.jdbcPass ?? "",
-		jdbcProperties: jdbcValues.jdbcProperties ?? "",
+		srcOptions: { ...info.values, ...jdbcValues },
+		inlineSetting: info.inlineSetting,
 		...extra,
 	});
 }
 
 // ソース未指定・none・JDBC未接続のsqlではsidecarへ問い合わせない
 function isSrcReady(info: DatasetSrcInfo, connectionOk: boolean): boolean {
-	if (!info.srcPath || !info.srcType || info.srcType === "none") {
+	const srcType = srcTypeOf(info);
+	if (!info.values.src || !srcType || srcType === "none") {
 		return false;
 	}
-	return info.srcType !== "sql" || connectionOk;
+	return srcType !== "sql" || connectionOk;
 }
 
 async function fetchTableNames(
@@ -68,7 +51,7 @@ async function fetchTableNames(
 	signal?: AbortSignal,
 	onLog?: (line: string) => void,
 ): Promise<string[]> {
-	if (!info.srcPath) {
+	if (!info.values.src) {
 		return [];
 	}
 	const fetchParams = {
@@ -152,7 +135,7 @@ async function fetchTablePreview(
 	signal?: AbortSignal,
 	onLog?: (line: string) => void,
 ): Promise<TablePreview> {
-	if (!info.srcPath || !tableName) {
+	if (!info.values.src || !tableName) {
 		return EMPTY_PREVIEW;
 	}
 	const fetchParams = {
@@ -314,13 +297,15 @@ export const useSrcInfoColumnNames = (srcInfo: DatasetSrcInfo): string[] => {
 	return columnNames;
 };
 
+// 入力候補なので、settingの対象外のテーブルのカラムも含める
 async function loadAllColumnNames(
 	apiUrl: string,
-	info: DatasetSrcInfo,
+	srcInfo: DatasetSrcInfo,
 	jdbcValues: Record<string, string>,
 	paramInputs: Record<string, string>,
 	signal: AbortSignal,
 ): Promise<string[]> {
+	const info = withAllTables(srcInfo);
 	const tableNames = await fetchTableNames(
 		apiUrl,
 		info,
@@ -366,9 +351,10 @@ export const useColumnNamesFetcher = () => {
 		if (signal.aborted) {
 			return [];
 		}
+		// 入力候補なので、settingの対象外のテーブルでも取得する
 		const preview = await fetchTablePreview(
 			apiUrl,
-			srcInfo,
+			withAllTables(srcInfo),
 			tableName,
 			jdbcValues,
 			paramInputs,

@@ -13,6 +13,7 @@ import {
 	useResourceContent,
 	useSaveResourceContent,
 } from "../../../../hooks/useResourceFiles";
+import { withoutSetting, withValues } from "../../../../model/CommandOption";
 import type { QueryDatasourceType } from "../../../../model/QueryDatasource";
 import { saveOnSuccess } from "../../../../utils/fetchUtils";
 import { insertAtCursor } from "../../../../utils/textInsert";
@@ -140,12 +141,10 @@ function Dialog(props: SqlEditorDialogProps & { value: string }) {
 			)}
 			{previewPath !== null && (
 				<DatasetTableNamesPreviewDialog
-					datasetSrcInfo={{
-						...datasetSrcInfo,
+					datasetSrcInfo={withValues(withoutSetting(datasetSrcInfo), {
 						srcType: props.type,
-						srcPath: previewPath,
-						setting: "",
-					}}
+						src: previewPath,
+					})}
 					handleDialogClose={() => setPreviewPath(null)}
 				/>
 			)}

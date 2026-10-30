@@ -2,6 +2,7 @@ import type { Dispatch, SetStateAction } from "react";
 import { InlineActions } from "../../../../components/dialog";
 import { useDatasetSrcInfo } from "../../../../context/DatasetSrcInfoProvider";
 import { useResourcesSettings } from "../../../../context/WorkspaceResourcesProvider";
+import { srcTypeOf } from "../../../../model/CommandOption";
 import { DatasetSettingGenerateButton } from "../dialog/DatasetSettingGenerateDialog";
 import DatasetSettingsDialog from "../dialog/DatasetSettingsDialog";
 import DatasetTableNamesPreviewButton from "../dialog/DatasetTableNamesPreviewButton";
@@ -32,7 +33,7 @@ export default function DatasetSettingText({
 			showDefaulePath={true}
 			handleValueChange={handleValueChange}
 			afterContent={({ path }) =>
-				datasetSrcInfo.srcType && !hideDatasetSettingEdit ? (
+				srcTypeOf(datasetSrcInfo) && !hideDatasetSettingEdit ? (
 					<InlineActions>
 						<DatasetTableNamesPreviewButton
 							title="Preview Before Settings"

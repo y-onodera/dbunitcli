@@ -48,9 +48,21 @@
     <tr><th>項目</th><th>説明</th></tr>
     <tr><td>setting</td><td>テーブルごとの主キー・並び順・フィルタなどを書いた設定ファイル（<a href="../dialogs/dataset-settings.html">Dataset Settings</a>）</td></tr>
     <tr><td>settingEncoding</td><td><code>setting</code> の文字コード</td></tr>
+    <tr><td>settingTargetOnly</td><td>ON にすると、<code>setting</code> の対象のテーブルだけを読み込む。デフォルトは OFF</td></tr>
   </table>
+  <p>settingTargetOnly を ON にしたときの対象は次のとおりです。対象外のテーブルは読み込まず、出力もしません。</p>
+  <ul>
+    <li><code>settings</code> の name / pattern に該当するテーブル（name / pattern の無い設定は全テーブルが対象）</li>
+    <li>join の left / right のテーブル（出力は join した結果だけ）</li>
+    <li>中身のある <code>commonSettings</code> の対象のテーブル。name / pattern の無い <code>commonSettings</code> があれば全テーブルが対象</li>
+  </ul>
+  <p>テーブル名は設定を適用した後の名前で出力します。settingTargetOnly を ON にするときは <code>setting</code> も指定してください。<code>setting</code> が空のまま実行すると、settingTargetOnly と <code>setting</code> の両方に入力エラーが表示されます。</p>
   <p><code>setting</code> の横の編集ボタンから、テーブルごとの設定を画面で編集できます（<a href="../dialogs/dataset-setting.html">Dataset Setting</a>）。generate ボタンからは、既存のデータセットのテーブル・カラム構成をもとに雛型を作れます（<a href="../dialogs/dataset-setting-generate.html">Dataset Setting Generate</a>）。</p>
   <p>Preview Before Settings（設定を適用する前）と Preview Apply Settings（<code>setting</code> を適用した後）では、読み込まれるテーブルの一覧を確認できます。一覧の preview ボタンを押すと、そのテーブルのデータを表示します。</p>
+  <ul>
+    <li>どちらもフォームに入力中の値（src・traversal・data load・srcType ごとの項目など）で読み込みます。</li>
+    <li>Preview Apply Settings は settingTargetOnly も反映します。Preview Before Settings は <code>setting</code> を適用しないため、settingTargetOnly も無視します。</li>
+  </ul>
   <ul>
     <li>読み込むのは選んだテーブルだけのため、テーブルが多いデータセットでも早く表示されます。ただし、<code>setting</code> で join したテーブルは、元のテーブルもすべて読み込みます</li>
     <li>表示するのは先頭 100 行までです。全体の行数が多いときは、表の上に「Showing first 100 of 全行数 rows (partial preview)」と表示されます</li>

@@ -65,7 +65,12 @@ vi.mock("../../../../../utils/fetchUtils", async (importOriginal) => {
 
 async function openPreview() {
 	const user = userEvent.setup();
-	render(<DatasetTableNamesPreviewButton title="Preview Before Settings" />);
+	render(
+		<DatasetTableNamesPreviewButton
+			title="Preview Before Settings"
+			setting=""
+		/>,
+	);
 	await user.click(
 		screen.getByRole("button", { name: "Preview Before Settings" }),
 	);
@@ -123,7 +128,9 @@ describe("DatasetTableNamesPreviewButtonのテスト", () => {
 		expect(await screen.findByText("Export completed.")).toBeInTheDocument();
 		expect(mockConvert).toHaveBeenCalledTimes(1);
 		const [srcInfo, tableName, result] = mockConvert.mock.calls[0];
-		expect(srcInfo).toEqual({});
+		expect(srcInfo).toEqual({
+			values: { setting: "" },
+		});
 		expect(tableName).toBe("big");
 		expect(result).toHaveProperty("-result.resultType");
 

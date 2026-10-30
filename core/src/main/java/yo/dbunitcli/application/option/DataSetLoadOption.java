@@ -20,6 +20,7 @@ public record DataSetLoadOption(
         , String src
         , String setting
         , String settingEncoding
+        , String settingTargetOnly
         , String regTableInclude
         , String regTableExclude
         , String loadData
@@ -47,6 +48,7 @@ public record DataSetLoadOption(
                 , Strings.isNotEmpty(dto.getSettingEncoding())
                         ? dto.getSettingEncoding()
                         : Charset.defaultCharset().displayName()
+                , Strings.isNotEmpty(dto.getSettingTargetOnly()) ? dto.getSettingTargetOnly() : "false"
                 , dto.getRegTableInclude()
                 , dto.getRegTableExclude()
                 , Strings.isNotEmpty(dto.getLoadData()) ? dto.getLoadData() : "true"
@@ -72,6 +74,7 @@ public record DataSetLoadOption(
                 .putAll(this.dataSetParam.toParameters())
                 .putFile("-setting", this.setting, BaseDir.SETTING)
                 .put("-settingEncoding", this.settingEncoding)
+                .putFlag("-settingTargetOnly", this.settingTargetOnly)
                 .put("-regTableInclude", this.regTableInclude)
                 .put("-regTableExclude", this.regTableExclude)
                 .putFlag("-loadData", this.loadData)
@@ -89,6 +92,8 @@ public record DataSetLoadOption(
         return Option.concat(this.validateFileExists("-src", this.src, this.srcBaseDir())
                 , this.validateFilesExist("-setting", this.setting, BaseDir.SETTING)
                 , this.validateEncoding("-settingEncoding", this.settingEncoding)
+                , this.validateBoolean("-settingTargetOnly", this.settingTargetOnly)
+                , this.validateRequiredByFlag("-settingTargetOnly", this.settingTargetOnly, "-setting", this.setting)
                 , this.validatePattern("-regTableInclude", this.regTableInclude)
                 , this.validatePattern("-regTableExclude", this.regTableExclude)
                 , this.validateBoolean("-loadData", this.loadData)
@@ -129,12 +134,21 @@ public record DataSetLoadOption(
         }
     }
 
+    /**
+     * -settingTargetOnly=trueなら設定の対象のテーブルだけを読み込む。
+     * settingが無ければ絞らない（コマンド実行時はvalidateで弾くため、ここに来るのはプレビュー等でsettingを外して読む場合）
+     */
     public TableSeparators getTableSeparators() {
         try {
-            return new FromJsonTableSeparatorsBuilder(this.settingEncoding).build(this.setting);
+            final TableSeparators result = new FromJsonTableSeparatorsBuilder(this.settingEncoding).build(this.setting);
+            return this.isSettingTargetOnly() && Strings.isNotEmpty(this.setting) ? result.onlySettingTargets() : result;
         } catch (final IOException e) {
             throw new AssertionError(e);
         }
+    }
+
+    private boolean isSettingTargetOnly() {
+        return Boolean.parseBoolean(this.settingTargetOnly);
     }
 
     public String getSetting() {

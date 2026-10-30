@@ -246,6 +246,76 @@ class DatasetSettingsControllerTest {
     }
 
     @Test
+    void testTableNames_inlineSettingはsettingより優先し対象のテーブルだけを適用後の名前で返す() throws IOException {
+        this.createPreviewSrc();
+
+        Assertions.assertEquals(List.of("renamed"), this.inlineTableNames(this.writeJoinSetting(),
+                Map.of("name", Map.of("any", List.of("big")), "tableName", "renamed")));
+    }
+
+    @Test
+    void testTableNames_inlineSettingは変換の無い設定でも対象のテーブルを返す() throws IOException {
+        this.createPreviewSrc();
+
+        Assertions.assertEquals(List.of("small"), this.inlineTableNames("",
+                Map.of("name", Map.of("any", List.of("small")), "keys", List.of("key"))));
+    }
+
+    @Test
+    void testTableNames_inlineSettingのjoinは結合結果だけを返す() throws IOException {
+        this.createPreviewSrc();
+
+        Assertions.assertEquals(List.of("joined"), this.inlineTableNames("",
+                Map.of("innerJoin", Map.of("left", "big", "right", "small", "column", List.of("key")), "tableName", "joined")));
+    }
+
+    @Test
+    void testTableNames_inlineSettingに一致するテーブルが無ければ空を返す() throws IOException {
+        this.createPreviewSrc();
+
+        Assertions.assertEquals(List.of(), this.inlineTableNames("",
+                Map.of("name", Map.of("any", List.of("nothing")), "tableName", "renamed")));
+    }
+
+    @Test
+    void testTableNames_settingTargetOnlyならsettingの対象のテーブルだけを返す() throws IOException {
+        this.createPreviewSrc();
+
+        Assertions.assertEquals(List.of("renamed"), this.tableNames(
+                this.tableBody("csv", this.writeRenameSetting(), "", Map.of("settingTargetOnly", "true"))));
+    }
+
+    @Test
+    void testTableNames_settingTargetOnlyでもsettingが無ければ絞らない() throws IOException {
+        this.createPreviewSrc();
+
+        Assertions.assertEquals(List.of("big", "small"), this.tableNames(
+                this.tableBody("csv", "", "", Map.of("settingTargetOnly", "true"))));
+    }
+
+    @Test
+    void testTableNames_settingTargetOnlyでなければsettingの対象外のテーブルも返す() throws IOException {
+        this.createPreviewSrc();
+
+        Assertions.assertEquals(List.of("renamed", "small"), this.tableNames(
+                this.tableBody("csv", this.writeRenameSetting(), "", Map.of("settingTargetOnly", "false"))));
+    }
+
+    @Test
+    void testTablePreview_inlineSettingで変えたテーブル名で読み込む() throws IOException {
+        this.createPreviewSrc();
+        final Map<String, Object> body = this.tableBody("csv", "", "renamed");
+        body.put("inlineSetting", Map.of("name", Map.of("any", List.of("big")), "tableName", "renamed"));
+
+        final String response = this.client.toBlocking().retrieve(
+                HttpRequest.POST("dbunit-cli/dataset-setting/table-preview", ObjectMapper.getDefault().writeValueAsString(body)));
+        final DatasetTablePreviewResponseDto actual = ObjectMapper.getDefault().readValue(response, DatasetTablePreviewResponseDto.class);
+
+        Assertions.assertArrayEquals(new String[]{"key", "value"}, actual.getHeaders());
+        Assertions.assertEquals(BIG_ROWS, actual.getTotalRows());
+    }
+
+    @Test
     void testTablePreview_存在しないテーブルは空を返す() throws IOException {
         this.createPreviewSrc();
 
@@ -382,16 +452,28 @@ class DatasetSettingsControllerTest {
 
     private String tableRequestBody(final String srcType, final String setting, final String tableName,
                                     final Map<String, String> result) throws IOException {
-        final Map<String, Object> body = new LinkedHashMap<>();
-        body.put("setting", setting);
-        body.put("srcType", srcType);
-        body.put("src", PREVIEW_SRC_DIR.toAbsolutePath().toString());
-        body.put("encoding", "UTF-8");
-        body.put("tableName", tableName);
+        final Map<String, Object> body = this.tableBody(srcType, setting, tableName);
         if (result != null) {
             body.put("result", result);
         }
         return ObjectMapper.getDefault().writeValueAsString(body);
+    }
+
+    private Map<String, Object> tableBody(final String srcType, final String setting, final String tableName) {
+        return this.tableBody(srcType, setting, tableName, Map.of());
+    }
+
+    private Map<String, Object> tableBody(final String srcType, final String setting, final String tableName,
+                                          final Map<String, String> otherSrcOptions) {
+        final Map<String, String> srcOptions = new LinkedHashMap<>(otherSrcOptions);
+        srcOptions.put("setting", setting);
+        srcOptions.put("srcType", srcType);
+        srcOptions.put("src", PREVIEW_SRC_DIR.toAbsolutePath().toString());
+        srcOptions.put("encoding", "UTF-8");
+        final Map<String, Object> body = new LinkedHashMap<>();
+        body.put("srcOptions", srcOptions);
+        body.put("tableName", tableName);
+        return body;
     }
 
     /**
@@ -455,6 +537,21 @@ class DatasetSettingsControllerTest {
         }
         Files.writeString(PREVIEW_SRC_DIR.resolve("big.csv"), big.toString());
         Files.writeString(PREVIEW_SRC_DIR.resolve("small.csv"), "key,other\n1,a\n2,b\n3,c\n");
+    }
+
+    private List<String> inlineTableNames(final String setting, final Map<String, Object> inlineSetting) throws IOException {
+        final Map<String, Object> body = this.tableBody("csv", setting, "");
+        body.put("inlineSetting", inlineSetting);
+        return this.tableNames(body);
+    }
+
+    /**
+     * table-namesの結果（名前順）
+     */
+    private List<String> tableNames(final Map<String, Object> body) throws IOException {
+        final String response = this.client.toBlocking().retrieve(
+                HttpRequest.POST("dbunit-cli/dataset-setting/table-names", ObjectMapper.getDefault().writeValueAsString(body)));
+        return List.of(ObjectMapper.getDefault().readValue(response, String[].class)).stream().sorted().toList();
     }
 
     private DatasetTablePreviewResponseDto tablePreview(final String setting, final String tableName) throws IOException {

@@ -4,7 +4,10 @@ import io.micronaut.http.MediaType;
 import io.micronaut.http.annotation.Body;
 import io.micronaut.http.annotation.Controller;
 import io.micronaut.http.annotation.Post;
+import io.micronaut.json.JsonMapper;
 import io.micronaut.serde.ObjectMapper;
+import jakarta.json.Json;
+import jakarta.json.JsonReader;
 import org.dbunit.dataset.Column;
 import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.ITableMetaData;
@@ -15,9 +18,11 @@ import yo.dbunitcli.application.CommandParameters;
 import yo.dbunitcli.application.Option;
 import yo.dbunitcli.application.OptionValidationException;
 import yo.dbunitcli.application.command.Convert;
+import yo.dbunitcli.application.command.ConvertOption;
 import yo.dbunitcli.application.command.GenerateType;
 import yo.dbunitcli.application.command.Type;
 import yo.dbunitcli.application.dto.DataSetLoadDto;
+import yo.dbunitcli.application.json.FromJsonTableSeparatorsBuilder;
 import yo.dbunitcli.application.option.DataSetLoadOption;
 import yo.dbunitcli.application.option.ResultOption;
 import yo.dbunitcli.common.Parameter;
@@ -26,7 +31,6 @@ import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.dataset.ComparableDataSetProducer;
 import yo.dbunitcli.dataset.ComparableTable;
 import yo.dbunitcli.dataset.ComparableTableJoin;
-import yo.dbunitcli.dataset.DataSourceType;
 import yo.dbunitcli.dataset.IDataSetConverter;
 import yo.dbunitcli.dataset.TableSeparators;
 import yo.dbunitcli.dataset.producer.ComparableDataSetLoader;
@@ -34,6 +38,7 @@ import yo.dbunitcli.resource.FileResources;
 import yo.dbunitcli.sidecar.domain.project.ResourceFile;
 import yo.dbunitcli.sidecar.domain.project.Workspace;
 import yo.dbunitcli.sidecar.dto.DatasetRequestDto;
+import yo.dbunitcli.sidecar.dto.DatasetSettingDto;
 import yo.dbunitcli.sidecar.dto.DatasetTableConvertRequestDto;
 import yo.dbunitcli.sidecar.dto.DatasetTableNamesRequestDto;
 import yo.dbunitcli.sidecar.dto.DatasetTablePreviewRequestDto;
@@ -42,13 +47,17 @@ import yo.dbunitcli.sidecar.job.Interruptible;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.StringReader;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Supplier;
 
 @Controller("dataset-setting")
 public class DatasetSettingsController extends AbstractResourceFileController<DatasetRequestDto> {
@@ -90,7 +99,7 @@ public class DatasetSettingsController extends AbstractResourceFileController<Da
     public String tableNames(@Body final DatasetTableNamesRequestDto request) {
         try {
             return ObjectMapper.getDefault().writeValueAsString(
-                    new ComparableDataSetLoader(this.buildParameter(request)).loadDataSet(this.toParam(request, "false").build())
+                    new ComparableDataSetLoader(this.buildParameter(request)).loadDataSet(this.toParam(request, "false").get().build())
                                                                              .getTableNames());
         } catch (final Throwable th) {
             LOGGER.warn("Could not get table names", th);
@@ -106,9 +115,10 @@ public class DatasetSettingsController extends AbstractResourceFileController<Da
     @Post(uri = "table-preview", produces = MediaType.APPLICATION_JSON)
     public String tablePreview(@Body final DatasetTablePreviewRequestDto request) {
         try {
-            final TableSeparators separators = this.toParam(request, "true").getTableSeparators();
+            final Supplier<ComparableDataSetParam.Builder> params = this.toParam(request, "true");
+            final TableSeparators separators = params.get().getTableSeparators();
             for (final Narrow narrow : Narrow.attempts(separators)) {
-                final Optional<DatasetTablePreviewResponseDto> preview = this.loadPreview(request, narrow, separators);
+                final Optional<DatasetTablePreviewResponseDto> preview = this.loadPreview(request, params.get(), narrow, separators);
                 if (preview.isPresent()) {
                     return ObjectMapper.getDefault().writeValueAsString(preview.get());
                 }
@@ -145,7 +155,7 @@ public class DatasetSettingsController extends AbstractResourceFileController<Da
             if (!violations.isEmpty()) {
                 throw new OptionValidationException(violations);
             }
-            final ComparableDataSetParam.Builder param = this.toParam(request, "true");
+            final ComparableDataSetParam.Builder param = this.toParam(request, "true").get();
             final TableSeparators separators = param.getTableSeparators();
             Narrow.singlePass(separators).applyTo(param, separators, tableName);
             FileResources.runInContext(() -> {
@@ -167,10 +177,10 @@ public class DatasetSettingsController extends AbstractResourceFileController<Da
      * 対象テーブルが読み込まれなければemptyを返す
      */
     private Optional<DatasetTablePreviewResponseDto> loadPreview(final DatasetTablePreviewRequestDto request,
+                                                                 final ComparableDataSetParam.Builder param,
                                                                  final Narrow narrow,
                                                                  final TableSeparators separators) throws Exception {
         final String tableName = request.getTableName();
-        final ComparableDataSetParam.Builder param = this.toParam(request, "true");
         narrow.applyTo(param, separators, tableName);
         final PreviewCollector collector = new PreviewCollector();
         try (final ComparableDataSetProducer producer = new ComparableDataSetLoader(this.buildParameter(request))
@@ -234,34 +244,42 @@ public class DatasetSettingsController extends AbstractResourceFileController<Da
         return Parameter.none().addAll(params);
     }
 
-    private ComparableDataSetParam.Builder toParam(final DatasetTableNamesRequestDto request, final String loadData) {
-        final DataSetLoadDto dto = new DataSetLoadDto();
-        dto.setSrc(request.getSrc());
-        dto.setSrcType(DataSourceType.valueOf(request.getSrcType()));
-        dto.setRegTableInclude(request.getRegTableInclude());
-        dto.setRegTableExclude(request.getRegTableExclude());
-        dto.setRecursive(String.valueOf(request.isRecursive()));
-        dto.setRegInclude(request.getRegInclude());
-        dto.setRegExclude(request.getRegExclude());
-        dto.setExtension(request.getExtension());
+    /**
+     * フォームの解釈とinline設定の読込はリクエストごとに1回だけ行い、読み直すたびに新しい読込パラメータを作る
+     */
+    private Supplier<ComparableDataSetParam.Builder> toParam(final DatasetTableNamesRequestDto request, final String loadData) throws IOException {
+        final DataSetLoadDto dto = this.toLoadDto(request.getSrcOptions());
         dto.setLoadData(loadData);
-        dto.setXlsxSchemaSource(request.getXlsxSchema());
-        dto.setFixedLength(request.getFixedLength());
-        dto.setRegHeaderSplit(request.getRegHeaderSplit());
-        dto.setRegDataSplit(request.getRegDataSplit());
-        dto.setEncoding(request.getEncoding());
-        dto.setDelimiter(request.getDelimiter());
-        dto.setIgnoreQuoted(request.isIgnoreQuoted());
-        dto.setHeaderName(request.getHeaderName());
-        dto.setStartRow(request.getStartRow());
-        dto.setAddFileInfo(request.isAddFileInfo());
-        dto.getJdbc().setJdbcUrl(request.getJdbcUrl());
-        dto.getJdbc().setJdbcUser(request.getJdbcUser());
-        dto.getJdbc().setJdbcPass(request.getJdbcPass());
-        dto.getJdbc().setJdbcProperties(request.getJdbcProperties());
-        dto.setSetting(request.getSetting());
-        dto.setSettingEncoding(request.getSettingEncoding());
-        return new DataSetLoadOption("", dto).getParam();
+        if (request.getInlineSetting() == null) {
+            return () -> new DataSetLoadOption("", dto).getParam();
+        }
+        dto.setSetting("");
+        final TableSeparators inline = this.inlineTableSeparators(request.getInlineSetting());
+        return () -> new DataSetLoadOption("", dto).getParam().setTableSeparators(inline);
+    }
+
+    /**
+     * フォームの値をコマンド実行時と同じく-src.&lt;オプション名&gt;の引数として解釈する（ファイルパスの解決も同じ）
+     */
+    private DataSetLoadDto toLoadDto(final Map<String, String> srcOptions) {
+        final Map<String, String> args = new LinkedHashMap<>();
+        Optional.ofNullable(srcOptions).orElse(Map.of()).forEach((key, value) -> args.put("-src." + key, value));
+        return ConvertOption.toDto(AbstractCommandController.resolveSidecarFilePaths(
+                new CommandParameters(Type.convert, args)).args()).getSrcData();
+    }
+
+    /**
+     * 保存時と同じ形式のJSONにして、settingsにこの1件だけを持つ設定として読む。
+     * 設定の対象外のテーブルは読み込まず、設定を適用した結果だけを返す
+     */
+    private TableSeparators inlineTableSeparators(final DatasetSettingDto setting) throws IOException {
+        final String json = "{\"settings\":[" + JsonMapper.createDefault().writeValueAsString(setting) + "]}";
+        try (final JsonReader reader = Json.createReader(new StringReader(json))) {
+            return new FromJsonTableSeparatorsBuilder(StandardCharsets.UTF_8.name())
+                    .configureSetting(reader.readObject())
+                    .build()
+                    .onlySettingTargets();
+        }
     }
 
     /**

@@ -13,6 +13,7 @@ public record TableSeparators(List<TableSeparator> settings
         , List<TableSeparator> commonSettings
         , List<ComparableTableJoinCondition> joinConditions
         , TableMetaDataFilter filter
+        , TableMetaDataFilter sourceFilter
         , TableSeparators next) {
 
     public enum FilterCombine {
@@ -30,11 +31,26 @@ public record TableSeparators(List<TableSeparator> settings
                 , new ArrayList<>(builder.getCommonSettings())
                 , new ArrayList<>(builder.getJoinConditions())
                 , builder.getFilter()
+                , builder.getSourceFilter()
                 , builder.getNext());
     }
 
     public TableSeparators filter(TableMetaDataFilter filter) {
         return this.builder().setFilter(filter).build();
+    }
+
+    /**
+     * settingsの対象（name/pattern）、joinの対象（left/right）、中身のあるcommonSettingsの対象のソーステーブルだけを読み込む。
+     * 対象外のテーブルは出力しないため、設定を適用した結果だけを確認できる。設定が無ければ何も読み込まない
+     */
+    public TableSeparators onlySettingTargets() {
+        final TableMetaDataFilter settingTargets = Stream.concat(this.settings.stream()
+                                                                 , this.commonSettings.stream().filter(TableSeparator::hasSettings))
+                                                         .map(TableSeparator::sourceFilter)
+                                                         .reduce(new AlwaysFilter(false), TableMetaDataFilter::or);
+        final List<ComparableTableJoinCondition> joins = this.joinConditions;
+        final TableMetaDataFilter joinTargets = tableName -> joins.stream().anyMatch(it -> it.hasRelation(tableName));
+        return this.builder().addSourceFilter(settingTargets.or(joinTargets)).build();
     }
 
     public TableSeparators then(final TableSeparators next) {
@@ -96,7 +112,8 @@ public record TableSeparators(List<TableSeparator> settings
      * （出力テーブル名が読込前に決まり、出力の絞り込み（outputFilter）がある）
      */
     public boolean canExcludeBeforeRead() {
-        return this.isIndependentTables() && this.chain().anyMatch(it -> !Builder.isUnset(it.filter()));
+        return this.isIndependentTables()
+                && this.chain().anyMatch(it -> !Builder.isUnset(it.filter()) || !Builder.isUnset(it.sourceFilter()));
     }
 
     /**
@@ -123,6 +140,9 @@ public record TableSeparators(List<TableSeparator> settings
     }
 
     public Stream<AddSettingTableMetaData> getAddSettingTableMetaData(final ITableMetaData metaData) {
+        if (!this.sourceFilter.test(metaData)) {
+            return Stream.empty();
+        }
         return this.chainNext(this.addNewNameSetting(this.addSettings(metaData), metaData.getTableName()));
     }
 
@@ -184,12 +204,14 @@ public record TableSeparators(List<TableSeparator> settings
         private TableSeparators next = TableSeparators.NONE;
         private List<TableSeparator> commonSettings = new ArrayList<>();
         private TableMetaDataFilter filter = new AlwaysFilter(true);
+        private TableMetaDataFilter sourceFilter = new AlwaysFilter(true);
 
         public Builder add(final TableSeparators tableSeparators) {
             this.settings.addAll(tableSeparators.settings());
             this.commonSettings.addAll(tableSeparators.commonSettings());
             this.joinConditions.addAll(tableSeparators.joinConditions());
             this.filter = this.combine(this.filter, tableSeparators.filter(), FilterCombine.AND);
+            this.sourceFilter = this.combine(this.sourceFilter, tableSeparators.sourceFilter(), FilterCombine.AND);
             this.next = this.next.then(tableSeparators.next());
             return this;
         }
@@ -227,6 +249,18 @@ public record TableSeparators(List<TableSeparator> settings
 
         public TableMetaDataFilter getFilter() {
             return this.filter;
+        }
+
+        /**
+         * 読み込むソーステーブルの絞り込み（設定を適用する前のテーブルで判定する）
+         */
+        public Builder addSourceFilter(final TableMetaDataFilter other) {
+            this.sourceFilter = this.combine(this.sourceFilter, other, FilterCombine.AND);
+            return this;
+        }
+
+        public TableMetaDataFilter getSourceFilter() {
+            return this.sourceFilter;
         }
 
         public Builder setFilter(TableMetaDataFilter filter) {

@@ -8,10 +8,9 @@ import {
 import type {
 	CommandOption,
 	DatasetSource,
-	DatasetSrcInfo,
 	SrcType,
 } from "../../../model/CommandOption";
-import { buildDatasetSrcInfo } from "../../../model/CommandOption";
+import { buildDatasetSrcInfo, withValues } from "../../../model/CommandOption";
 import DataLoadFormSection from "./DataLoadFormSection";
 import Select from "./element/Select";
 import SettingFormSection from "./SettingFormSection";
@@ -36,24 +35,11 @@ function DatasetLoadFormContent({
 	const datasetSrcInfo = useDatasetSrcInfo();
 	const setDatasetSrcInfo = useSetDatasetSrcInfo();
 
-	const handleToggleChecked =
-		(element: CommandOption) => (checked: boolean) => {
-			if (element.name in datasetSrcInfo) {
-				setDatasetSrcInfo({
-					...datasetSrcInfo,
-					[element.name]: checked,
-				} as DatasetSrcInfo);
-			}
-		};
-	const handleValueChange = (element: CommandOption) => (newValue: string) => {
-		const key = element.name === "src" ? "srcPath" : element.name;
-		if (key in datasetSrcInfo) {
-			setDatasetSrcInfo({
-				...datasetSrcInfo,
-				[key]: newValue,
-			} as DatasetSrcInfo);
-		}
-	};
+	// src要素の値はすべてそのままsidecarへ渡すため、項目を選ばずに反映する
+	const handleValueChange = (element: CommandOption) => (newValue: string) =>
+		setDatasetSrcInfo(withValues(datasetSrcInfo, { [element.name]: newValue }));
+	const handleToggleChecked = (element: CommandOption) => (checked: boolean) =>
+		handleValueChange(element)(String(checked));
 	const jdbcOption = srcData.jdbcProperties ? srcData : undefined;
 	const templateOption = srcData.templateGroup ? srcData : undefined;
 	return (

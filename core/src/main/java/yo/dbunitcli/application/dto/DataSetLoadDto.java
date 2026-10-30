@@ -15,6 +15,8 @@ public class DataSetLoadDto implements CompositeDto {
     private String setting;
     @CommandLine.Option(names = "-settingEncoding", description = "settings encoding")
     private String settingEncoding;
+    @CommandLine.Option(names = "-settingTargetOnly", description = "default false. if true, load only tables targeted by setting")
+    private String settingTargetOnly;
     @CommandLine.Option(names = "-loadData", description = "if false data row didn't load")
     private String loadData;
     @CommandLine.Option(names = "-includeMetaData", description = "whether param include tableName and columns or not ")
@@ -102,6 +104,14 @@ public class DataSetLoadDto implements CompositeDto {
 
     public void setLoadData(final String loadData) {
         this.loadData = loadData;
+    }
+
+    public String getSettingTargetOnly() {
+        return this.settingTargetOnly;
+    }
+
+    public void setSettingTargetOnly(final String settingTargetOnly) {
+        this.settingTargetOnly = settingTargetOnly;
     }
 
     public String getIncludeMetaData() {

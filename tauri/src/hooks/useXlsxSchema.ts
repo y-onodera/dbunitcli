@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useEnvironment } from "../context/EnvironmentProvider";
-import type { SrcInfo } from "../model/CommandOption";
+import type { DatasetSrcInfo } from "../model/CommandOption";
 import { XlsxSchema, type XlsxSchemaBuilder } from "../model/XlsxSchema";
 import {
 	fetchData,
@@ -68,11 +68,21 @@ async function loadXlsxSchema(
 		});
 }
 
+type SheetSrc = {
+	src: string;
+	regTableInclude: string;
+	regTableExclude: string;
+	recursive: string;
+	regInclude: string;
+	regExclude: string;
+	extension: string;
+};
+
 async function fetchSheets(
 	apiUrl: string,
-	srcInfo: SrcInfo,
+	sheetSrc: SheetSrc,
 ): Promise<string[]> {
-	if (!srcInfo.srcPath) {
+	if (!sheetSrc.src) {
 		return [];
 	}
 	const fetchParams = {
@@ -81,13 +91,8 @@ async function fetchSheets(
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
 			body: JSON.stringify({
-				src: srcInfo.srcPath,
-				regTableInclude: srcInfo.regTableInclude,
-				regTableExclude: srcInfo.regTableExclude,
-				recursive: srcInfo.recursive === "true",
-				regInclude: srcInfo.regInclude,
-				regExclude: srcInfo.regExclude,
-				extension: srcInfo.extension,
+				...sheetSrc,
+				recursive: sheetSrc.recursive === "true",
 			}),
 		},
 	};
@@ -96,24 +101,26 @@ async function fetchSheets(
 		.catch(() => []);
 }
 
-export const useSrcInfoSheets = (srcInfo: SrcInfo): string[] => {
+export const useSrcInfoSheets = (srcInfo: DatasetSrcInfo): string[] => {
 	const [sheetNames, setSheetNames] = useState<string[]>([]);
 	const { apiUrl } = useEnvironment();
-	const srcPath = srcInfo.srcPath;
-	const regTableInclude = srcInfo.regTableInclude;
-	const regTableExclude = srcInfo.regTableExclude;
-	const recursive = srcInfo.recursive;
-	const regInclude = srcInfo.regInclude;
-	const regExclude = srcInfo.regExclude;
-	const extension = srcInfo.extension;
+	const {
+		src = "",
+		regTableInclude = "",
+		regTableExclude = "",
+		recursive = "",
+		regInclude = "",
+		regExclude = "",
+		extension = "",
+	} = srcInfo.values;
 
 	useEffect(() => {
-		if (!srcPath) {
+		if (!src) {
 			return;
 		}
 		const controller = new AbortController();
 		fetchSheets(apiUrl, {
-			srcPath,
+			src,
 			regTableInclude,
 			regTableExclude,
 			recursive,
@@ -130,7 +137,7 @@ export const useSrcInfoSheets = (srcInfo: SrcInfo): string[] => {
 		};
 	}, [
 		apiUrl,
-		srcPath,
+		src,
 		regTableInclude,
 		regTableExclude,
 		recursive,

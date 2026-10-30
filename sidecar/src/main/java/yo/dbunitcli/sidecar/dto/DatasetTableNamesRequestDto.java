@@ -9,38 +9,15 @@ public class DatasetTableNamesRequestDto {
 
     private Map<String, String> parameters;
 
-    private String srcType;
-    private String src;
+    /**
+     * データセット読込フォームの値（srcType・src・setting等のオプション名→値）。-src.&lt;オプション名&gt;として解釈する
+     */
+    private Map<String, String> srcOptions;
 
-    private String regTableInclude;
-    private String regTableExclude;
-    private boolean recursive;
-    private String regInclude;
-    private String regExclude;
-    private String extension;
-
-    private String xlsxSchema;
-
-    private String fixedLength;
-
-    private String regHeaderSplit;
-    private String regDataSplit;
-
-    private String encoding;
-    private String delimiter;
-    private boolean ignoreQuoted;
-
-    private String headerName;
-    private String startRow;
-    private boolean addFileInfo;
-
-    private String setting;
-    private String settingEncoding;
-
-    private String jdbcUrl;
-    private String jdbcUser;
-    private String jdbcPass;
-    private String jdbcProperties;
+    /**
+     * 未保存の設定1件。指定時はsettingより優先し、この設定の対象のテーブルだけをこの設定を適用して読み込む（設定ダイアログのプレビュー用）
+     */
+    private DatasetSettingDto inlineSetting;
 
     public Map<String, String> getParameters() {
         return this.parameters;
@@ -50,195 +27,19 @@ public class DatasetTableNamesRequestDto {
         this.parameters = parameters;
     }
 
-    public String getSetting() {
-        return this.setting;
+    public Map<String, String> getSrcOptions() {
+        return this.srcOptions;
     }
 
-    public void setSetting(final String setting) {
-        this.setting = setting;
+    public void setSrcOptions(final Map<String, String> srcOptions) {
+        this.srcOptions = srcOptions;
     }
 
-    public String getSrcType() {
-        return this.srcType;
+    public DatasetSettingDto getInlineSetting() {
+        return this.inlineSetting;
     }
 
-    public void setSrcType(final String srcType) {
-        this.srcType = srcType;
-    }
-
-    public String getSrc() {
-        return this.src;
-    }
-
-    public void setSrc(final String src) {
-        this.src = src;
-    }
-
-    public String getRegTableInclude() {
-        return this.regTableInclude;
-    }
-
-    public void setRegTableInclude(final String regTableInclude) {
-        this.regTableInclude = regTableInclude;
-    }
-
-    public String getRegTableExclude() {
-        return this.regTableExclude;
-    }
-
-    public void setRegTableExclude(final String regTableExclude) {
-        this.regTableExclude = regTableExclude;
-    }
-
-    public boolean isRecursive() {
-        return this.recursive;
-    }
-
-    public void setRecursive(final boolean recursive) {
-        this.recursive = recursive;
-    }
-
-    public String getRegInclude() {
-        return this.regInclude;
-    }
-
-    public void setRegInclude(final String regInclude) {
-        this.regInclude = regInclude;
-    }
-
-    public String getRegExclude() {
-        return this.regExclude;
-    }
-
-    public void setRegExclude(final String regExclude) {
-        this.regExclude = regExclude;
-    }
-
-    public String getExtension() {
-        return this.extension;
-    }
-
-    public void setExtension(final String extension) {
-        this.extension = extension;
-    }
-
-    public String getXlsxSchema() {
-        return this.xlsxSchema;
-    }
-
-    public void setXlsxSchema(final String xlsxSchema) {
-        this.xlsxSchema = xlsxSchema;
-    }
-
-    public String getFixedLength() {
-        return this.fixedLength;
-    }
-
-    public void setFixedLength(final String fixedLength) {
-        this.fixedLength = fixedLength;
-    }
-
-    public String getRegHeaderSplit() {
-        return this.regHeaderSplit;
-    }
-
-    public void setRegHeaderSplit(final String regHeaderSplit) {
-        this.regHeaderSplit = regHeaderSplit;
-    }
-
-    public String getRegDataSplit() {
-        return this.regDataSplit;
-    }
-
-    public void setRegDataSplit(final String regDataSplit) {
-        this.regDataSplit = regDataSplit;
-    }
-
-    public String getEncoding() {
-        return this.encoding;
-    }
-
-    public void setEncoding(final String encoding) {
-        this.encoding = encoding;
-    }
-
-    public String getDelimiter() {
-        return this.delimiter;
-    }
-
-    public void setDelimiter(final String delimiter) {
-        this.delimiter = delimiter;
-    }
-
-    public boolean isIgnoreQuoted() {
-        return this.ignoreQuoted;
-    }
-
-    public void setIgnoreQuoted(final boolean ignoreQuoted) {
-        this.ignoreQuoted = ignoreQuoted;
-    }
-
-    public String getHeaderName() {
-        return this.headerName;
-    }
-
-    public void setHeaderName(final String headerName) {
-        this.headerName = headerName;
-    }
-
-    public String getStartRow() {
-        return this.startRow;
-    }
-
-    public void setStartRow(final String startRow) {
-        this.startRow = startRow;
-    }
-
-    public boolean isAddFileInfo() {
-        return this.addFileInfo;
-    }
-
-    public void setAddFileInfo(final boolean addFileInfo) {
-        this.addFileInfo = addFileInfo;
-    }
-
-    public String getJdbcUrl() {
-        return this.jdbcUrl;
-    }
-
-    public void setJdbcUrl(final String jdbcUrl) {
-        this.jdbcUrl = jdbcUrl;
-    }
-
-    public String getJdbcUser() {
-        return this.jdbcUser;
-    }
-
-    public void setJdbcUser(final String jdbcUser) {
-        this.jdbcUser = jdbcUser;
-    }
-
-    public String getJdbcPass() {
-        return this.jdbcPass;
-    }
-
-    public void setJdbcPass(final String jdbcPass) {
-        this.jdbcPass = jdbcPass;
-    }
-
-    public String getJdbcProperties() {
-        return this.jdbcProperties;
-    }
-
-    public void setJdbcProperties(final String jdbcProperties) {
-        this.jdbcProperties = jdbcProperties;
-    }
-
-    public String getSettingEncoding() {
-        return this.settingEncoding;
-    }
-
-    public void setSettingEncoding(final String settingEncoding) {
-        this.settingEncoding = settingEncoding;
+    public void setInlineSetting(final DatasetSettingDto inlineSetting) {
+        this.inlineSetting = inlineSetting;
     }
 }
