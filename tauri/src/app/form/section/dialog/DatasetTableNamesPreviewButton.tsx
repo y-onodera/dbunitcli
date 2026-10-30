@@ -24,6 +24,10 @@ import {
 	withoutSetting,
 	withValues,
 } from "../../../../model/CommandOption";
+import {
+	type OperationResult,
+	saveOnSuccess,
+} from "../../../../utils/fetchUtils";
 import TableConvertDialog from "./TableConvertDialog";
 
 export default function DatasetTableNamesPreviewButton({
@@ -54,6 +58,38 @@ function withPreviewSetting(
 	setting: string,
 ): DatasetSrcInfo {
 	return setting === "" ? withoutSetting(info) : withValues(info, { setting });
+}
+
+// 編集中の内容をpathへ保存し、保存できたらtoSrcInfo(path)で読み込まれるテーブル一覧をプレビューする（編集ダイアログは開いたまま）
+export function SaveAndPreviewButton({
+	path,
+	save,
+	toSrcInfo,
+}: {
+	path: string;
+	save: (path: string) => Promise<OperationResult>;
+	toSrcInfo: (savedPath: string) => DatasetSrcInfo;
+}) {
+	const [savedPath, setSavedPath] = useState<string | null>(null);
+	return (
+		<>
+			<BlueButton
+				title="Save and Preview"
+				handleClick={() =>
+					saveOnSuccess(
+						() => save(path),
+						() => setSavedPath(path),
+					)
+				}
+			/>
+			{savedPath !== null && (
+				<DatasetTableNamesPreviewDialog
+					datasetSrcInfo={toSrcInfo(savedPath)}
+					handleDialogClose={() => setSavedPath(null)}
+				/>
+			)}
+		</>
+	);
 }
 
 export function DatasetTableNamesPreviewDialog({

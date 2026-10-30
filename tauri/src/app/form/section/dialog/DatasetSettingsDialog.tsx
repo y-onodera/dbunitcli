@@ -8,7 +8,6 @@ import {
 	StatusMessage,
 	Text,
 } from "../../../../components/dialog";
-import { BlueButton } from "../../../../components/element/Button";
 import {
 	AddButton,
 	RemoveButton,
@@ -30,7 +29,7 @@ import {
 } from "../../../../model/DatasetSettings";
 import { saveOnSuccess } from "../../../../utils/fetchUtils";
 import DatasetSettingDialog from "./DatasetSettingDialog";
-import { DatasetTableNamesPreviewDialog } from "./DatasetTableNamesPreviewButton";
+import { SaveAndPreviewButton } from "./DatasetTableNamesPreviewButton";
 
 export default function DatasetSettingsDialog(props: {
 	fileName: string;
@@ -61,12 +60,7 @@ export function DatasetSettingsEditDialog(props: {
 		props.settings,
 	);
 	const datasetSrcInfo = useDatasetSrcInfo();
-	const [previewPath, setPreviewPath] = useState<string | null>(null);
-	const saveThen = (onSaved: (path: string) => void) => (path: string) =>
-		saveOnSuccess(
-			() => saveSettings(path, dataSettings),
-			() => onSaved(path),
-		);
+	const save = (path: string) => saveSettings(path, dataSettings);
 	return (
 		<SettingDialog
 			title="Dataset Settings"
@@ -74,13 +68,19 @@ export function DatasetSettingsEditDialog(props: {
 			helpLabel="Dataset Settings"
 			handleDialogClose={props.handleDialogClose}
 			fileName={props.fileName}
-			handleSave={saveThen(props.handleSave)}
+			handleSave={(fileName) =>
+				saveOnSuccess(
+					() => save(fileName),
+					() => props.handleSave(fileName),
+				)
+			}
 			footerActions={(fileName) =>
-				// 保存したファイルをsettingに適用してテーブル一覧をプレビューする（それ以外のsrc要素はフォームのまま）。編集ダイアログは開いたまま
+				// 保存したファイルをsettingに適用してプレビューする（それ以外のsrc要素はフォームのまま）
 				srcTypeOf(datasetSrcInfo) && (
-					<BlueButton
-						title="Save and Preview"
-						handleClick={() => saveThen(setPreviewPath)(fileName)}
+					<SaveAndPreviewButton
+						path={fileName}
+						save={save}
+						toSrcInfo={(path) => withValues(datasetSrcInfo, { setting: path })}
 					/>
 				)
 			}
@@ -121,12 +121,6 @@ export function DatasetSettingsEditDialog(props: {
 					setDataSettings((cur) => cur.replaceImports(imports))
 				}
 			/>
-			{previewPath !== null && (
-				<DatasetTableNamesPreviewDialog
-					datasetSrcInfo={withValues(datasetSrcInfo, { setting: previewPath })}
-					handleDialogClose={() => setPreviewPath(null)}
-				/>
-			)}
 		</SettingDialog>
 	);
 }
