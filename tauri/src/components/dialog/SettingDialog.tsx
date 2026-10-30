@@ -217,8 +217,6 @@ export function Select(props: {
 	);
 }
 
-const NEW_ITEM = "new item";
-
 // index以外の行に同じ値があるか
 export function isDuplicated(
 	values: string[],
@@ -238,9 +236,10 @@ export function Arrays(props: {
 	list?: string;
 	handleSelect?: (index: number) => void;
 }) {
+	// Addで出す空行は値が確定するまで画面だけに持つ（モデルは空の値を保持しないため）
+	const [adding, setAdding] = useState(false);
 	const lastValue = props.values[props.values.length - 1];
-	// 末尾が空、または追加済みの未編集行があるときは追加させない（同じ値の行を増やさない）
-	const canAdd = !!lastValue && !props.values.includes(NEW_ITEM);
+	const canAdd = !!lastValue && !adding;
 	return (
 		<>
 			{props.values.length === 0 ? (
@@ -276,14 +275,28 @@ export function Arrays(props: {
 					);
 				})
 			)}
+			{adding && (
+				<ArraysText
+					name={props.name}
+					val={""}
+					index={props.values.length}
+					handleChange={(text, index) => {
+						setAdding(false);
+						props.handleChange(text, index);
+					}}
+					handleRemove={() => setAdding(false)}
+					isDuplicated={(text) =>
+						isDuplicated(props.values, text, props.values.length)
+					}
+					ignoreLabel={props.ignoreLabel}
+					showCaption={props.showCaption}
+					list={props.list}
+				/>
+			)}
 			<div className="grid grid-cols-5 justify-center pb-2">
 				{canAdd && (
 					<div className="col-start-2">
-						<AddButton
-							handleClick={() =>
-								props.handleChange(NEW_ITEM, props.values.length + 1)
-							}
-						/>
+						<AddButton handleClick={() => setAdding(true)} />
 					</div>
 				)}
 			</div>
@@ -362,6 +375,8 @@ export function KeyValues(props: {
 	handleChange: (index: number, value: { [prop: string]: string }) => void;
 	handleRemove: (index: number) => void;
 }) {
+	// Addで出す空行は名前が確定するまで画面だけに持つ
+	const [adding, setAdding] = useState(false);
 	const entries = Object.entries(props.values);
 	return (
 		<>
@@ -389,14 +404,23 @@ export function KeyValues(props: {
 					);
 				})
 			)}
+			{adding && (
+				<KeyValueText
+					propKey={""}
+					name={props.name}
+					value={""}
+					index={entries.length}
+					handleChange={(index, value) => {
+						setAdding(false);
+						props.handleChange(index, value);
+					}}
+					handleRemove={() => setAdding(false)}
+				/>
+			)}
 			<div className="grid grid-cols-5 justify-center pb-2">
-				{entries.length > 0 && (
+				{entries.length > 0 && !adding && (
 					<div className="col-start-2">
-						<AddButton
-							handleClick={() =>
-								props.handleChange(entries.length, { [NEW_ITEM]: "" })
-							}
-						/>
+						<AddButton handleClick={() => setAdding(true)} />
 					</div>
 				)}
 			</div>
