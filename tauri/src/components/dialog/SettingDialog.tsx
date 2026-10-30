@@ -217,6 +217,15 @@ export function Select(props: {
 	);
 }
 
+// index以外の行に同じ値があるか
+export function isDuplicated(
+	values: string[],
+	text: string,
+	index: number,
+): boolean {
+	return values.some((v, i) => i !== index && v === text);
+}
+
 export function Arrays(props: {
 	name: string;
 	values: string[];
@@ -227,47 +236,47 @@ export function Arrays(props: {
 	list?: string;
 	handleSelect?: (index: number) => void;
 }) {
+	// 値が空のときとAdd中は、末尾に画面だけの空行を出す（モデルは空の値を保持しないため）
+	// selectなど外から値が確定して行数が変われば、Add中は自然に終わる
+	const [addingAt, setAddingAt] = useState<number | null>(null);
+	const adding = addingAt === props.values.length;
+	const setAdding = (value: boolean) =>
+		setAddingAt(value ? props.values.length : null);
+	const blankIndex =
+		adding || props.values.length === 0 ? props.values.length : -1;
+	const rows = blankIndex < 0 ? props.values : [...props.values, ""];
+	const lastValue = props.values[props.values.length - 1];
+	const canAdd = !!lastValue && !adding;
 	return (
 		<>
-			{props.values.length === 0 ? (
-				<ArraysText
-					key={0}
-					name={props.name}
-					val={""}
-					index={0}
-					handleChange={props.handleChange}
-					handleRemove={props.handleRemove}
-					ignoreLabel={props.ignoreLabel}
-					showCaption={props.showCaption}
-					list={props.list}
-					handleSelect={props.handleSelect}
-				/>
-			) : (
-				props.values.map((val, index) => {
-					return (
-						<ArraysText
-							key={val ?? index}
-							name={props.name}
-							val={val}
-							index={index}
-							handleChange={props.handleChange}
-							handleRemove={props.handleRemove}
-							ignoreLabel={props.ignoreLabel}
-							showCaption={props.showCaption}
-							list={props.list}
-							handleSelect={props.handleSelect}
-						/>
-					);
-				})
-			)}
-			<div className="grid grid-cols-5 justify-center pb-2">
-				{props.values.length > 0 && props.values[props.values.length - 1] && (
-					<div className="col-start-2">
-						<AddButton
-							handleClick={() =>
-								props.handleChange("new item", props.values.length + 1)
+			{rows.map((val, index) => {
+				const blank = index === blankIndex;
+				return (
+					<ArraysText
+						// biome-ignore lint/suspicious/noArrayIndexKey: 読込んだ設定に同じ値が重複していても一意にし、位置か値が変われば入力中のstateを作り直す
+						key={`${index}:${val}`}
+						name={props.name}
+						val={val}
+						index={index}
+						handleChange={(text, i) => {
+							if (blank) {
+								setAdding(false);
 							}
-						/>
+							props.handleChange(text, i);
+						}}
+						handleRemove={blank ? () => setAdding(false) : props.handleRemove}
+						isDuplicated={(text) => isDuplicated(props.values, text, index)}
+						ignoreLabel={props.ignoreLabel}
+						showCaption={props.showCaption}
+						list={props.list}
+						handleSelect={props.handleSelect}
+					/>
+				);
+			})}
+			<div className="grid grid-cols-5 justify-center pb-2">
+				{canAdd && (
+					<div className="col-start-2">
+						<AddButton handleClick={() => setAdding(true)} />
 					</div>
 				)}
 			</div>
@@ -281,14 +290,21 @@ export function ArraysText(props: {
 	index: number;
 	handleChange: (text: string, index: number) => void;
 	handleRemove: (index: number) => void;
+	isDuplicated?: (text: string) => boolean;
 	ignoreLabel?: boolean;
 	showCaption?: boolean;
 	list?: string;
 	handleSelect?: (index: number) => void;
 }) {
 	const [text, setText] = useState(props.val);
-	const handleBlur = (newVal: React.FocusEvent<HTMLInputElement>) =>
+	// 他の行と同じ値は確定させず、入力前の値に戻す
+	const handleBlur = (newVal: React.FocusEvent<HTMLInputElement>) => {
+		if (props.isDuplicated?.(newVal.target.value)) {
+			setText(props.val);
+			return;
+		}
 		props.handleChange(newVal.target.value, props.index);
+	};
 	const handleRemove = () => props.handleRemove(props.index);
 	const showLabel = !props.ignoreLabel && props.index === 0;
 	return (
@@ -339,41 +355,36 @@ export function KeyValues(props: {
 	handleChange: (index: number, value: { [prop: string]: string }) => void;
 	handleRemove: (index: number) => void;
 }) {
+	// 値が空のときとAdd中は、末尾に画面だけの空行を出す（名前が確定するまでモデルに入れない）
+	const [adding, setAdding] = useState(false);
 	const entries = Object.entries(props.values);
+	const blankIndex = adding || entries.length === 0 ? entries.length : -1;
+	const rows = blankIndex < 0 ? entries : [...entries, ["", ""]];
 	return (
 		<>
-			{entries.length === 0 ? (
-				<KeyValueText
-					propKey={""}
-					name={props.name}
-					value={""}
-					index={0}
-					handleChange={props.handleChange}
-					handleRemove={props.handleRemove}
-				/>
-			) : (
-				entries.map(([key, value], index) => {
-					return (
-						<KeyValueText
-							key={key}
-							propKey={key}
-							name={props.name}
-							value={value.toString()}
-							index={index}
-							handleChange={props.handleChange}
-							handleRemove={props.handleRemove}
-						/>
-					);
-				})
-			)}
-			<div className="grid grid-cols-5 justify-center pb-2">
-				{entries.length > 0 && (
-					<div className="col-start-2">
-						<AddButton
-							handleClick={() =>
-								props.handleChange(entries.length, { "new item": "" })
+			{rows.map(([key, value], index) => {
+				const blank = index === blankIndex;
+				return (
+					<KeyValueText
+						key={key}
+						propKey={key}
+						name={props.name}
+						value={value.toString()}
+						index={index}
+						handleChange={(i, newValue) => {
+							if (blank) {
+								setAdding(false);
 							}
-						/>
+							props.handleChange(i, newValue);
+						}}
+						handleRemove={blank ? () => setAdding(false) : props.handleRemove}
+					/>
+				);
+			})}
+			<div className="grid grid-cols-5 justify-center pb-2">
+				{entries.length > 0 && !adding && (
+					<div className="col-start-2">
+						<AddButton handleClick={() => setAdding(true)} />
 					</div>
 				)}
 			</div>

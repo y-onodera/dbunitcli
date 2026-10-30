@@ -24,6 +24,7 @@ export {
 	ArraysText,
 	Check,
 	Fieldset,
+	isDuplicated,
 	KeyValues,
 	KeyValueText,
 	Select,
