@@ -3,40 +3,31 @@ import userEvent from "@testing-library/user-event";
 import { useState } from "react";
 import { describe, expect, it } from "vitest";
 import { KeyValues } from "../../../components/dialog";
+import { DatasetSetting } from "../../../model/DatasetSettings";
 
 function KeyValuesHarness({ initial }: { initial: { [k: string]: string } }) {
-	const [values, setValues] = useState(initial);
+	const [target, setTarget] = useState(new DatasetSetting({ string: initial }));
 	return (
 		<KeyValues
 			name="string"
-			values={values}
+			values={target.string}
 			handleChange={(index, value) =>
-				setValues((cur) => {
-					const entries = Object.entries(cur);
-					const next = entries.flatMap(([k, v], i) =>
-						i === index ? Object.entries(value) : [[k, v]],
-					);
-					return Object.fromEntries(
-						index >= entries.length
-							? [...next, ...Object.entries(value)]
-							: next,
-					);
-				})
+				setTarget((cur) => cur.replaceString(index, value))
 			}
-			handleRemove={(index) =>
-				setValues((cur) =>
-					Object.fromEntries(Object.entries(cur).filter((_, i) => i !== index)),
-				)
-			}
+			handleRemove={(index) => setTarget((cur) => cur.removeString(index))}
 		/>
 	);
 }
 
 // 1行につき名前と式の2つの入力欄が並ぶ
-function inputValues() {
+function inputs() {
 	return Array.from(
 		document.querySelectorAll<HTMLInputElement>('input[name="string"]'),
-	).map((input) => input.value);
+	);
+}
+
+function inputValues() {
+	return inputs().map((input) => input.value);
 }
 
 describe("KeyValuesのテスト", () => {
@@ -50,10 +41,7 @@ describe("KeyValuesのテスト", () => {
 			screen.queryByRole("button", { name: "add" }),
 		).not.toBeInTheDocument();
 
-		const name = document.querySelectorAll<HTMLInputElement>(
-			'input[name="string"]',
-		)[2];
-		await user.type(name, "COL_B");
+		await user.type(inputs()[2], "COL_B");
 		await user.tab();
 		expect(inputValues()).toEqual(["COL_A", "1", "COL_B", ""]);
 		expect(screen.getByRole("button", { name: "add" })).toBeInTheDocument();

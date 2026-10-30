@@ -56,6 +56,16 @@ describe("FilterOrderFieldsのカラム選択のテスト", () => {
 		expect(includeValues()).toEqual(["COL_A", "COL_C", "COL_B"]);
 	});
 
+	it("Addで出した空の行でもselectでカラムを設定できる", async () => {
+		const user = userEvent.setup();
+		render(<FilterOrderHarness include={["COL_A"]} />);
+
+		// exclude/include はどちらも値が入っていない行で Add が出ないため、include の Add が先頭
+		await user.click(screen.getAllByRole("button", { name: "add" })[0]);
+		await selectColumns(user, 1, ["COL_B"]);
+		expect(includeValues()).toEqual(["COL_A", "COL_B"]);
+	});
+
 	it("選んだカラムがすべて他の行にあれば何も変えない", async () => {
 		const user = userEvent.setup();
 		render(<FilterOrderHarness include={["COL_A", "COL_B"]} />);

@@ -3,27 +3,20 @@ import userEvent from "@testing-library/user-event";
 import { useState } from "react";
 import { describe, expect, it } from "vitest";
 import { Arrays } from "../../../components/dialog";
-
-// モデルのreplaceArrayと同じく、空の値は追加しない
-function replaceAt(values: string[], text: string, index: number): string[] {
-	if (index < values.length) {
-		return values.map((v, i) => (i === index ? text : v));
-	}
-	return text ? [...values, text] : values;
-}
+import { DatasetSetting } from "../../../model/DatasetSettings";
 
 function ArraysHarness({ initial }: { initial: string[] }) {
-	const [values, setValues] = useState(initial);
+	const [target, setTarget] = useState(
+		new DatasetSetting({ include: initial }),
+	);
 	return (
 		<Arrays
 			name="include"
-			values={values}
+			values={target.include}
 			handleChange={(text, index) =>
-				setValues((cur) => replaceAt(cur, text, index))
+				setTarget((cur) => cur.replaceInclude(text, index))
 			}
-			handleRemove={(index) =>
-				setValues((cur) => cur.filter((_, i) => i !== index))
-			}
+			handleRemove={(index) => setTarget((cur) => cur.removeInclude(index))}
 		/>
 	);
 }
