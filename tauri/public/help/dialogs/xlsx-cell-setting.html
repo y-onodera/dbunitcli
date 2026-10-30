@@ -34,6 +34,14 @@
   </table>
   <p>複数の帳票が 1 シートに並ぶ場合は <code>rows</code> に行を追加し、それぞれの帳票のセルアドレスをカンマ区切りで指定します。</p>
 
+  <h2 id="section-preview">Preview</h2>
+  <p>ダイアログ下部の Preview を押すと、編集中のこの定義で読み込まれるテーブルの一覧を表示します（<a href="../sections/dataset-load-form.html">Dataset Load Form</a> の Preview Apply Settings と同じ表示です）。一覧の preview ボタンを押すと、そのテーブルのデータを表示します。</p>
+  <ul>
+    <li>適用するのはこのダイアログで編集中の定義 1 件だけです。Xlsx Schema のほかの行や、フォームの <code>xlsxSchema</code>・<code>setting</code> に指定したファイルは適用しません。</li>
+    <li>Save を押す前の内容でも確認でき、プレビューしてもスキーマファイルは保存されません。</li>
+    <li>Preview はフォームで <code>srcType</code> を指定しているときだけ表示されます。</li>
+  </ul>
+
   <h2 id="section-notes">注意</h2>
   <ol>
     <li><code>sheetName</code> と <code>tableName</code> の両方が入力されていない行は保存対象から除外されます。</li>
