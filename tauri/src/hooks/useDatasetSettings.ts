@@ -2,7 +2,11 @@ import { useEffect, useState } from "react";
 import { useEnvironment } from "../context/EnvironmentProvider";
 import { useJdbcConnectionState } from "../context/JdbcConnectionProvider";
 import { useParamInputs } from "../context/ParameterInputProvider";
-import { type DatasetSrcInfo, srcTypeOf } from "../model/CommandOption";
+import {
+	type DatasetSrcInfo,
+	srcTypeOf,
+	withAllTables,
+} from "../model/CommandOption";
 import {
 	DatasetSettings,
 	type DatasetSettingsBuilder,
@@ -293,13 +297,15 @@ export const useSrcInfoColumnNames = (srcInfo: DatasetSrcInfo): string[] => {
 	return columnNames;
 };
 
+// 入力候補なので、settingの対象外のテーブルのカラムも含める
 async function loadAllColumnNames(
 	apiUrl: string,
-	info: DatasetSrcInfo,
+	srcInfo: DatasetSrcInfo,
 	jdbcValues: Record<string, string>,
 	paramInputs: Record<string, string>,
 	signal: AbortSignal,
 ): Promise<string[]> {
+	const info = withAllTables(srcInfo);
 	const tableNames = await fetchTableNames(
 		apiUrl,
 		info,
@@ -345,9 +351,10 @@ export const useColumnNamesFetcher = () => {
 		if (signal.aborted) {
 			return [];
 		}
+		// 入力候補なので、settingの対象外のテーブルでも取得する
 		const preview = await fetchTablePreview(
 			apiUrl,
-			srcInfo,
+			withAllTables(srcInfo),
 			tableName,
 			jdbcValues,
 			paramInputs,

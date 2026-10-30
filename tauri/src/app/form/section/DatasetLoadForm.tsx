@@ -10,7 +10,7 @@ import type {
 	DatasetSource,
 	SrcType,
 } from "../../../model/CommandOption";
-import { buildDatasetSrcInfo } from "../../../model/CommandOption";
+import { buildDatasetSrcInfo, withValues } from "../../../model/CommandOption";
 import DataLoadFormSection from "./DataLoadFormSection";
 import Select from "./element/Select";
 import SettingFormSection from "./SettingFormSection";
@@ -37,10 +37,7 @@ function DatasetLoadFormContent({
 
 	// src要素の値はすべてそのままsidecarへ渡すため、項目を選ばずに反映する
 	const handleValueChange = (element: CommandOption) => (newValue: string) =>
-		setDatasetSrcInfo({
-			...datasetSrcInfo,
-			values: { ...datasetSrcInfo.values, [element.name]: newValue },
-		});
+		setDatasetSrcInfo(withValues(datasetSrcInfo, { [element.name]: newValue }));
 	const handleToggleChecked = (element: CommandOption) => (checked: boolean) =>
 		handleValueChange(element)(String(checked));
 	const jdbcOption = srcData.jdbcProperties ? srcData : undefined;

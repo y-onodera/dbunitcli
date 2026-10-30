@@ -5,18 +5,17 @@ import DatasetSettingDialog from "../../../../../app/form/section/dialog/Dataset
 import type { DatasetSrcInfo } from "../../../../../model/CommandOption";
 import { DatasetSetting } from "../../../../../model/DatasetSettings";
 
+const baseSrcInfo: DatasetSrcInfo = {
+	values: {
+		srcType: "csv",
+		src: "src",
+		setting: "setting.json",
+		settingTargetOnly: "true",
+	},
+};
 const { mockTableNames, srcInfoFixture } = vi.hoisted(() => ({
 	mockTableNames: vi.fn(),
-	srcInfoFixture: {
-		current: {
-			values: {
-				srcType: "csv",
-				src: "src",
-				setting: "setting.json",
-				settingTargetOnly: "true",
-			},
-		} as DatasetSrcInfo,
-	},
+	srcInfoFixture: { current: {} as DatasetSrcInfo },
 }));
 vi.mock("../../../../../hooks/useDatasetSettings", () => ({
 	useDatasetTableNames: (srcInfo: DatasetSrcInfo) => {
@@ -44,14 +43,7 @@ function renderDialog() {
 
 describe("DatasetSettingDialogのテスト", () => {
 	it("Previewで編集中の設定だけを適用し、settingファイルなしでテーブル一覧をプレビューする", async () => {
-		srcInfoFixture.current = {
-			values: {
-				srcType: "csv",
-				src: "src",
-				setting: "setting.json",
-				settingTargetOnly: "true",
-			},
-		};
+		srcInfoFixture.current = baseSrcInfo;
 		const { user, setting } = renderDialog();
 		await user.click(screen.getByRole("button", { name: "Preview" }));
 
@@ -68,14 +60,7 @@ describe("DatasetSettingDialogのテスト", () => {
 	});
 
 	it("Targetのテーブル名候補はsettingTargetOnlyで絞らずに取得する", () => {
-		srcInfoFixture.current = {
-			values: {
-				srcType: "csv",
-				src: "src",
-				setting: "setting.json",
-				settingTargetOnly: "true",
-			},
-		};
+		srcInfoFixture.current = baseSrcInfo;
 		renderDialog();
 
 		expect(mockTableNames).toHaveBeenCalledWith({

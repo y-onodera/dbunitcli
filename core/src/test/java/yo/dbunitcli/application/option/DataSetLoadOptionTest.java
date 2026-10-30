@@ -8,10 +8,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import yo.dbunitcli.application.Option;
 import yo.dbunitcli.application.dto.DataSetLoadDto;
-import org.dbunit.dataset.Column;
-import org.dbunit.dataset.DefaultTableMetaData;
-import org.dbunit.dataset.datatype.DataType;
-import yo.dbunitcli.dataset.AddSettingTableMetaData;
 import yo.dbunitcli.dataset.DataSourceType;
 import yo.dbunitcli.dataset.TableSeparators;
 
@@ -20,6 +16,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
+
+import static yo.dbunitcli.dataset.TableSeparatorsTest.outputNames;
 
 class DataSetLoadOptionTest {
 
@@ -105,11 +103,5 @@ class DataSetLoadOptionTest {
         final Path file = this.tempDir.resolve("setting.json");
         Files.writeString(file, content);
         return file.toAbsolutePath().toString();
-    }
-
-    private static List<String> outputNames(final TableSeparators separators, final String tableName) {
-        return separators.getAddSettingTableMetaData(new DefaultTableMetaData(tableName, new Column[]{new Column("key", DataType.UNKNOWN)}))
-                         .map(AddSettingTableMetaData::getTableName)
-                         .toList();
     }
 }

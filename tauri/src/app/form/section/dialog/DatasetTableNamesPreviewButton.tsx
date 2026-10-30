@@ -22,6 +22,7 @@ import {
 import {
 	type DatasetSrcInfo,
 	withoutSetting,
+	withValues,
 } from "../../../../model/CommandOption";
 import TableConvertDialog from "./TableConvertDialog";
 
@@ -30,7 +31,7 @@ export default function DatasetTableNamesPreviewButton({
 	setting,
 }: {
 	title: string;
-	setting?: string;
+	setting: string;
 }) {
 	const [showDialog, setShowDialog] = useState(false);
 	const datasetSrcInfo = useDatasetSrcInfo();
@@ -50,15 +51,9 @@ export default function DatasetTableNamesPreviewButton({
 // settingが空ならsettingを適用せず、指定があればそのファイルを適用して読む（それ以外のsrc要素はフォームのまま）
 function withPreviewSetting(
 	info: DatasetSrcInfo,
-	setting: string | undefined,
+	setting: string,
 ): DatasetSrcInfo {
-	if (setting === undefined) {
-		return info;
-	}
-	if (setting === "") {
-		return withoutSetting(info);
-	}
-	return { ...info, values: { ...info.values, setting } };
+	return setting === "" ? withoutSetting(info) : withValues(info, { setting });
 }
 
 export function DatasetTableNamesPreviewDialog({

@@ -280,24 +280,17 @@ class DatasetSettingsControllerTest {
     @Test
     void testTableNames_settingTargetOnlyならsettingの対象のテーブルだけを返す() throws IOException {
         this.createPreviewSrc();
-        final Map<String, Object> body = this.tableBody("csv", this.writeRenameSetting(), "", Map.of("settingTargetOnly", "true"));
 
-        final String response = this.client.toBlocking().retrieve(
-                HttpRequest.POST("dbunit-cli/dataset-setting/table-names", ObjectMapper.getDefault().writeValueAsString(body)));
-
-        Assertions.assertEquals(List.of("renamed"), List.of(ObjectMapper.getDefault().readValue(response, String[].class)));
+        Assertions.assertEquals(List.of("renamed"), this.tableNames(
+                this.tableBody("csv", this.writeRenameSetting(), "", Map.of("settingTargetOnly", "true"))));
     }
 
     @Test
     void testTableNames_settingTargetOnlyでなければsettingの対象外のテーブルも返す() throws IOException {
         this.createPreviewSrc();
-        final Map<String, Object> body = this.tableBody("csv", this.writeRenameSetting(), "", Map.of("settingTargetOnly", "false"));
 
-        final String response = this.client.toBlocking().retrieve(
-                HttpRequest.POST("dbunit-cli/dataset-setting/table-names", ObjectMapper.getDefault().writeValueAsString(body)));
-
-        Assertions.assertEquals(List.of("renamed", "small"),
-                List.of(ObjectMapper.getDefault().readValue(response, String[].class)).stream().sorted().toList());
+        Assertions.assertEquals(List.of("renamed", "small"), this.tableNames(
+                this.tableBody("csv", this.writeRenameSetting(), "", Map.of("settingTargetOnly", "false"))));
     }
 
     @Test
@@ -541,6 +534,13 @@ class DatasetSettingsControllerTest {
     private List<String> inlineTableNames(final String setting, final Map<String, Object> inlineSetting) throws IOException {
         final Map<String, Object> body = this.tableBody("csv", setting, "");
         body.put("inlineSetting", inlineSetting);
+        return this.tableNames(body);
+    }
+
+    /**
+     * table-namesの結果（名前順）
+     */
+    private List<String> tableNames(final Map<String, Object> body) throws IOException {
         final String response = this.client.toBlocking().retrieve(
                 HttpRequest.POST("dbunit-cli/dataset-setting/table-names", ObjectMapper.getDefault().writeValueAsString(body)));
         return List.of(ObjectMapper.getDefault().readValue(response, String[].class)).stream().sorted().toList();

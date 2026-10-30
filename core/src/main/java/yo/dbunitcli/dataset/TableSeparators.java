@@ -48,8 +48,8 @@ public record TableSeparators(List<TableSeparator> settings
                                                                  , this.commonSettings.stream().filter(TableSeparator::hasSettings))
                                                          .map(TableSeparator::sourceFilter)
                                                          .reduce(new AlwaysFilter(false), TableMetaDataFilter::or);
-        final TableMetaDataFilter joinTargets = tableName -> this.joinConditions.stream()
-                                                                                .anyMatch(it -> it.hasRelation(tableName));
+        final List<ComparableTableJoinCondition> joins = this.joinConditions;
+        final TableMetaDataFilter joinTargets = tableName -> joins.stream().anyMatch(it -> it.hasRelation(tableName));
         return this.builder().addSourceFilter(settingTargets.or(joinTargets)).build();
     }
 

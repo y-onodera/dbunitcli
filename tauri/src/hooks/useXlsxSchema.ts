@@ -104,21 +104,23 @@ async function fetchSheets(
 export const useSrcInfoSheets = (srcInfo: DatasetSrcInfo): string[] => {
 	const [sheetNames, setSheetNames] = useState<string[]>([]);
 	const { apiUrl } = useEnvironment();
-	const srcPath = srcInfo.values.src ?? "";
-	const regTableInclude = srcInfo.values.regTableInclude ?? "";
-	const regTableExclude = srcInfo.values.regTableExclude ?? "";
-	const recursive = srcInfo.values.recursive ?? "";
-	const regInclude = srcInfo.values.regInclude ?? "";
-	const regExclude = srcInfo.values.regExclude ?? "";
-	const extension = srcInfo.values.extension ?? "";
+	const {
+		src = "",
+		regTableInclude = "",
+		regTableExclude = "",
+		recursive = "",
+		regInclude = "",
+		regExclude = "",
+		extension = "",
+	} = srcInfo.values;
 
 	useEffect(() => {
-		if (!srcPath) {
+		if (!src) {
 			return;
 		}
 		const controller = new AbortController();
 		fetchSheets(apiUrl, {
-			src: srcPath,
+			src,
 			regTableInclude,
 			regTableExclude,
 			recursive,
@@ -135,7 +137,7 @@ export const useSrcInfoSheets = (srcInfo: DatasetSrcInfo): string[] => {
 		};
 	}, [
 		apiUrl,
-		srcPath,
+		src,
 		regTableInclude,
 		regTableExclude,
 		recursive,

@@ -227,18 +227,20 @@ export function srcTypeOf(info: DatasetSrcInfo): SrcType | undefined {
 	return info.values.srcType as SrcType | undefined;
 }
 
+// 一部のsrc要素の値だけを差し替える
+export function withValues(
+	info: DatasetSrcInfo,
+	values: Record<string, string>,
+): DatasetSrcInfo {
+	return { ...info, values: { ...info.values, ...values } };
+}
+
 // settingを適用せずに読む。対象だけに絞ると何も読まないため、settingTargetOnlyも無効にする
 export function withoutSetting(info: DatasetSrcInfo): DatasetSrcInfo {
-	return {
-		...info,
-		values: { ...info.values, setting: "", settingTargetOnly: "false" },
-	};
+	return withValues(info, { setting: "", settingTargetOnly: "false" });
 }
 
 // 入力候補（テーブル名・カラム名）の取得用。settingの対象外のテーブルも候補にする
 export function withAllTables(info: DatasetSrcInfo): DatasetSrcInfo {
-	return {
-		...info,
-		values: { ...info.values, settingTargetOnly: "false" },
-	};
+	return withValues(info, { settingTargetOnly: "false" });
 }

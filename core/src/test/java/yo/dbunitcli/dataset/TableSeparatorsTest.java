@@ -16,7 +16,7 @@ public class TableSeparatorsTest {
         return new DefaultTableMetaData(tableName, new Column[]{new Column("key", DataType.UNKNOWN)});
     }
 
-    private static List<String> outputNames(final TableSeparators separators, final String tableName) {
+    public static List<String> outputNames(final TableSeparators separators, final String tableName) {
         return separators.getAddSettingTableMetaData(metaData(tableName))
                          .map(AddSettingTableMetaData::getTableName)
                          .toList();
