@@ -54,6 +54,7 @@ public record ComparableTableMappingContext(TableSeparators tableSeparators
 
     public TreeMap<String, ComparableTable> close() {
         this.executeJoin();
+        this.excludeUnusedJoinInputs();
         if (this.converter != null) {
             this.tableMap.values().forEach(this.converter::convert);
             this.converter.endDataSet();
@@ -68,12 +69,16 @@ public record ComparableTableMappingContext(TableSeparators tableSeparators
 
     private void executeJoin() {
         if (!this.joins.isEmpty()) {
-            this.joins.stream()
-                    .filter(ComparableTableJoin::isExecutable)
-                    .flatMap(it -> Stream.of(it.getCondition().left(), it.getCondition().right()))
-                    .forEach(this.tableMap::remove);
             this.processExecutableJoins(new ArrayList<>(this.joins));
         }
+    }
+
+    /**
+     * joinで使われずに残った元テーブル（相手のテーブルが無かったもの）のうち、出力の絞り込みで除かれるものを除く
+     */
+    private void excludeUnusedJoinInputs() {
+        this.tableMap.values().removeIf(table -> !this.tableSeparators.filter().test(table.getTableMetaData())
+                && this.joins.stream().anyMatch(join -> join.hasRelation(table.getTableMetaData())));
     }
 
     private void processExecutableJoins(final List<ComparableTableJoin> remaining) {
@@ -82,6 +87,9 @@ public record ComparableTableMappingContext(TableSeparators tableSeparators
                 .findFirst()
                 .ifPresent(join -> {
                     LOGGER.debug("startTableJoin(join={}) - start", join);
+                    // 元テーブルはjoinの結果に置き換える（joinの結果を使うjoinでは、使われたjoinの結果も置き換える）
+                    this.tableMap.remove(join.getCondition().left());
+                    this.tableMap.remove(join.getCondition().right());
                     final List<ComparableTableJoin> newRemaining = remaining.stream()
                             .filter(it -> !it.equals(join))
                             .toList();

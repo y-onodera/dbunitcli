@@ -89,6 +89,27 @@ public class LazyloadTaskMapperTest {
         Assertions.assertEquals(Set.of("a", "b", "c"), actual.get("a_with_b_with_c"));
     }
 
+    @Test
+    public void joinの結果を読み直すとjoinの元テーブルも読む() {
+        Assertions.assertEquals(Map.of("a_with_b", 3), this.loadedRowCounts("""
+                {"settings": [{"innerJoin": {"left": "a", "right": "b", "column": ["key"]}}]}
+                """, "a", "b"));
+    }
+
+    /**
+     * tableNamesのテーブル（3行ずつ）を読み、出力されたテーブルごとに読み直した行数を返す
+     */
+    private Map<String, Integer> loadedRowCounts(final String setting, final String... tableNames) {
+        final ComparableDataSetParam param = ComparableDataSetParam.builder()
+                                                                   .setTableSeparators(LazyloadTaskMapperTest.separators(setting))
+                                                                   .build();
+        final Map<String, Integer> result = new LinkedHashMap<>();
+        LazyloadTaskMapper.mappingFrom(param, Stream.of(tableNames).map(name -> new RecordingTask(name, param, this.rowsRead)))
+                          .forEach(dto -> result.put(dto.getTableName()
+                                  , ((List<?>) dto.applyDataSetSeparators(TableSeparators.NONE).getRows()).size()));
+        return result;
+    }
+
     /**
      * sources個のソースがaに3行ずつ書き、出力されたテーブルごとに読み直した行数を返す
      */

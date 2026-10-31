@@ -1,7 +1,6 @@
 package yo.dbunitcli.dataset;
 
 import java.util.*;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -61,18 +60,15 @@ public class ComparableTableMapperBuilder {
         final List<? extends ComparableTableMapper> results = IntStream.range(0, targets.size())
                 .mapToObj(index -> {
                     final AddSettingTableMetaData target = targets.get(index);
-                    final List<ComparableTableJoin> targetJoins = this.joins.stream()
-                            .filter(join -> join.hasRelation(target))
-                            .collect(Collectors.toList());
                     final boolean enableRowProcessing = this.converter != null && this.converter.isEnableRowProcessing(target, this.joins);
                     if (index > 0 && this.isSplittable()) {
-                        return new ComparableTableMapperSingle(target, this.converter.split(), this.contextShareTableMap, this.alreadyWrite, targetJoins, new ArrayList<>(), false, enableRowProcessing, this.tableSeparators, this.listener);
+                        return new ComparableTableMapperSingle(target, this.converter.split(), this.contextShareTableMap, this.alreadyWrite, this.joins, new ArrayList<>(), false, enableRowProcessing, this.tableSeparators, this.listener);
                     }
                     // 行を保持する読込（converterなし）では、続くソースはこのソースの最後のテーブルを確定させてから1回だけ読む
                     final List<ComparableTableMappingTask> chain = this.converter == null && index < targets.size() - 1
                             ? new ArrayList<>()
                             : this.chain;
-                    return new ComparableTableMapperSingle(target, this.converter, this.contextShareTableMap, this.alreadyWrite, targetJoins, chain, this.chainRun, enableRowProcessing, this.tableSeparators, this.listener);
+                    return new ComparableTableMapperSingle(target, this.converter, this.contextShareTableMap, this.alreadyWrite, this.joins, chain, this.chainRun, enableRowProcessing, this.tableSeparators, this.listener);
                 })
                 .toList();
         if (results.isEmpty()) {

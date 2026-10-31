@@ -78,7 +78,7 @@ public record TableSeparators(List<TableSeparator> settings
     }
 
     public TableSeparators map(final Consumer<TableSeparators.Builder> editor) {
-        final TableSeparators.Builder builder = this.builder().add(this);
+        final TableSeparators.Builder builder = this.builder();
         editor.accept(builder);
         return builder.build();
     }
@@ -183,7 +183,15 @@ public record TableSeparators(List<TableSeparator> settings
                          }
                          return Stream.of(it);
                      })
-                     .filter(this.filter::test);
+                     .filter(it -> this.filter.test(it) || this.isJoinInput(it));
+    }
+
+    /**
+     * joinの元テーブルか。出力の絞り込み（outputFilter）はjoinの結果にかけるため、元テーブルは絞り込まずに読む
+     * （joinで使われずに残った元テーブルは、読込の終わりに絞り込む）
+     */
+    private boolean isJoinInput(final AddSettingTableMetaData metaData) {
+        return this.joinConditions.stream().anyMatch(it -> it.hasRelation(metaData));
     }
 
     private Stream<AddSettingTableMetaData> addSettings(final ITableMetaData originMetaData) {

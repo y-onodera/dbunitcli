@@ -3,6 +3,7 @@ package yo.dbunitcli.dataset;
 import org.dbunit.dataset.DataSetException;
 
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class ComparableTableMapperSingle implements ComparableTableMapper {
@@ -10,7 +11,14 @@ public class ComparableTableMapperSingle implements ComparableTableMapper {
     private final IDataSetConverter converter;
     private final WrittenTables alreadyWrite;
     private final TreeMap<String, ComparableTable> contextShareTableMap;
+    /**
+     * このテーブルに関係するjoin
+     */
     private final List<ComparableTableJoin> joins;
+    /**
+     * 読込（コンテキスト）のすべてのjoin。続くソースもこのjoinに関係させる
+     */
+    private final List<ComparableTableJoin> contextJoins;
     private final List<ComparableTableMappingTask> chain;
     private final boolean chainRun;
     private final boolean enableRowProcessing;
@@ -45,13 +53,14 @@ public class ComparableTableMapperSingle implements ComparableTableMapper {
         this.converter = converter;
         this.contextShareTableMap = contextShareTableMap;
         this.alreadyWrite = alreadyWrite;
-        this.joins = joins;
+        this.joins = joins.stream().filter(join -> join.hasRelation(metaData)).collect(Collectors.toList());
+        this.contextJoins = joins;
         this.chain = chain;
         this.chainRun = chainRun;
         this.enableRowProcessing = enableRowProcessing;
         this.tableSeparators = tableSeparators;
         this.listener = listener;
-        this.hasOutput = converter == null || converter.isRowRequired(metaData, joins);
+        this.hasOutput = converter == null || converter.isRowRequired(metaData, this.joins);
     }
 
     @Override
@@ -93,7 +102,7 @@ public class ComparableTableMapperSingle implements ComparableTableMapper {
                         , this.converter
                         , this.contextShareTableMap
                         , this.alreadyWrite
-                        , this.joins
+                        , this.contextJoins
                         , restChain
                         , true
                         , this.listener
@@ -128,7 +137,7 @@ public class ComparableTableMapperSingle implements ComparableTableMapper {
                         , null
                         , this.contextShareTableMap
                         , this.alreadyWrite
-                        , new ArrayList<>()
+                        , this.contextJoins
                         , restChain
                         , true
                         , this.listener
