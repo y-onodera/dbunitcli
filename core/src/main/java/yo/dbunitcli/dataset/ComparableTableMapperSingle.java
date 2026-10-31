@@ -29,6 +29,10 @@ public class ComparableTableMapperSingle implements ComparableTableMapper {
     private final TableSplitter splitter;
     private final WrittenTables.SplitState splitState;
     private final boolean hasOutput;
+    /**
+     * 行を保持して分割するテーブルで、行を持たず件数だけを数えるか
+     */
+    private final boolean rowCountOnly;
     private final ComparableTableMappingContext.Listener listener;
     private AddSettingTableMetaData metaData;
     private boolean startTable;
@@ -61,6 +65,8 @@ public class ComparableTableMapperSingle implements ComparableTableMapper {
         this.tableSeparators = tableSeparators;
         this.listener = listener;
         this.hasOutput = converter == null || converter.isRowRequired(metaData, this.joins);
+        this.rowCountOnly = converter != null && !enableRowProcessing && this.splitter.isSplit()
+                && converter.isRowCountOnly(metaData, this.joins);
     }
 
     @Override
@@ -116,7 +122,7 @@ public class ComparableTableMapperSingle implements ComparableTableMapper {
             }
         } else {
             if (this.splitter.isSplit()) {
-                this.addSplitResult();
+                this.addPendingSplit();
             } else if (this.contextShareTableMap.containsKey(this.metaData.getTableName())) {
                 final ComparableTable other = this.contextShareTableMap.get(this.metaData.getTableName());
                 final AddSettingTableMetaData.Rows add = other.getRows().add(this.metaData.distinct(this.rows,
@@ -143,7 +149,10 @@ public class ComparableTableMapperSingle implements ComparableTableMapper {
                         , this.listener
                 ));
             }
-            this.joins.forEach(it -> it.setIfRelated(this.contextShareTableMap.get(this.metaData.getTableName())));
+            // 分割するテーブルは、分割を確定させるときにjoinへ渡す（ComparableTableMappingContext#flushSplits）
+            if (!this.splitter.isSplit()) {
+                this.joins.forEach(it -> it.setIfRelated(this.contextShareTableMap.get(this.metaData.getTableName())));
+            }
         }
     }
 
@@ -153,41 +162,19 @@ public class ComparableTableMapperSingle implements ComparableTableMapper {
     }
 
     /**
-     * 保持した行を並べ替えて分割する。前のソースで同じテーブルを分割していれば、その行とまとめてから分割し直す
-     * （行を流しながら分割する場合と同じく、ソースをまたいで分割する）
+     * 保持した行を、分割を待つ行に加える。分割は読込の終わりに、同じテーブルに入るすべてのソースの行をまとめて1回だけ行う
+     * （行を流しながら分割する場合と同じく、ソースをまたいで分割する）。分割後の1つ目のテーブル名で、このソースが書いたことを通知する
      */
-    protected void addSplitResult() {
-        final AddSettingTableMetaData.Rows distinctRows = this.mergePreviousSplit(this.baseMetaData.distinct(this.rows,
-                                                                                                             this.filteredRowIndexes));
-        final ComparableTable sorted = new ComparableTable.Builder(this.baseMetaData).setRows(distinctRows).build();
-        AddSettingTableMetaData splitMetaData = this.splitter.getMetaData(this.baseMetaData, 0);
-        ArrayList<Integer> targetRowIndexes = new ArrayList<>();
-        ArrayList<Object[]> targetValues = new ArrayList<>();
-        final TableSplitter.Counter counter = this.splitter.counter();
-        int splitCount = 0;
-        for (int i = 0, j = distinctRows.size(); i < j; i++) {
-            final Object[] row = sorted.getRow(i);
-            if (counter.isBreak(this.breakKeys(row), targetValues.size())) {
-                this.hold(splitMetaData.getTableName()
-                        , new ComparableTable.Builder(splitMetaData)
-                                                      .setRows(new AddSettingTableMetaData.Rows(targetValues,
-                                                                                                targetRowIndexes))
-                                                      .build());
-                this.putSplitTable(splitMetaData.getTableName());
-                targetRowIndexes = new ArrayList<>();
-                targetValues = new ArrayList<>();
-                splitMetaData = this.splitter.getMetaData(this.baseMetaData, ++splitCount);
-            }
-            targetValues.add(row);
-            if (this.metaData.hasRowFilter()) {
-                targetRowIndexes.add(distinctRows.filteredRowIndexes().get(i));
-            }
+    private void addPendingSplit() {
+        final String firstTableName = this.splitter.tableName(this.baseMetaData.getTableName(), 0);
+        final PendingSplit pending = this.alreadyWrite.pendingSplit(firstTableName, this.splitter);
+        if (this.rowCountOnly) {
+            pending.addCount(this.baseMetaData, this.addRowCount, this.joins);
+        } else {
+            pending.add(this.baseMetaData, this.baseMetaData.distinct(this.rows, this.filteredRowIndexes), this.joins);
         }
-        this.hold(splitMetaData.getTableName()
-                , new ComparableTable.Builder(splitMetaData)
-                                              .setRows(new AddSettingTableMetaData.Rows(targetValues, targetRowIndexes))
-                                              .build());
-        this.putSplitTable(splitMetaData.getTableName());
+        this.alreadyWrite.putSplitTable(firstTableName, firstTableName);
+        this.listener.held(firstTableName);
     }
 
     private void hold(final String tableName, final ComparableTable table) {
@@ -197,23 +184,6 @@ public class ComparableTableMapperSingle implements ComparableTableMapper {
 
     private void putSplitTable(final String tableName) {
         this.alreadyWrite.putSplitTable(tableName, this.splitter.tableName(this.baseMetaData.getTableName(), 0));
-    }
-
-    private AddSettingTableMetaData.Rows mergePreviousSplit(final AddSettingTableMetaData.Rows rows) {
-        final List<Object[]> mergedRows = new ArrayList<>();
-        final List<Integer> mergedIndexes = new ArrayList<>();
-        ComparableTable table;
-        for (int no = 0; (table = this.contextShareTableMap.remove(this.splitter.tableName(this.baseMetaData.getTableName(), no))) != null; no++) {
-            mergedRows.addAll(table.getRows().rows());
-            mergedIndexes.addAll(table.getRows().filteredRowIndexes());
-        }
-        if (mergedRows.isEmpty()) {
-            return rows;
-        }
-        mergedRows.addAll(rows.rows());
-        mergedIndexes.addAll(rows.filteredRowIndexes());
-        final AddSettingTableMetaData.Rows merged = new AddSettingTableMetaData.Rows(mergedRows, mergedIndexes);
-        return this.baseMetaData.isNeedDistinct() ? merged.distinct() : merged;
     }
 
     protected void processingStart() {
@@ -241,7 +211,7 @@ public class ComparableTableMapperSingle implements ComparableTableMapper {
                     }
                     this.splitTable(applySetting);
                     this.converter.row(applySetting);
-                } else {
+                } else if (!this.rowCountOnly) {
                     this.rows.add(applySetting);
                     if (this.metaData.hasRowFilter()) {
                         this.filteredRowIndexes.add(this.addCount);

@@ -1,8 +1,6 @@
 package yo.dbunitcli.dataset;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 /**
  * 1回の読込（コンテキスト）で書き込んだテーブルの行数と、分割の途中状態。
@@ -15,6 +13,8 @@ public final class WrittenTables {
     private final Map<SplitKey, SplitState> splits = new HashMap<>();
 
     private final Map<String, String> splitTables = new HashMap<>();
+
+    private final Map<SplitKey, PendingSplit> pendingSplits = new LinkedHashMap<>();
 
     public boolean contains(final String tableName) {
         return this.rows.containsKey(tableName);
@@ -33,6 +33,22 @@ public final class WrittenTables {
      */
     public SplitState split(final String firstTableName, final TableSplitter splitter) {
         return this.splits.computeIfAbsent(new SplitKey(firstTableName, splitter), _ -> SplitState.start(splitter));
+    }
+
+    /**
+     * 行を保持して分割するテーブルの、分割を待っている行。分割後の1つ目のテーブル名と分割の設定ごとに、ソースをまたいでためる
+     */
+    PendingSplit pendingSplit(final String firstTableName, final TableSplitter splitter) {
+        return this.pendingSplits.computeIfAbsent(new SplitKey(firstTableName, splitter), _ -> new PendingSplit(firstTableName, splitter));
+    }
+
+    /**
+     * 分割を待っている行をすべて取り出す（取り出した分は残さない）
+     */
+    List<PendingSplit> takePendingSplits() {
+        final List<PendingSplit> result = new ArrayList<>(this.pendingSplits.values());
+        this.pendingSplits.clear();
+        return result;
     }
 
     /**

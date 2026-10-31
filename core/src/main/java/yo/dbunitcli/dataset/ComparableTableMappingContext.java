@@ -53,6 +53,7 @@ public record ComparableTableMappingContext(TableSeparators tableSeparators
     }
 
     public TreeMap<String, ComparableTable> close() {
+        this.flushSplits();
         this.executeJoin();
         this.excludeUnusedJoinInputs();
         if (this.converter != null) {
@@ -65,6 +66,22 @@ public record ComparableTableMappingContext(TableSeparators tableSeparators
 
     public Stream<AddSettingTableMetaData> getAddSettingTableMetaData(final ComparableTableJoin join) {
         return this.tableSeparators.getAddSettingTableMetaData(join);
+    }
+
+    /**
+     * 分割を待っている行（行を保持して分割するテーブル）を、まとめて1回だけ並べ替えて分割し、分割後のテーブルを確定させる。
+     * 分割後の1つ目のテーブルを関係するjoinへ渡す
+     */
+    public void flushSplits() {
+        this.alreadyWrite.takePendingSplits().forEach(pending -> {
+            final List<ComparableTable> tables = pending.split();
+            tables.forEach(table -> {
+                this.tableMap.put(table.getTableName(), table);
+                this.alreadyWrite.putSplitTable(table.getTableName(), pending.firstTableName());
+                this.listener.held(table.getTableName());
+            });
+            pending.joins().forEach(join -> join.setIfRelated(tables.getFirst()));
+        });
     }
 
     private void executeJoin() {
@@ -106,6 +123,7 @@ public record ComparableTableMappingContext(TableSeparators tableSeparators
                     joinMapper.startTable();
                     join.execute().forEach(joinMapper::addRow);
                     joinMapper.endTable();
+                    this.flushSplits();
                     this.listener.joined(join);
                     this.processExecutableJoins(newRemaining);
                 });
@@ -120,7 +138,9 @@ public record ComparableTableMappingContext(TableSeparators tableSeparators
         };
 
         /**
-         * テーブルを読込の終わりにまとめて出力するため、共有のtableMapに入れた（入れ直した）
+         * テーブルを読込の終わりにまとめて出力するため、共有のtableMapに入れた（入れ直した）。
+         * 行を保持して分割するテーブルは、ソースを読んだ時点では分割後の1つ目のテーブル名で通知し、
+         * 分割を確定させたとき（{@link #flushSplits()}）に分割後のテーブルごとに通知する
          */
         default void held(final String tableName) {
             // 既定では何もしない

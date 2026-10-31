@@ -53,6 +53,12 @@ public class LazyloadTaskMapper {
                      .forEach(tableName -> tableTasks.merge(tableName, task.withTargetTable(tableName)
                              , ComparableTableMappingTask.WithTargetTable::chain));
         });
+        // 行を保持して分割するテーブルは、分割後の1つ目のテーブルと同じタスクで読む
+        context.flushSplits();
+        collector.drainTableNames()
+                 .forEach(tableName -> written.splitGroup(tableName)
+                                              .map(tableTasks::get)
+                                              .ifPresent(task -> tableTasks.putIfAbsent(tableName, task.retarget(tableName))));
         LazyloadTaskMapper.readSplitGroupFromAllSources(tableTasks, written);
         final Map<String, ITableMetaData> output = collector.takeMetaData();
         context.close();
@@ -132,6 +138,14 @@ public class LazyloadTaskMapper {
         @Override
         public boolean isRowRequired(final AddSettingTableMetaData metaData, final List<ComparableTableJoin> joins) {
             return metaData.getTableSplitter().isSplit() || (this.joinRowRequired && !joins.isEmpty());
+        }
+
+        /**
+         * 分割後の名前が件数だけで決まる（distinct・breakKeyが無く、joinに渡さない）テーブルは、行を持たず件数だけを数える
+         */
+        @Override
+        public boolean isRowCountOnly(final AddSettingTableMetaData metaData, final List<ComparableTableJoin> joins) {
+            return !metaData.isNeedDistinct() && metaData.getTableSplitter().breakKeys().isEmpty() && joins.isEmpty();
         }
 
         Stream<String> drainTableNames() {
