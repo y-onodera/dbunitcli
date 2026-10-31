@@ -106,7 +106,7 @@ public class DatasetSettingsController extends AbstractResourceFileController<Da
     @Post(uri = "table-names", produces = MediaType.APPLICATION_JSON)
     public String tableNames(@Body final DatasetTableNamesRequestDto request) {
         try (final ComparableDataSetProducer producer = new ComparableDataSetLoader(this.buildParameter(request))
-                .getComparableDataSetProducer(this.toParam(request, "false").get().build())) {
+                .getComparableDataSetProducer(this.toParam(request).get().build())) {
             return ObjectMapper.getDefault().writeValueAsString(producer.lazyLoad(false).keySet());
         } catch (final Throwable th) {
             LOGGER.warn("Could not get table names", th);
@@ -122,7 +122,7 @@ public class DatasetSettingsController extends AbstractResourceFileController<Da
     @Post(uri = "table-preview", produces = MediaType.APPLICATION_JSON)
     public String tablePreview(@Body final DatasetTablePreviewRequestDto request) {
         try {
-            final Supplier<ComparableDataSetParam.Builder> params = this.toParam(request, "true");
+            final Supplier<ComparableDataSetParam.Builder> params = this.toParam(request);
             final TableSeparators separators = params.get().getTableSeparators();
             for (final Narrow narrow : Narrow.attempts(separators)) {
                 final Optional<DatasetTablePreviewResponseDto> preview = this.loadPreview(request, params.get(), narrow, separators);
@@ -162,7 +162,7 @@ public class DatasetSettingsController extends AbstractResourceFileController<Da
             if (!violations.isEmpty()) {
                 throw new OptionValidationException(violations);
             }
-            final ComparableDataSetParam.Builder param = this.toParam(request, "true").get();
+            final ComparableDataSetParam.Builder param = this.toParam(request).get();
             final TableSeparators separators = param.getTableSeparators();
             Narrow.singlePass(separators).applyTo(param, separators, tableName);
             FileResources.runInContext(() -> {
@@ -252,11 +252,12 @@ public class DatasetSettingsController extends AbstractResourceFileController<Da
     }
 
     /**
-     * フォームの解釈とinline設定の読込はリクエストごとに1回だけ行い、読み直すたびに新しい読込パラメータを作る
+     * フォームの解釈とinline設定の読込はリクエストごとに1回だけ行い、読み直すたびに新しい読込パラメータを作る。
+     * 行は常に読む設定にする（フォームのloadDataは使わない）。テーブル名の一覧はlazyLoadがタスクごとに行を読むかを決める
      */
-    private Supplier<ComparableDataSetParam.Builder> toParam(final DatasetTableNamesRequestDto request, final String loadData) throws IOException {
+    private Supplier<ComparableDataSetParam.Builder> toParam(final DatasetTableNamesRequestDto request) throws IOException {
         final DataSetLoadDto dto = this.toLoadDto(request.getSrcOptions());
-        dto.setLoadData(loadData);
+        dto.setLoadData("true");
         final UnaryOperator<ComparableDataSetParam.Builder> inlineXlsxSchema = this.inlineXlsxSchema(dto, request.getInlineXlsxSchema());
         final UnaryOperator<ComparableDataSetParam.Builder> inlineSetting = this.inlineSetting(dto, request.getInlineSetting());
         return () -> inlineSetting.apply(inlineXlsxSchema.apply(new DataSetLoadOption("", dto).getParam()));

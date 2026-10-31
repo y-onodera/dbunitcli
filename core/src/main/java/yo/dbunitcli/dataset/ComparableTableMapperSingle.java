@@ -21,6 +21,7 @@ public class ComparableTableMapperSingle implements ComparableTableMapper {
     private final TableSplitter splitter;
     private final WrittenTables.SplitState splitState;
     private final boolean hasOutput;
+    private final ComparableTableMappingContext.Listener listener;
     private AddSettingTableMetaData metaData;
     private boolean startTable;
     private int addCount = 0;
@@ -30,7 +31,8 @@ public class ComparableTableMapperSingle implements ComparableTableMapper {
                                        final TreeMap<String, ComparableTable> contextShareTableMap,
                                        final WrittenTables alreadyWrite, final List<ComparableTableJoin> joins,
                                        final List<ComparableTableMappingTask> chain, final boolean chainRun,
-                                       final boolean enableRowProcessing, final TableSeparators tableSeparators) {
+                                       final boolean enableRowProcessing, final TableSeparators tableSeparators,
+                                       final ComparableTableMappingContext.Listener listener) {
         this.baseMetaData = metaData;
         this.splitter = metaData.getTableSplitter();
         // 行を流しながら分割する場合は、同じテーブルに前のソースが書いた続きから分割する
@@ -48,6 +50,7 @@ public class ComparableTableMapperSingle implements ComparableTableMapper {
         this.chainRun = chainRun;
         this.enableRowProcessing = enableRowProcessing;
         this.tableSeparators = tableSeparators;
+        this.listener = listener;
         this.hasOutput = converter == null || converter.isRowRequired(metaData, joins);
     }
 
@@ -77,6 +80,9 @@ public class ComparableTableMapperSingle implements ComparableTableMapper {
     @Override
     public void endTable() {
         this.alreadyWrite.put(this.metaData.getTableName(), this.getAddRowCount());
+        if (this.enableRowProcessing && this.splitter.isSplit()) {
+            this.putSplitTable(this.metaData.getTableName());
+        }
         if (this.enableRowProcessing && this.startTable) {
             if (!this.chain.isEmpty()) {
                 final ComparableTableMappingTask next = this.chain.getFirst();
@@ -90,6 +96,7 @@ public class ComparableTableMapperSingle implements ComparableTableMapper {
                         , this.joins
                         , restChain
                         , true
+                        , this.listener
                 ));
             } else {
                 try {
@@ -105,25 +112,27 @@ public class ComparableTableMapperSingle implements ComparableTableMapper {
                 final ComparableTable other = this.contextShareTableMap.get(this.metaData.getTableName());
                 final AddSettingTableMetaData.Rows add = other.getRows().add(this.metaData.distinct(this.rows,
                                                                                                     this.filteredRowIndexes));
-                this.contextShareTableMap.put(this.metaData.getTableName(), this.metaData.isNeedDistinct()
+                this.hold(this.metaData.getTableName(), this.metaData.isNeedDistinct()
                         ? new ComparableTable.Builder(this.metaData).setRows(add.distinct()).build()
                         : new ComparableTable.Builder(this.metaData).setRows(add).build());
             } else {
-                this.contextShareTableMap.put(this.metaData.getTableName(), this.lazyProcess());
-                if (!this.chain.isEmpty()) {
-                    final ComparableTableMappingTask next = this.chain.getFirst();
-                    final List<ComparableTableMappingTask> restChain = this.chain.size() == 1
-                            ? List.of()
-                            : this.chain.subList(1, this.chain.size());
-                    next.run(new ComparableTableMappingContext(this.chainSeparators(next)
-                            , null
-                            , this.contextShareTableMap
-                            , this.alreadyWrite
-                            , new ArrayList<>()
-                            , restChain
-                            , true
-                    ));
-                }
+                this.hold(this.metaData.getTableName(), this.lazyProcess());
+            }
+            // 分割・既存のテーブルへの追加でも、続くソースを読む
+            if (!this.chain.isEmpty()) {
+                final ComparableTableMappingTask next = this.chain.getFirst();
+                final List<ComparableTableMappingTask> restChain = this.chain.size() == 1
+                        ? List.of()
+                        : this.chain.subList(1, this.chain.size());
+                next.run(new ComparableTableMappingContext(this.chainSeparators(next)
+                        , null
+                        , this.contextShareTableMap
+                        , this.alreadyWrite
+                        , new ArrayList<>()
+                        , restChain
+                        , true
+                        , this.listener
+                ));
             }
             this.joins.forEach(it -> it.setIfRelated(this.contextShareTableMap.get(this.metaData.getTableName())));
         }
@@ -150,11 +159,12 @@ public class ComparableTableMapperSingle implements ComparableTableMapper {
         for (int i = 0, j = distinctRows.size(); i < j; i++) {
             final Object[] row = sorted.getRow(i);
             if (counter.isBreak(this.breakKeys(row), targetValues.size())) {
-                this.contextShareTableMap.put(splitMetaData.getTableName()
+                this.hold(splitMetaData.getTableName()
                         , new ComparableTable.Builder(splitMetaData)
                                                       .setRows(new AddSettingTableMetaData.Rows(targetValues,
                                                                                                 targetRowIndexes))
                                                       .build());
+                this.putSplitTable(splitMetaData.getTableName());
                 targetRowIndexes = new ArrayList<>();
                 targetValues = new ArrayList<>();
                 splitMetaData = this.splitter.getMetaData(this.baseMetaData, ++splitCount);
@@ -164,10 +174,20 @@ public class ComparableTableMapperSingle implements ComparableTableMapper {
                 targetRowIndexes.add(distinctRows.filteredRowIndexes().get(i));
             }
         }
-        this.contextShareTableMap.put(splitMetaData.getTableName()
+        this.hold(splitMetaData.getTableName()
                 , new ComparableTable.Builder(splitMetaData)
                                               .setRows(new AddSettingTableMetaData.Rows(targetValues, targetRowIndexes))
                                               .build());
+        this.putSplitTable(splitMetaData.getTableName());
+    }
+
+    private void hold(final String tableName, final ComparableTable table) {
+        this.contextShareTableMap.put(tableName, table);
+        this.listener.held(tableName);
+    }
+
+    private void putSplitTable(final String tableName) {
+        this.alreadyWrite.putSplitTable(tableName, this.splitter.tableName(this.baseMetaData.getTableName(), 0));
     }
 
     private AddSettingTableMetaData.Rows mergePreviousSplit(final AddSettingTableMetaData.Rows rows) {
