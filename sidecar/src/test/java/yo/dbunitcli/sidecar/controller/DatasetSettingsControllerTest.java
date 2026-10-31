@@ -288,6 +288,15 @@ class DatasetSettingsControllerTest {
     }
 
     @Test
+    void testTableNames_inlineSettingのjoinをsplitすれば分割後の名前だけを返す() throws IOException {
+        this.createPreviewSrc();
+
+        Assertions.assertEquals(List.of("joined_00", "joined_01", "joined_02"), this.inlineTableNames("",
+                Map.of("innerJoin", Map.of("left", "big", "right", "small", "column", List.of("key")),
+                        "split", Map.of("tableName", "joined", "suffix", "_%02d", "limit", 1))));
+    }
+
+    @Test
     void testTableNames_inlineSettingに一致するテーブルが無ければ空を返す() throws IOException {
         this.createPreviewSrc();
 

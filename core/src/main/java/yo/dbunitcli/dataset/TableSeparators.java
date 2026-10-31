@@ -90,13 +90,15 @@ public record TableSeparators(List<TableSeparator> settings
                     .toList().isEmpty();
     }
 
+    /**
+     * settings・commonSettings・joinの設定のいずれかに件数分割があるか（後段（next）は見ない）
+     */
     public boolean hasSplitter() {
-        return this.settings()
-                   .stream()
-                   .anyMatch(it -> it.splitter().isSplit())
-                || this.commonSettings()
-                       .stream()
-                       .anyMatch(it -> it.splitter().isSplit());
+        return Stream.of(this.settings().stream()
+                             , this.commonSettings().stream()
+                             , this.joinConditions().stream().flatMap(it -> it.tableSeparators().stream()))
+                     .flatMap(it -> it)
+                     .anyMatch(it -> it.splitter().isSplit());
     }
 
     /**

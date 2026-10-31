@@ -712,6 +712,33 @@ public class GenerateTest {
             });
         }
 
+        /**
+         * lazyLoadでもlazyLoadなしと同じテーブル（join後に分割したテーブルだけ）を出力する
+         */
+        @Test
+        public void testGenerateFromSplitAfterJoinWithLazyLoad() {
+            Generate.main(new String[]{
+                    "-srcType=csv"
+                    , "-src=src/test/resources/yo/dbunitcli/application/src/generate/table/source/csv"
+                    , "-encoding=MS932"
+                    , "-setting=src/test/resources/yo/dbunitcli/application/settings/generate/with_metadata/split_after_join.json"
+                    , "-addFileInfo=true"
+                    , "-generateType=xlsx"
+                    , "-unit=table"
+                    , "-lazyLoad=true"
+                    , "-template=src/test/resources/yo/dbunitcli/application/settings/generate/with_metadata/split_after_join.xlsx"
+                    , "-resultPath=target/test-classes/yo/dbunitcli/application/generate/with_metadata/result/generated_split_after_join_lazyLoad/$param.tableName$.xlsx"
+            });
+            Compare.main(new String[]{
+                    "-old.src=src/test/resources/yo/dbunitcli/application/expect/generate/with_metadata/split_after_join"
+                    , "-srcType=xlsx"
+                    , "-new.src=" + this.getBaseDir() + "generate/with_metadata/result/generated_split_after_join_lazyLoad"
+                    , "-setting=src/test/resources/yo/dbunitcli/application/settings/generate/with_metadata/compare_split_after_join.json"
+                    , "-result=target/test-classes/yo/dbunitcli/application/command/generate/with_metadata/result" +
+                            "/compare_split_after_join_lazyLoad"
+            });
+        }
+
         @ParameterizedTest
         @ValueSource(booleans = {true, false})
         public void testGenerateFromMetaData(boolean formulaProcess) {

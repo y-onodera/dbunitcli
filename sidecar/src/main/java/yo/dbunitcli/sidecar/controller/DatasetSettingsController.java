@@ -56,7 +56,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -100,24 +99,14 @@ public class DatasetSettingsController extends AbstractResourceFileController<Da
     }
 
     /**
-     * 読み込まれるテーブル名を返す。データ行は分割（split）後の名前を求める場合だけ読み、
-     * その場合も行は保持せずテーブル名だけを集める（{@link TableNameCollector}）
+     * 読み込まれるテーブル名を返す。lazyLoadで求めるため、データ行は分割（split）後の名前を求める場合だけ読む
      */
     @Interruptible
     @Post(uri = "table-names", produces = MediaType.APPLICATION_JSON)
     public String tableNames(@Body final DatasetTableNamesRequestDto request) {
-        try {
-            final ComparableDataSetParam.Builder param = this.toParam(request, "false").get();
-            final ComparableDataSetLoader loader = new ComparableDataSetLoader(this.buildParameter(request));
-            if (!param.getTableSeparators().isTableNameDependsOnRows()) {
-                return ObjectMapper.getDefault().writeValueAsString(loader.loadDataSet(param.build()).getTableNames());
-            }
-            final TableNameCollector collector = new TableNameCollector();
-            try (final ComparableDataSetProducer producer = loader.getComparableDataSetProducer(
-                    param.setLoadData(true).setConverter(collector).build())) {
-                producer.produce();
-            }
-            return ObjectMapper.getDefault().writeValueAsString(collector.tableNames);
+        try (final ComparableDataSetProducer producer = new ComparableDataSetLoader(this.buildParameter(request))
+                .getComparableDataSetProducer(this.toParam(request, "false").get().build())) {
+            return ObjectMapper.getDefault().writeValueAsString(producer.lazyLoad(false).keySet());
         } catch (final Throwable th) {
             LOGGER.warn("Could not get table names", th);
             return "[]";
@@ -408,9 +397,23 @@ public class DatasetSettingsController extends AbstractResourceFileController<Da
     }
 
     /**
-     * 読み込んだテーブルを集める（分割後も同じインスタンスで受け、テーブルの終わりでは何もしない）
+     * 渡されたテーブル（{@link TargetTableConverter}で対象だけに絞られる）の先頭{@link #PREVIEW_ROW_LIMIT}行と全行数を集める
      */
-    private abstract static class Collector implements IDataSetConverter {
+    private static class PreviewCollector implements IDataSetConverter {
+        private ComparableTable.Builder builder;
+        private int totalRows;
+
+        Optional<DatasetTablePreviewResponseDto> toResponse() {
+            if (this.builder == null) {
+                return Optional.empty();
+            }
+            final ComparableTable table = this.builder.build();
+            final String[] headers = Arrays.stream(table.getTableMetaData().getColumns())
+                                           .map(Column::getColumnName)
+                                           .toArray(String[]::new);
+            return Optional.of(new DatasetTablePreviewResponseDto(headers, table.rows().rows(), this.totalRows));
+        }
+
         @Override
         public boolean isExportEmptyTable() {
             return true;
@@ -427,54 +430,15 @@ public class DatasetSettingsController extends AbstractResourceFileController<Da
         }
 
         @Override
-        public abstract void startTable(ITableMetaData metaData);
-
-        @Override
-        public void endTable() {
-            // nothing
-        }
-    }
-
-    /**
-     * 出力されるテーブル名だけを集める（行は捨てる）
-     */
-    private static class TableNameCollector extends Collector {
-        private final Set<String> tableNames = new LinkedHashSet<>();
-
-        @Override
-        public void startTable(final ITableMetaData metaData) {
-            this.tableNames.add(metaData.getTableName());
-        }
-
-        @Override
-        public void row(final Object[] values) {
-            // テーブル名だけを使う
-        }
-    }
-
-    /**
-     * 渡されたテーブル（{@link TargetTableConverter}で対象だけに絞られる）の先頭{@link #PREVIEW_ROW_LIMIT}行と全行数を集める
-     */
-    private static class PreviewCollector extends Collector {
-        private ComparableTable.Builder builder;
-        private int totalRows;
-
-        Optional<DatasetTablePreviewResponseDto> toResponse() {
-            if (this.builder == null) {
-                return Optional.empty();
-            }
-            final ComparableTable table = this.builder.build();
-            final String[] headers = Arrays.stream(table.getTableMetaData().getColumns())
-                                           .map(Column::getColumnName)
-                                           .toArray(String[]::new);
-            return Optional.of(new DatasetTablePreviewResponseDto(headers, table.rows().rows(), this.totalRows));
-        }
-
-        @Override
         public void startTable(final ITableMetaData metaData) {
             if (this.builder == null) {
                 this.builder = new ComparableTable.Builder(metaData);
             }
+        }
+
+        @Override
+        public void endTable() {
+            // nothing
         }
 
         @Override
