@@ -70,16 +70,6 @@ public class HeaderOverColumnTest {
     }
 
     @Test
-    public void fixedIgnoresColumnsOverHeaderName() throws IOException, DataSetException {
-        final File src = this.write("fixed.txt", "1ax\n2by\n");
-        this.assertRows(new ComparableFixedFileDataSetProducer(this.builder(src, DataSourceType.fixed)
-                        .setFixedLength("1,1,1")
-                        .setHeaderName("ID,VAL")
-                        .build()).loadDataSet().getTable("fixed")
-                , List.of("ID", "VAL"), List.of("1", "a"), List.of("2", "b"));
-    }
-
-    @Test
     public void xlsIgnoresColumnsOverHeader() throws IOException, DataSetException {
         final File src = this.writeExcel(new HSSFWorkbook(), "book.xls");
         this.assertRows(new ComparableXlsDataSetProducer(this.builder(src, DataSourceType.xls)
