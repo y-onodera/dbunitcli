@@ -20,13 +20,12 @@ public class ComparableTableMapperSingle implements ComparableTableMapper {
     private final List<Integer> filteredRowIndexes;
     private final Collection<Object[]> rows;
     private final TableSplitter splitter;
-    private final List<String> currentKeys = new ArrayList<>();
+    private final TableSplitter.Counter splitCounter;
     private AddSettingTableMetaData metaData;
     private int no;
     private boolean startTable;
     private int addCount = 0;
     private int addRowCount = 0;
-    private int breakKeyCount = 0;
 
     public ComparableTableMapperSingle(final AddSettingTableMetaData metaData, final IDataSetConverter converter,
                                        final TreeMap<String, ComparableTable> contextShareTableMap,
@@ -35,6 +34,7 @@ public class ComparableTableMapperSingle implements ComparableTableMapper {
                                        final boolean enableRowProcessing, final TableSeparators tableSeparators) {
         this.baseMetaData = metaData;
         this.splitter = metaData.getTableSplitter();
+        this.splitCounter = this.splitter.counter();
         this.metaData = this.splitter.getMetaData(this.baseMetaData, this.no);
         this.rows = new ArrayList<>();
         this.filteredRowIndexes = new ArrayList<>();
@@ -139,26 +139,11 @@ public class ComparableTableMapperSingle implements ComparableTableMapper {
         AddSettingTableMetaData splitMetaData = this.metaData;
         ArrayList<Integer> targetRowIndexes = new ArrayList<>();
         ArrayList<Object[]> targetValues = new ArrayList<>();
-        final List<String> keys = new ArrayList<>();
-        int keyCount = 0;
+        final TableSplitter.Counter counter = this.splitter.counter();
         int splitCount = 0;
         for (int i = 0, j = distinctRows.size(); i < j; i++) {
             final Object[] row = sorted.getRow(i);
-            if (!this.splitter.breakKeys().isEmpty()) {
-                final List<String> breakKey = this.metaData.getBreakKeys(row);
-                if (i == 0) {
-                    keys.addAll(breakKey);
-                } else {
-                    if (!keys.equals(breakKey)) {
-                        keyCount++;
-                        keys.clear();
-                        keys.addAll(breakKey);
-                    }
-                }
-            } else if (i > 0) {
-                keyCount++;
-            }
-            if (this.splitter.isLimit(keyCount)) {
+            if (counter.isBreak(this.metaData.getBreakKeys(row), targetValues.size())) {
                 this.contextShareTableMap.put(splitMetaData.getTableName()
                         , new ComparableTable.Builder(splitMetaData)
                                                       .setRows(new AddSettingTableMetaData.Rows(targetValues,
@@ -166,7 +151,6 @@ public class ComparableTableMapperSingle implements ComparableTableMapper {
                                                       .build());
                 targetRowIndexes = new ArrayList<>();
                 targetValues = new ArrayList<>();
-                keyCount = 0;
                 splitMetaData = this.splitter.getMetaData(this.baseMetaData, ++splitCount);
             }
             targetValues.add(row);
@@ -220,24 +204,12 @@ public class ComparableTableMapperSingle implements ComparableTableMapper {
     }
 
     protected void splitTable(final Object[] applySetting) throws DataSetException {
-        if (!this.splitter.breakKeys().isEmpty()) {
-            final List<String> keys = this.metaData.getBreakKeys(applySetting);
-            if (!this.currentKeys.equals(keys)) {
-                // 1行目のキーは区切りに数えない（addSplitResultと同じ数え方）
-                if (!this.currentKeys.isEmpty()) {
-                    this.breakKeyCount++;
-                }
-                this.currentKeys.clear();
-                this.currentKeys.addAll(keys);
-            }
-        }
-        if (this.splitter.isLimit(this.getBreakKeyCount())) {
+        if (this.splitCounter.isBreak(this.metaData.getBreakKeys(applySetting), this.getAddRowCount())) {
             this.endTable();
             this.no++;
             this.metaData = this.splitter.getMetaData(this.baseMetaData, this.no);
             this.processingStart();
             this.addRowCount = 0;
-            this.breakKeyCount = 0;
         }
     }
 
@@ -260,10 +232,6 @@ public class ComparableTableMapperSingle implements ComparableTableMapper {
 
     protected int getAddRowCount() {
         return this.addRowCount + Optional.ofNullable(this.alreadyWrite.get(this.metaData.getTableName())).orElse(0);
-    }
-
-    protected int getBreakKeyCount() {
-        return this.splitter.breakKeys().isEmpty() ? this.getAddRowCount() : this.breakKeyCount;
     }
 
 }
