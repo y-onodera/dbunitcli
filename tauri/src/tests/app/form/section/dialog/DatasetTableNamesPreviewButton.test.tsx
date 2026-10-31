@@ -1,7 +1,7 @@
 import { core } from "@tauri-apps/api";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import DatasetTableNamesPreviewButton from "../../../../../app/form/section/dialog/DatasetTableNamesPreviewButton";
 import type { TablePreview } from "../../../../../hooks/useDatasetSettings";
 import {
@@ -31,20 +31,27 @@ vi.mock("../../../../../hooks/useWorkspaceResources", () => ({
 }));
 
 // （mockReset:trueで実装が毎回リセットされるため、resolve値は各テスト内で設定する）
-const { previewFixture, mockConvert } = vi.hoisted(() => ({
-	previewFixture: { current: null as TablePreview | null },
+const { previewFixture, tableNamesFixture, mockConvert } = vi.hoisted(() => ({
+	previewFixture: {
+		current: null as TablePreview | null,
+		error: "",
+		logs: [] as string[],
+	},
+	tableNamesFixture: { error: "", logs: [] as string[] },
 	mockConvert: vi.fn(),
 }));
 vi.mock("../../../../../hooks/useDatasetSettings", () => ({
 	useDatasetTableNames: () => ({
-		tableNames: ["big"],
+		tableNames: tableNamesFixture.error ? [] : ["big"],
 		loading: false,
-		logs: [],
+		logs: tableNamesFixture.logs,
+		error: tableNamesFixture.error,
 	}),
 	useDatasetTablePreview: () => ({
 		preview: previewFixture.current,
 		loading: false,
-		logs: [],
+		logs: previewFixture.logs,
+		error: previewFixture.error,
 	}),
 	useDatasetTableConvert: () => mockConvert,
 }));
@@ -89,6 +96,47 @@ async function openExport() {
 }
 
 describe("DatasetTableNamesPreviewButtonのテスト", () => {
+	beforeEach(() => {
+		previewFixture.error = "";
+		previewFixture.logs = [];
+		tableNamesFixture.error = "";
+		tableNamesFixture.logs = [];
+	});
+
+	it("テーブル一覧の読込に失敗したら、エラーと読込中のログを残す", async () => {
+		tableNamesFixture.error = "boom";
+		tableNamesFixture.logs = ["step1", "step2"];
+		const user = userEvent.setup();
+		render(
+			<DatasetTableNamesPreviewButton
+				title="Preview Before Settings"
+				setting=""
+			/>,
+		);
+		await user.click(
+			screen.getByRole("button", { name: "Preview Before Settings" }),
+		);
+
+		expect(screen.getByText("Error: boom")).toBeInTheDocument();
+		expect(
+			screen.getByRole("log", { name: "execution log" }),
+		).toHaveTextContent("step1 step2");
+		expect(screen.queryByText("No tables found.")).not.toBeInTheDocument();
+	});
+
+	it("データの読込に失敗したら、エラーと読込中のログを残し、Exportはできない", async () => {
+		previewFixture.error = "boom";
+		previewFixture.logs = ["step1"];
+		await openPreview();
+
+		expect(screen.getByText("Error: boom")).toBeInTheDocument();
+		expect(
+			screen.getByRole("log", { name: "execution log" }),
+		).toHaveTextContent("step1");
+		expect(screen.queryByText("No data found.")).not.toBeInTheDocument();
+		expect(screen.getByRole("button", { name: "Export" })).toBeDisabled();
+	});
+
 	it("全行数より表示行が少ないときは部分表示であることを示す", async () => {
 		previewFixture.current = {
 			headers: ["key"],

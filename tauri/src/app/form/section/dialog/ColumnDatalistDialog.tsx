@@ -4,6 +4,7 @@ import {
 	DialogActions,
 	DialogField,
 	DialogTitle,
+	JobFailure,
 	ModalOverlay,
 	StatusMessage,
 	Td,
@@ -16,6 +17,7 @@ import { useAbortSignalRef } from "../../../../hooks/useAbortSignalRef";
 import { useColumnNamesFetcher } from "../../../../hooks/useDatasetSettings";
 import { useJobLog } from "../../../../hooks/useJobLog";
 import type { DatasetSetting } from "../../../../model/DatasetSettings";
+import { getErrorMessage } from "../../../../utils/fetchUtils";
 
 export default function ColumnDatalistDialog({
 	tableNames,
@@ -30,6 +32,7 @@ export default function ColumnDatalistDialog({
 }) {
 	const filteredTables = filterTablesByTarget(tableNames, target);
 	const [loadingTable, setLoadingTable] = useState<string | null>(null);
+	const [loadError, setLoadError] = useState("");
 	const srcInfo = useDatasetSrcInfo();
 	const fetchColumnNames = useColumnNamesFetcher();
 	const abortControllerRef = useAbortSignalRef();
@@ -44,6 +47,7 @@ export default function ColumnDatalistDialog({
 			return;
 		}
 		setLoadingTable(tableName);
+		setLoadError("");
 		jobLog.reset();
 		const { signal } = abortControllerRef.current;
 		fetchColumnNames(srcInfo, tableName, signal, jobLog.append).then(
@@ -51,6 +55,13 @@ export default function ColumnDatalistDialog({
 				if (!abortControllerRef.current?.signal.aborted) {
 					onLoad(columns);
 					onClose();
+				}
+			},
+			// 失敗したら閉じずに、エラーと実行中のログを残す（別のテーブルを選び直せる）
+			(ex) => {
+				if (!abortControllerRef.current?.signal.aborted) {
+					setLoadError(getErrorMessage(ex));
+					setLoadingTable(null);
 				}
 			},
 		);
@@ -92,6 +103,7 @@ export default function ColumnDatalistDialog({
 				/>
 			) : (
 				<>
+					{loadError && <JobFailure message={loadError} lines={jobLog.logs} />}
 					{renderBody()}
 					<DialogActions>
 						<WhiteButton title="Close" handleClick={onClose} />

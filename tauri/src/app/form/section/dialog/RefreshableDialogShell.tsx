@@ -5,6 +5,7 @@ import {
 	DialogFooter,
 	DialogTitle,
 	FullDialog,
+	JobFailure,
 	StatusMessage,
 } from "../../../../components/dialog";
 import { BlueButton, WhiteButton } from "../../../../components/element/Button";
@@ -64,9 +65,7 @@ export function RefreshableDialogShell<OPTIONS>({
 				{executing && (
 					<JobProgress title="Now Execution" lines={logs} onAbandon={onClose} />
 				)}
-				{executeError && (
-					<StatusMessage kind="error">Error: {executeError}</StatusMessage>
-				)}
+				{executeError && <JobFailure message={executeError} lines={logs} />}
 			</DialogBody>
 			<DialogFooter>
 				<BlueButton

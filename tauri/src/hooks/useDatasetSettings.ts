@@ -67,19 +67,24 @@ async function fetchTableNames(
 		signal,
 		onLog,
 	};
-	return fetchData(fetchParams)
-		.then((r) => r.json())
-		.catch(() => []);
+	// 失敗は呼び出し元で扱う（Previewはエラーとログを表示し、入力候補は空にする）
+	return fetchData(fetchParams).then((r) => r.json());
 }
 
 // withLogs: 読込中のログも受け取る（読込中の表示に使う場合）
 export const useDatasetTableNames = (
 	srcInfo: DatasetSrcInfo,
 	withLogs = false,
-): { tableNames: string[]; loading: boolean; logs: string[] } => {
+): {
+	tableNames: string[];
+	loading: boolean;
+	logs: string[];
+	error: string;
+} => {
 	const [tableNames, setTableNames] = useState<string[]>([]);
 	const [loading, setLoading] = useState(false);
 	const [logs, setLogs] = useState<string[]>([]);
+	const [error, setError] = useState("");
 	const { apiUrl } = useEnvironment();
 	const { jdbcValues, connectionOk } = useJdbcConnectionState();
 	const paramInputs = useParamInputs();
@@ -90,11 +95,13 @@ export const useDatasetTableNames = (
 		if (!srcReady) {
 			setTableNames([]);
 			setLoading(false);
+			setError("");
 			return;
 		}
 		const controller = new AbortController();
 		setLoading(true);
 		setLogs([]);
+		setError("");
 		fetchTableNames(
 			apiUrl,
 			srcInfo,
@@ -104,18 +111,27 @@ export const useDatasetTableNames = (
 			withLogs
 				? (line) => setLogs((current) => appendLogLines(current, [line]))
 				: undefined,
-		).then((names) => {
-			if (!controller.signal.aborted) {
-				setTableNames(names);
-				setLoading(false);
-			}
-		});
+		).then(
+			(names) => {
+				if (!controller.signal.aborted) {
+					setTableNames(names);
+					setLoading(false);
+				}
+			},
+			(ex) => {
+				if (!controller.signal.aborted) {
+					setTableNames([]);
+					setError(getErrorMessage(ex));
+					setLoading(false);
+				}
+			},
+		);
 		return () => {
 			controller.abort();
 		};
 	}, [apiUrl, srcInfo, srcReady, jdbcValues, paramInputs, withLogs]);
 
-	return { tableNames, loading, logs };
+	return { tableNames, loading, logs, error };
 };
 
 // rowsは先頭の一部だけ（sidecarが件数を制限する）。totalRowsが対象テーブルの全行数
@@ -152,18 +168,23 @@ async function fetchTablePreview(
 		signal,
 		onLog,
 	};
-	return fetchData(fetchParams)
-		.then((r) => r.json())
-		.catch(() => EMPTY_PREVIEW);
+	// 失敗は呼び出し元で扱う（Previewはエラーとログを表示し、入力候補は空にする）
+	return fetchData(fetchParams).then((r) => r.json());
 }
 
 export const useDatasetTablePreview = (
 	srcInfo: DatasetSrcInfo,
 	tableName: string,
-): { preview: TablePreview | null; loading: boolean; logs: string[] } => {
+): {
+	preview: TablePreview | null;
+	loading: boolean;
+	logs: string[];
+	error: string;
+} => {
 	const [preview, setPreview] = useState<TablePreview | null>(null);
 	const [loading, setLoading] = useState(false);
 	const [logs, setLogs] = useState<string[]>([]);
+	const [error, setError] = useState("");
 	const { apiUrl } = useEnvironment();
 	const { jdbcValues, connectionOk } = useJdbcConnectionState();
 	const paramInputs = useParamInputs();
@@ -174,11 +195,13 @@ export const useDatasetTablePreview = (
 		if (!srcReady || !tableName) {
 			setPreview(null);
 			setLoading(false);
+			setError("");
 			return;
 		}
 		const controller = new AbortController();
 		setLoading(true);
 		setLogs([]);
+		setError("");
 		fetchTablePreview(
 			apiUrl,
 			srcInfo,
@@ -187,18 +210,27 @@ export const useDatasetTablePreview = (
 			paramInputs,
 			controller.signal,
 			(line) => setLogs((current) => appendLogLines(current, [line])),
-		).then((result) => {
-			if (!controller.signal.aborted) {
-				setPreview(result);
-				setLoading(false);
-			}
-		});
+		).then(
+			(result) => {
+				if (!controller.signal.aborted) {
+					setPreview(result);
+					setLoading(false);
+				}
+			},
+			(ex) => {
+				if (!controller.signal.aborted) {
+					setPreview(null);
+					setError(getErrorMessage(ex));
+					setLoading(false);
+				}
+			},
+		);
 		return () => {
 			controller.abort();
 		};
 	}, [apiUrl, srcInfo, srcReady, jdbcValues, tableName, paramInputs]);
 
-	return { preview, loading, logs };
+	return { preview, loading, logs, error };
 };
 
 // 選んだテーブルだけをresultフォームの値（-result.*）でconvertし、出力先ディレクトリを返す（DB出力なら空文字）。
@@ -307,13 +339,14 @@ async function loadAllColumnNames(
 	signal: AbortSignal,
 ): Promise<string[]> {
 	const info = withAllTables(srcInfo);
-	const tableNames = await fetchTableNames(
+	// 入力候補なので、取得できなかったテーブルは候補なしとして続ける
+	const tableNames: string[] = await fetchTableNames(
 		apiUrl,
 		info,
 		jdbcValues,
 		paramInputs,
 		signal,
-	);
+	).catch(() => []);
 	const previews = await Promise.all(
 		tableNames.map((tableName) =>
 			fetchTablePreview(
@@ -323,7 +356,7 @@ async function loadAllColumnNames(
 				jdbcValues,
 				paramInputs,
 				signal,
-			),
+			).catch(() => EMPTY_PREVIEW),
 		),
 	);
 	const seen = new Set<string>();
@@ -349,6 +382,7 @@ export const useColumnNamesFetcher = () => {
 		signal: AbortSignal,
 		onLog?: (line: string) => void,
 	): Promise<string[]> => {
+		// 失敗は投げる（呼び出し元がエラーと実行中のログを表示する）
 		if (signal.aborted) {
 			return [];
 		}
