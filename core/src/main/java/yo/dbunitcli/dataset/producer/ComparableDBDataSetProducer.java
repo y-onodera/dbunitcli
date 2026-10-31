@@ -142,9 +142,14 @@ public class ComparableDBDataSetProducer implements ComparableDataSetProducer {
                 try {
                     ComparableDBDataSetProducer.LOGGER.info("produce - start databaseTable={}", table.getTableMetaData().getTableName());
                     final ITableMetaData tableMetaData;
+                    // ヘッダより多い列は無視する
+                    final Column[] valueColumns = this.param.headerNames() != null
+                            ? Arrays.copyOf(table.getTableMetaData().getColumns()
+                            , Math.min(this.param.headerNames().length, table.getTableMetaData().getColumns().length))
+                            : table.getTableMetaData().getColumns();
                     if (this.param.headerNames() != null) {
                         final ITableMetaData metaData = table.getTableMetaData();
-                        final Column[] columns = Arrays.stream(this.param.headerNames(), 0, metaData.getColumns().length)
+                        final Column[] columns = Arrays.stream(this.param.headerNames(), 0, valueColumns.length)
                                 .map(name -> new Column(name.trim(), DataType.UNKNOWN))
                                 .toArray(Column[]::new);
                         tableMetaData = new DefaultTableMetaData(table.getTableMetaData().getTableName()
@@ -157,6 +162,7 @@ public class ComparableDBDataSetProducer implements ComparableDataSetProducer {
                                         throw new RuntimeException(e);
                                     }
                                 })
+                                .filter(i -> i < columns.length)
                                 .mapToObj(i -> columns[i])
                                 .toArray(Column[]::new));
                     } else {
@@ -165,13 +171,12 @@ public class ComparableDBDataSetProducer implements ComparableDataSetProducer {
                     final ComparableTableMapper mapper = context.createMapper(source.wrap(tableMetaData));
                     mapper.startTable();
                     if (this.param.loadData() && mapper.hasOutput()) {
-                        final Column[] columns = table.getTableMetaData().getColumns();
                         int row = 0;
                         for (; true; row++) {
                             try {
-                                final Object[] rows = new Object[columns.length];
+                                final Object[] rows = new Object[valueColumns.length];
                                 int columnIndex = 0;
-                                for (final Column column : columns) {
+                                for (final Column column : valueColumns) {
                                     rows[columnIndex++] = table.getValue(row, column.getColumnName());
                                 }
                                 mapper.addRow(rows);

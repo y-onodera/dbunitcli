@@ -57,7 +57,11 @@ public record ComparableFixedFileDataSetProducer(ComparableDataSetParam param,
                                 break;
                             }
                             if (rows + 1 >= this.param.startRow()) {
-                                mapper.addRow(metaData.source().apply(this.split(s)));
+                                final Object[] values = this.split(s);
+                                // ヘッダより多い列は無視する
+                                mapper.addRow(metaData.source().apply(values.length > this.param.headerNames().length
+                                        ? Arrays.copyOf(values, this.param.headerNames().length)
+                                        : values));
                             }
                             rows++;
                         }

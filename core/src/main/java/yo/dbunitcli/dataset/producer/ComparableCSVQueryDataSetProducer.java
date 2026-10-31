@@ -52,7 +52,12 @@ public record ComparableCSVQueryDataSetProducer(ComparableDataSetParam param,
                      final ResultSet rst = stmt.executeQuery(query)
                 ) {
                     final ResultSetMetaData metaData = rst.getMetaData();
-                    final Column[] columns = IntStream.range(0, metaData.getColumnCount())
+                    // ヘッダより多い列は無視する
+                    final int resultColumnCount = metaData.getColumnCount();
+                    final int columnCount = Optional.ofNullable(this.param.headerNames())
+                            .map(it -> Math.min(it.length, resultColumnCount))
+                            .orElse(resultColumnCount);
+                    final Column[] columns = IntStream.range(0, columnCount)
                             .mapToObj(i -> {
                                 try {
                                     return Optional.ofNullable(this.param.headerNames())
@@ -69,7 +74,7 @@ public record ComparableCSVQueryDataSetProducer(ComparableDataSetParam param,
                     if (this.param.loadData() && mapper.hasOutput()) {
                         int readRows = 0;
                         while (rst.next()) {
-                            mapper.addRow(IntStream.rangeClosed(1, metaData.getColumnCount())
+                            mapper.addRow(IntStream.rangeClosed(1, columnCount)
                                     .mapToObj(i -> {
                                         try {
                                             return Optional.ofNullable(rst.getString(i))

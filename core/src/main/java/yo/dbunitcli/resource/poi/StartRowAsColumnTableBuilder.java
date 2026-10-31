@@ -21,6 +21,7 @@ public class StartRowAsColumnTableBuilder implements XlsxRowsToTableBuilder {
     private final int startRow;
     private final Source source;
     private TableMetaDataWithSource nowProcessing = null;
+    private int headerColumnCount = 0;
 
     public StartRowAsColumnTableBuilder(final int startRow, final String[] headerNames, final Source source) {
         this.source = source;
@@ -46,7 +47,9 @@ public class StartRowAsColumnTableBuilder implements XlsxRowsToTableBuilder {
 
     @Override
     public TableMetaDataWithSource startNewTable() {
-        this.nowProcessing = this.source.wrap(new DefaultTableMetaData(this.tableName, this.getColumns()));
+        final Column[] columns = this.getColumns();
+        this.headerColumnCount = columns.length;
+        this.nowProcessing = this.source.wrap(new DefaultTableMetaData(this.tableName, columns));
         return this.nowProcessing;
     }
 
@@ -68,8 +71,9 @@ public class StartRowAsColumnTableBuilder implements XlsxRowsToTableBuilder {
 
     @Override
     public String[] currentRow() {
-        if (this.nowProcessing.getColumnLength() < this.rowValues.size()) {
-            throw new AssertionError(this.rowValues + " large items than header:" + Arrays.toString(this.nowProcessing.getColumns()));
+        // ヘッダより多い列は無視する
+        if (this.headerColumnCount < this.rowValues.size()) {
+            return this.nowProcessing.withDefaultValuesToArray(this.rowValues.subList(0, this.headerColumnCount));
         }
         return this.nowProcessing.withDefaultValuesToArray(this.rowValues);
     }
