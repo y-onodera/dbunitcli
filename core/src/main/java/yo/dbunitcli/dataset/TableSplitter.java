@@ -1,7 +1,11 @@
 package yo.dbunitcli.dataset;
 
+import org.dbunit.dataset.DataSetException;
+
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.function.Function;
 
 public record TableSplitter(TableRenameStrategy renameFunction, List<String> breakKeys, int limit) {
 
@@ -23,10 +27,20 @@ public record TableSplitter(TableRenameStrategy renameFunction, List<String> bre
     }
 
     /**
-     * 分割の区切りを判定する行のキー（breakKeyが無ければ空）
+     * 分割の区切りを判定する行のキーを読む関数（breakKeyが無ければ空を返す）。列の位置はここで1回だけ求める
      */
-    public List<String> breakKeys(final AddSettingTableMetaData metaData, final Object[] row) {
-        return this.breakKeys.isEmpty() ? List.of() : metaData.getBreakKeys(row);
+    public Function<Object[], List<String>> breakKeyReader(final AddSettingTableMetaData metaData) {
+        if (this.breakKeys.isEmpty()) {
+            return _ -> List.of();
+        }
+        final int[] indexes = this.breakKeys.stream().mapToInt(name -> {
+            try {
+                return metaData.getColumnIndex(name);
+            } catch (final DataSetException e) {
+                throw new RuntimeException(e);
+            }
+        }).toArray();
+        return row -> Arrays.stream(indexes).mapToObj(i -> row[i].toString()).toList();
     }
 
     public boolean isLimit(final int addRowCount) {

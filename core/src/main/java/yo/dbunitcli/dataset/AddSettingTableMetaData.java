@@ -144,19 +144,6 @@ public record AddSettingTableMetaData(
         return presetSplitter.isSplit() ? presetSplitter : this.tableSeparator.splitter();
     }
 
-    public List<String> getBreakKeys(final Object[] applySetting) {
-        return this.getTableSplitter().breakKeys().stream()
-                .map(name -> {
-                    try {
-                        return this.getColumnIndex(name);
-                    } catch (final DataSetException e) {
-                        throw new RuntimeException(e);
-                    }
-                })
-                .map(index -> applySetting[index].toString())
-                .toList();
-    }
-
     public Column[] getOrderColumns() {
         final Column[] own = this.tableSeparator.getOrderColumns();
         if (own.length > 0 || this.preset == null) {

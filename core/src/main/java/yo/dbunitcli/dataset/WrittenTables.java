@@ -14,6 +14,11 @@ public final class WrittenTables {
 
     private final Map<String, String> splitTables = new HashMap<>();
 
+    /**
+     * 分割するテーブルの分割前の名前
+     */
+    private final Set<String> splitBaseTables = new HashSet<>();
+
     private final Map<SplitKey, PendingTable> pendingTables = new LinkedHashMap<>();
 
     /**
@@ -63,6 +68,20 @@ public final class WrittenTables {
      */
     void putSplitTable(final String tableName, final String firstTableName) {
         this.splitTables.put(tableName, firstTableName);
+    }
+
+    /**
+     * 分割するテーブルの分割前の名前を記録する
+     */
+    void putSplitBaseTable(final String baseTableName) {
+        this.splitBaseTables.add(baseTableName);
+    }
+
+    /**
+     * 分割するテーブルの、分割前または分割後の名前か
+     */
+    boolean isSplitTableName(final String tableName) {
+        return this.splitTables.containsKey(tableName) || this.splitBaseTables.contains(tableName);
     }
 
     /**

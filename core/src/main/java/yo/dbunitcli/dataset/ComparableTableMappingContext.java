@@ -46,6 +46,7 @@ public record ComparableTableMappingContext(TableSeparators tableSeparators
     public TreeMap<String, ComparableTable> close() {
         this.flushPendingTables();
         this.processExecutableJoins(this.joins);
+        this.warnJoinsOnSplitTables();
         this.excludeUnusedJoinInputs();
         if (this.converter != null) {
             this.tableMap.values().forEach(this.converter::convert);
@@ -70,6 +71,17 @@ public record ComparableTableMappingContext(TableSeparators tableSeparators
             });
             pending.joins().forEach(join -> join.setIfRelated(tables.getFirst()));
         });
+    }
+
+    /**
+     * 分割するテーブル（分割前・分割後のどちらの名前でも）はjoinの左右に使えない。そのため実行できなかったjoinを警告する
+     */
+    private void warnJoinsOnSplitTables() {
+        this.joins.stream()
+                  .filter(join -> !join.isExecutable())
+                  .map(ComparableTableJoin::getCondition)
+                  .filter(it -> this.alreadyWrite.isSplitTableName(it.left()) || this.alreadyWrite.isSplitTableName(it.right()))
+                  .forEach(it -> LOGGER.warn("join(left={}, right={}) is not executed. a split table cannot be joined.", it.left(), it.right()));
     }
 
     /**

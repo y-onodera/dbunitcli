@@ -3,7 +3,6 @@ package yo.dbunitcli.dataset;
 import org.dbunit.dataset.ITableMetaData;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import yo.dbunitcli.common.Source;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -43,8 +42,8 @@ public class ComparableTableMappingTaskTest {
                                                                    .setTableSeparators(DataSetTestSupport.separators(setting))
                                                                    .build();
         final Map<String, List<String>> rows = new LinkedHashMap<>();
-        new ComparableTableMappingTask.WithTargetTable("a", List.of(new KeysTask(param, this.runs, "11", "12", "13")
-                , new KeysTask(param, this.runs, "21", "22", "23")))
+        new ComparableTableMappingTask.WithTargetTable("a", List.of(this.task(param, "11", "12", "13")
+                , this.task(param, "21", "22", "23")))
                 .runWith(_ -> {
                 }, new RowsByTable(rows, splittable));
         return rows;
@@ -53,23 +52,8 @@ public class ComparableTableMappingTaskTest {
     /**
      * テーブルaにkeysの行を書くソース。読んだことをrunsに1つ目のkeyで記録する
      */
-    private record KeysTask(ComparableDataSetParam param, List<String> runs, String... keys) implements ComparableTableMappingTask {
-
-        @Override
-        public Source source() {
-            return Source.NONE.tableName("a");
-        }
-
-        @Override
-        public void run(final ComparableTableMappingContext context) {
-            this.runs.add(this.keys[0]);
-            DataSetTestSupport.write(context, "a", this.keys);
-        }
-
-        @Override
-        public ComparableTableMappingTask with(final ComparableDataSetParam.Builder builder) {
-            return new KeysTask(builder.build(), this.runs, this.keys);
-        }
+    private ComparableTableMappingTask task(final ComparableDataSetParam param, final String... keys) {
+        return new DataSetTestSupport.KeysTask("a", param, (task, _) -> this.runs.add(task.keys()[0]), keys);
     }
 
     /**

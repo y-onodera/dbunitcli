@@ -1,7 +1,9 @@
 package yo.dbunitcli.dataset;
 
+import org.dbunit.dataset.Column;
 import org.dbunit.dataset.ITableMetaData;
 import yo.dbunitcli.common.TableMetaDataFilter;
+import yo.dbunitcli.common.TableMetaDataWithSource;
 import yo.dbunitcli.common.filter.AlwaysFilter;
 
 import java.util.*;
@@ -148,19 +150,26 @@ public record TableSeparators(List<TableSeparator> settings
     }
 
     public Stream<AddSettingTableMetaData> getAddSettingTableMetaData(final ComparableTableJoin join) {
-        return this.chainNext(this.addNewNameSetting(join.getCondition().tableSeparators()
-                                                         .stream()
-                                                         .map(it -> this.getCommonSettings(join.joinMetaData())
-                                                                        .add(it)
-                                                                        .addSetting(join.joinMetaData()))
-                , join.joinMetaData().getTableName()));
+        return this.chainNext(this.joinOutputs(join.getCondition(), join.joinMetaData()).flatMap(this::applyFilter));
     }
 
     public Stream<AddSettingTableMetaData> getAddSettingTableMetaData(final ITableMetaData metaData) {
         if (!this.sourceFilter.test(metaData)) {
             return Stream.empty();
         }
-        return this.chainNext(this.addNewNameSetting(this.addSettings(metaData), metaData.getTableName()));
+        return this.chainNext(this.addNewNameSetting(this.addSettings(metaData), metaData.getTableName()).flatMap(this::applyFilter));
+    }
+
+    /**
+     * joinの出力テーブル（この段の設定を適用し、出力の絞り込みはかけない）
+     */
+    private Stream<AddSettingTableMetaData> joinOutputs(final ComparableTableJoinCondition join, final ITableMetaData joinMetaData) {
+        return this.addNewNameSetting(join.tableSeparators()
+                                          .stream()
+                                          .map(it -> this.getCommonSettings(joinMetaData)
+                                                         .add(it)
+                                                         .addSetting(joinMetaData))
+                , joinMetaData.getTableName());
     }
 
     private Stream<AddSettingTableMetaData> chainNext(final Stream<AddSettingTableMetaData> stage) {
@@ -183,12 +192,11 @@ public record TableSeparators(List<TableSeparator> settings
                                      , it.getTableName());
                          }
                          return Stream.of(it);
-                     })
-                     .flatMap(this::applyFilter);
+                     });
     }
 
     /**
-     * 出力の絞り込み（outputFilter）をかける。joinの結果にかけるため、joinの元テーブルは除かずに読み、
+     * 出力の絞り込み（outputFilter）をかける。joinの結果にかけるため、絞り込みに合いうる出力を作るjoinの元テーブルは除かずに読み、
      * joinで使われずに残ったら読込の終わりに除くよう印を付ける（{@link AddSettingTableMetaData#isOutputExcluded()}）
      */
     private Stream<AddSettingTableMetaData> applyFilter(final AddSettingTableMetaData metaData) {
@@ -199,10 +207,23 @@ public record TableSeparators(List<TableSeparator> settings
     }
 
     /**
-     * joinの元テーブルか
+     * 出力の絞り込みに合いうる出力を作るjoinの、元テーブルか
      */
     private boolean isJoinInput(final AddSettingTableMetaData metaData) {
-        return this.joinConditions.stream().anyMatch(it -> it.hasRelation(metaData));
+        return this.joinConditions.stream()
+                                  .anyMatch(it -> it.hasRelation(metaData) && this.mayOutput(it, new HashSet<>(Set.of(it))));
+    }
+
+    /**
+     * joinの出力が出力の絞り込みに合いうるか。joinの結果を使うjoinがあれば、その出力でも判定する（visitedは判定済みのjoin）
+     */
+    private boolean mayOutput(final ComparableTableJoinCondition join, final Set<ComparableTableJoinCondition> visited) {
+        final ITableMetaData joinMetaData = TableMetaDataWithSource.fromJoin(join.left() + "_with_" + join.right()
+                , new Column[0], new Column[0]);
+        return this.joinOutputs(join, joinMetaData)
+                   .anyMatch(output -> this.filter.test(output)
+                           || this.joinConditions.stream()
+                                                 .anyMatch(it -> it.hasRelation(output) && visited.add(it) && this.mayOutput(it, visited)));
     }
 
     private Stream<AddSettingTableMetaData> addSettings(final ITableMetaData originMetaData) {

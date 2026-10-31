@@ -3,6 +3,7 @@ package yo.dbunitcli.dataset;
 import org.dbunit.dataset.DataSetException;
 
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -26,6 +27,7 @@ public class ComparableTableMapperSingle implements ComparableTableMapper {
     private final List<Integer> originalRowIndexes;
     private final Collection<Object[]> rows;
     private final TableSplitter splitter;
+    private final Function<Object[], List<String>> breakKeys;
     private final WrittenTables.SplitState splitState;
     private final boolean hasOutput;
     /**
@@ -42,6 +44,7 @@ public class ComparableTableMapperSingle implements ComparableTableMapper {
                                        final List<ComparableTableMappingTask> sources, final boolean enableRowProcessing) {
         this.baseMetaData = metaData;
         this.splitter = metaData.getTableSplitter();
+        this.breakKeys = this.splitter.breakKeyReader(metaData);
         this.firstTableName = this.splitter.tableName(metaData.getTableName(), 0);
         // 行を流しながら分割する場合は、同じテーブルに前のソースが書いた続きから分割する
         this.splitState = enableRowProcessing && this.splitter.isSplit()
@@ -86,6 +89,9 @@ public class ComparableTableMapperSingle implements ComparableTableMapper {
     public void endTable() {
         this.alreadyWrite.put(this.metaData.getTableName(), this.getAddRowCount());
         this.alreadyWrite.wrote(this.firstTableName, this.sources);
+        if (this.splitter.isSplit()) {
+            this.alreadyWrite.putSplitBaseTable(this.baseMetaData.getTableName());
+        }
         if (this.enableRowProcessing && this.splitter.isSplit()) {
             this.alreadyWrite.putSplitTable(this.metaData.getTableName(), this.firstTableName);
         }
@@ -157,7 +163,7 @@ public class ComparableTableMapperSingle implements ComparableTableMapper {
         if (!this.splitter.isSplit()) {
             return;
         }
-        if (this.splitState.counter().isBreak(this.splitter.breakKeys(this.metaData, applySetting), this.getAddRowCount())) {
+        if (this.splitState.counter().isBreak(this.breakKeys.apply(applySetting), this.getAddRowCount())) {
             this.endTable();
             this.splitState.next();
             this.metaData = this.splitter.getMetaData(this.baseMetaData, this.splitState.no());

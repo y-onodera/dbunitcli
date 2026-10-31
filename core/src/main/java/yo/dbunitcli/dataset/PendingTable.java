@@ -1,6 +1,7 @@
 package yo.dbunitcli.dataset;
 
 import java.util.*;
+import java.util.function.Function;
 
 /**
  * 行を保持するテーブルの、確定を待っている行。同じテーブルに複数のソースから行が入る場合はソースをまたいでためておき、
@@ -62,11 +63,12 @@ final class PendingTable {
         }
         final List<ComparableTable> result = new ArrayList<>();
         final TableSplitter.Counter counter = this.splitter.counter();
+        final Function<Object[], List<String>> breakKeys = this.splitter.breakKeyReader(this.metaData);
         List<Object[]> targetValues = new ArrayList<>();
         List<Integer> targetRowIndexes = new ArrayList<>();
         for (int i = 0, j = targetRows.size(); i < j; i++) {
             final Object[] row = sorted.getRow(i);
-            if (counter.isBreak(this.splitter.breakKeys(this.metaData, row), targetValues.size())) {
+            if (counter.isBreak(breakKeys.apply(row), targetValues.size())) {
                 result.add(this.table(result.size(), targetValues, targetRowIndexes));
                 targetValues = new ArrayList<>();
                 targetRowIndexes = new ArrayList<>();
