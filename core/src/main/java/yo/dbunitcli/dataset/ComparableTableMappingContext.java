@@ -39,14 +39,13 @@ public record ComparableTableMappingContext(TableSeparators tableSeparators
                 .setConverter(this.converter)
                 .setAlreadyWrite(this.alreadyWrite)
                 .setJoins(this.joins)
-                .setContextShareTableMap(this.tableMap)
                 .setSources(this.sources)
                 .build(this.tableSeparators.getAddSettingTableMetaData(metaData));
     }
 
     public TreeMap<String, ComparableTable> close() {
-        this.flushSplits();
-        this.executeJoin();
+        this.flushPendingTables();
+        this.processExecutableJoins(this.joins);
         this.excludeUnusedJoinInputs();
         if (this.converter != null) {
             this.tableMap.values().forEach(this.converter::convert);
@@ -57,24 +56,20 @@ public record ComparableTableMappingContext(TableSeparators tableSeparators
     }
 
     /**
-     * 分割を待っている行（行を保持して分割するテーブル）を、まとめて1回だけ並べ替えて分割し、分割後のテーブルを確定させる。
-     * 分割後の1つ目のテーブルを関係するjoinへ渡す
+     * 確定を待っている行（行を保持するテーブル）を、テーブルごとにまとめて1回だけ確定させ（分割するテーブルは並べ替えて分割し）、
+     * 読込の結果に入れる。1つ目のテーブルを関係するjoinへ渡す
      */
-    private void flushSplits() {
-        this.alreadyWrite.takePendingSplits().forEach(pending -> {
-            final List<ComparableTable> tables = pending.split();
+    private void flushPendingTables() {
+        this.alreadyWrite.takePendingTables().forEach(pending -> {
+            final List<ComparableTable> tables = pending.tables();
             tables.forEach(table -> {
                 this.tableMap.put(table.getTableName(), table);
-                this.alreadyWrite.putSplitTable(table.getTableName(), pending.firstTableName());
+                if (pending.isSplit()) {
+                    this.alreadyWrite.putSplitTable(table.getTableName(), pending.firstTableName());
+                }
             });
             pending.joins().forEach(join -> join.setIfRelated(tables.getFirst()));
         });
-    }
-
-    private void executeJoin() {
-        if (!this.joins.isEmpty()) {
-            this.processExecutableJoins(new ArrayList<>(this.joins));
-        }
     }
 
     /**
@@ -98,7 +93,6 @@ public record ComparableTableMappingContext(TableSeparators tableSeparators
                             .toList();
                     final ComparableTableMapper joinMapper = new ComparableTableMapperBuilder()
                             .setConverter(this.converter)
-                            .setContextShareTableMap(this.tableMap)
                             .setAlreadyWrite(this.alreadyWrite)
                             .setJoins(newRemaining)
                             // joinの出力テーブルには、左右のテーブルに行を入れたタスクが行を入れたものとする
@@ -108,7 +102,7 @@ public record ComparableTableMappingContext(TableSeparators tableSeparators
                     joinMapper.startTable();
                     join.execute().forEach(joinMapper::addRow);
                     joinMapper.endTable();
-                    this.flushSplits();
+                    this.flushPendingTables();
                     this.processExecutableJoins(newRemaining);
                 });
     }

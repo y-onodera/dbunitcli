@@ -257,16 +257,13 @@ public record AddSettingTableMetaData(
         }
 
         /**
-         * 行をつなげる。行番号はそれぞれのソースでの行番号のまま残す
-         */
-        public Rows add(final Rows other) {
-            return Rows.concat(List.of(this, other));
-        }
-
-        /**
-         * 行をつなげる。行番号はそれぞれのソースでの行番号のまま残す
+         * 行をつなげる。行番号はそれぞれのソースでの行番号のまま残す（行のあるソースが1つなら、そのソースの行番号の持ち方のまま）
          */
         public static Rows concat(final List<Rows> sources) {
+            final List<Rows> nonEmpty = sources.stream().filter(it -> it.size() > 0).toList();
+            if (nonEmpty.size() <= 1) {
+                return nonEmpty.isEmpty() ? new Rows() : nonEmpty.getFirst();
+            }
             final int size = sources.stream().mapToInt(Rows::size).sum();
             final List<Object[]> rows = new ArrayList<>(size);
             final List<Integer> originalRowIndexes = new ArrayList<>(size);
@@ -277,6 +274,9 @@ public record AddSettingTableMetaData(
             return new Rows(rows, originalRowIndexes);
         }
 
+        /**
+         * 行を変換し、nullになった行とkeepに合わない行を除く。行を除かなければ、行番号の持ち方はこのRowsのまま
+         */
         public Rows map(final UnaryOperator<Object[]> rowFunction, final Predicate<Object[]> keep) {
             final List<Object[]> newRows = new ArrayList<>();
             final List<Integer> newOriginalRowIndexes = new ArrayList<>();
@@ -287,7 +287,7 @@ public record AddSettingTableMetaData(
                     newOriginalRowIndexes.add(this.originalRowIndex(i));
                 }
             }
-            return new Rows(newRows, newOriginalRowIndexes);
+            return new Rows(newRows, newRows.size() == this.rows.size() ? this.originalRowIndexes : newOriginalRowIndexes);
         }
 
         public Rows distinct() {

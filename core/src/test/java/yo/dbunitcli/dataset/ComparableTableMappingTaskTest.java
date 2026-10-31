@@ -46,7 +46,7 @@ public class ComparableTableMappingTaskTest {
         new ComparableTableMappingTask.WithTargetTable("a", List.of(new KeysTask(param, this.runs, "11", "12", "13")
                 , new KeysTask(param, this.runs, "21", "22", "23")))
                 .runWith(_ -> {
-                }, new RowsByTable(rows, new String[1], splittable));
+                }, new RowsByTable(rows, splittable));
         return rows;
     }
 
@@ -74,9 +74,18 @@ public class ComparableTableMappingTaskTest {
 
     /**
      * jxls（StreamingEachCommand）と同じく行を流して受け取り、テーブルごとの行を記録する。
-     * 分割（split）しても書き込み先と書き込み中のテーブル（current）を共有する。splittableがfalseならxlsのシート出力と同じく分割できない
+     * 分割（split）しても同じインスタンスで受ける。splittableがfalseならxlsのシート出力と同じく分割できない
      */
-    private record RowsByTable(Map<String, List<String>> rows, String[] current, boolean splittable) implements IDataSetConverter {
+    private static final class RowsByTable extends MetaDataCapture {
+
+        private final Map<String, List<String>> rows;
+        private final boolean splittable;
+        private String current;
+
+        private RowsByTable(final Map<String, List<String>> rows, final boolean splittable) {
+            this.rows = rows;
+            this.splittable = splittable;
+        }
 
         @Override
         public boolean isExportEmptyTable() {
@@ -89,28 +98,18 @@ public class ComparableTableMappingTaskTest {
         }
 
         @Override
-        public void reStartTable(final AddSettingTableMetaData tableMetaData, final Integer writeRows) {
-            this.startTable(tableMetaData);
-        }
-
-        @Override
-        public IDataSetConverter split() {
-            return new RowsByTable(this.rows, this.current, this.splittable);
-        }
-
-        @Override
         public void startTable(final ITableMetaData metaData) {
-            this.current[0] = metaData.getTableName();
+            this.current = metaData.getTableName();
         }
 
         @Override
         public void endTable() {
-            this.current[0] = null;
+            this.current = null;
         }
 
         @Override
         public void row(final Object[] values) {
-            this.rows.computeIfAbsent(this.current[0], _ -> new ArrayList<>()).add(values[0].toString());
+            this.rows.computeIfAbsent(this.current, _ -> new ArrayList<>()).add(values[0].toString());
         }
     }
 }

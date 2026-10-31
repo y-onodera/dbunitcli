@@ -24,16 +24,16 @@ public class ComparableTableTest {
 
     @BeforeEach
     public void setUp() throws DataSetException {
-        final TreeMap<String, ComparableTable> map = new TreeMap<>();
+        final ComparableTableMappingContext context = new ComparableTableMappingContext(TableSeparators.NONE, null);
         final ComparableTableMapper builder = new ComparableTableMapperBuilder()
-                .setContextShareTableMap(map)
+                .setAlreadyWrite(context.alreadyWrite())
                 .build(TableSeparators.NONE.getAddSettingTableMetaData(this.table));
         builder.startTable();
         builder.addRow(new Object[]{"1", "a", "あ", 1});
         builder.addRow(new Object[]{"1", "b", "あ", 1});
         builder.addRow(new Object[]{"2", "a", "い", 2});
         builder.endTable();
-        this.target = map.values().iterator().next();
+        this.target = context.close().values().iterator().next();
     }
 
     @Test

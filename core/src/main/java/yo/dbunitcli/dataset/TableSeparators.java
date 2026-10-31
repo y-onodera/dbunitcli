@@ -125,10 +125,11 @@ public record TableSeparators(List<TableSeparator> settings
 
     /**
      * 読込前に求めた出力テーブルの候補で、読まずに除外できるソースがありうるか
-     * （出力テーブル名が読込前に決まり、出力の絞り込み（outputFilter）がある）
+     * （出力テーブル名が行を読まずに決まり、出力の絞り込み（outputFilter）がある）。
+     * joinの元テーブルは絞り込みで除かずに読むため（{@link #getAddSettingTableMetaData(ITableMetaData)}）、joinがあってもよい
      */
     public boolean canExcludeBeforeRead() {
-        return this.isIndependentTables()
+        return !this.isTableNameDependsOnRows()
                 && this.chain().anyMatch(it -> !Builder.isUnset(it.filter()) || !Builder.isUnset(it.sourceFilter()));
     }
 

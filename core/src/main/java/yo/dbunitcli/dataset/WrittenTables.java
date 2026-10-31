@@ -14,13 +14,12 @@ public final class WrittenTables {
 
     private final Map<String, String> splitTables = new HashMap<>();
 
-    private final Map<SplitKey, PendingSplit> pendingSplits = new LinkedHashMap<>();
+    private final Map<SplitKey, PendingTable> pendingTables = new LinkedHashMap<>();
 
     /**
      * テーブル（分割後のテーブルは分割のまとまり）ごとの、行を入れたタスク（入れた順）
      */
     private final Map<String, Set<ComparableTableMappingTask>> sources = new HashMap<>();
-
 
     public boolean contains(final String tableName) {
         return this.rows.containsKey(tableName);
@@ -42,18 +41,20 @@ public final class WrittenTables {
     }
 
     /**
-     * 行を保持して分割するテーブルの、分割を待っている行。分割後の1つ目のテーブル名と分割の設定ごとに、ソースをまたいでためる
+     * 行を保持するテーブルの、確定を待っている行。分割後の1つ目のテーブル名と分割の設定ごとに、ソースをまたいでためる
+     * （分割しないテーブルはテーブル名ごと）
      */
-    PendingSplit pendingSplit(final String firstTableName, final TableSplitter splitter) {
-        return this.pendingSplits.computeIfAbsent(new SplitKey(firstTableName, splitter), _ -> new PendingSplit(firstTableName, splitter));
+    PendingTable pendingTable(final String firstTableName, final TableSplitter splitter) {
+        final TableSplitter key = splitter.isSplit() ? splitter : TableSplitter.NONE;
+        return this.pendingTables.computeIfAbsent(new SplitKey(firstTableName, key), _ -> new PendingTable(firstTableName, splitter));
     }
 
     /**
-     * 分割を待っている行をすべて取り出す（取り出した分は残さない）
+     * 確定を待っている行をすべて取り出す（取り出した分は残さない）
      */
-    List<PendingSplit> takePendingSplits() {
-        final List<PendingSplit> result = new ArrayList<>(this.pendingSplits.values());
-        this.pendingSplits.clear();
+    List<PendingTable> takePendingTables() {
+        final List<PendingTable> result = new ArrayList<>(this.pendingTables.values());
+        this.pendingTables.clear();
         return result;
     }
 

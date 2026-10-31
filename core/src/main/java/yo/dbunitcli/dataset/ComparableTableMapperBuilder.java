@@ -9,7 +9,6 @@ public class ComparableTableMapperBuilder {
     private IDataSetConverter converter = null;
     private WrittenTables alreadyWrite = new WrittenTables();
     private List<ComparableTableJoin> joins = new ArrayList<>();
-    private TreeMap<String, ComparableTable> contextShareTableMap = new TreeMap<>();
     private List<ComparableTableMappingTask> sources = List.of();
 
     public ComparableTableMapperBuilder setConverter(final IDataSetConverter converter) {
@@ -24,11 +23,6 @@ public class ComparableTableMapperBuilder {
 
     public ComparableTableMapperBuilder setJoins(final List<ComparableTableJoin> joins) {
         this.joins = joins;
-        return this;
-    }
-
-    public ComparableTableMapperBuilder setContextShareTableMap(final TreeMap<String, ComparableTable> contextShareTableMap) {
-        this.contextShareTableMap = contextShareTableMap;
         return this;
     }
 
@@ -47,7 +41,7 @@ public class ComparableTableMapperBuilder {
                     final AddSettingTableMetaData target = targets.get(index);
                     final boolean enableRowProcessing = this.converter != null && this.converter.isEnableRowProcessing(target, this.joins);
                     final IDataSetConverter converter = index > 0 && this.isSplittable() ? this.converter.split() : this.converter;
-                    return new ComparableTableMapperSingle(target, converter, this.contextShareTableMap, this.alreadyWrite, this.joins, this.sources, enableRowProcessing);
+                    return new ComparableTableMapperSingle(target, converter, this.alreadyWrite, this.joins, this.sources, enableRowProcessing);
                 })
                 .toList();
         if (results.isEmpty()) {
