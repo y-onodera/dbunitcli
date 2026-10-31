@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { type ReactNode, useRef, useState } from "react";
 import {
 	DialogActions,
 	DialogField,
@@ -29,8 +29,8 @@ import TableList from "./TableList";
 
 type AffixOption = { label: string; value: string };
 
-// 列選択ダイアログの中身: 読込中・読込結果・失敗時のメッセージ
-type ColumnData = string[] | "loading" | { error: string };
+// テーブル一覧・列の読込状態: 読込中・読込結果・失敗時のメッセージ
+type LoadData = string[] | "loading" | { error: string };
 
 const NONE: AffixOption = { label: "None", value: "" };
 const AS: AffixOption = { label: "as", value: " as " };
@@ -55,9 +55,7 @@ export default function SqlTableInsertDialog({
 	plain = false,
 	onClose,
 }: SqlTableInsertDialogProps) {
-	const [tables, setTables] = useState<string[] | null>(null);
-	const [loading, setLoading] = useState(false);
-	const [loadError, setLoadError] = useState("");
+	const [tables, setTables] = useState<LoadData | null>(null);
 	const jobLog = useJobLog();
 	const abortControllerRef = useAbortSignalRef();
 	const getJdbcTables = useJdbcTables();
@@ -65,11 +63,10 @@ export default function SqlTableInsertDialog({
 
 	// 閉じると（アンマウントでabort）sidecar側の読込も中断する
 	const handleLoad = () => {
-		if (loading) {
+		if (tables === "loading") {
 			return;
 		}
-		setLoading(true);
-		setLoadError("");
+		setTables("loading");
 		jobLog.reset();
 		getJdbcTables(jdbcValues, {
 			signal: abortControllerRef.current?.signal,
@@ -78,15 +75,12 @@ export default function SqlTableInsertDialog({
 			(result) => {
 				if (!abortControllerRef.current?.signal.aborted) {
 					setTables(result);
-					setLoading(false);
 				}
 			},
 			// 失敗したら原因を追えるよう、エラーと実行中のログを残す
 			(ex) => {
 				if (!abortControllerRef.current?.signal.aborted) {
-					setTables(null);
-					setLoadError(getErrorMessage(ex));
-					setLoading(false);
+					setTables({ error: getErrorMessage(ex) });
 				}
 			},
 		);
@@ -98,7 +92,7 @@ export default function SqlTableInsertDialog({
 	): Promise<string[]> => getJdbcColumns(jdbcValues, table, fetchOptions);
 
 	function renderBody() {
-		if (loading) {
+		if (tables === "loading") {
 			return (
 				<JobProgress
 					title="Loading..."
@@ -107,32 +101,25 @@ export default function SqlTableInsertDialog({
 				/>
 			);
 		}
-		if (loadError) {
+		if (tables === null || "error" in tables) {
 			return (
 				<>
-					<JobFailure message={loadError} lines={jobLog.logs} />
+					{tables && <JobFailure message={tables.error} lines={jobLog.logs} />}
 					<DialogActions>
 						<WhiteButton title="Cancel" handleClick={onClose} />
 					</DialogActions>
 				</>
 			);
 		}
-		if (tables !== null) {
-			return (
-				<TablesContent
-					tables={tables}
-					onInsert={onInsert}
-					onInsertColumn={onInsertColumn}
-					plain={plain}
-					onQueryColumns={queryColumns}
-					onClose={onClose}
-				/>
-			);
-		}
 		return (
-			<DialogActions>
-				<WhiteButton title="Cancel" handleClick={onClose} />
-			</DialogActions>
+			<TablesContent
+				tables={tables}
+				onInsert={onInsert}
+				onInsertColumn={onInsertColumn}
+				plain={plain}
+				onQueryColumns={queryColumns}
+				onClose={onClose}
+			/>
 		);
 	}
 
@@ -159,7 +146,7 @@ function TablesContent({
 	onInsert: (tables: string[]) => void;
 	onInsertColumn?: (columns: string[]) => void;
 	plain: boolean;
-	onQueryColumns?: (
+	onQueryColumns: (
 		table: string,
 		fetchOptions?: JdbcFetchOptions,
 	) => Promise<string[]>;
@@ -168,7 +155,7 @@ function TablesContent({
 	const { selected, toggle, toggleAll } = useTableSelection();
 	const [columnDialog, setColumnDialog] = useState<{
 		table: string;
-		data: ColumnData;
+		data: LoadData;
 	} | null>(null);
 	const abortControllerRef = useAbortSignalRef();
 	// 列の読込1回分。閉じたら中断する（ダイアログ全体のアンマウントでも中断される）
@@ -198,7 +185,7 @@ function TablesContent({
 		]);
 		setColumnDialog({ table, data: "loading" });
 		columnLog.reset();
-		onQueryColumns?.(table, { signal, onLog: columnLog.append }).then(
+		onQueryColumns(table, { signal, onLog: columnLog.append }).then(
 			(columns) => {
 				if (!signal.aborted) {
 					setColumnDialog((prev) =>
@@ -218,13 +205,6 @@ function TablesContent({
 		);
 	};
 
-	// 一覧内で列を展開するときは読込ログを出さないため、失敗はalertで知らせる
-	const queryColumnsWithAlert = (table: string) =>
-		onQueryColumns?.(table).catch((ex) => {
-			alert(getErrorMessage(ex));
-			throw ex;
-		}) ?? Promise.resolve([]);
-
 	const closeColumnDialog = () => {
 		columnAbortRef.current?.abort();
 		setColumnDialog(null);
@@ -241,11 +221,7 @@ function TablesContent({
 						selected={selected}
 						onToggleAll={toggleAll}
 						onToggle={toggle}
-						onQueryColumns={
-							onInsertColumn || !onQueryColumns
-								? undefined
-								: queryColumnsWithAlert
-						}
+						onQueryColumns={onInsertColumn ? undefined : onQueryColumns}
 						onSelectTable={onInsertColumn ? handleSelectTable : undefined}
 					/>
 				)}
@@ -293,7 +269,7 @@ function ColumnSelectDialog({
 	onClose,
 }: {
 	table: string;
-	columnData: ColumnData;
+	columnData: LoadData;
 	logs: string[];
 	plain: boolean;
 	onInsert: (columns: string[]) => void;
@@ -314,25 +290,17 @@ function ColumnSelectDialog({
 
 	if ("error" in columnData) {
 		return (
-			<ModalOverlay width="w-80" zClass="z-modal-nested">
-				<DialogTitle>Select Columns</DialogTitle>
-				<p className="text-caption mb-4 truncate" title={table}>
-					{table}
-				</p>
+			<ColumnDialogFrame table={table}>
 				<JobFailure message={columnData.error} lines={logs} />
 				<DialogActions>
 					<WhiteButton title="Close" handleClick={onClose} />
 				</DialogActions>
-			</ModalOverlay>
+			</ColumnDialogFrame>
 		);
 	}
 
 	return (
-		<ModalOverlay width="w-80" zClass="z-modal-nested">
-			<DialogTitle>Select Columns</DialogTitle>
-			<p className="text-caption mb-4 truncate" title={table}>
-				{table}
-			</p>
+		<ColumnDialogFrame table={table}>
 			{!plain && (
 				<DialogField>
 					<InputLabel
@@ -387,6 +355,25 @@ function ColumnSelectDialog({
 				/>
 				<WhiteButton title="Cancel" handleClick={onClose} />
 			</DialogActions>
+		</ColumnDialogFrame>
+	);
+}
+
+// 列選択ダイアログの枠: 見出しと対象のテーブル名
+function ColumnDialogFrame({
+	table,
+	children,
+}: {
+	table: string;
+	children: ReactNode;
+}) {
+	return (
+		<ModalOverlay width="w-80" zClass="z-modal-nested">
+			<DialogTitle>Select Columns</DialogTitle>
+			<p className="text-caption mb-4 truncate" title={table}>
+				{table}
+			</p>
+			{children}
 		</ModalOverlay>
 	);
 }

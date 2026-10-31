@@ -31,8 +31,10 @@ export default function ColumnDatalistDialog({
 	onClose: () => void;
 }) {
 	const filteredTables = filterTablesByTarget(tableNames, target);
-	const [loadingTable, setLoadingTable] = useState<string | null>(null);
-	const [loadError, setLoadError] = useState("");
+	// 読込中のテーブル、または直前の読込の失敗メッセージ
+	const [load, setLoad] = useState<{ loading: string } | { error: string }>({
+		error: "",
+	});
 	const srcInfo = useDatasetSrcInfo();
 	const fetchColumnNames = useColumnNamesFetcher();
 	const abortControllerRef = useAbortSignalRef();
@@ -40,14 +42,13 @@ export default function ColumnDatalistDialog({
 
 	// 閉じると（アンマウントでabort）sidecar側の読込も中断する
 	const handleLoadColumns = (tableName: string) => {
-		if (loadingTable !== null) {
+		if ("loading" in load) {
 			return;
 		}
 		if (!abortControllerRef.current) {
 			return;
 		}
-		setLoadingTable(tableName);
-		setLoadError("");
+		setLoad({ loading: tableName });
 		jobLog.reset();
 		const { signal } = abortControllerRef.current;
 		fetchColumnNames(srcInfo, tableName, signal, jobLog.append).then(
@@ -60,8 +61,7 @@ export default function ColumnDatalistDialog({
 			// 失敗したら閉じずに、エラーと実行中のログを残す（別のテーブルを選び直せる）
 			(ex) => {
 				if (!abortControllerRef.current?.signal.aborted) {
-					setLoadError(getErrorMessage(ex));
-					setLoadingTable(null);
+					setLoad({ error: getErrorMessage(ex) });
 				}
 			},
 		);
@@ -95,15 +95,17 @@ export default function ColumnDatalistDialog({
 	return (
 		<ModalOverlay width="w-lg" zClass="z-modal-nested">
 			<DialogTitle>Load Column Datalist</DialogTitle>
-			{loadingTable !== null ? (
+			{"loading" in load ? (
 				<JobProgress
-					title={`Loading ${loadingTable}...`}
+					title={`Loading ${load.loading}...`}
 					lines={jobLog.logs}
 					onAbandon={onClose}
 				/>
 			) : (
 				<>
-					{loadError && <JobFailure message={loadError} lines={jobLog.logs} />}
+					{load.error && (
+						<JobFailure message={load.error} lines={jobLog.logs} />
+					)}
 					{renderBody()}
 					<DialogActions>
 						<WhiteButton title="Close" handleClick={onClose} />

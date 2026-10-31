@@ -3,6 +3,7 @@ import { Td, Tr } from "../../../../components/dialog";
 import { ButtonIcon } from "../../../../components/element/ButtonIcon";
 import { ExpandIcon, PreviewIcon } from "../../../../components/element/Icon";
 import { useAbortSignalRef } from "../../../../hooks/useAbortSignalRef";
+import { getErrorMessage } from "../../../../utils/fetchUtils";
 import SelectableTable from "./SelectableTable";
 
 export interface TableListProps {
@@ -49,8 +50,10 @@ export default function TableList({
 					setColumnMap((prev) => new Map(prev).set(table, columns));
 				}
 			},
-			() => {
+			// 一覧内の展開では読込ログを出さないため、失敗はalertで知らせる
+			(ex) => {
 				if (!abortControllerRef.current?.signal.aborted) {
+					alert(getErrorMessage(ex));
 					setColumnMap((prev) => {
 						const next = new Map(prev);
 						next.delete(table);

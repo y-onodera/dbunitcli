@@ -44,6 +44,38 @@ function isSrcReady(info: DatasetSrcInfo, connectionOk: boolean): boolean {
 	return srcType !== "sql" || connectionOk;
 }
 
+// Previewの読込状態。失敗したらdataは空にし、errorにメッセージを持つ
+type Load<T> = { data: T; loading: boolean; error: string };
+
+// 読込の結果をstateへ反映する（中断後の結果は捨てる）。
+// 取得関数は失敗を投げ、扱いは呼び出し元が決める（Previewはエラーとログを表示し、入力候補は空にする）
+function settleLoad<T>(
+	promise: Promise<T>,
+	signal: AbortSignal,
+	empty: T,
+	setLoad: (load: Load<T>) => void,
+) {
+	promise.then(
+		(data) => {
+			if (!signal.aborted) {
+				setLoad({ data, loading: false, error: "" });
+			}
+		},
+		(ex) => {
+			if (!signal.aborted) {
+				setLoad({ data: empty, loading: false, error: getErrorMessage(ex) });
+			}
+		},
+	);
+}
+
+// 読込を始める（前回の結果は読込中も表示したまま、エラーだけ消す）
+const startLoad = <T>(load: Load<T>): Load<T> => ({
+	...load,
+	loading: true,
+	error: "",
+});
+
 async function fetchTableNames(
 	apiUrl: string,
 	info: DatasetSrcInfo,
@@ -67,9 +99,14 @@ async function fetchTableNames(
 		signal,
 		onLog,
 	};
-	// 失敗は呼び出し元で扱う（Previewはエラーとログを表示し、入力候補は空にする）
 	return fetchData(fetchParams).then((r) => r.json());
 }
+
+const IDLE_TABLE_NAMES: Load<string[]> = {
+	data: [],
+	loading: false,
+	error: "",
+};
 
 // withLogs: 読込中のログも受け取る（読込中の表示に使う場合）
 export const useDatasetTableNames = (
@@ -81,10 +118,8 @@ export const useDatasetTableNames = (
 	logs: string[];
 	error: string;
 } => {
-	const [tableNames, setTableNames] = useState<string[]>([]);
-	const [loading, setLoading] = useState(false);
+	const [load, setLoad] = useState<Load<string[]>>(IDLE_TABLE_NAMES);
 	const [logs, setLogs] = useState<string[]>([]);
-	const [error, setError] = useState("");
 	const { apiUrl } = useEnvironment();
 	const { jdbcValues, connectionOk } = useJdbcConnectionState();
 	const paramInputs = useParamInputs();
@@ -93,45 +128,38 @@ export const useDatasetTableNames = (
 
 	useEffect(() => {
 		if (!srcReady) {
-			setTableNames([]);
-			setLoading(false);
-			setError("");
+			setLoad(IDLE_TABLE_NAMES);
 			return;
 		}
 		const controller = new AbortController();
-		setLoading(true);
+		setLoad(startLoad);
 		setLogs([]);
-		setError("");
-		fetchTableNames(
-			apiUrl,
-			srcInfo,
-			jdbcValues,
-			paramInputs,
+		settleLoad(
+			fetchTableNames(
+				apiUrl,
+				srcInfo,
+				jdbcValues,
+				paramInputs,
+				controller.signal,
+				withLogs
+					? (line) => setLogs((current) => appendLogLines(current, [line]))
+					: undefined,
+			),
 			controller.signal,
-			withLogs
-				? (line) => setLogs((current) => appendLogLines(current, [line]))
-				: undefined,
-		).then(
-			(names) => {
-				if (!controller.signal.aborted) {
-					setTableNames(names);
-					setLoading(false);
-				}
-			},
-			(ex) => {
-				if (!controller.signal.aborted) {
-					setTableNames([]);
-					setError(getErrorMessage(ex));
-					setLoading(false);
-				}
-			},
+			[],
+			setLoad,
 		);
 		return () => {
 			controller.abort();
 		};
 	}, [apiUrl, srcInfo, srcReady, jdbcValues, paramInputs, withLogs]);
 
-	return { tableNames, loading, logs, error };
+	return {
+		tableNames: load.data,
+		loading: load.loading,
+		logs,
+		error: load.error,
+	};
 };
 
 // rowsは先頭の一部だけ（sidecarが件数を制限する）。totalRowsが対象テーブルの全行数
@@ -142,6 +170,11 @@ export type TablePreview = {
 };
 
 const EMPTY_PREVIEW: TablePreview = { headers: [], rows: [], totalRows: 0 };
+const IDLE_PREVIEW: Load<TablePreview | null> = {
+	data: null,
+	loading: false,
+	error: "",
+};
 
 async function fetchTablePreview(
 	apiUrl: string,
@@ -168,7 +201,6 @@ async function fetchTablePreview(
 		signal,
 		onLog,
 	};
-	// 失敗は呼び出し元で扱う（Previewはエラーとログを表示し、入力候補は空にする）
 	return fetchData(fetchParams).then((r) => r.json());
 }
 
@@ -181,10 +213,8 @@ export const useDatasetTablePreview = (
 	logs: string[];
 	error: string;
 } => {
-	const [preview, setPreview] = useState<TablePreview | null>(null);
-	const [loading, setLoading] = useState(false);
+	const [load, setLoad] = useState<Load<TablePreview | null>>(IDLE_PREVIEW);
 	const [logs, setLogs] = useState<string[]>([]);
-	const [error, setError] = useState("");
 	const { apiUrl } = useEnvironment();
 	const { jdbcValues, connectionOk } = useJdbcConnectionState();
 	const paramInputs = useParamInputs();
@@ -193,44 +223,37 @@ export const useDatasetTablePreview = (
 
 	useEffect(() => {
 		if (!srcReady || !tableName) {
-			setPreview(null);
-			setLoading(false);
-			setError("");
+			setLoad(IDLE_PREVIEW);
 			return;
 		}
 		const controller = new AbortController();
-		setLoading(true);
+		setLoad(startLoad);
 		setLogs([]);
-		setError("");
-		fetchTablePreview(
-			apiUrl,
-			srcInfo,
-			tableName,
-			jdbcValues,
-			paramInputs,
+		settleLoad<TablePreview | null>(
+			fetchTablePreview(
+				apiUrl,
+				srcInfo,
+				tableName,
+				jdbcValues,
+				paramInputs,
+				controller.signal,
+				(line) => setLogs((current) => appendLogLines(current, [line])),
+			),
 			controller.signal,
-			(line) => setLogs((current) => appendLogLines(current, [line])),
-		).then(
-			(result) => {
-				if (!controller.signal.aborted) {
-					setPreview(result);
-					setLoading(false);
-				}
-			},
-			(ex) => {
-				if (!controller.signal.aborted) {
-					setPreview(null);
-					setError(getErrorMessage(ex));
-					setLoading(false);
-				}
-			},
+			null,
+			setLoad,
 		);
 		return () => {
 			controller.abort();
 		};
 	}, [apiUrl, srcInfo, srcReady, jdbcValues, tableName, paramInputs]);
 
-	return { preview, loading, logs, error };
+	return {
+		preview: load.data,
+		loading: load.loading,
+		logs,
+		error: load.error,
+	};
 };
 
 // 選んだテーブルだけをresultフォームの値（-result.*）でconvertし、出力先ディレクトリを返す（DB出力なら空文字）。

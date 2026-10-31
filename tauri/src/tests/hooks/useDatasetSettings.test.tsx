@@ -42,6 +42,12 @@ function MockProvider({ children }: { children: React.ReactNode }) {
 const wrapper = ({ children }: { children: React.ReactNode }) => (
 	<MockProvider>{children}</MockProvider>
 );
+// WorkspaceResourcesに依存しないフック用に、環境設定だけを渡す
+const envWrapper = ({ children }: { children: React.ReactNode }) => (
+	<environmentContext.Provider value={mockEnvironment}>
+		{children}
+	</environmentContext.Provider>
+);
 
 const { mockFetchData, mockFetchAndUpdate } = vi.hoisted(() => {
 	const mockFetchData = vi.fn((params: FetchParams) => {
@@ -133,13 +139,6 @@ describe("DatasetSettingsProviderのテスト", () => {
 				params.endpoint.includes(endpoint),
 			);
 
-		// フックはWorkspaceResourcesに依存しないため環境設定だけを渡す
-		const envWrapper = ({ children }: { children: React.ReactNode }) => (
-			<environmentContext.Provider value={mockEnvironment}>
-				{children}
-			</environmentContext.Provider>
-		);
-
 		it("全テーブルの列名を重複なく出現順で返すことを確認", async () => {
 			const { result } = renderHook(() => useSrcInfoColumnNames(srcInfo), {
 				wrapper: envWrapper,
@@ -189,13 +188,6 @@ describe("DatasetSettingsProviderのテスト", () => {
 	});
 
 	describe("Preview用フック（useDatasetTableNames・useDatasetTablePreview）のテスト", () => {
-		// フックはWorkspaceResourcesに依存しないため環境設定だけを渡す
-		const envWrapper = ({ children }: { children: React.ReactNode }) => (
-			<environmentContext.Provider value={mockEnvironment}>
-				{children}
-			</environmentContext.Provider>
-		);
-
 		// 読込中にログを2行流してから失敗する
 		const failWithLogs = () =>
 			mockFetchData.mockImplementationOnce(async (params: FetchParams) => {
@@ -204,21 +196,26 @@ describe("DatasetSettingsProviderのテスト", () => {
 				throw new Error("boom");
 			});
 
-		// 対象のフックをrenderHookへそのまま渡す（条件分岐で呼ぶとフックの規則に反する）
+		// どちらのフックも同じ形（data・loading・logs・error）で見る
 		const previewHooks = {
-			tableNames: () => useDatasetTableNames(srcInfo, true),
-			preview: () => useDatasetTablePreview(srcInfo, "t1"),
+			tableNames: () => {
+				const { tableNames, ...rest } = useDatasetTableNames(srcInfo, true);
+				return { ...rest, data: tableNames as unknown };
+			},
+			preview: () => {
+				const { preview, ...rest } = useDatasetTablePreview(srcInfo, "t1");
+				return { ...rest, data: preview as unknown };
+			},
 		};
-		// 共通の項目（loading・logs・error）だけを見るテストはどちらのフックでも同じ書き方にする
 		const renderPreviewHook = (name: keyof typeof previewHooks) =>
-			renderHook<{ loading: boolean; logs: string[]; error: string }, unknown>(
-				previewHooks[name],
-				{ wrapper: envWrapper },
-			);
+			renderHook(previewHooks[name], { wrapper: envWrapper });
 
-		it.each(["tableNames", "preview"] as const)(
-			"%s: 読込に失敗したら、エラーと読込中に届いたログを返すことを確認",
-			async (name) => {
+		it.each([
+			{ name: "tableNames", empty: [] },
+			{ name: "preview", empty: null },
+		] as const)(
+			"$name: 読込に失敗したら、データは空にしてエラーと読込中に届いたログを返すことを確認",
+			async ({ name, empty }) => {
 				failWithLogs();
 				const { result } = renderPreviewHook(name);
 
@@ -227,30 +224,9 @@ describe("DatasetSettingsProviderのテスト", () => {
 				});
 				expect(result.current.error).toBe("boom");
 				expect(result.current.logs).toStrictEqual(["step1", "step2"]);
+				expect(result.current.data).toStrictEqual(empty);
 			},
 		);
-
-		it("tableNames: 読込に失敗したらテーブル一覧は空にすることを確認", async () => {
-			failWithLogs();
-			const { result } = renderHook(previewHooks.tableNames, {
-				wrapper: envWrapper,
-			});
-			await waitFor(() => {
-				expect(result.current.error).toBe("boom");
-			});
-			expect(result.current.tableNames).toStrictEqual([]);
-		});
-
-		it("preview: 読込に失敗したらデータは返さないことを確認", async () => {
-			failWithLogs();
-			const { result } = renderHook(previewHooks.preview, {
-				wrapper: envWrapper,
-			});
-			await waitFor(() => {
-				expect(result.current.error).toBe("boom");
-			});
-			expect(result.current.preview).toBeNull();
-		});
 
 		it.each(["tableNames", "preview"] as const)(
 			"%s: 読込に成功したらエラーは空であることを確認",
@@ -279,11 +255,7 @@ describe("DatasetSettingsProviderのテスト", () => {
 	describe("useDatasetTableConvertのテスト", () => {
 		it("読込元・テーブル名・resultの値を送り、出力先ディレクトリを返すことを確認", async () => {
 			const { result } = renderHook(() => useDatasetTableConvert(), {
-				wrapper: ({ children }: { children: React.ReactNode }) => (
-					<environmentContext.Provider value={mockEnvironment}>
-						{children}
-					</environmentContext.Provider>
-				),
+				wrapper: envWrapper,
 			});
 			const resultDir = await result.current(srcInfo, "t1", {
 				"-result.resultType": "csv",
