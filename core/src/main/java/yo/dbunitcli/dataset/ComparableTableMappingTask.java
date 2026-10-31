@@ -76,8 +76,12 @@ public interface ComparableTableMappingTask {
             return this.head.param();
         }
 
+        /**
+         * タスクを同じコンテキストで順に1回ずつ実行する。同じテーブルに入る2つ目以降のタスクの行は、
+         * 前のタスクが書いた続きから書き込み・分割する（{@link WrittenTables}）
+         */
         public void run(final ComparableTableMappingContext mappingContext) {
-            this.head().run(mappingContext.addChain(this.rest()));
+            this.tasks().forEach(task -> task.run(mappingContext));
         }
 
         @Override

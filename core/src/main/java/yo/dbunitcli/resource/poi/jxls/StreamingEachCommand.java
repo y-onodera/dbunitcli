@@ -245,7 +245,8 @@ public class StreamingEachCommand extends EachCommand {
 
         @Override
         public void reStartTable(final AddSettingTableMetaData tableMetaData, final Integer writeRows) {
-            // nothing
+            // 同じテーブルに入る後のソースの行は、書き込み位置（state）を引き継いで続きに書く
+            this.startTable(tableMetaData);
         }
 
         @Override

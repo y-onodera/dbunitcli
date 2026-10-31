@@ -3,7 +3,7 @@ package yo.dbunitcli.dataset;
 import java.util.*;
 
 /**
- * 1回の読込（コンテキスト）で書き込んだテーブルの行数と、分割の途中状態。
+ * 1回の読込（コンテキスト）で書き込んだテーブルの行数と、分割の途中状態、テーブルごとの行を入れたタスク。
  * 同じテーブル名に複数のソースから書き込む場合に、前のソースの続きから書き込み・分割する
  */
 public final class WrittenTables {
@@ -15,6 +15,16 @@ public final class WrittenTables {
     private final Map<String, String> splitTables = new HashMap<>();
 
     private final Map<SplitKey, PendingSplit> pendingSplits = new LinkedHashMap<>();
+
+    /**
+     * テーブル（分割後のテーブルは分割のまとまり）ごとの、行を入れたタスク（入れた順）
+     */
+    private final Map<String, Set<ComparableTableMappingTask>> sources = new HashMap<>();
+
+    /**
+     * これから書くテーブルに行を入れるタスク。記録しない読込では空
+     */
+    private Set<ComparableTableMappingTask> reading = Set.of();
 
     public boolean contains(final String tableName) {
         return this.rows.containsKey(tableName);
@@ -59,10 +69,30 @@ public final class WrittenTables {
     }
 
     /**
-     * 分割後のテーブルが属する分割のまとまり（分割後の1つ目のテーブル名）。分割後のテーブルでなければ空
+     * これから書くテーブルに行を入れるタスクを設定し、それまでのタスクを返す。
+     * joinの出力では、joinの左右のテーブルに行を入れたタスクを設定する
      */
-    Optional<String> splitGroup(final String tableName) {
-        return Optional.ofNullable(this.splitTables.get(tableName));
+    Set<ComparableTableMappingTask> reading(final Collection<ComparableTableMappingTask> tasks) {
+        final Set<ComparableTableMappingTask> previous = this.reading;
+        this.reading = new LinkedHashSet<>(tasks);
+        return previous;
+    }
+
+    /**
+     * テーブル（分割するテーブルは分割のまとまり＝分割後の1つ目のテーブル名）に、今読んでいるタスクが行を入れた
+     */
+    void wrote(final String tableNameOrSplitGroup) {
+        if (!this.reading.isEmpty()) {
+            this.sources.computeIfAbsent(tableNameOrSplitGroup, _ -> new LinkedHashSet<>()).addAll(this.reading);
+        }
+    }
+
+    /**
+     * テーブルに行を入れたタスク（入れた順）。分割後のテーブルは、分割のまとまりに行を入れた全タスク
+     * （分割はタスクをまたいで数えるため、一部のタスクだけを読むと分割後のテーブルの行が変わる）
+     */
+    List<ComparableTableMappingTask> sources(final String tableName) {
+        return List.copyOf(this.sources.getOrDefault(this.splitTables.getOrDefault(tableName, tableName), Set.of()));
     }
 
     private record SplitKey(String firstTableName, TableSplitter splitter) {
