@@ -8,16 +8,16 @@ import {
 } from "../../../../components/dialog";
 import { BlueButton, WhiteButton } from "../../../../components/element/Button";
 import { JdbcConnectionProvider } from "../../../../context/JdbcConnectionProvider";
+import type { JobContext } from "../../../../hooks/useJob";
 import type { ConvertOptions } from "../../../../model/SelectParameter";
 import type { FormValues } from "../../../../utils/formValues";
 import ResultFormSection from "../ResultFormSection";
 import { RefreshableDialogShell } from "./RefreshableDialogShell";
-import type { DialogFetchOptions } from "./refreshableDialogForm";
 import { useRefreshableDialog } from "./useRefreshableDialog";
 
 export type TableConvert = (
 	result: FormValues,
-	fetchOptions: DialogFetchOptions,
+	context: JobContext,
 ) => Promise<string>;
 
 // プレビュー中のテーブルだけをconvertする。resultフォームはconvertの既定値から入力する
@@ -79,14 +79,12 @@ function TableConvertFormDialog({
 			executing={dialog.executing}
 			executeError={dialog.executeError}
 			logs={dialog.logs}
-			onExecute={() =>
-				dialog.execute(async (values, context) => {
-					const resultDir = await convert(values, context);
-					if (!context.signal.aborted) {
-						onDone(resultDir);
-					}
-				})
-			}
+			onExecute={async () => {
+				const result = await dialog.execute(convert);
+				if (result) {
+					onDone(result.value);
+				}
+			}}
 			onClose={onClose}
 		>
 			{(options) => (

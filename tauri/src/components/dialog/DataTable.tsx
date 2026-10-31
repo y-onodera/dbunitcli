@@ -43,18 +43,14 @@ export function Th({
 
 export function Tr({
 	onClick,
-	muted = false,
 	children,
 }: {
 	onClick?: () => void;
-	muted?: boolean;
 	children: ReactNode;
 }) {
-	const base = "border-t border-border-faint";
-	const tone = muted ? " bg-surface-subtle" : " hover:bg-surface-subtle";
 	return (
 		<tr
-			className={`${base}${tone}${onClick ? " cursor-pointer" : ""}`}
+			className={`border-t border-border-faint hover:bg-surface-subtle${onClick ? " cursor-pointer" : ""}`}
 			onClick={onClick}
 		>
 			{children}

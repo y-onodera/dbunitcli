@@ -23,7 +23,11 @@ import {
 	OptionValidationError,
 } from "../../../utils/fetchUtils";
 import type { CollectedFormValues } from "../../../utils/formValues";
-import { emitJobLogs, expectJobLog } from "../../helpers/jobFailure";
+import {
+	emitJobLogs,
+	expectJobLog,
+	expectNoJobLog,
+} from "../../helpers/jobFailure";
 import { environmentFixture, workspaceResourcesFixture } from "../../setup";
 
 const mockEnvironment: Environment = { ...environmentFixture };
@@ -218,9 +222,7 @@ describe("Footerの実行ボタン", () => {
 			if (shown) {
 				expectJobLog();
 			} else {
-				expect(
-					screen.queryByRole("log", { name: "execution log" }),
-				).not.toBeInTheDocument();
+				expectNoJobLog();
 			}
 		},
 	);

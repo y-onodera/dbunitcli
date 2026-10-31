@@ -4,7 +4,7 @@ import { describe, expect, it, vi } from "vitest";
 import ColumnDatalistDialog from "../../../../../app/form/section/dialog/ColumnDatalistDialog";
 import { RefreshableDialogShell } from "../../../../../app/form/section/dialog/RefreshableDialogShell";
 import SqlTableInsertDialog from "../../../../../app/form/section/dialog/SqlTableInsertDialog";
-import type { JdbcFetchOptions } from "../../../../../hooks/useJdbc";
+import type { JobContext } from "../../../../../hooks/useJob";
 import { DatasetSetting } from "../../../../../model/DatasetSettings";
 import {
 	emitLogsThenFail,
@@ -52,11 +52,7 @@ describe("RefreshableDialogShellのExecute失敗", () => {
 });
 
 describe("SqlTableInsertDialogの読込失敗", () => {
-	it("テーブル一覧の読込に失敗したら、エラーと読込中のログを残す", async () => {
-		mockJdbcTables.mockImplementation(
-			(_jdbcValues, fetchOptions: JdbcFetchOptions) =>
-				emitLogsThenFail(fetchOptions.onLog),
-		);
+	const renderDialog = () =>
 		render(
 			<SqlTableInsertDialog
 				jdbcValues={{}}
@@ -65,6 +61,12 @@ describe("SqlTableInsertDialogの読込失敗", () => {
 				onClose={vi.fn()}
 			/>,
 		);
+
+	it("テーブル一覧の読込に失敗したら、エラーと読込中のログを残す", async () => {
+		mockJdbcTables.mockImplementation((_jdbcValues, context: JobContext) =>
+			emitLogsThenFail(context.onLog),
+		);
+		renderDialog();
 		await userEvent.click(screen.getByRole("button", { name: "Load Tables" }));
 
 		expectJobFailure();
@@ -74,17 +76,10 @@ describe("SqlTableInsertDialogの読込失敗", () => {
 	it("列の読込に失敗したら、列選択ダイアログにエラーと読込中のログを残す", async () => {
 		mockJdbcTables.mockResolvedValue(["T1"]);
 		mockJdbcColumns.mockImplementation(
-			(_jdbcValues, _table, fetchOptions: JdbcFetchOptions) =>
-				emitLogsThenFail(fetchOptions.onLog),
+			(_jdbcValues, _table, context: JobContext) =>
+				emitLogsThenFail(context.onLog),
 		);
-		render(
-			<SqlTableInsertDialog
-				jdbcValues={{}}
-				onInsert={vi.fn()}
-				onInsertColumn={vi.fn()}
-				onClose={vi.fn()}
-			/>,
-		);
+		renderDialog();
 		await userEvent.click(screen.getByRole("button", { name: "Load Tables" }));
 		await userEvent.click(await screen.findByTitle("Select columns"));
 
@@ -96,8 +91,8 @@ describe("SqlTableInsertDialogの読込失敗", () => {
 describe("ColumnDatalistDialogの読込失敗", () => {
 	it("列の読込に失敗したら、閉じずにエラーと読込中のログを残す", async () => {
 		mockFetchColumnNames.mockImplementation(
-			(_srcInfo, _tableName, _signal, onLog: (line: string) => void) =>
-				emitLogsThenFail(onLog),
+			(_srcInfo, _tableName, context: JobContext) =>
+				emitLogsThenFail(context.onLog),
 		);
 		const onLoad = vi.fn();
 		const onClose = vi.fn();

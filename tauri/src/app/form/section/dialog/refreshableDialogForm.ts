@@ -1,8 +1,5 @@
-import {
-	type FetchParams,
-	fetchData,
-	getErrorMessage,
-} from "../../../../utils/fetchUtils";
+import type { JobContext } from "../../../../hooks/useJob";
+import { fetchData, getErrorMessage } from "../../../../utils/fetchUtils";
 import type { FormValues } from "../../../../utils/formValues";
 
 // refresh系エンドポイントで再構成するダイアログフォーム（Scaffold・XlsxSchema生成）の共通基盤
@@ -11,14 +8,12 @@ export type DialogLoadState<OPTIONS> =
 	| { status: "error"; message: string }
 	| { status: "loaded"; options: OPTIONS };
 
-export type DialogFetchOptions = Pick<FetchParams, "signal" | "onLog">;
-
 export async function postDialogForm<T>(
 	apiUrl: string,
 	endpoint: string,
 	values: FormValues,
 	// 実行系（generate・scaffold）はsignalでsidecar側も中断し、onLogで実行中のログを受け取る
-	fetchOptions?: DialogFetchOptions,
+	fetchOptions?: JobContext,
 ): Promise<T> {
 	const response = await fetchData({
 		endpoint: `${apiUrl}${endpoint}`,

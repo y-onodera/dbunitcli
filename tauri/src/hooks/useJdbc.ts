@@ -6,6 +6,7 @@ import {
 	handleFetchError,
 	logFetchError,
 } from "../utils/fetchUtils";
+import type { JobContext } from "./useJob";
 import { useUpdateResourceFiles } from "./useResourceFiles";
 
 // タイムアウト時はsidecarへcancelも送られ、sidecar側の処理も中断する
@@ -19,9 +20,6 @@ function toJdbcRequestBody(jdbcValues: Record<string, string>) {
 		properties: jdbcValues.jdbcProperties ?? "",
 	};
 }
-
-// 一覧の取得を中断するsignalと、実行中のログの受け取り先
-export type JdbcFetchOptions = Pick<FetchParams, "signal" | "onLog">;
 
 // 一覧を取得する。失敗は呼び出し元がログと一緒に表示するため投げる（自分で中断したときはコンソールにも出さない）
 async function fetchJdbcList(params: FetchParams): Promise<string[]> {
@@ -40,7 +38,7 @@ export const useJdbcTables = () => {
 	const { apiUrl } = useEnvironment();
 	return (
 		jdbcValues: Record<string, string>,
-		fetchOptions?: JdbcFetchOptions,
+		context: JobContext,
 	): Promise<string[]> =>
 		fetchJdbcList({
 			endpoint: `${apiUrl}jdbc/tables`,
@@ -50,7 +48,7 @@ export const useJdbcTables = () => {
 				body: JSON.stringify(toJdbcRequestBody(jdbcValues)),
 			},
 			timeoutMs: JDBC_TIMEOUT_MS,
-			...fetchOptions,
+			...context,
 		});
 };
 
@@ -59,7 +57,7 @@ export const useJdbcColumns = () => {
 	return (
 		jdbcValues: Record<string, string>,
 		table: string,
-		fetchOptions?: JdbcFetchOptions,
+		context: JobContext,
 	): Promise<string[]> =>
 		fetchJdbcList({
 			endpoint: `${apiUrl}jdbc/columns`,
@@ -69,7 +67,7 @@ export const useJdbcColumns = () => {
 				body: JSON.stringify({ ...toJdbcRequestBody(jdbcValues), table }),
 			},
 			timeoutMs: JDBC_TIMEOUT_MS,
-			...fetchOptions,
+			...context,
 		});
 };
 

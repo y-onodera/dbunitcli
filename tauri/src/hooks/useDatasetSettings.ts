@@ -12,12 +12,12 @@ import {
 	type DatasetSettingsBuilder,
 } from "../model/DatasetSettings";
 import {
-	type FetchParams,
 	fetchData,
 	getErrorMessage,
 	handleFetchError,
 } from "../utils/fetchUtils";
 import type { FormValues } from "../utils/formValues";
+import type { JobContext } from "./useJob";
 import { appendLogLines } from "./useJobLog";
 import { useUpdateResourceFiles } from "./useResourceFiles";
 
@@ -47,12 +47,20 @@ function isSrcReady(info: DatasetSrcInfo, connectionOk: boolean): boolean {
 // Previewの読込状態。失敗したらdataは空にし、errorにメッセージを持つ。logsは読込中に届いたログ（失敗後も残す）
 type Load<T> = { data: T; loading: boolean; error: string; logs: string[] };
 
+// 読み込んでいない状態。dataは失敗したときの空の値にも使う
+const idleLoad = <T>(data: T): Load<T> => ({
+	data,
+	loading: false,
+	error: "",
+	logs: [],
+});
+
 // 読込を始め、結果をstateへ反映する（中断後の結果は捨てる）。前回の結果は読込中も表示したまま、エラーとログだけ消す。
 // 取得関数は失敗を投げ、扱いは呼び出し元が決める（Previewはエラーとログを表示し、入力候補は空にする）
 function startLoad<T>(
 	fetch: (onLog: (line: string) => void) => Promise<T>,
 	signal: AbortSignal,
-	empty: T,
+	idle: Load<T>,
 	setLoad: Dispatch<SetStateAction<Load<T>>>,
 ) {
 	setLoad((load) => ({ ...load, loading: true, error: "", logs: [] }));
@@ -68,7 +76,7 @@ function startLoad<T>(
 			if (!signal.aborted) {
 				setLoad((load) => ({
 					...load,
-					data: empty,
+					data: idle.data,
 					loading: false,
 					error: getErrorMessage(ex),
 				}));
@@ -103,12 +111,7 @@ async function fetchTableNames(
 	return fetchData(fetchParams).then((r) => r.json());
 }
 
-const IDLE_TABLE_NAMES: Load<string[]> = {
-	data: [],
-	loading: false,
-	error: "",
-	logs: [],
-};
+const IDLE_TABLE_NAMES = idleLoad<string[]>([]);
 
 // withLogs: 読込中のログも受け取る（読込中の表示に使う場合）
 export const useDatasetTableNames = (
@@ -133,7 +136,7 @@ export const useDatasetTableNames = (
 			return;
 		}
 		const controller = new AbortController();
-		startLoad<string[]>(
+		startLoad(
 			(onLog) =>
 				fetchTableNames(
 					apiUrl,
@@ -144,7 +147,7 @@ export const useDatasetTableNames = (
 					withLogs ? onLog : undefined,
 				),
 			controller.signal,
-			[],
+			IDLE_TABLE_NAMES,
 			setLoad,
 		);
 		return () => {
@@ -168,12 +171,7 @@ export type TablePreview = {
 };
 
 const EMPTY_PREVIEW: TablePreview = { headers: [], rows: [], totalRows: 0 };
-const IDLE_PREVIEW: Load<TablePreview | null> = {
-	data: null,
-	loading: false,
-	error: "",
-	logs: [],
-};
+const IDLE_PREVIEW = idleLoad<TablePreview | null>(null);
 
 async function fetchTablePreview(
 	apiUrl: string,
@@ -225,7 +223,7 @@ export const useDatasetTablePreview = (
 			return;
 		}
 		const controller = new AbortController();
-		startLoad<TablePreview | null>(
+		startLoad(
 			(onLog) =>
 				fetchTablePreview(
 					apiUrl,
@@ -237,7 +235,7 @@ export const useDatasetTablePreview = (
 					onLog,
 				),
 			controller.signal,
-			null,
+			IDLE_PREVIEW,
 			setLoad,
 		);
 		return () => {
@@ -263,7 +261,7 @@ export const useDatasetTableConvert = () => {
 		srcInfo: DatasetSrcInfo,
 		tableName: string,
 		result: FormValues,
-		fetchOptions?: Pick<FetchParams, "signal" | "onLog">,
+		context: JobContext,
 	): Promise<string> => {
 		const response = await fetchData({
 			endpoint: `${apiUrl}dataset-setting/table-convert`,
@@ -276,7 +274,7 @@ export const useDatasetTableConvert = () => {
 					result,
 				}),
 			},
-			...fetchOptions,
+			...context,
 		});
 		return response.text();
 	};
@@ -399,13 +397,9 @@ export const useColumnNamesFetcher = () => {
 	return async (
 		srcInfo: DatasetSrcInfo,
 		tableName: string,
-		signal: AbortSignal,
-		onLog?: (line: string) => void,
+		{ signal, onLog }: JobContext,
 	): Promise<string[]> => {
-		// 失敗は投げる（呼び出し元がエラーと実行中のログを表示する）
-		if (signal.aborted) {
-			return [];
-		}
+		// 失敗は投げる（呼び出し元がエラーと実行中のログを表示する）。
 		// 入力候補なので、settingの対象外のテーブルでも取得する
 		const preview = await fetchTablePreview(
 			apiUrl,

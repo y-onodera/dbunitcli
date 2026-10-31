@@ -41,8 +41,8 @@ export default function ColumnDatalistDialog({
 			return;
 		}
 		setLoadingTable(tableName);
-		const result = await job.run(({ signal, onLog }) =>
-			fetchColumnNames(srcInfo, tableName, signal, onLog),
+		const result = await job.run((context) =>
+			fetchColumnNames(srcInfo, tableName, context),
 		);
 		if (result) {
 			onLoad(result.value);

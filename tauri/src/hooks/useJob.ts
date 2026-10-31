@@ -1,13 +1,10 @@
 import { useRef, useState } from "react";
-import { getErrorMessage } from "../utils/fetchUtils";
+import { type FetchParams, getErrorMessage } from "../utils/fetchUtils";
 import { useAbortSignalRef } from "./useAbortSignalRef";
 import { useJobLog } from "./useJobLog";
 
 // ジョブへ渡すfetchオプション（signalでsidecar側も中断し、onLogで実行中のログを受け取る）
-export type JobContext = {
-	signal: AbortSignal;
-	onLog: (line: string) => void;
-};
+export type JobContext = Required<Pick<FetchParams, "signal" | "onLog">>;
 
 type JobState =
 	| { status: "idle" }

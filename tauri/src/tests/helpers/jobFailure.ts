@@ -20,11 +20,16 @@ export async function emitLogsThenFail(
 	throw new Error(JOB_ERROR);
 }
 
+const queryJobLog = () => screen.queryByRole("log", { name: "execution log" });
+
 // 実行ログ欄に、流したログが表示されている
 export function expectJobLog() {
-	expect(screen.getByRole("log", { name: "execution log" })).toHaveTextContent(
-		JOB_LOG_LINES.join(" "),
-	);
+	expect(queryJobLog()).toHaveTextContent(JOB_LOG_LINES.join(" "));
+}
+
+// 実行ログ欄が表示されていない
+export function expectNoJobLog() {
+	expect(queryJobLog()).not.toBeInTheDocument();
 }
 
 // 失敗の表示（JobFailure）: エラーメッセージと、実行中に届いたログ

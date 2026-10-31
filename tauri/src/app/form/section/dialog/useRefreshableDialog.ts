@@ -71,15 +71,16 @@ export function useRefreshableDialog<OPTIONS>({
 		);
 	};
 
-	// runが投げた例外はダイアログ内にログと一緒に表示する。ダイアログを閉じると（アンマウントでabort）sidecar側も中断する
-	const execute = async (
-		run: (values: FormValues, context: JobContext) => Promise<void>,
-	) => {
+	// runが投げた例外はダイアログ内にログと一緒に表示する。ダイアログを閉じると（アンマウントでabort）sidecar側も中断する。
+	// 成功したら結果を返す（入力エラー・失敗・中断ならnull）
+	const execute = async <T>(
+		run: (values: FormValues, context: JobContext) => Promise<T>,
+	): Promise<{ value: T } | null> => {
 		const { values, validationError } = collectFormValues(formId, true);
 		if (validationError) {
-			return;
+			return null;
 		}
-		await job.run((context) => run(values, context));
+		return job.run((context) => run(values, context));
 	};
 
 	return {

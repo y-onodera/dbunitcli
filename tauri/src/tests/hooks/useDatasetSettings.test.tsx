@@ -260,9 +260,12 @@ describe("DatasetSettingsProviderのテスト", () => {
 			const { result } = renderHook(() => useDatasetTableConvert(), {
 				wrapper: envWrapper,
 			});
-			const resultDir = await result.current(srcInfo, "t1", {
-				"-result.resultType": "csv",
-			});
+			const resultDir = await result.current(
+				srcInfo,
+				"t1",
+				{ "-result.resultType": "csv" },
+				{ signal: new AbortController().signal, onLog: () => {} },
+			);
 
 			expect(resultDir).toBe("/work/result");
 			const [params] = mockFetchData.mock.calls.filter(([p]) =>

@@ -196,7 +196,7 @@ describe("DatasetTableNamesPreviewButtonのテスト", () => {
 		const user = await openExport();
 		await user.click(screen.getByRole("button", { name: "Execute" }));
 
-		expect(await screen.findByText(`Error: ${JOB_ERROR}`)).toBeInTheDocument();
+		await screen.findByText(`Error: ${JOB_ERROR}`);
 		expectJobFailure();
 		expect(screen.queryByText("Export completed.")).not.toBeInTheDocument();
 	});
