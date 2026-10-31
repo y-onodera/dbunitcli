@@ -40,8 +40,9 @@ public class LazyloadTaskMapper {
         final List<ComparableTableJoin> joins = tableSeparators.joins();
         final MetaDataCollector collector = new MetaDataCollector(LazyloadTaskMapper.isJoinRowRequired(tableSeparators));
         final RecordingTableMap tableMap = new RecordingTableMap();
-        final ComparableTableMappingContext context = new ComparableTableMappingContext(tableSeparators, collector, tableMap, new WrittenTables(), joins, new ArrayList<>(), false);
-        final Map<String, ComparableTableMappingTask.WithTargetTable> tableTasks = new HashMap<>();
+        final WrittenTables written = new WrittenTables();
+        final ComparableTableMappingContext context = new ComparableTableMappingContext(tableSeparators, collector, tableMap, written, joins, new ArrayList<>(), false);
+        final Map<String, ComparableTableMappingTask.WithTargetTable> tableTasks = new LinkedHashMap<>();
         context.open();
         tasks.forEach(task -> {
             Workers.checkInterrupted();
@@ -53,6 +54,7 @@ public class LazyloadTaskMapper {
                   .forEach(tableName -> tableTasks.merge(tableName, task.withTargetTable(tableName)
                           , ComparableTableMappingTask.WithTargetTable::chain));
         });
+        LazyloadTaskMapper.readSplitGroupFromAllSources(tableTasks, written);
         final Map<String, ITableMetaData> output = collector.takeMetaData();
         context.close();
         // 読込の終わりに出力したテーブルのうち、ソースのタスクで出していないものはjoinの出力
@@ -82,6 +84,25 @@ public class LazyloadTaskMapper {
     private static boolean isJoinRowRequired(final TableSeparators tableSeparators) {
         return tableSeparators.hasJoinSplitter()
                 || (tableSeparators.next() != null && tableSeparators.next().isTableNameDependsOnRows());
+    }
+
+    /**
+     * 複数のソースから行が入る分割では、分割後のテーブルはどれも、そのまとまりに書いた全ソースから読む。
+     * 分割はソースをまたいで数えるため、一部のソースだけを読むと分割後のテーブルの行が変わる
+     */
+    private static void readSplitGroupFromAllSources(final Map<String, ComparableTableMappingTask.WithTargetTable> tableTasks
+            , final WrittenTables written) {
+        final Map<String, List<String>> groups = new LinkedHashMap<>();
+        tableTasks.keySet().forEach(tableName -> written.splitGroup(tableName)
+                                                         .ifPresent(group -> groups.computeIfAbsent(group, _ -> new ArrayList<>()).add(tableName)));
+        groups.values().forEach(tableNames -> {
+            final List<ComparableTableMappingTask> tasks = tableNames.stream()
+                                                                     .flatMap(tableName -> tableTasks.get(tableName).tasks())
+                                                                     .distinct()
+                                                                     .toList();
+            tableNames.forEach(tableName -> tableTasks.put(tableName, new ComparableTableMappingTask.WithTargetTable(tableName
+                    , tasks.getFirst(), tasks.subList(1, tasks.size()))));
+        });
     }
 
     private static Stream<String> drain(final Set<String> tableNames) {
