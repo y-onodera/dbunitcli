@@ -10,7 +10,7 @@ import java.util.stream.Stream;
 public record ComparableTableMappingContext(TableSeparators tableSeparators
         , IDataSetConverter converter
         , TreeMap<String, ComparableTable> tableMap
-        , Map<String, Integer> alreadyWrite
+        , WrittenTables alreadyWrite
         , List<ComparableTableJoin> joins
         , List<ComparableTableMappingTask> chain
         , boolean chainRun) {
@@ -18,7 +18,7 @@ public record ComparableTableMappingContext(TableSeparators tableSeparators
     private static final Logger LOGGER = LoggerFactory.getLogger(ComparableTableMappingContext.class);
 
     public ComparableTableMappingContext(final TableSeparators tableSeparators, final IDataSetConverter converter) {
-        this(tableSeparators, converter, new TreeMap<>(), new HashMap<>(), tableSeparators.joins(), new ArrayList<>(), false);
+        this(tableSeparators, converter, new TreeMap<>(), new WrittenTables(), tableSeparators.joins(), new ArrayList<>(), false);
     }
 
     public ComparableTableMappingContext addChain(final List<ComparableTableMappingTask> chain) {

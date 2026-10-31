@@ -90,13 +90,22 @@ public record TableSeparators(List<TableSeparator> settings
                     .toList().isEmpty();
     }
 
+    /**
+     * settings・commonSettings・joinの設定のいずれかに件数分割があるか（後段（next）は見ない）
+     */
     public boolean hasSplitter() {
-        return this.settings()
-                   .stream()
-                   .anyMatch(it -> it.splitter().isSplit())
-                || this.commonSettings()
-                       .stream()
-                       .anyMatch(it -> it.splitter().isSplit());
+        return Stream.concat(this.settings().stream(), this.commonSettings().stream())
+                     .anyMatch(it -> it.splitter().isSplit())
+                || this.hasJoinSplitter();
+    }
+
+    /**
+     * joinの設定に件数分割があるか（後段（next）は見ない）
+     */
+    public boolean hasJoinSplitter() {
+        return this.joinConditions().stream()
+                   .flatMap(it -> it.tableSeparators().stream())
+                   .anyMatch(it -> it.splitter().isSplit());
     }
 
     /**
@@ -104,7 +113,14 @@ public record TableSeparators(List<TableSeparator> settings
      * 後段（next）の設定も含めて見る
      */
     public boolean isIndependentTables() {
-        return this.chain().allMatch(it -> it.joinConditions().isEmpty() && !it.hasSplitter());
+        return !this.isTableNameDependsOnRows() && this.chain().allMatch(it -> it.joinConditions().isEmpty());
+    }
+
+    /**
+     * 出力テーブル名を求めるのに行を読む必要があるか（件数分割は分割後の名前が行数で決まる）。後段（next）の設定も含めて見る
+     */
+    public boolean isTableNameDependsOnRows() {
+        return this.chain().anyMatch(TableSeparators::hasSplitter);
     }
 
     /**

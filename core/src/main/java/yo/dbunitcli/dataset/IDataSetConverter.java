@@ -97,6 +97,15 @@ public interface IDataSetConverter extends IDataSetConsumer, AutoCloseable {
         return this.split();
     }
 
+    /**
+     * このテーブルの行を使うか。falseならproducerは行の読込を省く（{@link ComparableTableMapper#hasOutput()}）
+     *
+     * @param joins このテーブルに関係するjoin
+     */
+    default boolean isRowRequired(final AddSettingTableMetaData metaData, final List<ComparableTableJoin> joins) {
+        return true;
+    }
+
     default boolean isEnableRowProcessing(final AddSettingTableMetaData metaData, final List<ComparableTableJoin> joins) {
         return metaData.getOrderColumns().length == 0
                 && !metaData.isNeedDistinct()

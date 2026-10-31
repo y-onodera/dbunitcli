@@ -33,6 +33,7 @@ import yo.dbunitcli.dataset.ComparableDataSetProducer;
 import yo.dbunitcli.dataset.ComparableTable;
 import yo.dbunitcli.dataset.ComparableTableJoin;
 import yo.dbunitcli.dataset.IDataSetConverter;
+import yo.dbunitcli.dataset.MetaDataCapture;
 import yo.dbunitcli.dataset.TableSeparators;
 import yo.dbunitcli.dataset.producer.ComparableDataSetLoader;
 import yo.dbunitcli.resource.FileResources;
@@ -98,13 +99,15 @@ public class DatasetSettingsController extends AbstractResourceFileController<Da
         }
     }
 
+    /**
+     * 読み込まれるテーブル名を返す。lazyLoadで求めるため、データ行は分割（split）後の名前を求める場合だけ読む
+     */
     @Interruptible
     @Post(uri = "table-names", produces = MediaType.APPLICATION_JSON)
     public String tableNames(@Body final DatasetTableNamesRequestDto request) {
-        try {
-            return ObjectMapper.getDefault().writeValueAsString(
-                    new ComparableDataSetLoader(this.buildParameter(request)).loadDataSet(this.toParam(request, "false").get().build())
-                                                                             .getTableNames());
+        try (final ComparableDataSetProducer producer = new ComparableDataSetLoader(this.buildParameter(request))
+                .getComparableDataSetProducer(this.toParam(request, "false").get().build())) {
+            return ObjectMapper.getDefault().writeValueAsString(producer.lazyLoad(false).keySet());
         } catch (final Throwable th) {
             LOGGER.warn("Could not get table names", th);
             return "[]";
@@ -397,7 +400,7 @@ public class DatasetSettingsController extends AbstractResourceFileController<Da
     /**
      * 渡されたテーブル（{@link TargetTableConverter}で対象だけに絞られる）の先頭{@link #PREVIEW_ROW_LIMIT}行と全行数を集める
      */
-    private static class PreviewCollector implements IDataSetConverter {
+    private static class PreviewCollector extends MetaDataCapture {
         private ComparableTable.Builder builder;
         private int totalRows;
 
@@ -413,30 +416,10 @@ public class DatasetSettingsController extends AbstractResourceFileController<Da
         }
 
         @Override
-        public boolean isExportEmptyTable() {
-            return true;
-        }
-
-        @Override
-        public void reStartTable(final AddSettingTableMetaData tableMetaData, final Integer writeRows) {
-            this.startTable(tableMetaData);
-        }
-
-        @Override
-        public IDataSetConverter split() {
-            return this;
-        }
-
-        @Override
         public void startTable(final ITableMetaData metaData) {
             if (this.builder == null) {
                 this.builder = new ComparableTable.Builder(metaData);
             }
-        }
-
-        @Override
-        public void endTable() {
-            // nothing
         }
 
         @Override

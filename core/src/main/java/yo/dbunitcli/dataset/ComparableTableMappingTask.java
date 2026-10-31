@@ -104,6 +104,13 @@ public interface ComparableTableMappingTask {
             return this.head().with(builder);
         }
 
+        /**
+         * 読み込むタスクはそのままに、対象のテーブルだけを変える
+         */
+        public WithTargetTable retarget(final String tableName) {
+            return new WithTargetTable(tableName, this.head, this.rest);
+        }
+
         public WithTargetTable chain(final WithTargetTable target) {
             final List<ComparableTableMappingTask> newRest = new ArrayList<>(this.rest);
             newRest.add(target.head());

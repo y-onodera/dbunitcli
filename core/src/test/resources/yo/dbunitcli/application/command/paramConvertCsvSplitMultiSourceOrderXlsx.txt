@@ -1,0 +1,6 @@
+-src=src/test/resources/yo/dbunitcli/application/src/csv/split_multi_source
+-srcType=csv
+-setting=src/test/resources/yo/dbunitcli/application/settings/split/multisource_order_setting.json
+-result=target/test-classes/yo/dbunitcli/application/command/convert/split/order_multisource_result
+-resultType=xlsx
+-excelTable=BOOK

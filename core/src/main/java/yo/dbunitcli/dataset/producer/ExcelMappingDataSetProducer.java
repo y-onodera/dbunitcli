@@ -82,20 +82,42 @@ public class ExcelMappingDataSetProducer {
                     this.mapper = this.context.createMapper(this.rowsTableBuilder.startNewTable());
                     this.mapper.startTable();
                     this.rowTableRows = 0;
-                    if (this.rowsTableBuilder.hasRow(rowNumber)) {
-                        this.addRowToTable(this.rowsTableBuilder.currentRow());
-                        this.rowTableRows++;
-                    }
-                } else if (this.rowsTableBuilder.hasRow(rowNumber)) {
-                    if (this.rowsTableBuilder.hasRow(rowNumber)) {
-                        this.addRowToTable(this.rowsTableBuilder.currentRow());
-                        this.rowTableRows++;
-                    }
                 }
+                this.addRowToRowsTable(rowNumber);
                 this.rowsTableBuilder.clearRowValue();
             }
         } catch (final DataSetException e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * シートの残りを読まなくてもよいか。行単位のテーブルがすべて開始していて、以降の行を使わない場合にtrue。
+     * 行を読まない（loadData=false）ならセル指定のテーブルのメタデータは定義から決まり、
+     * 行を読む場合も、今のテーブルが行を使わず（hasOutput）、セル指定のテーブルが無ければよい
+     */
+    protected boolean isMetaDataComplete() {
+        if (this.rowsTableBuilder != null && !this.rowsTableBuilder.isAllTablesStarted()) {
+            return false;
+        }
+        return !this.isRowUsed()
+                && (!this.loadData || this.randomCellRecordBuilder == null || this.randomCellRecordBuilder.getTableNames().length == 0);
+    }
+
+    /**
+     * 今のテーブル（mapper）が行を使うか
+     */
+    private boolean isRowUsed() {
+        return this.loadData && this.mapper != null && this.mapper.hasOutput();
+    }
+
+    /**
+     * 行を読まない場合（loadData=false・出力しないテーブル）は、行の配列化とmapperへの追加を省く
+     */
+    private void addRowToRowsTable(final int rowNumber) throws DataSetException {
+        if (this.isRowUsed() && this.rowsTableBuilder.hasRow(rowNumber)) {
+            this.addRowToTable(this.rowsTableBuilder.currentRow());
+            this.rowTableRows++;
         }
     }
 
@@ -104,7 +126,7 @@ public class ExcelMappingDataSetProducer {
             this.mapper = this.context.createMapper(this.randomCellRecordBuilder.getTableMetaData(tableName));
             this.mapper.startTable();
             ExcelMappingDataSetProducer.LOGGER.info("produce - start tableName={}", tableName);
-            if (this.loadData) {
+            if (this.isRowUsed()) {
                 int i = 0;
                 for (final String[] row : this.randomCellRecordBuilder.getRows(tableName)) {
                     this.addRowToTable(row);

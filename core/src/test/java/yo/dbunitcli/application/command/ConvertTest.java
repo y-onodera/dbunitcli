@@ -29,6 +29,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Properties;
 import java.util.Set;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 public class ConvertTest {
 
@@ -45,6 +47,22 @@ public class ConvertTest {
         return Arrays.stream(split1.getTableMetaData().getColumns())
                 .map(Column::getColumnName)
                 .toArray(String[]::new);
+    }
+
+    private static List<String> keys(final ITable table) {
+        return IntStream.range(0, table.getRowCount())
+                        .mapToObj(row -> {
+                            try {
+                                return String.valueOf(table.getValue(row, "key"));
+                            } catch (final DataSetException e) {
+                                throw new AssertionError(e);
+                            }
+                        })
+                        .toList();
+    }
+
+    private static long distinctKeys(final ITable table) {
+        return ConvertTest.keys(table).stream().distinct().count();
     }
 
     private static void copy(final String from, final String to) {
@@ -75,6 +93,14 @@ public class ConvertTest {
     }
 
     abstract static class TestCase {
+
+        ComparableDataSet loadXlsx(final String resultDir) {
+            return new ComparableXlsxDataSetProducer(
+                    ComparableDataSetParam.builder()
+                            .setSrc(new File(this.getBaseDir() + resultDir))
+                            .setSource(DataSourceType.xlsx)
+                            .build()).loadDataSet();
+        }
         @AfterAll
         static void restore() {
             System.setProperties(backup);
@@ -639,6 +665,61 @@ public class ConvertTest {
             Assertions.assertEquals("あ", split3.getValue(0, "key1"));
             Assertions.assertEquals("3", split3.getValue(0, "key2"));
             Assertions.assertEquals("", split3.getValue(0, "col1"));
+        }
+
+        /**
+         * orderが無ければ行を保持せずに分割する。1行目のキーは分割の区切りに数えない（order有りと同じ数え方）
+         */
+        @Test
+        public void testFromCsvToSplitByColumnWithoutOrderMultiXlsx() throws Exception {
+            Convert.main(this.getArgs("/paramConvertCsvSplitByColumnNoOrderMultiXlsx.txt"));
+            final File src = new File(this.getBaseDir() + "/convert/split/keysplit_noorder_result");
+            final ComparableDataSet actual = new ComparableXlsxDataSetProducer(
+                    ComparableDataSetParam.builder()
+                            .setSrc(src)
+                            .setSource(DataSourceType.xlsx)
+                            .build()).loadDataSet();
+            Assertions.assertArrayEquals(new String[]{"0000_break_key1", "0001_break_key1", "0002_break_key1"}, actual.getTableNames());
+            final ITable split1 = actual.getTables()[0];
+            Assertions.assertEquals(4, split1.getRowCount());
+            Assertions.assertEquals("A", split1.getValue(0, "key1"));
+            Assertions.assertEquals("2", split1.getValue(0, "key2"));
+            Assertions.assertEquals("A", split1.getValue(3, "key1"));
+            Assertions.assertEquals("3", split1.getValue(3, "key2"));
+            final ITable split2 = actual.getTables()[1];
+            Assertions.assertEquals(4, split2.getRowCount());
+            Assertions.assertEquals("B", split2.getValue(0, "key1"));
+            Assertions.assertEquals("1", split2.getValue(3, "key1"));
+            final ITable split3 = actual.getTables()[2];
+            Assertions.assertEquals(1, split3.getRowCount());
+            Assertions.assertEquals("2", split3.getValue(0, "key1"));
+        }
+
+        /**
+         * 複数のソースを同じテーブルに分割する場合、行を流しながら分割してもソースをまたいで数え続ける（ソースの読込順は決まらない）
+         */
+        @Test
+        public void testFromCsvToSplitMultiSourceXlsx() throws Exception {
+            Convert.main(this.getArgs("/paramConvertCsvSplitMultiSourceXlsx.txt"));
+            final ComparableDataSet actual = this.loadXlsx("/convert/split/stream_multisource_result");
+            Assertions.assertArrayEquals(new String[]{"k_00", "k_01", "t_00", "t_01", "t_02"}, actual.getTableNames());
+            Assertions.assertEquals(List.of(2L, 2L), Stream.of("k_00", "k_01").map(it -> ConvertTest.distinctKeys(actual.getTable(it))).toList());
+            Assertions.assertEquals(List.of(2, 2, 2), Stream.of("t_00", "t_01", "t_02").map(it -> actual.getTable(it).getRowCount()).toList());
+        }
+
+        /**
+         * 行を保持して並べ替えてから分割する場合も、ソースをまたいでまとめてから分割する
+         */
+        @Test
+        public void testFromCsvToSplitMultiSourceWithOrderXlsx() throws Exception {
+            Convert.main(this.getArgs("/paramConvertCsvSplitMultiSourceOrderXlsx.txt"));
+            final ComparableDataSet actual = this.loadXlsx("/convert/split/order_multisource_result");
+            Assertions.assertArrayEquals(new String[]{"k_00", "k_01", "t_00", "t_01", "t_02"}, actual.getTableNames());
+            Assertions.assertEquals(List.of("1", "1", "2"), ConvertTest.keys(actual.getTable("k_00")));
+            Assertions.assertEquals(List.of("3", "4"), ConvertTest.keys(actual.getTable("k_01")));
+            Assertions.assertEquals(List.of("1", "2"), ConvertTest.keys(actual.getTable("t_00")));
+            Assertions.assertEquals(List.of("3", "4"), ConvertTest.keys(actual.getTable("t_01")));
+            Assertions.assertEquals(List.of("5", "6"), ConvertTest.keys(actual.getTable("t_02")));
         }
 
         @Test

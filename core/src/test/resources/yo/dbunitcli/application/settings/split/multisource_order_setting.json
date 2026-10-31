@@ -1,0 +1,24 @@
+{
+  "settings": [
+    {
+      "name": "a",
+      "split": {"tableName": "t", "suffix": "_%02d", "limit": 2},
+      "order": ["key"]
+    },
+    {
+      "name": "b",
+      "split": {"tableName": "t", "suffix": "_%02d", "limit": 2},
+      "order": ["key"]
+    },
+    {
+      "name": "c",
+      "split": {"tableName": "k", "suffix": "_%02d", "limit": 2, "breakKey": ["key"]},
+      "order": ["key"]
+    },
+    {
+      "name": "d",
+      "split": {"tableName": "k", "suffix": "_%02d", "limit": 2, "breakKey": ["key"]},
+      "order": ["key"]
+    }
+  ]
+}

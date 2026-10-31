@@ -142,4 +142,23 @@ public class ComparableXlsxDataSetProducerTest {
         Assertions.assertEquals("5", actualTable.getValue(1, "column3"));
         Assertions.assertEquals("", actualTable.getValue(2, "column3"));
     }
+
+    /**
+     * loadData=falseならシートの列だけを読み、データ行は読み込まない
+     */
+    @Test
+    public void createDataSetWithoutLoadData() throws DataSetException {
+        final ComparableDataSet actual = new ComparableXlsxDataSetProducer(
+                ComparableDataSetParam.builder()
+                        .setSrc(new File(this.resource, "multifile.xlsx"))
+                        .setSource(DataSourceType.xlsx)
+                        .setLoadData(false)
+                        .build()).loadDataSet();
+
+        Assertions.assertEquals(2, actual.getTableNames().length);
+        Assertions.assertEquals(4, actual.getTable("multi1").getTableMetaData().getColumns().length);
+        Assertions.assertEquals(0, actual.getTable("multi1").getRowCount());
+        Assertions.assertEquals(4, actual.getTable("multi2").getTableMetaData().getColumns().length);
+        Assertions.assertEquals(0, actual.getTable("multi2").getRowCount());
+    }
 }

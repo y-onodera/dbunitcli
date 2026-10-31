@@ -7,7 +7,7 @@ import java.util.stream.Stream;
 public class ComparableTableMapperBuilder {
 
     private IDataSetConverter converter = null;
-    private Map<String, Integer> alreadyWrite = new HashMap<>();
+    private WrittenTables alreadyWrite = new WrittenTables();
     private List<ComparableTableJoin> joins = new ArrayList<>();
     private List<ComparableTableMappingTask> chain = new ArrayList<>();
     private TreeMap<String, ComparableTable> contextShareTableMap = new TreeMap<>();
@@ -24,7 +24,7 @@ public class ComparableTableMapperBuilder {
         return this;
     }
 
-    public ComparableTableMapperBuilder setAlreadyWrite(final Map<String, Integer> alreadyWrite) {
+    public ComparableTableMapperBuilder setAlreadyWrite(final WrittenTables alreadyWrite) {
         this.alreadyWrite = alreadyWrite;
         return this;
     }

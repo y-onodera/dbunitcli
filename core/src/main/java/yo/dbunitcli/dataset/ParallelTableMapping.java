@@ -6,10 +6,12 @@ import yo.dbunitcli.resource.Workers;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Queue;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.stream.Stream;
 
 /**
  * ソースを別スレッドで並列に読み込む。
@@ -86,13 +88,40 @@ public final class ParallelTableMapping {
 
     public static TreeMap<String, ComparableTable> run(final ComparableDataSetParam param
             , final List<List<ComparableTableMappingTask>> lanes) {
-        final int threads = Math.min(ParallelTableMapping.parallelism(param), lanes.size());
-        ParallelTableMapping.LOGGER.info("produce() - parallel lanes={}, threads={}", lanes.size(), threads);
-        final Queue<List<ComparableTableMappingTask>> queue = new ConcurrentLinkedQueue<>(lanes);
         final TreeMap<String, ComparableTable> result = new TreeMap<>();
-        Workers.run(threads, "produce-", i -> () -> ParallelTableMapping.runWorker(param, queue, i == 0))
-                .forEach(result::putAll);
+        ParallelTableMapping.runLanes(param, lanes, "produce-", (tasks, resources) -> ParallelTableMapping.runWorker(param, tasks, resources))
+                            .forEach(result::putAll);
         return result;
+    }
+
+    /**
+     * レーンを処理する作業スレッドの中身
+     */
+    @FunctionalInterface
+    public interface LaneWorker<R> {
+        /**
+         * @param tasks     この作業スレッドが取り出したレーンのタスク（元の順）
+         * @param resources 作業スレッドの資源。最初の作業スレッドは元のconverter・タスクをそのまま使う（DB接続を余分に張らない）ためnull
+         */
+        R run(Stream<ComparableTableMappingTask> tasks, Workers.WorkerResources resources);
+    }
+
+    /**
+     * 作業スレッドがキューが空になるまでレーンを取り出して順に処理し、作業スレッドごとの結果を返す
+     */
+    public static <R> List<R> runLanes(final ComparableDataSetParam param
+            , final List<List<ComparableTableMappingTask>> lanes, final String threadNamePrefix, final LaneWorker<R> worker) {
+        final int threads = Math.min(ParallelTableMapping.parallelism(param), lanes.size());
+        ParallelTableMapping.LOGGER.info("runLanes() - {} parallel lanes={}, threads={}", threadNamePrefix, lanes.size(), threads);
+        final Queue<List<ComparableTableMappingTask>> queue = new ConcurrentLinkedQueue<>(lanes);
+        return Workers.run(threads, threadNamePrefix, i -> () -> {
+            try (final Workers.WorkerResources resources = new Workers.WorkerResources()) {
+                return worker.run(Stream.generate(queue::poll)
+                                        .takeWhile(Objects::nonNull)
+                                        .flatMap(List::stream)
+                        , i == 0 ? null : resources);
+            }
+        });
     }
 
     /**
@@ -103,27 +132,20 @@ public final class ParallelTableMapping {
     }
 
     /**
-     * キューが空になるまでレーンを取り出して処理する。converter・DB接続はワーカー単位で確保してレーン間で使い回す。
+     * converter・DB接続はワーカー単位で確保してレーン間で使い回す。
      * レーンごとに出力テーブルが異なるので、コンテキストもワーカーで1つにできる
-     *
-     * @param first 最初のワーカーは元のconverterとタスクをそのまま使う（DB接続を余分に張らない）
      */
     private static TreeMap<String, ComparableTable> runWorker(final ComparableDataSetParam param
-            , final Queue<List<ComparableTableMappingTask>> queue, final boolean first) {
-        try (final Workers.WorkerResources resources = new Workers.WorkerResources()) {
-            final IDataSetConverter converter = first || param.converter() == null
-                    ? param.converter()
-                    : param.converter().splitForParallel(resources);
-            final ComparableTableMappingContext context = new ComparableTableMappingContext(param.tableSeparators(), converter);
-            context.open();
-            List<ComparableTableMappingTask> lane;
-            while ((lane = queue.poll()) != null) {
-                for (final ComparableTableMappingTask task : lane) {
-                    Workers.checkInterrupted();
-                    (first ? task : task.forWorker(resources)).run(context);
-                }
-            }
-            return context.close();
-        }
+            , final Stream<ComparableTableMappingTask> tasks, final Workers.WorkerResources resources) {
+        final IDataSetConverter converter = resources == null || param.converter() == null
+                ? param.converter()
+                : param.converter().splitForParallel(resources);
+        final ComparableTableMappingContext context = new ComparableTableMappingContext(param.tableSeparators(), converter);
+        context.open();
+        tasks.forEach(task -> {
+            Workers.checkInterrupted();
+            (resources == null ? task : task.forWorker(resources)).run(context);
+        });
+        return context.close();
     }
 }
