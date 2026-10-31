@@ -56,16 +56,19 @@ final class PendingSplit {
         final TableSplitter.Counter counter = this.splitter.counter();
         List<Object[]> targetValues = new ArrayList<>();
         List<Integer> targetRowIndexes = new ArrayList<>();
+        final boolean hasRowIndexes = targetRows.filteredRowIndexes().size() == targetRows.size();
         for (int i = 0, j = targetRows.size(); i < j; i++) {
-            final Object[] row = sorted.getRow(i);
+            // 並べ替え後のi行目と、その行のソースでの行番号は、並べ替え前の位置で対応させる
+            final int before = sorted.getIndexBeforeSort(i);
+            final Object[] row = targetRows.get(before);
             if (counter.isBreak(this.splitter.breakKeys(this.metaData, row), targetValues.size())) {
                 result.add(this.table(result.size(), targetValues, targetRowIndexes));
                 targetValues = new ArrayList<>();
                 targetRowIndexes = new ArrayList<>();
             }
             targetValues.add(row);
-            if (this.metaData.hasRowFilter()) {
-                targetRowIndexes.add(targetRows.filteredRowIndexes().get(i));
+            if (hasRowIndexes) {
+                targetRowIndexes.add(targetRows.filteredRowIndexes().get(before));
             }
         }
         result.add(this.table(result.size(), targetValues, targetRowIndexes));

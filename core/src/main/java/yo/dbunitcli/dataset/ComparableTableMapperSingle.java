@@ -80,6 +80,7 @@ public class ComparableTableMapperSingle implements ComparableTableMapper {
     public void addRow(final Object[] values) {
         if (this.metaData.isNeedDistinct()) {
             this.rows.add(values);
+            this.filteredRowIndexes.add(this.addCount);
             this.addCount++;
         } else {
             this.addValue(this.metaData.applySetting(values));
@@ -194,9 +195,8 @@ public class ComparableTableMapperSingle implements ComparableTableMapper {
                     this.converter.row(applySetting);
                 } else {
                     this.rows.add(applySetting);
-                    if (this.metaData.hasRowFilter()) {
-                        this.filteredRowIndexes.add(this.addCount);
-                    }
+                    // ソースでの行番号（compareの$ROW_ORIGINAL）。filter・distinctで行を除いても元の行番号を残す
+                    this.filteredRowIndexes.add(this.addCount);
                 }
                 this.addRowCount++;
             }

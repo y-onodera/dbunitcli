@@ -114,10 +114,6 @@ public record AddSettingTableMetaData(
         return target.distinct(row -> this.applySetting(row, this.preset != null && !this.preset.isNeedDistinct()));
     }
 
-    public boolean hasRowFilter() {
-        return this.tableSeparator.hasRowFilter();
-    }
-
     public TableSplitter getTableSplitter() {
         // 後段がsplitしない場合は、前段のsplitを引き継ぐ
         if (this.tableSeparator.splitter().isSplit() || this.preset == null) {
@@ -200,9 +196,10 @@ public record AddSettingTableMetaData(
                 .toArray(Object[]::new);
     }
 
+    /**
+     * @param filteredRowIndexes 各行の、ソースでの行番号（filter・distinctで除く前の何行目か）。記録していなければ空
+     */
     public record Rows(List<Object[]> rows, List<Integer> filteredRowIndexes) {
-
-        private static final BiPredicate<List<Object[]>, Object[]> DISTINCT_PREDICATE = (newRows, row) -> newRows.stream().noneMatch(it -> Arrays.equals(it, row));
 
         public Rows() {
             this(new ArrayList<>(), new ArrayList<>());
@@ -252,11 +249,15 @@ public record AddSettingTableMetaData(
         }
 
         public Rows distinct() {
-            return this.map(it -> it, DISTINCT_PREDICATE);
+            return this.distinct(it -> it);
         }
 
+        /**
+         * 内容（Arrays.equalsと同じく要素のequals）が同じ行を除く。行の内容をキーにしたSetで判定する
+         */
         public Rows distinct(final UnaryOperator<Object[]> rowFunction) {
-            return this.map(rowFunction, DISTINCT_PREDICATE);
+            final Set<List<Object>> seen = new HashSet<>();
+            return this.map(rowFunction, (newRows, row) -> seen.add(Arrays.asList(row)));
         }
     }
 

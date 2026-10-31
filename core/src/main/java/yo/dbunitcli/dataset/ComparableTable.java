@@ -119,15 +119,21 @@ public record ComparableTable(AddSettingTableMetaData addSettingTableMetaData
         return row[j] == null ? ITable.NO_VALUE : row[j];
     }
 
+    /**
+     * ソースでの行番号（filter・distinctで除く前の何行目か）。記録が無ければ並べ替え前の行番号
+     */
     private int getOriginalRowIndex(final int sortedIndex) {
         final int row = this.getIndexBeforeSort(sortedIndex);
-        if (this.addSettingTableMetaData.hasRowFilter()) {
+        if (this.rows.filteredRowIndexes().size() == this.rows.size()) {
             return this.rows.filteredRowIndexes().get(row);
         }
         return row;
     }
 
-    private int getIndexBeforeSort(final int sortedIndex) {
+    /**
+     * 並べ替え後のsortedIndex行目が、rowsの何番目の行か
+     */
+    int getIndexBeforeSort(final int sortedIndex) {
         if (!this.addSettingTableMetaData.isSorted()) {
             return sortedIndex;
         }
