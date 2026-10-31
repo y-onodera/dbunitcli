@@ -92,11 +92,17 @@ public class ExcelMappingDataSetProducer {
     }
 
     /**
-     * 行を読まない場合に、シートの残りを読まなくてもテーブルのメタデータが揃ったか。
-     * セル指定のテーブルのメタデータは定義から決まり、行単位のテーブルはすべて開始していればよい
+     * シートの残りを読まなくてもよいか。行単位のテーブルがすべて開始していて、以降の行を使わない場合にtrue。
+     * 行を読まない（loadData=false）ならセル指定のテーブルのメタデータは定義から決まり、
+     * 行を読む場合も、今のテーブルが行を使わず（hasOutput）、セル指定のテーブルが無ければよい
      */
     protected boolean isMetaDataComplete() {
-        return !this.loadData && (this.rowsTableBuilder == null || this.rowsTableBuilder.isAllTablesStarted());
+        if (this.rowsTableBuilder != null && !this.rowsTableBuilder.isAllTablesStarted()) {
+            return false;
+        }
+        return !this.loadData
+                || ((this.mapper == null || !this.mapper.hasOutput())
+                && (this.randomCellRecordBuilder == null || this.randomCellRecordBuilder.getTableNames().length == 0));
     }
 
     /**
@@ -114,7 +120,7 @@ public class ExcelMappingDataSetProducer {
             this.mapper = this.context.createMapper(this.randomCellRecordBuilder.getTableMetaData(tableName));
             this.mapper.startTable();
             ExcelMappingDataSetProducer.LOGGER.info("produce - start tableName={}", tableName);
-            if (this.loadData) {
+            if (this.loadData && this.mapper.hasOutput()) {
                 int i = 0;
                 for (final String[] row : this.randomCellRecordBuilder.getRows(tableName)) {
                     this.addRowToTable(row);

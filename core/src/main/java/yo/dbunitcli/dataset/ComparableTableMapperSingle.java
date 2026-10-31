@@ -68,6 +68,11 @@ public class ComparableTableMapperSingle implements ComparableTableMapper {
     }
 
     @Override
+    public boolean hasOutput() {
+        return this.converter == null || this.converter.isRowRequired(this.baseMetaData, this.joins);
+    }
+
+    @Override
     public void endTable() {
         this.alreadyWrite.put(this.metaData.getTableName(), this.getAddRowCount());
         if (this.enableRowProcessing && this.startTable) {

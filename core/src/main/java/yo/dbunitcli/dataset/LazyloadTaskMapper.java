@@ -48,7 +48,7 @@ public class LazyloadTaskMapper {
         final TableSeparators tableSeparators = param.tableSeparators();
         final boolean loadRows = tableSeparators.isTableNameDependsOnRows();
         final List<ComparableTableJoin> joins = tableSeparators.joins();
-        final MetaDataCollector collector = new MetaDataCollector();
+        final MetaDataCollector collector = new MetaDataCollector(LazyloadTaskMapper.isJoinRowRequired(tableSeparators));
         final RecordingTableMap tableMap = new RecordingTableMap();
         final ComparableTableMappingContext context = new ComparableTableMappingContext(tableSeparators, collector, tableMap, new WrittenTables(), joins, new ArrayList<>(), false);
         final Map<String, ComparableTableMappingTask.WithTargetTable> tableTasks = new HashMap<>();
@@ -83,6 +83,16 @@ public class LazyloadTaskMapper {
     }
 
     /**
+     * joinの結果を分割する（joinの設定・後段（next）に分割がある）場合は、joinに関係するテーブルの行を読む
+     */
+    private static boolean isJoinRowRequired(final TableSeparators tableSeparators) {
+        return tableSeparators.joinConditions().stream()
+                              .flatMap(it -> it.tableSeparators().stream())
+                              .anyMatch(it -> it.splitter().isSplit())
+                || (tableSeparators.next() != null && tableSeparators.next().isTableNameDependsOnRows());
+    }
+
+    /**
      * joinの左右のテーブルを読み込むタスクを順につなげる（同じソースは1回だけ読む）
      */
     private Optional<ComparableTableMappingTask.WithTargetTable> joinTask(final ComparableTableJoin join
@@ -112,12 +122,23 @@ public class LazyloadTaskMapper {
     }
 
     /**
-     * 出力されたテーブルのメタデータを受け取る（行データは使わない）
+     * 出力されたテーブルのメタデータを受け取る（行データは使わない）。
+     * 行は分割後の名前を求めるのに要るテーブル（分割するテーブル・分割するjoinに関係するテーブル）だけ読む
      */
     private static final class MetaDataCollector extends MetaDataCapture {
 
         private final Map<String, ITableMetaData> metaData = new LinkedHashMap<>();
         private final Set<String> tableNames = new LinkedHashSet<>();
+        private final boolean joinRowRequired;
+
+        private MetaDataCollector(final boolean joinRowRequired) {
+            this.joinRowRequired = joinRowRequired;
+        }
+
+        @Override
+        public boolean isRowRequired(final AddSettingTableMetaData metaData, final List<ComparableTableJoin> joins) {
+            return metaData.getTableSplitter().isSplit() || (this.joinRowRequired && !joins.isEmpty());
+        }
 
         Stream<String> takeTableNames() {
             final List<String> result = new ArrayList<>(this.tableNames);

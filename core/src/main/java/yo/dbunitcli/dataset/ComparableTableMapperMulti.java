@@ -37,6 +37,11 @@ public class ComparableTableMapperMulti implements ComparableTableMapper {
     }
 
     @Override
+    public boolean hasOutput() {
+        return this.head.hasOutput() || this.rests.stream().anyMatch(ComparableTableMapper::hasOutput);
+    }
+
+    @Override
     public void endTable() {
         this.head.endTable();
         if (this.isConverterSplit) {
