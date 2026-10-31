@@ -88,7 +88,7 @@ public class LazyloadTaskMapper {
     /**
      * 出力されたテーブルのメタデータを受け取る（行データは使わない）
      */
-    private static final class MetaDataCollector implements IDataSetConverter {
+    private static final class MetaDataCollector extends MetaDataCapture {
 
         private final Map<String, ITableMetaData> metaData = new LinkedHashMap<>();
         private final Set<String> tableNames = new LinkedHashSet<>();
@@ -100,34 +100,9 @@ public class LazyloadTaskMapper {
         }
 
         @Override
-        public boolean isExportEmptyTable() {
-            return true;
-        }
-
-        @Override
-        public void reStartTable(final AddSettingTableMetaData metaData, final Integer writeRows) {
-            this.startTable(metaData);
-        }
-
-        @Override
-        public IDataSetConverter split() {
-            return this;
-        }
-
-        @Override
         public void startTable(final ITableMetaData metaData) {
             this.metaData.putIfAbsent(metaData.getTableName(), metaData);
             this.tableNames.add(metaData.getTableName());
-        }
-
-        @Override
-        public void endTable() {
-            // メタデータだけを使う
-        }
-
-        @Override
-        public void row(final Object[] values) {
-            // メタデータだけを使う
         }
     }
 

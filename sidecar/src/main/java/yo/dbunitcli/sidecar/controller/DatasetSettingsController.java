@@ -33,6 +33,7 @@ import yo.dbunitcli.dataset.ComparableDataSetProducer;
 import yo.dbunitcli.dataset.ComparableTable;
 import yo.dbunitcli.dataset.ComparableTableJoin;
 import yo.dbunitcli.dataset.IDataSetConverter;
+import yo.dbunitcli.dataset.MetaDataCapture;
 import yo.dbunitcli.dataset.TableSeparators;
 import yo.dbunitcli.dataset.producer.ComparableDataSetLoader;
 import yo.dbunitcli.resource.FileResources;
@@ -399,7 +400,7 @@ public class DatasetSettingsController extends AbstractResourceFileController<Da
     /**
      * 渡されたテーブル（{@link TargetTableConverter}で対象だけに絞られる）の先頭{@link #PREVIEW_ROW_LIMIT}行と全行数を集める
      */
-    private static class PreviewCollector implements IDataSetConverter {
+    private static class PreviewCollector extends MetaDataCapture {
         private ComparableTable.Builder builder;
         private int totalRows;
 
@@ -415,30 +416,10 @@ public class DatasetSettingsController extends AbstractResourceFileController<Da
         }
 
         @Override
-        public boolean isExportEmptyTable() {
-            return true;
-        }
-
-        @Override
-        public void reStartTable(final AddSettingTableMetaData tableMetaData, final Integer writeRows) {
-            this.startTable(tableMetaData);
-        }
-
-        @Override
-        public IDataSetConverter split() {
-            return this;
-        }
-
-        @Override
         public void startTable(final ITableMetaData metaData) {
             if (this.builder == null) {
                 this.builder = new ComparableTable.Builder(metaData);
             }
-        }
-
-        @Override
-        public void endTable() {
-            // nothing
         }
 
         @Override

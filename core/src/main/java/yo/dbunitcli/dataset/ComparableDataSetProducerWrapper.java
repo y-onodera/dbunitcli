@@ -89,41 +89,6 @@ public abstract class ComparableDataSetProducerWrapper implements ComparableData
         }
     }
 
-    /**
-     * delegateのタスクが読み込んだテーブルのメタデータを受け取る（行データは使わない）
-     */
-    private abstract static class MetaDataCapture implements IDataSetConverter {
-
-        @Override
-        public boolean isExportEmptyTable() {
-            return true;
-        }
-
-        @Override
-        public void reStartTable(final AddSettingTableMetaData tableMetaData, final Integer writeRows) {
-            try {
-                this.startTable(tableMetaData);
-            } catch (final DataSetException e) {
-                throw new AssertionError(e);
-            }
-        }
-
-        @Override
-        public void row(final Object[] values) {
-            // メタデータだけを使う
-        }
-
-        @Override
-        public void endTable() {
-            // メタデータだけを使う
-        }
-
-        @Override
-        public IDataSetConverter split() {
-            return this;
-        }
-    }
-
     private static final class TableNameCollector extends MetaDataCapture {
 
         private final Set<String> tableNames = new LinkedHashSet<>();
