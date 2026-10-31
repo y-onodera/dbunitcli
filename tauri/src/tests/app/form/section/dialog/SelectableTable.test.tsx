@@ -1,6 +1,5 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { useState } from "react";
 import { describe, expect, it } from "vitest";
 import SelectableTable from "../../../../../app/form/section/dialog/SelectableTable";
 import { useTableSelection } from "../../../../../hooks/useTableSelection";
@@ -13,7 +12,6 @@ function Harness({
 	emptyMessage?: string;
 }) {
 	const { selected, toggle, toggleAll } = useTableSelection();
-	const [extra] = useState(true);
 	return (
 		<>
 			<SelectableTable
@@ -24,14 +22,6 @@ function Harness({
 				columnLabel="Table Name"
 				filterPlaceholder="Filter..."
 				emptyMessage={emptyMessage}
-				renderExtraRows={(item) =>
-					extra && item === "ORDERS" ? (
-						<tr>
-							<td />
-							<td>extra-row</td>
-						</tr>
-					) : null
-				}
 			/>
 			<output data-testid="selected">{[...selected].sort().join(",")}</output>
 		</>
@@ -55,11 +45,6 @@ describe("SelectableTable", () => {
 		expect(screen.queryByText("ORDERS")).toBeNull();
 		await user.click(screen.getAllByRole("checkbox")[0]);
 		expect(screen.getByTestId("selected").textContent).toBe("USERS,USER_ROLES");
-	});
-
-	it("追加行を行の直下へ描画する", () => {
-		render(<Harness items={["USERS", "ORDERS"]} />);
-		expect(screen.getByText("extra-row")).toBeTruthy();
 	});
 
 	it("itemsが空でemptyMessage指定時はメッセージを表示する", () => {

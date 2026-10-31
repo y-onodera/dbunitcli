@@ -129,13 +129,13 @@ function TxtTemplateGenerateDialog({
 		initialValues: prefill,
 	});
 
-	const handleExecute = () =>
-		dialog.execute(async (values) => {
+	const handleExecute = async () => {
+		const result = await dialog.execute(async (values, context) => {
 			const params = await postDialogForm<Record<string, string>>(
 				dialog.apiUrl,
 				"scaffold/exec",
 				values,
-				dialog.fetchOptions(),
+				context,
 			);
 			await Promise.all([
 				handleReflect({
@@ -144,10 +144,11 @@ function TxtTemplateGenerateDialog({
 				}),
 				reloadResources(),
 			]);
-			if (!dialog.isAborted()) {
-				handleDialogClose();
-			}
 		});
+		if (result) {
+			handleDialogClose();
+		}
+	};
 
 	return (
 		<RefreshableDialogShell

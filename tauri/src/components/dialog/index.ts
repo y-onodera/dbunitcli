@@ -7,6 +7,7 @@ export {
 	StatusMessage,
 } from "./DialogLayout";
 export { FullDialog } from "./FullDialog";
+export { JobFailure } from "./JobFailure";
 export {
 	DialogActions,
 	DialogFooter,

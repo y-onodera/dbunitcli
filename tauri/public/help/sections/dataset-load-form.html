@@ -66,12 +66,13 @@
   <ul>
     <li>読み込むのは選んだテーブルだけのため、テーブルが多いデータセットでも早く表示されます。ただし、<code>setting</code> で join したテーブルは、元のテーブルもすべて読み込みます</li>
     <li>表示するのは先頭 100 行までです。全体の行数が多いときは、表の上に「Showing first 100 of 全行数 rows (partial preview)」と表示されます</li>
+    <li>テーブル一覧・データの読込に失敗したときは、エラーメッセージと読込中に出ていたログを表示します。データの読込に失敗したときは Export できません</li>
   </ul>
   <p>データ表示の Export ボタンを押すと、そのテーブルだけを convert と同じ形式で出力できます。</p>
   <ol>
     <li>Export を押すと、出力先の指定（<a href="result-form.html">Result Form</a>）を入力するダイアログが開きます。入力欄の初期値は convert のデフォルトです。</li>
     <li>Execute を押すと、プレビューと同じ読込条件（<code>setting</code> の適用有無を含む）で読み込み、選んだテーブルだけを出力します。</li>
-    <li>完了すると Export completed. と表示されます。ファイルへ出力した場合は Open Directory で出力先を開けます。</li>
+    <li>完了すると Export completed. と表示されます。ファイルへ出力した場合は Open Directory で出力先を開けます。失敗したときは、ダイアログ内にエラーメッセージと実行中に出ていたログを表示します。</li>
   </ol>
 
   <h2 id="section-related">関連</h2>

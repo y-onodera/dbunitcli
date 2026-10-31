@@ -5,6 +5,7 @@ import {
 	DialogFooter,
 	DialogTitle,
 	FullDialog,
+	JobFailure,
 	type SaveThen,
 	StatusMessage,
 	Td,
@@ -124,7 +125,7 @@ export function DatasetTableNamesPreviewDialog({
 	datasetSrcInfo: DatasetSrcInfo;
 	handleDialogClose: () => void;
 }) {
-	const { tableNames, loading, logs } = useDatasetTableNames(
+	const { tableNames, loading, logs, error } = useDatasetTableNames(
 		datasetSrcInfo,
 		true,
 	);
@@ -139,6 +140,9 @@ export function DatasetTableNamesPreviewDialog({
 					onAbandon={handleDialogClose}
 				/>
 			);
+		}
+		if (error) {
+			return <JobFailure message={error} lines={logs} />;
 		}
 		if (tableNames.length === 0) {
 			return <StatusMessage kind="empty">No tables found.</StatusMessage>;
@@ -187,7 +191,7 @@ function TableDataPreviewDialog({
 	tableName: string;
 	handleClose: () => void;
 }) {
-	const { preview, loading, logs } = useDatasetTablePreview(
+	const { preview, loading, logs, error } = useDatasetTablePreview(
 		datasetSrcInfo,
 		tableName,
 	);
@@ -199,6 +203,9 @@ function TableDataPreviewDialog({
 			return (
 				<JobProgress title="Loading..." lines={logs} onAbandon={handleClose} />
 			);
+		}
+		if (error) {
+			return <JobFailure message={error} lines={logs} />;
 		}
 		if (!preview?.headers || preview.headers.length === 0) {
 			return <StatusMessage kind="empty">No data found.</StatusMessage>;
@@ -243,7 +250,7 @@ function TableDataPreviewDialog({
 				<BlueButton
 					title="Export"
 					handleClick={() => setShowExport(true)}
-					disabled={loading}
+					disabled={loading || error !== ""}
 				/>
 				<WhiteButton title="Close" handleClick={handleClose} />
 			</DialogFooter>

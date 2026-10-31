@@ -23,6 +23,11 @@ import {
 	OptionValidationError,
 } from "../../../utils/fetchUtils";
 import type { CollectedFormValues } from "../../../utils/formValues";
+import {
+	emitJobLogs,
+	expectJobLog,
+	expectNoJobLog,
+} from "../../helpers/jobFailure";
 import { environmentFixture, workspaceResourcesFixture } from "../../setup";
 
 const mockEnvironment: Environment = { ...environmentFixture };
@@ -193,6 +198,32 @@ describe("Footerの実行ボタン", () => {
 			expect(screen.queryByText("Open Directory")).not.toBeInTheDocument();
 			expect(alertSpy).not.toHaveBeenCalled();
 			alertSpy.mockRestore();
+		},
+	);
+
+	it.each([
+		{ fail: true, shown: true },
+		{ fail: false, shown: false },
+	])(
+		"Execの結果ダイアログには失敗時だけ実行ログを残す（失敗: $fail）",
+		async ({ fail, shown }) => {
+			await act(async () => {
+				renderFooter();
+			});
+			mockFetchData.mockImplementationOnce(async (params: FetchParams) => {
+				emitJobLogs(params.onLog);
+				if (fail) {
+					throw new Error("failed");
+				}
+				return { text: () => Promise.resolve("result/dir") } as Response;
+			});
+			await userEvent.click(screen.getByText("Exec"));
+
+			if (shown) {
+				expectJobLog();
+			} else {
+				expectNoJobLog();
+			}
 		},
 	);
 

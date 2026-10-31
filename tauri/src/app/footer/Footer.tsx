@@ -1,15 +1,16 @@
 import { core } from "@tauri-apps/api";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { SectionHelpButton } from "../../components/dialog";
 import { BlueButton, WhiteButton } from "../../components/element/Button";
 import { BlueEditButton } from "../../components/element/ButtonIcon";
+import { JobLog } from "../../components/element/JobLog";
 import { JobProgress } from "../../components/element/JobProgress";
 import {
 	useParamInputs,
 	useSetParamInputs,
 } from "../../context/ParameterInputProvider";
 import { useSelectParameter } from "../../context/SelectParameterProvider";
-import { useJobLog } from "../../hooks/useJobLog";
+import { type JobContext, useJob } from "../../hooks/useJob";
 import {
 	type Running,
 	useExecParameter,
@@ -30,9 +31,8 @@ export default function Footer(prop: {
 	const setParamInputs = useSetParamInputs();
 	const [showParamDialog, setShowParamDialog] = useState(false);
 	const [running, setRunning] = useState<Running>(RESET_RUNNING);
-	const [isLoading, setIsLoading] = useState(false);
-	const jobLog = useJobLog();
-	const abortControllerRef = useRef<AbortController | null>(null);
+	// 実行し直す・中断する・アンマウントすると、それまでの実行を中断して結果を捨てる
+	const job = useJob();
 	const parameter = useSelectParameter();
 	const saveParameter = useSaveParameter();
 	const execParameter = useExecParameter();
@@ -42,26 +42,13 @@ export default function Footer(prop: {
 		setParamInputs(parameter.inputParam ?? {});
 	}, [parameter.inputParam, setParamInputs]);
 
-	// アンマウント時に実行中の処理を中断する
-	useEffect(() => {
-		return () => {
-			abortControllerRef.current?.abort();
-		};
-	}, []);
-
-	// 実行ごとにAbortControllerを作り、中断・置き換え後の結果は捨てる
+	// 失敗は例外ではなくRunning（failed）で返り、結果ダイアログに表示する
 	const run = async (
-		call: (signal: AbortSignal) => Promise<Running | null>,
+		call: (context: JobContext) => Promise<Running | null>,
 	) => {
-		const controller = new AbortController();
-		abortControllerRef.current = controller;
-		jobLog.reset();
-		setIsLoading(true);
-		const result = await call(controller.signal);
-		// 応答後の処理中に中断されることもあるため、nullでなくてもsignalを確認する
-		if (result && !controller.signal.aborted) {
-			setRunning(result);
-			setIsLoading(false);
+		const result = await job.run(call);
+		if (result?.value) {
+			setRunning(result.value);
 		}
 	};
 
@@ -77,34 +64,33 @@ export default function Footer(prop: {
 		if (input.validationError) {
 			return;
 		}
-		run((signal) =>
-			execParameter(withParamInputs(input.values), signal, jobLog.append),
+		run(({ signal, onLog }) =>
+			execParameter(withParamInputs(input.values), signal, onLog),
 		);
 	};
 
 	const handleSave = () =>
-		run((signal) =>
+		run(({ signal }) =>
 			saveParameter(withParamInputs(prop.formData(false).values), signal),
 		);
 
-	const handleSaveShell = () => run((signal) => saveShell(signal));
+	const handleSaveShell = () => run(({ signal }) => saveShell(signal));
 
 	const openDirectory = async (path: string) => {
 		await core.invoke("open_directory", { path });
 	};
 
 	const handleCancel = () => {
-		abortControllerRef.current?.abort();
-		setIsLoading(false);
+		job.cancel();
 		setRunning(RESET_RUNNING);
 	};
 
-	if (isLoading) {
+	if (job.running) {
 		return (
 			<ResultDialog hidden={false}>
 				<JobProgress
 					title="Now Execution"
-					lines={jobLog.logs}
+					lines={job.logs}
 					onAbandon={handleCancel}
 				/>
 			</ResultDialog>
@@ -131,6 +117,8 @@ export default function Footer(prop: {
 							))}
 						</ul>
 					)}
+					{/* 失敗時は原因を追えるよう、実行中に届いたログを閉じるまで残す */}
+					{running.failed && <JobLog lines={job.logs} className="mb-5" />}
 					<div className="flex items-center justify-end gap-2">
 						{running.resultDir && (
 							<BlueButton

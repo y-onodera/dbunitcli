@@ -55,7 +55,7 @@ function useGenerateXlsxTemplate() {
 	const setResourcesSettings = useSetResourcesSettings();
 	return async (
 		values: FormValues,
-		{ apiUrl, isAborted, fetchOptions }: GenerateExecuteContext,
+		{ apiUrl, fetchOptions }: GenerateExecuteContext,
 	) => {
 		const templateFiles = await postDialogForm<string[]>(
 			apiUrl,
@@ -64,7 +64,7 @@ function useGenerateXlsxTemplate() {
 			fetchOptions,
 		);
 		setResourcesSettings((current) => current.with({ templateFiles }));
-		return isAborted() ? null : toSavedFileName(String(values[fileNameField]));
+		return toSavedFileName(String(values[fileNameField]));
 	};
 }
 

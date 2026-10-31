@@ -127,7 +127,7 @@
   <table>
     <tr><th>ボタン</th><th>動作</th><th>Workspace への影響</th></tr>
     <tr><td>Edit Parameters (-P)</td><td>SQL やテンプレートに渡す -P 値を入力（設定数が右に表示される）。詳細は <a href="parameters.html">Parameters (-P)</a> を参照</td><td>Exec に渡され、Save で一緒に保存される（保存後は .bat でも使われる）。保存済みオプションを開くと保存済みの値に置き換わる</td></tr>
-    <tr><td>Exec</td><td>フォームに表示中の内容でコマンドを実行。保存は不要。実行中は Abandoned で中断でき、完了後は Open Directory で出力先を開ける。必須の未入力・存在しないファイル・同時に指定できないオプション・不正な値（数値・真偽値として読めない値、文字コード・正規表現・選択肢にない値など）があると実行せずに Invalid Option と表示し、該当する入力欄（チェックボックス・選択欄を含む）の下にメッセージを赤字で出す。メッセージは入力し直すか、ボタンでファイルを選び直すと消える。折りたたんだ欄など画面に出ていない欄のメッセージは結果ダイアログに一覧で出し、欄を展開するとその下にも出る。実行に失敗したときは、結果ダイアログにエラーメッセージを赤字で出す。</td><td>相対パスは Workspace / Dataset Base / Result Base を基準に解決し、<code>${env.変数名}</code> は Env ファイルの値に置き換わる。結果は Result Base 配下に出力</td></tr>
+    <tr><td>Exec</td><td>フォームに表示中の内容でコマンドを実行。保存は不要。実行中は Abandoned で中断でき、完了後は Open Directory で出力先を開ける。必須の未入力・存在しないファイル・同時に指定できないオプション・不正な値（数値・真偽値として読めない値、文字コード・正規表現・選択肢にない値など）があると実行せずに Invalid Option と表示し、該当する入力欄（チェックボックス・選択欄を含む）の下にメッセージを赤字で出す。メッセージは入力し直すか、ボタンでファイルを選び直すと消える。折りたたんだ欄など画面に出ていない欄のメッセージは結果ダイアログに一覧で出し、欄を展開するとその下にも出る。実行に失敗したときは、結果ダイアログにエラーメッセージを赤字で出し、実行中に出ていたログも Close するまで残す。</td><td>相対パスは Workspace / Dataset Base / Result Base を基準に解決し、<code>${env.変数名}</code> は Env ファイルの値に置き換わる。結果は Result Base 配下に出力</td></tr>
     <tr><td>Save</td><td>フォームに表示中の内容を保存済みオプションに上書き保存。失敗したときは、結果ダイアログにエラーメッセージを赤字で出す。</td><td><code>option/&lt;command&gt;/&lt;name&gt;.txt</code> を上書き</td></tr>
     <tr><td>Save Shell</td><td>保存済みオプションを CLI で実行する .bat を作成。未保存の変更は含まれないため、先に Save する。失敗したときは、結果ダイアログにエラーメッセージを赤字で出す。</td><td>.bat はアプリの起動ディレクトリに <code>&lt;command&gt;_&lt;name&gt;.bat</code> で作成（Workspace の中ではない）。現在の Workspace / Dataset Base / Result Base / Env が埋め込まれる</td></tr>
   </table>

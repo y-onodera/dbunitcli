@@ -1,9 +1,15 @@
 import { core } from "@tauri-apps/api";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import DatasetTableNamesPreviewButton from "../../../../../app/form/section/dialog/DatasetTableNamesPreviewButton";
 import type { TablePreview } from "../../../../../hooks/useDatasetSettings";
+import {
+	emitLogsThenFail,
+	expectJobFailure,
+	JOB_ERROR,
+	JOB_LOG_LINES,
+} from "../../../../helpers/jobFailure";
 import {
 	environmentFixture,
 	workspaceResourcesFixture,
@@ -31,20 +37,27 @@ vi.mock("../../../../../hooks/useWorkspaceResources", () => ({
 }));
 
 // （mockReset:trueで実装が毎回リセットされるため、resolve値は各テスト内で設定する）
-const { previewFixture, mockConvert } = vi.hoisted(() => ({
-	previewFixture: { current: null as TablePreview | null },
+const { previewFixture, tableNamesFixture, mockConvert } = vi.hoisted(() => ({
+	previewFixture: {
+		current: null as TablePreview | null,
+		error: "",
+		logs: [] as string[],
+	},
+	tableNamesFixture: { error: "", logs: [] as string[] },
 	mockConvert: vi.fn(),
 }));
 vi.mock("../../../../../hooks/useDatasetSettings", () => ({
 	useDatasetTableNames: () => ({
-		tableNames: ["big"],
+		tableNames: tableNamesFixture.error ? [] : ["big"],
 		loading: false,
-		logs: [],
+		logs: tableNamesFixture.logs,
+		error: tableNamesFixture.error,
 	}),
 	useDatasetTablePreview: () => ({
 		preview: previewFixture.current,
 		loading: false,
-		logs: [],
+		logs: previewFixture.logs,
+		error: previewFixture.error,
 	}),
 	useDatasetTableConvert: () => mockConvert,
 }));
@@ -89,6 +102,41 @@ async function openExport() {
 }
 
 describe("DatasetTableNamesPreviewButtonのテスト", () => {
+	beforeEach(() => {
+		previewFixture.error = "";
+		previewFixture.logs = [];
+		tableNamesFixture.error = "";
+		tableNamesFixture.logs = [];
+	});
+
+	it("テーブル一覧の読込に失敗したら、エラーと読込中のログを残す", async () => {
+		tableNamesFixture.error = JOB_ERROR;
+		tableNamesFixture.logs = JOB_LOG_LINES;
+		const user = userEvent.setup();
+		render(
+			<DatasetTableNamesPreviewButton
+				title="Preview Before Settings"
+				setting=""
+			/>,
+		);
+		await user.click(
+			screen.getByRole("button", { name: "Preview Before Settings" }),
+		);
+
+		expectJobFailure();
+		expect(screen.queryByText("No tables found.")).not.toBeInTheDocument();
+	});
+
+	it("データの読込に失敗したら、エラーと読込中のログを残し、Exportはできない", async () => {
+		previewFixture.error = JOB_ERROR;
+		previewFixture.logs = JOB_LOG_LINES;
+		await openPreview();
+
+		expectJobFailure();
+		expect(screen.queryByText("No data found.")).not.toBeInTheDocument();
+		expect(screen.getByRole("button", { name: "Export" })).toBeDisabled();
+	});
+
 	it("全行数より表示行が少ないときは部分表示であることを示す", async () => {
 		previewFixture.current = {
 			headers: ["key"],
@@ -140,12 +188,16 @@ describe("DatasetTableNamesPreviewButtonのテスト", () => {
 		});
 	});
 
-	it("convertが失敗したらダイアログ内にエラーを表示する", async () => {
-		mockConvert.mockRejectedValue(new Error("boom"));
+	it("convertが失敗したらダイアログ内にエラーと実行中のログを表示する", async () => {
+		mockConvert.mockImplementation(
+			(_srcInfo, _tableName, _result, fetchOptions) =>
+				emitLogsThenFail(fetchOptions.onLog),
+		);
 		const user = await openExport();
 		await user.click(screen.getByRole("button", { name: "Execute" }));
 
-		expect(await screen.findByText("Error: boom")).toBeInTheDocument();
+		await screen.findByText(`Error: ${JOB_ERROR}`);
+		expectJobFailure();
 		expect(screen.queryByText("Export completed.")).not.toBeInTheDocument();
 	});
 });

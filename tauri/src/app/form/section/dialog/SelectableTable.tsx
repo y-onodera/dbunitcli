@@ -1,4 +1,4 @@
-import { Fragment, type ReactNode, useState } from "react";
+import { type ReactNode, useState } from "react";
 import {
 	DataTable,
 	StatusMessage,
@@ -21,7 +21,6 @@ export default function SelectableTable({
 	filterPlaceholder,
 	emptyMessage,
 	renderItem = renderAsText,
-	renderExtraRows,
 }: {
 	items: string[];
 	selected: Set<string>;
@@ -33,8 +32,6 @@ export default function SelectableTable({
 	// 指定時、items が空ならテーブルの代わりに表示する
 	emptyMessage?: string;
 	renderItem?: (item: string) => ReactNode;
-	// 行の直下へ差し込む追加行（展開したカラム一覧など）
-	renderExtraRows?: (item: string) => ReactNode;
 }) {
 	const [filter, setFilter] = useState("");
 	const filterLower = filter.toLowerCase();
@@ -70,21 +67,18 @@ export default function SelectableTable({
 					}
 				>
 					{filteredItems.map((item) => (
-						<Fragment key={item}>
-							<Tr onClick={() => onToggle(item)}>
-								<Td>
-									<input
-										type="checkbox"
-										checked={selected.has(item)}
-										onChange={() => onToggle(item)}
-										onClick={(e) => e.stopPropagation()}
-										className="w-4 h-4 text-primary"
-									/>
-								</Td>
-								<Td>{renderItem(item)}</Td>
-							</Tr>
-							{renderExtraRows?.(item)}
-						</Fragment>
+						<Tr key={item} onClick={() => onToggle(item)}>
+							<Td>
+								<input
+									type="checkbox"
+									checked={selected.has(item)}
+									onChange={() => onToggle(item)}
+									onClick={(e) => e.stopPropagation()}
+									className="w-4 h-4 text-primary"
+								/>
+							</Td>
+							<Td>{renderItem(item)}</Td>
+						</Tr>
 					))}
 				</DataTable>
 			)}

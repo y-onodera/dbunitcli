@@ -1,5 +1,6 @@
 import { type ReactElement, type ReactNode, useState } from "react";
 import { AddButton } from "../../../../components/element/ButtonIcon";
+import type { JobContext } from "../../../../hooks/useJob";
 import type { GenerateOptions } from "../../../../model/SelectParameter";
 import type { FormValues } from "../../../../utils/formValues";
 import { DatasetLoadForm } from "../DatasetLoadForm";
@@ -7,10 +8,7 @@ import { RefreshableDialogShell } from "./RefreshableDialogShell";
 import ResourceEditButton, {
 	type ResourceEditButtonProp,
 } from "./ResourceEditButton";
-import {
-	type DialogFetchOptions,
-	postDialogForm,
-} from "./refreshableDialogForm";
+import { postDialogForm } from "./refreshableDialogForm";
 import { useRefreshableDialog } from "./useRefreshableDialog";
 
 type GenerateDialogConfig = {
@@ -25,17 +23,18 @@ type GenerateDialogConfig = {
 
 export type GenerateExecuteContext = {
 	apiUrl: string;
-	isAborted: () => boolean;
 	// generate/refreshと同じgenerateType付きで値を送る
 	withGenerateType: (values: FormValues) => FormValues;
 	// 生成の実行に渡すfetchオプション（ログ表示・ダイアログを閉じたときのsidecar側の中断）
-	fetchOptions: DialogFetchOptions;
+	fetchOptions: JobContext;
 };
 
-function GenerateFormDialog({
+// onExecuteで生成し、成功したら（中断されていなければ）結果をonDoneへ渡す
+function GenerateFormDialog<T>({
 	config,
 	leading,
 	onExecute,
+	onDone,
 	onClose,
 }: {
 	config: GenerateDialogConfig;
@@ -43,7 +42,8 @@ function GenerateFormDialog({
 	onExecute: (
 		values: FormValues,
 		context: GenerateExecuteContext,
-	) => Promise<void>;
+	) => Promise<T>;
+	onDone: (value: T) => void;
 	onClose: () => void;
 }) {
 	const dialog = useRefreshableDialog<GenerateOptions>({
@@ -61,16 +61,18 @@ function GenerateFormDialog({
 			executing={dialog.executing}
 			executeError={dialog.executeError}
 			logs={dialog.logs}
-			onExecute={() =>
-				dialog.execute((values) =>
+			onExecute={async () => {
+				const result = await dialog.execute((values, context) =>
 					onExecute(values, {
 						apiUrl: dialog.apiUrl,
-						isAborted: dialog.isAborted,
 						withGenerateType: dialog.withGenerateType,
-						fetchOptions: dialog.fetchOptions(),
+						fetchOptions: context,
 					}),
-				)
-			}
+				);
+				if (result) {
+					onDone(result.value);
+				}
+			}}
 			onClose={onClose}
 		>
 			{(options) => (
@@ -155,20 +157,15 @@ function ModelGenerateDialog<BUILDER, MODEL>({
 		<GenerateFormDialog
 			config={config}
 			onClose={handleDialogClose}
-			onExecute={async (
-				values,
-				{ apiUrl, isAborted, withGenerateType, fetchOptions },
-			) => {
-				const builder = await postDialogForm<BUILDER>(
+			onExecute={(values, { apiUrl, withGenerateType, fetchOptions }) =>
+				postDialogForm<BUILDER>(
 					apiUrl,
 					config.endpoint,
 					withGenerateType(values),
 					fetchOptions,
-				);
-				if (!isAborted()) {
-					setGenerated(config.build(builder));
-				}
-			}}
+				)
+			}
+			onDone={(builder) => setGenerated(config.build(builder))}
 		/>
 	);
 }
@@ -196,10 +193,9 @@ export function ModelGenerateButton<BUILDER, MODEL>({
 type FileGenerate = (
 	values: FormValues,
 	context: GenerateExecuteContext,
-) => Promise<string | null>;
+) => Promise<string>;
 
-// 生成のみで完結しパスを返す形式（XlsxTemplate）。
-// generateは中断された場合はnull・成功時は保存したファイル名を返す
+// 生成のみで完結しパスを返す形式（XlsxTemplate）。generateは保存したファイル名を返す
 export function FileGenerateButton({
 	setPath,
 	config,
@@ -217,12 +213,8 @@ export function FileGenerateButton({
 					config={config}
 					leading={leading}
 					onClose={handleDialogClose}
-					onExecute={async (values, context) => {
-						const fileName = await generate(values, context);
-						if (fileName !== null) {
-							handleSave(fileName);
-						}
-					}}
+					onExecute={generate}
+					onDone={handleSave}
 				/>
 			)}
 		</GenerateButton>

@@ -8,12 +8,19 @@ import WorkspaceResourcesProvider from "../../context/WorkspaceResourcesProvider
 import {
 	useDatasetSettingsData,
 	useDatasetTableConvert,
+	useDatasetTableNames,
+	useDatasetTablePreview,
 	useSrcInfoColumnNames,
 } from "../../hooks/useDatasetSettings";
 import type { DatasetSrcInfo } from "../../model/CommandOption";
 import { DatasetSettings } from "../../model/DatasetSettings";
 import type { WorkspaceResources } from "../../model/WorkspaceResources";
 import type { FetchParams } from "../../utils/fetchUtils";
+import {
+	emitLogsThenFail,
+	JOB_ERROR,
+	JOB_LOG_LINES,
+} from "../helpers/jobFailure";
 import { environmentFixture, workspaceResourcesFixture } from "../setup";
 
 // モックデータ
@@ -39,6 +46,12 @@ function MockProvider({ children }: { children: React.ReactNode }) {
 }
 const wrapper = ({ children }: { children: React.ReactNode }) => (
 	<MockProvider>{children}</MockProvider>
+);
+// WorkspaceResourcesに依存しないフック用に、環境設定だけを渡す
+const envWrapper = ({ children }: { children: React.ReactNode }) => (
+	<environmentContext.Provider value={mockEnvironment}>
+		{children}
+	</environmentContext.Provider>
 );
 
 const { mockFetchData, mockFetchAndUpdate } = vi.hoisted(() => {
@@ -79,7 +92,8 @@ const { mockFetchData, mockFetchAndUpdate } = vi.hoisted(() => {
 	return { mockFetchData, mockFetchAndUpdate };
 });
 
-vi.mock("../../utils/fetchUtils", () => ({
+vi.mock("../../utils/fetchUtils", async (importOriginal) => ({
+	...(await importOriginal<typeof import("../../utils/fetchUtils")>()),
 	fetchData: mockFetchData,
 	fetchAndUpdate: mockFetchAndUpdate,
 }));
@@ -130,13 +144,6 @@ describe("DatasetSettingsProviderのテスト", () => {
 				params.endpoint.includes(endpoint),
 			);
 
-		// フックはWorkspaceResourcesに依存しないため環境設定だけを渡す
-		const envWrapper = ({ children }: { children: React.ReactNode }) => (
-			<environmentContext.Provider value={mockEnvironment}>
-				{children}
-			</environmentContext.Provider>
-		);
-
 		it("全テーブルの列名を重複なく出現順で返すことを確認", async () => {
 			const { result } = renderHook(() => useSrcInfoColumnNames(srcInfo), {
 				wrapper: envWrapper,
@@ -185,18 +192,80 @@ describe("DatasetSettingsProviderのテスト", () => {
 		});
 	});
 
+	describe("Preview用フック（useDatasetTableNames・useDatasetTablePreview）のテスト", () => {
+		// 読込中にログを流してから失敗する
+		const failWithLogs = () =>
+			mockFetchData.mockImplementationOnce((params: FetchParams) =>
+				emitLogsThenFail(params.onLog),
+			);
+
+		// どちらのフックも同じ形（data・loading・logs・error）で見る
+		const previewHooks = {
+			tableNames: () => {
+				const { tableNames, ...rest } = useDatasetTableNames(srcInfo, true);
+				return { ...rest, data: tableNames as unknown };
+			},
+			preview: () => {
+				const { preview, ...rest } = useDatasetTablePreview(srcInfo, "t1");
+				return { ...rest, data: preview as unknown };
+			},
+		};
+		const renderPreviewHook = (name: keyof typeof previewHooks) =>
+			renderHook(previewHooks[name], { wrapper: envWrapper });
+
+		it.each([
+			{ name: "tableNames", empty: [] },
+			{ name: "preview", empty: null },
+		] as const)(
+			"$name: 読込に失敗したら、データは空にしてエラーと読込中に届いたログを返すことを確認",
+			async ({ name, empty }) => {
+				failWithLogs();
+				const { result } = renderPreviewHook(name);
+
+				await waitFor(() => {
+					expect(result.current.loading).toBe(false);
+				});
+				expect(result.current.error).toBe(JOB_ERROR);
+				expect(result.current.logs).toStrictEqual(JOB_LOG_LINES);
+				expect(result.current.data).toStrictEqual(empty);
+			},
+		);
+
+		it.each(["tableNames", "preview"] as const)(
+			"%s: 読込に成功したらエラーは空であることを確認",
+			async (name) => {
+				const { result } = renderPreviewHook(name);
+				await waitFor(() => {
+					expect(result.current.loading).toBe(false);
+				});
+				expect(result.current.error).toBe("");
+			},
+		);
+
+		it("入力候補（useSrcInfoColumnNames）は、テーブル一覧の読込に失敗しても空配列のままにすることを確認", async () => {
+			failWithLogs();
+			const { result } = renderHook(() => useSrcInfoColumnNames(srcInfo), {
+				wrapper: envWrapper,
+			});
+			await waitFor(() => {
+				expect(mockFetchData).toHaveBeenCalled();
+			});
+			await act(async () => {});
+			expect(result.current).toStrictEqual([]);
+		});
+	});
+
 	describe("useDatasetTableConvertのテスト", () => {
 		it("読込元・テーブル名・resultの値を送り、出力先ディレクトリを返すことを確認", async () => {
 			const { result } = renderHook(() => useDatasetTableConvert(), {
-				wrapper: ({ children }: { children: React.ReactNode }) => (
-					<environmentContext.Provider value={mockEnvironment}>
-						{children}
-					</environmentContext.Provider>
-				),
+				wrapper: envWrapper,
 			});
-			const resultDir = await result.current(srcInfo, "t1", {
-				"-result.resultType": "csv",
-			});
+			const resultDir = await result.current(
+				srcInfo,
+				"t1",
+				{ "-result.resultType": "csv" },
+				{ signal: new AbortController().signal, onLog: () => {} },
+			);
 
 			expect(resultDir).toBe("/work/result");
 			const [params] = mockFetchData.mock.calls.filter(([p]) =>
