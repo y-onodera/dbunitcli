@@ -7,6 +7,7 @@ import yo.dbunitcli.application.json.FromJsonTableSeparatorsBuilder;
 import yo.dbunitcli.common.Source;
 
 import java.io.StringReader;
+import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.stream.Stream;
 
@@ -29,13 +30,27 @@ final class DataSetTestSupport {
     }
 
     /**
+     * 設定ファイルと同じ形式のJSONの設定で読み込むパラメータ
+     */
+    static ComparableDataSetParam param(final String setting) {
+        return ComparableDataSetParam.builder().setTableSeparators(DataSetTestSupport.separators(setting)).build();
+    }
+
+    /**
      * key列にkeysの行を持つテーブルtableNameをcontextに書き込む
      */
     static void write(final ComparableTableMappingContext context, final String tableName, final String... keys) {
-        final ComparableTableMapper mapper = context.createMapper(Source.NONE.tableName(tableName).createMetaData(new String[]{"key"}));
-        mapper.startTable();
-        Stream.of(keys).forEach(key -> mapper.addRow(new Object[]{key}));
-        mapper.endTable();
+        new KeysTask(tableName, ComparableDataSetParam.builder().build(), (_, _) -> {
+        }, keys).run(context);
+    }
+
+    /**
+     * key列にkeys（既定は1〜3）の行を持つテーブルtableNameを書くソース。行を読んだか（loadDataとhasOutput）をrowsReadに記録する
+     */
+    static ComparableTableMappingTask recording(final String tableName, final ComparableDataSetParam param
+            , final Map<String, Boolean> rowsRead, final String... keys) {
+        return new KeysTask(tableName, param, (task, read) -> rowsRead.put(task.tableName(), read)
+                , keys.length == 0 ? new String[]{"1", "2", "3"} : keys);
     }
 
     /**

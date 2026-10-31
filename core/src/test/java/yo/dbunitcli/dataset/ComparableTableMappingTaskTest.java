@@ -38,9 +38,7 @@ public class ComparableTableMappingTaskTest {
      * 2つのソース（11〜13・21〜23）がaに書く行を、jxlsと同じく行を流して受け取るconverterで読み、テーブルごとの行を返す
      */
     private Map<String, List<String>> run(final String setting, final boolean splittable) {
-        final ComparableDataSetParam param = ComparableDataSetParam.builder()
-                                                                   .setTableSeparators(DataSetTestSupport.separators(setting))
-                                                                   .build();
+        final ComparableDataSetParam param = DataSetTestSupport.param(setting);
         final Map<String, List<String>> rows = new LinkedHashMap<>();
         new ComparableTableMappingTask.WithTargetTable("a", List.of(this.task(param, "11", "12", "13")
                 , this.task(param, "21", "22", "23")))

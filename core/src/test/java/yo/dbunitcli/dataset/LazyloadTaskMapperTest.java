@@ -70,14 +70,12 @@ public class LazyloadTaskMapperTest {
 
     @Test
     public void 後に並ぶjoinの結果を使うjoinは_使うjoinの左右のテーブルも読む() {
-        final ComparableDataSetParam param = ComparableDataSetParam.builder()
-                                                                   .setTableSeparators(DataSetTestSupport.separators("""
-                                                                           {"settings": [{"innerJoin": {"left": "a_with_b", "right": "c", "column": ["key"]}}
-                                                                                       , {"innerJoin": {"left": "a", "right": "b", "column": ["key"]}}]}
-                                                                           """))
-                                                                   .build();
+        final ComparableDataSetParam param = DataSetTestSupport.param("""
+                {"settings": [{"innerJoin": {"left": "a_with_b", "right": "c", "column": ["key"]}}
+                            , {"innerJoin": {"left": "a", "right": "b", "column": ["key"]}}]}
+                """);
         final Map<String, Set<String>> actual = new LinkedHashMap<>();
-        LazyloadTaskMapper.mappingFrom(param, Stream.of("a", "b", "c").map(name -> LazyloadTaskMapperTest.recording(name, param, this.rowsRead)))
+        LazyloadTaskMapper.mappingFrom(param, Stream.of("a", "b", "c").map(name -> DataSetTestSupport.recording(name, param, this.rowsRead)))
                           .forEach(dto -> actual.put(dto.getTableName(), dto.getTask().tasks().stream()
                                                                             .map(task -> task.source().getTableName())
                                                                             .collect(Collectors.toSet())));
@@ -96,7 +94,7 @@ public class LazyloadTaskMapperTest {
      * tableNamesのテーブル（3行ずつ）を読み、出力されたテーブルごとに読み直した行数を返す
      */
     private Map<String, Integer> loadedRowCounts(final String setting, final String... tableNames) {
-        return this.loadedRowCounts(setting, param -> Stream.of(tableNames).map(name -> LazyloadTaskMapperTest.recording(name, param, this.rowsRead)));
+        return this.loadedRowCounts(setting, param -> Stream.of(tableNames).map(name -> DataSetTestSupport.recording(name, param, this.rowsRead)));
     }
 
     /**
@@ -104,15 +102,13 @@ public class LazyloadTaskMapperTest {
      */
     private Map<String, Integer> loadedRowCounts(final String setting, final int sources) {
         return this.loadedRowCounts(setting, param -> IntStream.range(0, sources)
-                                                               .mapToObj(no -> LazyloadTaskMapperTest.recording("a", param, this.rowsRead
+                                                               .mapToObj(no -> DataSetTestSupport.recording("a", param, this.rowsRead
                                                                        , no + "1", no + "2", no + "3")));
     }
 
     private Map<String, Integer> loadedRowCounts(final String setting
             , final Function<ComparableDataSetParam, Stream<ComparableTableMappingTask>> tasks) {
-        final ComparableDataSetParam param = ComparableDataSetParam.builder()
-                                                                   .setTableSeparators(DataSetTestSupport.separators(setting))
-                                                                   .build();
+        final ComparableDataSetParam param = DataSetTestSupport.param(setting);
         final Map<String, Integer> result = new LinkedHashMap<>();
         LazyloadTaskMapper.mappingFrom(param, tasks.apply(param))
                           .forEach(dto -> result.put(dto.getTableName()
@@ -121,22 +117,11 @@ public class LazyloadTaskMapperTest {
     }
 
     private List<String> tableNames(final String setting) {
-        final ComparableDataSetParam param = ComparableDataSetParam.builder()
-                                                                   .setTableSeparators(DataSetTestSupport.separators(setting))
-                                                                   .build();
-        return LazyloadTaskMapper.mappingFrom(param, Stream.of(LazyloadTaskMapperTest.recording("a", param, this.rowsRead)
-                                                     , LazyloadTaskMapperTest.recording("b", param, this.rowsRead)))
+        final ComparableDataSetParam param = DataSetTestSupport.param(setting);
+        return LazyloadTaskMapper.mappingFrom(param, Stream.of(DataSetTestSupport.recording("a", param, this.rowsRead)
+                                                     , DataSetTestSupport.recording("b", param, this.rowsRead)))
                                  .stream()
                                  .map(ComparableTableDto::getTableName)
                                  .toList();
-    }
-
-    /**
-     * key列にkeys（既定は1〜3）の行を持つテーブル。行を読んだか（loadDataとhasOutput）をrowsReadに記録する
-     */
-    private static ComparableTableMappingTask recording(final String tableName, final ComparableDataSetParam param
-            , final Map<String, Boolean> rowsRead, final String... keys) {
-        return new DataSetTestSupport.KeysTask(tableName, param, (task, read) -> rowsRead.put(task.tableName(), read)
-                , keys.length == 0 ? new String[]{"1", "2", "3"} : keys);
     }
 }

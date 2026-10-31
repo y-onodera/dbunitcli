@@ -211,19 +211,21 @@ public record TableSeparators(List<TableSeparator> settings
      */
     private boolean isJoinInput(final AddSettingTableMetaData metaData) {
         return this.joinConditions.stream()
-                                  .anyMatch(it -> it.hasRelation(metaData) && this.mayOutput(it, new HashSet<>(Set.of(it))));
+                                  .anyMatch(it -> it.hasRelation(metaData) && this.mayOutput(it, new HashSet<>()));
     }
 
     /**
      * joinの出力が出力の絞り込みに合いうるか。joinの結果を使うjoinがあれば、その出力でも判定する（visitedは判定済みのjoin）
      */
     private boolean mayOutput(final ComparableTableJoinCondition join, final Set<ComparableTableJoinCondition> visited) {
-        final ITableMetaData joinMetaData = TableMetaDataWithSource.fromJoin(join.left() + "_with_" + join.right()
-                , new Column[0], new Column[0]);
+        if (!visited.add(join)) {
+            return false;
+        }
+        // 出力テーブル名だけを求めるため、列は空でよい
+        final ITableMetaData joinMetaData = TableMetaDataWithSource.fromJoin(join.joinTableName(), new Column[0], new Column[0]);
         return this.joinOutputs(join, joinMetaData)
                    .anyMatch(output -> this.filter.test(output)
-                           || this.joinConditions.stream()
-                                                 .anyMatch(it -> it.hasRelation(output) && visited.add(it) && this.mayOutput(it, visited)));
+                           || this.joinConditions.stream().anyMatch(it -> it.hasRelation(output) && this.mayOutput(it, visited)));
     }
 
     private Stream<AddSettingTableMetaData> addSettings(final ITableMetaData originMetaData) {

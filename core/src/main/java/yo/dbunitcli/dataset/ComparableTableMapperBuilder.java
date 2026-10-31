@@ -7,7 +7,7 @@ import java.util.stream.Stream;
 public class ComparableTableMapperBuilder {
 
     private IDataSetConverter converter = null;
-    private WrittenTables alreadyWrite = new WrittenTables();
+    private WrittenTables written = new WrittenTables();
     private List<ComparableTableJoin> joins = new ArrayList<>();
     private List<ComparableTableMappingTask> sources = List.of();
 
@@ -16,8 +16,8 @@ public class ComparableTableMapperBuilder {
         return this;
     }
 
-    public ComparableTableMapperBuilder setAlreadyWrite(final WrittenTables alreadyWrite) {
-        this.alreadyWrite = alreadyWrite;
+    public ComparableTableMapperBuilder setWritten(final WrittenTables written) {
+        this.written = written;
         return this;
     }
 
@@ -41,7 +41,7 @@ public class ComparableTableMapperBuilder {
                     final AddSettingTableMetaData target = targets.get(index);
                     final boolean enableRowProcessing = this.converter != null && this.converter.isEnableRowProcessing(target, this.joins);
                     final IDataSetConverter converter = index > 0 && this.isSplittable() ? this.converter.split() : this.converter;
-                    return new ComparableTableMapperSingle(target, converter, this.alreadyWrite, this.joins, this.sources, enableRowProcessing);
+                    return new ComparableTableMapperSingle(target, converter, this.written, this.joins, this.sources, enableRowProcessing);
                 })
                 .toList();
         if (results.isEmpty()) {

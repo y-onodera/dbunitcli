@@ -9,7 +9,7 @@ import java.util.function.Function;
  */
 final class PendingTable {
 
-    private final String firstTableName;
+    private final String groupTableName;
     private final TableSplitter splitter;
     /**
      * ソースごとの行（distinctするテーブルはソースの中で重複を除いたもの）
@@ -18,16 +18,16 @@ final class PendingTable {
     private final Set<ComparableTableJoin> joins = new LinkedHashSet<>();
     private AddSettingTableMetaData metaData;
 
-    PendingTable(final String firstTableName, final TableSplitter splitter) {
-        this.firstTableName = firstTableName;
+    PendingTable(final String groupTableName, final TableSplitter splitter) {
+        this.groupTableName = groupTableName;
         this.splitter = splitter;
     }
 
     /**
-     * 分割後の1つ目のテーブル名（分割のまとまり）。分割しないテーブルはテーブル名
+     * 分割のまとまり（分割後の1つ目のテーブル名。分割しないテーブルはテーブル名）
      */
-    String firstTableName() {
-        return this.firstTableName;
+    String groupTableName() {
+        return this.groupTableName;
     }
 
     boolean isSplit() {
@@ -84,11 +84,8 @@ final class PendingTable {
      * ソースごとの行を1つにまとめる。ソースの中の重複はソースごとに除いているため、ソースをまたぐ重複だけを除く
      */
     private AddSettingTableMetaData.Rows mergeSourceRows() {
-        if (this.sourceRows.size() == 1) {
-            return this.sourceRows.getFirst();
-        }
         final AddSettingTableMetaData.Rows merged = AddSettingTableMetaData.Rows.concat(this.sourceRows);
-        return this.metaData.isNeedDistinct() ? merged.distinct() : merged;
+        return this.sourceRows.size() > 1 && this.metaData.isNeedDistinct() ? merged.distinct() : merged;
     }
 
     private ComparableTable table(final int no, final List<Object[]> values, final List<Integer> rowIndexes) {

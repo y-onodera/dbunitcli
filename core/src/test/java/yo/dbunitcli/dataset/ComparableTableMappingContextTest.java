@@ -95,14 +95,11 @@ public class ComparableTableMappingContextTest {
      * key列に1〜3の3行を持つテーブルtableNamesを読み込み、テーブルごとに行を読んだか（行が使われるか）を返す
      */
     private static Map<String, Boolean> rowsRead(final String setting, final String... tableNames) {
-        final ComparableDataSetParam param = ComparableDataSetParam.builder()
-                                                                   .setTableSeparators(DataSetTestSupport.separators(setting))
-                                                                   .build();
+        final ComparableDataSetParam param = DataSetTestSupport.param(setting);
         final Map<String, Boolean> result = new LinkedHashMap<>();
         final ComparableTableMappingContext context = new ComparableTableMappingContext(param.tableSeparators(), null);
         context.open();
-        Stream.of(tableNames).forEach(tableName -> new DataSetTestSupport.KeysTask(tableName, param
-                , (task, read) -> result.put(task.tableName(), read), "1", "2", "3").run(context));
+        Stream.of(tableNames).forEach(tableName -> DataSetTestSupport.recording(tableName, param, result).run(context));
         context.close();
         return result;
     }

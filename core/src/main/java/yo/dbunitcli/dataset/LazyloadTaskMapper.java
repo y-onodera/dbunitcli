@@ -48,7 +48,7 @@ public class LazyloadTaskMapper {
         });
         context.close();
         collector.metaData.forEach((tableName, metaData) -> {
-            final List<ComparableTableMappingTask> sources = context.alreadyWrite().sources(tableName);
+            final List<ComparableTableMappingTask> sources = context.written().sources(tableName);
             if (!sources.isEmpty()) {
                 final ComparableTableDto dto = new ComparableTableDto(metaData);
                 dto.setRows(new ComparableTableMappingTask.WithTargetTable(tableName, sources));

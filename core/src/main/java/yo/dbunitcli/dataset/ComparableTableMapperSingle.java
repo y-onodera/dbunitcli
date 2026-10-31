@@ -10,7 +10,7 @@ import java.util.stream.IntStream;
 public class ComparableTableMapperSingle implements ComparableTableMapper {
 
     private final IDataSetConverter converter;
-    private final WrittenTables alreadyWrite;
+    private final WrittenTables written;
     /**
      * このテーブルに関係するjoin
      */
@@ -25,36 +25,36 @@ public class ComparableTableMapperSingle implements ComparableTableMapper {
      * 保持した行の、ソースでの行番号。行を除くまでは記録しない（{@link AddSettingTableMetaData.Rows#originalRowIndexes()}）
      */
     private final List<Integer> originalRowIndexes;
-    private final Collection<Object[]> rows;
+    private final List<Object[]> rows;
     private final TableSplitter splitter;
     private final Function<Object[], List<String>> breakKeys;
     private final WrittenTables.SplitState splitState;
     private final boolean hasOutput;
     /**
-     * 分割後の1つ目のテーブル名（分割のまとまり）
+     * 分割のまとまり（分割後の1つ目のテーブル名。分割しないテーブルはテーブル名）
      */
-    private final String firstTableName;
+    private final String groupTableName;
     private AddSettingTableMetaData metaData;
     private boolean startTable;
     private int addCount = 0;
     private int addRowCount = 0;
 
     public ComparableTableMapperSingle(final AddSettingTableMetaData metaData, final IDataSetConverter converter,
-                                       final WrittenTables alreadyWrite, final List<ComparableTableJoin> joins,
+                                       final WrittenTables written, final List<ComparableTableJoin> joins,
                                        final List<ComparableTableMappingTask> sources, final boolean enableRowProcessing) {
         this.baseMetaData = metaData;
         this.splitter = metaData.getTableSplitter();
         this.breakKeys = this.splitter.breakKeyReader(metaData);
-        this.firstTableName = this.splitter.tableName(metaData.getTableName(), 0);
+        this.groupTableName = this.splitter.tableName(metaData.getTableName(), 0);
         // 行を流しながら分割する場合は、同じテーブルに前のソースが書いた続きから分割する
         this.splitState = enableRowProcessing && this.splitter.isSplit()
-                ? alreadyWrite.split(this.firstTableName, this.splitter)
+                ? written.split(this.groupTableName, this.splitter)
                 : WrittenTables.SplitState.start(this.splitter);
         this.metaData = this.splitter.getMetaData(this.baseMetaData, this.splitState.no());
         this.rows = new ArrayList<>();
         this.originalRowIndexes = new ArrayList<>();
         this.converter = converter;
-        this.alreadyWrite = alreadyWrite;
+        this.written = written;
         this.joins = joins.stream().filter(join -> join.hasRelation(metaData)).collect(Collectors.toList());
         this.sources = sources;
         this.enableRowProcessing = enableRowProcessing;
@@ -87,13 +87,14 @@ public class ComparableTableMapperSingle implements ComparableTableMapper {
 
     @Override
     public void endTable() {
-        this.alreadyWrite.put(this.metaData.getTableName(), this.getAddRowCount());
-        this.alreadyWrite.wrote(this.firstTableName, this.sources);
+        this.written.put(this.metaData.getTableName(), this.getAddRowCount());
+        this.written.wrote(this.groupTableName, this.sources);
         if (this.splitter.isSplit()) {
-            this.alreadyWrite.putSplitBaseTable(this.baseMetaData.getTableName());
-        }
-        if (this.enableRowProcessing && this.splitter.isSplit()) {
-            this.alreadyWrite.putSplitTable(this.metaData.getTableName(), this.firstTableName);
+            this.written.putSplitTable(this.baseMetaData.getTableName(), this.groupTableName);
+            // 行を保持して分割するテーブルの分割後の名前は、分割を確定させるときに記録する
+            if (this.enableRowProcessing) {
+                this.written.putSplitTable(this.metaData.getTableName(), this.groupTableName);
+            }
         }
         if (this.enableRowProcessing && this.startTable) {
             try {
@@ -105,15 +106,15 @@ public class ComparableTableMapperSingle implements ComparableTableMapper {
             // 行を保持するテーブルは、読込の終わりに同じテーブルに入るすべてのソースの行をまとめて1回だけ確定させる
             // （分割するテーブルは、行を流しながら分割する場合と同じくソースをまたいで、並べ替えてから分割する）。
             // joinへは確定させたときに渡す（ComparableTableMappingContext#flushPendingTables）
-            this.alreadyWrite.pendingTable(this.firstTableName, this.splitter)
-                             .add(this.baseMetaData, this.baseMetaData.distinct(this.rows, this.originalRowIndexes), this.joins);
+            this.written.pendingTable(this.groupTableName, this.splitter)
+                        .add(this.baseMetaData, this.baseMetaData.distinct(new AddSettingTableMetaData.Rows(this.rows, this.originalRowIndexes)), this.joins);
         }
     }
 
     protected void processingStart() {
         try {
-            if (this.alreadyWrite.contains(this.metaData.getTableName())) {
-                this.converter.reStartTable(this.metaData, this.alreadyWrite.rows(this.metaData.getTableName()));
+            if (this.written.contains(this.metaData.getTableName())) {
+                this.converter.reStartTable(this.metaData, this.written.rows(this.metaData.getTableName()));
             } else {
                 this.converter.startTable(this.metaData);
             }
@@ -173,7 +174,7 @@ public class ComparableTableMapperSingle implements ComparableTableMapper {
     }
 
     protected int getAddRowCount() {
-        return this.addRowCount + this.alreadyWrite.rows(this.metaData.getTableName());
+        return this.addRowCount + this.written.rows(this.metaData.getTableName());
     }
 
 }

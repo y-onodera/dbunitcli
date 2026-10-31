@@ -10,7 +10,7 @@ import java.util.stream.Stream;
 public record ComparableTableMappingContext(TableSeparators tableSeparators
         , IDataSetConverter converter
         , TreeMap<String, ComparableTable> tableMap
-        , WrittenTables alreadyWrite
+        , WrittenTables written
         , List<ComparableTableJoin> joins
         , List<ComparableTableMappingTask> sources) {
 
@@ -24,7 +24,7 @@ public record ComparableTableMappingContext(TableSeparators tableSeparators
      * 同じ読込で、書いたテーブルにtaskが行を入れたと記録するコンテキスト（{@link WrittenTables#sources}）
      */
     public ComparableTableMappingContext withSource(final ComparableTableMappingTask task) {
-        return new ComparableTableMappingContext(this.tableSeparators, this.converter, this.tableMap, this.alreadyWrite
+        return new ComparableTableMappingContext(this.tableSeparators, this.converter, this.tableMap, this.written
                 , this.joins, List.of(task));
     }
 
@@ -37,7 +37,7 @@ public record ComparableTableMappingContext(TableSeparators tableSeparators
     public ComparableTableMapper createMapper(final TableMetaDataWithSource metaData) {
         return new ComparableTableMapperBuilder()
                 .setConverter(this.converter)
-                .setAlreadyWrite(this.alreadyWrite)
+                .setWritten(this.written)
                 .setJoins(this.joins)
                 .setSources(this.sources)
                 .build(this.tableSeparators.getAddSettingTableMetaData(metaData));
@@ -61,12 +61,12 @@ public record ComparableTableMappingContext(TableSeparators tableSeparators
      * 読込の結果に入れる。1つ目のテーブルを関係するjoinへ渡す
      */
     private void flushPendingTables() {
-        this.alreadyWrite.takePendingTables().forEach(pending -> {
+        this.written.takePendingTables().forEach(pending -> {
             final List<ComparableTable> tables = pending.tables();
             tables.forEach(table -> {
                 this.tableMap.put(table.getTableName(), table);
                 if (pending.isSplit()) {
-                    this.alreadyWrite.putSplitTable(table.getTableName(), pending.firstTableName());
+                    this.written.putSplitTable(table.getTableName(), pending.groupTableName());
                 }
             });
             pending.joins().forEach(join -> join.setIfRelated(tables.getFirst()));
@@ -80,7 +80,7 @@ public record ComparableTableMappingContext(TableSeparators tableSeparators
         this.joins.stream()
                   .filter(join -> !join.isExecutable())
                   .map(ComparableTableJoin::getCondition)
-                  .filter(it -> this.alreadyWrite.isSplitTableName(it.left()) || this.alreadyWrite.isSplitTableName(it.right()))
+                  .filter(it -> this.written.isSplitTableName(it.left()) || this.written.isSplitTableName(it.right()))
                   .forEach(it -> LOGGER.warn("join(left={}, right={}) is not executed. a split table cannot be joined.", it.left(), it.right()));
     }
 
@@ -105,11 +105,11 @@ public record ComparableTableMappingContext(TableSeparators tableSeparators
                             .toList();
                     final ComparableTableMapper joinMapper = new ComparableTableMapperBuilder()
                             .setConverter(this.converter)
-                            .setAlreadyWrite(this.alreadyWrite)
+                            .setWritten(this.written)
                             .setJoins(newRemaining)
                             // joinの出力テーブルには、左右のテーブルに行を入れたタスクが行を入れたものとする
-                            .setSources(Stream.concat(this.alreadyWrite.sources(join.getCondition().left()).stream()
-                                    , this.alreadyWrite.sources(join.getCondition().right()).stream()).distinct().toList())
+                            .setSources(Stream.concat(this.written.sources(join.getCondition().left()).stream()
+                                    , this.written.sources(join.getCondition().right()).stream()).distinct().toList())
                             .build(this.tableSeparators.getAddSettingTableMetaData(join));
                     joinMapper.startTable();
                     join.execute().forEach(joinMapper::addRow);

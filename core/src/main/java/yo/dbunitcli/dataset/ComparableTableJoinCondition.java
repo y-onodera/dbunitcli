@@ -18,6 +18,13 @@ public record ComparableTableJoinCondition(String left, String right
         this(builder.getLeft(), builder.getRight(), builder.getLeftFilePath(), builder.getRightFilePath(), builder.getStrategy(), builder.getTableSeparators());
     }
 
+    /**
+     * joinの出力テーブル名（設定を適用する前）
+     */
+    public String joinTableName() {
+        return this.left + "_with_" + this.right;
+    }
+
     public boolean hasRelation(final String tableName) {
         return Objects.equals(this.right(), tableName) || Objects.equals(this.left(), tableName);
     }

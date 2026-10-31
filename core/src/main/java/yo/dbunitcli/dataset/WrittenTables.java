@@ -3,8 +3,10 @@ package yo.dbunitcli.dataset;
 import java.util.*;
 
 /**
- * 1回の読込（コンテキスト）で書き込んだテーブルの行数と、分割の途中状態、テーブルごとの行を入れたタスク。
- * 同じテーブル名に複数のソースから書き込む場合に、前のソースの続きから書き込み・分割する
+ * 1回の読込（コンテキスト）で書き込んだテーブルの状態。同じテーブル名に複数のソースから書き込む場合に、前のソースの続きから
+ * 書き込み・分割し（行数・分割の途中状態）、行を保持するテーブルはソースをまたいでためて読込の終わりに確定させる（確定を待つ行）。
+ * あわせて、分割のまとまりとテーブルごとの行を入れたタスクを記録する。
+ * 分割のまとまりは分割後の1つ目のテーブル名（groupTableName）で表し、分割しないテーブルではテーブル名と同じ
  */
 public final class WrittenTables {
 
@@ -12,12 +14,10 @@ public final class WrittenTables {
 
     private final Map<SplitKey, SplitState> splits = new HashMap<>();
 
-    private final Map<String, String> splitTables = new HashMap<>();
-
     /**
-     * 分割するテーブルの分割前の名前
+     * 分割するテーブルの、分割前・分割後の名前ごとの分割のまとまり
      */
-    private final Set<String> splitBaseTables = new HashSet<>();
+    private final Map<String, String> splitTables = new HashMap<>();
 
     private final Map<SplitKey, PendingTable> pendingTables = new LinkedHashMap<>();
 
@@ -26,32 +26,32 @@ public final class WrittenTables {
      */
     private final Map<String, Set<ComparableTableMappingTask>> sources = new HashMap<>();
 
-    public boolean contains(final String tableName) {
+    boolean contains(final String tableName) {
         return this.rows.containsKey(tableName);
     }
 
-    public int rows(final String tableName) {
+    int rows(final String tableName) {
         return this.rows.getOrDefault(tableName, 0);
     }
 
-    public void put(final String tableName, final int rows) {
+    void put(final String tableName, final int rows) {
         this.rows.put(tableName, rows);
     }
 
     /**
-     * 分割後の1つ目のテーブル名と分割の設定ごとの分割の途中状態。初めてなら1つ目のテーブルから数え始める
+     * 分割のまとまりと分割の設定ごとの分割の途中状態。初めてなら1つ目のテーブルから数え始める
      */
-    public SplitState split(final String firstTableName, final TableSplitter splitter) {
-        return this.splits.computeIfAbsent(new SplitKey(firstTableName, splitter), _ -> SplitState.start(splitter));
+    SplitState split(final String groupTableName, final TableSplitter splitter) {
+        return this.splits.computeIfAbsent(new SplitKey(groupTableName, splitter), _ -> SplitState.start(splitter));
     }
 
     /**
-     * 行を保持するテーブルの、確定を待っている行。分割後の1つ目のテーブル名と分割の設定ごとに、ソースをまたいでためる
-     * （分割しないテーブルはテーブル名ごと）
+     * 行を保持するテーブルの、確定を待っている行。分割のまとまりと分割の設定ごとに、ソースをまたいでためる
+     * （分割しないテーブルは、設定が違っても同じテーブル名なら1つにまとめる）
      */
-    PendingTable pendingTable(final String firstTableName, final TableSplitter splitter) {
+    PendingTable pendingTable(final String groupTableName, final TableSplitter splitter) {
         final TableSplitter key = splitter.isSplit() ? splitter : TableSplitter.NONE;
-        return this.pendingTables.computeIfAbsent(new SplitKey(firstTableName, key), _ -> new PendingTable(firstTableName, splitter));
+        return this.pendingTables.computeIfAbsent(new SplitKey(groupTableName, key), _ -> new PendingTable(groupTableName, splitter));
     }
 
     /**
@@ -64,32 +64,25 @@ public final class WrittenTables {
     }
 
     /**
-     * 分割後のテーブルを、どの分割のまとまり（分割後の1つ目のテーブル名）に属するかとともに記録する
+     * 分割するテーブルの名前（分割前・分割後）を、どの分割のまとまりに属するかとともに記録する
      */
-    void putSplitTable(final String tableName, final String firstTableName) {
-        this.splitTables.put(tableName, firstTableName);
-    }
-
-    /**
-     * 分割するテーブルの分割前の名前を記録する
-     */
-    void putSplitBaseTable(final String baseTableName) {
-        this.splitBaseTables.add(baseTableName);
+    void putSplitTable(final String tableName, final String groupTableName) {
+        this.splitTables.put(tableName, groupTableName);
     }
 
     /**
      * 分割するテーブルの、分割前または分割後の名前か
      */
     boolean isSplitTableName(final String tableName) {
-        return this.splitTables.containsKey(tableName) || this.splitBaseTables.contains(tableName);
+        return this.splitTables.containsKey(tableName);
     }
 
     /**
-     * テーブル（分割するテーブルは分割のまとまり＝分割後の1つ目のテーブル名）に、tasksが行を入れた。記録しない読込ではtasksは空
+     * 分割のまとまりに、tasksが行を入れた。記録しない読込ではtasksは空
      */
-    void wrote(final String tableNameOrSplitGroup, final Collection<ComparableTableMappingTask> tasks) {
+    void wrote(final String groupTableName, final Collection<ComparableTableMappingTask> tasks) {
         if (!tasks.isEmpty()) {
-            this.sources.computeIfAbsent(tableNameOrSplitGroup, _ -> new LinkedHashSet<>()).addAll(tasks);
+            this.sources.computeIfAbsent(groupTableName, _ -> new LinkedHashSet<>()).addAll(tasks);
         }
     }
 
@@ -101,7 +94,7 @@ public final class WrittenTables {
         return List.copyOf(this.sources.getOrDefault(this.splitTables.getOrDefault(tableName, tableName), Set.of()));
     }
 
-    private record SplitKey(String firstTableName, TableSplitter splitter) {
+    private record SplitKey(String groupTableName, TableSplitter splitter) {
     }
 
     public static final class SplitState {

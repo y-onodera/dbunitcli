@@ -121,11 +121,11 @@ public record AddSettingTableMetaData(
         return map;
     }
 
-    public Rows distinct(final Collection<Object[]> values, final Collection<Integer> originalRowIndexes) {
-        Rows target = new Rows(values, originalRowIndexes);
-        if (this.isPresetNeedDistinct()) {
-            target = this.preset.distinct(values, originalRowIndexes);
-        }
+    /**
+     * 保持した行に、行を保持してから適用する設定（distinct。前段がdistinctなら自段の設定も）を適用する
+     */
+    public Rows distinct(final Rows rows) {
+        final Rows target = this.isPresetNeedDistinct() ? this.preset.distinct(rows) : rows;
         if (!this.distinct) {
             // 前段がdistinctで行を確定させた場合、その出力行にも自段の設定（式・列の絞り込み・filter）を適用する
             return this.isPresetNeedDistinct()
@@ -266,15 +266,23 @@ public record AddSettingTableMetaData(
          */
         public Rows map(final UnaryOperator<Object[]> rowFunction, final Predicate<Object[]> keep) {
             final List<Object[]> newRows = new ArrayList<>();
-            final List<Integer> newOriginalRowIndexes = new ArrayList<>();
+            // 行を除くまでは作らない。初めて除いたときに、それまでに残した行の行番号を埋める
+            List<Integer> newOriginalRowIndexes = null;
             for (int i = 0, j = this.rows.size(); i < j; i++) {
                 final Object[] row = rowFunction.apply(this.rows.get(i));
                 if (row != null && keep.test(row)) {
                     newRows.add(row);
-                    newOriginalRowIndexes.add(this.originalRowIndex(i));
+                    if (newOriginalRowIndexes != null) {
+                        newOriginalRowIndexes.add(this.originalRowIndex(i));
+                    }
+                } else if (newOriginalRowIndexes == null) {
+                    newOriginalRowIndexes = new ArrayList<>();
+                    for (int k = 0; k < i; k++) {
+                        newOriginalRowIndexes.add(this.originalRowIndex(k));
+                    }
                 }
             }
-            return new Rows(newRows, newRows.size() == this.rows.size() ? this.originalRowIndexes : newOriginalRowIndexes);
+            return new Rows(newRows, newOriginalRowIndexes == null ? this.originalRowIndexes : newOriginalRowIndexes);
         }
 
         public Rows distinct() {

@@ -40,7 +40,13 @@ public record TableSplitter(TableRenameStrategy renameFunction, List<String> bre
                 throw new RuntimeException(e);
             }
         }).toArray();
-        return row -> Arrays.stream(indexes).mapToObj(i -> row[i].toString()).toList();
+        return row -> {
+            final String[] keys = new String[indexes.length];
+            for (int i = 0; i < indexes.length; i++) {
+                keys[i] = row[indexes[i]].toString();
+            }
+            return Arrays.asList(keys);
+        };
     }
 
     public boolean isLimit(final int addRowCount) {
