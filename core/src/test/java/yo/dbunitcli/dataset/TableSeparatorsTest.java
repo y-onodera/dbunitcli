@@ -71,4 +71,19 @@ public class TableSeparatorsTest {
 
         Assertions.assertEquals(List.of("small"), outputNames(builder.build(), "small"));
     }
+
+    @Test
+    public void mapで編集しても設定とjoinは重複しない() {
+        final TableSeparators.Builder builder = new TableSeparators.Builder();
+        builder.addSetting(TableSeparator.builder()
+                                         .setTargetFilter(new AnyFilter(List.of("big")))
+                                         .build());
+        builder.addJoin(ComparableTableJoinCondition.builder().setLeft("a").setRight("b").build());
+
+        final TableSeparators mapped = builder.build().map(it -> {
+        });
+
+        Assertions.assertEquals(1, mapped.settings().size());
+        Assertions.assertEquals(1, mapped.joinConditions().size());
+    }
 }

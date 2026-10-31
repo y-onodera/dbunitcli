@@ -107,10 +107,6 @@ public record TableSeparator(TableMetaDataFilter sourceFilter
                 .toList().toArray(new Column[0]);
     }
 
-    public boolean hasRowFilter() {
-        return this.filter().isEmpty();
-    }
-
     public boolean test(final Map<String, Object> rowToMap) {
         return this.filter.test(rowToMap);
     }

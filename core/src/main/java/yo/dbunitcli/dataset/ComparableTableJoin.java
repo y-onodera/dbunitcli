@@ -65,7 +65,7 @@ public class ComparableTableJoin {
     }
 
     public TableMetaDataWithSource joinMetaData() {
-        return TableMetaDataWithSource.fromJoin(this.left.getTableMetaData().getTableName() + "_with_" + this.right.getTableMetaData().getTableName()
+        return TableMetaDataWithSource.fromJoin(this.condition.joinTableName()
                 , Stream.concat(this.convertColumnName(this.left.getTableMetaData())
                                 , this.convertColumnName(this.right.getTableMetaData()))
                         .toArray(Column[]::new)

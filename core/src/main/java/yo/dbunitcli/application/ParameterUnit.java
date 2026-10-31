@@ -164,7 +164,7 @@ public enum ParameterUnit {
 
         @Override
         public Stream<ComparableTableMappingTask> tasks() {
-            return this.dto.getTask().tasks();
+            return this.dto.getTask().tasks().stream();
         }
 
         @Override
@@ -196,7 +196,7 @@ public enum ParameterUnit {
 
         @Override
         public Stream<ComparableTableMappingTask> tasks() {
-            return this.dto.getTask().tasks();
+            return this.dto.getTask().tasks().stream();
         }
 
         @Override

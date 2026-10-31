@@ -24,16 +24,29 @@ public class ComparableTableTest {
 
     @BeforeEach
     public void setUp() throws DataSetException {
-        final TreeMap<String, ComparableTable> map = new TreeMap<>();
+        final ComparableTableMappingContext context = new ComparableTableMappingContext(TableSeparators.NONE, null);
         final ComparableTableMapper builder = new ComparableTableMapperBuilder()
-                .setContextShareTableMap(map)
+                .setWritten(context.written())
                 .build(TableSeparators.NONE.getAddSettingTableMetaData(this.table));
         builder.startTable();
         builder.addRow(new Object[]{"1", "a", "あ", 1});
         builder.addRow(new Object[]{"1", "b", "あ", 1});
         builder.addRow(new Object[]{"2", "a", "い", 2});
         builder.endTable();
-        this.target = map.values().iterator().next();
+        this.target = context.close().values().iterator().next();
+    }
+
+    @Test
+    public void toMapは行を列名から値へのMapで返し_includeMetaDataならテーブルのDTOの行として返す() {
+        final List<Map<String, Object>> rows = this.target.toMap(false);
+        assertEquals(3, rows.size());
+        assertEquals(List.of("1", "b", "あ", 1), new ArrayList<>(rows.get(1).values()));
+        assertEquals(List.of("COLUMN1", "COLUMN2", "COLUMN3", ""), new ArrayList<>(rows.get(1).keySet()));
+
+        final List<Map<String, Object>> withMetaData = this.target.toMap(true);
+        assertEquals(1, withMetaData.size());
+        assertEquals("TABLE1", withMetaData.getFirst().get("tableName"));
+        assertEquals(rows, withMetaData.getFirst().get("rows"));
     }
 
     @Test

@@ -41,7 +41,7 @@ public record ComparableTable(AddSettingTableMetaData addSettingTableMetaData
     }
 
     public Stream<Map<String, Object>> stream() {
-        return IntStream.range(0, this.getRowCount()).mapToObj(this::getRowToMap);
+        return this.rowMaps().stream();
     }
 
     public int getNumberOfColumns() {
@@ -52,21 +52,32 @@ public record ComparableTable(AddSettingTableMetaData addSettingTableMetaData
         return this.rows;
     }
 
+    /**
+     * テンプレートに渡す形にする。includeMetaDataなら、行（{@link #rowMaps()}）を持つテーブルのDTO1つを、
+     * そうでなければ行を返す。行ごとのMapは保持せず、読まれたときに作る
+     */
     public List<Map<String, Object>> toMap(final boolean includeMetaData) {
-        final List<Map<String, Object>> result = new ArrayList<>();
-        final List<Map<String, Object>> rowMap = new ArrayList<>();
         if (includeMetaData) {
-            result.add(new ComparableTableDto(this.getTableMetaData(), rowMap));
+            return List.of(new ComparableTableDto(this.getTableMetaData(), this.rowMaps()));
         }
-        IntStream.range(0, this.getRowCount()).forEach(rowNum -> {
-            final Map<String, Object> map = this.getRowToMap(rowNum);
-            if (includeMetaData) {
-                rowMap.add(map);
-            } else {
-                result.add(map);
+        return this.rowMaps();
+    }
+
+    /**
+     * 行を列名→値のMapで返すビュー。行ごとのMapは保持せず、読まれたときに作る
+     */
+    public List<Map<String, Object>> rowMaps() {
+        return new AbstractList<>() {
+            @Override
+            public Map<String, Object> get(final int index) {
+                return ComparableTable.this.getRowToMap(index);
             }
-        });
-        return result;
+
+            @Override
+            public int size() {
+                return ComparableTable.this.getRowCount();
+            }
+        };
     }
 
     public Map<CompareKeys, Map.Entry<Integer, Object[]>> getRows(final List<String> keys) {
@@ -119,12 +130,11 @@ public record ComparableTable(AddSettingTableMetaData addSettingTableMetaData
         return row[j] == null ? ITable.NO_VALUE : row[j];
     }
 
-    private int getOriginalRowIndex(final int sortedIndex) {
-        final int row = this.getIndexBeforeSort(sortedIndex);
-        if (this.addSettingTableMetaData.hasRowFilter()) {
-            return this.rows.filteredRowIndexes().get(row);
-        }
-        return row;
+    /**
+     * 並べ替え後のsortedIndex行目の、ソースでの行番号（filter・distinctで除く前の何行目か）
+     */
+    int getOriginalRowIndex(final int sortedIndex) {
+        return this.rows.originalRowIndex(this.getIndexBeforeSort(sortedIndex));
     }
 
     private int getIndexBeforeSort(final int sortedIndex) {

@@ -10,27 +10,22 @@ import java.util.stream.Stream;
 public record ComparableTableMappingContext(TableSeparators tableSeparators
         , IDataSetConverter converter
         , TreeMap<String, ComparableTable> tableMap
-        , WrittenTables alreadyWrite
+        , WrittenTables written
         , List<ComparableTableJoin> joins
-        , List<ComparableTableMappingTask> chain
-        , boolean chainRun
-        , Listener listener) {
+        , List<ComparableTableMappingTask> sources) {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ComparableTableMappingContext.class);
 
     public ComparableTableMappingContext(final TableSeparators tableSeparators, final IDataSetConverter converter) {
-        this(tableSeparators, converter, new TreeMap<>(), new WrittenTables(), tableSeparators.joins(), new ArrayList<>(), false, Listener.NONE);
+        this(tableSeparators, converter, new TreeMap<>(), new WrittenTables(), tableSeparators.joins(), List.of());
     }
 
-    public ComparableTableMappingContext addChain(final List<ComparableTableMappingTask> chain) {
-        return new ComparableTableMappingContext(this.tableSeparators
-                , this.converter
-                , this.tableMap
-                , this.alreadyWrite
-                , this.joins
-                , chain
-                , false
-                , this.listener);
+    /**
+     * 同じ読込で、書いたテーブルにtaskが行を入れたと記録するコンテキスト（{@link WrittenTables#sources}）
+     */
+    public ComparableTableMappingContext withSource(final ComparableTableMappingTask task) {
+        return new ComparableTableMappingContext(this.tableSeparators, this.converter, this.tableMap, this.written
+                , this.joins, List.of(task));
     }
 
     public void open() {
@@ -42,18 +37,17 @@ public record ComparableTableMappingContext(TableSeparators tableSeparators
     public ComparableTableMapper createMapper(final TableMetaDataWithSource metaData) {
         return new ComparableTableMapperBuilder()
                 .setConverter(this.converter)
-                .setTableSeparators(this.tableSeparators)
-                .setAlreadyWrite(this.alreadyWrite)
+                .setWritten(this.written)
                 .setJoins(this.joins)
-                .setChain(this.chain)
-                .setChainRun(this.chainRun)
-                .setContextShareTableMap(this.tableMap)
-                .setListener(this.listener)
+                .setSources(this.sources)
                 .build(this.tableSeparators.getAddSettingTableMetaData(metaData));
     }
 
     public TreeMap<String, ComparableTable> close() {
-        this.executeJoin();
+        this.flushPendingTables();
+        this.processExecutableJoins(this.joins);
+        this.warnJoinsOnSplitTables();
+        this.excludeUnusedJoinInputs();
         if (this.converter != null) {
             this.tableMap.values().forEach(this.converter::convert);
             this.converter.endDataSet();
@@ -62,18 +56,39 @@ public record ComparableTableMappingContext(TableSeparators tableSeparators
         return this.tableMap;
     }
 
-    public Stream<AddSettingTableMetaData> getAddSettingTableMetaData(final ComparableTableJoin join) {
-        return this.tableSeparators.getAddSettingTableMetaData(join);
+    /**
+     * 確定を待っている行（行を保持するテーブル）を、テーブルごとにまとめて1回だけ確定させ（分割するテーブルは並べ替えて分割し）、
+     * 読込の結果に入れる。1つ目のテーブルを関係するjoinへ渡す
+     */
+    private void flushPendingTables() {
+        this.written.takePendingTables().forEach(pending -> {
+            final List<ComparableTable> tables = pending.tables();
+            tables.forEach(table -> {
+                this.tableMap.put(table.getTableName(), table);
+                if (pending.isSplit()) {
+                    this.written.putSplitTable(table.getTableName(), pending.groupTableName());
+                }
+            });
+            pending.joins().forEach(join -> join.setIfRelated(tables.getFirst()));
+        });
     }
 
-    private void executeJoin() {
-        if (!this.joins.isEmpty()) {
-            this.joins.stream()
-                    .filter(ComparableTableJoin::isExecutable)
-                    .flatMap(it -> Stream.of(it.getCondition().left(), it.getCondition().right()))
-                    .forEach(this.tableMap::remove);
-            this.processExecutableJoins(new ArrayList<>(this.joins));
-        }
+    /**
+     * 分割するテーブル（分割前・分割後のどちらの名前でも）はjoinの左右に使えない。そのため実行できなかったjoinを警告する
+     */
+    private void warnJoinsOnSplitTables() {
+        this.joins.stream()
+                  .filter(join -> !join.isExecutable())
+                  .map(ComparableTableJoin::getCondition)
+                  .filter(it -> this.written.isSplitTableName(it.left()) || this.written.isSplitTableName(it.right()))
+                  .forEach(it -> LOGGER.warn("join(left={}, right={}) is not executed. a split table cannot be joined.", it.left(), it.right()));
+    }
+
+    /**
+     * joinで使われずに残った元テーブル（相手のテーブルが無かったもの）のうち、読込時に出力の絞り込みで除くと決めたものを除く
+     */
+    private void excludeUnusedJoinInputs() {
+        this.tableMap.values().removeIf(table -> table.getTableMetaData().isOutputExcluded());
     }
 
     private void processExecutableJoins(final List<ComparableTableJoin> remaining) {
@@ -82,48 +97,26 @@ public record ComparableTableMappingContext(TableSeparators tableSeparators
                 .findFirst()
                 .ifPresent(join -> {
                     LOGGER.debug("startTableJoin(join={}) - start", join);
+                    // 元テーブルはjoinの結果に置き換える（joinの結果を使うjoinでは、使われたjoinの結果も置き換える）
+                    this.tableMap.remove(join.getCondition().left());
+                    this.tableMap.remove(join.getCondition().right());
                     final List<ComparableTableJoin> newRemaining = remaining.stream()
                             .filter(it -> !it.equals(join))
                             .toList();
                     final ComparableTableMapper joinMapper = new ComparableTableMapperBuilder()
                             .setConverter(this.converter)
-                            .setTableSeparators(this.tableSeparators)
-                            .setContextShareTableMap(this.tableMap)
-                            .setAlreadyWrite(this.alreadyWrite)
+                            .setWritten(this.written)
                             .setJoins(newRemaining)
-                            .setChain(this.chain)
-                            .setChainRun(this.chainRun)
-                            .setListener(this.listener)
-                            .build(this.getAddSettingTableMetaData(join));
+                            // joinの出力テーブルには、左右のテーブルに行を入れたタスクが行を入れたものとする
+                            .setSources(Stream.concat(this.written.sources(join.getCondition().left()).stream()
+                                    , this.written.sources(join.getCondition().right()).stream()).distinct().toList())
+                            .build(this.tableSeparators.getAddSettingTableMetaData(join));
                     joinMapper.startTable();
                     join.execute().forEach(joinMapper::addRow);
                     joinMapper.endTable();
-                    this.listener.joined(join);
+                    this.flushPendingTables();
                     this.processExecutableJoins(newRemaining);
                 });
-    }
-
-    /**
-     * 読込の途中経過の通知を受ける
-     */
-    public interface Listener {
-
-        Listener NONE = new Listener() {
-        };
-
-        /**
-         * テーブルを読込の終わりにまとめて出力するため、共有のtableMapに入れた（入れ直した）
-         */
-        default void held(final String tableName) {
-            // 既定では何もしない
-        }
-
-        /**
-         * joinを1つ実行し終えた。そのjoinの出力テーブルの通知（held・converterのstartTable）は、この前に済んでいる
-         */
-        default void joined(final ComparableTableJoin join) {
-            // 既定では何もしない
-        }
     }
 
 }

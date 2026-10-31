@@ -68,6 +68,7 @@ class DatasetSettingsControllerTest {
         this.tryDelete("importSetting.json");
         this.tryDelete("previewRenameSetting.json");
         this.tryDelete("previewJoinSetting.json");
+        this.tryDelete("previewUnmatchedJoinSetting.json");
         this.tryDelete("previewKeysSetting.json");
         this.deletePreviewSrc();
     }
@@ -244,6 +245,15 @@ class DatasetSettingsControllerTest {
 
         Assertions.assertEquals(3, actual.getTotalRows());
         Assertions.assertEquals(3, actual.getRows().size());
+    }
+
+    @Test
+    void testTablePreview_joinがあってもjoinに関係しないテーブルと相手の無い元テーブルを読み込む() throws IOException {
+        this.createPreviewSrc();
+        final String setting = this.writeUnmatchedJoinSetting();
+
+        Assertions.assertEquals(3, this.tablePreview(setting, "small").getTotalRows());
+        Assertions.assertEquals(BIG_ROWS, this.tablePreview(setting, "big").getTotalRows());
     }
 
     @Test
@@ -486,6 +496,16 @@ class DatasetSettingsControllerTest {
     }
 
     @Test
+    void testTableConvert_joinがあってもjoinに関係しないテーブルだけを出力する() throws IOException {
+        this.createPreviewSrc();
+        final Path resultDir = Paths.get(this.tableConvert(
+                this.writeUnmatchedJoinSetting(), "small"));
+
+        Assertions.assertEquals(4, Files.readAllLines(resultDir.resolve("small.csv")).size());
+        Assertions.assertFalse(Files.exists(resultDir.resolve("big.csv")));
+    }
+
+    @Test
     void testTableConvert_resultの検証エラーは400を返す() throws IOException {
         this.createPreviewSrc();
 
@@ -584,6 +604,14 @@ class DatasetSettingsControllerTest {
     private String writeJoinSetting() throws IOException {
         return this.writeSetting("previewJoinSetting.json",
                 "{\"settings\":[{\"innerJoin\":{\"left\":\"big\",\"right\":\"small\",\"column\":[\"key\"]},\"tableName\":\"joined\"}]}");
+    }
+
+    /**
+     * bigと存在しないテーブルのjoin。bigはjoinで使われずに残る
+     */
+    private String writeUnmatchedJoinSetting() throws IOException {
+        return this.writeSetting("previewUnmatchedJoinSetting.json",
+                "{\"settings\":[{\"innerJoin\":{\"left\":\"big\",\"right\":\"missing\",\"column\":[\"key\"]}}]}");
     }
 
     private String writeSetting(final String fileName, final String content) throws IOException {

@@ -110,7 +110,9 @@ public class ComparableTableDto extends HashMap<String, Object> {
 
     /**
      * 行を読み込んだDTOを新たに作って返す（このDTOは変更しない）。
-     * 読込前のDTOを一覧で保持していても、読み込んだ行は返したDTOを手放せば解放される
+     * 読込前のDTOを一覧で保持していても、読み込んだ行は返したDTOを手放せば解放される。
+     * 対象以外のテーブル（同じ分割のまとまりの他の分割後のテーブルなど）もsubTableとして渡す。
+     * 行は読まれたときに列名→値のMapにする（行ごとのMapを保持しない）
      */
     public ComparableTableDto applyDataSetSeparators(final TableSeparators dataSetSeparators) {
         final String tableName = this.task.targetTableName();
