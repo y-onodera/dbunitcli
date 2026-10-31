@@ -52,21 +52,15 @@ public record ComparableTable(AddSettingTableMetaData addSettingTableMetaData
         return this.rows;
     }
 
+    /**
+     * テンプレートに渡す形にする。includeMetaDataなら、行（{@link #rowMaps()}）を持つテーブルのDTO1つを、
+     * そうでなければ行を返す。行ごとのMapは保持せず、読まれたときに作る
+     */
     public List<Map<String, Object>> toMap(final boolean includeMetaData) {
-        final List<Map<String, Object>> result = new ArrayList<>();
-        final List<Map<String, Object>> rowMap = new ArrayList<>();
         if (includeMetaData) {
-            result.add(new ComparableTableDto(this.getTableMetaData(), rowMap));
+            return List.of(new ComparableTableDto(this.getTableMetaData(), this.rowMaps()));
         }
-        IntStream.range(0, this.getRowCount()).forEach(rowNum -> {
-            final Map<String, Object> map = this.getRowToMap(rowNum);
-            if (includeMetaData) {
-                rowMap.add(map);
-            } else {
-                result.add(map);
-            }
-        });
-        return result;
+        return this.rowMaps();
     }
 
     /**

@@ -37,6 +37,19 @@ public class ComparableTableTest {
     }
 
     @Test
+    public void toMapは行を列名から値へのMapで返し_includeMetaDataならテーブルのDTOの行として返す() {
+        final List<Map<String, Object>> rows = this.target.toMap(false);
+        assertEquals(3, rows.size());
+        assertEquals(List.of("1", "b", "あ", 1), new ArrayList<>(rows.get(1).values()));
+        assertEquals(List.of("COLUMN1", "COLUMN2", "COLUMN3", ""), new ArrayList<>(rows.get(1).keySet()));
+
+        final List<Map<String, Object>> withMetaData = this.target.toMap(true);
+        assertEquals(1, withMetaData.size());
+        assertEquals("TABLE1", withMetaData.getFirst().get("tableName"));
+        assertEquals(rows, withMetaData.getFirst().get("rows"));
+    }
+
+    @Test
     public void getRows_result_has_argument_column_length() {
         final Collection<Map.Entry<Integer, Object[]>> actual = this.target.getRows(List.of("COLUMN1", "COLUMN2")).values();
         final Iterator<Map.Entry<Integer, Object[]>> it = actual.iterator();

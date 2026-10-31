@@ -122,11 +122,10 @@ public class ComparableTableDto extends HashMap<String, Object> {
         final TreeMap<String, ComparableTable> tables = this.task.runWith(builder, null);
         final ComparableTableDto result = new ComparableTableDto(this);
         final ComparableTable target = tables.get(tableName);
-        result.setRows(target == null ? new ArrayList<>() : target.rowMaps());
+        result.setRows(target == null ? new ArrayList<>() : target.toMap(false));
         tables.entrySet().stream()
               .filter(it -> !it.getKey().equals(tableName))
-              .forEach(it -> result.getSubTables().put(it.getKey()
-                      , new ComparableTableDto(it.getValue().getTableMetaData(), it.getValue().rowMaps())));
+              .forEach(it -> result.getSubTables().put(it.getKey(), it.getValue().toMap(true).getFirst()));
         return result;
     }
 
