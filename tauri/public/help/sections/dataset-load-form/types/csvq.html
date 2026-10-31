@@ -58,5 +58,10 @@ SQL (joinQuery.sql):
   [3, C1, 花子, 30000]
   [1, A1, 太郎, 10000]</pre>
   <p><code>CSVREAD(fileName, columns, csvOptions)</code> の第 2 引数を <code>null</code> にすると、先頭行がヘッダとして扱われます。第 3 引数では <code>charset</code>・<code>fieldSeparator</code>・<code>fieldDelimiter</code> などの H2 の CSV オプションを指定できます（例: TSV を読む場合は <code>'charset=UTF-8 fieldSeparator=\t'</code>）。</p>
+
+  <h2 id="section-notes">注意</h2>
+  <ul>
+    <li><a href="../../data-load.html">Data Load</a> の <code>headerName</code> を指定すると、取得した列の先頭から順に列名を置き換えます。<code>headerName</code> が取得した列より少ない場合、超えた列は無視されます。多い場合、余った列名の列を追加し値は空文字になります</li>
+  </ul>
 </body>
 </html>

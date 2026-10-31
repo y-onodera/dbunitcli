@@ -52,17 +52,18 @@ public record ComparableCSVQueryDataSetProducer(ComparableDataSetParam param,
                      final ResultSet rst = stmt.executeQuery(query)
                 ) {
                     final ResultSetMetaData metaData = rst.getMetaData();
-                    // ヘッダより多い列は無視する
+                    // ヘッダより多い列は無視し、足りない列はブランクとする
                     final int resultColumnCount = metaData.getColumnCount();
                     final int columnCount = Optional.ofNullable(this.param.headerNames())
-                            .map(it -> Math.min(it.length, resultColumnCount))
+                            .map(it -> it.length)
                             .orElse(resultColumnCount);
                     final Column[] columns = IntStream.range(0, columnCount)
                             .mapToObj(i -> {
                                 try {
-                                    return Optional.ofNullable(this.param.headerNames())
-                                            .map(it -> it[i])
-                                            .orElse(metaData.getColumnName(i + 1));
+                                    if (this.param.headerNames() != null) {
+                                        return this.param.headerNames()[i];
+                                    }
+                                    return metaData.getColumnName(i + 1);
                                 } catch (final SQLException e) {
                                     throw new RuntimeException(e);
                                 }
@@ -77,6 +78,9 @@ public record ComparableCSVQueryDataSetProducer(ComparableDataSetParam param,
                             mapper.addRow(IntStream.rangeClosed(1, columnCount)
                                     .mapToObj(i -> {
                                         try {
+                                            if (i > resultColumnCount) {
+                                                return "";
+                                            }
                                             return Optional.ofNullable(rst.getString(i))
                                                     .orElse("");
                                         } catch (final SQLException e) {

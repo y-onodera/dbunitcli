@@ -201,6 +201,47 @@ public class HeaderOverColumnTest {
                 , List.of("2", "b", path, "q.sql", ""));
     }
 
+    @Test
+    public void csvqFillsBlankForHeaderNameOverColumns() throws IOException, DataSetException {
+        final File data = this.write("data.csv", "C1,C2\n1,a\n2,b\n");
+        final File queryDir = Files.createDirectories(this.tempDir.resolve("csvq")).toFile();
+        Files.writeString(new File(queryDir, "q.sql").toPath()
+                , "SELECT * FROM CSVREAD('" + this.path(data) + "', null, 'charset=UTF-8') ORDER BY C1"
+                , StandardCharsets.UTF_8);
+        this.assertRows(new ComparableCSVQueryDataSetProducer(this.builder(queryDir, DataSourceType.csvq)
+                        .setHeaderName("ID,VAL,EXT")
+                        .build(), Parameter.none()).loadDataSet().getTable("q")
+                , List.of("ID", "VAL", "EXT"), List.of("1", "a", ""), List.of("2", "b", ""));
+    }
+
+    @Test
+    public void tableFillsBlankForHeaderNameOverColumns() throws IOException, SQLException, DataSetException {
+        final String url = "jdbc:h2:mem:headerOverColumnTableBlank;DB_CLOSE_DELAY=-1";
+        this.createTable(url);
+        final File listFile = this.write("tables.txt", "T1");
+        final ComparableTable table = new ComparableDBDataSetProducer(this.builder(listFile, DataSourceType.table)
+                .setDatabaseConnectionLoader(this.connectionLoader(url))
+                .setHeaderName("ID,VAL,EXT,MEMO")
+                .setAddFileInfo(true)
+                .build()).loadDataSet().getTable("T1");
+        this.assertRows(table, List.of("ID", "VAL", "EXT", "MEMO", "$FILE_PATH", "$FILE_NAME", "$SHEET_NAME")
+                , List.of("1", "a", "x", "", this.path(listFile), "tables.txt", "")
+                , List.of("2", "b", "y", "", this.path(listFile), "tables.txt", ""));
+    }
+
+    @Test
+    public void sqlFillsBlankForHeaderNameOverColumns() throws IOException, SQLException, DataSetException {
+        final String url = "jdbc:h2:mem:headerOverColumnSqlBlank;DB_CLOSE_DELAY=-1";
+        this.createTable(url);
+        final File queryDir = Files.createDirectories(this.tempDir.resolve("sql")).toFile();
+        Files.writeString(new File(queryDir, "q.sql").toPath(), "select C1, C2 from T1 order by C1", StandardCharsets.UTF_8);
+        this.assertRows(new ComparableQueryDataSetProducer(this.builder(queryDir, DataSourceType.sql)
+                        .setDatabaseConnectionLoader(this.connectionLoader(url))
+                        .setHeaderName("ID,VAL,EXT")
+                        .build(), Parameter.none()).loadDataSet().getTable("q")
+                , List.of("ID", "VAL", "EXT"), List.of("1", "a", ""), List.of("2", "b", ""));
+    }
+
     private void createTable(final String url) throws SQLException {
         try (final Connection conn = DriverManager.getConnection(url, "sa", "");
              final Statement stmt = conn.createStatement()) {
