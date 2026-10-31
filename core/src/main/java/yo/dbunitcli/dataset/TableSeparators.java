@@ -104,7 +104,7 @@ public record TableSeparators(List<TableSeparator> settings
      * 後段（next）の設定も含めて見る
      */
     public boolean isIndependentTables() {
-        return this.chain().allMatch(it -> it.joinConditions().isEmpty() && !it.hasSplitter());
+        return !this.isTableNameDependsOnRows() && this.chain().allMatch(it -> it.joinConditions().isEmpty());
     }
 
     /**

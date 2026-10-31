@@ -117,7 +117,7 @@ public class DatasetSettingsController extends AbstractResourceFileController<Da
                     param.setLoadData(true).setConverter(collector).build())) {
                 producer.produce();
             }
-            return ObjectMapper.getDefault().writeValueAsString(collector.tableNames.toArray(new String[0]));
+            return ObjectMapper.getDefault().writeValueAsString(collector.tableNames);
         } catch (final Throwable th) {
             LOGGER.warn("Could not get table names", th);
             return "[]";
@@ -408,11 +408,9 @@ public class DatasetSettingsController extends AbstractResourceFileController<Da
     }
 
     /**
-     * 出力されるテーブル名だけを集める（行は捨てる）
+     * 読み込んだテーブルを集める（分割後も同じインスタンスで受け、テーブルの終わりでは何もしない）
      */
-    private static class TableNameCollector implements IDataSetConverter {
-        private final Set<String> tableNames = new LinkedHashSet<>();
-
+    private abstract static class Collector implements IDataSetConverter {
         @Override
         public boolean isExportEmptyTable() {
             return true;
@@ -429,13 +427,23 @@ public class DatasetSettingsController extends AbstractResourceFileController<Da
         }
 
         @Override
-        public void startTable(final ITableMetaData metaData) {
-            this.tableNames.add(metaData.getTableName());
-        }
+        public abstract void startTable(ITableMetaData metaData);
 
         @Override
         public void endTable() {
             // nothing
+        }
+    }
+
+    /**
+     * 出力されるテーブル名だけを集める（行は捨てる）
+     */
+    private static class TableNameCollector extends Collector {
+        private final Set<String> tableNames = new LinkedHashSet<>();
+
+        @Override
+        public void startTable(final ITableMetaData metaData) {
+            this.tableNames.add(metaData.getTableName());
         }
 
         @Override
@@ -447,7 +455,7 @@ public class DatasetSettingsController extends AbstractResourceFileController<Da
     /**
      * 渡されたテーブル（{@link TargetTableConverter}で対象だけに絞られる）の先頭{@link #PREVIEW_ROW_LIMIT}行と全行数を集める
      */
-    private static class PreviewCollector implements IDataSetConverter {
+    private static class PreviewCollector extends Collector {
         private ComparableTable.Builder builder;
         private int totalRows;
 
@@ -463,30 +471,10 @@ public class DatasetSettingsController extends AbstractResourceFileController<Da
         }
 
         @Override
-        public boolean isExportEmptyTable() {
-            return true;
-        }
-
-        @Override
-        public void reStartTable(final AddSettingTableMetaData tableMetaData, final Integer writeRows) {
-            this.startTable(tableMetaData);
-        }
-
-        @Override
-        public IDataSetConverter split() {
-            return this;
-        }
-
-        @Override
         public void startTable(final ITableMetaData metaData) {
             if (this.builder == null) {
                 this.builder = new ComparableTable.Builder(metaData);
             }
-        }
-
-        @Override
-        public void endTable() {
-            // nothing
         }
 
         @Override
