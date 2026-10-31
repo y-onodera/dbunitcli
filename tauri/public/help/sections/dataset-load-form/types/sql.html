@@ -41,7 +41,9 @@ JDBC 実行結果:
 
   <h2 id="section-notes">注意</h2>
   <ul>
-    <li><a href="../../data-load.html">Data Load</a> の <code>headerName</code> / <code>startRow</code> / <code>addFileInfo</code> は効きません</li>
+    <li><a href="../../data-load.html">Data Load</a> の <code>headerName</code> を指定すると、取得した列の先頭から順に列名を置き換えます。<code>headerName</code> が取得した列より少ない場合、超えた列は無視されます。多い場合、余った列名の列を追加し値は空文字になります</li>
+    <li><a href="../../data-load.html">Data Load</a> の <code>addFileInfo</code> を ON にすると、SQL ファイルのパス・ファイル名を各行に追加します（<code>$SHEET_NAME</code> は空文字）</li>
+    <li><a href="../../data-load.html">Data Load</a> の <code>startRow</code> は効きません</li>
     <li>SQL の中で -P 値を参照できます（<a href="../../../dialogs/parameters.html">Parameters (-P)</a>）</li>
   </ul>
 </body>

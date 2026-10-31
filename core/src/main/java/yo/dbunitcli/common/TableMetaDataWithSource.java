@@ -7,6 +7,7 @@ import org.dbunit.dataset.ITableMetaData;
 import org.dbunit.dataset.datatype.DataType;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.IntStream;
 
@@ -41,14 +42,31 @@ public class TableMetaDataWithSource extends DefaultTableMetaData {
         return this.source.defaultColumnValues(this.getColumnLength());
     }
 
+    /**
+     * 行の値をヘッダの列数に合わせ（ヘッダより多い列は無視し、足りない列はブランク）、ファイル情報を付ける
+     */
+    public Object[] toRow(final Object[] values) {
+        final int headerColumnCount = this.headerColumnCount();
+        if (values.length == headerColumnCount) {
+            return this.source.apply(values);
+        }
+        final Object[] row = Arrays.copyOf(values, headerColumnCount, Object[].class);
+        Arrays.fill(row, Math.min(values.length, headerColumnCount), headerColumnCount, "");
+        return this.source.apply(row);
+    }
+
     public String[] withDefaultValuesToArray(final List<String> rowValues) {
-        final List<String> results = new ArrayList<>(rowValues);
+        final List<String> results = new ArrayList<>(rowValues.subList(0, Math.min(rowValues.size(), this.headerColumnCount())));
         if (results.size() < this.getColumnLength()) {
             final String[] defaultValues = this.defaultColumnValues();
             IntStream.range(results.size(), this.getColumnLength())
                     .forEach(i -> results.add(defaultValues[i]));
         }
         return results.toArray(new String[0]);
+    }
+
+    private int headerColumnCount() {
+        return this.source.addFileInfo() ? this.getColumnLength() - OPTION_COLUMNS.length : this.getColumnLength();
     }
 
     public int getColumnLength() {

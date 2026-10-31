@@ -60,10 +60,11 @@ public record ComparableRegexSplitDataSetProducer(ComparableDataSetParam param) 
                     }
                 }
                 int row = 1;
+                final TableMetaDataWithSource metaData;
                 final ComparableTableMapper mapper;
                 try (final BufferedReader reader = Files.newBufferedReader(Path.of(this.source.filePath()), Charset.forName(this.param.encoding()))) {
                     if (this.param.headerNames() != null) {
-                        mapper = context.createMapper(this.source.createMetaData(this.param.headerNames()));
+                        metaData = this.source.createMetaData(this.param.headerNames());
                     } else {
                         int readed = 1;
                         String header = "";
@@ -74,15 +75,16 @@ public record ComparableRegexSplitDataSetProducer(ComparableDataSetParam param) 
                             }
                             readed++;
                         }
-                        mapper = context.createMapper(this.source.createMetaData(this.headerSplitPattern.split(header)));
+                        metaData = this.source.createMetaData(this.headerSplitPattern.split(header));
                     }
+                    mapper = context.createMapper(metaData);
                     mapper.startTable();
                     while (mapper.hasOutput()) {
                         final String s = reader.readLine();
                         if (s == null) {
                             break;
                         }
-                        mapper.addRow(this.source.apply(this.dataSplitPattern.split(s)));
+                        mapper.addRow(metaData.toRow(this.dataSplitPattern.split(s)));
                         row++;
                     }
                 }

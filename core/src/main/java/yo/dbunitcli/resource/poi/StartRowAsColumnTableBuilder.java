@@ -68,9 +68,6 @@ public class StartRowAsColumnTableBuilder implements XlsxRowsToTableBuilder {
 
     @Override
     public String[] currentRow() {
-        if (this.nowProcessing.getColumnLength() < this.rowValues.size()) {
-            throw new AssertionError(this.rowValues + " large items than header:" + Arrays.toString(this.nowProcessing.getColumns()));
-        }
         return this.nowProcessing.withDefaultValuesToArray(this.rowValues);
     }
 

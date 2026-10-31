@@ -12,9 +12,11 @@ import java.lang.reflect.Field;
 import java.text.CharacterIterator;
 import java.text.StringCharacterIterator;
 import java.util.List;
+import java.util.regex.Pattern;
 
 public record ComparableCsvDataSetProducer(ComparableDataSetParam param) implements ComparableDataSetProducer {
     private static final Logger LOGGER = LoggerFactory.getLogger(ComparableCsvDataSetProducer.class);
+    private static final Pattern BACKSLASH = Pattern.compile("(?!<\\\\)\\\\(?![\\\\\"])");
 
     @Override
     public boolean isParallelizableSource() {
@@ -65,8 +67,8 @@ public record ComparableCsvDataSetProducer(ComparableDataSetParam param) impleme
                 if (this.param.loadData() && mapper.hasOutput()) {
                     int rows = 0;
                     List<Object> columns;
-                    while ((columns = this.collectExpectedNumberOfColumns(headerName.length, lineNumberReader)) != null) {
-                        mapper.addRow(metaData.source().apply(columns));
+                    while ((columns = this.readRecord(lineNumberReader)) != null) {
+                        mapper.addRow(metaData.toRow(columns.toArray()));
                         rows++;
                     }
                     ComparableCsvDataSetProducer.LOGGER.info("produce - rows={}", rows);
@@ -107,43 +109,35 @@ public record ComparableCsvDataSetProducer(ComparableDataSetParam param) impleme
             return this.pipeline.getProducts();
         }
 
-        private List<Object> collectExpectedNumberOfColumns(final int expectedNumberOfColumns, final LineNumberReader lineNumberReader) {
+        private List<Object> readRecord(final LineNumberReader lineNumberReader) {
             try {
-                List<Object> columns = null;
-                int columnsCollectedSoFar = 0;
-                final StringBuilder buffer = new StringBuilder();
                 String anotherLine = lineNumberReader.readLine();
                 if (anotherLine == null) {
                     return null;
-                } else {
-                    boolean shouldProceed = false;
-                    while (columnsCollectedSoFar < expectedNumberOfColumns) {
-                        try {
-                            columns = this.parse(buffer.append(anotherLine.replaceAll("(?!<\\\\)\\\\(?![\\\\\"])", "\\\\\\\\")).toString());
-                            columnsCollectedSoFar = columns.size();
-                        } catch (final IllegalStateException var9) {
-                            this.resetThePipeline();
-                            anotherLine = lineNumberReader.readLine();
-                            if (anotherLine == null) {
-                                break;
-                            }
-                            buffer.append("\n");
-                            shouldProceed = true;
+                }
+                final StringBuilder buffer = new StringBuilder(this.escapeBackslash(anotherLine));
+                List<Object> columns = null;
+                while (columns == null) {
+                    try {
+                        columns = this.parse(buffer.toString());
+                    } catch (final IllegalStateException e) {
+                        // 引用符が閉じていないため、次の行も同じ値の続きとして読む
+                        this.resetThePipeline();
+                        anotherLine = lineNumberReader.readLine();
+                        if (anotherLine == null) {
+                            throw new AssertionError("Unterminated quoted value on line " + lineNumberReader.getLineNumber() + ". Offending line: " + buffer);
                         }
-                        if (!shouldProceed) {
-                            break;
-                        }
-                    }
-                    if (columnsCollectedSoFar != expectedNumberOfColumns) {
-                        final String message = "Expected " + expectedNumberOfColumns + " columns on line " + lineNumberReader.getLineNumber() + ", got " + columnsCollectedSoFar + ". Offending line: " + buffer;
-                        throw new AssertionError(message);
-                    } else {
-                        return columns;
+                        buffer.append("\n").append(this.escapeBackslash(anotherLine));
                     }
                 }
+                return columns;
             } catch (final IOException e) {
                 throw new AssertionError(e);
             }
+        }
+
+        private String escapeBackslash(final String line) {
+            return ComparableCsvDataSetProducer.BACKSLASH.matcher(line).replaceAll("\\\\\\\\");
         }
 
         private void skipToStartRow(final LineNumberReader reader) throws IOException {

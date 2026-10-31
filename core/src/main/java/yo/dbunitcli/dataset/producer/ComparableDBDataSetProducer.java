@@ -144,7 +144,7 @@ public class ComparableDBDataSetProducer implements ComparableDataSetProducer {
                     final ITableMetaData tableMetaData;
                     if (this.param.headerNames() != null) {
                         final ITableMetaData metaData = table.getTableMetaData();
-                        final Column[] columns = Arrays.stream(this.param.headerNames(), 0, metaData.getColumns().length)
+                        final Column[] columns = Arrays.stream(this.param.headerNames())
                                 .map(name -> new Column(name.trim(), DataType.UNKNOWN))
                                 .toArray(Column[]::new);
                         tableMetaData = new DefaultTableMetaData(table.getTableMetaData().getTableName()
@@ -157,12 +157,14 @@ public class ComparableDBDataSetProducer implements ComparableDataSetProducer {
                                         throw new RuntimeException(e);
                                     }
                                 })
+                                .filter(i -> i < columns.length)
                                 .mapToObj(i -> columns[i])
                                 .toArray(Column[]::new));
                     } else {
                         tableMetaData = table.getTableMetaData();
                     }
-                    final ComparableTableMapper mapper = context.createMapper(source.wrap(tableMetaData));
+                    final TableMetaDataWithSource metaDataWithSource = source.wrap(tableMetaData);
+                    final ComparableTableMapper mapper = context.createMapper(metaDataWithSource);
                     mapper.startTable();
                     if (this.param.loadData() && mapper.hasOutput()) {
                         final Column[] columns = table.getTableMetaData().getColumns();
@@ -174,7 +176,7 @@ public class ComparableDBDataSetProducer implements ComparableDataSetProducer {
                                 for (final Column column : columns) {
                                     rows[columnIndex++] = table.getValue(row, column.getColumnName());
                                 }
-                                mapper.addRow(rows);
+                                mapper.addRow(metaDataWithSource.toRow(rows));
                             } catch (final RowOutOfBoundsException e) {
                                 break;
                             }

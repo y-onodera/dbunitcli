@@ -24,7 +24,8 @@
 
   <h2 id="section-header-name">headerName の詳細</h2>
   <p>カラム名をカンマ区切りで与えると、その名前順にテーブル列が構築されます。<strong>指定された場合は先頭行も自動的にはヘッダとみなされず、すべての行がデータ行になります</strong>。既にヘッダ行が存在するファイルでヘッダを上書きしたい場合は、<code>startRow</code> と併用してヘッダ行をスキップしてください。</p>
-  <p><strong>例 1: ヘッダ行がない CSV に列名を与える</strong></p>
+  <p>データ行の列がヘッダ（ヘッダ行、または <code>headerName</code> で与えた列名）より多い場合、超えた列は無視されます。少ない場合、足りない列は空文字になります（srcType が fixed の場合は、<code>fixedLength</code> と <code>headerName</code> の数が違うとエラーになります）。</p>
+  <p><strong>例 1:ヘッダ行がない CSV に列名を与える</strong></p>
   <pre>入力 (users.csv):
 John,30
 Jane,25
@@ -95,7 +96,7 @@ Jane,25
   <p>ON にすると、読み込んだ各行の末尾に元ファイル情報を示す次の 3 カラムが自動で追加されます。</p>
   <table>
     <tr><th>カラム</th><th>内容</th></tr>
-    <tr><td>$FILE_PATH</td><td>入力ファイルの絶対パス（区切りはスラッシュに正規化）</td></tr>
+    <tr><td>$FILE_PATH</td><td>入力ファイルの絶対パス（区切りはスラッシュに正規化）。srcType が table の場合はテーブル名の一覧ファイル、sql / csvq の場合は SQL ファイル</td></tr>
     <tr><td>$FILE_NAME</td><td>入力ファイルのファイル名（例: <code>users.csv</code>）</td></tr>
     <tr><td>$SHEET_NAME</td><td>Excel の場合はシート名。CSV など単一表の場合は空文字</td></tr>
   </table>

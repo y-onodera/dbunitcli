@@ -220,6 +220,14 @@ class CommandLineOptionValidationTest {
         }
 
         @Test
+        void fixedLengthCountMustMatchHeaderNameCount() {
+            assertEquals(List.of("Error: -src.fixedLength=<fixedLength> count (3) must match -src.headerName=<headerName> count (2)")
+                    , this.validate("-src.srcType=fixed", "-src.fixedLength=3,5,1", "-src.headerName=A,B"));
+            assertEquals(List.of("Error: -src.fixedLength=<fixedLength> count (1) must match -src.headerName=<headerName> count (2)")
+                    , this.validate("-src.srcType=fixed", "-src.fixedLength=3", "-src.headerName=A,B"));
+        }
+
+        @Test
         void unsupportedEncodingIsInvalid() {
             assertEquals(List.of("Invalid value for option '-src.encoding': unsupported encoding: 'XXX'")
                     , this.validate("-src.encoding=XXX"));
