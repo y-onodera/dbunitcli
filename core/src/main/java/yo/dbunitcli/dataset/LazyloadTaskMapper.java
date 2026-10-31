@@ -1,8 +1,10 @@
 package yo.dbunitcli.dataset;
 
 import org.dbunit.dataset.ITableMetaData;
+import yo.dbunitcli.resource.Workers;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -15,11 +17,34 @@ public class LazyloadTaskMapper {
     private final Map<String, ComparableTableDto> result = new TreeMap<>();
 
     public static Collection<ComparableTableDto> mappingFrom(final ComparableDataSetParam param, final Stream<ComparableTableMappingTask> tasks) {
-        final LazyloadTaskMapper mapper = new LazyloadTaskMapper(param, tasks);
+        final LazyloadTaskMapper mapper = new LazyloadTaskMapper(param, tasks, null);
         return mapper.result.values();
     }
 
-    private LazyloadTaskMapper(final ComparableDataSetParam param, final Stream<ComparableTableMappingTask> tasks) {
+    /**
+     * レーン（{@link ParallelTableMapping#plan}）ごとに別スレッドで求める。レーン間で出力テーブルを共有しないため、結果はそのまま合わせられる。
+     * 作業スレッドはレーンを順に取り出し、2つ目以降の作業スレッドはスレッドごとの資源（DB接続など）で読む
+     */
+    public static Collection<ComparableTableDto> mappingFrom(final ComparableDataSetParam param
+            , final List<List<ComparableTableMappingTask>> lanes) {
+        final int threads = Math.min(ParallelTableMapping.parallelism(param), lanes.size());
+        final Queue<List<ComparableTableMappingTask>> queue = new ConcurrentLinkedQueue<>(lanes);
+        final Map<String, ComparableTableDto> result = new TreeMap<>();
+        Workers.run(threads, "lazyload-", i -> () -> {
+            try (final Workers.WorkerResources resources = new Workers.WorkerResources()) {
+                return new LazyloadTaskMapper(param
+                        , Stream.generate(queue::poll).takeWhile(Objects::nonNull).flatMap(List::stream)
+                        , i == 0 ? null : resources).result;
+            }
+        }).forEach(result::putAll);
+        return result.values();
+    }
+
+    /**
+     * @param resources 作業スレッドの資源。元のタスクのまま読む場合はnull（結果のタスクは常に元のタスクを使う）
+     */
+    private LazyloadTaskMapper(final ComparableDataSetParam param, final Stream<ComparableTableMappingTask> tasks
+            , final Workers.WorkerResources resources) {
         final TableSeparators tableSeparators = param.tableSeparators();
         final boolean loadRows = tableSeparators.isTableNameDependsOnRows();
         final List<ComparableTableJoin> joins = tableSeparators.joins();
@@ -29,8 +54,9 @@ public class LazyloadTaskMapper {
         final Map<String, ComparableTableMappingTask.WithTargetTable> tableTasks = new HashMap<>();
         context.open();
         tasks.forEach(task -> {
-            task.with(builder -> builder.setLoadData(loadRows))
-                .run(context);
+            Workers.checkInterrupted();
+            final ComparableTableMappingTask loading = task.with(builder -> builder.setLoadData(loadRows));
+            (resources == null ? loading : loading.forWorker(resources)).run(context);
             // 行を処理しながら出力したテーブル（collector）と、読込の終わりにまとめて出力するテーブル（tableMap）
             Stream.concat(collector.takeTableNames(), tableMap.takePutKeys())
                   .distinct()

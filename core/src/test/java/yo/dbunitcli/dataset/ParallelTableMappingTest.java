@@ -123,6 +123,18 @@ public class ParallelTableMappingTest {
     }
 
     @Test
+    public void lazyLoad_same_as_sequential() {
+        final Map<String, Object> sequential = this.producer(this.renameBToA(), null, 1).lazyLoad(true);
+        final Map<String, Object> parallel = this.producer(this.renameBToA(), null, 4).lazyLoad(true);
+        Assertions.assertEquals(List.of("a", "c", "d"), List.copyOf(parallel.keySet()));
+        Assertions.assertEquals(List.copyOf(sequential.keySet()), List.copyOf(parallel.keySet()));
+        // 同じテーブルを書くソース（a・b）は1つのタスクにつながり、読めば両方の行になる
+        final ComparableTableMappingTask.WithTargetTable task = ((ComparableTableDto) parallel.get("a")).getTask();
+        Assertions.assertEquals(200, task.runWith(it -> {
+        }, null).get("a").getRowCount());
+    }
+
+    @Test
     public void produce_with_converter_same_as_sequential() throws IOException {
         final File sequentialDir = this.tempDir.resolve("sequential").toFile();
         final File parallelDir = this.tempDir.resolve("parallel").toFile();
