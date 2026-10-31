@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.regex.Pattern;
 
 public record ComparableRegexSplitDataSetProducer(ComparableDataSetParam param) implements ComparableDataSetProducer {
@@ -61,8 +62,10 @@ public record ComparableRegexSplitDataSetProducer(ComparableDataSetParam param) 
                 }
                 int row = 1;
                 final ComparableTableMapper mapper;
+                final int columnCount;
                 try (final BufferedReader reader = Files.newBufferedReader(Path.of(this.source.filePath()), Charset.forName(this.param.encoding()))) {
                     if (this.param.headerNames() != null) {
+                        columnCount = this.param.headerNames().length;
                         mapper = context.createMapper(this.source.createMetaData(this.param.headerNames()));
                     } else {
                         int readed = 1;
@@ -74,7 +77,9 @@ public record ComparableRegexSplitDataSetProducer(ComparableDataSetParam param) 
                             }
                             readed++;
                         }
-                        mapper = context.createMapper(this.source.createMetaData(this.headerSplitPattern.split(header)));
+                        final String[] headerNames = this.headerSplitPattern.split(header);
+                        columnCount = headerNames.length;
+                        mapper = context.createMapper(this.source.createMetaData(headerNames));
                     }
                     mapper.startTable();
                     while (mapper.hasOutput()) {
@@ -82,7 +87,9 @@ public record ComparableRegexSplitDataSetProducer(ComparableDataSetParam param) 
                         if (s == null) {
                             break;
                         }
-                        mapper.addRow(this.source.apply(this.dataSplitPattern.split(s)));
+                        final String[] values = this.dataSplitPattern.split(s);
+                        // ヘッダより多い列は無視する
+                        mapper.addRow(this.source.apply(values.length > columnCount ? Arrays.copyOf(values, columnCount) : values));
                         row++;
                     }
                 }

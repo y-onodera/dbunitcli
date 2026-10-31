@@ -134,11 +134,12 @@ public record ComparableCsvDataSetProducer(ComparableDataSetParam param) impleme
                             break;
                         }
                     }
-                    if (columnsCollectedSoFar != expectedNumberOfColumns) {
+                    if (columnsCollectedSoFar < expectedNumberOfColumns) {
                         final String message = "Expected " + expectedNumberOfColumns + " columns on line " + lineNumberReader.getLineNumber() + ", got " + columnsCollectedSoFar + ". Offending line: " + buffer;
                         throw new AssertionError(message);
                     } else {
-                        return columns;
+                        // ヘッダより多い列は無視する
+                        return columns.subList(0, expectedNumberOfColumns);
                     }
                 }
             } catch (final IOException e) {
