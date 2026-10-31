@@ -6,6 +6,12 @@ import { RefreshableDialogShell } from "../../../../../app/form/section/dialog/R
 import SqlTableInsertDialog from "../../../../../app/form/section/dialog/SqlTableInsertDialog";
 import type { JdbcFetchOptions } from "../../../../../hooks/useJdbc";
 import { DatasetSetting } from "../../../../../model/DatasetSettings";
+import {
+	emitLogsThenFail,
+	expectJobFailure,
+	JOB_ERROR,
+	JOB_LOG_LINES,
+} from "../../../../helpers/jobFailure";
 
 // （mockReset:trueで実装が毎回リセットされるため、実装は各テスト内で設定する）
 const { mockJdbcTables, mockJdbcColumns, mockFetchColumnNames } = vi.hoisted(
@@ -23,23 +29,6 @@ vi.mock("../../../../../hooks/useDatasetSettings", () => ({
 	useColumnNamesFetcher: () => mockFetchColumnNames,
 }));
 
-// ログを2行流してから失敗する取得処理
-const failWithLogs =
-	(onLogOf: (args: unknown[]) => ((line: string) => void) | undefined) =>
-	async (...args: unknown[]) => {
-		const onLog = onLogOf(args);
-		onLog?.("step1");
-		onLog?.("step2");
-		throw new Error("boom");
-	};
-
-const expectFailureWithLogs = () => {
-	expect(screen.getByText("Error: boom")).toBeInTheDocument();
-	expect(screen.getByRole("log", { name: "execution log" })).toHaveTextContent(
-		"step1 step2",
-	);
-};
-
 describe("RefreshableDialogShellのExecute失敗", () => {
 	it("エラーと実行中のログを残す", () => {
 		render(
@@ -50,40 +39,43 @@ describe("RefreshableDialogShellのExecute失敗", () => {
 				formId="testForm"
 				loadState={{ status: "loaded", options: {} }}
 				executing={false}
-				executeError="boom"
-				logs={["step1", "step2"]}
+				executeError={JOB_ERROR}
+				logs={JOB_LOG_LINES}
 				onExecute={vi.fn()}
 				onClose={vi.fn()}
 			>
 				{() => null}
 			</RefreshableDialogShell>,
 		);
-		expectFailureWithLogs();
+		expectJobFailure();
 	});
 });
 
 describe("SqlTableInsertDialogの読込失敗", () => {
 	it("テーブル一覧の読込に失敗したら、エラーと読込中のログを残す", async () => {
 		mockJdbcTables.mockImplementation(
-			failWithLogs((args) => (args[1] as JdbcFetchOptions).onLog),
+			(_jdbcValues, fetchOptions: JdbcFetchOptions) =>
+				emitLogsThenFail(fetchOptions.onLog),
 		);
 		render(
 			<SqlTableInsertDialog
 				jdbcValues={{}}
 				onInsert={vi.fn()}
+				onInsertColumn={vi.fn()}
 				onClose={vi.fn()}
 			/>,
 		);
 		await userEvent.click(screen.getByRole("button", { name: "Load Tables" }));
 
-		expectFailureWithLogs();
+		expectJobFailure();
 		expect(screen.queryByText("No tables found")).not.toBeInTheDocument();
 	});
 
 	it("列の読込に失敗したら、列選択ダイアログにエラーと読込中のログを残す", async () => {
 		mockJdbcTables.mockResolvedValue(["T1"]);
 		mockJdbcColumns.mockImplementation(
-			failWithLogs((args) => (args[2] as JdbcFetchOptions).onLog),
+			(_jdbcValues, _table, fetchOptions: JdbcFetchOptions) =>
+				emitLogsThenFail(fetchOptions.onLog),
 		);
 		render(
 			<SqlTableInsertDialog
@@ -96,7 +88,7 @@ describe("SqlTableInsertDialogの読込失敗", () => {
 		await userEvent.click(screen.getByRole("button", { name: "Load Tables" }));
 		await userEvent.click(await screen.findByTitle("Select columns"));
 
-		expectFailureWithLogs();
+		expectJobFailure();
 		expect(screen.getByText("Select Columns")).toBeInTheDocument();
 	});
 });
@@ -104,7 +96,8 @@ describe("SqlTableInsertDialogの読込失敗", () => {
 describe("ColumnDatalistDialogの読込失敗", () => {
 	it("列の読込に失敗したら、閉じずにエラーと読込中のログを残す", async () => {
 		mockFetchColumnNames.mockImplementation(
-			failWithLogs((args) => args[3] as (line: string) => void),
+			(_srcInfo, _tableName, _signal, onLog: (line: string) => void) =>
+				emitLogsThenFail(onLog),
 		);
 		const onLoad = vi.fn();
 		const onClose = vi.fn();
@@ -118,7 +111,7 @@ describe("ColumnDatalistDialogの読込失敗", () => {
 		);
 		await userEvent.click(screen.getByRole("button", { name: "Load Columns" }));
 
-		expectFailureWithLogs();
+		expectJobFailure();
 		expect(onLoad).not.toHaveBeenCalled();
 		expect(onClose).not.toHaveBeenCalled();
 		// 別のテーブルを選び直せるよう一覧は残す

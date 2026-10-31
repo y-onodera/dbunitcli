@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { type Dispatch, type SetStateAction, useEffect, useState } from "react";
 import { useEnvironment } from "../context/EnvironmentProvider";
 import { useJdbcConnectionState } from "../context/JdbcConnectionProvider";
 import { useParamInputs } from "../context/ParameterInputProvider";
@@ -44,37 +44,38 @@ function isSrcReady(info: DatasetSrcInfo, connectionOk: boolean): boolean {
 	return srcType !== "sql" || connectionOk;
 }
 
-// Previewの読込状態。失敗したらdataは空にし、errorにメッセージを持つ
-type Load<T> = { data: T; loading: boolean; error: string };
+// Previewの読込状態。失敗したらdataは空にし、errorにメッセージを持つ。logsは読込中に届いたログ（失敗後も残す）
+type Load<T> = { data: T; loading: boolean; error: string; logs: string[] };
 
-// 読込の結果をstateへ反映する（中断後の結果は捨てる）。
+// 読込を始め、結果をstateへ反映する（中断後の結果は捨てる）。前回の結果は読込中も表示したまま、エラーとログだけ消す。
 // 取得関数は失敗を投げ、扱いは呼び出し元が決める（Previewはエラーとログを表示し、入力候補は空にする）
-function settleLoad<T>(
-	promise: Promise<T>,
+function startLoad<T>(
+	fetch: (onLog: (line: string) => void) => Promise<T>,
 	signal: AbortSignal,
 	empty: T,
-	setLoad: (load: Load<T>) => void,
+	setLoad: Dispatch<SetStateAction<Load<T>>>,
 ) {
-	promise.then(
+	setLoad((load) => ({ ...load, loading: true, error: "", logs: [] }));
+	fetch((line) =>
+		setLoad((load) => ({ ...load, logs: appendLogLines(load.logs, [line]) })),
+	).then(
 		(data) => {
 			if (!signal.aborted) {
-				setLoad({ data, loading: false, error: "" });
+				setLoad((load) => ({ ...load, data, loading: false }));
 			}
 		},
 		(ex) => {
 			if (!signal.aborted) {
-				setLoad({ data: empty, loading: false, error: getErrorMessage(ex) });
+				setLoad((load) => ({
+					...load,
+					data: empty,
+					loading: false,
+					error: getErrorMessage(ex),
+				}));
 			}
 		},
 	);
 }
-
-// 読込を始める（前回の結果は読込中も表示したまま、エラーだけ消す）
-const startLoad = <T>(load: Load<T>): Load<T> => ({
-	...load,
-	loading: true,
-	error: "",
-});
 
 async function fetchTableNames(
 	apiUrl: string,
@@ -106,6 +107,7 @@ const IDLE_TABLE_NAMES: Load<string[]> = {
 	data: [],
 	loading: false,
 	error: "",
+	logs: [],
 };
 
 // withLogs: 読込中のログも受け取る（読込中の表示に使う場合）
@@ -119,7 +121,6 @@ export const useDatasetTableNames = (
 	error: string;
 } => {
 	const [load, setLoad] = useState<Load<string[]>>(IDLE_TABLE_NAMES);
-	const [logs, setLogs] = useState<string[]>([]);
 	const { apiUrl } = useEnvironment();
 	const { jdbcValues, connectionOk } = useJdbcConnectionState();
 	const paramInputs = useParamInputs();
@@ -132,19 +133,16 @@ export const useDatasetTableNames = (
 			return;
 		}
 		const controller = new AbortController();
-		setLoad(startLoad);
-		setLogs([]);
-		settleLoad(
-			fetchTableNames(
-				apiUrl,
-				srcInfo,
-				jdbcValues,
-				paramInputs,
-				controller.signal,
-				withLogs
-					? (line) => setLogs((current) => appendLogLines(current, [line]))
-					: undefined,
-			),
+		startLoad<string[]>(
+			(onLog) =>
+				fetchTableNames(
+					apiUrl,
+					srcInfo,
+					jdbcValues,
+					paramInputs,
+					controller.signal,
+					withLogs ? onLog : undefined,
+				),
 			controller.signal,
 			[],
 			setLoad,
@@ -157,7 +155,7 @@ export const useDatasetTableNames = (
 	return {
 		tableNames: load.data,
 		loading: load.loading,
-		logs,
+		logs: load.logs,
 		error: load.error,
 	};
 };
@@ -174,6 +172,7 @@ const IDLE_PREVIEW: Load<TablePreview | null> = {
 	data: null,
 	loading: false,
 	error: "",
+	logs: [],
 };
 
 async function fetchTablePreview(
@@ -214,7 +213,6 @@ export const useDatasetTablePreview = (
 	error: string;
 } => {
 	const [load, setLoad] = useState<Load<TablePreview | null>>(IDLE_PREVIEW);
-	const [logs, setLogs] = useState<string[]>([]);
 	const { apiUrl } = useEnvironment();
 	const { jdbcValues, connectionOk } = useJdbcConnectionState();
 	const paramInputs = useParamInputs();
@@ -227,18 +225,17 @@ export const useDatasetTablePreview = (
 			return;
 		}
 		const controller = new AbortController();
-		setLoad(startLoad);
-		setLogs([]);
-		settleLoad<TablePreview | null>(
-			fetchTablePreview(
-				apiUrl,
-				srcInfo,
-				tableName,
-				jdbcValues,
-				paramInputs,
-				controller.signal,
-				(line) => setLogs((current) => appendLogLines(current, [line])),
-			),
+		startLoad<TablePreview | null>(
+			(onLog) =>
+				fetchTablePreview(
+					apiUrl,
+					srcInfo,
+					tableName,
+					jdbcValues,
+					paramInputs,
+					controller.signal,
+					onLog,
+				),
 			controller.signal,
 			null,
 			setLoad,
@@ -251,7 +248,7 @@ export const useDatasetTablePreview = (
 	return {
 		preview: load.data,
 		loading: load.loading,
-		logs,
+		logs: load.logs,
 		error: load.error,
 	};
 };

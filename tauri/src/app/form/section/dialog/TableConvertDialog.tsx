@@ -80,9 +80,9 @@ function TableConvertFormDialog({
 			executeError={dialog.executeError}
 			logs={dialog.logs}
 			onExecute={() =>
-				dialog.execute(async (values) => {
-					const resultDir = await convert(values, dialog.fetchOptions());
-					if (!dialog.isAborted()) {
+				dialog.execute(async (values, context) => {
+					const resultDir = await convert(values, context);
+					if (!context.signal.aborted) {
 						onDone(resultDir);
 					}
 				})

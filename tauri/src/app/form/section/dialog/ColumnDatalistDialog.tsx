@@ -13,11 +13,9 @@ import {
 import { BlueButton, WhiteButton } from "../../../../components/element/Button";
 import { JobProgress } from "../../../../components/element/JobProgress";
 import { useDatasetSrcInfo } from "../../../../context/DatasetSrcInfoProvider";
-import { useAbortSignalRef } from "../../../../hooks/useAbortSignalRef";
 import { useColumnNamesFetcher } from "../../../../hooks/useDatasetSettings";
-import { useJobLog } from "../../../../hooks/useJobLog";
+import { useJob } from "../../../../hooks/useJob";
 import type { DatasetSetting } from "../../../../model/DatasetSettings";
-import { getErrorMessage } from "../../../../utils/fetchUtils";
 
 export default function ColumnDatalistDialog({
 	tableNames,
@@ -31,40 +29,25 @@ export default function ColumnDatalistDialog({
 	onClose: () => void;
 }) {
 	const filteredTables = filterTablesByTarget(tableNames, target);
-	// 読込中のテーブル、または直前の読込の失敗メッセージ
-	const [load, setLoad] = useState<{ loading: string } | { error: string }>({
-		error: "",
-	});
+	// 読込中の表示に出すテーブル名
+	const [loadingTable, setLoadingTable] = useState("");
 	const srcInfo = useDatasetSrcInfo();
 	const fetchColumnNames = useColumnNamesFetcher();
-	const abortControllerRef = useAbortSignalRef();
-	const jobLog = useJobLog();
+	// 失敗したら閉じずに、エラーと実行中のログを残す（別のテーブルを選び直せる）。閉じると（アンマウントでabort）sidecar側の読込も中断する
+	const job = useJob();
 
-	// 閉じると（アンマウントでabort）sidecar側の読込も中断する
-	const handleLoadColumns = (tableName: string) => {
-		if ("loading" in load) {
+	const handleLoadColumns = async (tableName: string) => {
+		if (job.running) {
 			return;
 		}
-		if (!abortControllerRef.current) {
-			return;
-		}
-		setLoad({ loading: tableName });
-		jobLog.reset();
-		const { signal } = abortControllerRef.current;
-		fetchColumnNames(srcInfo, tableName, signal, jobLog.append).then(
-			(columns) => {
-				if (!abortControllerRef.current?.signal.aborted) {
-					onLoad(columns);
-					onClose();
-				}
-			},
-			// 失敗したら閉じずに、エラーと実行中のログを残す（別のテーブルを選び直せる）
-			(ex) => {
-				if (!abortControllerRef.current?.signal.aborted) {
-					setLoad({ error: getErrorMessage(ex) });
-				}
-			},
+		setLoadingTable(tableName);
+		const result = await job.run(({ signal, onLog }) =>
+			fetchColumnNames(srcInfo, tableName, signal, onLog),
 		);
+		if (result) {
+			onLoad(result.value);
+			onClose();
+		}
 	};
 
 	function renderRow(name: string) {
@@ -95,17 +78,15 @@ export default function ColumnDatalistDialog({
 	return (
 		<ModalOverlay width="w-lg" zClass="z-modal-nested">
 			<DialogTitle>Load Column Datalist</DialogTitle>
-			{"loading" in load ? (
+			{job.running ? (
 				<JobProgress
-					title={`Loading ${load.loading}...`}
-					lines={jobLog.logs}
+					title={`Loading ${loadingTable}...`}
+					lines={job.logs}
 					onAbandon={onClose}
 				/>
 			) : (
 				<>
-					{load.error && (
-						<JobFailure message={load.error} lines={jobLog.logs} />
-					)}
+					{job.error && <JobFailure message={job.error} lines={job.logs} />}
 					{renderBody()}
 					<DialogActions>
 						<WhiteButton title="Close" handleClick={onClose} />

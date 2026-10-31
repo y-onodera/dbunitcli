@@ -16,6 +16,11 @@ import type { DatasetSrcInfo } from "../../model/CommandOption";
 import { DatasetSettings } from "../../model/DatasetSettings";
 import type { WorkspaceResources } from "../../model/WorkspaceResources";
 import type { FetchParams } from "../../utils/fetchUtils";
+import {
+	emitLogsThenFail,
+	JOB_ERROR,
+	JOB_LOG_LINES,
+} from "../helpers/jobFailure";
 import { environmentFixture, workspaceResourcesFixture } from "../setup";
 
 // モックデータ
@@ -188,13 +193,11 @@ describe("DatasetSettingsProviderのテスト", () => {
 	});
 
 	describe("Preview用フック（useDatasetTableNames・useDatasetTablePreview）のテスト", () => {
-		// 読込中にログを2行流してから失敗する
+		// 読込中にログを流してから失敗する
 		const failWithLogs = () =>
-			mockFetchData.mockImplementationOnce(async (params: FetchParams) => {
-				params.onLog?.("step1");
-				params.onLog?.("step2");
-				throw new Error("boom");
-			});
+			mockFetchData.mockImplementationOnce((params: FetchParams) =>
+				emitLogsThenFail(params.onLog),
+			);
 
 		// どちらのフックも同じ形（data・loading・logs・error）で見る
 		const previewHooks = {
@@ -222,8 +225,8 @@ describe("DatasetSettingsProviderのテスト", () => {
 				await waitFor(() => {
 					expect(result.current.loading).toBe(false);
 				});
-				expect(result.current.error).toBe("boom");
-				expect(result.current.logs).toStrictEqual(["step1", "step2"]);
+				expect(result.current.error).toBe(JOB_ERROR);
+				expect(result.current.logs).toStrictEqual(JOB_LOG_LINES);
 				expect(result.current.data).toStrictEqual(empty);
 			},
 		);

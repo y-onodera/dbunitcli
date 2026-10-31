@@ -1,13 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 import { useEnvironment } from "../../../../context/EnvironmentProvider";
-import { useJobLog } from "../../../../hooks/useJobLog";
-import { getErrorMessage } from "../../../../utils/fetchUtils";
+import { type JobContext, useJob } from "../../../../hooks/useJob";
 import {
 	collectFormValues,
 	type FormValues,
 } from "../../../../utils/formValues";
 import {
-	type DialogFetchOptions,
 	type DialogLoadState,
 	refreshDialogOptions,
 } from "./refreshableDialogForm";
@@ -42,9 +40,7 @@ export function useRefreshableDialog<OPTIONS>({
 	const [loadState, setLoadState] = useState<DialogLoadState<OPTIONS>>({
 		status: "loading",
 	});
-	const [executing, setExecuting] = useState(false);
-	const [executeError, setExecuteError] = useState("");
-	const jobLog = useJobLog();
+	const job = useJob();
 	const abortControllerRef = useRef<AbortController | null>(null);
 
 	useEffect(() => {
@@ -65,14 +61,6 @@ export function useRefreshableDialog<OPTIONS>({
 	const withGenerateType = (values: FormValues): FormValues =>
 		addGenerateType(values, generateType);
 
-	const isAborted = () => abortControllerRef.current?.signal.aborted ?? false;
-
-	// 実行に渡すfetchオプション。ダイアログを閉じると（アンマウントでabort）sidecar側も中断する
-	const fetchOptions = (): DialogFetchOptions => ({
-		signal: abortControllerRef.current?.signal,
-		onLog: jobLog.append,
-	});
-
 	const refresh = async () => {
 		await refreshDialogOptions(
 			apiUrl,
@@ -83,33 +71,23 @@ export function useRefreshableDialog<OPTIONS>({
 		);
 	};
 
-	// runが投げた例外はダイアログ内に表示する。成功時は呼び出し側が閉じる／遷移するためexecutingは戻さない
-	const execute = async (run: (values: FormValues) => Promise<void>) => {
+	// runが投げた例外はダイアログ内にログと一緒に表示する。ダイアログを閉じると（アンマウントでabort）sidecar側も中断する
+	const execute = async (
+		run: (values: FormValues, context: JobContext) => Promise<void>,
+	) => {
 		const { values, validationError } = collectFormValues(formId, true);
 		if (validationError) {
 			return;
 		}
-		setExecuting(true);
-		setExecuteError("");
-		jobLog.reset();
-		try {
-			await run(values);
-		} catch (ex) {
-			if (!isAborted()) {
-				setExecuteError(getErrorMessage(ex));
-				setExecuting(false);
-			}
-		}
+		await job.run((context) => run(values, context));
 	};
 
 	return {
 		apiUrl,
 		loadState,
-		executing,
-		executeError,
-		logs: jobLog.logs,
-		fetchOptions,
-		isAborted,
+		executing: job.running,
+		executeError: job.error,
+		logs: job.logs,
 		refresh,
 		execute,
 		withGenerateType,

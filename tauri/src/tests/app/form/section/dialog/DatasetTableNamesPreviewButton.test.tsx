@@ -5,6 +5,12 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import DatasetTableNamesPreviewButton from "../../../../../app/form/section/dialog/DatasetTableNamesPreviewButton";
 import type { TablePreview } from "../../../../../hooks/useDatasetSettings";
 import {
+	emitLogsThenFail,
+	expectJobFailure,
+	JOB_ERROR,
+	JOB_LOG_LINES,
+} from "../../../../helpers/jobFailure";
+import {
 	environmentFixture,
 	workspaceResourcesFixture,
 } from "../../../../setup";
@@ -104,8 +110,8 @@ describe("DatasetTableNamesPreviewButtonのテスト", () => {
 	});
 
 	it("テーブル一覧の読込に失敗したら、エラーと読込中のログを残す", async () => {
-		tableNamesFixture.error = "boom";
-		tableNamesFixture.logs = ["step1", "step2"];
+		tableNamesFixture.error = JOB_ERROR;
+		tableNamesFixture.logs = JOB_LOG_LINES;
 		const user = userEvent.setup();
 		render(
 			<DatasetTableNamesPreviewButton
@@ -117,22 +123,16 @@ describe("DatasetTableNamesPreviewButtonのテスト", () => {
 			screen.getByRole("button", { name: "Preview Before Settings" }),
 		);
 
-		expect(screen.getByText("Error: boom")).toBeInTheDocument();
-		expect(
-			screen.getByRole("log", { name: "execution log" }),
-		).toHaveTextContent("step1 step2");
+		expectJobFailure();
 		expect(screen.queryByText("No tables found.")).not.toBeInTheDocument();
 	});
 
 	it("データの読込に失敗したら、エラーと読込中のログを残し、Exportはできない", async () => {
-		previewFixture.error = "boom";
-		previewFixture.logs = ["step1"];
+		previewFixture.error = JOB_ERROR;
+		previewFixture.logs = JOB_LOG_LINES;
 		await openPreview();
 
-		expect(screen.getByText("Error: boom")).toBeInTheDocument();
-		expect(
-			screen.getByRole("log", { name: "execution log" }),
-		).toHaveTextContent("step1");
+		expectJobFailure();
 		expect(screen.queryByText("No data found.")).not.toBeInTheDocument();
 		expect(screen.getByRole("button", { name: "Export" })).toBeDisabled();
 	});
@@ -188,12 +188,16 @@ describe("DatasetTableNamesPreviewButtonのテスト", () => {
 		});
 	});
 
-	it("convertが失敗したらダイアログ内にエラーを表示する", async () => {
-		mockConvert.mockRejectedValue(new Error("boom"));
+	it("convertが失敗したらダイアログ内にエラーと実行中のログを表示する", async () => {
+		mockConvert.mockImplementation(
+			(_srcInfo, _tableName, _result, fetchOptions) =>
+				emitLogsThenFail(fetchOptions.onLog),
+		);
 		const user = await openExport();
 		await user.click(screen.getByRole("button", { name: "Execute" }));
 
-		expect(await screen.findByText("Error: boom")).toBeInTheDocument();
+		expect(await screen.findByText(`Error: ${JOB_ERROR}`)).toBeInTheDocument();
+		expectJobFailure();
 		expect(screen.queryByText("Export completed.")).not.toBeInTheDocument();
 	});
 });

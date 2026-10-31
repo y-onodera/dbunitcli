@@ -62,12 +62,12 @@ function GenerateFormDialog({
 			executeError={dialog.executeError}
 			logs={dialog.logs}
 			onExecute={() =>
-				dialog.execute((values) =>
+				dialog.execute((values, context) =>
 					onExecute(values, {
 						apiUrl: dialog.apiUrl,
-						isAborted: dialog.isAborted,
+						isAborted: () => context.signal.aborted,
 						withGenerateType: dialog.withGenerateType,
-						fetchOptions: dialog.fetchOptions(),
+						fetchOptions: context,
 					}),
 				)
 			}

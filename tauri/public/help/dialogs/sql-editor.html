@@ -26,9 +26,16 @@
   <p>JDBC 接続が確認済み（<a href="../sections/jdbc.html">JDBC</a> セクションの接続テスト成功）のときのみ、Select Tables ボタンが表示されます。</p>
   <ol>
     <li>Select Tables を押し、Load Tables でデータベースのテーブル一覧を取得します。</li>
-    <li>挿入したいテーブルにチェックを入れ、Insert を押すと、テーブル名が本文の末尾に 1 行 1 テーブルで追加されます。</li>
-    <li><code>srcType</code> が <code>sql</code> の場合は、テーブル名をクリックするとカラム選択ダイアログが開き、選択したカラム名を本文の末尾に追加できます。</li>
+    <li>挿入したいテーブルにチェックを入れ、Insert を押すと、テーブル名が本文のカーソル位置に 1 行 1 テーブルで挿入され、Select Tables が閉じます。本文で範囲を選択していた場合は、その範囲を置き換えます。</li>
+    <li>テーブル名の横の Select columns アイコンを押すと、そのテーブルのカラム選択ダイアログ（Select Columns）が開きます。カラムにチェックを入れて Insert Columns を押すと、カラム名がカーソル位置に 1 行 1 カラムで挿入されます。Select Tables は開いたままなので、続けて別のテーブルを選べます。</li>
   </ol>
+  <p><code>srcType</code> が <code>sql</code> / <code>csvq</code> の場合は、挿入する名前の前後に付ける文字を選べます。<code>table</code> の場合はこれらの項目は表示されず、名前だけを挿入します。</p>
+  <table>
+    <tr><th>項目</th><th>表示する場所</th><th>内容</th></tr>
+    <tr><td>Prefix</td><td>Select Tables・Select Columns</td><td>各行の前に付ける文字。テーブルは None / <code>,</code>、カラムは None / <code>,</code> / <code>and</code></td></tr>
+    <tr><td>Suffix</td><td>Select Tables・Select Columns</td><td>各行の後に付ける文字。テーブルは None / <code>,</code> / <code>as</code>、カラムは None / <code>,</code> / <code>as</code> / <code>=</code></td></tr>
+    <tr><td>Table alias</td><td>Select Columns</td><td>指定すると、カラム名を <code>別名.カラム名</code> の形で挿入する</td></tr>
+  </table>
   <p>テーブル一覧やカラムの取得に失敗したときは、ダイアログ内にエラーメッセージと読込中に出ていたログを表示します。</p>
 
   <h2 id="section-save">保存</h2>

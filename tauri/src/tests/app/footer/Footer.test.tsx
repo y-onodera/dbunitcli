@@ -23,6 +23,7 @@ import {
 	OptionValidationError,
 } from "../../../utils/fetchUtils";
 import type { CollectedFormValues } from "../../../utils/formValues";
+import { emitJobLogs, expectJobLog } from "../../helpers/jobFailure";
 import { environmentFixture, workspaceResourcesFixture } from "../../setup";
 
 const mockEnvironment: Environment = { ...environmentFixture };
@@ -206,8 +207,7 @@ describe("Footerの実行ボタン", () => {
 				renderFooter();
 			});
 			mockFetchData.mockImplementationOnce(async (params: FetchParams) => {
-				params.onLog?.("step1");
-				params.onLog?.("step2");
+				emitJobLogs(params.onLog);
 				if (fail) {
 					throw new Error("failed");
 				}
@@ -215,11 +215,12 @@ describe("Footerの実行ボタン", () => {
 			});
 			await userEvent.click(screen.getByText("Exec"));
 
-			const log = screen.queryByRole("log", { name: "execution log" });
 			if (shown) {
-				expect(log).toHaveTextContent("step1 step2");
+				expectJobLog();
 			} else {
-				expect(log).not.toBeInTheDocument();
+				expect(
+					screen.queryByRole("log", { name: "execution log" }),
+				).not.toBeInTheDocument();
 			}
 		},
 	);
