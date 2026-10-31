@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import yo.dbunitcli.dataset.ComparableDataSet;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.dataset.ComparableTable;
+import yo.dbunitcli.dataset.DataSourceType;
 
 import java.io.File;
 import java.io.UnsupportedEncodingException;
@@ -137,5 +138,24 @@ public class ComparableXlsDataSetProducerTest {
         Assertions.assertEquals("4", actualTable.getValue(0, "column3"));
         Assertions.assertEquals("5", actualTable.getValue(1, "column3"));
         Assertions.assertEquals("", actualTable.getValue(2, "column3"));
+    }
+
+    /**
+     * loadData=falseならシートの列だけを読み、データ行は読み込まない
+     */
+    @Test
+    public void createDataSetWithoutLoadData() throws DataSetException {
+        final ComparableDataSet actual = new ComparableXlsDataSetProducer(
+                ComparableDataSetParam.builder()
+                        .setSrc(new File(this.resource, "multifile.xls"))
+                        .setSource(DataSourceType.xls)
+                        .setLoadData(false)
+                        .build()).loadDataSet();
+
+        Assertions.assertEquals(2, actual.getTableNames().length);
+        Assertions.assertEquals(4, actual.getTable("multi1").getTableMetaData().getColumns().length);
+        Assertions.assertEquals(0, actual.getTable("multi1").getRowCount());
+        Assertions.assertEquals(4, actual.getTable("multi2").getTableMetaData().getColumns().length);
+        Assertions.assertEquals(0, actual.getTable("multi2").getRowCount());
     }
 }

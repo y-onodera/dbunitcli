@@ -82,20 +82,22 @@ public class ExcelMappingDataSetProducer {
                     this.mapper = this.context.createMapper(this.rowsTableBuilder.startNewTable());
                     this.mapper.startTable();
                     this.rowTableRows = 0;
-                    if (this.rowsTableBuilder.hasRow(rowNumber)) {
-                        this.addRowToTable(this.rowsTableBuilder.currentRow());
-                        this.rowTableRows++;
-                    }
-                } else if (this.rowsTableBuilder.hasRow(rowNumber)) {
-                    if (this.rowsTableBuilder.hasRow(rowNumber)) {
-                        this.addRowToTable(this.rowsTableBuilder.currentRow());
-                        this.rowTableRows++;
-                    }
                 }
+                this.addRowToRowsTable(rowNumber);
                 this.rowsTableBuilder.clearRowValue();
             }
         } catch (final DataSetException e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * 行を読まない場合（loadData=false・出力しないテーブル）は、行の配列化とmapperへの追加を省く
+     */
+    private void addRowToRowsTable(final int rowNumber) throws DataSetException {
+        if (this.loadData && this.mapper != null && this.mapper.hasOutput() && this.rowsTableBuilder.hasRow(rowNumber)) {
+            this.addRowToTable(this.rowsTableBuilder.currentRow());
+            this.rowTableRows++;
         }
     }
 
