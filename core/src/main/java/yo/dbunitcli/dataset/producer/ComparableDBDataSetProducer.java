@@ -179,7 +179,7 @@ public class ComparableDBDataSetProducer implements ComparableDataSetProducer {
                                 for (final Column column : valueColumns) {
                                     rows[columnIndex++] = table.getValue(row, column.getColumnName());
                                 }
-                                mapper.addRow(rows);
+                                mapper.addRow(source.apply(rows));
                             } catch (final RowOutOfBoundsException e) {
                                 break;
                             }

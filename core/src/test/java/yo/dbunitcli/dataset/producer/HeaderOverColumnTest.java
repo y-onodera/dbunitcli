@@ -151,6 +151,39 @@ public class HeaderOverColumnTest {
                 , List.of("ID", "VAL"), List.of("1", "a"), List.of("2", "b"));
     }
 
+    @Test
+    public void tableAddsFileInfoAfterHeaderNameColumns() throws IOException, SQLException, DataSetException {
+        final String url = "jdbc:h2:mem:headerOverColumnTableFileInfo;DB_CLOSE_DELAY=-1";
+        this.createTable(url);
+        final File listFile = this.write("tables.txt", "T1");
+        final ComparableTable table = new ComparableDBDataSetProducer(this.builder(listFile, DataSourceType.table)
+                .setDatabaseConnectionLoader(this.connectionLoader(url))
+                .setHeaderName("ID,VAL")
+                .setAddFileInfo(true)
+                .build()).loadDataSet().getTable("T1");
+        final String path = listFile.getAbsolutePath().replace("\\", "/");
+        this.assertRows(table, List.of("ID", "VAL", "$FILE_PATH", "$FILE_NAME", "$SHEET_NAME")
+                , List.of("1", "a", path, "tables.txt", "")
+                , List.of("2", "b", path, "tables.txt", ""));
+    }
+
+    @Test
+    public void sqlAddsFileInfo() throws IOException, SQLException, DataSetException {
+        final String url = "jdbc:h2:mem:headerOverColumnSqlFileInfo;DB_CLOSE_DELAY=-1";
+        this.createTable(url);
+        final File queryDir = Files.createDirectories(this.tempDir.resolve("sql")).toFile();
+        final File query = new File(queryDir, "q.sql");
+        Files.writeString(query.toPath(), "select C1, C2 from T1 order by C1", StandardCharsets.UTF_8);
+        final String path = query.getAbsolutePath().replace("\\", "/");
+        this.assertRows(new ComparableQueryDataSetProducer(this.builder(queryDir, DataSourceType.sql)
+                        .setDatabaseConnectionLoader(this.connectionLoader(url))
+                        .setAddFileInfo(true)
+                        .build(), Parameter.none()).loadDataSet().getTable("q")
+                , List.of("C1", "C2", "$FILE_PATH", "$FILE_NAME", "$SHEET_NAME")
+                , List.of("1", "a", path, "q.sql", "")
+                , List.of("2", "b", path, "q.sql", ""));
+    }
+
     private void createTable(final String url) throws SQLException {
         try (final Connection conn = DriverManager.getConnection(url, "sa", "");
              final Statement stmt = conn.createStatement()) {
