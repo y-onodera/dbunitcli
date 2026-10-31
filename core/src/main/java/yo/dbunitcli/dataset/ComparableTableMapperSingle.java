@@ -223,7 +223,10 @@ public class ComparableTableMapperSingle implements ComparableTableMapper {
         if (!this.splitter.breakKeys().isEmpty()) {
             final List<String> keys = this.metaData.getBreakKeys(applySetting);
             if (!this.currentKeys.equals(keys)) {
-                this.breakKeyCount++;
+                // 1行目のキーは区切りに数えない（addSplitResultと同じ数え方）
+                if (!this.currentKeys.isEmpty()) {
+                    this.breakKeyCount++;
+                }
                 this.currentKeys.clear();
                 this.currentKeys.addAll(keys);
             }

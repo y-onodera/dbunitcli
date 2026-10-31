@@ -56,6 +56,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -99,17 +100,24 @@ public class DatasetSettingsController extends AbstractResourceFileController<Da
     }
 
     /**
-     * 読み込まれるテーブル名を返す。データ行は分割（split）後の名前を求める場合だけ読む
+     * 読み込まれるテーブル名を返す。データ行は分割（split）後の名前を求める場合だけ読み、
+     * その場合も行は保持せずテーブル名だけを集める（{@link TableNameCollector}）
      */
     @Interruptible
     @Post(uri = "table-names", produces = MediaType.APPLICATION_JSON)
     public String tableNames(@Body final DatasetTableNamesRequestDto request) {
         try {
             final ComparableDataSetParam.Builder param = this.toParam(request, "false").get();
-            param.setLoadData(param.getTableSeparators().isTableNameDependsOnRows());
-            return ObjectMapper.getDefault().writeValueAsString(
-                    new ComparableDataSetLoader(this.buildParameter(request)).loadDataSet(param.build())
-                                                                             .getTableNames());
+            final ComparableDataSetLoader loader = new ComparableDataSetLoader(this.buildParameter(request));
+            if (!param.getTableSeparators().isTableNameDependsOnRows()) {
+                return ObjectMapper.getDefault().writeValueAsString(loader.loadDataSet(param.build()).getTableNames());
+            }
+            final TableNameCollector collector = new TableNameCollector();
+            try (final ComparableDataSetProducer producer = loader.getComparableDataSetProducer(
+                    param.setLoadData(true).setConverter(collector).build())) {
+                producer.produce();
+            }
+            return ObjectMapper.getDefault().writeValueAsString(collector.tableNames.toArray(new String[0]));
         } catch (final Throwable th) {
             LOGGER.warn("Could not get table names", th);
             return "[]";
@@ -396,6 +404,43 @@ public class DatasetSettingsController extends AbstractResourceFileController<Da
         private boolean target(final ITableMetaData metaData) {
             this.processTarget = metaData.getTableName().equals(this.tableName);
             return this.processTarget;
+        }
+    }
+
+    /**
+     * 出力されるテーブル名だけを集める（行は捨てる）
+     */
+    private static class TableNameCollector implements IDataSetConverter {
+        private final Set<String> tableNames = new LinkedHashSet<>();
+
+        @Override
+        public boolean isExportEmptyTable() {
+            return true;
+        }
+
+        @Override
+        public void reStartTable(final AddSettingTableMetaData tableMetaData, final Integer writeRows) {
+            this.startTable(tableMetaData);
+        }
+
+        @Override
+        public IDataSetConverter split() {
+            return this;
+        }
+
+        @Override
+        public void startTable(final ITableMetaData metaData) {
+            this.tableNames.add(metaData.getTableName());
+        }
+
+        @Override
+        public void endTable() {
+            // nothing
+        }
+
+        @Override
+        public void row(final Object[] values) {
+            // テーブル名だけを使う
         }
     }
 

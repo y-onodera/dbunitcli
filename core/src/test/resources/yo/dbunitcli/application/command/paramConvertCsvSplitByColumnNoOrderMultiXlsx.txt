@@ -1,0 +1,6 @@
+-src=src/test/resources/yo/dbunitcli/application/src/csv/combikey
+-srcType=csv
+-setting=src/test/resources/yo/dbunitcli/application/settings/split/keysplit_noorder_setting.json
+-result=target/test-classes/yo/dbunitcli/application/command/convert/split/keysplit_noorder_result
+-resultType=xlsx
+-excelTable=BOOK

@@ -1,0 +1,16 @@
+{
+  "settings": [
+    {
+      "pattern": "combikey",
+      "split": {
+        "prefix": "%04d_",
+        "tableName": "break_key1",
+        "breakKey": [
+          "key1",
+          "col1"
+        ],
+        "limit": 3
+      }
+    }
+  ]
+}
