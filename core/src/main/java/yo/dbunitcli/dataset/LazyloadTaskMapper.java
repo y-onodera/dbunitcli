@@ -25,7 +25,7 @@ public class LazyloadTaskMapper {
         final List<ComparableTableJoin> joins = tableSeparators.joins();
         final MetaDataCollector collector = new MetaDataCollector();
         final RecordingTableMap tableMap = new RecordingTableMap();
-        final ComparableTableMappingContext context = new ComparableTableMappingContext(tableSeparators, collector, tableMap, new HashMap<>(), joins, new ArrayList<>(), false);
+        final ComparableTableMappingContext context = new ComparableTableMappingContext(tableSeparators, collector, tableMap, new WrittenTables(), joins, new ArrayList<>(), false);
         final Map<String, ComparableTableMappingTask.WithTargetTable> tableTasks = new HashMap<>();
         context.open();
         tasks.forEach(task -> {
