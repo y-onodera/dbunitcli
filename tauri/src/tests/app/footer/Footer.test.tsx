@@ -196,6 +196,34 @@ describe("Footerの実行ボタン", () => {
 		},
 	);
 
+	it.each([
+		{ fail: true, shown: true },
+		{ fail: false, shown: false },
+	])(
+		"Execの結果ダイアログには失敗時だけ実行ログを残す（失敗: $fail）",
+		async ({ fail, shown }) => {
+			await act(async () => {
+				renderFooter();
+			});
+			mockFetchData.mockImplementationOnce(async (params: FetchParams) => {
+				params.onLog?.("step1");
+				params.onLog?.("step2");
+				if (fail) {
+					throw new Error("failed");
+				}
+				return { text: () => Promise.resolve("result/dir") } as Response;
+			});
+			await userEvent.click(screen.getByText("Exec"));
+
+			const log = screen.queryByRole("log", { name: "execution log" });
+			if (shown) {
+				expect(log).toHaveTextContent("step1 step2");
+			} else {
+				expect(log).not.toBeInTheDocument();
+			}
+		},
+	);
+
 	it("Abandonedで中断すると実行中の結果を表示しない", async () => {
 		await act(async () => {
 			renderFooter();

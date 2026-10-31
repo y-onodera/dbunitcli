@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { SectionHelpButton } from "../../components/dialog";
 import { BlueButton, WhiteButton } from "../../components/element/Button";
 import { BlueEditButton } from "../../components/element/ButtonIcon";
+import { JobLog } from "../../components/element/JobLog";
 import { JobProgress } from "../../components/element/JobProgress";
 import {
 	useParamInputs,
@@ -131,6 +132,8 @@ export default function Footer(prop: {
 							))}
 						</ul>
 					)}
+					{/* 失敗時は原因を追えるよう、実行中に届いたログを閉じるまで残す */}
+					{running.failed && <JobLog lines={jobLog.logs} className="mb-5" />}
 					<div className="flex items-center justify-end gap-2">
 						{running.resultDir && (
 							<BlueButton
