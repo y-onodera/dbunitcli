@@ -29,7 +29,7 @@ public final class WrittenTables {
      * 分割後の1つ目のテーブル名と分割の設定ごとの分割の途中状態。初めてなら1つ目のテーブルから数え始める
      */
     public SplitState split(final String firstTableName, final TableSplitter splitter) {
-        return this.splits.computeIfAbsent(new SplitKey(firstTableName, splitter), _ -> new SplitState(splitter.counter()));
+        return this.splits.computeIfAbsent(new SplitKey(firstTableName, splitter), _ -> SplitState.start(splitter));
     }
 
     private record SplitKey(String firstTableName, TableSplitter splitter) {

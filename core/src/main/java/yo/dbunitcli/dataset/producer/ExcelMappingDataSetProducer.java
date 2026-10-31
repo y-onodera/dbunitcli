@@ -100,16 +100,22 @@ public class ExcelMappingDataSetProducer {
         if (this.rowsTableBuilder != null && !this.rowsTableBuilder.isAllTablesStarted()) {
             return false;
         }
-        return !this.loadData
-                || ((this.mapper == null || !this.mapper.hasOutput())
-                && (this.randomCellRecordBuilder == null || this.randomCellRecordBuilder.getTableNames().length == 0));
+        return !this.isRowUsed()
+                && (!this.loadData || this.randomCellRecordBuilder == null || this.randomCellRecordBuilder.getTableNames().length == 0);
+    }
+
+    /**
+     * 今のテーブル（mapper）が行を使うか
+     */
+    private boolean isRowUsed() {
+        return this.loadData && this.mapper != null && this.mapper.hasOutput();
     }
 
     /**
      * 行を読まない場合（loadData=false・出力しないテーブル）は、行の配列化とmapperへの追加を省く
      */
     private void addRowToRowsTable(final int rowNumber) throws DataSetException {
-        if (this.loadData && this.mapper != null && this.mapper.hasOutput() && this.rowsTableBuilder.hasRow(rowNumber)) {
+        if (this.isRowUsed() && this.rowsTableBuilder.hasRow(rowNumber)) {
             this.addRowToTable(this.rowsTableBuilder.currentRow());
             this.rowTableRows++;
         }
@@ -120,7 +126,7 @@ public class ExcelMappingDataSetProducer {
             this.mapper = this.context.createMapper(this.randomCellRecordBuilder.getTableMetaData(tableName));
             this.mapper.startTable();
             ExcelMappingDataSetProducer.LOGGER.info("produce - start tableName={}", tableName);
-            if (this.loadData && this.mapper.hasOutput()) {
+            if (this.isRowUsed()) {
                 int i = 0;
                 for (final String[] row : this.randomCellRecordBuilder.getRows(tableName)) {
                     this.addRowToTable(row);

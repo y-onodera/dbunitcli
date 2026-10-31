@@ -20,6 +20,7 @@ public class ComparableTableMapperSingle implements ComparableTableMapper {
     private final Collection<Object[]> rows;
     private final TableSplitter splitter;
     private final WrittenTables.SplitState splitState;
+    private final boolean hasOutput;
     private AddSettingTableMetaData metaData;
     private boolean startTable;
     private int addCount = 0;
@@ -47,6 +48,7 @@ public class ComparableTableMapperSingle implements ComparableTableMapper {
         this.chainRun = chainRun;
         this.enableRowProcessing = enableRowProcessing;
         this.tableSeparators = tableSeparators;
+        this.hasOutput = converter == null || converter.isRowRequired(metaData, joins);
     }
 
     @Override
@@ -69,7 +71,7 @@ public class ComparableTableMapperSingle implements ComparableTableMapper {
 
     @Override
     public boolean hasOutput() {
-        return this.converter == null || this.converter.isRowRequired(this.baseMetaData, this.joins);
+        return this.hasOutput;
     }
 
     @Override
@@ -147,7 +149,7 @@ public class ComparableTableMapperSingle implements ComparableTableMapper {
         int splitCount = 0;
         for (int i = 0, j = distinctRows.size(); i < j; i++) {
             final Object[] row = sorted.getRow(i);
-            if (counter.isBreak(this.metaData.getBreakKeys(row), targetValues.size())) {
+            if (counter.isBreak(this.breakKeys(row), targetValues.size())) {
                 this.contextShareTableMap.put(splitMetaData.getTableName()
                         , new ComparableTable.Builder(splitMetaData)
                                                       .setRows(new AddSettingTableMetaData.Rows(targetValues,
@@ -169,18 +171,19 @@ public class ComparableTableMapperSingle implements ComparableTableMapper {
     }
 
     private AddSettingTableMetaData.Rows mergePreviousSplit(final AddSettingTableMetaData.Rows rows) {
-        AddSettingTableMetaData.Rows previous = null;
-        for (int no = 0; ; no++) {
-            final ComparableTable table = this.contextShareTableMap.remove(this.splitter.getMetaData(this.baseMetaData, no).getTableName());
-            if (table == null) {
-                break;
-            }
-            previous = previous == null ? table.getRows() : previous.add(table.getRows());
+        final List<Object[]> mergedRows = new ArrayList<>();
+        final List<Integer> mergedIndexes = new ArrayList<>();
+        ComparableTable table;
+        for (int no = 0; (table = this.contextShareTableMap.remove(this.splitter.tableName(this.baseMetaData.getTableName(), no))) != null; no++) {
+            mergedRows.addAll(table.getRows().rows());
+            mergedIndexes.addAll(table.getRows().filteredRowIndexes());
         }
-        if (previous == null) {
+        if (mergedRows.isEmpty()) {
             return rows;
         }
-        final AddSettingTableMetaData.Rows merged = previous.add(rows);
+        mergedRows.addAll(rows.rows());
+        mergedIndexes.addAll(rows.filteredRowIndexes());
+        final AddSettingTableMetaData.Rows merged = new AddSettingTableMetaData.Rows(mergedRows, mergedIndexes);
         return this.baseMetaData.isNeedDistinct() ? merged.distinct() : merged;
     }
 
@@ -224,13 +227,20 @@ public class ComparableTableMapperSingle implements ComparableTableMapper {
     }
 
     protected void splitTable(final Object[] applySetting) throws DataSetException {
-        if (this.splitState.counter().isBreak(this.metaData.getBreakKeys(applySetting), this.getAddRowCount())) {
+        if (!this.splitter.isSplit()) {
+            return;
+        }
+        if (this.splitState.counter().isBreak(this.breakKeys(applySetting), this.getAddRowCount())) {
             this.endTable();
             this.splitState.next();
             this.metaData = this.splitter.getMetaData(this.baseMetaData, this.splitState.no());
             this.processingStart();
             this.addRowCount = 0;
         }
+    }
+
+    private List<String> breakKeys(final Object[] row) {
+        return this.splitter.breakKeys().isEmpty() ? List.of() : this.metaData.getBreakKeys(row);
     }
 
     protected void add(final ComparableTable other) {

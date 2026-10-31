@@ -10,6 +10,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -37,19 +38,26 @@ public interface ComparableDataSetProducer extends AutoCloseable {
 
     default TreeMap<String, ComparableTable> produce() {
         LOGGER.info("produce() - start");
-        final Stream<ComparableTableMappingTask> tasks = this.getSourceStream().map(this::createTableMappingTask);
-        final TreeMap<String, ComparableTable> result;
-        if (ParallelTableMapping.isParallelizable(this)) {
-            // レーン分けには全タスクが要るため、並列化の余地があるときだけ先に列挙する。除外もレーン分けと同じ候補で行う
-            final ParallelTableMapping.Plan plan = ParallelTableMapping.plan(this, tasks.collect(Collectors.toList()));
-            result = plan.lanes()
-                    .map(lanes -> ParallelTableMapping.run(this.param(), lanes))
-                    .orElseGet(() -> this.produceSequential(plan.tasks().stream()));
-        } else {
-            result = this.produceSequential(this.excludeFilteredOut(tasks));
-        }
+        final TreeMap<String, ComparableTable> result = this.mapTasks(this::produceSequential
+                , lanes -> ParallelTableMapping.run(this.param(), lanes));
         LOGGER.info("produce() - end");
         return result;
+    }
+
+    /**
+     * ソースのタスクを、並列化できればレーンごとに（parallel）、できなければ順に（sequential）処理する
+     */
+    private <R> R mapTasks(final Function<Stream<ComparableTableMappingTask>, R> sequential
+            , final Function<List<List<ComparableTableMappingTask>>, R> parallel) {
+        final Stream<ComparableTableMappingTask> tasks = this.getSourceStream().map(this::createTableMappingTask);
+        if (!ParallelTableMapping.isParallelizable(this)) {
+            return sequential.apply(this.excludeFilteredOut(tasks));
+        }
+        // レーン分けには全タスクが要るため、並列化の余地があるときだけ先に列挙する。除外もレーン分けと同じ候補で行う
+        final ParallelTableMapping.Plan plan = ParallelTableMapping.plan(this, tasks.collect(Collectors.toList()));
+        return plan.lanes()
+                   .map(parallel)
+                   .orElseGet(() -> sequential.apply(plan.tasks().stream()));
     }
 
     /**
@@ -82,7 +90,8 @@ public interface ComparableDataSetProducer extends AutoCloseable {
     default Map<String, Object> lazyLoad(final boolean includeMetaData) {
         final Map<String, Object> result = new LinkedHashMap<>();
         LOGGER.info("lazyLoad() - start, includeMetaData={}", includeMetaData);
-        this.lazyLoadTables()
+        this.<Collection<ComparableTableDto>>mapTasks(tasks -> LazyloadTaskMapper.mappingFrom(this.param(), tasks)
+                        , lanes -> LazyloadTaskMapper.mappingFrom(this.param(), lanes))
                 .forEach(it -> {
                     LOGGER.info("lazyLoad() - processing tableName={}", it.getTableName());
                     if (includeMetaData) {
@@ -93,20 +102,6 @@ public interface ComparableDataSetProducer extends AutoCloseable {
                 });
         LOGGER.info("lazyLoad() - end, result size={}", result.size());
         return result;
-    }
-
-    /**
-     * produce()と同じ条件で、並列化できればレーンごとに並列に求める
-     */
-    private Collection<ComparableTableDto> lazyLoadTables() {
-        final Stream<ComparableTableMappingTask> tasks = this.getSourceStream().map(this::createTableMappingTask);
-        if (!ParallelTableMapping.isParallelizable(this)) {
-            return LazyloadTaskMapper.mappingFrom(this.param(), this.excludeFilteredOut(tasks));
-        }
-        final ParallelTableMapping.Plan plan = ParallelTableMapping.plan(this, tasks.collect(Collectors.toList()));
-        return plan.lanes()
-                   .map(lanes -> LazyloadTaskMapper.mappingFrom(this.param(), lanes))
-                   .orElseGet(() -> LazyloadTaskMapper.mappingFrom(this.param(), plan.tasks().stream()));
     }
 
     default Stream<? extends Source> getSourceStream() {

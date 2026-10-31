@@ -12,7 +12,14 @@ public record TableSplitter(TableRenameStrategy renameFunction, List<String> bre
     }
 
     public AddSettingTableMetaData getMetaData(final AddSettingTableMetaData metaData, final int no) {
-        return metaData.rename(this.renameFunction.renameFunction().apply(metaData.getTableName(), no));
+        return metaData.rename(this.tableName(metaData.getTableName(), no));
+    }
+
+    /**
+     * 分割前のテーブル名からno番目の分割後のテーブル名
+     */
+    public String tableName(final String baseTableName, final int no) {
+        return this.renameFunction.renameFunction().apply(baseTableName, no);
     }
 
     public boolean isLimit(final int addRowCount) {

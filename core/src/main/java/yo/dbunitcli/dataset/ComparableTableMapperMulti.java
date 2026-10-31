@@ -10,12 +10,14 @@ public class ComparableTableMapperMulti implements ComparableTableMapper {
     private final List<? extends ComparableTableMapper> rests;
     private final Collection<Object[]> rows;
     private final boolean isConverterSplit;
+    private final boolean hasOutput;
 
     public ComparableTableMapperMulti(final List<? extends ComparableTableMapper> delegates, final boolean converterSplittable) {
         this.head = delegates.getFirst();
         this.rests = delegates.subList(1, delegates.size());
         this.rows = new ArrayList<>();
         this.isConverterSplit = converterSplittable;
+        this.hasOutput = delegates.stream().anyMatch(ComparableTableMapper::hasOutput);
     }
 
     @Override
@@ -38,7 +40,7 @@ public class ComparableTableMapperMulti implements ComparableTableMapper {
 
     @Override
     public boolean hasOutput() {
-        return this.head.hasOutput() || this.rests.stream().anyMatch(ComparableTableMapper::hasOutput);
+        return this.hasOutput;
     }
 
     @Override
