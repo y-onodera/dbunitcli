@@ -98,12 +98,17 @@ public class DatasetSettingsController extends AbstractResourceFileController<Da
         }
     }
 
+    /**
+     * 読み込まれるテーブル名を返す。データ行は分割（split）後の名前を求める場合だけ読む
+     */
     @Interruptible
     @Post(uri = "table-names", produces = MediaType.APPLICATION_JSON)
     public String tableNames(@Body final DatasetTableNamesRequestDto request) {
         try {
+            final ComparableDataSetParam.Builder param = this.toParam(request, "false").get();
+            param.setLoadData(param.getTableSeparators().isTableNameDependsOnRows());
             return ObjectMapper.getDefault().writeValueAsString(
-                    new ComparableDataSetLoader(this.buildParameter(request)).loadDataSet(this.toParam(request, "false").get().build())
+                    new ComparableDataSetLoader(this.buildParameter(request)).loadDataSet(param.build())
                                                                              .getTableNames());
         } catch (final Throwable th) {
             LOGGER.warn("Could not get table names", th);

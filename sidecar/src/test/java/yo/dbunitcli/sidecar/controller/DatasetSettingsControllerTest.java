@@ -271,6 +271,14 @@ class DatasetSettingsControllerTest {
     }
 
     @Test
+    void testTableNames_inlineSettingのsplitは行を読んで分割後の名前を返す() throws IOException {
+        this.createPreviewSrc();
+
+        Assertions.assertEquals(List.of("small_00", "small_01"), this.inlineTableNames("",
+                Map.of("name", Map.of("any", List.of("small")), "split", Map.of("suffix", "_%02d", "limit", 2))));
+    }
+
+    @Test
     void testTableNames_inlineSettingに一致するテーブルが無ければ空を返す() throws IOException {
         this.createPreviewSrc();
 

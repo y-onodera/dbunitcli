@@ -108,6 +108,13 @@ public record TableSeparators(List<TableSeparator> settings
     }
 
     /**
+     * 出力テーブル名を求めるのに行を読む必要があるか（件数分割は分割後の名前が行数で決まる）。後段（next）の設定も含めて見る
+     */
+    public boolean isTableNameDependsOnRows() {
+        return this.chain().anyMatch(TableSeparators::hasSplitter);
+    }
+
+    /**
      * 読込前に求めた出力テーブルの候補で、読まずに除外できるソースがありうるか
      * （出力テーブル名が読込前に決まり、出力の絞り込み（outputFilter）がある）
      */
