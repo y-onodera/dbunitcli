@@ -14,6 +14,7 @@ public class ComparableTableMapperBuilder {
     private TreeMap<String, ComparableTable> contextShareTableMap = new TreeMap<>();
     private boolean chainRun = false;
     private TableSeparators tableSeparators = TableSeparators.NONE;
+    private ComparableTableMappingContext.Listener listener = ComparableTableMappingContext.Listener.NONE;
 
     public ComparableTableMapperBuilder setTableSeparators(final TableSeparators tableSeparators) {
         this.tableSeparators = tableSeparators;
@@ -50,6 +51,11 @@ public class ComparableTableMapperBuilder {
         return this;
     }
 
+    public ComparableTableMapperBuilder setListener(final ComparableTableMappingContext.Listener listener) {
+        this.listener = listener;
+        return this;
+    }
+
     public ComparableTableMapper build(final Stream<AddSettingTableMetaData> addSettingTableMetaData) {
         final List<AddSettingTableMetaData> targets = addSettingTableMetaData.toList();
         final List<? extends ComparableTableMapper> results = IntStream.range(0, targets.size())
@@ -60,13 +66,13 @@ public class ComparableTableMapperBuilder {
                             .collect(Collectors.toList());
                     final boolean enableRowProcessing = this.converter != null && this.converter.isEnableRowProcessing(target, this.joins);
                     if (index > 0 && this.isSplittable()) {
-                        return new ComparableTableMapperSingle(target, this.converter.split(), this.contextShareTableMap, this.alreadyWrite, targetJoins, new ArrayList<>(), false, enableRowProcessing, this.tableSeparators);
+                        return new ComparableTableMapperSingle(target, this.converter.split(), this.contextShareTableMap, this.alreadyWrite, targetJoins, new ArrayList<>(), false, enableRowProcessing, this.tableSeparators, this.listener);
                     }
                     // 行を保持する読込（converterなし）では、続くソースはこのソースの最後のテーブルを確定させてから1回だけ読む
                     final List<ComparableTableMappingTask> chain = this.converter == null && index < targets.size() - 1
                             ? new ArrayList<>()
                             : this.chain;
-                    return new ComparableTableMapperSingle(target, this.converter, this.contextShareTableMap, this.alreadyWrite, targetJoins, chain, this.chainRun, enableRowProcessing, this.tableSeparators);
+                    return new ComparableTableMapperSingle(target, this.converter, this.contextShareTableMap, this.alreadyWrite, targetJoins, chain, this.chainRun, enableRowProcessing, this.tableSeparators, this.listener);
                 })
                 .toList();
         if (results.isEmpty()) {

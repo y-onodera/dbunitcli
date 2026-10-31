@@ -4,6 +4,7 @@ import org.dbunit.dataset.ITableMetaData;
 import yo.dbunitcli.resource.Workers;
 
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -39,35 +40,26 @@ public class LazyloadTaskMapper {
         final boolean loadRows = tableSeparators.isTableNameDependsOnRows();
         final List<ComparableTableJoin> joins = tableSeparators.joins();
         final MetaDataCollector collector = new MetaDataCollector(LazyloadTaskMapper.isJoinRowRequired(tableSeparators));
-        final RecordingTableMap tableMap = new RecordingTableMap();
         final WrittenTables written = new WrittenTables();
-        final ComparableTableMappingContext context = new ComparableTableMappingContext(tableSeparators, collector, tableMap, written, joins, new ArrayList<>(), false);
+        final ComparableTableMappingContext context = new ComparableTableMappingContext(tableSeparators, collector
+                , new TreeMap<>(), written, joins, new ArrayList<>(), false, collector);
         final Map<String, ComparableTableMappingTask.WithTargetTable> tableTasks = new LinkedHashMap<>();
         context.open();
         tasks.forEach(task -> {
             Workers.checkInterrupted();
             final ComparableTableMappingTask loading = task.with(builder -> builder.setLoadData(loadRows));
             (resources == null ? loading : loading.forWorker(resources)).run(context);
-            // 行を処理しながら出力したテーブル（collector）と、読込の終わりにまとめて出力するテーブル（tableMap）
-            Stream.concat(LazyloadTaskMapper.drain(collector.tableNames), LazyloadTaskMapper.drain(tableMap.putKeys))
-                  .distinct()
-                  .forEach(tableName -> tableTasks.merge(tableName, task.withTargetTable(tableName)
-                          , ComparableTableMappingTask.WithTargetTable::chain));
+            collector.drainTableNames()
+                     .forEach(tableName -> tableTasks.merge(tableName, task.withTargetTable(tableName)
+                             , ComparableTableMappingTask.WithTargetTable::chain));
         });
         LazyloadTaskMapper.readSplitGroupFromAllSources(tableTasks, written);
         final Map<String, ITableMetaData> output = collector.takeMetaData();
         context.close();
-        // 読込の終わりに出力したテーブルのうち、ソースのタスクで出していないものはjoinの出力
-        final Map<String, ITableMetaData> closed = collector.takeMetaData();
-        output.putAll(closed);
-        final Set<String> joinOutputs = new LinkedHashSet<>(closed.keySet());
-        joinOutputs.removeAll(tableTasks.keySet());
-        joins.forEach(join -> this.joinTask(join, tableTasks).ifPresent(task -> {
-            final Set<String> outputOfJoin = LazyloadTaskMapper.outputOf(context, join, joinOutputs);
-            joinOutputs.stream()
-                       .filter(outputOfJoin::contains)
-                       .forEach(tableName -> tableTasks.putIfAbsent(tableName, task.retarget(tableName)));
-        }));
+        output.putAll(collector.takeMetaData());
+        // joinを実行した順に、joinの出力テーブルを左右のテーブルを読むタスクで読む（joinの結果を使うjoinは、使うjoinのタスクも含む）
+        collector.joinOutputs.forEach((join, tableNames) -> this.joinTask(join, tableTasks)
+                .ifPresent(task -> tableNames.forEach(tableName -> tableTasks.putIfAbsent(tableName, task.retarget(tableName)))));
         output.forEach((tableName, metaData) -> {
             final ComparableTableMappingTask.WithTargetTable task = tableTasks.get(tableName);
             if (task != null) {
@@ -105,12 +97,6 @@ public class LazyloadTaskMapper {
         });
     }
 
-    private static Stream<String> drain(final Set<String> tableNames) {
-        final List<String> result = new ArrayList<>(tableNames);
-        tableNames.clear();
-        return result.stream();
-    }
-
     /**
      * joinの左右のテーブルを読み込むタスクを順につなげる（同じソースは1回だけ読む）
      */
@@ -123,35 +109,20 @@ public class LazyloadTaskMapper {
     }
 
     /**
-     * candidatesのうちjoinの出力テーブル（分割していれば分割後のテーブル）。分割後の名前は番号順に、candidatesに無くなるまで求める
-     */
-    private static Set<String> outputOf(final ComparableTableMappingContext context, final ComparableTableJoin join
-            , final Set<String> candidates) {
-        final Set<String> result = new HashSet<>();
-        if (!join.isExecutable()) {
-            return result;
-        }
-        context.getAddSettingTableMetaData(join).forEach(metaData -> {
-            final TableSplitter splitter = metaData.getTableSplitter();
-            if (!splitter.isSplit()) {
-                result.add(metaData.getTableName());
-                return;
-            }
-            for (int no = 0; candidates.contains(splitter.tableName(metaData.getTableName(), no)); no++) {
-                result.add(splitter.tableName(metaData.getTableName(), no));
-            }
-        });
-        return result;
-    }
-
-    /**
      * 出力されたテーブルのメタデータを受け取る（行データは使わない）。
      * 行は分割後の名前を求めるのに要るテーブル（分割するテーブル・分割するjoinに関係するテーブル）だけ読む
      */
-    private static final class MetaDataCollector extends MetaDataCapture {
+    private static final class MetaDataCollector extends MetaDataCapture implements ComparableTableMappingContext.Listener {
 
         private final Map<String, ITableMetaData> metaData = new LinkedHashMap<>();
+        /**
+         * 前回取り出してから出力したテーブル。行を処理しながら出力したもの（startTable）と、読込の終わりにまとめて出力するもの（held）
+         */
         private final Set<String> tableNames = new LinkedHashSet<>();
+        /**
+         * 実行した順のjoinごとの出力テーブル
+         */
+        private final Map<ComparableTableJoin, Set<String>> joinOutputs = new LinkedHashMap<>();
         private final boolean joinRowRequired;
 
         private MetaDataCollector(final boolean joinRowRequired) {
@@ -161,6 +132,12 @@ public class LazyloadTaskMapper {
         @Override
         public boolean isRowRequired(final AddSettingTableMetaData metaData, final List<ComparableTableJoin> joins) {
             return metaData.getTableSplitter().isSplit() || (this.joinRowRequired && !joins.isEmpty());
+        }
+
+        Stream<String> drainTableNames() {
+            final List<String> result = new ArrayList<>(this.tableNames);
+            this.tableNames.clear();
+            return result.stream();
         }
 
         Map<String, ITableMetaData> takeMetaData() {
@@ -174,19 +151,15 @@ public class LazyloadTaskMapper {
             this.metaData.putIfAbsent(metaData.getTableName(), metaData);
             this.tableNames.add(metaData.getTableName());
         }
-    }
-
-    /**
-     * タスクごとに、読込の終わりにまとめて出力するテーブル（distinct・order・join・分割で行を保持するもの）の名前を記録する
-     */
-    private static final class RecordingTableMap extends TreeMap<String, ComparableTable> {
-
-        private final Set<String> putKeys = new LinkedHashSet<>();
 
         @Override
-        public ComparableTable put(final String key, final ComparableTable value) {
-            this.putKeys.add(key);
-            return super.put(key, value);
+        public void held(final String tableName) {
+            this.tableNames.add(tableName);
+        }
+
+        @Override
+        public void joined(final ComparableTableJoin join) {
+            this.joinOutputs.put(join, this.drainTableNames().collect(Collectors.toCollection(LinkedHashSet::new)));
         }
     }
 }

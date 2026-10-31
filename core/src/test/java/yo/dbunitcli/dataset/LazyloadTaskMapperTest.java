@@ -11,6 +11,8 @@ import java.io.StringReader;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -68,6 +70,23 @@ public class LazyloadTaskMapperTest {
         Assertions.assertEquals(Map.of("a", 9), this.loadedRowCounts("""
                 {"settings": [{"name": "a", "order": ["key"]}]}
                 """, 3));
+    }
+
+    @Test
+    public void 後に並ぶjoinの結果を使うjoinは_使うjoinの左右のテーブルも読む() {
+        final ComparableDataSetParam param = ComparableDataSetParam.builder()
+                                                                   .setTableSeparators(LazyloadTaskMapperTest.separators("""
+                                                                           {"settings": [{"innerJoin": {"left": "a_with_b", "right": "c", "column": ["key"]}}
+                                                                                       , {"innerJoin": {"left": "a", "right": "b", "column": ["key"]}}]}
+                                                                           """))
+                                                                   .build();
+        final Map<String, Set<String>> actual = new LinkedHashMap<>();
+        LazyloadTaskMapper.mappingFrom(param, Stream.of("a", "b", "c").map(name -> new RecordingTask(name, param, this.rowsRead)))
+                          .forEach(dto -> actual.put(dto.getTableName(), dto.getTask().tasks()
+                                                                            .map(task -> task.source().getTableName())
+                                                                            .collect(Collectors.toSet())));
+
+        Assertions.assertEquals(Set.of("a", "b", "c"), actual.get("a_with_b_with_c"));
     }
 
     /**
