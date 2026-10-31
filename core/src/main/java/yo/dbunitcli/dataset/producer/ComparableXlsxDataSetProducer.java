@@ -138,6 +138,8 @@ public record ComparableXlsxDataSetProducer(ComparableDataSetParam param) implem
                         styles, null, strings, sheetHandler, formatter, false);
                 sheetParser.setContentHandler(handler);
                 sheetParser.parse(sheetSource);
+            } catch (final XlsxSchemaHandler.StopSheet e) {
+                sheetHandler.endSheet();
             } catch (final ParserConfigurationException e) {
                 throw new RuntimeException("SAX parser appears to be broken - " + e.getMessage());
             }

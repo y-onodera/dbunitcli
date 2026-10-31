@@ -76,6 +76,11 @@ public class StartRowAsColumnTableBuilder implements XlsxRowsToTableBuilder {
         return this.nowProcessing != null;
     }
 
+    @Override
+    public boolean isAllTablesStarted() {
+        return this.isNowProcessing();
+    }
+
     private Column[] getColumns() {
         final Stream<String> columnNames = this.headerNames == null ? this.rowValues.stream() : Arrays.stream(this.headerNames);
         return columnNames

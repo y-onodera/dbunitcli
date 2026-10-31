@@ -32,6 +32,9 @@ public class XlsxSchemaHandler extends ExcelMappingDataSetProducer implements XS
     @Override
     public void endRow(final int rowNum) {
         this.addNewRowToRowsTable(rowNum);
+        if (this.isMetaDataComplete()) {
+            throw new StopSheet();
+        }
     }
 
     @Override
@@ -48,6 +51,15 @@ public class XlsxSchemaHandler extends ExcelMappingDataSetProducer implements XS
     @Override
     public void endSheet() {
         this.handleSheetEnd();
+    }
+
+    /**
+     * 行を読まない場合に、テーブルのメタデータが揃った時点でシートの解析を打ち切る
+     */
+    public static final class StopSheet extends RuntimeException {
+        private StopSheet() {
+            super(null, null, false, false);
+        }
     }
 
 }

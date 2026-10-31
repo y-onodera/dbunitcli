@@ -92,6 +92,14 @@ public class ExcelMappingDataSetProducer {
     }
 
     /**
+     * 行を読まない場合に、シートの残りを読まなくてもテーブルのメタデータが揃ったか。
+     * セル指定のテーブルのメタデータは定義から決まり、行単位のテーブルはすべて開始していればよい
+     */
+    protected boolean isMetaDataComplete() {
+        return !this.loadData && (this.rowsTableBuilder == null || this.rowsTableBuilder.isAllTablesStarted());
+    }
+
+    /**
      * 行を読まない場合（loadData=false・出力しないテーブル）は、行の配列化とmapperへの追加を省く
      */
     private void addRowToRowsTable(final int rowNumber) throws DataSetException {

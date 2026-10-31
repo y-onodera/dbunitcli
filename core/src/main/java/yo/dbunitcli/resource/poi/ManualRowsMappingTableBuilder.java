@@ -104,6 +104,11 @@ public class ManualRowsMappingTableBuilder implements XlsxRowsToTableBuilder {
         return this.nowProcessing != null;
     }
 
+    @Override
+    public boolean isAllTablesStarted() {
+        return !this.existsToBeMapping();
+    }
+
     private void addValue(final int i, final String o) {
         if (this.targetIndex.get(this.getTableName()).contains(i)) {
             this.rowValues.add(o);
