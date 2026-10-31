@@ -2,6 +2,8 @@ package yo.dbunitcli.dataset;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import yo.dbunitcli.application.SplitOrNameFilter;
+import yo.dbunitcli.common.TableMetaDataFilter;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -27,6 +29,20 @@ public class ComparableTableMappingContextTest {
         Assertions.assertEquals(Map.of("a", 3, "b", 3), ComparableTableMappingContextTest.load("""
                 {"settings": [{"innerJoin": {"left": "a", "right": "c", "column": ["key"]}}]}
                 """, "a", "b"));
+    }
+
+    @Test
+    public void joinで使われずに残った分割後の元テーブルは_joinの無い分割と同じく分割前の名前で絞り込む() {
+        final String split = """
+                {"settings": [{"name": "a", "split": {"suffix": "_%02d", "limit": 2}}
+                            JOIN]}
+                """;
+        final TableMetaDataFilter filter = new SplitOrNameFilter("a_01");
+        Assertions.assertEquals(Map.of("a_00", 2, "a_01", 1), ComparableTableMappingContextTest.load(
+                DataSetTestSupport.separators(split.replace("JOIN", "")).filter(filter), "a"));
+        Assertions.assertEquals(Map.of("a_00", 2, "a_01", 1), ComparableTableMappingContextTest.load(
+                DataSetTestSupport.separators(split.replace("JOIN", """
+                        , {"innerJoin": {"left": "a_00", "right": "c", "column": ["key"]}}""")).filter(filter), "a"));
     }
 
     @Test
@@ -95,7 +111,11 @@ public class ComparableTableMappingContextTest {
      * key列に1〜3の3行を持つテーブルtableNamesを読み込み、出力したテーブルごとの行数を返す
      */
     private static Map<String, Integer> load(final String setting, final String... tableNames) {
-        final ComparableTableMappingContext context = new ComparableTableMappingContext(DataSetTestSupport.separators(setting), null);
+        return ComparableTableMappingContextTest.load(DataSetTestSupport.separators(setting), tableNames);
+    }
+
+    private static Map<String, Integer> load(final TableSeparators separators, final String... tableNames) {
+        final ComparableTableMappingContext context = new ComparableTableMappingContext(separators, null);
         context.open();
         Stream.of(tableNames).forEach(tableName -> DataSetTestSupport.write(context, tableName, "1", "2", "3"));
         final Map<String, Integer> result = new LinkedHashMap<>();

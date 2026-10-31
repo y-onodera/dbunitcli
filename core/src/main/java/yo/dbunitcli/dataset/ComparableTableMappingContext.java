@@ -68,11 +68,10 @@ public record ComparableTableMappingContext(TableSeparators tableSeparators
     }
 
     /**
-     * joinで使われずに残った元テーブル（相手のテーブルが無かったもの）のうち、出力の絞り込みで除かれるものを除く
+     * joinで使われずに残った元テーブル（相手のテーブルが無かったもの）のうち、読込時に出力の絞り込みで除くと決めたものを除く
      */
     private void excludeUnusedJoinInputs() {
-        this.tableMap.values().removeIf(table -> !this.tableSeparators.filter().test(table.getTableMetaData())
-                && this.joins.stream().anyMatch(join -> join.hasRelation(table.getTableMetaData())));
+        this.tableMap.values().removeIf(table -> table.getTableMetaData().isOutputExcluded());
     }
 
     private void processExecutableJoins(final List<ComparableTableJoin> remaining) {

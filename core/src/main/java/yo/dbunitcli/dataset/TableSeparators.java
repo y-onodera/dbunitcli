@@ -183,12 +183,22 @@ public record TableSeparators(List<TableSeparator> settings
                          }
                          return Stream.of(it);
                      })
-                     .filter(it -> this.filter.test(it) || this.isJoinInput(it));
+                     .flatMap(this::applyFilter);
     }
 
     /**
-     * joinの元テーブルか。出力の絞り込み（outputFilter）はjoinの結果にかけるため、元テーブルは絞り込まずに読む
-     * （joinで使われずに残った元テーブルは、読込の終わりに絞り込む）
+     * 出力の絞り込み（outputFilter）をかける。joinの結果にかけるため、joinの元テーブルは除かずに読み、
+     * joinで使われずに残ったら読込の終わりに除くよう印を付ける（{@link AddSettingTableMetaData#isOutputExcluded()}）
+     */
+    private Stream<AddSettingTableMetaData> applyFilter(final AddSettingTableMetaData metaData) {
+        if (this.filter.test(metaData)) {
+            return Stream.of(metaData);
+        }
+        return this.isJoinInput(metaData) ? Stream.of(metaData.excludeFromOutput()) : Stream.empty();
+    }
+
+    /**
+     * joinの元テーブルか
      */
     private boolean isJoinInput(final AddSettingTableMetaData metaData) {
         return this.joinConditions.stream().anyMatch(it -> it.hasRelation(metaData));

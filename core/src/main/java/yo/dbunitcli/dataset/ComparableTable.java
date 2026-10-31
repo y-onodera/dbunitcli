@@ -69,6 +69,23 @@ public record ComparableTable(AddSettingTableMetaData addSettingTableMetaData
         return result;
     }
 
+    /**
+     * 行を列名→値のMapで返すビュー。行ごとのMapは保持せず、読まれたときに作る
+     */
+    public List<Map<String, Object>> rowMaps() {
+        return new AbstractList<>() {
+            @Override
+            public Map<String, Object> get(final int index) {
+                return ComparableTable.this.getRowToMap(index);
+            }
+
+            @Override
+            public int size() {
+                return ComparableTable.this.getRowCount();
+            }
+        };
+    }
+
     public Map<CompareKeys, Map.Entry<Integer, Object[]>> getRows(final List<String> keys) {
         final Map<CompareKeys, Map.Entry<Integer, Object[]>> result = new HashMap<>();
         IntStream.range(0, this.getRowCount())

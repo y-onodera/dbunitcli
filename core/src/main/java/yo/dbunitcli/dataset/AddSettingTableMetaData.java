@@ -23,7 +23,8 @@ public record AddSettingTableMetaData(
         TableSeparator tableSeparator,
         Boolean distinct,
         AddSettingTableMetaData preset,
-        String sourceFilePath) implements ITableMetaData {
+        String sourceFilePath,
+        boolean outputExcluded) implements ITableMetaData {
 
     public static Builder builder(final ITableMetaData originMetaData, final Column[] primaryKey, final TableSeparator tableSeparator) {
         return new Builder(originMetaData, primaryKey, tableSeparator);
@@ -41,6 +42,7 @@ public record AddSettingTableMetaData(
                 , builder.getDistinct()
                 , builder.getPreset()
                 , builder.getSourceFilePath()
+                , false
         );
     }
 
@@ -56,7 +58,34 @@ public record AddSettingTableMetaData(
                 , this.distinct
                 , this.preset
                 , this.sourceFilePath
+                , this.outputExcluded
         );
+    }
+
+    /**
+     * 出力の絞り込み（outputFilter）で除くが、joinの元テーブルのため読むテーブル。joinで使われずに残れば読込の終わりに除く
+     */
+    public AddSettingTableMetaData excludeFromOutput() {
+        return new AddSettingTableMetaData(this.tableName
+                , this.primaryKeys
+                , this.columns
+                , this.columnIndexes
+                , this.allColumns
+                , this.additionalExpression
+                , this.filteredColumnIndex
+                , this.tableSeparator
+                , this.distinct
+                , this.preset
+                , this.sourceFilePath
+                , true
+        );
+    }
+
+    /**
+     * joinで使われずに残ったら出力から除くか（前段で除くと決めたものも含む）
+     */
+    public boolean isOutputExcluded() {
+        return this.outputExcluded || (this.preset != null && this.preset.isOutputExcluded());
     }
 
     @Override
