@@ -88,8 +88,10 @@ public record ComparableRegexSplitDataSetProducer(ComparableDataSetParam param) 
                             break;
                         }
                         final String[] values = this.dataSplitPattern.split(s);
-                        // ヘッダより多い列は無視する
-                        mapper.addRow(this.source.apply(values.length > columnCount ? Arrays.copyOf(values, columnCount) : values));
+                        // ヘッダより多い列は無視し、足りない列はブランクとする
+                        final String[] rowValues = Arrays.copyOf(values, columnCount);
+                        Arrays.fill(rowValues, Math.min(values.length, columnCount), columnCount, "");
+                        mapper.addRow(this.source.apply(rowValues));
                         row++;
                     }
                 }

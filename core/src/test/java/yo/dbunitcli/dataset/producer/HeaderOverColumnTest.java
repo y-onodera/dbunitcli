@@ -33,7 +33,7 @@ import java.util.List;
 import java.util.Properties;
 
 /**
- * ヘッダより多いデータ行の列は無視して読み込むこと
+ * ヘッダより多いデータ行の列は無視し、足りない列はブランクとして読み込むこと
  */
 public class HeaderOverColumnTest {
 
@@ -48,6 +48,33 @@ public class HeaderOverColumnTest {
                         .setDataSplitPattern(",")
                         .build()).loadDataSet().getTable("reg")
                 , List.of("ID", "VAL"), List.of("1", "a"), List.of("2", "b"));
+    }
+
+    @Test
+    public void regexSplitFillsBlankForMissingColumns() throws IOException, DataSetException {
+        final File src = this.write("reg.txt", "ID,VAL,EXT\n1,a\n2\n3,c,,\n");
+        this.assertRows(new ComparableRegexSplitDataSetProducer(this.builder(src, DataSourceType.reg)
+                        .setHeaderSplitPattern(",")
+                        .setDataSplitPattern(",")
+                        .setAddFileInfo(true)
+                        .build()).loadDataSet().getTable("reg")
+                , List.of("ID", "VAL", "EXT", "$FILE_PATH", "$FILE_NAME", "$SHEET_NAME")
+                , List.of("1", "a", "", this.path(src), "reg.txt", "")
+                , List.of("2", "", "", this.path(src), "reg.txt", "")
+                , List.of("3", "c", "", this.path(src), "reg.txt", ""));
+    }
+
+    @Test
+    public void csvFillsBlankForMissingColumns() throws IOException, DataSetException {
+        final File src = this.write("csv.csv", "ID,VAL,EXT\n1,a\n2,\"b\nc\"\n3\n4,d,x\n");
+        this.assertRows(new ComparableCsvDataSetProducer(this.builder(src, DataSourceType.csv)
+                        .setAddFileInfo(true)
+                        .build()).loadDataSet().getTable("csv")
+                , List.of("ID", "VAL", "EXT", "$FILE_PATH", "$FILE_NAME", "$SHEET_NAME")
+                , List.of("1", "a", "", this.path(src), "csv.csv", "")
+                , List.of("2", "b\nc", "", this.path(src), "csv.csv", "")
+                , List.of("3", "", "", this.path(src), "csv.csv", "")
+                , List.of("4", "d", "x", this.path(src), "csv.csv", ""));
     }
 
     @Test
@@ -74,7 +101,7 @@ public class HeaderOverColumnTest {
         final File src = this.writeExcel(new HSSFWorkbook(), "book.xls");
         this.assertRows(new ComparableXlsDataSetProducer(this.builder(src, DataSourceType.xls)
                         .build()).loadDataSet().getTable("s1")
-                , List.of("ID", "VAL"), List.of("1", "a"), List.of("2", "b"));
+                , List.of("ID", "VAL"), List.of("1", "a"), List.of("2", "b"), List.of("3", ""));
     }
 
     @Test
@@ -83,7 +110,7 @@ public class HeaderOverColumnTest {
         this.assertRows(new ComparableXlsDataSetProducer(this.builder(src, DataSourceType.xls)
                         .setHeaderName("ID")
                         .build()).loadDataSet().getTable("s1")
-                , List.of("ID"), List.of("ID"), List.of("1"), List.of("2"));
+                , List.of("ID"), List.of("ID"), List.of("1"), List.of("2"), List.of("3"));
     }
 
     @Test
@@ -91,7 +118,7 @@ public class HeaderOverColumnTest {
         final File src = this.writeExcel(new XSSFWorkbook(), "book.xlsx");
         this.assertRows(new ComparableXlsxDataSetProducer(this.builder(src, DataSourceType.xlsx)
                         .build()).loadDataSet().getTable("s1")
-                , List.of("ID", "VAL"), List.of("1", "a"), List.of("2", "b"));
+                , List.of("ID", "VAL"), List.of("1", "a"), List.of("2", "b"), List.of("3", ""));
     }
 
     @Test
@@ -100,7 +127,7 @@ public class HeaderOverColumnTest {
         this.assertRows(new ComparableXlsxDataSetProducer(this.builder(src, DataSourceType.xlsx)
                         .setHeaderName("ID")
                         .build()).loadDataSet().getTable("s1")
-                , List.of("ID"), List.of("ID"), List.of("1"), List.of("2"));
+                , List.of("ID"), List.of("ID"), List.of("1"), List.of("2"), List.of("3"));
     }
 
     @Test
@@ -204,7 +231,7 @@ public class HeaderOverColumnTest {
     }
 
     /**
-     * シートs1に ID,VAL のヘッダ行と、ヘッダより列が多いデータ行を書き込む
+     * シートs1に ID,VAL のヘッダ行と、ヘッダより列が多い・少ないデータ行を書き込む
      */
     private File writeExcel(final Workbook workbook, final String name) throws IOException {
         final File file = this.tempDir.resolve(name).toFile();
@@ -213,6 +240,7 @@ public class HeaderOverColumnTest {
             this.writeRow(sheet.createRow(0), "ID", "VAL");
             this.writeRow(sheet.createRow(1), "1", "a", "x", "y");
             this.writeRow(sheet.createRow(2), "2", "b");
+            this.writeRow(sheet.createRow(3), "3");
             workbook.write(out);
         }
         return file;
@@ -222,6 +250,10 @@ public class HeaderOverColumnTest {
         for (int i = 0; i < values.length; i++) {
             row.createCell(i).setCellValue(values[i]);
         }
+    }
+
+    private String path(final File file) {
+        return file.getAbsolutePath().replace("\\", "/");
     }
 
     private List<String> columnNames(final ComparableTable table) {

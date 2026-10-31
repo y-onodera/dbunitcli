@@ -24,7 +24,7 @@
 
   <h2 id="section-header-name">headerName の詳細</h2>
   <p>カラム名をカンマ区切りで与えると、その名前順にテーブル列が構築されます。<strong>指定された場合は先頭行も自動的にはヘッダとみなされず、すべての行がデータ行になります</strong>。既にヘッダ行が存在するファイルでヘッダを上書きしたい場合は、<code>startRow</code> と併用してヘッダ行をスキップしてください。</p>
-  <p>データ行の列がヘッダ（ヘッダ行、または <code>headerName</code> で与えた列名）より多い場合、超えた列は無視されます（srcType が fixed の場合は、<code>fixedLength</code> と <code>headerName</code> の数が違うとエラーになります）。</p>
+  <p>データ行の列がヘッダ（ヘッダ行、または <code>headerName</code> で与えた列名）より多い場合、超えた列は無視されます。少ない場合、足りない列は空文字になります（srcType が fixed の場合は、<code>fixedLength</code> と <code>headerName</code> の数が違うとエラーになります）。</p>
   <p><strong>例 1:ヘッダ行がない CSV に列名を与える</strong></p>
   <pre>入力 (users.csv):
 John,30
