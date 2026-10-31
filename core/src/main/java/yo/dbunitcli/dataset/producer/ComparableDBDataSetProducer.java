@@ -142,11 +142,6 @@ public class ComparableDBDataSetProducer implements ComparableDataSetProducer {
                 try {
                     ComparableDBDataSetProducer.LOGGER.info("produce - start databaseTable={}", table.getTableMetaData().getTableName());
                     final ITableMetaData tableMetaData;
-                    // ヘッダより多い列は無視し、足りない列はブランクとする
-                    final Column[] valueColumns = this.param.headerNames() != null
-                            ? Arrays.copyOf(table.getTableMetaData().getColumns()
-                            , Math.min(this.param.headerNames().length, table.getTableMetaData().getColumns().length))
-                            : table.getTableMetaData().getColumns();
                     if (this.param.headerNames() != null) {
                         final ITableMetaData metaData = table.getTableMetaData();
                         final Column[] columns = Arrays.stream(this.param.headerNames())
@@ -162,26 +157,26 @@ public class ComparableDBDataSetProducer implements ComparableDataSetProducer {
                                         throw new RuntimeException(e);
                                     }
                                 })
-                                .filter(i -> i < valueColumns.length)
+                                .filter(i -> i < columns.length)
                                 .mapToObj(i -> columns[i])
                                 .toArray(Column[]::new));
                     } else {
                         tableMetaData = table.getTableMetaData();
                     }
-                    final ComparableTableMapper mapper = context.createMapper(source.wrap(tableMetaData));
+                    final TableMetaDataWithSource metaDataWithSource = source.wrap(tableMetaData);
+                    final ComparableTableMapper mapper = context.createMapper(metaDataWithSource);
                     mapper.startTable();
                     if (this.param.loadData() && mapper.hasOutput()) {
-                        final int columnCount = this.param.headerNames() != null ? this.param.headerNames().length : valueColumns.length;
+                        final Column[] columns = table.getTableMetaData().getColumns();
                         int row = 0;
                         for (; true; row++) {
                             try {
-                                final Object[] rows = new Object[columnCount];
-                                Arrays.fill(rows, valueColumns.length, columnCount, "");
+                                final Object[] rows = new Object[columns.length];
                                 int columnIndex = 0;
-                                for (final Column column : valueColumns) {
+                                for (final Column column : columns) {
                                     rows[columnIndex++] = table.getValue(row, column.getColumnName());
                                 }
-                                mapper.addRow(source.apply(rows));
+                                mapper.addRow(metaDataWithSource.toRow(rows));
                             } catch (final RowOutOfBoundsException e) {
                                 break;
                             }

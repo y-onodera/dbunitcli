@@ -228,26 +228,6 @@ public class ComparableCsvDataSetProducerTest {
     }
 
     @Test
-    public void createDataSetIgnoreColumnsOverHeader() throws DataSetException {
-        final File src = new File(this.resource, "overcolumn/overcolumn.csv");
-        final ComparableDataSet actual = new ComparableCsvDataSetProducer(
-                ComparableDataSetParam.builder()
-                        .setSrc(src)
-                        .setSource(DataSourceType.csv)
-                        .setEncoding("UTF8")
-                        .build()).loadDataSet();
-        final ComparableTable actualTable = actual.getTable("overcolumn");
-        Assertions.assertEquals(2, actualTable.getTableMetaData().getColumns().length);
-        Assertions.assertEquals(3, actualTable.getRowCount());
-        Assertions.assertEquals("1", actualTable.getValue(0, "key"));
-        Assertions.assertEquals("a", actualTable.getValue(0, "column1"));
-        Assertions.assertEquals("2", actualTable.getValue(1, "key"));
-        Assertions.assertEquals("b\nc", actualTable.getValue(1, "column1"));
-        Assertions.assertEquals("3", actualTable.getValue(2, "key"));
-        Assertions.assertEquals("d", actualTable.getValue(2, "column1"));
-    }
-
-    @Test
     public void createDataSetFromDirectoryWithOutputFilter() throws DataSetException {
         final File src = new File(this.resource, "multifile");
         final ComparableDataSet actual = new ComparableCsvDataSetProducer(

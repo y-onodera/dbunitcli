@@ -1,11 +1,10 @@
 package yo.dbunitcli.dataset.producer;
 
-import org.dbunit.dataset.Column;
-import org.dbunit.dataset.datatype.DataType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import yo.dbunitcli.common.Parameter;
 import yo.dbunitcli.common.Source;
+import yo.dbunitcli.common.TableMetaDataWithSource;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.dataset.ComparableTableMapper;
 import yo.dbunitcli.dataset.ComparableTableMappingContext;
@@ -24,6 +23,14 @@ public record ComparableCSVQueryDataSetProducer(ComparableDataSetParam param,
 
     private static String url() {
         return "jdbc:h2:file:" + FileResources.datasetDir().getAbsolutePath() + ";MODE=Oracle";
+    }
+
+    private static String[] columnNames(final ResultSetMetaData metaData) throws SQLException {
+        final String[] result = new String[metaData.getColumnCount()];
+        for (int i = 0; i < result.length; i++) {
+            result[i] = metaData.getColumnName(i + 1);
+        }
+        return result;
     }
 
     /**
@@ -51,43 +58,25 @@ public record ComparableCSVQueryDataSetProducer(ComparableDataSetParam param,
                      final Statement stmt = conn.createStatement();
                      final ResultSet rst = stmt.executeQuery(query)
                 ) {
-                    final ResultSetMetaData metaData = rst.getMetaData();
-                    // ヘッダより多い列は無視し、足りない列はブランクとする
-                    final int resultColumnCount = metaData.getColumnCount();
-                    final int columnCount = Optional.ofNullable(this.param.headerNames())
-                            .map(it -> it.length)
-                            .orElse(resultColumnCount);
-                    final Column[] columns = IntStream.range(0, columnCount)
-                            .mapToObj(i -> {
-                                try {
-                                    if (this.param.headerNames() != null) {
-                                        return this.param.headerNames()[i];
-                                    }
-                                    return metaData.getColumnName(i + 1);
-                                } catch (final SQLException e) {
-                                    throw new RuntimeException(e);
-                                }
-                            })
-                            .map(name -> new Column(name.trim(), DataType.UNKNOWN))
-                            .toArray(Column[]::new);
-                    final ComparableTableMapper mapper = context.createMapper(this.source.createMetaData(columns));
+                    final int resultColumnCount = rst.getMetaData().getColumnCount();
+                    final TableMetaDataWithSource metaData = this.source.createMetaData(this.param.headerNames() != null
+                            ? this.param.headerNames()
+                            : ComparableCSVQueryDataSetProducer.columnNames(rst.getMetaData()));
+                    final ComparableTableMapper mapper = context.createMapper(metaData);
                     mapper.startTable();
                     if (this.param.loadData() && mapper.hasOutput()) {
                         int readRows = 0;
                         while (rst.next()) {
-                            mapper.addRow(IntStream.rangeClosed(1, columnCount)
+                            mapper.addRow(metaData.toRow(IntStream.rangeClosed(1, resultColumnCount)
                                     .mapToObj(i -> {
                                         try {
-                                            if (i > resultColumnCount) {
-                                                return "";
-                                            }
                                             return Optional.ofNullable(rst.getString(i))
                                                     .orElse("");
                                         } catch (final SQLException e) {
                                             throw new RuntimeException(e);
                                         }
                                     })
-                                    .toArray());
+                                    .toArray()));
                             readRows++;
                         }
                         ComparableCSVQueryDataSetProducer.LOGGER.info("produce - rows={}", readRows);

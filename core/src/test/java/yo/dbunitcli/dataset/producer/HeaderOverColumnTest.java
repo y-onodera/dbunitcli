@@ -66,7 +66,7 @@ public class HeaderOverColumnTest {
 
     @Test
     public void csvFillsBlankForMissingColumns() throws IOException, DataSetException {
-        final File src = this.write("csv.csv", "ID,VAL,EXT\n1,a\n2,\"b\nc\"\n3\n4,d,x\n");
+        final File src = this.write("csv.csv", "ID,VAL,EXT\n1,a\n2,\"b\nc\"\n3\n4,d,x,y\n");
         this.assertRows(new ComparableCsvDataSetProducer(this.builder(src, DataSourceType.csv)
                         .setAddFileInfo(true)
                         .build()).loadDataSet().getTable("csv")
@@ -135,24 +135,12 @@ public class HeaderOverColumnTest {
         final File data = this.write("data.csv", "C1,C2,C3\n1,a,x\n2,b,y\n");
         final File queryDir = Files.createDirectories(this.tempDir.resolve("csvq")).toFile();
         Files.writeString(new File(queryDir, "q.sql").toPath()
-                , "SELECT * FROM CSVREAD('" + data.getAbsolutePath().replace("\\", "/") + "', null, 'charset=UTF-8') ORDER BY C1"
+                , "SELECT * FROM CSVREAD('" + this.path(data) + "', null, 'charset=UTF-8') ORDER BY C1"
                 , StandardCharsets.UTF_8);
         this.assertRows(new ComparableCSVQueryDataSetProducer(this.builder(queryDir, DataSourceType.csvq)
                         .setHeaderName("ID,VAL")
                         .build(), Parameter.none()).loadDataSet().getTable("q")
                 , List.of("ID", "VAL"), List.of("1", "a"), List.of("2", "b"));
-    }
-
-    @Test
-    public void tableIgnoresColumnsOverHeaderName() throws IOException, SQLException, DataSetException {
-        final String url = "jdbc:h2:mem:headerOverColumnTable;DB_CLOSE_DELAY=-1";
-        this.createTable(url);
-        final File listFile = this.write("tables.txt", "T1");
-        final ComparableTable table = new ComparableDBDataSetProducer(this.builder(listFile, DataSourceType.table)
-                .setDatabaseConnectionLoader(this.connectionLoader(url))
-                .setHeaderName("ID,VAL")
-                .build()).loadDataSet().getTable("T1");
-        this.assertRows(table, List.of("ID", "VAL"), List.of("1", "a"), List.of("2", "b"));
     }
 
     @Test
@@ -169,8 +157,8 @@ public class HeaderOverColumnTest {
     }
 
     @Test
-    public void tableAddsFileInfoAfterHeaderNameColumns() throws IOException, SQLException, DataSetException {
-        final String url = "jdbc:h2:mem:headerOverColumnTableFileInfo;DB_CLOSE_DELAY=-1";
+    public void tableIgnoresColumnsOverHeaderName() throws IOException, SQLException, DataSetException {
+        final String url = "jdbc:h2:mem:headerOverColumnTable;DB_CLOSE_DELAY=-1";
         this.createTable(url);
         final File listFile = this.write("tables.txt", "T1");
         final ComparableTable table = new ComparableDBDataSetProducer(this.builder(listFile, DataSourceType.table)
@@ -178,10 +166,9 @@ public class HeaderOverColumnTest {
                 .setHeaderName("ID,VAL")
                 .setAddFileInfo(true)
                 .build()).loadDataSet().getTable("T1");
-        final String path = listFile.getAbsolutePath().replace("\\", "/");
         this.assertRows(table, List.of("ID", "VAL", "$FILE_PATH", "$FILE_NAME", "$SHEET_NAME")
-                , List.of("1", "a", path, "tables.txt", "")
-                , List.of("2", "b", path, "tables.txt", ""));
+                , List.of("1", "a", this.path(listFile), "tables.txt", "")
+                , List.of("2", "b", this.path(listFile), "tables.txt", ""));
     }
 
     @Test
@@ -191,27 +178,30 @@ public class HeaderOverColumnTest {
         final File queryDir = Files.createDirectories(this.tempDir.resolve("sql")).toFile();
         final File query = new File(queryDir, "q.sql");
         Files.writeString(query.toPath(), "select C1, C2 from T1 order by C1", StandardCharsets.UTF_8);
-        final String path = query.getAbsolutePath().replace("\\", "/");
         this.assertRows(new ComparableQueryDataSetProducer(this.builder(queryDir, DataSourceType.sql)
                         .setDatabaseConnectionLoader(this.connectionLoader(url))
                         .setAddFileInfo(true)
                         .build(), Parameter.none()).loadDataSet().getTable("q")
                 , List.of("C1", "C2", "$FILE_PATH", "$FILE_NAME", "$SHEET_NAME")
-                , List.of("1", "a", path, "q.sql", "")
-                , List.of("2", "b", path, "q.sql", ""));
+                , List.of("1", "a", this.path(query), "q.sql", "")
+                , List.of("2", "b", this.path(query), "q.sql", ""));
     }
 
     @Test
     public void csvqFillsBlankForHeaderNameOverColumns() throws IOException, DataSetException {
         final File data = this.write("data.csv", "C1,C2\n1,a\n2,b\n");
         final File queryDir = Files.createDirectories(this.tempDir.resolve("csvq")).toFile();
-        Files.writeString(new File(queryDir, "q.sql").toPath()
+        final File query = new File(queryDir, "q.sql");
+        Files.writeString(query.toPath()
                 , "SELECT * FROM CSVREAD('" + this.path(data) + "', null, 'charset=UTF-8') ORDER BY C1"
                 , StandardCharsets.UTF_8);
         this.assertRows(new ComparableCSVQueryDataSetProducer(this.builder(queryDir, DataSourceType.csvq)
                         .setHeaderName("ID,VAL,EXT")
+                        .setAddFileInfo(true)
                         .build(), Parameter.none()).loadDataSet().getTable("q")
-                , List.of("ID", "VAL", "EXT"), List.of("1", "a", ""), List.of("2", "b", ""));
+                , List.of("ID", "VAL", "EXT", "$FILE_PATH", "$FILE_NAME", "$SHEET_NAME")
+                , List.of("1", "a", "", this.path(query), "q.sql", "")
+                , List.of("2", "b", "", this.path(query), "q.sql", ""));
     }
 
     @Test
