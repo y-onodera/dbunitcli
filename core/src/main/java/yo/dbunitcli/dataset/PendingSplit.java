@@ -56,20 +56,15 @@ final class PendingSplit {
         final TableSplitter.Counter counter = this.splitter.counter();
         List<Object[]> targetValues = new ArrayList<>();
         List<Integer> targetRowIndexes = new ArrayList<>();
-        final boolean hasRowIndexes = targetRows.filteredRowIndexes().size() == targetRows.size();
         for (int i = 0, j = targetRows.size(); i < j; i++) {
-            // 並べ替え後のi行目と、その行のソースでの行番号は、並べ替え前の位置で対応させる
-            final int before = sorted.getIndexBeforeSort(i);
-            final Object[] row = targetRows.get(before);
+            final Object[] row = sorted.getRow(i);
             if (counter.isBreak(this.splitter.breakKeys(this.metaData, row), targetValues.size())) {
                 result.add(this.table(result.size(), targetValues, targetRowIndexes));
                 targetValues = new ArrayList<>();
                 targetRowIndexes = new ArrayList<>();
             }
             targetValues.add(row);
-            if (hasRowIndexes) {
-                targetRowIndexes.add(targetRows.filteredRowIndexes().get(before));
-            }
+            targetRowIndexes.add(sorted.getOriginalRowIndex(i));
         }
         result.add(this.table(result.size(), targetValues, targetRowIndexes));
         return result;
@@ -82,14 +77,7 @@ final class PendingSplit {
         if (this.sourceRows.size() == 1) {
             return this.sourceRows.getFirst();
         }
-        final int size = this.sourceRows.stream().mapToInt(AddSettingTableMetaData.Rows::size).sum();
-        final List<Object[]> rows = new ArrayList<>(size);
-        final List<Integer> filteredRowIndexes = new ArrayList<>(size);
-        this.sourceRows.forEach(it -> {
-            rows.addAll(it.rows());
-            filteredRowIndexes.addAll(it.filteredRowIndexes());
-        });
-        final AddSettingTableMetaData.Rows merged = new AddSettingTableMetaData.Rows(rows, filteredRowIndexes);
+        final AddSettingTableMetaData.Rows merged = AddSettingTableMetaData.Rows.concat(this.sourceRows);
         return this.metaData.isNeedDistinct() ? merged.distinct() : merged;
     }
 

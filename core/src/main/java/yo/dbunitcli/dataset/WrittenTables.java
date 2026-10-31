@@ -21,10 +21,6 @@ public final class WrittenTables {
      */
     private final Map<String, Set<ComparableTableMappingTask>> sources = new HashMap<>();
 
-    /**
-     * これから書くテーブルに行を入れるタスク。記録しない読込では空
-     */
-    private Set<ComparableTableMappingTask> reading = Set.of();
 
     public boolean contains(final String tableName) {
         return this.rows.containsKey(tableName);
@@ -69,21 +65,11 @@ public final class WrittenTables {
     }
 
     /**
-     * これから書くテーブルに行を入れるタスクを設定し、それまでのタスクを返す。
-     * joinの出力では、joinの左右のテーブルに行を入れたタスクを設定する
+     * テーブル（分割するテーブルは分割のまとまり＝分割後の1つ目のテーブル名）に、tasksが行を入れた。記録しない読込ではtasksは空
      */
-    Set<ComparableTableMappingTask> reading(final Collection<ComparableTableMappingTask> tasks) {
-        final Set<ComparableTableMappingTask> previous = this.reading;
-        this.reading = new LinkedHashSet<>(tasks);
-        return previous;
-    }
-
-    /**
-     * テーブル（分割するテーブルは分割のまとまり＝分割後の1つ目のテーブル名）に、今読んでいるタスクが行を入れた
-     */
-    void wrote(final String tableNameOrSplitGroup) {
-        if (!this.reading.isEmpty()) {
-            this.sources.computeIfAbsent(tableNameOrSplitGroup, _ -> new LinkedHashSet<>()).addAll(this.reading);
+    void wrote(final String tableNameOrSplitGroup, final Collection<ComparableTableMappingTask> tasks) {
+        if (!tasks.isEmpty()) {
+            this.sources.computeIfAbsent(tableNameOrSplitGroup, _ -> new LinkedHashSet<>()).addAll(tasks);
         }
     }
 

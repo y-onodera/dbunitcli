@@ -11,12 +11,21 @@ public record ComparableTableMappingContext(TableSeparators tableSeparators
         , IDataSetConverter converter
         , TreeMap<String, ComparableTable> tableMap
         , WrittenTables alreadyWrite
-        , List<ComparableTableJoin> joins) {
+        , List<ComparableTableJoin> joins
+        , List<ComparableTableMappingTask> sources) {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ComparableTableMappingContext.class);
 
     public ComparableTableMappingContext(final TableSeparators tableSeparators, final IDataSetConverter converter) {
-        this(tableSeparators, converter, new TreeMap<>(), new WrittenTables(), tableSeparators.joins());
+        this(tableSeparators, converter, new TreeMap<>(), new WrittenTables(), tableSeparators.joins(), List.of());
+    }
+
+    /**
+     * 同じ読込で、書いたテーブルにtaskが行を入れたと記録するコンテキスト（{@link WrittenTables#sources}）
+     */
+    public ComparableTableMappingContext withSource(final ComparableTableMappingTask task) {
+        return new ComparableTableMappingContext(this.tableSeparators, this.converter, this.tableMap, this.alreadyWrite
+                , this.joins, List.of(task));
     }
 
     public void open() {
@@ -31,6 +40,7 @@ public record ComparableTableMappingContext(TableSeparators tableSeparators
                 .setAlreadyWrite(this.alreadyWrite)
                 .setJoins(this.joins)
                 .setContextShareTableMap(this.tableMap)
+                .setSources(this.sources)
                 .build(this.tableSeparators.getAddSettingTableMetaData(metaData));
     }
 
@@ -83,24 +93,22 @@ public record ComparableTableMappingContext(TableSeparators tableSeparators
                     // 元テーブルはjoinの結果に置き換える（joinの結果を使うjoinでは、使われたjoinの結果も置き換える）
                     this.tableMap.remove(join.getCondition().left());
                     this.tableMap.remove(join.getCondition().right());
-                    // joinの出力テーブルには、左右のテーブルに行を入れたタスクが行を入れたものとする
-                    final Set<ComparableTableMappingTask> previous = this.alreadyWrite.reading(Stream.concat(
-                            this.alreadyWrite.sources(join.getCondition().left()).stream()
-                            , this.alreadyWrite.sources(join.getCondition().right()).stream()).toList());
                     final List<ComparableTableJoin> newRemaining = remaining.stream()
                             .filter(it -> !it.equals(join))
                             .toList();
                     final ComparableTableMapper joinMapper = new ComparableTableMapperBuilder()
                             .setConverter(this.converter)
-                                        .setContextShareTableMap(this.tableMap)
+                            .setContextShareTableMap(this.tableMap)
                             .setAlreadyWrite(this.alreadyWrite)
                             .setJoins(newRemaining)
+                            // joinの出力テーブルには、左右のテーブルに行を入れたタスクが行を入れたものとする
+                            .setSources(Stream.concat(this.alreadyWrite.sources(join.getCondition().left()).stream()
+                                    , this.alreadyWrite.sources(join.getCondition().right()).stream()).distinct().toList())
                             .build(this.tableSeparators.getAddSettingTableMetaData(join));
                     joinMapper.startTable();
                     join.execute().forEach(joinMapper::addRow);
                     joinMapper.endTable();
                     this.flushSplits();
-                    this.alreadyWrite.reading(previous);
                     this.processExecutableJoins(newRemaining);
                 });
     }

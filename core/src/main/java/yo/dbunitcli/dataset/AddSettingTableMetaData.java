@@ -7,7 +7,7 @@ import org.dbunit.dataset.NoSuchColumnException;
 import yo.dbunitcli.common.TableMetaDataWithSource;
 
 import java.util.*;
-import java.util.function.BiPredicate;
+import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -47,6 +47,17 @@ public record AddSettingTableMetaData(
     }
 
     public AddSettingTableMetaData rename(final String newTableName) {
+        return this.copy(newTableName, this.outputExcluded);
+    }
+
+    /**
+     * 出力の絞り込み（outputFilter）で除くが、joinの元テーブルのため読むテーブル。joinで使われずに残れば読込の終わりに除く
+     */
+    public AddSettingTableMetaData excludeFromOutput() {
+        return this.copy(this.tableName, true);
+    }
+
+    private AddSettingTableMetaData copy(final String newTableName, final boolean newOutputExcluded) {
         return new AddSettingTableMetaData(newTableName
                 , this.primaryKeys
                 , this.columns
@@ -58,26 +69,7 @@ public record AddSettingTableMetaData(
                 , this.distinct
                 , this.preset
                 , this.sourceFilePath
-                , this.outputExcluded
-        );
-    }
-
-    /**
-     * 出力の絞り込み（outputFilter）で除くが、joinの元テーブルのため読むテーブル。joinで使われずに残れば読込の終わりに除く
-     */
-    public AddSettingTableMetaData excludeFromOutput() {
-        return new AddSettingTableMetaData(this.tableName
-                , this.primaryKeys
-                , this.columns
-                , this.columnIndexes
-                , this.allColumns
-                , this.additionalExpression
-                , this.filteredColumnIndex
-                , this.tableSeparator
-                , this.distinct
-                , this.preset
-                , this.sourceFilePath
-                , true
+                , newOutputExcluded
         );
     }
 
@@ -129,15 +121,15 @@ public record AddSettingTableMetaData(
         return map;
     }
 
-    public Rows distinct(final Collection<Object[]> values, final Collection<Integer> filteredRowIndexes) {
-        Rows target = new Rows(values, filteredRowIndexes);
+    public Rows distinct(final Collection<Object[]> values, final Collection<Integer> originalRowIndexes) {
+        Rows target = new Rows(values, originalRowIndexes);
         if (this.isPresetNeedDistinct()) {
-            target = this.preset.distinct(values, filteredRowIndexes);
+            target = this.preset.distinct(values, originalRowIndexes);
         }
         if (!this.distinct) {
             // 前段がdistinctで行を確定させた場合、その出力行にも自段の設定（式・列の絞り込み・filter）を適用する
             return this.isPresetNeedDistinct()
-                    ? target.map(row -> this.applySetting(row, false), (newRows, row) -> true)
+                    ? target.map(row -> this.applySetting(row, false), row -> true)
                     : target;
         }
         return target.distinct(row -> this.applySetting(row, this.preset != null && !this.preset.isNeedDistinct()));
@@ -226,20 +218,34 @@ public record AddSettingTableMetaData(
     }
 
     /**
-     * @param filteredRowIndexes 各行の、ソースでの行番号（filter・distinctで除く前の何行目か）。記録していなければ空
+     * @param originalRowIndexes 各行の、ソースでの行番号（filter・distinctで除く前の何行目か）。
+     *                           空なら行を除いていない（行の位置がそのまま行番号）。空でなければ行と同じ数
      */
-    public record Rows(List<Object[]> rows, List<Integer> filteredRowIndexes) {
+    public record Rows(List<Object[]> rows, List<Integer> originalRowIndexes) {
+
+        public Rows {
+            if (!originalRowIndexes.isEmpty() && originalRowIndexes.size() != rows.size()) {
+                throw new IllegalArgumentException("rows:" + rows.size() + " originalRowIndexes:" + originalRowIndexes.size());
+            }
+        }
 
         public Rows() {
             this(new ArrayList<>(), new ArrayList<>());
         }
 
-        public Rows(final Collection<Object[]> rows, final Collection<Integer> filteredRowIndexes) {
-            this(new ArrayList<>(rows), new ArrayList<>(filteredRowIndexes));
+        public Rows(final Collection<Object[]> rows, final Collection<Integer> originalRowIndexes) {
+            this(new ArrayList<>(rows), new ArrayList<>(originalRowIndexes));
         }
 
         public Object[] get(final int index) {
             return this.rows().get(index);
+        }
+
+        /**
+         * index番目の行の、ソースでの行番号
+         */
+        public int originalRowIndex(final int index) {
+            return this.originalRowIndexes.isEmpty() ? index : this.originalRowIndexes.get(index);
         }
 
         public Stream<Object[]> stream() {
@@ -250,31 +256,38 @@ public record AddSettingTableMetaData(
             return this.rows().size();
         }
 
-        public boolean isFiltered() {
-            return !this.filteredRowIndexes().isEmpty();
-        }
-
+        /**
+         * 行をつなげる。行番号はそれぞれのソースでの行番号のまま残す
+         */
         public Rows add(final Rows other) {
-            final List<Object[]> mergeRows = new ArrayList<>(this.rows());
-            final List<Integer> mergeFilteredRowIndexes = new ArrayList<>(this.filteredRowIndexes());
-            mergeRows.addAll(other.rows());
-            mergeFilteredRowIndexes.addAll(other.filteredRowIndexes());
-            return new Rows(mergeRows, mergeFilteredRowIndexes);
+            return Rows.concat(List.of(this, other));
         }
 
-        public Rows map(final UnaryOperator<Object[]> rowFunction, final BiPredicate<List<Object[]>, Object[]> reduceCondition) {
+        /**
+         * 行をつなげる。行番号はそれぞれのソースでの行番号のまま残す
+         */
+        public static Rows concat(final List<Rows> sources) {
+            final int size = sources.stream().mapToInt(Rows::size).sum();
+            final List<Object[]> rows = new ArrayList<>(size);
+            final List<Integer> originalRowIndexes = new ArrayList<>(size);
+            sources.forEach(it -> {
+                rows.addAll(it.rows());
+                IntStream.range(0, it.size()).forEach(i -> originalRowIndexes.add(it.originalRowIndex(i)));
+            });
+            return new Rows(rows, originalRowIndexes);
+        }
+
+        public Rows map(final UnaryOperator<Object[]> rowFunction, final Predicate<Object[]> keep) {
             final List<Object[]> newRows = new ArrayList<>();
-            final List<Integer> newFilteredRowIndexes = new ArrayList<>();
+            final List<Integer> newOriginalRowIndexes = new ArrayList<>();
             for (int i = 0, j = this.rows.size(); i < j; i++) {
                 final Object[] row = rowFunction.apply(this.rows.get(i));
-                if (row != null && reduceCondition.test(newRows, row)) {
+                if (row != null && keep.test(row)) {
                     newRows.add(row);
-                    if (this.isFiltered()) {
-                        newFilteredRowIndexes.add(this.filteredRowIndexes.get(i));
-                    }
+                    newOriginalRowIndexes.add(this.originalRowIndex(i));
                 }
             }
-            return new Rows(newRows, newFilteredRowIndexes);
+            return new Rows(newRows, newOriginalRowIndexes);
         }
 
         public Rows distinct() {
@@ -285,8 +298,8 @@ public record AddSettingTableMetaData(
          * 内容（Arrays.equalsと同じく要素のequals）が同じ行を除く。行の内容をキーにしたSetで判定する
          */
         public Rows distinct(final UnaryOperator<Object[]> rowFunction) {
-            final Set<List<Object>> seen = new HashSet<>();
-            return this.map(rowFunction, (newRows, row) -> seen.add(Arrays.asList(row)));
+            final Set<List<Object>> seen = HashSet.newHashSet(this.rows.size());
+            return this.map(rowFunction, row -> seen.add(Arrays.asList(row)));
         }
     }
 

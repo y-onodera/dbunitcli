@@ -216,7 +216,7 @@ public class DatasetSettingsController extends AbstractResourceFileController<Da
          * splitはoutputFilterで見つからなければ絞らずに読み直す
          */
         static List<Narrow> attempts(final TableSeparators separators) {
-            return separators.isTableNameDependsOnRows() ? List.of(OUTPUT, NONE) : List.of(OUTPUT);
+            return singlePass(separators) == OUTPUT ? List.of(OUTPUT) : List.of(OUTPUT, NONE);
         }
 
         /**

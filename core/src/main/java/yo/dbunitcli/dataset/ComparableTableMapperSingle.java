@@ -15,9 +15,16 @@ public class ComparableTableMapperSingle implements ComparableTableMapper {
      * このテーブルに関係するjoin
      */
     private final List<ComparableTableJoin> joins;
+    /**
+     * 書いたテーブルに行を入れたと記録するタスク
+     */
+    private final List<ComparableTableMappingTask> sources;
     private final boolean enableRowProcessing;
     private final AddSettingTableMetaData baseMetaData;
-    private final List<Integer> filteredRowIndexes;
+    /**
+     * 保持した行の、ソースでの行番号。行を除くまでは記録しない（{@link AddSettingTableMetaData.Rows#originalRowIndexes()}）
+     */
+    private final List<Integer> originalRowIndexes;
     private final Collection<Object[]> rows;
     private final TableSplitter splitter;
     private final WrittenTables.SplitState splitState;
@@ -34,7 +41,7 @@ public class ComparableTableMapperSingle implements ComparableTableMapper {
     public ComparableTableMapperSingle(final AddSettingTableMetaData metaData, final IDataSetConverter converter,
                                        final TreeMap<String, ComparableTable> contextShareTableMap,
                                        final WrittenTables alreadyWrite, final List<ComparableTableJoin> joins,
-                                       final boolean enableRowProcessing) {
+                                       final List<ComparableTableMappingTask> sources, final boolean enableRowProcessing) {
         this.baseMetaData = metaData;
         this.splitter = metaData.getTableSplitter();
         this.firstTableName = this.splitter.tableName(metaData.getTableName(), 0);
@@ -44,11 +51,12 @@ public class ComparableTableMapperSingle implements ComparableTableMapper {
                 : WrittenTables.SplitState.start(this.splitter);
         this.metaData = this.splitter.getMetaData(this.baseMetaData, this.splitState.no());
         this.rows = new ArrayList<>();
-        this.filteredRowIndexes = new ArrayList<>();
+        this.originalRowIndexes = new ArrayList<>();
         this.converter = converter;
         this.contextShareTableMap = contextShareTableMap;
         this.alreadyWrite = alreadyWrite;
         this.joins = joins.stream().filter(join -> join.hasRelation(metaData)).collect(Collectors.toList());
+        this.sources = sources;
         this.enableRowProcessing = enableRowProcessing;
         this.hasOutput = converter == null || converter.isRowRequired(metaData, this.joins);
     }
@@ -64,8 +72,8 @@ public class ComparableTableMapperSingle implements ComparableTableMapper {
     @Override
     public void addRow(final Object[] values) {
         if (this.metaData.isNeedDistinct()) {
+            // distinctは保持した行に設定を適用するときに行を除き、行番号を残す（AddSettingTableMetaData#distinct）
             this.rows.add(values);
-            this.filteredRowIndexes.add(this.addCount);
             this.addCount++;
         } else {
             this.addValue(this.metaData.applySetting(values));
@@ -80,7 +88,7 @@ public class ComparableTableMapperSingle implements ComparableTableMapper {
     @Override
     public void endTable() {
         this.alreadyWrite.put(this.metaData.getTableName(), this.getAddRowCount());
-        this.alreadyWrite.wrote(this.splitter.isSplit() ? this.firstTableName : this.metaData.getTableName());
+        this.alreadyWrite.wrote(this.splitter.isSplit() ? this.firstTableName : this.metaData.getTableName(), this.sources);
         if (this.enableRowProcessing && this.splitter.isSplit()) {
             this.alreadyWrite.putSplitTable(this.metaData.getTableName(), this.firstTableName);
         }
@@ -96,7 +104,7 @@ public class ComparableTableMapperSingle implements ComparableTableMapper {
             } else if (this.contextShareTableMap.containsKey(this.metaData.getTableName())) {
                 final ComparableTable other = this.contextShareTableMap.get(this.metaData.getTableName());
                 final AddSettingTableMetaData.Rows add = other.getRows().add(this.metaData.distinct(this.rows,
-                                                                                                    this.filteredRowIndexes));
+                                                                                                    this.originalRowIndexes));
                 this.hold(this.metaData.getTableName(), this.metaData.isNeedDistinct()
                         ? new ComparableTable.Builder(this.metaData).setRows(add.distinct()).build()
                         : new ComparableTable.Builder(this.metaData).setRows(add).build());
@@ -116,7 +124,7 @@ public class ComparableTableMapperSingle implements ComparableTableMapper {
      */
     private void addPendingSplit() {
         this.alreadyWrite.pendingSplit(this.firstTableName, this.splitter)
-                         .add(this.baseMetaData, this.baseMetaData.distinct(this.rows, this.filteredRowIndexes), this.joins);
+                         .add(this.baseMetaData, this.baseMetaData.distinct(this.rows, this.originalRowIndexes), this.joins);
     }
 
     private void hold(final String tableName, final ComparableTable table) {
@@ -147,8 +155,7 @@ public class ComparableTableMapperSingle implements ComparableTableMapper {
                     this.converter.row(applySetting);
                 } else {
                     this.rows.add(applySetting);
-                    // ソースでの行番号（compareの$ROW_ORIGINAL）。filter・distinctで行を除いても元の行番号を残す
-                    this.filteredRowIndexes.add(this.addCount);
+                    this.recordOriginalRowIndex();
                 }
                 this.addRowCount++;
             }
@@ -156,6 +163,21 @@ public class ComparableTableMapperSingle implements ComparableTableMapper {
         } catch (final DataSetException e) {
             throw new AssertionError(e);
         }
+    }
+
+    /**
+     * 保持した行の、ソースでの行番号（compareの$ROW_ORIGINAL）を記録する。filterで行を除くまでは行の位置と同じため記録せず、
+     * 初めて除いたときにそれまでの行番号を埋める
+     */
+    private void recordOriginalRowIndex() {
+        final int position = this.rows.size() - 1;
+        if (this.originalRowIndexes.isEmpty()) {
+            if (this.addCount == position) {
+                return;
+            }
+            IntStream.range(0, position).forEach(this.originalRowIndexes::add);
+        }
+        this.originalRowIndexes.add(this.addCount);
     }
 
     protected void splitTable(final Object[] applySetting) throws DataSetException {
@@ -184,7 +206,7 @@ public class ComparableTableMapperSingle implements ComparableTableMapper {
 
     protected ComparableTable lazyProcess() {
         return new ComparableTable.Builder(this.metaData)
-                .setRows(this.metaData.distinct(this.rows, this.filteredRowIndexes))
+                .setRows(this.metaData.distinct(this.rows, this.originalRowIndexes))
                 .build();
     }
 

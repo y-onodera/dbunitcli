@@ -42,19 +42,16 @@ public class LazyloadTaskMapper {
         context.open();
         tasks.forEach(task -> {
             Workers.checkInterrupted();
-            // 出力テーブルごとに、行を入れたタスクとして元のタスクを記録する（読込にはloadDataなどを変えたタスクを使う）
-            context.alreadyWrite().reading(List.of(task));
             final ComparableTableMappingTask loading = task.with(builder -> builder.setLoadData(loadRows));
-            (resources == null ? loading : loading.forWorker(resources)).run(context);
+            // 出力テーブルごとに、行を入れたタスクとして元のタスクを記録する（読込にはloadDataなどを変えたタスクを使う）
+            (resources == null ? loading : loading.forWorker(resources)).run(context.withSource(task));
         });
-        context.alreadyWrite().reading(List.of());
         context.close();
         collector.metaData.forEach((tableName, metaData) -> {
             final List<ComparableTableMappingTask> sources = context.alreadyWrite().sources(tableName);
             if (!sources.isEmpty()) {
                 final ComparableTableDto dto = new ComparableTableDto(metaData);
-                dto.setRows(new ComparableTableMappingTask.WithTargetTable(tableName, sources.getFirst()
-                        , sources.subList(1, sources.size())));
+                dto.setRows(new ComparableTableMappingTask.WithTargetTable(tableName, sources));
                 this.result.put(tableName, dto);
             }
         });

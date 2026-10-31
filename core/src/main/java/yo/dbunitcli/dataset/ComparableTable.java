@@ -131,20 +131,13 @@ public record ComparableTable(AddSettingTableMetaData addSettingTableMetaData
     }
 
     /**
-     * ソースでの行番号（filter・distinctで除く前の何行目か）。記録が無ければ並べ替え前の行番号
+     * 並べ替え後のsortedIndex行目の、ソースでの行番号（filter・distinctで除く前の何行目か）
      */
-    private int getOriginalRowIndex(final int sortedIndex) {
-        final int row = this.getIndexBeforeSort(sortedIndex);
-        if (this.rows.filteredRowIndexes().size() == this.rows.size()) {
-            return this.rows.filteredRowIndexes().get(row);
-        }
-        return row;
+    int getOriginalRowIndex(final int sortedIndex) {
+        return this.rows.originalRowIndex(this.getIndexBeforeSort(sortedIndex));
     }
 
-    /**
-     * 並べ替え後のsortedIndex行目が、rowsの何番目の行か
-     */
-    int getIndexBeforeSort(final int sortedIndex) {
+    private int getIndexBeforeSort(final int sortedIndex) {
         if (!this.addSettingTableMetaData.isSorted()) {
             return sortedIndex;
         }

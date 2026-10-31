@@ -79,7 +79,7 @@ public class LazyloadTaskMapperTest {
                                                                    .build();
         final Map<String, Set<String>> actual = new LinkedHashMap<>();
         LazyloadTaskMapper.mappingFrom(param, Stream.of("a", "b", "c").map(name -> new RecordingTask(name, param, this.rowsRead)))
-                          .forEach(dto -> actual.put(dto.getTableName(), dto.getTask().tasks()
+                          .forEach(dto -> actual.put(dto.getTableName(), dto.getTask().tasks().stream()
                                                                             .map(task -> task.source().getTableName())
                                                                             .collect(Collectors.toSet())));
 

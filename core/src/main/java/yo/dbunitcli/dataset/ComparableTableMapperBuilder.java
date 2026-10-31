@@ -10,6 +10,7 @@ public class ComparableTableMapperBuilder {
     private WrittenTables alreadyWrite = new WrittenTables();
     private List<ComparableTableJoin> joins = new ArrayList<>();
     private TreeMap<String, ComparableTable> contextShareTableMap = new TreeMap<>();
+    private List<ComparableTableMappingTask> sources = List.of();
 
     public ComparableTableMapperBuilder setConverter(final IDataSetConverter converter) {
         this.converter = converter;
@@ -31,6 +32,14 @@ public class ComparableTableMapperBuilder {
         return this;
     }
 
+    /**
+     * 書いたテーブルに行を入れたと記録するタスク（{@link WrittenTables#sources}）。記録しない読込では空
+     */
+    public ComparableTableMapperBuilder setSources(final List<ComparableTableMappingTask> sources) {
+        this.sources = sources;
+        return this;
+    }
+
     public ComparableTableMapper build(final Stream<AddSettingTableMetaData> addSettingTableMetaData) {
         final List<AddSettingTableMetaData> targets = addSettingTableMetaData.toList();
         final List<? extends ComparableTableMapper> results = IntStream.range(0, targets.size())
@@ -38,7 +47,7 @@ public class ComparableTableMapperBuilder {
                     final AddSettingTableMetaData target = targets.get(index);
                     final boolean enableRowProcessing = this.converter != null && this.converter.isEnableRowProcessing(target, this.joins);
                     final IDataSetConverter converter = index > 0 && this.isSplittable() ? this.converter.split() : this.converter;
-                    return new ComparableTableMapperSingle(target, converter, this.contextShareTableMap, this.alreadyWrite, this.joins, enableRowProcessing);
+                    return new ComparableTableMapperSingle(target, converter, this.contextShareTableMap, this.alreadyWrite, this.joins, this.sources, enableRowProcessing);
                 })
                 .toList();
         if (results.isEmpty()) {
