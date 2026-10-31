@@ -106,16 +106,6 @@ public interface IDataSetConverter extends IDataSetConsumer, AutoCloseable {
         return true;
     }
 
-    /**
-     * 行を保持して分割するテーブルで、行の値を持たず件数だけを数えればよいか（分割後のテーブル名だけを使う場合）。
-     * trueなら分割後のテーブルは行を持たない
-     *
-     * @param joins このテーブルに関係するjoin
-     */
-    default boolean isRowCountOnly(final AddSettingTableMetaData metaData, final List<ComparableTableJoin> joins) {
-        return false;
-    }
-
     default boolean isEnableRowProcessing(final AddSettingTableMetaData metaData, final List<ComparableTableJoin> joins) {
         return metaData.getOrderColumns().length == 0
                 && !metaData.isNeedDistinct()

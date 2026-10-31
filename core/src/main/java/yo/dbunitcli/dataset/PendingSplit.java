@@ -10,15 +10,12 @@ final class PendingSplit {
 
     private final String firstTableName;
     private final TableSplitter splitter;
-    private final List<Object[]> rows = new ArrayList<>();
-    private final List<Integer> filteredRowIndexes = new ArrayList<>();
+    /**
+     * ソースごとの行（distinctするテーブルはソースの中で重複を除いたもの）
+     */
+    private final List<AddSettingTableMetaData.Rows> sourceRows = new ArrayList<>();
     private final Set<ComparableTableJoin> joins = new LinkedHashSet<>();
     private AddSettingTableMetaData metaData;
-    /**
-     * 行を持たず件数だけを数えたソースの行数（{@link IDataSetConverter#isRowCountOnly}）
-     */
-    private int countOnlyRows;
-    private int sources;
 
     PendingSplit(final String firstTableName, final TableSplitter splitter) {
         this.firstTableName = firstTableName;
@@ -33,26 +30,12 @@ final class PendingSplit {
     }
 
     /**
-     * 1つのソースの行（distinctするテーブルはソースの中で重複を除いたもの）を加える。分割後のテーブルは最後に加えたソースの設定で作る
+     * 1つのソースの行を加える。分割後のテーブルは最後に加えたソースの設定で作る
      */
     void add(final AddSettingTableMetaData metaData, final AddSettingTableMetaData.Rows rows, final List<ComparableTableJoin> joins) {
-        this.rows.addAll(rows.rows());
-        this.filteredRowIndexes.addAll(rows.filteredRowIndexes());
-        this.addSource(metaData, joins);
-    }
-
-    /**
-     * 1つのソースの行数だけを加える（行の値は使わない）
-     */
-    void addCount(final AddSettingTableMetaData metaData, final int rowCount, final List<ComparableTableJoin> joins) {
-        this.countOnlyRows += rowCount;
-        this.addSource(metaData, joins);
-    }
-
-    private void addSource(final AddSettingTableMetaData metaData, final List<ComparableTableJoin> joins) {
         this.metaData = metaData;
+        this.sourceRows.add(rows);
         this.joins.addAll(joins);
-        this.sources++;
     }
 
     /**
@@ -63,12 +46,11 @@ final class PendingSplit {
     }
 
     /**
-     * ためた行を並べ替えて分割した、分割後のテーブル（1つ目から順に、少なくとも1つ）
+     * ためた行を並べ替えて分割した、分割後のテーブル（1つ目から順に、少なくとも1つ）。ためた行はここで手放す
      */
     List<ComparableTable> split() {
-        final AddSettingTableMetaData.Rows merged = new AddSettingTableMetaData.Rows(this.rows, this.filteredRowIndexes);
-        // ソースの中の重複はソースごとに除いているため、ソースをまたぐ重複だけを除く
-        final AddSettingTableMetaData.Rows targetRows = this.metaData.isNeedDistinct() && this.sources > 1 ? merged.distinct() : merged;
+        final AddSettingTableMetaData.Rows targetRows = this.mergeSourceRows();
+        this.sourceRows.clear();
         final ComparableTable sorted = new ComparableTable.Builder(this.metaData).setRows(targetRows).build();
         final List<ComparableTable> result = new ArrayList<>();
         final TableSplitter.Counter counter = this.splitter.counter();
@@ -76,7 +58,7 @@ final class PendingSplit {
         List<Integer> targetRowIndexes = new ArrayList<>();
         for (int i = 0, j = targetRows.size(); i < j; i++) {
             final Object[] row = sorted.getRow(i);
-            if (counter.isBreak(this.breakKeys(row), targetValues.size())) {
+            if (counter.isBreak(this.splitter.breakKeys(this.metaData, row), targetValues.size())) {
                 result.add(this.table(result.size(), targetValues, targetRowIndexes));
                 targetValues = new ArrayList<>();
                 targetRowIndexes = new ArrayList<>();
@@ -86,28 +68,31 @@ final class PendingSplit {
                 targetRowIndexes.add(targetRows.filteredRowIndexes().get(i));
             }
         }
-        // 件数だけを数えたソースの分は、行の無い分割後のテーブルを件数どおりに作る
-        int targetCount = targetValues.size();
-        for (int i = 0; i < this.countOnlyRows; i++) {
-            if (counter.isBreak(List.of(), targetCount)) {
-                result.add(this.table(result.size(), targetValues, targetRowIndexes));
-                targetValues = new ArrayList<>();
-                targetRowIndexes = new ArrayList<>();
-                targetCount = 0;
-            }
-            targetCount++;
-        }
         result.add(this.table(result.size(), targetValues, targetRowIndexes));
         return result;
+    }
+
+    /**
+     * ソースごとの行を1つにまとめる。ソースの中の重複はソースごとに除いているため、ソースをまたぐ重複だけを除く
+     */
+    private AddSettingTableMetaData.Rows mergeSourceRows() {
+        if (this.sourceRows.size() == 1) {
+            return this.sourceRows.getFirst();
+        }
+        final int size = this.sourceRows.stream().mapToInt(AddSettingTableMetaData.Rows::size).sum();
+        final List<Object[]> rows = new ArrayList<>(size);
+        final List<Integer> filteredRowIndexes = new ArrayList<>(size);
+        this.sourceRows.forEach(it -> {
+            rows.addAll(it.rows());
+            filteredRowIndexes.addAll(it.filteredRowIndexes());
+        });
+        final AddSettingTableMetaData.Rows merged = new AddSettingTableMetaData.Rows(rows, filteredRowIndexes);
+        return this.metaData.isNeedDistinct() ? merged.distinct() : merged;
     }
 
     private ComparableTable table(final int no, final List<Object[]> values, final List<Integer> rowIndexes) {
         return new ComparableTable.Builder(this.splitter.getMetaData(this.metaData, no))
                 .setRows(new AddSettingTableMetaData.Rows(values, rowIndexes))
                 .build();
-    }
-
-    private List<String> breakKeys(final Object[] row) {
-        return this.splitter.breakKeys().isEmpty() ? List.of() : this.metaData.getBreakKeys(row);
     }
 }

@@ -53,13 +53,9 @@ public class LazyloadTaskMapper {
                      .forEach(tableName -> tableTasks.merge(tableName, task.withTargetTable(tableName)
                              , ComparableTableMappingTask.WithTargetTable::chain));
         });
-        // 行を保持して分割するテーブルは、分割後の1つ目のテーブルと同じタスクで読む
+        // 行を保持して分割するテーブルの分割後のテーブルは、分割を確定させて求める
         context.flushSplits();
-        collector.drainTableNames()
-                 .forEach(tableName -> written.splitGroup(tableName)
-                                              .map(tableTasks::get)
-                                              .ifPresent(task -> tableTasks.putIfAbsent(tableName, task.retarget(tableName))));
-        LazyloadTaskMapper.readSplitGroupFromAllSources(tableTasks, written);
+        LazyloadTaskMapper.readSplitGroupFromAllSources(tableTasks, collector.drainTableNames(), written);
         final Map<String, ITableMetaData> output = collector.takeMetaData();
         context.close();
         output.putAll(collector.takeMetaData());
@@ -87,17 +83,25 @@ public class LazyloadTaskMapper {
     /**
      * 複数のソースから行が入る分割では、分割後のテーブルはどれも、そのまとまりに書いた全ソースから読む。
      * 分割はソースをまたいで数えるため、一部のソースだけを読むと分割後のテーブルの行が変わる
+     *
+     * @param splitTables ソースを読み終えてから分割を確定させたテーブル（まだタスクが無い）
      */
     private static void readSplitGroupFromAllSources(final Map<String, ComparableTableMappingTask.WithTargetTable> tableTasks
-            , final WrittenTables written) {
-        final Map<String, List<String>> groups = new LinkedHashMap<>();
-        tableTasks.keySet().forEach(tableName -> written.splitGroup(tableName)
-                                                         .ifPresent(group -> groups.computeIfAbsent(group, _ -> new ArrayList<>()).add(tableName)));
+            , final Stream<String> splitTables, final WrittenTables written) {
+        final Map<String, Set<String>> groups = new LinkedHashMap<>();
+        Stream.concat(tableTasks.keySet().stream(), splitTables)
+              .forEach(tableName -> written.splitGroup(tableName)
+                                           .ifPresent(group -> groups.computeIfAbsent(group, _ -> new LinkedHashSet<>()).add(tableName)));
         groups.values().forEach(tableNames -> {
             final List<ComparableTableMappingTask> tasks = tableNames.stream()
-                                                                     .flatMap(tableName -> tableTasks.get(tableName).tasks())
+                                                                     .map(tableTasks::get)
+                                                                     .filter(Objects::nonNull)
+                                                                     .flatMap(ComparableTableMappingTask.WithTargetTable::tasks)
                                                                      .distinct()
                                                                      .toList();
+            if (tasks.isEmpty()) {
+                return;
+            }
             tableNames.forEach(tableName -> tableTasks.put(tableName, new ComparableTableMappingTask.WithTargetTable(tableName
                     , tasks.getFirst(), tasks.subList(1, tasks.size()))));
         });
@@ -141,10 +145,11 @@ public class LazyloadTaskMapper {
         }
 
         /**
-         * 分割後の名前が件数だけで決まる（distinct・breakKeyが無く、joinに渡さない）テーブルは、行を持たず件数だけを数える
+         * 並べ替え（order）しても出力テーブルの名前は変わらないため、distinct・breakKeyでの分割・joinが無ければ
+         * 行を保持せず流しながら名前を求める（分割は件数だけで決まる）
          */
         @Override
-        public boolean isRowCountOnly(final AddSettingTableMetaData metaData, final List<ComparableTableJoin> joins) {
+        public boolean isEnableRowProcessing(final AddSettingTableMetaData metaData, final List<ComparableTableJoin> joins) {
             return !metaData.isNeedDistinct() && metaData.getTableSplitter().breakKeys().isEmpty() && joins.isEmpty();
         }
 

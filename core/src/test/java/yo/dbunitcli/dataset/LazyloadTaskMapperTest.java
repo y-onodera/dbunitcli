@@ -1,17 +1,14 @@
 package yo.dbunitcli.dataset;
 
-import jakarta.json.Json;
-import jakarta.json.JsonReader;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import yo.dbunitcli.application.json.FromJsonTableSeparatorsBuilder;
 import yo.dbunitcli.common.Source;
 
-import java.io.StringReader;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -75,7 +72,7 @@ public class LazyloadTaskMapperTest {
     @Test
     public void 後に並ぶjoinの結果を使うjoinは_使うjoinの左右のテーブルも読む() {
         final ComparableDataSetParam param = ComparableDataSetParam.builder()
-                                                                   .setTableSeparators(LazyloadTaskMapperTest.separators("""
+                                                                   .setTableSeparators(DataSetTestSupport.separators("""
                                                                            {"settings": [{"innerJoin": {"left": "a_with_b", "right": "c", "column": ["key"]}}
                                                                                        , {"innerJoin": {"left": "a", "right": "b", "column": ["key"]}}]}
                                                                            """))
@@ -100,27 +97,25 @@ public class LazyloadTaskMapperTest {
      * tableNamesのテーブル（3行ずつ）を読み、出力されたテーブルごとに読み直した行数を返す
      */
     private Map<String, Integer> loadedRowCounts(final String setting, final String... tableNames) {
-        final ComparableDataSetParam param = ComparableDataSetParam.builder()
-                                                                   .setTableSeparators(LazyloadTaskMapperTest.separators(setting))
-                                                                   .build();
-        final Map<String, Integer> result = new LinkedHashMap<>();
-        LazyloadTaskMapper.mappingFrom(param, Stream.of(tableNames).map(name -> new RecordingTask(name, param, this.rowsRead)))
-                          .forEach(dto -> result.put(dto.getTableName()
-                                  , ((List<?>) dto.applyDataSetSeparators(TableSeparators.NONE).getRows()).size()));
-        return result;
+        return this.loadedRowCounts(setting, param -> Stream.of(tableNames).map(name -> new RecordingTask(name, param, this.rowsRead)));
     }
 
     /**
      * sources個のソースがaに3行ずつ書き、出力されたテーブルごとに読み直した行数を返す
      */
     private Map<String, Integer> loadedRowCounts(final String setting, final int sources) {
+        return this.loadedRowCounts(setting, param -> IntStream.range(0, sources)
+                                                               .mapToObj(no -> new RecordingTask("a", param, this.rowsRead
+                                                                       , no + "1", no + "2", no + "3")));
+    }
+
+    private Map<String, Integer> loadedRowCounts(final String setting
+            , final Function<ComparableDataSetParam, Stream<RecordingTask>> tasks) {
         final ComparableDataSetParam param = ComparableDataSetParam.builder()
-                                                                   .setTableSeparators(LazyloadTaskMapperTest.separators(setting))
+                                                                   .setTableSeparators(DataSetTestSupport.separators(setting))
                                                                    .build();
         final Map<String, Integer> result = new LinkedHashMap<>();
-        LazyloadTaskMapper.mappingFrom(param, IntStream.range(0, sources)
-                                                       .mapToObj(no -> new RecordingTask("a", param, this.rowsRead
-                                                               , no + "1", no + "2", no + "3")))
+        LazyloadTaskMapper.mappingFrom(param, tasks.apply(param).map(ComparableTableMappingTask.class::cast))
                           .forEach(dto -> result.put(dto.getTableName()
                                   , ((List<?>) dto.applyDataSetSeparators(TableSeparators.NONE).getRows()).size()));
         return result;
@@ -128,19 +123,13 @@ public class LazyloadTaskMapperTest {
 
     private List<String> tableNames(final String setting) {
         final ComparableDataSetParam param = ComparableDataSetParam.builder()
-                                                                   .setTableSeparators(LazyloadTaskMapperTest.separators(setting))
+                                                                   .setTableSeparators(DataSetTestSupport.separators(setting))
                                                                    .build();
         return LazyloadTaskMapper.mappingFrom(param, Stream.of(new RecordingTask("a", param, this.rowsRead)
                                                      , new RecordingTask("b", param, this.rowsRead)))
                                  .stream()
                                  .map(ComparableTableDto::getTableName)
                                  .toList();
-    }
-
-    private static TableSeparators separators(final String setting) {
-        try (final JsonReader reader = Json.createReader(new StringReader(setting))) {
-            return new FromJsonTableSeparatorsBuilder("UTF-8").configureSetting(reader.readObject()).build();
-        }
     }
 
     /**

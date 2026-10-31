@@ -22,6 +22,13 @@ public record TableSplitter(TableRenameStrategy renameFunction, List<String> bre
         return this.renameFunction.renameFunction().apply(baseTableName, no);
     }
 
+    /**
+     * 分割の区切りを判定する行のキー（breakKeyが無ければ空）
+     */
+    public List<String> breakKeys(final AddSettingTableMetaData metaData, final Object[] row) {
+        return this.breakKeys.isEmpty() ? List.of() : metaData.getBreakKeys(row);
+    }
+
     public boolean isLimit(final int addRowCount) {
         return this.isSplit() && this.limit <= addRowCount;
     }

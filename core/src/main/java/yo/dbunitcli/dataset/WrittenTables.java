@@ -54,14 +54,14 @@ public final class WrittenTables {
     /**
      * 分割後のテーブルを、どの分割のまとまり（分割後の1つ目のテーブル名）に属するかとともに記録する
      */
-    public void putSplitTable(final String tableName, final String firstTableName) {
+    void putSplitTable(final String tableName, final String firstTableName) {
         this.splitTables.put(tableName, firstTableName);
     }
 
     /**
      * 分割後のテーブルが属する分割のまとまり（分割後の1つ目のテーブル名）。分割後のテーブルでなければ空
      */
-    public Optional<String> splitGroup(final String tableName) {
+    Optional<String> splitGroup(final String tableName) {
         return Optional.ofNullable(this.splitTables.get(tableName));
     }
 

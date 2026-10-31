@@ -64,15 +64,11 @@ public record ComparableTableMappingContext(TableSeparators tableSeparators
         return this.tableMap;
     }
 
-    public Stream<AddSettingTableMetaData> getAddSettingTableMetaData(final ComparableTableJoin join) {
-        return this.tableSeparators.getAddSettingTableMetaData(join);
-    }
-
     /**
      * 分割を待っている行（行を保持して分割するテーブル）を、まとめて1回だけ並べ替えて分割し、分割後のテーブルを確定させる。
      * 分割後の1つ目のテーブルを関係するjoinへ渡す
      */
-    public void flushSplits() {
+    void flushSplits() {
         this.alreadyWrite.takePendingSplits().forEach(pending -> {
             final List<ComparableTable> tables = pending.split();
             tables.forEach(table -> {
@@ -119,7 +115,7 @@ public record ComparableTableMappingContext(TableSeparators tableSeparators
                             .setChain(this.chain)
                             .setChainRun(this.chainRun)
                             .setListener(this.listener)
-                            .build(this.getAddSettingTableMetaData(join));
+                            .build(this.tableSeparators.getAddSettingTableMetaData(join));
                     joinMapper.startTable();
                     join.execute().forEach(joinMapper::addRow);
                     joinMapper.endTable();
