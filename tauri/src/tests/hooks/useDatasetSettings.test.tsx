@@ -292,6 +292,34 @@ describe("DatasetSettingsProviderのテスト", () => {
 			});
 		});
 
+		it("同じ値で再レンダーしても読み直さず、追加項目（unitSettingEncoding）が変わったら読み直すことを確認", async () => {
+			const unitPreviewCalls = () =>
+				mockFetchData.mock.calls.filter(([p]) =>
+					p.endpoint.includes("/dataset-setting/unit-table-preview"),
+				);
+			const { result, rerender } = renderHook(
+				({ encoding }) =>
+					useDatasetUnitTablePreview(srcInfo, "t1", "unit.json", encoding),
+				{ wrapper: envWrapper, initialProps: { encoding: "MS932" } },
+			);
+			await waitFor(() => {
+				expect(result.current.loading).toBe(false);
+			});
+			expect(unitPreviewCalls()).toHaveLength(1);
+
+			rerender({ encoding: "MS932" });
+			await act(async () => {});
+			expect(unitPreviewCalls()).toHaveLength(1);
+
+			rerender({ encoding: "UTF-8" });
+			await waitFor(() => {
+				expect(unitPreviewCalls()).toHaveLength(2);
+			});
+			expect(
+				JSON.parse(String(unitPreviewCalls()[1][0].options.body)),
+			).toMatchObject({ unitSettingEncoding: "UTF-8" });
+		});
+
 		it("unitSettingが空なら問い合わせないことを確認", async () => {
 			const { result } = renderHook(
 				() => useDatasetUnitTablePreview(srcInfo, "t1", "", ""),
