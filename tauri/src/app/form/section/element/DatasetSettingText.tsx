@@ -1,25 +1,39 @@
-import type { Dispatch, SetStateAction } from "react";
+import type { ComponentType, Dispatch, SetStateAction } from "react";
 import { InlineActions } from "../../../../components/dialog";
 import { useDatasetSrcInfo } from "../../../../context/DatasetSrcInfoProvider";
 import { useResourcesSettings } from "../../../../context/WorkspaceResourcesProvider";
 import { srcTypeOf } from "../../../../model/CommandOption";
-import { DatasetSettingGenerateButton } from "../dialog/DatasetSettingGenerateDialog";
-import DatasetSettingsDialog from "../dialog/DatasetSettingsDialog";
+import {
+	DatasetSettingGenerateButton,
+	type DatasetSettingsEditDialogComponent,
+} from "../dialog/DatasetSettingGenerateDialog";
+import DatasetSettingsDialog, {
+	DatasetSettingsEditDialog,
+} from "../dialog/DatasetSettingsDialog";
 import DatasetTableNamesPreviewButton from "../dialog/DatasetTableNamesPreviewButton";
 import {
 	EditResourceButton,
+	type EditResourceDialogProps,
 	RemoveResourceButton,
 } from "../dialog/ResourceEditButton";
 import type { TextProp } from "./FormElementProp";
 import Text, { TextDropDownMenu } from "./Text";
 
+// editDialog: 編集ボタンで開くダイアログ、generateEditDialog: 生成結果を確認・保存するダイアログ。
+// 省略するとDataset Settingsを使う（compareの-settingはCompare Key Settingsを渡し、Previewも出さない）
 export default function DatasetSettingText({
 	prefix,
 	element,
 	hidden,
-	hideDatasetSettingEdit,
 	handleValueChange,
-}: TextProp) {
+	editDialog = DatasetSettingsDialog,
+	generateEditDialog = DatasetSettingsEditDialog,
+	showPreview = true,
+}: TextProp & {
+	editDialog?: ComponentType<EditResourceDialogProps>;
+	generateEditDialog?: DatasetSettingsEditDialogComponent;
+	showPreview?: boolean;
+}) {
 	const datasetSrcInfo = useDatasetSrcInfo();
 	const settings = useResourcesSettings();
 	const resourceFiles = settings.datasetSettings;
@@ -33,7 +47,7 @@ export default function DatasetSettingText({
 			showDefaulePath={true}
 			handleValueChange={handleValueChange}
 			afterContent={({ path }) =>
-				srcTypeOf(datasetSrcInfo) && !hideDatasetSettingEdit ? (
+				showPreview && srcTypeOf(datasetSrcInfo) ? (
 					<InlineActions>
 						<DatasetTableNamesPreviewButton
 							title="Preview Before Settings"
@@ -62,23 +76,19 @@ export default function DatasetSettingText({
 						prefix={prefix}
 						element={element}
 						isValueInDatalist={isValueInDatalist}
-						editButtons={
-							!hideDatasetSettingEdit
-								? [
-										<EditResourceButton
-											dialog={DatasetSettingsDialog}
-											key="edit"
-											path={path}
-											setPath={handleSetPath}
-										/>,
-										<DatasetSettingGenerateButton
-											key="generate"
-											path={path}
-											setPath={handleSetPath}
-										/>,
-									]
-								: undefined
-						}
+						editButtons={[
+							<EditResourceButton
+								dialog={editDialog}
+								key="edit"
+								path={path}
+								setPath={handleSetPath}
+							/>,
+							<DatasetSettingGenerateButton
+								key="generate"
+								setPath={handleSetPath}
+								editDialog={generateEditDialog}
+							/>,
+						]}
 						removeButton={(closeMenu) => (
 							<RemoveResourceButton
 								kind="datasetSetting"

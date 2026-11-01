@@ -4,8 +4,11 @@ import { DatasetSrcInfoProvider } from "../../context/DatasetSrcInfoProvider";
 import { buildDatasetSrcInfo } from "../../model/CommandOption";
 import type { CompareOptions } from "../../model/SelectParameter";
 import { DatasetLoadForm } from "./section/DatasetLoadForm";
+import CompareKeySettingsDialog, {
+	CompareKeySettingsEditDialog,
+} from "./section/dialog/CompareKeySettingsDialog";
 import Check from "./section/element/Check";
-import CompareSettingText from "./section/element/CompareSettingText";
+import DatasetSettingText from "./section/element/DatasetSettingText";
 import EncodingText from "./section/element/EncodingText";
 import FileText from "./section/element/FileText";
 import Select from "./section/element/Select";
@@ -49,7 +52,13 @@ export function CompareForm(prop: {
 						key={`${prop.name}compare-setting:${oldData.srcType?.value ?? ""}`}
 						initialValue={oldDataInitialInfo}
 					>
-						<CompareSettingText prefix="" element={settingElement} />
+						<DatasetSettingText
+							prefix=""
+							element={settingElement}
+							editDialog={CompareKeySettingsDialog}
+							generateEditDialog={CompareKeySettingsEditDialog}
+							showPreview={false}
+						/>
 					</DatasetSrcInfoProvider>
 				) : (
 					<FileText prefix="" element={settingElement} />

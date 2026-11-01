@@ -1,3 +1,4 @@
+import type { ComponentType } from "react";
 import {
 	DatasetSettings,
 	type DatasetSettingsBuilder,
@@ -9,28 +10,40 @@ import {
 	type ModelGenerateConfig,
 } from "./GenerateDialog";
 
-export const datasetSettingGenerateConfig: ModelGenerateConfig<
-	DatasetSettingsBuilder,
-	DatasetSettings
-> = {
-	generateType: "settings",
-	formId: "datasetSettingGenerateForm",
-	name: "datasetSettingGenerate",
-	command: "dialogs/dataset-setting-generate",
-	label: "Dataset Setting Generate",
-	title: "Generate Dataset Setting",
-	endpoint: "dataset-setting/generate",
-	build: DatasetSettings.build,
-	// 生成後は既存の編集ダイアログで内容確認・命名保存する
-	renderEditDialog: (settings, props) => (
-		<DatasetSettingsEditDialog settings={settings} {...props} />
-	),
-};
+export type DatasetSettingsEditDialogComponent = ComponentType<{
+	settings: DatasetSettings;
+	fileName: string;
+	handleDialogClose: () => void;
+	handleSave: (fileName: string) => void;
+}>;
 
-export function DatasetSettingGenerateButton({ setPath }: GenerateButtonProps) {
+// 生成後は渡された編集ダイアログで内容確認・命名保存する
+function datasetSettingGenerateConfig(
+	EditDialog: DatasetSettingsEditDialogComponent,
+): ModelGenerateConfig<DatasetSettingsBuilder, DatasetSettings> {
+	return {
+		generateType: "settings",
+		formId: "datasetSettingGenerateForm",
+		name: "datasetSettingGenerate",
+		command: "dialogs/dataset-setting-generate",
+		label: "Dataset Setting Generate",
+		title: "Generate Dataset Setting",
+		endpoint: "dataset-setting/generate",
+		build: DatasetSettings.build,
+		renderEditDialog: (settings, props) => (
+			<EditDialog settings={settings} {...props} />
+		),
+	};
+}
+
+// editDialogを省略するとDataset Settingsで確認する（compareの比較キーはCompare Key Settingsを渡す）
+export function DatasetSettingGenerateButton({
+	setPath,
+	editDialog = DatasetSettingsEditDialog,
+}: GenerateButtonProps & { editDialog?: DatasetSettingsEditDialogComponent }) {
 	return (
 		<ModelGenerateButton
-			config={datasetSettingGenerateConfig}
+			config={datasetSettingGenerateConfig(editDialog)}
 			setPath={setPath}
 		/>
 	);

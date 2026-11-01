@@ -180,11 +180,9 @@ const filterOrderFields = [
 	},
 ] as const;
 
-export type FilterOrderFieldName = (typeof filterOrderFields)[number]["name"];
-const allFilterOrderFieldNames: readonly FilterOrderFieldName[] =
-	filterOrderFields.map((field) => field.name);
+type FilterOrderFieldName = (typeof filterOrderFields)[number]["name"];
 
-// fieldNamesで表示する項目を絞れる（compareの比較キー設定ではkeysだけを使う）
+// fieldNamesで表示する項目を絞れる（省略時はすべて。compareの比較キー設定ではkeysだけを使う）
 export function FilterOrderFields({
 	target,
 	setTarget,
@@ -192,7 +190,7 @@ export function FilterOrderFields({
 	columnList,
 	onLoadColumns,
 	legend = "Filter / Order",
-	fieldNames = allFilterOrderFieldNames,
+	fieldNames,
 }: DatasetSettingFieldsProps & {
 	columnDatalist: string[];
 	columnList: string | undefined;
@@ -200,8 +198,8 @@ export function FilterOrderFields({
 	legend?: string;
 	fieldNames?: readonly FilterOrderFieldName[];
 }) {
-	const visibleFields = filterOrderFields.filter((field) =>
-		fieldNames.includes(field.name),
+	const visibleFields = filterOrderFields.filter(
+		(field) => !fieldNames || fieldNames.includes(field.name),
 	);
 	const [selecting, setSelecting] = useState<{
 		field: (typeof filterOrderFields)[number];

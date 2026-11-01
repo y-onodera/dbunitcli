@@ -4,27 +4,18 @@ import {
 	SettingTable,
 	StatusMessage,
 } from "../../../../components/dialog";
-import { useDatasetSrcInfo } from "../../../../context/DatasetSrcInfoProvider";
 import {
 	useDatasetSettingsData,
-	useDatasetTableNames,
 	useSaveDatasetSettings,
 } from "../../../../hooks/useDatasetSettings";
-import { withAllTables } from "../../../../model/CommandOption";
 import {
 	type DatasetSetting,
 	type DatasetSettings,
-	type DatasetSettingsBuilder,
 	newDatasetSetting,
 } from "../../../../model/DatasetSettings";
 import ColumnDatalistDialog from "./ColumnDatalistDialog";
 import { FilterOrderFields, TargetFields } from "./DatasetSettingFields";
-import { datasetSettingGenerateConfig } from "./DatasetSettingGenerateDialog";
-import {
-	type GenerateButtonProps,
-	ModelGenerateButton,
-	type ModelGenerateConfig,
-} from "./GenerateDialog";
+import { useColumnCandidates } from "./useColumnCandidates";
 
 const keysOnly = ["keys"] as const;
 
@@ -113,12 +104,7 @@ export function CompareKeySettingDialog(props: {
 	handleCommit: (newSettings: DatasetSetting) => void;
 }) {
 	const [target, setTarget] = useState(props.setting);
-	const [columnDatalist, setColumnDatalist] = useState<string[]>([]);
-	const [showColumnDialog, setShowColumnDialog] = useState(false);
-	const columnList =
-		columnDatalist.length > 0 ? "column_datalist_list" : undefined;
-	const datasetSrcInfo = useDatasetSrcInfo();
-	const { tableNames } = useDatasetTableNames(withAllTables(datasetSrcInfo));
+	const candidates = useColumnCandidates();
 
 	return (
 		<SettingDialog
@@ -132,47 +118,25 @@ export function CompareKeySettingDialog(props: {
 			<TargetFields
 				target={target}
 				setTarget={setTarget}
-				tableNames={tableNames}
+				tableNames={candidates.tableNames}
 			/>
 			<FilterOrderFields
 				target={target}
 				setTarget={setTarget}
-				columnDatalist={columnDatalist}
-				columnList={columnList}
-				onLoadColumns={() => setShowColumnDialog(true)}
+				columnDatalist={candidates.columnDatalist}
+				columnList={candidates.columnList}
+				onLoadColumns={candidates.openColumnDialog}
 				legend="Keys"
 				fieldNames={keysOnly}
 			/>
-			{showColumnDialog && (
+			{candidates.showColumnDialog && (
 				<ColumnDatalistDialog
-					tableNames={tableNames}
+					tableNames={candidates.tableNames}
 					target={target}
-					onLoad={(columns) => setColumnDatalist(columns)}
-					onClose={() => setShowColumnDialog(false)}
+					onLoad={candidates.setColumnDatalist}
+					onClose={candidates.closeColumnDialog}
 				/>
 			)}
 		</SettingDialog>
-	);
-}
-
-// 生成はDataset Setting Generateと同じで、生成結果の確認・保存をこのダイアログで行う
-const compareKeySettingGenerateConfig: ModelGenerateConfig<
-	DatasetSettingsBuilder,
-	DatasetSettings
-> = {
-	...datasetSettingGenerateConfig,
-	renderEditDialog: (settings, props) => (
-		<CompareKeySettingsEditDialog settings={settings} {...props} />
-	),
-};
-
-export function CompareKeySettingGenerateButton({
-	setPath,
-}: GenerateButtonProps) {
-	return (
-		<ModelGenerateButton
-			config={compareKeySettingGenerateConfig}
-			setPath={setPath}
-		/>
 	);
 }
