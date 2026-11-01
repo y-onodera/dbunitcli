@@ -1,358 +1,113 @@
 package yo.dbunitcli.application.command;
 
-import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
 import yo.dbunitcli.application.ParameterUnit;
-import yo.dbunitcli.common.Parameter;
+import yo.dbunitcli.application.command.generate.DdlGenerateStrategy;
+import yo.dbunitcli.application.command.generate.DescriptorGenerateStrategy;
+import yo.dbunitcli.application.command.generate.ExcelGenerateStrategy;
+import yo.dbunitcli.application.command.generate.FixedColumnDefGenerateStrategy;
+import yo.dbunitcli.application.command.generate.GenerateStrategy;
+import yo.dbunitcli.application.command.generate.GenerateWriter;
+import yo.dbunitcli.application.command.generate.JavaBeanGenerateStrategy;
+import yo.dbunitcli.application.command.generate.SettingsGenerateStrategy;
+import yo.dbunitcli.application.command.generate.SqlGenerateStrategy;
+import yo.dbunitcli.application.command.generate.TextGenerateStrategy;
+import yo.dbunitcli.application.command.generate.XlsxSchemaGenerateStrategy;
+import yo.dbunitcli.application.command.generate.XlsxTemplateGenerateStrategy;
 import yo.dbunitcli.dataset.ComparableDataSetProducer;
-import yo.dbunitcli.dataset.producer.ComparableDdlMetaDataProducer;
-import yo.dbunitcli.dataset.producer.ComparableFixedColumnDefMetaDataProducer;
-import yo.dbunitcli.dataset.producer.ComparableXlsxSchemaMetaDataProducer;
-import yo.dbunitcli.resource.FileResources;
-import yo.dbunitcli.resource.poi.jxls.JxlsTemplateGenerator;
-import yo.dbunitcli.resource.poi.jxls.JxlsTemplateRender;
-import yo.dbunitcli.resource.st4.TemplateRender;
 
-import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.util.stream.Stream;
 
+/**
+ * -generateTypeの値。具体的な生成ロジックは定数ごとの{@link GenerateStrategy}実装（command/generate/配下）が持ち、
+ * このenumは委譲するだけ
+ */
 public enum GenerateType {
-    txt(null, null) {
-        @Override
-        public String getTemplateString(final GenerateOption option) {
-            final File templatePath = option.getTemplatePath();
-            if (templatePath == null || !templatePath.exists() || !templatePath.isFile()) {
-                throw new AssertionError(option.template() + " is not exist file",
-                                         new IllegalArgumentException(String.valueOf(option.template())));
-            }
-            return FileResources.read(templatePath, option.templateOption().encoding());
-        }
-    }, xlsx(null, null) {
-        @Override
-        public Writer writer(final GenerateOption option) throws IOException {
-            return GenerateType.excelWriter(option);
-        }
-    }, xls(null, null) {
-        @Override
-        public Writer writer(final GenerateOption option) throws IOException {
-            return GenerateType.excelWriter(option);
-        }
-    }, settings("settings/settingTemplate.stg", "settings/settingTemplate.txt") {
-        @Override
-        public boolean isFixedTemplate() {
-            return true;
-        }
+    txt(new TextGenerateStrategy()),
+    xlsx(new ExcelGenerateStrategy()),
+    xls(new ExcelGenerateStrategy()),
+    settings(new SettingsGenerateStrategy()),
+    sql(new SqlGenerateStrategy()),
+    ddl(new DdlGenerateStrategy()),
+    xlsxTemplate(new XlsxTemplateGenerateStrategy()),
+    xlsxSchema(new XlsxSchemaGenerateStrategy()),
+    javaBean(new JavaBeanGenerateStrategy()),
+    fixedColumnDef(new FixedColumnDefGenerateStrategy());
 
-        @Override
-        public ParameterUnit getFixedUnit() {
-            return ParameterUnit.dataset;
-        }
+    private final GenerateStrategy strategy;
 
-        @Override
-        protected boolean loadData() {
-            return false;
-        }
-
-        @Override
-        protected boolean useJdbcMetaData() {
-            return true;
-        }
-    }, sql("sql/sqlTemplate.stg", null) {
-        @Override
-        public boolean isFixedTemplate() {
-            return true;
-        }
-
-        @Override
-        public ParameterUnit getFixedUnit() {
-            return ParameterUnit.table;
-        }
-
-        @Override
-        public String getTemplateString(final GenerateOption option) {
-            return FileResources.readClasspathResource(switch (option.operation()) {
-                case INSERT -> "sql/insertTemplate.txt";
-                case DELETE -> "sql/deleteTemplate.txt";
-                case UPDATE -> "sql/updateTemplate.txt";
-                case CLEAN_INSERT -> "sql/cleanInsertTemplate.txt";
-                default -> "sql/deleteInsertTemplate.txt";
-            });
-        }
-
-        @Override
-        protected boolean useJdbcMetaData() {
-            return true;
-        }
-
-        @Override
-        protected String resultPathTemplate(final GenerateOption option) {
-            return GenerateType.sqlResultPath(option);
-        }
-    }, ddl("sql/ddlTemplate.stg", "sql/ddlTemplate.txt") {
-        @Override
-        public boolean isFixedTemplate() {
-            return true;
-        }
-
-        @Override
-        public ParameterUnit getFixedUnit() {
-            return ParameterUnit.table;
-        }
-
-        @Override
-        public String defaultSettingsPath() {
-            return "sql/ddlSettings.json";
-        }
-
-        @Override
-        protected boolean loadData() {
-            return false;
-        }
-
-        @Override
-        protected boolean useJdbcMetaData() {
-            return true;
-        }
-
-        @Override
-        protected ComparableDataSetProducer wrapProducer(final GenerateOption option, final ComparableDataSetProducer producer) {
-            return ComparableDdlMetaDataProducer.forSource(producer);
-        }
-
-        @Override
-        protected String resultPathTemplate(final GenerateOption option) {
-            return GenerateType.sqlResultPath(option);
-        }
-    }, xlsxTemplate(null, null) {
-        @Override
-        public boolean isFixedTemplate() {
-            return true;
-        }
-
-        @Override
-        public ParameterUnit getFixedUnit() {
-            return ParameterUnit.dataset;
-        }
-
-        @Override
-        protected boolean loadData() {
-            return false;
-        }
-
-        @Override
-        public Writer writer(final GenerateOption option) {
-            return JxlsTemplateGenerator::createTemplate;
-        }
-    }, xlsxSchema("xlsxschema/xlsxSchemaTemplate.stg", "xlsxschema/xlsxSchemaTemplate.txt") {
-        @Override
-        public boolean isFixedTemplate() {
-            return true;
-        }
-
-        @Override
-        public ParameterUnit getFixedUnit() {
-            return ParameterUnit.table;
-        }
-
-        // separateルールでPK/CELLSサブテーブルを合成する（Scaffoldがコピーする雛型と同一ファイル。
-        // テンプレートのsubTable.PK/subTable.CELLS参照はこの分割が前提）
-        @Override
-        public String defaultSettingsPath() {
-            return "xlsxschema/xlsxSchemaSettings.json";
-        }
-
-        @Override
-        protected boolean loadData() {
-            return false;
-        }
-
-        @Override
-        protected String resultPathTemplate(final GenerateOption option) {
-            return GenerateType.tableFileResultPath(option);
-        }
-
-        @Override
-        protected ComparableDataSetProducer wrapProducer(final GenerateOption option, final ComparableDataSetProducer producer) {
-            return new ComparableXlsxSchemaMetaDataProducer(producer);
-        }
-    }, javaBean("javabean/javaBeanTemplate.stg", "javabean/javaBeanTemplate.txt") {
-        @Override
-        public boolean isFixedTemplate() {
-            return true;
-        }
-
-        @Override
-        public ParameterUnit getFixedUnit() {
-            return ParameterUnit.table;
-        }
-
-        @Override
-        public String defaultSettingsPath() {
-            return "javabean/javaBeanSettings.json";
-        }
-
-        @Override
-        protected boolean loadData() {
-            return false;
-        }
-
-        @Override
-        protected boolean useJdbcMetaData() {
-            return true;
-        }
-
-        @Override
-        protected ComparableDataSetProducer wrapProducer(final GenerateOption option, final ComparableDataSetProducer producer) {
-            return ComparableDdlMetaDataProducer.forSource(producer);
-        }
-
-        @Override
-        protected String resultPathTemplate(final GenerateOption option) {
-            return GenerateType.tableFileResultPath(option, "", "", ".java", "snakeToUpperCamel");
-        }
-    }, fixedColumnDef("fixedcolumndef/fixedColumnDefTemplate.stg", "fixedcolumndef/fixedColumnDefTemplate.txt") {
-        @Override
-        public boolean isFixedTemplate() {
-            return true;
-        }
-
-        @Override
-        public ParameterUnit getFixedUnit() {
-            return ParameterUnit.table;
-        }
-
-        @Override
-        protected boolean loadData() {
-            return false;
-        }
-
-        @Override
-        protected String resultPathTemplate(final GenerateOption option) {
-            return GenerateType.tableFileResultPath(option);
-        }
-
-        @Override
-        protected ComparableDataSetProducer wrapProducer(final GenerateOption option, final ComparableDataSetProducer producer) {
-            return ComparableFixedColumnDefMetaDataProducer.of(producer, option.fixedLength(), option.defaultLength(), option.align());
-        }
-    };
-
-    private final String stgPath;
-    private final String templatePath;
-
-    GenerateType(final String stgPath, final String templatePath) {
-        this.stgPath = stgPath;
-        this.templatePath = templatePath;
-    }
-
-    private static STGroup loadStGroup(final String stgPath) {
-        return new TemplateRender.Builder().setTemplateParameterAttribute(null).build().createSTGroup(stgPath);
+    GenerateType(final GenerateStrategy strategy) {
+        this.strategy = strategy;
     }
 
     public String getStgPath() {
-        return this.stgPath;
+        return this.strategy.stgPath();
     }
 
     public String getTemplatePath() {
-        return this.templatePath;
+        return this.strategy.templatePath();
     }
 
     public STGroup getStGroup() {
-        return this.stgPath != null ? loadStGroup(this.stgPath) : null;
+        return this.strategy.stGroup();
     }
 
     public String getTemplateString(final GenerateOption option) {
-        return this.templatePath != null ? FileResources.readClasspathResource(this.templatePath) : null;
+        return this.strategy.templateString(option);
     }
 
     public String defaultSettingsPath() {
-        return null;
+        return this.strategy.defaultSettingsPath();
     }
 
     public boolean isExcel() {
-        return Stream.of(xlsx, xls)
-                     .anyMatch(it -> it == this);
+        return this.strategy.isExcel();
     }
 
     public boolean isText() {
-        return Stream.of(xlsx, xls, xlsxTemplate)
-                     .noneMatch(it -> it == this);
+        return this.strategy.isText();
     }
 
     protected boolean isFixedTemplate() {
-        return false;
+        return this.strategy.isFixedTemplate();
     }
 
     protected ParameterUnit getFixedUnit() {
-        return null;
+        return this.strategy.fixedUnit();
     }
 
     protected boolean loadData() {
-        return true;
+        return this.strategy.loadData();
     }
 
     protected boolean useJdbcMetaData() {
-        return false;
+        return this.strategy.useJdbcMetaData();
     }
 
-    // GenerateOption.forEachParameter()のunit=table（Excel以外）だけがこの戻り値を消費する(ParameterUnit.tableTemplates()経由)。
-    // ここをoverrideしてもunit=table以外では反映されない。
     protected ComparableDataSetProducer wrapProducer(final GenerateOption option, final ComparableDataSetProducer producer) {
-        return producer;
+        return this.strategy.wrapProducer(option, producer);
     }
 
     protected String resultPathTemplate(final GenerateOption option) {
-        return option.resultPath();
-    }
-
-    private static String tableFileResultPath(final GenerateOption option) {
-        return GenerateType.tableFileResultPath(option, "", "", ".json");
-    }
-
-    private static String tableFileResultPath(final GenerateOption option, final String prefix, final String suffix,
-                                              final String extension) {
-        return GenerateType.tableFileResultPath(option, prefix, suffix, extension, null);
-    }
-
-    private static String tableFileResultPath(final GenerateOption option, final String prefix, final String suffix,
-                                              final String extension, final String nameFormat) {
-        final String tableName = nameFormat == null
-                ? option.templateOption().getTemplateRender().getAttributeName("tableName")
-                : option.templateOption().getTemplateRender().getAttributeName("tableName", nameFormat);
-        return option.resultPath() + "/" + prefix + tableName + suffix + extension;
-    }
-
-    private static String sqlResultPath(final GenerateOption option) {
-        return GenerateType.tableFileResultPath(option, option.sqlFilePrefix(), option.sqlFileSuffix(), ".sql");
+        return this.strategy.resultPathTemplate(option);
     }
 
     /**
      * テンプレートの読込・コンパイルを1回だけ行い、出力処理を返す。戻り値は複数スレッドから同時に呼ばれうる
      */
-    public Writer writer(final GenerateOption option) throws IOException {
-        final TemplateRender render = option.templateOption().getTemplateRender();
-        final ST template = render.compile(this.getStGroup(), option.templateString());
-        return (resultFile, param) -> render.write(template, param, resultFile, option.outputEncoding());
+    public GenerateWriter writer(final GenerateOption option) throws IOException {
+        return this.strategy.writer(option);
     }
 
-    private static Writer excelWriter(final GenerateOption option) throws IOException {
-        final JxlsTemplateRender render = JxlsTemplateRender.builder()
-                .setTemplateParameterAttribute(option.templateOption().templateParameterAttribute())
-                .setFormulaProcess(Boolean.parseBoolean(option.templateOption().formulaProcess()))
-                .setEvaluateFormulas(Boolean.parseBoolean(option.templateOption().evaluateFormulas()))
-                .setForceFormulaRecalc(Boolean.parseBoolean(option.templateOption().forceFormulaRecalc()))
-                .setFastFormulaProcess(Boolean.parseBoolean(option.templateOption().fastFormulaProcess()))
-                .setDeleteBlankCells(Boolean.parseBoolean(option.templateOption().deleteBlankCells())).build();
-        final byte[] template = Files.readAllBytes(option.getTemplatePath().toPath());
-        final boolean useStreamingEach = option.unit() != ParameterUnit.record;
-        return (resultFile, param) -> render.render(template, resultFile, param, useStreamingEach);
+    /**
+     * 記述子行を合成する型（ddl/javaBean/xlsxSchema/fixedColumnDef）のstrategy。ScaffoldTargetが記述子dataset雛型の合成に使う
+     *
+     * @throws IllegalStateException 記述子型でない場合
+     */
+    DescriptorGenerateStrategy descriptorStrategy() {
+        if (this.strategy instanceof final DescriptorGenerateStrategy descriptor) {
+            return descriptor;
+        }
+        throw new IllegalStateException(this.name() + " is not descriptor generateType");
     }
-
-    @FunctionalInterface
-    public interface Writer {
-        void write(File resultFile, Parameter param) throws IOException;
-    }
-
 }

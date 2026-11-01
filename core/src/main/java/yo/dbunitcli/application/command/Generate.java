@@ -1,6 +1,7 @@
 package yo.dbunitcli.application.command;
 
 import yo.dbunitcli.application.Command;
+import yo.dbunitcli.application.command.generate.GenerateWriter;
 import yo.dbunitcli.common.Parameter;
 
 import java.io.File;
@@ -15,7 +16,7 @@ public class Generate implements Command<GenerateDto, GenerateOption> {
 
     @Override
     public void execute(final GenerateOption options) {
-        final GenerateType.Writer writer;
+        final GenerateWriter writer;
         try {
             writer = options.writer();
         } catch (final IOException e) {
