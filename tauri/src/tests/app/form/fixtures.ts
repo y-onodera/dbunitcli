@@ -415,7 +415,6 @@ function makeCsvConvertResult(required = false, parallel = true) {
 			required ? ["csv", "xls", "xlsx"] : ["csv", "xls", "xlsx", "table"],
 		),
 		result: makeElement("result", "DIR", "", "RESULT", false),
-		resultPath: makeElement("resultPath", "TEXT", "", "WORKSPACE", false),
 		exportEmptyTable: makeElement(
 			"exportEmptyTable",
 			"FLG",
@@ -451,7 +450,12 @@ function makeXlsxConvertResult(resultValue: string, excelTable = "SHEET") {
 			"table",
 		]),
 		result: makeElement("result", "DIR", resultValue, "RESULT", false),
-		resultPath: makeElement("resultPath", "TEXT", "", "WORKSPACE", false),
+		// BOOKと確定しているときはresultPathを使わないため含まれない
+		...(excelTable === "BOOK"
+			? {}
+			: {
+					resultPath: makeElement("resultPath", "TEXT", "", "WORKSPACE", false),
+				}),
 		exportEmptyTable: makeElement(
 			"exportEmptyTable",
 			"FLG",
@@ -528,7 +532,6 @@ export const compareLoadResponseFixture = {
 			"RESULT",
 			false,
 		),
-		resultPath: makeElement("resultPath", "TEXT", "", "WORKSPACE", false),
 		exportEmptyTable: makeElement(
 			"exportEmptyTable",
 			"FLG",

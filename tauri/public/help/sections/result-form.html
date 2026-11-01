@@ -27,10 +27,10 @@
   <p><code>resultType</code> が <code>table</code> 以外の場合に表示される共通項目です。</p>
   <table>
     <tr><th>項目</th><th>説明</th><th>デフォルト</th></tr>
-    <tr><td>result</td><td>出力先ディレクトリのパス</td><td>—</td></tr>
-    <tr><td>resultPath</td><td>出力先のパス。テーブル名などを変数として使える</td><td>—</td></tr>
+    <tr><td>result</td><td>出力先ディレクトリのパス。相対パスは Result Base からの相対</td><td>（空）＝ Result Base</td></tr>
+    <tr><td>resultPath</td><td>全テーブルをまとめたブックのファイル名（拡張子なし）。xls / xlsx のときだけ表示し、<code>excelTable=BOOK</code> のときは表示しない（下記「<a href="#section-result-path-examples">result と resultPath の生成例</a>」を参照）</td><td>（空）</td></tr>
     <tr><td>exportEmptyTable</td><td>ON にすると、データ行が 0 件のテーブルも出力する</td><td>ON</td></tr>
-    <tr><td>exportHeader</td><td>ON にすると、出力ファイルにヘッダ行を含める</td><td>ON</td></tr>
+    <tr><td>exportHeader</td><td>ON にすると、出力ファイルにヘッダ行を含める。<code>format</code> / <code>fixed</code> ではヘッダ行を出力しないため表示しない</td><td>ON</td></tr>
     <tr><td>parallel</td><td>入力ソースを並列に読み込むスレッド数。並列化できる組み合わせのときだけ表示（<code>table</code> でも表示）。<code>1</code> で逐次。空欄なら並列化できる場合に CPU コア数で並列化する（Parameterize の並列実行の中では逐次）。詳細は下記「並列読込」を参照</td><td>（空）</td></tr>
   </table>
 
@@ -50,9 +50,153 @@
   <p>Compare では、new / old それぞれの読み込みに適用されます（比較結果の出力自体は並列化しません）。並び替え・重複除去を指定したテーブルは全行をメモリに保持するため、並列数を増やすとメモリ使用量も増えます。</p>
   <p>入力の srcType が <code>table</code> / <code>sql</code> の場合と、出力形式が <code>table</code> の場合は、スレッドごとに DB 接続を張って読み込み・書き込みます（接続数は読み込み・書き込みそれぞれ最大で並列数。詳細は <a href="result-form/types/table.html">table</a> を参照）。</p>
 
+  <h2 id="section-result-path-examples">result と resultPath の生成例</h2>
+  <p>出力ファイルのパスは <code>result</code>（ディレクトリ）と <code>resultPath</code>（その中のファイル名・相対パス）を組み合わせて決まります。以下の例では Result Base（<a href="../dialogs/workspace.html">Workspace</a> で設定。未設定なら Workspace）を <code>C:/work</code>、テーブルを <code>ORDERS</code> / <code>ITEMS</code> の 2 つとします。</p>
+
+  <h3 id="section-result-path-rule">result の解決ルール（全コマンド共通）</h3>
+  <table>
+    <tr><th>result の値</th><th>出力先ディレクトリ</th></tr>
+    <tr><td>（空）</td><td><code>C:/work</code>（Result Base そのもの）</td></tr>
+    <tr><td><code>out/convert</code>（相対パス）</td><td><code>C:/work/out/convert</code></td></tr>
+    <tr><td><code>D:/export</code>（絶対パス）</td><td><code>D:/export</code>（Result Base は使わない）</td></tr>
+    <tr><td><code>%USERPROFILE%/export</code></td><td><code>C:/Users/&lt;ユーザ&gt;/export</code>（<code>%USERPROFILE%</code> / <code>%HOME%</code> は OS の環境変数に置き換わる）</td></tr>
+  </table>
+  <p>出力先のディレクトリがなければ作成されます。</p>
+
+  <h3 id="section-result-path-convert">Convert / Compare（Result Form）</h3>
+  <p>csv / format / fixed と、xls / xlsx の <code>excelTable=BOOK</code> は <strong>テーブルごとに <code>テーブル名.拡張子</code> のファイル</strong>を作るため、<code>resultPath</code> は表示されません。<code>resultPath</code> を使うのは、全テーブルを 1 ブックにまとめる xls / xlsx の <code>excelTable=SHEET</code> だけです（<code>excelTable</code> に Env の変数を指定した場合も、<code>BOOK</code> と確定していないため表示されます）。</p>
+  <table>
+    <tr><th>resultType</th><th>result</th><th>resultPath</th><th>出力されるファイル</th></tr>
+    <tr><td>csv</td><td><code>out</code></td><td>（表示されない）</td><td><code>C:/work/out/ORDERS.csv</code><br><code>C:/work/out/ITEMS.csv</code></td></tr>
+    <tr><td>csv（<code>outputExtension=tsv</code>）</td><td><code>out</code></td><td>（表示されない）</td><td><code>C:/work/out/ORDERS.tsv</code><br><code>C:/work/out/ITEMS.tsv</code></td></tr>
+    <tr><td>xlsx（<code>excelTable=BOOK</code>）</td><td><code>out</code></td><td>（表示されない）</td><td><code>C:/work/out/ORDERS.xlsx</code><br><code>C:/work/out/ITEMS.xlsx</code></td></tr>
+    <tr><td>xlsx（<code>excelTable=SHEET</code>）</td><td><code>out</code></td><td><code>orders_all</code></td><td><code>C:/work/out/orders_all.xlsx</code>（シート ORDERS / ITEMS）</td></tr>
+    <tr><td>xlsx（<code>excelTable=SHEET</code>）</td><td><code>out</code></td><td><code>orders_all.xlsx</code></td><td><code>C:/work/out/orders_all.xlsx.xlsx</code>（拡張子は自動で付くため、<code>resultPath</code> には付けない）</td></tr>
+    <tr><td>xls（<code>excelTable=SHEET</code>）</td><td><code>out</code></td><td><code>orders_all</code></td><td><code>C:/work/out/orders_all.xls</code></td></tr>
+  </table>
+  <p><code>excelTable=SHEET</code> で <code>resultPath</code> を省略したときのファイル名はコマンドによって違います。</p>
+  <table>
+    <tr><th>コマンド</th><th>resultPath 省略時のファイル名</th><th>例（result=<code>out/daily</code>、保存名 <code>orders_export</code>）</th></tr>
+    <tr><td>Convert</td><td>GUI の Exec では保存済みオプションの名前。CLI では <code>result</code>（<code>@オプションファイル</code> で実行した場合はそのファイル名から拡張子を除いたもの）</td><td><code>C:/work/out/daily/orders_export.xlsx</code></td></tr>
+    <tr><td>Compare</td><td><code>result</code> に指定したディレクトリの名前</td><td><code>C:/work/out/daily/daily.xlsx</code></td></tr>
+  </table>
+  <p>Compare で <code>expectData</code> を指定した場合、想定差分との比較結果は <code>result</code> の下の <code>expectedDiff</code> ディレクトリに出力されます。</p>
+
+  <h3 id="section-result-path-generate">Generate</h3>
+  <p><a href="../commands/generate.html">Generate</a> の <code>resultPath</code> は <code>result</code> からの相対パスで、サブディレクトリも書けます。<strong>テンプレートとして処理される</strong>ため、テーブル名や行の値を変数として使えます。変数の書き方は <a href="template.html">Template</a> の設定に従います（以下はデフォルトの <code>templateParameterAttribute=param</code>、区切り文字 <code>$</code> の場合。<code>templateParameterAttribute</code> を空にした場合は <code>param.</code> を付けずに <code>$tableName$</code> と書きます）。</p>
+
+  <h4>テンプレート指定タイプ（txt / xlsx / xls）</h4>
+  <table>
+    <tr><th>unit</th><th>result</th><th>resultPath</th><th>出力されるファイル</th></tr>
+    <tr><td>table</td><td><code>gen</code></td><td><code>$param.tableName$.sql</code></td><td><code>C:/work/gen/ORDERS.sql</code><br><code>C:/work/gen/ITEMS.sql</code></td></tr>
+    <tr><td>table</td><td><code>gen</code></td><td><code>sql/$param.tableName$/insert.sql</code></td><td><code>C:/work/gen/sql/ORDERS/insert.sql</code><br><code>C:/work/gen/sql/ITEMS/insert.sql</code></td></tr>
+    <tr><td>table</td><td>（空）</td><td><code>$param.tableName$.xlsx</code></td><td><code>C:/work/ORDERS.xlsx</code><br><code>C:/work/ITEMS.xlsx</code></td></tr>
+    <tr><td>table</td><td><code>gen</code></td><td><code>$param.tableName; format="snakeToUpperCamel"$.java</code></td><td>（テーブル <code>order_detail</code> の場合）<code>C:/work/gen/OrderDetail.java</code></td></tr>
+    <tr><td>record</td><td><code>gen</code></td><td><code>$param.tableName$_$param.rowNumber$.txt</code></td><td><code>C:/work/gen/ORDERS_0.txt</code>、<code>C:/work/gen/ORDERS_1.txt</code>、…（行番号はテーブルごとに 0 始まり）</td></tr>
+    <tr><td>record</td><td><code>gen</code></td><td><code>$param.ORDER_ID$.txt</code></td><td>（列 <code>ORDER_ID</code> の値が 1001, 1002 の場合）<code>C:/work/gen/1001.txt</code>、<code>C:/work/gen/1002.txt</code>。srcData の <code>includeMetaData</code> が ON のときは <code>$param.row.ORDER_ID$</code> と書く</td></tr>
+    <tr><td>dataset</td><td><code>gen</code></td><td><code>all.txt</code></td><td><code>C:/work/gen/all.txt</code></td></tr>
+    <tr><td>table</td><td><code>gen</code></td><td><code>all.txt</code>（変数なし）</td><td><code>C:/work/gen/all.txt</code>。全テーブルが同じファイルに出力され、<strong>最後のテーブルの内容だけが残る</strong></td></tr>
+    <tr><td>（任意）</td><td><code>gen</code></td><td>（空）</td><td><code>C:/work/gen/orders_export</code>（保存済みオプションの名前。拡張子なし。CLI では <code>result</code>）</td></tr>
+  </table>
+  <p><code>unit=table</code> / <code>record</code> で <code>resultPath</code> を省略したり、変数を含めなかったりすると、全テーブル（全行）が同じファイルに上書きされます。テーブルや行ごとにファイルを分けたいときは、必ず <code>tableName</code> や列の値を含めてください。</p>
+
+  <h4>固定成果物タイプ（sql / ddl / javaBean / xlsxSchema / fixedColumnDef）</h4>
+  <p>テーブル単位の固定成果物タイプでは、<code>resultPath</code> は<strong>ディレクトリ</strong>として扱われ、その下にテーブルごとのファイルが作られます（ファイル名は自動で決まります）。</p>
+  <table>
+    <tr><th>generateType</th><th>result</th><th>resultPath</th><th>出力されるファイル</th></tr>
+    <tr><td>sql</td><td><code>gen</code></td><td><code>sql</code></td><td><code>C:/work/gen/sql/ORDERS.sql</code><br><code>C:/work/gen/sql/ITEMS.sql</code></td></tr>
+    <tr><td>sql（<code>sqlFilePrefix=V1_</code>、<code>sqlFileSuffix=_insert</code>）</td><td><code>gen</code></td><td><code>sql</code></td><td><code>C:/work/gen/sql/V1_ORDERS_insert.sql</code></td></tr>
+    <tr><td>ddl</td><td><code>gen</code></td><td>（空）</td><td><code>C:/work/gen/orders_export/ORDERS.sql</code>（保存済みオプションの名前のディレクトリ）</td></tr>
+    <tr><td>javaBean</td><td><code>gen</code></td><td><code>src/main/java/com/example</code></td><td>（テーブル <code>order_detail</code> の場合）<code>C:/work/gen/src/main/java/com/example/OrderDetail.java</code></td></tr>
+    <tr><td>xlsxSchema / fixedColumnDef</td><td><code>gen</code></td><td><code>schema</code></td><td><code>C:/work/gen/schema/ORDERS.json</code></td></tr>
+  </table>
+  <p><code>settings</code> / <code>xlsxTemplate</code>（<code>unit=dataset</code> 固定）は、<code>resultPath</code> がそのままファイル名になります（例：<code>resultPath=settings/orders.json</code> → <code>C:/work/gen/settings/orders.json</code>）。</p>
+
+  <h3 id="section-result-path-env">環境変数（Env）と組み合わせる</h3>
+  <p><code>result</code> / <code>resultPath</code> にも <code>${env.変数名}</code> を書けます。実行前に Env ファイル（<a href="../dialogs/workspace.html">Workspace</a> で選択）の値に置き換わるため、同じ保存済みオプションを Env の切り替えだけで別の出力先に向けられます。Env に定義していない変数を書くとエラーになります。</p>
+  <pre>Env ファイル (env.properties):
+outDir=D:/export/dev
+stage=dev
+
+Convert（resultType=xlsx、excelTable=SHEET）:
+  result     = ${env.outDir}/convert
+  resultPath = orders_${env.stage}
+  → D:/export/dev/convert/orders_dev.xlsx
+
+Generate（generateType=txt、unit=table）:
+  result     = ${env.outDir}
+  resultPath = ${env.stage}/$param.tableName$.sql
+  → D:/export/dev/dev/ORDERS.sql
+    D:/export/dev/dev/ITEMS.sql</pre>
+  <p>Env ファイルを <code>outDir=D:/export/prod</code>、<code>stage=prod</code> のものに切り替えると、オプションを変えずに <code>D:/export/prod/...</code> に出力されます。</p>
+
+  <h3 id="section-result-path-param">パラメータ（-P）と組み合わせる</h3>
+  <p>-P 値は <code>result</code> / <code>resultPath</code> の文字列には埋め込まれません（Convert / Compare ではどちらも使えません）。例外は Generate の <code>resultPath</code> で、テンプレートとして処理されるため <code>$param.inputParam.キー$</code> で参照できます。</p>
+  <pre>Parameters (-P):
+  targetDate = 20261101
+
+Generate（generateType=txt、unit=table）:
+  result     = gen
+  resultPath = $param.inputParam.targetDate$/$param.tableName$.csv
+  → C:/work/gen/20261101/ORDERS.csv
+    C:/work/gen/20261101/ITEMS.csv</pre>
+  <p>-P の値に Env を書くこともできます（例：<code>-PtargetDate=${env.targetDate}</code>）。<code>result</code> のディレクトリ部分を実行ごとに変えたい場合は、<code>resultPath</code> 側に書くか、Env または次の Parameterize を使ってください。詳細は <a href="../dialogs/parameters.html">Parameters (-P)</a> の「Env との使い分け」を参照してください。</p>
+
+  <h3 id="section-result-path-parameterize">Parameterize と組み合わせる</h3>
+  <p><a href="../commands/parameterize.html">Parameterize</a> のテンプレート / cmdParam に <code>result</code> / <code>resultPath</code> を書くと、パラメータデータの値を <code>$param.列名$</code> で埋め込めるため、Convert / Compare でも行ごとに出力先を変えられます。</p>
+  <pre>パラメータデータ (params/targets.csv):
+TARGET,BOOK
+orders,orders_all
+items,items_all
+
+テンプレート (convert_param.txt):
+-src=data/$param.TARGET$
+-srcType=csv
+-resultType=xlsx
+-excelTable=SHEET
+-result=out/$param.TARGET$
+-resultPath=$param.BOOK$
+
+指定:
+  unit            = record
+  cmd             = convert
+  template        = convert_param.txt
+  paramData の src = params/targets.csv
+
+→ C:/work/out/orders/orders_all.xlsx
+  C:/work/out/items/items_all.xlsx</pre>
+  <p>Generate の <code>resultPath</code> に Generate 側の変数（<code>$param.tableName$</code> など）を書きたい場合は、そのまま書くと Parameterize のテンプレート処理で先に展開されてしまいます（パラメータデータに該当する列がなければ空になります）。Parameterize の <a href="template.html">Template</a> 設定で区切り文字（<code>templateVarStart</code> / <code>templateVarStop</code>）を <code>#</code> などに変え、Parameterize の変数と Generate の変数を書き分けてください（<code>@</code> は区切り文字に使えません）。</p>
+  <pre>パラメータデータ (params/targets.csv):
+TARGET
+orders
+items
+
+テンプレート (generate_param.txt):
+-generateType=txt
+-unit=table
+-template=insert.txt
+-src=data/#param.TARGET#
+-srcType=csv
+-result=gen/#param.TARGET#
+-resultPath=$param.tableName$.sql
+
+指定:
+  unit             = record
+  cmd              = generate
+  template         = generate_param.txt
+  templateVarStart = #   (templateOption)
+  templateVarStop  = #   (templateOption)
+  paramData の src  = params/targets.csv
+
+→ C:/work/gen/orders/ORDERS.sql
+  C:/work/gen/items/ITEMS.sql</pre>
+
   <h2 id="section-related">関連</h2>
   <ul>
     <li><a href="dataset-load-form.html">Dataset Load Form</a> — 入力データセットの指定</li>
+    <li><a href="../commands/generate.html">Generate</a> — resultPath をテンプレートとして使うコマンド</li>
+    <li><a href="../dialogs/parameters.html">Parameters (-P)</a> — 実行時に値を渡す</li>
+    <li><a href="../dialogs/workspace.html">Workspace</a> — Result Base と Env ファイルの設定</li>
     <li><a href="jdbc.html">JDBC</a> — <code>resultType=table</code> の接続先</li>
   </ul>
 </body>

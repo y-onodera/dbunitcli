@@ -12,7 +12,7 @@
 | `fixed` | `outputEncoding` / `outputExtension` / `fixedColumnDef` / `fixedLengthType`（既定`char`） | 固定長ファイル |
 | `table` | `op`（`DbOperation`、既定`CLEAN_INSERT`） / `jdbc.*` | DBテーブル（JDBC書込） |
 
-全resultType共通: `resultDir`（`-result`）/ `resultPath` / `exportEmptyTable` / `exportHeader`（`table`除く）。
+全resultType共通（`table`除く）: `resultDir`（`-result`）/ `exportEmptyTable`。`exportHeader`は`format`/`fixed`以外（両者はヘッダを出力しない）。`resultPath`はxls/xlsxのみ（全テーブルを1ブックにまとめるSHEETのファイル名。excelTableは環境変数等を含む自由入力のため、`BOOK`と確定しているときだけ非表示。`DataSetConverterOption.usesResultPath()`）。
 
 `parallel`: ソースの並列読込数（`ComparableDataSetParam.parallel`へ渡す。Compareはnew/oldの読込に適用）。未指定はCPUコア数、`1`は逐次。
 

@@ -126,9 +126,9 @@ export type JdbcOption = CommandOptions & {
 export type ResultOption = CommandOptions & {
 	resultType: CommandOption;
 	result: CommandOption;
-	resultPath: CommandOption;
+	resultPath?: CommandOption;
 	exportEmptyTable: CommandOption;
-	exportHeader: CommandOption;
+	exportHeader?: CommandOption;
 	outputEncoding?: CommandOption;
 	excelTable?: CommandOption;
 	format?: CommandOption;

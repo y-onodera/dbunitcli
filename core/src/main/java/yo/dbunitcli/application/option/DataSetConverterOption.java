@@ -115,10 +115,14 @@ public record DataSetConverterOption(
                           , DbOperation.class)
                   .addComponent("jdbc", this.jdbcOption.toParameters());
         } else {
-            result.putDir("-result", this.resultDir, BaseDir.RESULT)
-                  .put("-resultPath", this.resultPath)
-                  .putFlag("-exportEmptyTable", this.exportEmptyTable)
-                  .putFlag("-exportHeader", this.skipHeader);
+            result.putDir("-result", this.resultDir, BaseDir.RESULT);
+            if (this.usesResultPath()) {
+                result.put("-resultPath", this.resultPath);
+            }
+            result.putFlag("-exportEmptyTable", this.exportEmptyTable);
+            if (type != ResultType.format && type != ResultType.fixed) {
+                result.putFlag("-exportHeader", this.skipHeader);
+            }
             if (type == ResultType.csv) {
                 result.put("-outputEncoding", this.outputEncoding);
                 result.put("-outputExtension", this.extension);
@@ -148,6 +152,15 @@ public record DataSetConverterOption(
     public boolean isParallelizable() {
         return (this.resultType != ResultType.xls && this.resultType != ResultType.xlsx)
                 || !XlsConverter.TableExportType.SHEET.name().equals(this.excelTable);
+    }
+
+    /**
+     * -resultPathを使うか。全テーブルを1ブックにまとめるxls/xlsxだけが使う（それ以外はテーブルごとのファイル名になる）。
+     * excelTableは環境変数で渡せる自由入力のため、BOOKと確定しているときだけ使わないとする
+     */
+    public boolean usesResultPath() {
+        return (this.resultType == ResultType.xls || this.resultType == ResultType.xlsx)
+                && !XlsConverter.TableExportType.BOOK.name().equals(this.excelTable);
     }
 
     public DataSetConverterParam.Builder getParam() {
