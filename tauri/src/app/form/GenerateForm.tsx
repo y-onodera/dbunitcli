@@ -1,16 +1,18 @@
+import { useState } from "react";
 import { SectionFieldset } from "../../components/dialog";
 import { SectionLegend } from "../../components/dialog/SectionFieldset";
 import { DatasetSrcInfoProvider } from "../../context/DatasetSrcInfoProvider";
+import { UnitSettingEncodingProvider } from "../../context/UnitSettingEncodingProvider";
 import { buildDatasetSrcInfo } from "../../model/CommandOption";
 import type { GenerateOptions } from "../../model/SelectParameter";
-import type { FormValues } from "../../utils/formValues";
 import { DatasetLoadForm } from "./section/DatasetLoadForm";
-import { DatasetSettingsDialogWithoutPreview } from "./section/dialog/DatasetSettingsDialog";
 import {
 	TxtTemplateGenerateButton,
 	type TxtTemplateGenerateFormValues,
 } from "./section/dialog/TxtTemplateGenerateDialog";
-import UnitSettingPreviewButton from "./section/dialog/UnitSettingPreviewButton";
+import UnitSettingPreviewButton, {
+	UnitSettingsDialog,
+} from "./section/dialog/UnitSettingPreviewButton";
 import { XlsxTemplateGenerateButton } from "./section/dialog/XlsxTemplateGenerateDialog";
 import Check from "./section/element/Check";
 import DatasetSettingText from "./section/element/DatasetSettingText";
@@ -28,8 +30,6 @@ export function GenerateForm(prop: {
 	generate: GenerateOptions;
 	scaffoldPrefill: () => TxtTemplateGenerateFormValues;
 	handleScaffoldReflect: (params: Record<string, string>) => Promise<void>;
-	// 押した時点のフォームの値（unitSettingのプレビューでsrc・unitSettingEncodingを読む）
-	formValues?: () => FormValues;
 }) {
 	const generate = prop.generate;
 	const srcData = generate.srcData;
@@ -42,8 +42,17 @@ export function GenerateForm(prop: {
 				<XlsxTemplateGenerateButton key="generate" setPath={setPath} />,
 			]
 		: undefined;
+	// unitSettingの編集・プレビューで読む文字コード（入力中の値）
+	const [unitSettingEncoding, setUnitSettingEncoding] = useState(
+		generate.unitSettingEncoding?.value ?? "",
+	);
+	// srcの入力値はsrcフォームとunitSettingの編集・プレビューで共有する
+	// （テーブル名・カラム名の候補とプレビューの読込元にsrcのデータセットを使う）
 	return (
-		<>
+		<DatasetSrcInfoProvider
+			key={`${prop.name}:src:${srcData.srcType?.value ?? ""}`}
+			initialValue={buildDatasetSrcInfo(srcData)}
+		>
 			<SectionFieldset>
 				<SectionLegend
 					title="generate"
@@ -68,28 +77,25 @@ export function GenerateForm(prop: {
 						element={generate.unit}
 					/>
 				)}
-				{generate.unitSetting && (
-					// unitSettingの編集・プレビューではsrc側のデータセットからテーブル名・カラム名の候補を取る
-					<DatasetSrcInfoProvider
-						key={`${prop.name}generate-unitSetting:${srcData.srcType?.value ?? ""}`}
-						initialValue={buildDatasetSrcInfo(srcData)}
-					>
+				<UnitSettingEncodingProvider encoding={unitSettingEncoding}>
+					{generate.unitSetting && (
 						<DatasetSettingText
 							prefix=""
 							element={generate.unitSetting}
-							editDialog={DatasetSettingsDialogWithoutPreview}
+							editDialog={UnitSettingsDialog}
 							showGenerate={false}
 							preview={(path) => (
-								<UnitSettingPreviewButton
-									unitSetting={path}
-									formValues={prop.formValues ?? emptyFormValues}
-								/>
+								<UnitSettingPreviewButton unitSetting={path} />
 							)}
 						/>
-					</DatasetSrcInfoProvider>
-				)}
+					)}
+				</UnitSettingEncodingProvider>
 				{generate.unitSettingEncoding && (
-					<EncodingText prefix="" element={generate.unitSettingEncoding} />
+					<EncodingText
+						prefix=""
+						element={generate.unitSettingEncoding}
+						handleValueChange={setUnitSettingEncoding}
+					/>
 				)}
 				{generate.template && (
 					<TemplateText
@@ -148,11 +154,8 @@ export function GenerateForm(prop: {
 				srcData={srcData}
 				helpCommand="sections/dataset-load-form"
 				helpLabel="src"
+				parentSrcInfo={true}
 			/>
-		</>
+		</DatasetSrcInfoProvider>
 	);
-}
-
-function emptyFormValues(): FormValues {
-	return {};
 }

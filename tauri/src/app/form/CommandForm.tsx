@@ -62,7 +62,6 @@ export default function CommandForm(prop: {
 						generate={select.options}
 						scaffoldPrefill={scaffoldPrefill}
 						handleScaffoldReflect={handleScaffoldReflect}
-						formValues={() => prop.formData(false).values}
 					/>
 				);
 			case "run":

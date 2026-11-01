@@ -101,6 +101,9 @@ export function DatasetLoadForm(prop: {
 	defalutType?: SrcType;
 	helpCommand?: string;
 	helpLabel?: string;
+	// trueなら自前のDatasetSrcInfoProviderを作らず、親のものへ入力値を反映する
+	// （generateフォームでは-unitSettingのプレビューも同じsrcの入力値を使うため）
+	parentSrcInfo?: boolean;
 }) {
 	if (prop.srcData.srcType?.value === "none") {
 		return (
@@ -119,19 +122,25 @@ export function DatasetLoadForm(prop: {
 			</SectionFieldset>
 		);
 	}
+	const content = (
+		<DatasetLoadFormContent
+			srcData={prop.srcData}
+			handleTypeSelect={prop.handleTypeSelect}
+			defaultType={prop.defalutType}
+			helpCommand={prop.helpCommand}
+			helpLabel={prop.helpLabel}
+		/>
+	);
+	if (prop.parentSrcInfo) {
+		return content;
+	}
 	const initialDatasetSrcInfo = buildDatasetSrcInfo(prop.srcData);
 	return (
 		<DatasetSrcInfoProvider
 			key={`${prop.name}:${prop.srcData.prefix}:${prop.srcData.srcType?.value ?? ""}`}
 			initialValue={initialDatasetSrcInfo}
 		>
-			<DatasetLoadFormContent
-				srcData={prop.srcData}
-				handleTypeSelect={prop.handleTypeSelect}
-				defaultType={prop.defalutType}
-				helpCommand={prop.helpCommand}
-				helpLabel={prop.helpLabel}
-			/>
+			{content}
 		</DatasetSrcInfoProvider>
 	);
 }

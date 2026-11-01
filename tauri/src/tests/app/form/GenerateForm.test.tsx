@@ -2,6 +2,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import { GenerateForm } from "../../../app/form/GenerateForm";
+import type { CommandOption } from "../../../model/CommandOption";
 import type { GenerateOptions } from "../../../model/SelectParameter";
 import { environmentFixture, workspaceResourcesFixture } from "../../setup";
 import {
@@ -371,5 +372,47 @@ describe("GenerateFormの描画テスト", () => {
 
 			expect(await templateMenuItem("generate")).not.toBeInTheDocument();
 		});
+	});
+});
+
+describe("unitSettingのPreview Unit Settings", () => {
+	const option = (
+		name: string,
+		value: string,
+		defaultPath: CommandOption["attribute"]["defaultPath"] = "WORKSPACE",
+	): CommandOption => ({
+		name,
+		value,
+		attribute: { type: "TEXT", required: false, selectOption: [], defaultPath },
+		optional: false,
+	});
+	// unit=tableのtxtでunitSettingを指定し、srcは空
+	const fixture: GenerateOptions = {
+		...generateLoadResponseFixture,
+		unit: {
+			...(generateLoadResponseFixture.unit as CommandOption),
+			value: "table",
+		},
+		unitSetting: option("unitSetting", "unit.json", "SETTING"),
+		unitSettingEncoding: option("unitSettingEncoding", "UTF-8"),
+		srcData: {
+			...generateLoadResponseFixture.srcData,
+			src: { ...generateLoadResponseFixture.srcData.src, value: "" },
+		},
+	};
+	const previewButton = () =>
+		screen.queryByRole("button", { name: "Preview Unit Settings" });
+
+	it("srcが空なら出さず、srcフォームに入力すると出す", async () => {
+		const user = userEvent.setup();
+		render(<GenerateForm {...makeGenerateProps(fixture)} />);
+		expect(previewButton()).not.toBeInTheDocument();
+
+		const srcInput = document.querySelector(
+			'input[type="text"][name="-src.src"]',
+		) as HTMLInputElement;
+		await user.type(srcInput, "resources/src/csv");
+
+		expect(previewButton()).toBeInTheDocument();
 	});
 });

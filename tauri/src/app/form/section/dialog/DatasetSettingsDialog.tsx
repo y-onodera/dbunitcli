@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { type ReactNode, useState } from "react";
 import {
 	Arrays,
 	Fieldset,
+	type SaveThen,
 	Select,
 	SettingDialog,
 	SettingTable,
@@ -34,7 +35,7 @@ export default function DatasetSettingsDialog(props: {
 	fileName: string;
 	handleDialogClose: () => void;
 	handleSave: (path: string) => void;
-	showSaveAndPreview?: boolean;
+	saveAndPreview?: (saveThen: SaveThen) => ReactNode;
 }) {
 	const { settings, loading } = useDatasetSettingsData(props.fileName);
 	if (loading) {
@@ -46,19 +47,9 @@ export default function DatasetSettingsDialog(props: {
 			fileName={props.fileName}
 			handleDialogClose={props.handleDialogClose}
 			handleSave={props.handleSave}
-			showSaveAndPreview={props.showSaveAndPreview}
+			saveAndPreview={props.saveAndPreview}
 		/>
 	);
-}
-
-// generateの-unitSetting用。srcの-settingを適用した後に効く設定のため、
-// srcの-settingを差し替えるSave and Previewは実際の結果と食い違うので出さない
-export function DatasetSettingsDialogWithoutPreview(props: {
-	fileName: string;
-	handleDialogClose: () => void;
-	handleSave: (path: string) => void;
-}) {
-	return <DatasetSettingsDialog {...props} showSaveAndPreview={false} />;
 }
 
 export function DatasetSettingsEditDialog(props: {
@@ -66,7 +57,8 @@ export function DatasetSettingsEditDialog(props: {
 	fileName: string;
 	handleDialogClose: () => void;
 	handleSave: (path: string) => void;
-	showSaveAndPreview?: boolean;
+	// 省略すると、保存したファイルをsrcのsettingに適用してプレビューする（generateの-unitSettingは適用先が違うため差し替える）
+	saveAndPreview?: (saveThen: SaveThen) => ReactNode;
 }) {
 	const saveSettings = useSaveDatasetSettings();
 	const [dataSettings, setDataSettings] = useState<DatasetSettings>(
@@ -82,16 +74,22 @@ export function DatasetSettingsEditDialog(props: {
 			fileName={props.fileName}
 			save={(path) => saveSettings(path, dataSettings)}
 			handleSave={props.handleSave}
-			footerActions={(saveThen) =>
+			footerActions={(saveThen) => {
+				if (props.saveAndPreview) {
+					return props.saveAndPreview(saveThen);
+				}
 				// 保存したファイルをsettingに適用してプレビューする（それ以外のsrc要素はフォームのまま）
-				(props.showSaveAndPreview ?? true) &&
-				srcTypeOf(datasetSrcInfo) && (
-					<SaveAndPreviewButton
-						saveThen={saveThen}
-						toSrcInfo={(path) => withValues(datasetSrcInfo, { setting: path })}
-					/>
-				)
-			}
+				return (
+					srcTypeOf(datasetSrcInfo) && (
+						<SaveAndPreviewButton
+							saveThen={saveThen}
+							toSrcInfo={(path) =>
+								withValues(datasetSrcInfo, { setting: path })
+							}
+						/>
+					)
+				);
+			}}
 		>
 			<SettingTable<DatasetSetting>
 				caption="Add Metadata Settings"

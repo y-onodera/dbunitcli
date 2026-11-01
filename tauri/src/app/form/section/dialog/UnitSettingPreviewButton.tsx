@@ -5,6 +5,7 @@ import {
 	DialogTitle,
 	FullDialog,
 	JobFailure,
+	type SaveThen,
 	StatusMessage,
 } from "../../../../components/dialog";
 import { BlueButton, WhiteButton } from "../../../../components/element/Button";
@@ -14,6 +15,7 @@ import {
 } from "../../../../components/element/ButtonIcon";
 import { JobProgress } from "../../../../components/element/JobProgress";
 import { useDatasetSrcInfo } from "../../../../context/DatasetSrcInfoProvider";
+import { useUnitSettingEncoding } from "../../../../context/UnitSettingEncodingProvider";
 import {
 	type UnitSettingRef,
 	type UnitTablePreview,
@@ -23,7 +25,7 @@ import {
 	type DatasetSrcInfo,
 	srcTypeOf,
 } from "../../../../model/CommandOption";
-import type { FormValues } from "../../../../utils/formValues";
+import DatasetSettingsDialog from "./DatasetSettingsDialog";
 import {
 	DatasetTableNamesPreviewDialog,
 	TablePreviewTable,
@@ -31,19 +33,23 @@ import {
 
 type PreviewTarget = { srcInfo: DatasetSrcInfo; unitSetting: UnitSettingRef };
 
+// srcTypeとsrcが入力されていればプレビューできる
+function canPreview(srcInfo: DatasetSrcInfo): boolean {
+	return !!srcTypeOf(srcInfo) && !!srcInfo.values.src;
+}
+
 // generateの-unitSettingのプレビュー。srcのsettingを適用したテーブル一覧を出し、各テーブルの横のボタンで
 // そのテーブルにunitSettingを適用した後のテーブル（rowsになるテーブル自身とsubTable）を確認する。
-// srcとunitSettingEncodingは押した時点のフォームの値（formValues）を使う
+// srcはDatasetSrcInfoProvider、文字コードはUnitSettingEncodingProviderの入力中の値を使う
 export default function UnitSettingPreviewButton({
 	unitSetting,
-	formValues,
 }: {
 	unitSetting: string;
-	formValues: () => FormValues;
 }) {
 	const datasetSrcInfo = useDatasetSrcInfo();
+	const encoding = useUnitSettingEncoding();
 	const [target, setTarget] = useState<PreviewTarget | null>(null);
-	if (!unitSetting || !srcTypeOf(datasetSrcInfo)) {
+	if (!unitSetting || !canPreview(datasetSrcInfo)) {
 		return null;
 	}
 	return (
@@ -51,45 +57,90 @@ export default function UnitSettingPreviewButton({
 			<BlueButton
 				title="Preview Unit Settings"
 				handleClick={() =>
-					setTarget(toPreviewTarget(formValues(), unitSetting))
+					setTarget({
+						srcInfo: datasetSrcInfo,
+						unitSetting: { path: unitSetting, encoding },
+					})
 				}
 			/>
 			{target !== null && (
-				<DatasetTableNamesPreviewDialog
-					datasetSrcInfo={target.srcInfo}
-					handleDialogClose={() => setTarget(null)}
-					rowActions={(tableName) => (
-						<UnitTablesButton
-							srcInfo={target.srcInfo}
-							tableName={tableName}
-							unitSetting={target.unitSetting}
-						/>
-					)}
+				<UnitSettingTableNamesDialog
+					target={target}
+					handleClose={() => setTarget(null)}
 				/>
 			)}
 		</>
 	);
 }
 
-// フォームの値（-src.<オプション名>・-unitSettingEncoding）からプレビューの読込条件を作る
-function toPreviewTarget(
-	values: FormValues,
-	unitSetting: string,
-): PreviewTarget {
-	const encoding = values["-unitSettingEncoding"];
-	const srcValues: Record<string, string> = {};
-	for (const [key, value] of Object.entries(values)) {
-		if (key.startsWith("-src.") && typeof value === "string") {
-			srcValues[key.substring("-src.".length)] = value;
-		}
+// unitSettingの編集ダイアログ（Dataset Settings）。Save and Previewは、保存したファイルを
+// srcのsettingではなくunitSettingとして適用してプレビューする（Preview Unit Settingsと同じ動作）
+export function UnitSettingsDialog(props: {
+	fileName: string;
+	handleDialogClose: () => void;
+	handleSave: (path: string) => void;
+}) {
+	return (
+		<DatasetSettingsDialog
+			{...props}
+			saveAndPreview={(saveThen) => (
+				<UnitSettingSaveAndPreviewButton saveThen={saveThen} />
+			)}
+		/>
+	);
+}
+
+function UnitSettingSaveAndPreviewButton({ saveThen }: { saveThen: SaveThen }) {
+	const datasetSrcInfo = useDatasetSrcInfo();
+	const encoding = useUnitSettingEncoding();
+	const [target, setTarget] = useState<PreviewTarget | null>(null);
+	if (!canPreview(datasetSrcInfo)) {
+		return null;
 	}
-	return {
-		srcInfo: { values: srcValues },
-		unitSetting: {
-			path: unitSetting,
-			encoding: typeof encoding === "string" ? encoding : "",
-		},
-	};
+	return (
+		<>
+			<BlueButton
+				title="Save and Preview"
+				handleClick={() =>
+					saveThen((savedPath) =>
+						setTarget({
+							srcInfo: datasetSrcInfo,
+							unitSetting: { path: savedPath, encoding },
+						}),
+					)
+				}
+			/>
+			{target !== null && (
+				<UnitSettingTableNamesDialog
+					target={target}
+					handleClose={() => setTarget(null)}
+				/>
+			)}
+		</>
+	);
+}
+
+// srcのsettingを適用したテーブル一覧。各テーブルの横にunitSetting適用後の一覧を開くボタンを出す
+function UnitSettingTableNamesDialog({
+	target,
+	handleClose,
+}: {
+	target: PreviewTarget;
+	handleClose: () => void;
+}) {
+	return (
+		<DatasetTableNamesPreviewDialog
+			datasetSrcInfo={target.srcInfo}
+			handleDialogClose={handleClose}
+			rowActions={(tableName) => (
+				<UnitTablesButton
+					srcInfo={target.srcInfo}
+					tableName={tableName}
+					unitSetting={target.unitSetting}
+				/>
+			)}
+		/>
+	);
 }
 
 function UnitTablesButton({

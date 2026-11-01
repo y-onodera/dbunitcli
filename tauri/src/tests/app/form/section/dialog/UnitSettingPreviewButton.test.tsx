@@ -1,7 +1,11 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import type { ReactNode } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import UnitSettingPreviewButton from "../../../../../app/form/section/dialog/UnitSettingPreviewButton";
+import UnitSettingPreviewButton, {
+	UnitSettingsDialog,
+} from "../../../../../app/form/section/dialog/UnitSettingPreviewButton";
+import type { SaveThen } from "../../../../../components/dialog";
 import type {
 	UnitSettingRef,
 	UnitTablePreview,
@@ -14,24 +18,37 @@ import {
 } from "../../../../helpers/jobFailure";
 
 // （mockReset:trueで実装が毎回リセットされるため、値は各テスト内で設定する）
-const { srcInfoFixture, unitFixture, unitCalls, tableNamesCalls } = vi.hoisted(
-	() => ({
-		srcInfoFixture: { current: { values: {} } as DatasetSrcInfo },
-		unitFixture: {
-			previews: [] as UnitTablePreview[],
-			error: "",
-			logs: [] as string[],
-		},
-		unitCalls: [] as {
-			srcInfo: DatasetSrcInfo;
-			tableName: string;
-			unitSetting: UnitSettingRef;
-		}[],
-		tableNamesCalls: [] as DatasetSrcInfo[],
-	}),
-);
+const {
+	srcInfoFixture,
+	encodingFixture,
+	unitFixture,
+	unitCalls,
+	tableNamesCalls,
+} = vi.hoisted(() => ({
+	srcInfoFixture: { current: { values: {} } as DatasetSrcInfo },
+	encodingFixture: { current: "" },
+	unitFixture: {
+		previews: [] as UnitTablePreview[],
+		error: "",
+		logs: [] as string[],
+	},
+	unitCalls: [] as {
+		srcInfo: DatasetSrcInfo;
+		tableName: string;
+		unitSetting: UnitSettingRef;
+	}[],
+	tableNamesCalls: [] as DatasetSrcInfo[],
+}));
 vi.mock("../../../../../context/DatasetSrcInfoProvider", () => ({
 	useDatasetSrcInfo: () => srcInfoFixture.current,
+}));
+vi.mock("../../../../../context/UnitSettingEncodingProvider", () => ({
+	useUnitSettingEncoding: () => encodingFixture.current,
+}));
+// 編集ダイアログ本体は使わず、footerのSave and Previewだけを出す（保存は"saved.json"へ成功したものとする）
+vi.mock("../../../../../app/form/section/dialog/DatasetSettingsDialog", () => ({
+	default: (props: { saveAndPreview?: (saveThen: SaveThen) => ReactNode }) =>
+		props.saveAndPreview?.((onSaved) => onSaved("saved.json")),
 }));
 vi.mock("../../../../../hooks/useDatasetSettings", () => ({
 	useDatasetTableNames: (srcInfo: DatasetSrcInfo) => {
@@ -60,22 +77,15 @@ vi.mock("../../../../../hooks/useDatasetSettings", () => ({
 	},
 }));
 
-const FORM_VALUES = {
-	"-generateType": "txt",
-	"-unitSettingEncoding": "MS932",
-	"-src.srcType": "csv",
-	"-src.src": "data/current",
-	"-src.setting": "src.json",
+const SRC_INFO: DatasetSrcInfo = {
+	values: { srcType: "csv", src: "data/current", setting: "src.json" },
 };
 
 function renderButton(unitSetting = "unit.json") {
-	return render(
-		<UnitSettingPreviewButton
-			unitSetting={unitSetting}
-			formValues={() => FORM_VALUES}
-		/>,
-	);
+	return render(<UnitSettingPreviewButton unitSetting={unitSetting} />);
 }
+
+const lastOf = <T,>(items: T[]): T | undefined => items[items.length - 1];
 
 async function openUnitTables() {
 	const user = userEvent.setup();
@@ -89,7 +99,8 @@ async function openUnitTables() {
 
 describe("UnitSettingPreviewButtonのテスト", () => {
 	beforeEach(() => {
-		srcInfoFixture.current = { values: { srcType: "csv", src: "data/old" } };
+		srcInfoFixture.current = SRC_INFO;
+		encodingFixture.current = "MS932";
 		unitFixture.previews = [
 			{ tableName: "big", headers: ["key"], rows: [["1"]], totalRows: 1 },
 			{
@@ -112,15 +123,18 @@ describe("UnitSettingPreviewButtonのテスト", () => {
 		).not.toBeInTheDocument();
 	});
 
-	it("srcTypeが未指定ならボタンを出さない", () => {
-		srcInfoFixture.current = { values: {} };
+	it.each<[string, DatasetSrcInfo]>([
+		["srcTypeが未指定", { values: { src: "data/current" } }],
+		["srcが空", { values: { srcType: "csv", src: "" } }],
+	])("%sならボタンを出さない", (_, info) => {
+		srcInfoFixture.current = info;
 		renderButton();
 		expect(
 			screen.queryByRole("button", { name: "Preview Unit Settings" }),
 		).not.toBeInTheDocument();
 	});
 
-	it("押した時点のフォームのsrcで、srcのsettingを適用したテーブル一覧を読む", async () => {
+	it("srcの入力値で、srcのsettingを適用したテーブル一覧を読む", async () => {
 		const user = userEvent.setup();
 		renderButton();
 		await user.click(
@@ -128,9 +142,7 @@ describe("UnitSettingPreviewButtonのテスト", () => {
 		);
 
 		expect(screen.getByText("big")).toBeInTheDocument();
-		expect(tableNamesCalls.at(-1)).toEqual({
-			values: { srcType: "csv", src: "data/current", setting: "src.json" },
-		});
+		expect(lastOf(tableNamesCalls)).toEqual(SRC_INFO);
 	});
 
 	it("テーブルの横のボタンで、unitSettingを適用した後のテーブル一覧を出す", async () => {
@@ -140,10 +152,8 @@ describe("UnitSettingPreviewButtonのテスト", () => {
 			screen.getByText("big — Unit Table List Preview"),
 		).toBeInTheDocument();
 		expect(screen.getByText("ONE")).toBeInTheDocument();
-		expect(unitCalls.at(-1)).toEqual({
-			srcInfo: {
-				values: { srcType: "csv", src: "data/current", setting: "src.json" },
-			},
+		expect(lastOf(unitCalls)).toEqual({
+			srcInfo: SRC_INFO,
 			tableName: "big",
 			unitSetting: { path: "unit.json", encoding: "MS932" },
 		});
@@ -167,5 +177,40 @@ describe("UnitSettingPreviewButtonのテスト", () => {
 		await openUnitTables();
 
 		expectJobFailure();
+	});
+
+	describe("unitSettingの編集ダイアログのSave and Preview", () => {
+		const renderDialog = () =>
+			render(
+				<UnitSettingsDialog
+					fileName="unit.json"
+					handleDialogClose={vi.fn()}
+					handleSave={vi.fn()}
+				/>,
+			);
+
+		it("保存したファイルをunitSettingとして適用してプレビューする", async () => {
+			const user = userEvent.setup();
+			renderDialog();
+			await user.click(
+				screen.getByRole("button", { name: "Save and Preview" }),
+			);
+			await user.click(screen.getByRole("button", { name: "Unit Preview" }));
+
+			expect(lastOf(tableNamesCalls)).toEqual(SRC_INFO);
+			expect(lastOf(unitCalls)).toEqual({
+				srcInfo: SRC_INFO,
+				tableName: "big",
+				unitSetting: { path: "saved.json", encoding: "MS932" },
+			});
+		});
+
+		it("srcが空ならSave and Previewを出さない", () => {
+			srcInfoFixture.current = { values: { srcType: "csv", src: "" } };
+			renderDialog();
+			expect(
+				screen.queryByRole("button", { name: "Save and Preview" }),
+			).not.toBeInTheDocument();
+		});
 	});
 });
