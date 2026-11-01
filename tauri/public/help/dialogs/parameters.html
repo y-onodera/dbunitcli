@@ -61,7 +61,7 @@
   <p>テンプレートの書き方は <a href="../reference/st4.html">StringTemplate 4</a> を参照してください。</p>
 
   <h2 id="env-vs-p">Env との使い分け</h2>
-  <p>Env（<a href="workspace.html">Workspace</a> の ChangeWorkspace で選ぶ環境変数ファイル）と -P は、どちらも値を外から渡す仕組みですが、適用範囲と効く場所が違います。</p>
+  <p>Env（<a href="workspace.html">Workspace</a> の ChangeWorkspace で選ぶ環境変数ファイル）と -P は、どちらも値を外から渡す仕組みですが、適用範囲と、値を参照・置換できる場所が違います。</p>
   <table>
     <tr><th>観点</th><th>Env（<code>${env.変数名}</code>）</th><th>Parameters（<code>-Pキー=値</code>）</th></tr>
     <tr><td>定義する場所</td><td>Workspace 内の .properties ファイル（デフォルトは <code>env.properties</code>）</td><td>Edit Parameters (-P) ダイアログ。Save で <code>option/&lt;command&gt;/&lt;name&gt;.txt</code> に保存</td></tr>

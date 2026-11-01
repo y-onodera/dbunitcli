@@ -168,7 +168,7 @@ user=app</pre>
     <li>CLI から実行する場合は Java システムプロパティ <code>-Dyo.dbunit.cli.env=env/staging.properties</code> で指定します</li>
   </ul>
   <h3>Parameters (-P) との使い分け</h3>
-  <p>Env は Workspace 全体に効き、オプションの値を置き換えます。SQL やテンプレートの中では使えません。保存済みオプション 1 つだけに効き、SQL やテンプレートの変数として使う値は -P 値で渡します。比較表と組み合わせ方は <a href="parameters.html">Parameters (-P)</a> の「Env との使い分け」を参照してください。</p>
+  <p>Env の値は、その Workspace のすべての保存済みオプションの実行に使われ、オプションの値に書いた <code>${env.変数名}</code> を実行前に置き換えます。SQL ファイルやテンプレートの中に書いた <code>${env.変数名}</code> は置き換えません。保存済みオプションごとに変えたい値や、SQL・テンプレートの変数として使う値は -P 値で渡します（-P 値はその保存済みオプションにだけ保存されます）。比較表と組み合わせ方は <a href="parameters.html">Parameters (-P)</a> の「Env との使い分け」を参照してください。</p>
 
   <h2 id="section-related">関連</h2>
   <ul>
