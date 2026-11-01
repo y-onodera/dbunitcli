@@ -13,7 +13,7 @@ Scaffoldは、Generateの固定成果物型（`isFixedTemplate()=true`）を`gen
 ## target追加の判断基準
 
 1. テンプレートが`rows`を「列定義」として読むか（`sql`のように実データとして読む型は対象外）
-2. `getFixedUnit()`がtableか（`dataset`固定はまずGenerate側を変更）
+2. `fixedUnit()`がtableか（記述子型は`DescriptorGenerateStrategy`実装であること）（`dataset`固定はまずGenerate側を変更）
 3. テンプレートがunit=tableの自然な形（`rows`/`tableName`/`subTable.<name>.rows`）を読むか（読まなければGenerate側をリファクタ。前例: xlsxSchema・fixedColumnDef）
 
 ## 関連スキル

@@ -7,6 +7,7 @@ import yo.dbunitcli.application.ArgumentMapper;
 import yo.dbunitcli.application.CommandLineOption;
 import yo.dbunitcli.application.CommandParameters;
 import yo.dbunitcli.application.Option;
+import yo.dbunitcli.application.command.generate.DescriptorOption;
 import yo.dbunitcli.application.ParameterUnit;
 import yo.dbunitcli.application.option.DataSetLoadOption;
 import yo.dbunitcli.common.Parameter;
@@ -48,7 +49,7 @@ public record ScaffoldOption(
         , String fixedLength
         , String defaultLength
         , String align
-) implements CommandLineOption<ScaffoldDto> {
+) implements CommandLineOption<ScaffoldDto>, DescriptorOption {
 
     private static final String COMMAND_INPUT_PREFIX = "-commandInput.";
     private static final String DATASET_SRC_DIR = "src";

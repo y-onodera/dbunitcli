@@ -107,7 +107,7 @@ public class CreatePatchSqlRowCompareResultHandler implements RowCompareResultHa
         if (!dir.exists() && !dir.mkdirs()) {
             throw new AssertionError("fail to create directory:" + dir);
         }
-        final STGroup stGroup = GenerateType.sql.getStGroup();
+        final STGroup stGroup = GenerateType.sql.strategy().stGroup();
         final StringBuilder sql = new StringBuilder();
         sql.append(this.render(stGroup, "update", this.updateRows));
         sql.append(this.render(stGroup, "insert", this.insertRows));

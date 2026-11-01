@@ -1,0 +1,51 @@
+package yo.dbunitcli.application.command.generate;
+
+import org.dbunit.dataset.Column;
+import yo.dbunitcli.application.Option;
+import yo.dbunitcli.dataset.ComparableDataSetProducer;
+import yo.dbunitcli.dataset.ComparableDataSetProducerWrapper;
+import yo.dbunitcli.dataset.producer.ComparableFixedColumnDefMetaDataProducer;
+
+import java.util.List;
+
+/**
+ * fixedColumnDef: テーブル毎に固定長ファイルの列定義（json）を生成する固定成果物型
+ */
+public final class FixedColumnDefGenerateStrategy implements DescriptorGenerateStrategy {
+
+    @Override
+    public String stgPath() {
+        return "fixedcolumndef/fixedColumnDefTemplate.stg";
+    }
+
+    @Override
+    public String templatePath() {
+        return "fixedcolumndef/fixedColumnDefTemplate.txt";
+    }
+
+    @Override
+    public Column[] descriptorSchema() {
+        return ComparableFixedColumnDefMetaDataProducer.outputSchema();
+    }
+
+    @Override
+    public ComparableDataSetProducerWrapper wrapDescriptor(final DescriptorOption option, final ComparableDataSetProducer source) {
+        return ComparableFixedColumnDefMetaDataProducer.of(source, option.fixedLength(), option.defaultLength(), option.align());
+    }
+
+    @Override
+    public String extension() {
+        return ".json";
+    }
+
+    @Override
+    public List<Option.Violation> validateOption(final GenerateContext option) {
+        return option.validateFixedColumnDef(option.fixedLength(), option.defaultLength(), option.align());
+    }
+
+    @Override
+    public void putDescriptorParameters(final DescriptorOption option, final Option.ParametersBuilder builder) {
+        builder.put("-fixedLength", option.fixedLength())
+               .put("-defaultLength", option.defaultLength()).put("-align", option.align());
+    }
+}
