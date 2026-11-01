@@ -10,11 +10,32 @@
   <h1>Convert</h1>
   <p>データセットを読み込み、指定した出力形式（CSV・Excel・DB テーブルなど）で書き出します。</p>
 
-  <h2 id="section-options">オプション</h2>
+  <h2 id="section-simple">シンプルな使い方</h2>
+  <p>入力元の <code>src</code> と、出力形式・出力先を指定するだけで変換できます。入力の <code>srcType</code> と出力の <code>resultType</code> はどちらもデフォルトが <code>csv</code> なので、CSV を読み込む場合は <code>srcType</code> を選ぶ必要はありません。</p>
+  <p>例: CSV ファイルを置いたディレクトリを、1 つの Excel ブックにまとめます（保存済みオプションの名前は <code>orders_export</code>）。</p>
+  <pre>入力:
+  data/orders/ORDERS.csv
+  data/orders/ITEMS.csv
+
+指定:
+  srcData の src              = data/orders
+  convertResult の resultType = xlsx
+  convertResult の result     = out
+
+結果:
+  out/orders_export.xlsx  (シート ORDERS / ITEMS)</pre>
+  <ul>
+    <li>CSV ファイル 1 つが 1 テーブルになり、ファイル名（拡張子なし）がテーブル名になる</li>
+    <li><code>src</code> と <code>result</code> の相対パスは、それぞれ Dataset Base・Result Base からの相対（<a href="../dialogs/workspace.html">Workspace</a> を参照）</li>
+    <li>ブックのファイル名は、<code>resultPath</code> を空にすると保存済みオプションの名前になる</li>
+  </ul>
+  <p><code>resultType</code> を変えずに <code>csv</code> のまま実行すると、<code>out/ORDERS.csv</code> / <code>out/ITEMS.csv</code> のようにテーブルごとのファイルに書き出されます（文字コードや区切り文字の変換に使えます）。</p>
+
+  <h2 id="section-options">変更できる設定</h2>
   <table>
     <tr><th>項目</th><th>説明</th></tr>
-    <tr><td>srcData</td><td>変換元のデータセット（<a href="../sections/dataset-load-form.html">Dataset Load Form</a>）</td></tr>
-    <tr><td>convertResult</td><td>出力形式と出力先（<a href="../sections/result-form.html">Result Form</a>）</td></tr>
+    <tr><td>srcData</td><td>変換元のデータセット。入力の形式（Excel・DB テーブル・SQL の結果など）、文字コード、ディレクトリの走査条件、テーブルごとの主キー・フィルタなどを変えられる（<a href="../sections/dataset-load-form.html">Dataset Load Form</a>）</td></tr>
+    <tr><td>convertResult</td><td>出力形式と出力先。DB テーブルへの書き込み、ブックの作り方（<code>excelTable</code>）、ファイル名（<code>resultPath</code>）、ヘッダ行の有無、並列読込などを変えられる（<a href="../sections/result-form.html">Result Form</a>）</td></tr>
   </table>
 
   <h2 id="section-related">関連</h2>
