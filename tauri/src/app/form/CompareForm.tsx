@@ -57,7 +57,7 @@ export function CompareForm(prop: {
 							element={settingElement}
 							editDialog={CompareKeySettingsDialog}
 							generateEditDialog={CompareKeySettingsEditDialog}
-							showPreview={false}
+							preview={null}
 						/>
 					</DatasetSrcInfoProvider>
 				) : (

@@ -210,7 +210,8 @@ async function fetchUnitTablePreview(
 	apiUrl: string,
 	info: DatasetSrcInfo,
 	tableName: string,
-	unitSetting: UnitSettingRef,
+	unitSetting: string,
+	unitSettingEncoding: string,
 	jdbcValues: Record<string, string>,
 	paramInputs: Record<string, string>,
 	signal?: AbortSignal,
@@ -223,8 +224,8 @@ async function fetchUnitTablePreview(
 			headers: { "Content-Type": "application/json" },
 			body: buildDatasetRequestBody(info, jdbcValues, {
 				tableName,
-				unitSetting: unitSetting.path,
-				unitSettingEncoding: unitSetting.encoding,
+				unitSetting,
+				unitSettingEncoding,
 				parameters: paramInputs,
 			}),
 		},
@@ -234,14 +235,12 @@ async function fetchUnitTablePreview(
 	return fetchData(fetchParams).then((r) => r.json());
 }
 
-// generateの-unitSetting・-unitSettingEncodingの値
-export type UnitSettingRef = { path: string; encoding: string };
-
 // srcのtableNameのテーブルにunitSettingを適用してできたテーブルごとのプレビュー（先頭がtableName自身）
 export const useDatasetUnitTablePreview = (
 	srcInfo: DatasetSrcInfo,
 	tableName: string,
-	unitSetting: UnitSettingRef,
+	unitSetting: string,
+	unitSettingEncoding: string,
 ): {
 	previews: UnitTablePreview[];
 	loading: boolean;
@@ -257,7 +256,7 @@ export const useDatasetUnitTablePreview = (
 	const srcReady = isSrcReady(srcInfo, connectionOk);
 
 	useEffect(() => {
-		if (!srcReady || !tableName || !unitSetting.path) {
+		if (!srcReady || !tableName || !unitSetting) {
 			setLoad(IDLE_UNIT_PREVIEWS);
 			return;
 		}
@@ -269,6 +268,7 @@ export const useDatasetUnitTablePreview = (
 					srcInfo,
 					tableName,
 					unitSetting,
+					unitSettingEncoding,
 					jdbcValues,
 					paramInputs,
 					controller.signal,
@@ -288,6 +288,7 @@ export const useDatasetUnitTablePreview = (
 		jdbcValues,
 		tableName,
 		unitSetting,
+		unitSettingEncoding,
 		paramInputs,
 	]);
 

@@ -74,12 +74,10 @@ export function DatasetSettingsEditDialog(props: {
 			fileName={props.fileName}
 			save={(path) => saveSettings(path, dataSettings)}
 			handleSave={props.handleSave}
-			footerActions={(saveThen) => {
-				if (props.saveAndPreview) {
-					return props.saveAndPreview(saveThen);
-				}
-				// 保存したファイルをsettingに適用してプレビューする（それ以外のsrc要素はフォームのまま）
-				return (
+			footerActions={
+				props.saveAndPreview ??
+				((saveThen) =>
+					// 保存したファイルをsettingに適用してプレビューする（それ以外のsrc要素はフォームのまま）
 					srcTypeOf(datasetSrcInfo) && (
 						<SaveAndPreviewButton
 							saveThen={saveThen}
@@ -87,9 +85,8 @@ export function DatasetSettingsEditDialog(props: {
 								withValues(datasetSrcInfo, { setting: path })
 							}
 						/>
-					)
-				);
-			}}
+					))
+			}
 		>
 			<SettingTable<DatasetSetting>
 				caption="Add Metadata Settings"

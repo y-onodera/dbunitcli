@@ -6,10 +6,7 @@ import UnitSettingPreviewButton, {
 	UnitSettingsDialog,
 } from "../../../../../app/form/section/dialog/UnitSettingPreviewButton";
 import type { SaveThen } from "../../../../../components/dialog";
-import type {
-	UnitSettingRef,
-	UnitTablePreview,
-} from "../../../../../hooks/useDatasetSettings";
+import type { UnitTablePreview } from "../../../../../hooks/useDatasetSettings";
 import type { DatasetSrcInfo } from "../../../../../model/CommandOption";
 import {
 	expectJobFailure,
@@ -35,7 +32,8 @@ const {
 	unitCalls: [] as {
 		srcInfo: DatasetSrcInfo;
 		tableName: string;
-		unitSetting: UnitSettingRef;
+		unitSetting: string;
+		encoding: string;
 	}[],
 	tableNamesCalls: [] as DatasetSrcInfo[],
 }));
@@ -65,9 +63,10 @@ vi.mock("../../../../../hooks/useDatasetSettings", () => ({
 	useDatasetUnitTablePreview: (
 		srcInfo: DatasetSrcInfo,
 		tableName: string,
-		unitSetting: UnitSettingRef,
+		unitSetting: string,
+		encoding: string,
 	) => {
-		unitCalls.push({ srcInfo, tableName, unitSetting });
+		unitCalls.push({ srcInfo, tableName, unitSetting, encoding });
 		return {
 			previews: unitFixture.previews,
 			loading: false,
@@ -155,7 +154,8 @@ describe("UnitSettingPreviewButtonのテスト", () => {
 		expect(lastOf(unitCalls)).toEqual({
 			srcInfo: SRC_INFO,
 			tableName: "big",
-			unitSetting: { path: "unit.json", encoding: "MS932" },
+			unitSetting: "unit.json",
+			encoding: "MS932",
 		});
 	});
 
@@ -201,7 +201,8 @@ describe("UnitSettingPreviewButtonのテスト", () => {
 			expect(lastOf(unitCalls)).toEqual({
 				srcInfo: SRC_INFO,
 				tableName: "big",
-				unitSetting: { path: "saved.json", encoding: "MS932" },
+				unitSetting: "saved.json",
+				encoding: "MS932",
 			});
 		});
 

@@ -167,18 +167,16 @@ public class DatasetSettingsController extends AbstractResourceFileController<Da
             final TableSeparators unitSeparators = this.unitTableSeparators(request);
             final Supplier<ComparableDataSetParam.Builder> params = this.toParam(request);
             final TableSeparators separators = params.get().getTableSeparators();
-            for (final Narrow narrow : Narrow.attempts(separators)) {
-                final ComparableDataSetParam.Builder param = params.get();
-                narrow.applyTo(param, separators, tableName);
-                try (final ComparableDataSetProducer producer = new ComparableDataSetLoader(this.buildParameter(request))
-                        .getComparableDataSetProducer(param.build())) {
-                    if (producer.lazyLoad(true).get(tableName) instanceof final ComparableTableDto dto) {
-                        return ObjectMapper.getDefault().writeValueAsString(
-                                DatasetSettingsController.toUnitPreviews(tableName, dto.loadSeparatedTables(unitSeparators)));
-                    }
-                }
+            // 対象を取りこぼさない絞り込み（splitがあれば絞らない）で1回だけ読む
+            final ComparableDataSetParam.Builder param = params.get();
+            Narrow.singlePass(separators).applyTo(param, separators, tableName);
+            try (final ComparableDataSetProducer producer = new ComparableDataSetLoader(this.buildParameter(request))
+                    .getComparableDataSetProducer(param.build())) {
+                return producer.lazyLoad(true).get(tableName) instanceof final ComparableTableDto dto
+                        ? ObjectMapper.getDefault().writeValueAsString(
+                                DatasetSettingsController.toUnitPreviews(tableName, dto.loadSeparatedTables(unitSeparators)))
+                        : "[]";
             }
-            return "[]";
         } catch (final Throwable th) {
             LOGGER.error("cause:", th);
             throw new ApplicationException(th);
@@ -189,11 +187,8 @@ public class DatasetSettingsController extends AbstractResourceFileController<Da
         final String encoding = Strings.isNotEmpty(request.getUnitSettingEncoding())
                 ? request.getUnitSettingEncoding()
                 : Charset.defaultCharset().displayName();
-        final String setting = request.getUnitSetting();
-        final File file = new File(setting).isAbsolute()
-                ? new File(setting)
-                : AbstractCommandController.resolveSidecarFilePath(Option.BaseDir.SETTING, setting);
-        return new FromJsonTableSeparatorsBuilder(encoding).build(file);
+        return new FromJsonTableSeparatorsBuilder(encoding)
+                .build(AbstractCommandController.resolveSidecarFile(Option.BaseDir.SETTING, request.getUnitSetting()));
     }
 
     private static List<DatasetUnitTablePreviewResponseDto> toUnitPreviews(final String tableName,
@@ -205,13 +200,16 @@ public class DatasetSettingsController extends AbstractResourceFileController<Da
     }
 
     private static DatasetUnitTablePreviewResponseDto toUnitPreview(final ComparableTable table) {
-        final String[] headers = Arrays.stream(table.getTableMetaData().getColumns())
-                                       .map(Column::getColumnName)
-                                       .toArray(String[]::new);
         final List<Object[]> rows = IntStream.range(0, Math.min(PREVIEW_ROW_LIMIT, table.getRowCount()))
                                              .mapToObj(table::getRow)
                                              .toList();
-        return new DatasetUnitTablePreviewResponseDto(table.getTableName(), headers, rows, table.getRowCount());
+        return new DatasetUnitTablePreviewResponseDto(table.getTableName(), DatasetSettingsController.headersOf(table), rows, table.getRowCount());
+    }
+
+    private static String[] headersOf(final ComparableTable table) {
+        return Arrays.stream(table.getTableMetaData().getColumns())
+                     .map(Column::getColumnName)
+                     .toArray(String[]::new);
     }
 
     /**
@@ -480,10 +478,7 @@ public class DatasetSettingsController extends AbstractResourceFileController<Da
                 return Optional.empty();
             }
             final ComparableTable table = this.builder.build();
-            final String[] headers = Arrays.stream(table.getTableMetaData().getColumns())
-                                           .map(Column::getColumnName)
-                                           .toArray(String[]::new);
-            return Optional.of(new DatasetTablePreviewResponseDto(headers, table.rows().rows(), this.totalRows));
+            return Optional.of(new DatasetTablePreviewResponseDto(DatasetSettingsController.headersOf(table), table.rows().rows(), this.totalRows));
         }
 
         @Override

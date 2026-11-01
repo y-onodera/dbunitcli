@@ -135,43 +135,19 @@ export function DatasetTableNamesPreviewDialog({
 	);
 	const [previewTable, setPreviewTable] = useState<string | null>(null);
 
-	function renderContent() {
-		if (loading) {
-			return (
-				<JobProgress
-					title="Loading..."
-					lines={logs}
-					onAbandon={handleDialogClose}
-				/>
-			);
-		}
-		if (error) {
-			return <JobFailure message={error} lines={logs} />;
-		}
-		if (tableNames.length === 0) {
-			return <StatusMessage kind="empty">No tables found.</StatusMessage>;
-		}
-		return (
-			<ul className="text-sm bg-surface-subtle border border-border rounded-lg p-3 overflow-auto max-h-96 space-y-1">
-				{tableNames.map((name) => (
-					<li
-						key={name}
-						className="flex items-center gap-2 text-content-secondary"
-					>
-						<span className="flex-1">{name}</span>
-						<PreviewButton handleClick={() => setPreviewTable(name)} />
-						{rowActions?.(name)}
-					</li>
-				))}
-			</ul>
-		);
-	}
-
 	return (
 		<FullDialog onClose={handleDialogClose}>
 			<DialogBody size="fluid">
 				<DialogTitle>Table List Preview</DialogTitle>
-				{renderContent()}
+				<TableNameList
+					names={tableNames}
+					loading={loading}
+					logs={logs}
+					error={error}
+					onAbandon={handleDialogClose}
+					onPreview={setPreviewTable}
+					rowActions={rowActions}
+				/>
 			</DialogBody>
 			<DialogFooter>
 				<WhiteButton title="Close" handleClick={handleDialogClose} />
@@ -278,5 +254,50 @@ export function TablePreviewTable({
 				))}
 			</DataTable>
 		</>
+	);
+}
+
+// テーブル名の一覧（読込中・失敗・空の表示を含む）。各名前の横にプレビューボタンとrowActionsを出す
+export function TableNameList({
+	names,
+	loading,
+	logs,
+	error,
+	onAbandon,
+	onPreview,
+	rowActions,
+}: {
+	names: string[];
+	loading: boolean;
+	logs: string[];
+	error: string;
+	onAbandon: () => void;
+	onPreview: (name: string) => void;
+	rowActions?: (name: string) => ReactNode;
+}) {
+	if (loading) {
+		return (
+			<JobProgress title="Loading..." lines={logs} onAbandon={onAbandon} />
+		);
+	}
+	if (error) {
+		return <JobFailure message={error} lines={logs} />;
+	}
+	if (names.length === 0) {
+		return <StatusMessage kind="empty">No tables found.</StatusMessage>;
+	}
+	return (
+		<ul className="text-sm bg-surface-subtle border border-border rounded-lg p-3 overflow-auto max-h-96 space-y-1">
+			{names.map((name) => (
+				<li
+					key={name}
+					className="flex items-center gap-2 text-content-secondary"
+				>
+					<span className="flex-1">{name}</span>
+					<PreviewButton handleClick={() => onPreview(name)} />
+					{rowActions?.(name)}
+				</li>
+			))}
+		</ul>
 	);
 }

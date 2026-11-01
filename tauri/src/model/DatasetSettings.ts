@@ -210,7 +210,7 @@ export class DatasetSettings {
 			settings: filterSettings(this.settings),
 			// commonSettingsは全テーブルに効くため対象テーブルを持たないのが普通。中身の無い行だけ除く
 			commonSettings: this.commonSettings.filter((setting) =>
-				hasValue(JSON.parse(JSON.stringify(setting))),
+				hasValue(setting.toJSON()),
 			),
 			...(outputFilter ? { outputFilter } : {}),
 			...(imports.length ? { import: imports } : {}),

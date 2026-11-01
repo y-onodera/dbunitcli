@@ -267,13 +267,9 @@ describe("DatasetSettingsProviderのテスト", () => {
 	});
 
 	describe("useDatasetUnitTablePreviewのテスト", () => {
-		// 入力は毎レンダー同一参照にする（新規オブジェクトだとeffectが再発火し続ける）
-		const unitSetting = { path: "unit.json", encoding: "MS932" };
-		const noUnitSetting = { path: "", encoding: "" };
-
 		it("読込元・テーブル名・unitSettingを送り、適用後のテーブルごとのプレビューを返すことを確認", async () => {
 			const { result } = renderHook(
-				() => useDatasetUnitTablePreview(srcInfo, "t1", unitSetting),
+				() => useDatasetUnitTablePreview(srcInfo, "t1", "unit.json", "MS932"),
 				{ wrapper: envWrapper },
 			);
 			await waitFor(() => {
@@ -298,7 +294,7 @@ describe("DatasetSettingsProviderのテスト", () => {
 
 		it("unitSettingが空なら問い合わせないことを確認", async () => {
 			const { result } = renderHook(
-				() => useDatasetUnitTablePreview(srcInfo, "t1", noUnitSetting),
+				() => useDatasetUnitTablePreview(srcInfo, "t1", "", ""),
 				{ wrapper: envWrapper },
 			);
 			await act(async () => {});
@@ -316,7 +312,7 @@ describe("DatasetSettingsProviderのテスト", () => {
 				emitLogsThenFail(params.onLog),
 			);
 			const { result } = renderHook(
-				() => useDatasetUnitTablePreview(srcInfo, "t1", unitSetting),
+				() => useDatasetUnitTablePreview(srcInfo, "t1", "unit.json", "MS932"),
 				{ wrapper: envWrapper },
 			);
 			await waitFor(() => {
