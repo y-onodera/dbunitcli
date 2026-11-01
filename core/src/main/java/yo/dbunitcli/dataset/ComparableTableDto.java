@@ -116,10 +116,7 @@ public class ComparableTableDto extends HashMap<String, Object> {
      */
     public ComparableTableDto applyDataSetSeparators(final TableSeparators dataSetSeparators) {
         final String tableName = this.task.targetTableName();
-        final Consumer<TableSeparators.Builder> builder = origin ->
-                origin.setFilter(origin.getFilter().and(new SplitOrNameFilter(tableName)))
-                      .setNext(origin.getNext().then(dataSetSeparators));
-        final TreeMap<String, ComparableTable> tables = this.task.runWith(builder, null);
+        final TreeMap<String, ComparableTable> tables = this.loadSeparatedTables(dataSetSeparators);
         final ComparableTableDto result = new ComparableTableDto(this);
         final ComparableTable target = tables.get(tableName);
         result.setRows(target == null ? new ArrayList<>() : target.toMap(false));
@@ -127,6 +124,18 @@ public class ComparableTableDto extends HashMap<String, Object> {
               .filter(it -> !it.getKey().equals(tableName))
               .forEach(it -> result.getSubTables().put(it.getKey(), it.getValue().toMap(true).getFirst()));
         return result;
+    }
+
+    /**
+     * このテーブルの行を読み込み、dataSetSeparatorsを適用した結果をテーブル名→テーブルで返す（このDTOは変更しない）。
+     * このテーブル自身（{@link #getTableName()}）と、dataSetSeparatorsでできた他のテーブルを含む
+     */
+    public TreeMap<String, ComparableTable> loadSeparatedTables(final TableSeparators dataSetSeparators) {
+        final String tableName = this.task.targetTableName();
+        final Consumer<TableSeparators.Builder> builder = origin ->
+                origin.setFilter(origin.getFilter().and(new SplitOrNameFilter(tableName)))
+                      .setNext(origin.getNext().then(dataSetSeparators));
+        return this.task.runWith(builder, null);
     }
 
 }

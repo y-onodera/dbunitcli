@@ -31,6 +31,7 @@ import yo.dbunitcli.dataset.AddSettingTableMetaData;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.dataset.ComparableDataSetProducer;
 import yo.dbunitcli.dataset.ComparableTable;
+import yo.dbunitcli.dataset.ComparableTableDto;
 import yo.dbunitcli.dataset.ComparableTableJoin;
 import yo.dbunitcli.dataset.IDataSetConverter;
 import yo.dbunitcli.dataset.MetaDataCapture;
@@ -46,12 +47,15 @@ import yo.dbunitcli.sidecar.dto.DatasetTableConvertRequestDto;
 import yo.dbunitcli.sidecar.dto.DatasetTableNamesRequestDto;
 import yo.dbunitcli.sidecar.dto.DatasetTablePreviewRequestDto;
 import yo.dbunitcli.sidecar.dto.DatasetTablePreviewResponseDto;
+import yo.dbunitcli.sidecar.dto.DatasetUnitTablePreviewRequestDto;
+import yo.dbunitcli.sidecar.dto.DatasetUnitTablePreviewResponseDto;
 import yo.dbunitcli.sidecar.dto.JsonXlsxSchemaDto;
 import yo.dbunitcli.sidecar.job.Interruptible;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -61,6 +65,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.TreeMap;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 
@@ -139,6 +146,72 @@ public class DatasetSettingsController extends AbstractResourceFileController<Da
                 return "{\"headers\":[],\"rows\":[],\"totalRows\":0}";
             }
         }
+    }
+
+    /**
+     * generateの-unitSettingのプレビュー。srcの読込で得たtableNameのテーブルにunitSettingを適用し、
+     * できたテーブルごとに先頭{@link #PREVIEW_ROW_LIMIT}行と全行数を返す（tableName自身が先頭、残りはテーブル名順）。
+     * unitSettingの誤りを直せるよう、読めなかったときはエラーを返す
+     */
+    @Interruptible
+    @Post(uri = "unit-table-preview", produces = MediaType.APPLICATION_JSON)
+    public String unitTablePreview(@Body final DatasetUnitTablePreviewRequestDto request) {
+        try {
+            final String tableName = request.getTableName();
+            if (Strings.isEmpty(tableName)) {
+                throw new IllegalArgumentException("tableName is required");
+            }
+            if (Strings.isEmpty(request.getUnitSetting())) {
+                throw new IllegalArgumentException("unitSetting is required");
+            }
+            final TableSeparators unitSeparators = this.unitTableSeparators(request);
+            final Supplier<ComparableDataSetParam.Builder> params = this.toParam(request);
+            final TableSeparators separators = params.get().getTableSeparators();
+            for (final Narrow narrow : Narrow.attempts(separators)) {
+                final ComparableDataSetParam.Builder param = params.get();
+                narrow.applyTo(param, separators, tableName);
+                try (final ComparableDataSetProducer producer = new ComparableDataSetLoader(this.buildParameter(request))
+                        .getComparableDataSetProducer(param.build())) {
+                    if (producer.lazyLoad(true).get(tableName) instanceof final ComparableTableDto dto) {
+                        return ObjectMapper.getDefault().writeValueAsString(
+                                DatasetSettingsController.toUnitPreviews(tableName, dto.loadSeparatedTables(unitSeparators)));
+                    }
+                }
+            }
+            return "[]";
+        } catch (final Throwable th) {
+            LOGGER.error("cause:", th);
+            throw new ApplicationException(th);
+        }
+    }
+
+    private TableSeparators unitTableSeparators(final DatasetUnitTablePreviewRequestDto request) {
+        final String encoding = Strings.isNotEmpty(request.getUnitSettingEncoding())
+                ? request.getUnitSettingEncoding()
+                : Charset.defaultCharset().displayName();
+        final String setting = request.getUnitSetting();
+        final File file = new File(setting).isAbsolute()
+                ? new File(setting)
+                : AbstractCommandController.resolveSidecarFilePath(Option.BaseDir.SETTING, setting);
+        return new FromJsonTableSeparatorsBuilder(encoding).build(file);
+    }
+
+    private static List<DatasetUnitTablePreviewResponseDto> toUnitPreviews(final String tableName,
+                                                                           final TreeMap<String, ComparableTable> tables) {
+        return Stream.concat(Stream.ofNullable(tables.get(tableName)),
+                             tables.values().stream().filter(it -> !it.getTableName().equals(tableName)))
+                     .map(DatasetSettingsController::toUnitPreview)
+                     .toList();
+    }
+
+    private static DatasetUnitTablePreviewResponseDto toUnitPreview(final ComparableTable table) {
+        final String[] headers = Arrays.stream(table.getTableMetaData().getColumns())
+                                       .map(Column::getColumnName)
+                                       .toArray(String[]::new);
+        final List<Object[]> rows = IntStream.range(0, Math.min(PREVIEW_ROW_LIMIT, table.getRowCount()))
+                                             .mapToObj(table::getRow)
+                                             .toList();
+        return new DatasetUnitTablePreviewResponseDto(table.getTableName(), headers, rows, table.getRowCount());
     }
 
     /**

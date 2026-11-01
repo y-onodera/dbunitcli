@@ -3,12 +3,14 @@ import { SectionLegend } from "../../components/dialog/SectionFieldset";
 import { DatasetSrcInfoProvider } from "../../context/DatasetSrcInfoProvider";
 import { buildDatasetSrcInfo } from "../../model/CommandOption";
 import type { GenerateOptions } from "../../model/SelectParameter";
+import type { FormValues } from "../../utils/formValues";
 import { DatasetLoadForm } from "./section/DatasetLoadForm";
 import { DatasetSettingsDialogWithoutPreview } from "./section/dialog/DatasetSettingsDialog";
 import {
 	TxtTemplateGenerateButton,
 	type TxtTemplateGenerateFormValues,
 } from "./section/dialog/TxtTemplateGenerateDialog";
+import UnitSettingPreviewButton from "./section/dialog/UnitSettingPreviewButton";
 import { XlsxTemplateGenerateButton } from "./section/dialog/XlsxTemplateGenerateDialog";
 import Check from "./section/element/Check";
 import DatasetSettingText from "./section/element/DatasetSettingText";
@@ -26,6 +28,8 @@ export function GenerateForm(prop: {
 	generate: GenerateOptions;
 	scaffoldPrefill: () => TxtTemplateGenerateFormValues;
 	handleScaffoldReflect: (params: Record<string, string>) => Promise<void>;
+	// 押した時点のフォームの値（unitSettingのプレビューでsrc・unitSettingEncodingを読む）
+	formValues?: () => FormValues;
 }) {
 	const generate = prop.generate;
 	const srcData = generate.srcData;
@@ -65,7 +69,7 @@ export function GenerateForm(prop: {
 					/>
 				)}
 				{generate.unitSetting && (
-					// unitSettingの編集ではsrc側のデータセットからテーブル名・カラム名の候補を取る
+					// unitSettingの編集・プレビューではsrc側のデータセットからテーブル名・カラム名の候補を取る
 					<DatasetSrcInfoProvider
 						key={`${prop.name}generate-unitSetting:${srcData.srcType?.value ?? ""}`}
 						initialValue={buildDatasetSrcInfo(srcData)}
@@ -74,8 +78,13 @@ export function GenerateForm(prop: {
 							prefix=""
 							element={generate.unitSetting}
 							editDialog={DatasetSettingsDialogWithoutPreview}
-							showPreview={false}
 							showGenerate={false}
+							preview={(path) => (
+								<UnitSettingPreviewButton
+									unitSetting={path}
+									formValues={prop.formValues ?? emptyFormValues}
+								/>
+							)}
 						/>
 					</DatasetSrcInfoProvider>
 				)}
@@ -142,4 +151,8 @@ export function GenerateForm(prop: {
 			/>
 		</>
 	);
+}
+
+function emptyFormValues(): FormValues {
+	return {};
 }

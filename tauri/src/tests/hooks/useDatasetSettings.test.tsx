@@ -10,6 +10,7 @@ import {
 	useDatasetTableConvert,
 	useDatasetTableNames,
 	useDatasetTablePreview,
+	useDatasetUnitTablePreview,
 	useSrcInfoColumnNames,
 } from "../../hooks/useDatasetSettings";
 import type { DatasetSrcInfo } from "../../model/CommandOption";
@@ -71,6 +72,16 @@ const { mockFetchData, mockFetchAndUpdate } = vi.hoisted(() => {
 		}
 		if (params.endpoint.includes("/dataset-setting/table-convert")) {
 			return Promise.resolve(new Response("/work/result"));
+		}
+		if (params.endpoint.includes("/dataset-setting/unit-table-preview")) {
+			return Promise.resolve(
+				new Response(
+					JSON.stringify([
+						{ tableName: "t1", headers: ["id"], rows: [["1"]], totalRows: 1 },
+						{ tableName: "PK", headers: ["id"], rows: [], totalRows: 0 },
+					]),
+				),
+			);
 		}
 		if (params.endpoint.includes("/dataset-setting/table-preview")) {
 			const { tableName } = JSON.parse(String(params.options.body));
@@ -252,6 +263,69 @@ describe("DatasetSettingsProviderのテスト", () => {
 			});
 			await act(async () => {});
 			expect(result.current).toStrictEqual([]);
+		});
+	});
+
+	describe("useDatasetUnitTablePreviewのテスト", () => {
+		// 入力は毎レンダー同一参照にする（新規オブジェクトだとeffectが再発火し続ける）
+		const unitSetting = { path: "unit.json", encoding: "MS932" };
+		const noUnitSetting = { path: "", encoding: "" };
+
+		it("読込元・テーブル名・unitSettingを送り、適用後のテーブルごとのプレビューを返すことを確認", async () => {
+			const { result } = renderHook(
+				() => useDatasetUnitTablePreview(srcInfo, "t1", unitSetting),
+				{ wrapper: envWrapper },
+			);
+			await waitFor(() => {
+				expect(result.current.loading).toBe(false);
+			});
+
+			expect(result.current.error).toBe("");
+			expect(result.current.previews.map((it) => it.tableName)).toStrictEqual([
+				"t1",
+				"PK",
+			]);
+			const [params] = mockFetchData.mock.calls.filter(([p]) =>
+				p.endpoint.includes("/dataset-setting/unit-table-preview"),
+			)[0];
+			expect(JSON.parse(String(params.options.body))).toMatchObject({
+				srcOptions: { src: "data/src", srcType: "csv" },
+				tableName: "t1",
+				unitSetting: "unit.json",
+				unitSettingEncoding: "MS932",
+			});
+		});
+
+		it("unitSettingが空なら問い合わせないことを確認", async () => {
+			const { result } = renderHook(
+				() => useDatasetUnitTablePreview(srcInfo, "t1", noUnitSetting),
+				{ wrapper: envWrapper },
+			);
+			await act(async () => {});
+
+			expect(result.current.previews).toStrictEqual([]);
+			expect(
+				mockFetchData.mock.calls.filter(([p]) =>
+					p.endpoint.includes("/dataset-setting/unit-table-preview"),
+				),
+			).toHaveLength(0);
+		});
+
+		it("読込に失敗したら、空の一覧とエラー・読込中に届いたログを返すことを確認", async () => {
+			mockFetchData.mockImplementationOnce((params: FetchParams) =>
+				emitLogsThenFail(params.onLog),
+			);
+			const { result } = renderHook(
+				() => useDatasetUnitTablePreview(srcInfo, "t1", unitSetting),
+				{ wrapper: envWrapper },
+			);
+			await waitFor(() => {
+				expect(result.current.loading).toBe(false);
+			});
+
+			expect(result.current.previews).toStrictEqual([]);
+			expect(result.current.error).toBe(JOB_ERROR);
+			expect(result.current.logs).toStrictEqual(JOB_LOG_LINES);
 		});
 	});
 

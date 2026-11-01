@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { type ReactNode, useState } from "react";
 import {
 	DataTable,
 	DialogBody,
@@ -17,6 +17,7 @@ import { PreviewButton } from "../../../../components/element/ButtonIcon";
 import { JobProgress } from "../../../../components/element/JobProgress";
 import { useDatasetSrcInfo } from "../../../../context/DatasetSrcInfoProvider";
 import {
+	type TablePreview,
 	useDatasetTableConvert,
 	useDatasetTableNames,
 	useDatasetTablePreview,
@@ -118,12 +119,15 @@ export function InlinePreviewButton({
 	);
 }
 
+// rowActions: 各テーブル名の横にプレビューボタンに加えて出すボタン（generateの-unitSettingのプレビューなど）
 export function DatasetTableNamesPreviewDialog({
 	datasetSrcInfo,
 	handleDialogClose,
+	rowActions,
 }: {
 	datasetSrcInfo: DatasetSrcInfo;
 	handleDialogClose: () => void;
+	rowActions?: (tableName: string) => ReactNode;
 }) {
 	const { tableNames, loading, logs, error } = useDatasetTableNames(
 		datasetSrcInfo,
@@ -156,6 +160,7 @@ export function DatasetTableNamesPreviewDialog({
 					>
 						<span className="flex-1">{name}</span>
 						<PreviewButton handleClick={() => setPreviewTable(name)} />
+						{rowActions?.(name)}
 					</li>
 				))}
 			</ul>
@@ -207,37 +212,7 @@ function TableDataPreviewDialog({
 		if (error) {
 			return <JobFailure message={error} lines={logs} />;
 		}
-		if (!preview?.headers || preview.headers.length === 0) {
-			return <StatusMessage kind="empty">No data found.</StatusMessage>;
-		}
-		const shownRows = preview.rows?.length ?? 0;
-		const { totalRows } = preview;
-		return (
-			<>
-				<p className="text-sm text-content-muted mb-2">
-					{shownRows < totalRows
-						? `Showing first ${shownRows} of ${totalRows} rows (partial preview)`
-						: `${totalRows} rows`}
-				</p>
-				<DataTable
-					head={preview.headers.map((header) => (
-						<Th key={header} nowrap>
-							{header}
-						</Th>
-					))}
-				>
-					{preview.rows?.map((row) => (
-						<Tr key={row.join("\x00")}>
-							{preview.headers.map((header, i) => (
-								<Td key={header} nowrap>
-									{row[i] ?? ""}
-								</Td>
-							))}
-						</Tr>
-					))}
-				</DataTable>
-			</>
-		);
+		return <TablePreviewTable preview={preview} />;
 	}
 
 	return (
@@ -264,5 +239,44 @@ function TableDataPreviewDialog({
 				/>
 			)}
 		</FullDialog>
+	);
+}
+
+// 先頭の一部の行と全行数の表示（rowsはsidecarが件数を制限した先頭の一部）
+export function TablePreviewTable({
+	preview,
+}: {
+	preview: TablePreview | null;
+}) {
+	if (!preview?.headers || preview.headers.length === 0) {
+		return <StatusMessage kind="empty">No data found.</StatusMessage>;
+	}
+	const shownRows = preview.rows?.length ?? 0;
+	const { totalRows } = preview;
+	return (
+		<>
+			<p className="text-sm text-content-muted mb-2">
+				{shownRows < totalRows
+					? `Showing first ${shownRows} of ${totalRows} rows (partial preview)`
+					: `${totalRows} rows`}
+			</p>
+			<DataTable
+				head={preview.headers.map((header) => (
+					<Th key={header} nowrap>
+						{header}
+					</Th>
+				))}
+			>
+				{preview.rows?.map((row) => (
+					<Tr key={row.join("\x00")}>
+						{preview.headers.map((header, i) => (
+							<Td key={header} nowrap>
+								{row[i] ?? ""}
+							</Td>
+						))}
+					</Tr>
+				))}
+			</DataTable>
+		</>
 	);
 }

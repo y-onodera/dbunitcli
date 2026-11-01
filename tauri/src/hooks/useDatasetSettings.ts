@@ -201,6 +201,104 @@ async function fetchTablePreview(
 	return fetchData(fetchParams).then((r) => r.json());
 }
 
+// generateの-unitSettingをsrcのテーブル1つに適用した結果のテーブル1つ分
+export type UnitTablePreview = TablePreview & { tableName: string };
+
+const IDLE_UNIT_PREVIEWS = idleLoad<UnitTablePreview[]>([]);
+
+async function fetchUnitTablePreview(
+	apiUrl: string,
+	info: DatasetSrcInfo,
+	tableName: string,
+	unitSetting: UnitSettingRef,
+	jdbcValues: Record<string, string>,
+	paramInputs: Record<string, string>,
+	signal?: AbortSignal,
+	onLog?: (line: string) => void,
+): Promise<UnitTablePreview[]> {
+	const fetchParams = {
+		endpoint: `${apiUrl}dataset-setting/unit-table-preview`,
+		options: {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			body: buildDatasetRequestBody(info, jdbcValues, {
+				tableName,
+				unitSetting: unitSetting.path,
+				unitSettingEncoding: unitSetting.encoding,
+				parameters: paramInputs,
+			}),
+		},
+		signal,
+		onLog,
+	};
+	return fetchData(fetchParams).then((r) => r.json());
+}
+
+// generateの-unitSetting・-unitSettingEncodingの値
+export type UnitSettingRef = { path: string; encoding: string };
+
+// srcのtableNameのテーブルにunitSettingを適用してできたテーブルごとのプレビュー（先頭がtableName自身）
+export const useDatasetUnitTablePreview = (
+	srcInfo: DatasetSrcInfo,
+	tableName: string,
+	unitSetting: UnitSettingRef,
+): {
+	previews: UnitTablePreview[];
+	loading: boolean;
+	logs: string[];
+	error: string;
+} => {
+	const [load, setLoad] =
+		useState<Load<UnitTablePreview[]>>(IDLE_UNIT_PREVIEWS);
+	const { apiUrl } = useEnvironment();
+	const { jdbcValues, connectionOk } = useJdbcConnectionState();
+	const paramInputs = useParamInputs();
+
+	const srcReady = isSrcReady(srcInfo, connectionOk);
+
+	useEffect(() => {
+		if (!srcReady || !tableName || !unitSetting.path) {
+			setLoad(IDLE_UNIT_PREVIEWS);
+			return;
+		}
+		const controller = new AbortController();
+		startLoad(
+			(onLog) =>
+				fetchUnitTablePreview(
+					apiUrl,
+					srcInfo,
+					tableName,
+					unitSetting,
+					jdbcValues,
+					paramInputs,
+					controller.signal,
+					onLog,
+				),
+			controller.signal,
+			IDLE_UNIT_PREVIEWS,
+			setLoad,
+		);
+		return () => {
+			controller.abort();
+		};
+	}, [
+		apiUrl,
+		srcInfo,
+		srcReady,
+		jdbcValues,
+		tableName,
+		unitSetting,
+		paramInputs,
+	]);
+
+	return {
+		previews: load.data,
+		loading: load.loading,
+		logs: load.logs,
+		error: load.error,
+	};
+};
+
 export const useDatasetTablePreview = (
 	srcInfo: DatasetSrcInfo,
 	tableName: string,

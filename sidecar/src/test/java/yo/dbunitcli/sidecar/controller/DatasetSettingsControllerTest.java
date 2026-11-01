@@ -24,6 +24,7 @@ import yo.dbunitcli.dataset.producer.ComparableCsvDataSetProducer;
 import yo.dbunitcli.dataset.producer.ComparableXlsxDataSetProducer;
 import yo.dbunitcli.resource.FileResources;
 import yo.dbunitcli.sidecar.dto.DatasetTablePreviewResponseDto;
+import yo.dbunitcli.sidecar.dto.DatasetUnitTablePreviewResponseDto;
 
 import org.junit.jupiter.api.Assertions;
 
@@ -70,6 +71,7 @@ class DatasetSettingsControllerTest {
         this.tryDelete("previewJoinSetting.json");
         this.tryDelete("previewUnmatchedJoinSetting.json");
         this.tryDelete("previewKeysSetting.json");
+        this.tryDelete("previewUnitSetting.json");
         this.deletePreviewSrc();
     }
 
@@ -254,6 +256,44 @@ class DatasetSettingsControllerTest {
 
         Assertions.assertEquals(3, this.tablePreview(setting, "small").getTotalRows());
         Assertions.assertEquals(BIG_ROWS, this.tablePreview(setting, "big").getTotalRows());
+    }
+
+    @Test
+    void testUnitTablePreview_unitSettingを適用した元のテーブルとsubTableを返す() throws IOException {
+        this.createPreviewSrc();
+        this.writeUnitSetting();
+
+        final List<DatasetUnitTablePreviewResponseDto> actual = this.unitTablePreview("", "big", "previewUnitSetting.json");
+
+        Assertions.assertEquals(List.of("big", "ONE"), actual.stream().map(DatasetUnitTablePreviewResponseDto::getTableName).toList());
+        final DatasetUnitTablePreviewResponseDto big = actual.getFirst();
+        Assertions.assertArrayEquals(new String[]{"key", "value", "label"}, big.getHeaders());
+        Assertions.assertEquals(DatasetSettingsController.PREVIEW_ROW_LIMIT, big.getRows().size());
+        Assertions.assertEquals(BIG_ROWS, big.getTotalRows());
+        Assertions.assertEquals("L1", String.valueOf(big.getRows().getFirst()[2]));
+        final DatasetUnitTablePreviewResponseDto one = actual.get(1);
+        Assertions.assertEquals(1, one.getTotalRows());
+        Assertions.assertEquals("1", String.valueOf(one.getRows().getFirst()[0]));
+    }
+
+    @Test
+    void testUnitTablePreview_srcのsettingを適用した後のテーブルに適用する() throws IOException {
+        this.createPreviewSrc();
+        this.writeUnitSetting();
+
+        final List<DatasetUnitTablePreviewResponseDto> actual = this.unitTablePreview(
+                this.writeRenameSetting(), "renamed", "previewUnitSetting.json");
+
+        Assertions.assertEquals(List.of("renamed", "ONE"), actual.stream().map(DatasetUnitTablePreviewResponseDto::getTableName).toList());
+        Assertions.assertEquals(BIG_ROWS, actual.getFirst().getTotalRows());
+    }
+
+    @Test
+    void testUnitTablePreview_unitSettingが無ければエラーを返す() throws IOException {
+        this.createPreviewSrc();
+
+        Assertions.assertThrows(HttpClientResponseException.class,
+                () -> this.unitTablePreview("", "big", "missingUnitSetting.json"));
     }
 
     @Test
@@ -596,6 +636,16 @@ class DatasetSettingsControllerTest {
                 "{\"settings\":[{\"name\":[\"big\"],\"tableName\":\"renamed\"}]}");
     }
 
+    /**
+     * 全行にlabel列を足し、key=1の行だけのサブテーブルONEを作るunitSetting
+     */
+    private void writeUnitSetting() throws IOException {
+        this.writeSetting("previewUnitSetting.json",
+                "{\"settings\":[{\"pattern\":{\"regex\":\".*\",\"exclude\":[\"ONE\"]},\"separate\":["
+                        + "{\"string\":{\"label\":\"'L' + key\"}},"
+                        + "{\"tableName\":\"ONE\",\"filter\":[\"key == '1'\"]}]}]}");
+    }
+
     private String writeKeysSetting() throws IOException {
         return this.writeSetting("previewKeysSetting.json",
                 "{\"settings\":[{\"name\":[\"small\"],\"keys\":[\"key\"]}]}");
@@ -675,6 +725,16 @@ class DatasetSettingsControllerTest {
         final String response = this.client.toBlocking().retrieve(
                 HttpRequest.POST("dbunit-cli/dataset-setting/table-preview", ObjectMapper.getDefault().writeValueAsString(body)));
         return ObjectMapper.getDefault().readValue(response, DatasetTablePreviewResponseDto.class);
+    }
+
+    private List<DatasetUnitTablePreviewResponseDto> unitTablePreview(final String setting, final String tableName,
+                                                                      final String unitSetting) throws IOException {
+        final Map<String, Object> body = this.tableBody("csv", setting, tableName);
+        body.put("unitSetting", unitSetting);
+        body.put("unitSettingEncoding", "UTF-8");
+        final String response = this.client.toBlocking().retrieve(
+                HttpRequest.POST("dbunit-cli/dataset-setting/unit-table-preview", ObjectMapper.getDefault().writeValueAsString(body)));
+        return List.of(ObjectMapper.getDefault().readValue(response, DatasetUnitTablePreviewResponseDto[].class));
     }
 
     private List<String> inlineTableNames(final String setting, final Map<String, Object> inlineSetting) throws IOException {

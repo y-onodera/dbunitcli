@@ -1,4 +1,4 @@
-import type { ComponentType, Dispatch, SetStateAction } from "react";
+import type { ComponentType, Dispatch, ReactNode, SetStateAction } from "react";
 import { InlineActions } from "../../../../components/dialog";
 import { useDatasetSrcInfo } from "../../../../context/DatasetSrcInfoProvider";
 import { useResourcesSettings } from "../../../../context/WorkspaceResourcesProvider";
@@ -21,7 +21,8 @@ import Text, { TextDropDownMenu } from "./Text";
 
 // editDialog: 編集ボタンで開くダイアログ、generateEditDialog: 生成結果を確認・保存するダイアログ。
 // 省略するとDataset Settingsを使う（compareの-settingはCompare Key Settingsを渡し、Previewも出さない）。
-// showGenerate=falseでgenerateボタンを出さない（generateの-unitSettingは雛型生成が用途に合わないため）
+// showGenerate=falseでgenerateボタンを出さない（generateの-unitSettingは雛型生成が用途に合わないため）。
+// previewを渡すと、既定のPreviewボタン（srcのsettingの適用前後）の代わりにそれを出す（generateの-unitSettingのプレビューなど）
 export default function DatasetSettingText({
 	prefix,
 	element,
@@ -31,11 +32,13 @@ export default function DatasetSettingText({
 	generateEditDialog = DatasetSettingsEditDialog,
 	showPreview = true,
 	showGenerate = true,
+	preview,
 }: TextProp & {
 	editDialog?: ComponentType<EditResourceDialogProps>;
 	generateEditDialog?: DatasetSettingsEditDialogComponent;
 	showPreview?: boolean;
 	showGenerate?: boolean;
+	preview?: (path: string) => ReactNode;
 }) {
 	const datasetSrcInfo = useDatasetSrcInfo();
 	const settings = useResourcesSettings();
@@ -49,8 +52,11 @@ export default function DatasetSettingText({
 			resourceFiles={resourceFiles}
 			showDefaulePath={true}
 			handleValueChange={handleValueChange}
-			afterContent={({ path }) =>
-				showPreview && srcTypeOf(datasetSrcInfo) ? (
+			afterContent={({ path }) => {
+				if (preview) {
+					return preview(path);
+				}
+				return showPreview && srcTypeOf(datasetSrcInfo) ? (
 					<InlineActions>
 						<DatasetTableNamesPreviewButton
 							title="Preview Before Settings"
@@ -63,8 +69,8 @@ export default function DatasetSettingText({
 							/>
 						)}
 					</InlineActions>
-				) : null
-			}
+				) : null;
+			}}
 		>
 			{({ path, setPath, isValueInDatalist }) => {
 				const handleSetPath: Dispatch<SetStateAction<string>> = (action) => {
