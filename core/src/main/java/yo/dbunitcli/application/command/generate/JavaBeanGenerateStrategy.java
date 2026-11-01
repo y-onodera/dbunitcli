@@ -1,7 +1,6 @@
 package yo.dbunitcli.application.command.generate;
 
 import org.dbunit.dataset.Column;
-import yo.dbunitcli.application.command.GenerateOption;
 import yo.dbunitcli.dataset.ComparableDataSetProducer;
 import yo.dbunitcli.dataset.ComparableDataSetProducerWrapper;
 import yo.dbunitcli.dataset.producer.ComparableDdlMetaDataProducer;
@@ -42,7 +41,7 @@ public final class JavaBeanGenerateStrategy implements DescriptorGenerateStrateg
     }
 
     @Override
-    public String resultPathTemplate(final GenerateOption option) {
+    public String resultPathTemplate(final GenerateContext option) {
         return ResultPaths.tableFile(option, "", "", ".java", "snakeToUpperCamel");
     }
 }

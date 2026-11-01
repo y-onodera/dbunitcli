@@ -2,7 +2,6 @@ package yo.dbunitcli.application.command.generate;
 
 import org.dbunit.dataset.Column;
 import yo.dbunitcli.application.ParameterUnit;
-import yo.dbunitcli.application.command.GenerateOption;
 import yo.dbunitcli.dataset.ComparableDataSetProducer;
 import yo.dbunitcli.dataset.ComparableDataSetProducerWrapper;
 
@@ -19,7 +18,7 @@ public interface DescriptorGenerateStrategy extends GenerateStrategy {
     ComparableDataSetProducerWrapper wrapDescriptor(DescriptorOption option, ComparableDataSetProducer source);
 
     @Override
-    default ComparableDataSetProducer wrapProducer(final GenerateOption option, final ComparableDataSetProducer producer) {
+    default ComparableDataSetProducer wrapProducer(final GenerateContext option, final ComparableDataSetProducer producer) {
         return this.wrapDescriptor(option, producer);
     }
 

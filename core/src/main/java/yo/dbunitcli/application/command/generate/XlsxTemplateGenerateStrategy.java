@@ -1,7 +1,6 @@
 package yo.dbunitcli.application.command.generate;
 
 import yo.dbunitcli.application.ParameterUnit;
-import yo.dbunitcli.application.command.GenerateOption;
 import yo.dbunitcli.resource.poi.jxls.JxlsTemplateGenerator;
 
 /**
@@ -30,7 +29,7 @@ public final class XlsxTemplateGenerateStrategy implements GenerateStrategy {
     }
 
     @Override
-    public GenerateWriter writer(final GenerateOption option) {
+    public GenerateWriter writer(final GenerateContext option) {
         return JxlsTemplateGenerator::createTemplate;
     }
 }

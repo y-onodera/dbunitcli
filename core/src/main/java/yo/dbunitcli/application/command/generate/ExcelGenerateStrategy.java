@@ -2,7 +2,6 @@ package yo.dbunitcli.application.command.generate;
 
 import yo.dbunitcli.application.Option;
 import yo.dbunitcli.application.ParameterUnit;
-import yo.dbunitcli.application.command.GenerateOption;
 import yo.dbunitcli.application.option.TemplateRenderOption;
 import yo.dbunitcli.resource.poi.jxls.JxlsTemplateRender;
 
@@ -35,17 +34,17 @@ public final class ExcelGenerateStrategy implements GenerateStrategy {
     }
 
     @Override
-    public List<Option.Violation> validateOption(final GenerateOption option) {
+    public List<Option.Violation> validateOption(final GenerateContext option) {
         return option.validateBoolean("-lazyLoad", option.lazyLoad());
     }
 
     @Override
-    public void putOptionParameters(final GenerateOption option, final Option.ParametersBuilder builder) {
+    public void putOptionParameters(final GenerateContext option, final Option.ParametersBuilder builder) {
         builder.put("-lazyLoad", option.lazyLoad());
     }
 
     @Override
-    public void putTemplateOptionParameters(final GenerateOption option, final Option.ParametersBuilder builder) {
+    public void putTemplateOptionParameters(final GenerateContext option, final Option.ParametersBuilder builder) {
         final TemplateRenderOption templateOption = option.templateOption();
         if (this.supportsFormulaProcess) {
             builder.putFlag("-formulaProcess", templateOption.formulaProcess());
@@ -57,7 +56,7 @@ public final class ExcelGenerateStrategy implements GenerateStrategy {
     }
 
     @Override
-    public GenerateWriter writer(final GenerateOption option) throws IOException {
+    public GenerateWriter writer(final GenerateContext option) throws IOException {
         final JxlsTemplateRender render = JxlsTemplateRender.builder()
                 .setTemplateParameterAttribute(option.templateOption().templateParameterAttribute())
                 .setFormulaProcess(Boolean.parseBoolean(option.templateOption().formulaProcess()))

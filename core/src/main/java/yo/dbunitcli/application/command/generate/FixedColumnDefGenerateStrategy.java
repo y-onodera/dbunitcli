@@ -2,7 +2,6 @@ package yo.dbunitcli.application.command.generate;
 
 import org.dbunit.dataset.Column;
 import yo.dbunitcli.application.Option;
-import yo.dbunitcli.application.command.GenerateOption;
 import yo.dbunitcli.dataset.ComparableDataSetProducer;
 import yo.dbunitcli.dataset.ComparableDataSetProducerWrapper;
 import yo.dbunitcli.dataset.producer.ComparableFixedColumnDefMetaDataProducer;
@@ -35,17 +34,17 @@ public final class FixedColumnDefGenerateStrategy implements DescriptorGenerateS
     }
 
     @Override
-    public String resultPathTemplate(final GenerateOption option) {
+    public String resultPathTemplate(final GenerateContext option) {
         return ResultPaths.tableFile(option);
     }
 
     @Override
-    public List<Option.Violation> validateOption(final GenerateOption option) {
+    public List<Option.Violation> validateOption(final GenerateContext option) {
         return option.validateFixedColumnDef(option.fixedLength(), option.defaultLength(), option.align());
     }
 
     @Override
-    public void putOptionParameters(final GenerateOption option, final Option.ParametersBuilder builder) {
+    public void putOptionParameters(final GenerateContext option, final Option.ParametersBuilder builder) {
         builder.put("-fixedLength", option.fixedLength())
                .put("-defaultLength", option.defaultLength()).put("-align", option.align());
     }

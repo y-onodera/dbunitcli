@@ -6,7 +6,7 @@ import yo.dbunitcli.application.CommandLineOption;
 import yo.dbunitcli.application.Option;
 import yo.dbunitcli.application.ParameterUnit;
 import yo.dbunitcli.application.RecordConverter;
-import yo.dbunitcli.application.command.generate.DescriptorOption;
+import yo.dbunitcli.application.command.generate.GenerateContext;
 import yo.dbunitcli.application.command.generate.GenerateWriter;
 import yo.dbunitcli.application.json.FromJsonTableSeparatorsBuilder;
 import yo.dbunitcli.application.option.DataSetConverterOption;
@@ -39,7 +39,7 @@ public record GenerateOption(Parameter parameter, String resultDir, String resul
                              String commit, String template, String outputEncoding, DataSetLoadOption srcData,
                              TemplateRenderOption templateOption, String includeAllColumns, String lazyLoad,
                              String fixedLength, String defaultLength, String align, String parallel)
-        implements CommandLineOption<GenerateDto>, DescriptorOption {
+        implements CommandLineOption<GenerateDto>, GenerateContext {
 
     public GenerateOption(final String resultFile, final GenerateDto dto, final Parameter param) {
         this(param, dto.getResultDir(),

@@ -1,6 +1,5 @@
 package yo.dbunitcli.application.command.generate;
 
-import yo.dbunitcli.application.command.GenerateOption;
 import yo.dbunitcli.resource.FileResources;
 
 import java.io.File;
@@ -11,7 +10,7 @@ import java.io.File;
 public final class TextGenerateStrategy implements GenerateStrategy {
 
     @Override
-    public String templateString(final GenerateOption option) {
+    public String templateString(final GenerateContext option) {
         final File templatePath = option.getTemplatePath();
         if (templatePath == null || !templatePath.exists() || !templatePath.isFile()) {
             throw new AssertionError(option.template() + " is not exist file",

@@ -2,7 +2,6 @@ package yo.dbunitcli.application.command.generate;
 
 import yo.dbunitcli.application.Option;
 import yo.dbunitcli.application.ParameterUnit;
-import yo.dbunitcli.application.command.GenerateOption;
 import yo.dbunitcli.dataset.DbOperation;
 import yo.dbunitcli.resource.FileResources;
 
@@ -19,7 +18,7 @@ public final class SqlGenerateStrategy implements GenerateStrategy {
     }
 
     @Override
-    public String templateString(final GenerateOption option) {
+    public String templateString(final GenerateContext option) {
         return FileResources.readClasspathResource(switch (option.operation()) {
             case INSERT -> "sql/insertTemplate.txt";
             case DELETE -> "sql/deleteTemplate.txt";
@@ -45,19 +44,19 @@ public final class SqlGenerateStrategy implements GenerateStrategy {
     }
 
     @Override
-    public String resultPathTemplate(final GenerateOption option) {
+    public String resultPathTemplate(final GenerateContext option) {
         return ResultPaths.sql(option);
     }
 
     @Override
-    public List<Option.Violation> validateOption(final GenerateOption option) {
+    public List<Option.Violation> validateOption(final GenerateContext option) {
         return Option.concat(
                 option.validateRequired("-op", option.operation() == null ? null : option.operation().name())
                 , option.validateBoolean("-commit", option.commit()));
     }
 
     @Override
-    public void putOptionParameters(final GenerateOption option, final Option.ParametersBuilder builder) {
+    public void putOptionParameters(final GenerateContext option, final Option.ParametersBuilder builder) {
         builder.put("-commit", option.commit()).put("-op", option.operation(), DbOperation.class)
                .put("-sqlFilePrefix", option.sqlFilePrefix()).put("-sqlFileSuffix", option.sqlFileSuffix());
     }

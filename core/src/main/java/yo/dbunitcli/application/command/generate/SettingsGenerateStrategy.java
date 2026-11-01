@@ -2,7 +2,6 @@ package yo.dbunitcli.application.command.generate;
 
 import yo.dbunitcli.application.Option;
 import yo.dbunitcli.application.ParameterUnit;
-import yo.dbunitcli.application.command.GenerateOption;
 
 import java.util.List;
 
@@ -42,12 +41,12 @@ public final class SettingsGenerateStrategy implements GenerateStrategy {
     }
 
     @Override
-    public List<Option.Violation> validateOption(final GenerateOption option) {
+    public List<Option.Violation> validateOption(final GenerateContext option) {
         return option.validateBoolean("-includeAllColumns", option.includeAllColumns());
     }
 
     @Override
-    public void putOptionParameters(final GenerateOption option, final Option.ParametersBuilder builder) {
+    public void putOptionParameters(final GenerateContext option, final Option.ParametersBuilder builder) {
         builder.put("-includeAllColumns", option.includeAllColumns());
     }
 }

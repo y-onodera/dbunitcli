@@ -2,7 +2,6 @@ package yo.dbunitcli.application.command.generate;
 
 import org.dbunit.dataset.Column;
 import yo.dbunitcli.application.Option;
-import yo.dbunitcli.application.command.GenerateOption;
 import yo.dbunitcli.dataset.ComparableDataSetProducer;
 import yo.dbunitcli.dataset.ComparableDataSetProducerWrapper;
 import yo.dbunitcli.dataset.producer.ComparableDdlMetaDataProducer;
@@ -43,12 +42,12 @@ public final class DdlGenerateStrategy implements DescriptorGenerateStrategy {
     }
 
     @Override
-    public String resultPathTemplate(final GenerateOption option) {
+    public String resultPathTemplate(final GenerateContext option) {
         return ResultPaths.sql(option);
     }
 
     @Override
-    public void putOptionParameters(final GenerateOption option, final Option.ParametersBuilder builder) {
+    public void putOptionParameters(final GenerateContext option, final Option.ParametersBuilder builder) {
         builder.put("-sqlFilePrefix", option.sqlFilePrefix()).put("-sqlFileSuffix", option.sqlFileSuffix());
     }
 }
