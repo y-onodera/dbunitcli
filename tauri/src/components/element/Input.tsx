@@ -1,4 +1,5 @@
-import { type ReactNode, useState } from "react";
+import { type ReactNode, useRef, useState } from "react";
+import { ClearIcon } from "./Icon";
 
 export function InputLabel(props: {
 	text: string;
@@ -21,33 +22,76 @@ export function InputLabel(props: {
 		</label>
 	);
 }
+// 手で全部消したときと同じinputイベントを起こし、onChangeや親でまとめて受けるchange（検証エラーの消去等）をそのまま動かす
+function clearInput(input: HTMLInputElement | null) {
+	if (!input) {
+		return;
+	}
+	Object.getOwnPropertyDescriptor(
+		HTMLInputElement.prototype,
+		"value",
+	)?.set?.call(input, "");
+	input.dispatchEvent(new Event("input", { bubbles: true }));
+	input.focus();
+}
+// 入力欄の右端に重ねる、入力を消すボタン。マウス操作用でTab移動の対象にはしない
+function ClearButton(props: { label: string; handleClick: () => void }) {
+	return (
+		<button
+			type="button"
+			tabIndex={-1}
+			aria-label={props.label}
+			className="absolute inset-y-0 end-0 flex items-center pe-2 text-content-muted hover:text-link-hover"
+			onClick={props.handleClick}
+		>
+			<ClearIcon title="clear" />
+		</button>
+	);
+}
 export function ControllTextBox(props: {
 	name: string;
 	id: string;
 	required: boolean;
 	value: string;
+	/** 枠の配置と幅（格子の位置など）。入力欄そのものの見た目は変えない */
 	wStyle?: string;
 	list?: string;
 	disabled?: boolean;
 	hidden?: boolean;
+	/** falseなら入力を消すボタンを出さない */
+	clearable?: boolean;
 	handleChange: (ev: React.ChangeEvent<HTMLInputElement>) => void;
 	handleBlur?: (ev: React.FocusEvent<HTMLInputElement>) => void;
 }) {
+	const inputRef = useRef<HTMLInputElement>(null);
+	const showClear =
+		(props.clearable ?? true) && props.value !== "" && !props.disabled;
 	return (
-		<input
-			name={props.name}
-			id={props.id}
-			type="text"
-			list={props.list ?? ""}
+		<div
+			className={`relative ${props.wStyle ?? "w-full"}`}
 			style={props.hidden ? { display: "none" } : {}}
-			className={inputStyle(props.wStyle ? props.wStyle : "w-full")}
-			required={props.required}
-			disabled={!!props.disabled}
-			value={props.value}
-			onChange={props.handleChange}
-			onBlur={(ev) => props.handleBlur?.(ev)}
-			autoComplete={props.list ? "off" : "on"}
-		/>
+		>
+			<input
+				ref={inputRef}
+				name={props.name}
+				id={props.id}
+				type="text"
+				list={props.list ?? ""}
+				className={`${inputStyle("w-full")} ${showClear ? "pe-8" : ""}`}
+				required={props.required}
+				disabled={!!props.disabled}
+				value={props.value}
+				onChange={props.handleChange}
+				onBlur={(ev) => props.handleBlur?.(ev)}
+				autoComplete={props.list ? "off" : "on"}
+			/>
+			{showClear && (
+				<ClearButton
+					label={`clear ${props.name}`}
+					handleClick={() => clearInput(inputRef.current)}
+				/>
+			)}
+		</div>
 	);
 }
 export function SelectBox(props: {
@@ -203,14 +247,24 @@ export function FilterInput({
 	onChange: (value: string) => void;
 	placeholder?: string;
 }) {
+	const inputRef = useRef<HTMLInputElement>(null);
 	return (
-		<input
-			type="text"
-			value={value}
-			onChange={(e) => onChange(e.target.value)}
-			placeholder={placeholder}
-			className="w-full mb-1 px-2 py-1 text-sm border border-border rounded bg-input focus-visible:ring-3 ring-primary-ring"
-		/>
+		<div className="relative mb-1">
+			<input
+				ref={inputRef}
+				type="text"
+				value={value}
+				onChange={(e) => onChange(e.target.value)}
+				placeholder={placeholder}
+				className={`w-full px-2 py-1 text-sm border border-border rounded bg-input focus-visible:ring-3 ring-primary-ring ${value === "" ? "" : "pe-8"}`}
+			/>
+			{value !== "" && (
+				<ClearButton
+					label="clear filter"
+					handleClick={() => clearInput(inputRef.current)}
+				/>
+			)}
+		</div>
 	);
 }
 function inputStyle(wStyle: string) {

@@ -433,7 +433,7 @@ export function KeyValueText(props: {
 					name={props.name}
 					id={props.name}
 					required={true}
-					wStyle="col-start-2 p-2.5"
+					wStyle="col-start-2"
 					value={key}
 					handleChange={(ev) => setKey(ev.target.value)}
 					handleBlur={handleKeyBlur}
@@ -442,7 +442,7 @@ export function KeyValueText(props: {
 					name={props.name}
 					id={props.name}
 					required={true}
-					wStyle="col-start-3 col-span-2 ml-1 "
+					wStyle="col-start-3 col-span-2 ml-1"
 					value={value}
 					disabled={!key || key === ""}
 					handleChange={(ev) => setValue(ev.target.value)}

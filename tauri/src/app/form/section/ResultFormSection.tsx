@@ -1,14 +1,25 @@
-import type { ResultOption } from "../../../model/CommandOption";
+import type { CommandOption, ResultOption } from "../../../model/CommandOption";
 import Check from "./element/Check";
 import EncodingText from "./element/EncodingText";
 import FileText from "./element/FileText";
 import FixedColumnDefText from "./element/FixedColumnDefText";
 import PlainText from "./element/PlainText";
 import Select from "./element/Select";
-import Text from "./element/Text";
 import JdbcFormSection from "./JdbcFormSection";
 
 const EXCEL_TABLE_TYPES = ["SHEET", "BOOK"];
+
+// 環境変数などSHEET・BOOK以外の値が設定済みなら、消えないよう選択肢に残す
+function excelTableElement(excelTable: CommandOption): CommandOption {
+	const selectOption =
+		excelTable.value && !EXCEL_TABLE_TYPES.includes(excelTable.value)
+			? [...EXCEL_TABLE_TYPES, excelTable.value]
+			: EXCEL_TABLE_TYPES;
+	return {
+		...excelTable,
+		attribute: { ...excelTable.attribute, selectOption },
+	};
+}
 
 export default function ResultFormSection({
 	resultOption,
@@ -25,10 +36,10 @@ export default function ResultFormSection({
 	const fixedColumnDef = resultOption.fixedColumnDef;
 	const fixedLengthType = resultOption.fixedLengthType;
 	const parallel = resultOption.parallel;
-	// 環境変数で値を渡せるよう自由入力のまま。SHEETのときだけparallelを隠すため、SHEETかどうかが変わったら再構成する
-	const handleExcelTableChange = (value: string) => {
+	// SHEETのときだけparallelを隠すため、SHEETかどうかが変わったら再構成する
+	const handleExcelTableChange = async (value: string) => {
 		if ((value === "SHEET") !== (excelTable?.value === "SHEET")) {
-			void handleTypeSelect(value);
+			await handleTypeSelect(value);
 		}
 	};
 	return (
@@ -51,11 +62,10 @@ export default function ResultFormSection({
 				<Check prefix={prefix} element={resultOption.exportHeader} />
 			)}
 			{excelTable && (
-				<Text
+				<Select
 					prefix={prefix}
-					element={excelTable}
-					resourceFiles={EXCEL_TABLE_TYPES}
-					handleValueChange={handleExcelTableChange}
+					element={excelTableElement(excelTable)}
+					handleTypeSelect={handleExcelTableChange}
 				/>
 			)}
 			{outputEncoding && (

@@ -108,4 +108,19 @@ describe("Arraysのテスト", () => {
 		await user.click(screen.getAllByRole("button", { name: "remove" })[0]);
 		expect(inputValues()).toEqual(["COL_A", "COL_C"]);
 	});
+
+	it("×で入力を消して入力し直すと、確定時に新しい値になる", async () => {
+		const user = userEvent.setup();
+		render(<ArraysHarness initial={["COL_A", "COL_B"]} />);
+
+		await user.click(
+			screen.getAllByRole("button", { name: "clear include" })[1],
+		);
+		expect(inputs()[1]).toHaveValue("");
+		expect(inputs()[1]).toHaveFocus();
+
+		await user.type(inputs()[1], "COL_C");
+		await user.tab();
+		expect(inputValues()).toEqual(["COL_A", "COL_C"]);
+	});
 });

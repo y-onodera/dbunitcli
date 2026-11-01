@@ -47,6 +47,17 @@ describe("SelectableTable", () => {
 		expect(screen.getByTestId("selected").textContent).toBe("USERS,USER_ROLES");
 	});
 
+	it("フィルタの×で絞り込みを解除する", async () => {
+		const user = userEvent.setup();
+		render(<Harness items={["USERS", "ORDERS"]} />);
+		await user.type(screen.getByPlaceholderText("Filter..."), "user");
+		expect(screen.queryByText("ORDERS")).toBeNull();
+
+		await user.click(screen.getByRole("button", { name: "clear filter" }));
+		expect(screen.getByPlaceholderText("Filter...")).toHaveValue("");
+		expect(screen.getByText("ORDERS")).toBeInTheDocument();
+	});
+
 	it("itemsが空でemptyMessage指定時はメッセージを表示する", () => {
 		render(<Harness items={[]} emptyMessage="No columns found" />);
 		expect(screen.getByText("No columns found")).toBeTruthy();
