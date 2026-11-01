@@ -9,7 +9,7 @@ import {
 	type ModelGenerateConfig,
 } from "./GenerateDialog";
 
-const datasetSettingGenerateConfig: ModelGenerateConfig<
+export const datasetSettingGenerateConfig: ModelGenerateConfig<
 	DatasetSettingsBuilder,
 	DatasetSettings
 > = {

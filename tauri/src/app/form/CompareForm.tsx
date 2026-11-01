@@ -5,6 +5,7 @@ import { buildDatasetSrcInfo } from "../../model/CommandOption";
 import type { CompareOptions } from "../../model/SelectParameter";
 import { DatasetLoadForm } from "./section/DatasetLoadForm";
 import Check from "./section/element/Check";
+import CompareSettingText from "./section/element/CompareSettingText";
 import EncodingText from "./section/element/EncodingText";
 import FileText from "./section/element/FileText";
 import Select from "./section/element/Select";
@@ -43,18 +44,15 @@ export function CompareForm(prop: {
 					element={targetTypeElement}
 				/>
 				{targetType === "data" ? (
+					// 比較キーの編集ではold側のデータセットからテーブル名・カラム名の候補を取る
 					<DatasetSrcInfoProvider
-						key={`${prop.name}compare-setting`}
+						key={`${prop.name}compare-setting:${oldData.srcType?.value ?? ""}`}
 						initialValue={oldDataInitialInfo}
 					>
-						<FileText prefix="" element={settingElement} />
+						<CompareSettingText prefix="" element={settingElement} />
 					</DatasetSrcInfoProvider>
 				) : (
-					<FileText
-						prefix=""
-						element={settingElement}
-						hideDatasetSettingEdit={true}
-					/>
+					<FileText prefix="" element={settingElement} />
 				)}
 				<EncodingText prefix="" element={settingEncodingElement} />
 				{targetType === "data" && (
