@@ -10,13 +10,34 @@
   <h1>Traversal</h1>
   <p><code>src</code> にディレクトリを指定したときに、どのファイルを読み込むかの条件です。<a href="dataset-load-form.html">Dataset Load Form</a> の <code>traversal option</code> から設定します。</p>
 
+  <h2 id="section-simple">シンプルな使い方</h2>
+  <p>ディレクトリの中から、読み込むファイルを絞り込みます。何も指定しなければ、<code>src</code> のディレクトリの直下にあるファイルを読み込みます。</p>
+  <p>例: サブディレクトリも含めて読み込み、<code>old</code> ディレクトリの中のファイルだけを外します。</p>
+  <pre>入力:
+  data/orders/ORDERS.csv
+  data/orders/ITEMS.csv
+  data/orders/2026/ORDERS_2026.csv
+  data/orders/old/ORDERS_2025.csv
+
+指定:
+  src        = data/orders
+  recursive  = ON
+  regExclude = old
+
+結果:
+  テーブル ORDERS / ITEMS / ORDERS_2026</pre>
+  <ul>
+    <li><code>recursive</code> が OFF なら、<code>2026</code> ディレクトリの中も読み込まない</li>
+    <li><code>regInclude</code> / <code>regExclude</code> はファイルのパス全体と照合し、一部に一致すれば条件に当てはまる。上の例では、パスに <code>old</code> を含む <code>ORDERS_2025.csv</code> が外れる</li>
+  </ul>
+
   <h2 id="section-options">設定項目</h2>
   <table>
     <tr><th>項目</th><th>説明</th></tr>
-    <tr><td>extension</td><td>対象にするファイルの拡張子</td></tr>
+    <tr><td>extension</td><td>対象にするファイルの拡張子。<code>.</code> を付けずに書く（例: <code>txt</code>）</td></tr>
     <tr><td>recursive</td><td>ON にすると、サブディレクトリの中も読み込む</td></tr>
-    <tr><td>regInclude</td><td>対象にするファイル名の条件（正規表現）</td></tr>
-    <tr><td>regExclude</td><td>対象から外すファイル名の条件（正規表現）</td></tr>
+    <tr><td>regInclude</td><td>対象にするファイルの条件（正規表現）。ファイルのパス全体と照合し、一部に一致すれば対象にする</td></tr>
+    <tr><td>regExclude</td><td>対象から外すファイルの条件（正規表現）。ファイルのパス全体と照合し、一部に一致すれば外す</td></tr>
   </table>
 
   <h2 id="section-related">関連</h2>

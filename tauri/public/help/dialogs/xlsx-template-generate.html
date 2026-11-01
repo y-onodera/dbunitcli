@@ -12,6 +12,7 @@
 
   <h2 id="toc">目次</h2>
   <ol>
+    <li><a href="#section-simple">シンプルな使い方</a></li>
     <li><a href="#section-overview">できること</a></li>
     <li><a href="#section-input">入力</a></li>
     <li><a href="#section-flow">操作の流れ</a></li>
@@ -19,6 +20,24 @@
     <li><a href="#section-notes">注意</a></li>
     <li><a href="#section-related">関連</a></li>
   </ol>
+  <h2 id="section-simple">シンプルな使い方</h2>
+  <p>保存するファイル名と元にするデータセットを指定して Execute を押すと、テーブルごとのシートを持つ jxls テンプレートが保存されます。</p>
+  <pre>入力:
+  テーブル USERS（カラム ID / NAME / EMAIL）
+
+指定:
+  fileName       = users
+  srcData の src = （USERS を含むデータセット）
+  → Execute
+
+結果:
+  template リソースに users.xlsx を保存し、template に users.xlsx を設定する
+  シート USERS: 1 行目にカラム名、2 行目に各カラムの値を埋め込むセル</pre>
+  <ul>
+    <li>このテンプレートは <code>unit=dataset</code> で使う（下記「生成例」）</li>
+    <li>書式や見出しの装飾は、保存されたファイルを Excel で開いて加える</li>
+  </ul>
+
   <h2 id="section-overview">できること</h2>
   <ul>
     <li>テーブルごとに 1 シートを作成し、1 行目にカラム名、2 行目に <code>${row.get('カラム名')}</code> 形式の埋め込み式を持つテンプレートを作る</li>

@@ -9,6 +9,24 @@
   <p><a href="../index.html">&larr; ヘルプ一覧に戻る</a></p>
   <h1>Scaffold</h1>
   <p>固定成果物タイプ（<code>ddl</code> / <code>javaBean</code> / <code>xlsxSchema</code> / <code>fixedColumnDef</code>）の組み込みテンプレートを、カスタマイズ生成の出発点として Workspace へ書き出し、その結果を generate フォームへ反映します。generateType が <code>txt</code> のとき、unit の上にある Scaffold ボタンから開きます（scaffold コマンドを実行します）。</p>
+  <h2 id="section-simple">シンプルな使い方</h2>
+  <p>組み込みテンプレートの名前を付けて Execute を押すと、テンプレートと、それを使う generate の設定一式ができあがります。</p>
+  <pre>指定:
+  target   = ddl
+  template = myddl
+  dataset  = （DDL を作りたいテーブルを含むデータセット）
+  → Execute
+
+結果:
+  resources/template/myddl.stg と myddl.txt を書き出す
+  dataset のテーブルごとの記述子データセット（1 カラム = 1 行の CSV）を書き出す
+  generate フォームに template = myddl.txt、templateGroup = myddl.stg、unit = table、
+  src = 記述子データセットのディレクトリ が設定される</pre>
+  <ul>
+    <li>そのまま <code>Exec</code> を押すと、書き出したテンプレートで DDL が生成される</li>
+    <li>書き出した <code>myddl.stg</code> / <code>myddl.txt</code> や記述子データセットを編集すると、生成結果を変えられる</li>
+  </ul>
+
   <h2 id="section-overview">できること</h2>
   <ul>
     <li>組み込みテンプレート（<code>.stg</code> / <code>.txt</code>）と、サンプルの unitSetting を Workspace へ書き出す</li>

@@ -12,6 +12,7 @@
 
   <h2 id="toc">目次</h2>
   <ol>
+    <li><a href="#section-simple">シンプルな使い方</a></li>
     <li><a href="#section-structure">全体構造</a></li>
     <li><a href="#section-fields">settings の項目</a></li>
     <li><a href="#section-common">commonSettings</a></li>
@@ -22,6 +23,28 @@
     <li><a href="#section-generate">雛型の生成</a></li>
     <li><a href="#section-related">関連</a></li>
   </ol>
+
+  <h2 id="section-simple">シンプルな使い方</h2>
+  <p>テーブル名と、そのテーブルに適用する設定を書きます。<code>setting</code> 横のメニューの編集ボタンで開き、表の行を追加して保存します。</p>
+  <p>例: Compare で、<code>users</code> を <code>id</code> で突き合わせ、更新日時の違いは差分にしないようにします。</p>
+  <pre>指定 (Settings の行を追加し、Dataset Setting で入力):
+  name    = users
+  keys    = id
+  exclude = updated_at
+  name（ダイアログ下部） = compare_users.json
+  → Save
+
+保存される内容 (compare_users.json):
+  {"settings": [{"name": "users", "keys": ["id"], "exclude": ["updated_at"]}]}
+
+結果:
+  setting に compare_users.json を設定する
+  Compare では users の行を id で突き合わせ、updated_at の値が違っても差分にならない</pre>
+  <ul>
+    <li>各行の項目の入力方法は <a href="dataset-setting.html">Dataset Setting</a> を参照</li>
+    <li>全テーブルに同じ設定をしたいときは <code>commonSettings</code> に書く（下記）</li>
+    <li>Save and Preview で、設定を適用した後のテーブルを確認できる</li>
+  </ul>
 
   <h2 id="section-structure">全体構造</h2>
   <p>設定ファイルは JSON で、次の 4 つのキーを持ちます。</p>

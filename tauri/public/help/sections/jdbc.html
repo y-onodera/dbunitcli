@@ -16,6 +16,20 @@
     <li><a href="../commands/run.html">Run</a> の <code>scriptType</code> = sql（SQL スクリプトを DB で実行）</li>
   </ul>
 
+  <h2 id="section-simple">シンプルな使い方</h2>
+  <p>接続先の URL・ユーザ・パスワードを入力し、Connection Test で接続できることを確かめます。</p>
+  <pre>指定:
+  jdbcUrl  = jdbc:postgresql://localhost:5432/mydb
+  jdbcUser = app_user
+  jdbcPass = app_password
+
+結果:
+  Connection Test を押すと接続を試し、結果がボタンの隣に表示される</pre>
+  <ul>
+    <li>Save as Properties で接続情報を <code>.properties</code> ファイルに保存しておくと、次からは <code>jdbcProperties</code> でそのファイルを選ぶだけで接続できる</li>
+    <li>URL の書き方がわからないときは、<code>jdbcUrl</code> 横の編集ボタンから開く JDBC URL Builder で組み立てられる</li>
+  </ul>
+
   <h2 id="section-fields">設定項目</h2>
   <p>フォームの <code>jdbc option</code> 展開ボタンから設定します。各項目は個別に入力しても、<code>jdbcProperties</code> に保存済みの <code>.properties</code> ファイルを選んでも構いません。両方が指定された場合、<strong><code>jdbcUrl</code> / <code>jdbcUser</code> / <code>jdbcPass</code> が <code>jdbcProperties</code> の同名キーを上書き</strong>します。</p>
   <table>

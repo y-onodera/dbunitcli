@@ -12,6 +12,7 @@
 
   <h2 id="toc">目次</h2>
   <ol>
+    <li><a href="#section-simple">シンプルな使い方</a></li>
     <li><a href="#section-overview">できること</a></li>
     <li><a href="#section-input">入力</a></li>
     <li><a href="#section-flow">操作の流れ</a></li>
@@ -19,6 +20,22 @@
     <li><a href="#section-notes">注意</a></li>
     <li><a href="#section-related">関連</a></li>
   </ol>
+  <h2 id="section-simple">シンプルな使い方</h2>
+  <p>元にするデータセットを指定して Execute を押すと、カラムごとの定義が入った <a href="fixed-column-def.html">Fixed Column Def</a> が開きます。</p>
+  <pre>入力:
+  テーブル USERS（カラム ID / NAME / EMAIL）
+
+指定:
+  srcData の src = （USERS を含むデータセット）
+  → Execute
+
+結果 (Fixed Column Def に反映される内容):
+  ID (10) / NAME (10) / EMAIL (10)   すべて左寄せ・半角スペース埋め</pre>
+  <ul>
+    <li>幅はすべて <code>10</code> になるので、実際のレイアウトに合わせて各行の <code>length</code> を直す</li>
+    <li>Fixed Column Def で name にファイル名を指定して Save を押すと、そのファイル名が <code>fixedColumnDef</code> に設定される</li>
+  </ul>
+
   <h2 id="section-overview">できること</h2>
   <ul>
     <li>元データセットのカラム名を並び順どおりに取り込み、カラムごとの幅・寄せ方向・パディング文字の定義を一括で作成する</li>
@@ -37,7 +54,7 @@
   <ol>
     <li>元にするデータセットを指定します。</li>
     <li>Execute を押すと、カラム構成から固定長の幅定義が生成されます。</li>
-    <li>生成結果は編集ダイアログに反映された状態で開きます。各カラムの内容を確認・修正してください。</li>
+    <li>生成結果は編集ダイアログ（<a href="fixed-column-def.html">Fixed Column Def</a>）に反映された状態で開きます。各カラムの内容を確認・修正してください。</li>
     <li>ファイル名を指定して保存すると、その名前が fixedColumnDef テキストボックスに設定されます。</li>
   </ol>
 
@@ -81,6 +98,7 @@
 
   <h2 id="section-related">関連</h2>
   <ul>
+    <li><a href="fixed-column-def.html">Fixed Column Def</a> — 定義の各項目と編集方法</li>
     <li><a href="../sections/result-form/types/fixed.html">resultType: fixed</a> — 定義ファイルを使って固定長で出力する</li>
     <li><a href="../commands/generate/types/fixedColumnDef.html">generateType: fixedColumnDef</a> — Generate で雛型を作る</li>
   </ul>

@@ -12,6 +12,7 @@
 
   <h2 id="toc">目次</h2>
   <ol>
+    <li><a href="#section-simple">シンプルな使い方</a></li>
     <li><a href="#section-overview">できること</a></li>
     <li><a href="#section-input">入力</a></li>
     <li><a href="#section-flow">操作の流れ</a></li>
@@ -19,6 +20,23 @@
     <li><a href="#section-notes">注意</a></li>
     <li><a href="#section-related">関連</a></li>
   </ol>
+  <h2 id="section-simple">シンプルな使い方</h2>
+  <p>元にするデータセットを指定して Execute を押すと、テーブルごとの設定が入った <a href="dataset-settings.html">Dataset Settings</a> が開きます。</p>
+  <pre>入力 (data/users/USERS.csv):
+  ID,NAME
+  1,Alice
+
+指定:
+  srcData の src = data/users
+  → Execute
+
+結果 (Dataset Settings に反映される内容):
+  {"settings": [{"name": "USERS", "keys": ["ID", "NAME"]}]}</pre>
+  <ul>
+    <li>CSV には主キーの情報がないため、<code>keys</code> は全カラムになる。不要なカラムは Dataset Settings で消す</li>
+    <li>Dataset Settings で name にファイル名を指定して Save を押すと、そのファイル名が <code>setting</code> に設定される</li>
+  </ul>
+
   <h2 id="section-overview">できること</h2>
   <ul>
     <li>データセット内のテーブルごとに、対象テーブル名（<code>name</code>）と主キー（<code>keys</code>）を持つ設定エントリを一括で作成する</li>

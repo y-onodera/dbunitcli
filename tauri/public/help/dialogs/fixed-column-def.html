@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <title>ヘルプ - Fixed Column Def</title>
+  <link rel="stylesheet" href="../help.css" />
+</head>
+<body>
+  <p><a href="../index.html">&larr; ヘルプ一覧に戻る</a></p>
+  <h1>Fixed Column Def</h1>
+  <p>固定長ファイルに出力するときの、カラムごとの幅・寄せ方向・埋める文字の定義（Fixed Column Def）を編集するダイアログです。<a href="../sections/result-form/types/fixed.html">resultType: fixed</a> のときに表示される <code>fixedColumnDef</code> テキストボックス横のメニューの編集ボタンから開きます。</p>
+
+  <h2 id="section-simple">シンプルな使い方</h2>
+  <p>出力するカラムを上から順に追加し、カラムごとの幅を指定して保存します。</p>
+  <p>例: <code>ID</code> を 5 桁の右寄せ・<code>0</code> 埋め、<code>NAME</code> を 10 桁の左寄せで出力します。</p>
+  <pre>指定 (Column Definitions):
+  1 行目: name = ID,   length = 5,  align = right, pad = 0
+  2 行目: name = NAME, length = 10, align = left,  pad = （半角スペース）
+  name = members.json
+  → Save
+
+保存される内容 (members.json):
+  {"columns": [
+    {"name": "ID", "length": 5, "align": "right", "pad": "0"},
+    {"name": "NAME", "length": 10, "align": "left", "pad": " "}
+  ]}
+
+結果 (ID=1、NAME=Alice の行):
+  00001Alice     </pre>
+  <ul>
+    <li>値が幅より長い場合は、幅の位置で切り捨てられる</li>
+    <li>定義に無いカラムは出力されない</li>
+    <li>既存のデータセットからカラムの一覧を作りたいときは、generate ボタンで雛型を作れる（<a href="fixed-column-def-generate.html">Fixed Column Def Generate</a>）</li>
+  </ul>
+
+  <h2 id="section-open">開き方</h2>
+  <p><code>fixedColumnDef</code> テキストボックス横のメニューにある編集ボタンから開きます。テキストボックスの値のファイル名が <code>&lt;workspace&gt;/resources/fixed-column-def</code> にあればその内容が読み込まれ、空の場合は空の定義が 1 行ある状態で開きます。同じメニューの削除ボタンでは、候補にある定義ファイルを削除できます。</p>
+  <p>同じメニューの generate ボタンからは、既存データセットのカラム構成をもとに雛型を作れます（<a href="fixed-column-def-generate.html">Fixed Column Def Generate</a>）。生成結果はこのダイアログに反映された状態で開きます。</p>
+
+  <h2 id="section-content">設定項目</h2>
+  <p>Column Definitions の表の 1 行が、出力ファイルの 1 カラムです。表の上から順に、固定長ファイルの左からカラムが並びます。行の編集ボタンで開く Column Def Setting で、次の項目を設定します。</p>
+  <table>
+    <tr><th>項目</th><th>説明</th><th>デフォルト</th></tr>
+    <tr><td>name</td><td>出力するカラム名。データセットがロード済みの場合、候補からカラム名を選べる</td><td>（空）</td></tr>
+    <tr><td>length</td><td>カラムの幅。文字数で数えるかバイト数で数えるかは、Result Form の <code>fixedLengthType</code> で決まる。数値以外を入力すると <code>0</code> になる。</td><td><code>0</code></td></tr>
+    <tr><td>align</td><td>値が幅に満たないときの寄せ方向: <code>left</code>（左寄せ）/ <code>right</code>（右寄せ）</td><td><code>left</code></td></tr>
+    <tr><td>pad</td><td>値が幅に満たない部分を埋める 1 文字。2 文字目以降は入力できない。空にすると半角スペースに戻る。</td><td>半角スペース</td></tr>
+  </table>
+  <p>表の各行の Target には <code>name (length)</code> の形で表示されます。</p>
+
+  <h2 id="section-operation">操作</h2>
+  <table>
+    <tr><th>ボタン</th><th>動作</th></tr>
+    <tr><td>追加</td><td>表の最後の行の下にあるボタン。空の Column Def Setting を開き、Save で表の末尾に追加する</td></tr>
+    <tr><td>編集</td><td>その行の Column Def Setting を開き、Save で内容を置き換える</td></tr>
+    <tr><td>削除</td><td>その行を表から取り除く</td></tr>
+    <tr><td>コピー</td><td>その行の内容を初期値にして Column Def Setting を開き、Save で表の末尾に追加する</td></tr>
+  </table>
+  <p>行の並び替えはできません。途中にカラムを入れたい場合は、後ろの行を削除してから追加し直してください。</p>
+
+  <h2 id="section-save">保存</h2>
+  <p>ダイアログ下部の name に保存先のファイル名を指定して Save を押すと、内容が <code>&lt;workspace&gt;/resources/fixed-column-def</code> にファイルとして書き出され、<code>fixedColumnDef</code> テキストボックスにそのファイル名が設定されます。存在しない名前を指定すると新規ファイルとして作成され、既存のファイル名を指定すると上書きされます。</p>
+
+  <h2 id="section-notes">注意</h2>
+  <ul>
+    <li><code>name</code> が空の行は保存されません。</li>
+    <li>Close を押すと、保存せずにダイアログを閉じます（<code>fixedColumnDef</code> テキストボックスは変更されません）。</li>
+  </ul>
+
+  <h2 id="section-related">関連</h2>
+  <ul>
+    <li><a href="../sections/result-form/types/fixed.html">resultType: fixed</a> — この定義を使って固定長で出力する</li>
+    <li><a href="fixed-column-def-generate.html">Fixed Column Def Generate</a> — 既存データセットから雛型を生成する</li>
+    <li><a href="../commands/generate/types/fixedColumnDef.html">generateType: fixedColumnDef</a> — Generate で雛型を作る</li>
+  </ul>
+</body>
+</html>

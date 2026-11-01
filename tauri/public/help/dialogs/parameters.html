@@ -10,6 +10,25 @@
   <h1>Parameters (-P)</h1>
   <p>フッターの Edit Parameters (-P) ボタンで、SQL やテンプレート、スクリプトに渡す値をキーと値の組で入力します。入力した値はコマンドの引数に <code>-Pキー=値</code> として追加されます。日付や対象 ID など、実行のたびに変える値を渡すのに使います。</p>
 
+  <h2 id="section-simple">シンプルな使い方</h2>
+  <p>SQL やテンプレートに <code>$param.キー$</code> と書いておき、実行するときにキーと値を入力します。</p>
+  <p>例: SQL の絞り込み条件の日付を、実行のたびに変えます。</p>
+  <pre>SQL (select.sql):
+  SELECT * FROM ORDERS
+  $if(param.orderDate)$WHERE ORDER_DATE = '$param.orderDate$'$endif$
+
+指定 (Edit Parameters (-P)):
+  キー = orderDate、値 = 2026-10-01
+  → Apply → Exec
+
+結果:
+  -PorderDate=2026-10-01 が渡され、ORDER_DATE が 2026-10-01 の行だけを読み込む
+  値を入力しなければ、条件なしで実行する</pre>
+  <ul>
+    <li>Generate や Parameterize のテンプレートでは書き方が違う（下記「値の参照方法」）</li>
+    <li>Save すると、入力した値も保存済みオプションに保存される</li>
+  </ul>
+
   <h2 id="usage">使い方</h2>
   <ol>
     <li>フッターの Edit Parameters (-P) ボタンを押してダイアログを開く</li>
@@ -39,16 +58,10 @@
     <tr><td>Run の cmd / bat</td><td>環境変数として渡される（例：<code>%キー%</code>）</td></tr>
     <tr><td>Run の ant</td><td>Ant のプロパティとして渡される（例：<code>${キー}</code>）</td></tr>
   </table>
-
-  <h3 id="example-sql">例: SQL の条件を実行時に変える</h3>
-  <pre>-- select.sql
-SELECT * FROM ORDERS
-$if(param.orderDate)$WHERE ORDER_DATE = '$param.orderDate$'$endif$</pre>
-  <p>Edit Parameters (-P) でキー <code>orderDate</code>、値 <code>2026-10-01</code> を入力して Exec すると、<code>-PorderDate=2026-10-01</code> が渡され、その日付で絞り込まれます。値を入力しなければ条件なしで実行されます。</p>
   <p>テンプレートの書き方は <a href="../reference/st4.html">StringTemplate 4</a> を参照してください。</p>
 
   <h2 id="env-vs-p">Env との使い分け</h2>
-  <p>Env（<a href="workspace.html">Workspace</a> の ChangeWorkspace で選ぶ環境変数ファイル）と -P は、どちらも値を外から渡す仕組みですが、適用範囲と効く場所が違います。</p>
+  <p>Env（<a href="workspace.html">Workspace</a> の ChangeWorkspace で選ぶ環境変数ファイル）と -P は、どちらも値を外から渡す仕組みですが、適用範囲と、値を参照・置換できる場所が違います。</p>
   <table>
     <tr><th>観点</th><th>Env（<code>${env.変数名}</code>）</th><th>Parameters（<code>-Pキー=値</code>）</th></tr>
     <tr><td>定義する場所</td><td>Workspace 内の .properties ファイル（デフォルトは <code>env.properties</code>）</td><td>Edit Parameters (-P) ダイアログ。Save で <code>option/&lt;command&gt;/&lt;name&gt;.txt</code> に保存</td></tr>

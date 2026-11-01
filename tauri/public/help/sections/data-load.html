@@ -10,6 +10,25 @@
   <h1>Data Load</h1>
   <p>読み込んだデータをどのようにテーブル化するかを指定します。<a href="dataset-load-form.html">Dataset Load Form</a> の <code>data load option</code> から設定します。</p>
 
+  <h2 id="section-simple">シンプルな使い方</h2>
+  <p>何も指定しなければ、ファイルの 1 行目をヘッダ（カラム名）、2 行目以降をデータとして読み込みます。先頭にタイトル行などがあるときは、<code>startRow</code> でヘッダの行を指定します。</p>
+  <pre>入力 (sales.csv):
+  1 行目: 売上レポート Q4
+  2 行目: id,name
+  3 行目: 1,Alice
+  4 行目: 2,Bob
+
+指定:
+  startRow = 2
+
+結果:
+  ヘッダ:   [id, name]   (2 行目)
+  データ行: 2 行         (3 行目以降)</pre>
+  <ul>
+    <li>ヘッダ行がないファイルは、<code>headerName</code> でカラム名を与える（下記「headerName の詳細」）</li>
+    <li>どのファイルから読んだ行かを残したいときは、<code>addFileInfo</code> を ON にする（下記「addFileInfo の詳細」）</li>
+  </ul>
+
   <h2 id="section-options">設定項目</h2>
   <table>
     <tr><th>項目</th><th>説明</th></tr>
@@ -52,20 +71,8 @@ Jane,25
 
   <h2 id="section-start-row">startRow の詳細</h2>
   <p>読み込みを開始する行番号を 1 始まりで指定します。未指定時は <code>1</code>（ファイル先頭）です。タイトル行やメタ情報行をスキップしたいときに使用します。Excel 入力にも同様に適用されます。<code>headerName</code> を併用しない場合、<code>startRow</code> で指定した行がヘッダ行として扱われ、その次の行以降がデータになります。</p>
-  <p><strong>例 1: タイトル行をスキップする</strong></p>
-  <pre>入力 (sales.csv):
-  1 行目: 売上レポート Q4
-  2 行目: id,name
-  3 行目: 1,Alice
-  4 行目: 2,Bob
-
-指定:
-  startRow = 2
-
-結果:
-  ヘッダ:   [id, name]   (2 行目)
-  データ行: 2 行         (3 行目以降)</pre>
-  <p><strong>例 2: タイトル行＋メタ情報行をまとめてスキップする</strong></p>
+  <p>タイトル行を 1 行だけ飛ばす例は「シンプルな使い方」を参照してください。</p>
+  <p><strong>例 1: タイトル行＋メタ情報行をまとめてスキップする</strong></p>
   <pre>入力 (report.csv):
   1 行目: Report
   2 行目: Generated 2026-04-20
@@ -78,7 +85,7 @@ Jane,25
 結果:
   ヘッダ:   [id, name]   (3 行目)
   データ行: 1 行以上     (4 行目以降)</pre>
-  <p><strong>例 3: <code>headerName</code> と併用する</strong></p>
+  <p><strong>例 2: <code>headerName</code> と併用する</strong></p>
   <pre>入力 (no_header.csv):
   1 行目: # 事前コメント
   2 行目: John,30
@@ -100,7 +107,6 @@ Jane,25
     <tr><td>$FILE_NAME</td><td>入力ファイルのファイル名（例: <code>users.csv</code>）</td></tr>
     <tr><td>$SHEET_NAME</td><td>Excel の場合はシート名。CSV など単一表の場合は空文字</td></tr>
   </table>
-  <p>ディレクトリを <code>src</code> に指定して複数ファイルをまとめて読み込む際、どの行がどのファイル由来かを追跡したい場合に有効です。Compare の差分レポートでソース特定にも利用できます。</p>
   <p><strong>例 1: CSV ファイル 1 件を読み込む場合</strong></p>
   <pre>入力 (data/users.csv):
 id,name

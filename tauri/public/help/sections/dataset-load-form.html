@@ -18,6 +18,23 @@
     <li><strong>Setting</strong> — テーブルごとの主キー・フィルタなどの設定ファイル</li>
   </ul>
 
+  <h2 id="section-simple">シンプルな使い方</h2>
+  <p>入力の形式を <code>srcType</code> で選び、<code>src</code> に読み込むファイルやディレクトリを指定します。<code>srcType</code> のデフォルトは <code>csv</code> なので、CSV を読み込む場合は <code>src</code> を指定するだけです。</p>
+  <pre>入力:
+  data/orders/ORDERS.csv
+  data/orders/ITEMS.csv
+
+指定:
+  src = data/orders
+
+結果:
+  テーブル ORDERS / ITEMS（各ファイルの 1 行目がカラム名）</pre>
+  <ul>
+    <li>CSV ファイル 1 つが 1 テーブルになり、ファイル名（拡張子なし）がテーブル名になる</li>
+    <li><code>src</code> の相対パスは Dataset Base からの相対（<a href="../dialogs/workspace.html">Workspace</a> を参照）</li>
+    <li>読み込まれるテーブルは、Setting の Preview Before Settings で実行前に確認できる</li>
+  </ul>
+
   <h2 id="section-src-type">srcType 一覧</h2>
   <p>選んだ形式に応じて、固有の項目がフォームに表示されます。<code>src</code> に指定するもの・テーブル名の決まり方・固有オプションは、各値のページを参照してください。</p>
   <table>

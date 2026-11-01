@@ -11,6 +11,24 @@
   <p><a href="../commands/compare.html">Compare</a> で <code>targetType</code> に <code>image</code> または <code>pdf</code> を選んだときに表示される、画像比較の設定です。比較エンジンには <a href="https://github.com/romankh3/image-comparison">image-comparison</a> ライブラリを使用します。</p>
   <p><code>oldData</code> / <code>newData</code> の指定方法と比較結果の形式は <a href="../commands/compare/types/image.html">targetType: image</a> / <a href="../commands/compare/types/pdf.html">targetType: pdf</a> を参照してください。</p>
 
+  <h2 id="section-simple">シンプルな使い方</h2>
+  <p>すべての項目にデフォルト値があるため、何も指定しなくても比較できます。毎回変わる日時の表示などを比較から外したいときは、<code>excludedAreas</code> にその領域を指定します。</p>
+  <p>例: 画面キャプチャの右上（日時の表示）を除いて比較します。</p>
+  <pre>入力:
+  old/top.png、new/top.png（右上の (600,0)-(800,40) に日時が表示されている）
+
+指定:
+  targetType    = image
+  excludedAreas = [600,0,800,40]
+
+結果:
+  日時の表示だけが違う場合は一致とみなし、COMPARE_RESULT に行は出力されない
+  それ以外の場所に差分があれば、差分を赤枠で囲んだ PNG 画像が出力される（除外した領域は緑枠）</pre>
+  <ul>
+    <li>小さな色の違いまで差分にしたくないときは、<code>threshold</code> や <code>pixelToleranceLevel</code> を大きくする</li>
+    <li>座標は画像の左上を原点とするピクセル単位（下記「<code>excludedAreas</code> の書式」）</li>
+  </ul>
+
   <h2 id="section-fields">設定項目</h2>
   <p>フォームの <code>image</code> セクションに表示される項目の一覧です。すべて任意で、未指定時は以下のデフォルト値が使われます。</p>
 

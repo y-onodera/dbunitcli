@@ -11,11 +11,35 @@
   <p><a href="../commands/generate.html">Generate</a> で <code>generateType = xlsx</code> または <code>xls</code> を選んだ場合に使用するテンプレートエンジンです。Excel ファイル（<code>.xlsx</code> / <code>.xls</code>）をテンプレートとして、入力データセットの各行を埋め込んで出力します。</p>
   <p>テンプレートには jxls のコメント記法（セルのコメントに <code>jx:each</code> 等のディレクティブを記述）を使います。テキスト出力で使う StringTemplate 4 のテンプレートは <a href="template.html">Template</a> を参照してください。</p>
 
+  <h2 id="section-simple">シンプルな使い方</h2>
+  <p>見出しと 1 行分のセルを書いた Excel をテンプレートにし、セルコメントで繰り返す範囲を指定します。設定項目はデフォルトのままで使えます。</p>
+  <p>例: テーブル <code>USERS</code>（<code>ID</code> / <code>NAME</code> の 2 行）を、テーブルごとの Excel に書き出します。</p>
+  <pre>テンプレート (users.xlsx):
+  A1: ID                     B1: NAME
+  A2: ${row.get('ID')}       B2: ${row.get('NAME')}
+  A1 のコメント: jx:area(lastCell="B2")
+  A2 のコメント: jx:each(items="param.rows" var="row" lastCell="B2")
+
+指定:
+  generateType = xlsx
+  unit         = table
+  template     = users.xlsx
+  resultPath   = $param.tableName$.xlsx
+
+結果 (USERS.xlsx):
+  1 行目: ID | NAME
+  2 行目: 1  | Alice
+  3 行目: 2  | Bob</pre>
+  <ul>
+    <li><code>jx:area</code> でテンプレートとして処理する範囲を、<code>jx:each</code> で行ごとに繰り返す範囲を指定する</li>
+    <li><code>items</code> に書くものは <code>unit</code> によって変わる（下記「テンプレートの書き方」）</li>
+  </ul>
+
   <h2 id="section-fields">設定項目</h2>
   <p>フォームの <code>jxls option</code> から設定します。</p>
   <table>
     <tr><th>項目</th><th>説明</th><th>デフォルト</th></tr>
-    <tr><td>templateParameterAttribute</td><td>テンプレート内でデータ行にアクセスする属性名。例えば <code>param</code> を指定すると <code>param.columnName</code> で参照する。空にするとカラム名で直接参照する</td><td>param</td></tr>
+    <tr><td>templateParameterAttribute</td><td>テンプレート内でデータ行にアクセスする属性名。例えば <code>param</code> を指定すると <code>param.rows</code> のように参照する。空にすると <code>rows</code> のように直接参照する</td><td>param</td></tr>
     <tr><td>formulaProcess</td><td>（<code>xlsx</code> のみ）数式セルを処理する。<code>false</code> にするとメモリ使用量は減るが、行を追加したときにセル参照が更新されない</td><td>true</td></tr>
     <tr><td>evaluateFormulas</td><td>Excel 数式を評価するか</td><td>true</td></tr>
     <tr><td>forceFormulaRecalc</td><td>出力ファイルを Excel で開いたときに自動再計算させるフラグを立てる</td><td>false</td></tr>
@@ -24,14 +48,13 @@
   </table>
 
   <h2 id="section-template">テンプレートの書き方</h2>
-  <p>Excel のセルコメントにディレクティブを記述します。各行のデータは <code>templateParameterAttribute</code> で指定した名前のオブジェクトとして参照します（デフォルト: <code>param</code>）。</p>
-  <pre>セル A1 のコメント:
-  jx:each(items="items" var="param" lastCell="C1")
-
-セル A1: $[param.id]
-セル B1: $[param.name]
-セル C1: $[param.value]</pre>
-  <p>データセットの各行が <code>items</code> として渡され、行ごとに展開されます。</p>
+  <p>Excel のセルコメントに jxls のコマンドを書きます。データは <code>templateParameterAttribute</code> で指定した名前（デフォルト: <code>param</code>）で参照します。<code>param</code> に入る値は Generate の <code>unit</code> によって変わり、<a href="../commands/generate/types/txt.html">generateType: txt</a> と同じです。</p>
+  <table>
+    <tr><th>unit</th><th>jx:each の items に書くもの</th></tr>
+    <tr><td>table</td><td><code>param.rows</code>（そのテーブルの全行）</td></tr>
+    <tr><td>dataset</td><td><code>param.dataSet.get('テーブル名').rows</code>（指定したテーブルの全行）</td></tr>
+  </table>
+  <p>各行はカラム名をキーとする Map なので、セルには <code>${row.get('カラム名')}</code> のように書きます（<code>row</code> は <code>jx:each</code> の <code>var</code> に指定した名前）。<code>unit=dataset</code> でテーブルごとのシートを持つテンプレートは、<a href="../dialogs/xlsx-template-generate.html">Xlsx Template Generate</a> で雛型を作れます。</p>
 
   <h2 id="section-related">関連</h2>
   <ul>
