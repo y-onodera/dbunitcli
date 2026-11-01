@@ -1,13 +1,22 @@
+import { useState } from "react";
 import { SectionFieldset } from "../../components/dialog";
 import { SectionLegend } from "../../components/dialog/SectionFieldset";
+import { UnitSettingEncodingProvider } from "../../context/UnitSettingEncodingProvider";
 import type { GenerateOptions } from "../../model/SelectParameter";
-import { DatasetLoadForm } from "./section/DatasetLoadForm";
+import {
+	DatasetLoadForm,
+	DatasetSrcInfoScope,
+} from "./section/DatasetLoadForm";
 import {
 	TxtTemplateGenerateButton,
 	type TxtTemplateGenerateFormValues,
 } from "./section/dialog/TxtTemplateGenerateDialog";
+import UnitSettingPreviewButton, {
+	UnitSettingsDialog,
+} from "./section/dialog/UnitSettingPreviewButton";
 import { XlsxTemplateGenerateButton } from "./section/dialog/XlsxTemplateGenerateDialog";
 import Check from "./section/element/Check";
+import DatasetSettingText from "./section/element/DatasetSettingText";
 import EncodingText from "./section/element/EncodingText";
 import FileText from "./section/element/FileText";
 import PlainText from "./section/element/PlainText";
@@ -34,8 +43,14 @@ export function GenerateForm(prop: {
 				<XlsxTemplateGenerateButton key="generate" setPath={setPath} />,
 			]
 		: undefined;
+	// unitSettingの編集・プレビューで読む文字コード（入力中の値）
+	const [unitSettingEncoding, setUnitSettingEncoding] = useState(
+		generate.unitSettingEncoding?.value ?? "",
+	);
+	// srcの入力値はsrcフォームとunitSettingの編集・プレビューで共有する
+	// （テーブル名・カラム名の候補とプレビューの読込元にsrcのデータセットを使う）
 	return (
-		<>
+		<DatasetSrcInfoScope name={prop.name} srcData={srcData}>
 			<SectionFieldset>
 				<SectionLegend
 					title="generate"
@@ -60,11 +75,25 @@ export function GenerateForm(prop: {
 						element={generate.unit}
 					/>
 				)}
-				{generate.unitSetting && (
-					<FileText prefix="" element={generate.unitSetting} />
-				)}
+				<UnitSettingEncodingProvider encoding={unitSettingEncoding}>
+					{generate.unitSetting && (
+						<DatasetSettingText
+							prefix=""
+							element={generate.unitSetting}
+							editDialog={UnitSettingsDialog}
+							showGenerate={false}
+							preview={(path) => (
+								<UnitSettingPreviewButton unitSetting={path} />
+							)}
+						/>
+					)}
+				</UnitSettingEncodingProvider>
 				{generate.unitSettingEncoding && (
-					<EncodingText prefix="" element={generate.unitSettingEncoding} />
+					<EncodingText
+						prefix=""
+						element={generate.unitSettingEncoding}
+						handleValueChange={setUnitSettingEncoding}
+					/>
 				)}
 				{generate.template && (
 					<TemplateText
@@ -123,7 +152,8 @@ export function GenerateForm(prop: {
 				srcData={srcData}
 				helpCommand="sections/dataset-load-form"
 				helpLabel="src"
+				parentSrcInfo={true}
 			/>
-		</>
+		</DatasetSrcInfoScope>
 	);
 }

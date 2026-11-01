@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { type ReactNode, useState } from "react";
 import {
 	DataTable,
 	DialogBody,
@@ -17,6 +17,7 @@ import { PreviewButton } from "../../../../components/element/ButtonIcon";
 import { JobProgress } from "../../../../components/element/JobProgress";
 import { useDatasetSrcInfo } from "../../../../context/DatasetSrcInfoProvider";
 import {
+	type TablePreview,
 	useDatasetTableConvert,
 	useDatasetTableNames,
 	useDatasetTablePreview,
@@ -59,25 +60,31 @@ function withPreviewSetting(
 	return setting === "" ? withoutSetting(info) : withValues(info, { setting });
 }
 
-// SettingDialogのfooterActionsに置き、編集中の内容を保存できたらtoSrcInfo(保存先)で読み込まれるテーブル一覧をプレビューする（編集ダイアログは開いたまま）
+// SettingDialogのfooterActionsに置き、編集中の内容を保存できたらtoSrcInfo(保存先)で読み込まれるテーブル一覧をプレビューする（編集ダイアログは開いたまま）。
+// saveThenが保存せずにファイルを渡すだけなら、指定済みのファイルでプレビューするボタンにもなる。
+// rowActions: 各テーブル名の横に足すボタン（保存先を受け取る）
 export function SaveAndPreviewButton({
+	title = "Save and Preview",
 	saveThen,
 	toSrcInfo,
+	rowActions,
 }: {
+	title?: string;
 	saveThen: SaveThen;
 	toSrcInfo: (savedPath: string) => DatasetSrcInfo;
+	rowActions?: (savedPath: string, tableName: string) => ReactNode;
 }) {
 	const [savedPath, setSavedPath] = useState<string | null>(null);
 	return (
 		<>
-			<BlueButton
-				title="Save and Preview"
-				handleClick={() => saveThen(setSavedPath)}
-			/>
+			<BlueButton title={title} handleClick={() => saveThen(setSavedPath)} />
 			{savedPath !== null && (
 				<DatasetTableNamesPreviewDialog
 					datasetSrcInfo={toSrcInfo(savedPath)}
 					handleDialogClose={() => setSavedPath(null)}
+					rowActions={
+						rowActions && ((tableName) => rowActions(savedPath, tableName))
+					}
 				/>
 			)}
 		</>
@@ -118,12 +125,15 @@ export function InlinePreviewButton({
 	);
 }
 
+// rowActions: 各テーブル名の横にプレビューボタンに加えて出すボタン（generateの-unitSettingのプレビューなど）
 export function DatasetTableNamesPreviewDialog({
 	datasetSrcInfo,
 	handleDialogClose,
+	rowActions,
 }: {
 	datasetSrcInfo: DatasetSrcInfo;
 	handleDialogClose: () => void;
+	rowActions?: (tableName: string) => ReactNode;
 }) {
 	const { tableNames, loading, logs, error } = useDatasetTableNames(
 		datasetSrcInfo,
@@ -131,42 +141,19 @@ export function DatasetTableNamesPreviewDialog({
 	);
 	const [previewTable, setPreviewTable] = useState<string | null>(null);
 
-	function renderContent() {
-		if (loading) {
-			return (
-				<JobProgress
-					title="Loading..."
-					lines={logs}
-					onAbandon={handleDialogClose}
-				/>
-			);
-		}
-		if (error) {
-			return <JobFailure message={error} lines={logs} />;
-		}
-		if (tableNames.length === 0) {
-			return <StatusMessage kind="empty">No tables found.</StatusMessage>;
-		}
-		return (
-			<ul className="text-sm bg-surface-subtle border border-border rounded-lg p-3 overflow-auto max-h-96 space-y-1">
-				{tableNames.map((name) => (
-					<li
-						key={name}
-						className="flex items-center gap-2 text-content-secondary"
-					>
-						<span className="flex-1">{name}</span>
-						<PreviewButton handleClick={() => setPreviewTable(name)} />
-					</li>
-				))}
-			</ul>
-		);
-	}
-
 	return (
 		<FullDialog onClose={handleDialogClose}>
 			<DialogBody size="fluid">
 				<DialogTitle>Table List Preview</DialogTitle>
-				{renderContent()}
+				<TableNameList
+					names={tableNames}
+					loading={loading}
+					logs={logs}
+					error={error}
+					onAbandon={handleDialogClose}
+					onPreview={setPreviewTable}
+					rowActions={rowActions}
+				/>
 			</DialogBody>
 			<DialogFooter>
 				<WhiteButton title="Close" handleClick={handleDialogClose} />
@@ -207,53 +194,22 @@ function TableDataPreviewDialog({
 		if (error) {
 			return <JobFailure message={error} lines={logs} />;
 		}
-		if (!preview?.headers || preview.headers.length === 0) {
-			return <StatusMessage kind="empty">No data found.</StatusMessage>;
-		}
-		const shownRows = preview.rows?.length ?? 0;
-		const { totalRows } = preview;
-		return (
-			<>
-				<p className="text-sm text-content-muted mb-2">
-					{shownRows < totalRows
-						? `Showing first ${shownRows} of ${totalRows} rows (partial preview)`
-						: `${totalRows} rows`}
-				</p>
-				<DataTable
-					head={preview.headers.map((header) => (
-						<Th key={header} nowrap>
-							{header}
-						</Th>
-					))}
-				>
-					{preview.rows?.map((row) => (
-						<Tr key={row.join("\x00")}>
-							{preview.headers.map((header, i) => (
-								<Td key={header} nowrap>
-									{row[i] ?? ""}
-								</Td>
-							))}
-						</Tr>
-					))}
-				</DataTable>
-			</>
-		);
+		return <TablePreviewTable preview={preview} />;
 	}
 
 	return (
-		<FullDialog onClose={handleClose}>
-			<DialogBody size="fluid">
-				<DialogTitle>{tableName} — Data Preview</DialogTitle>
-				{renderContent()}
-			</DialogBody>
-			<DialogFooter>
+		<DataPreviewDialog
+			tableName={tableName}
+			handleClose={handleClose}
+			body={renderContent()}
+			footerActions={
 				<BlueButton
 					title="Export"
 					handleClick={() => setShowExport(true)}
 					disabled={loading || error !== ""}
 				/>
-				<WhiteButton title="Close" handleClick={handleClose} />
-			</DialogFooter>
+			}
+		>
 			{showExport && (
 				<TableConvertDialog
 					tableName={tableName}
@@ -263,6 +219,119 @@ function TableDataPreviewDialog({
 					onClose={() => setShowExport(false)}
 				/>
 			)}
+		</DataPreviewDialog>
+	);
+}
+
+// 「{tableName} — Data Preview」ダイアログの外枠。footerActionsはCloseの前に並べ、childrenは上に重ねるダイアログ
+export function DataPreviewDialog({
+	tableName,
+	handleClose,
+	body,
+	footerActions,
+	children,
+}: {
+	tableName: string;
+	handleClose: () => void;
+	body: ReactNode;
+	footerActions?: ReactNode;
+	children?: ReactNode;
+}) {
+	return (
+		<FullDialog onClose={handleClose}>
+			<DialogBody size="fluid">
+				<DialogTitle>{tableName} — Data Preview</DialogTitle>
+				{body}
+			</DialogBody>
+			<DialogFooter>
+				{footerActions}
+				<WhiteButton title="Close" handleClick={handleClose} />
+			</DialogFooter>
+			{children}
 		</FullDialog>
+	);
+}
+
+// 先頭の一部の行と全行数の表示（rowsはsidecarが件数を制限した先頭の一部）
+export function TablePreviewTable({
+	preview,
+}: {
+	preview: TablePreview | null;
+}) {
+	if (!preview?.headers || preview.headers.length === 0) {
+		return <StatusMessage kind="empty">No data found.</StatusMessage>;
+	}
+	const shownRows = preview.rows?.length ?? 0;
+	const { totalRows } = preview;
+	return (
+		<>
+			<p className="text-sm text-content-muted mb-2">
+				{shownRows < totalRows
+					? `Showing first ${shownRows} of ${totalRows} rows (partial preview)`
+					: `${totalRows} rows`}
+			</p>
+			<DataTable
+				head={preview.headers.map((header) => (
+					<Th key={header} nowrap>
+						{header}
+					</Th>
+				))}
+			>
+				{preview.rows?.map((row) => (
+					<Tr key={row.join("\x00")}>
+						{preview.headers.map((header, i) => (
+							<Td key={header} nowrap>
+								{row[i] ?? ""}
+							</Td>
+						))}
+					</Tr>
+				))}
+			</DataTable>
+		</>
+	);
+}
+
+// テーブル名の一覧（読込中・失敗・空の表示を含む）。各名前の横にプレビューボタンとrowActionsを出す
+export function TableNameList({
+	names,
+	loading,
+	logs,
+	error,
+	onAbandon,
+	onPreview,
+	rowActions,
+}: {
+	names: string[];
+	loading: boolean;
+	logs: string[];
+	error: string;
+	onAbandon: () => void;
+	onPreview: (name: string) => void;
+	rowActions?: (name: string) => ReactNode;
+}) {
+	if (loading) {
+		return (
+			<JobProgress title="Loading..." lines={logs} onAbandon={onAbandon} />
+		);
+	}
+	if (error) {
+		return <JobFailure message={error} lines={logs} />;
+	}
+	if (names.length === 0) {
+		return <StatusMessage kind="empty">No tables found.</StatusMessage>;
+	}
+	return (
+		<ul className="text-sm bg-surface-subtle border border-border rounded-lg p-3 overflow-auto max-h-96 space-y-1">
+			{names.map((name) => (
+				<li
+					key={name}
+					className="flex items-center gap-2 text-content-secondary"
+				>
+					<span className="flex-1">{name}</span>
+					<PreviewButton handleClick={() => onPreview(name)} />
+					{rowActions?.(name)}
+				</li>
+			))}
+		</ul>
 	);
 }

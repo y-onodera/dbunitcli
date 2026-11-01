@@ -18,6 +18,7 @@
     <li><a href="#section-format">書式</a></li>
     <li><a href="#section-builtin">組み込み設定</a></li>
     <li><a href="#section-example">記述例</a></li>
+    <li><a href="#section-gui">画面での編集と確認</a></li>
     <li><a href="#section-notes">注意</a></li>
     <li><a href="#section-related">関連</a></li>
   </ol>
@@ -279,6 +280,22 @@ COMMENT ON COLUMN EMPLOYEE.SALARY IS 'SALARY';</pre></td>
     <li>判定や変換を足したい（空欄のデフォルト値、型の読み替え、条件分岐の元になるフラグ）: unitSetting に <code>string</code> / <code>boolean</code> を足し、テンプレートで参照する。</li>
     <li>一部の行を別に扱いたい（主キーだけ、特定の列だけ）: unitSetting の <code>separate</code> + <code>filter</code> でサブテーブルを作り、テンプレートで <code>subTable.{名前}.rows</code> を参照する。</li>
   </ul>
+
+  <h2 id="section-gui">画面での編集と確認</h2>
+  <p>Generate の <code>unitSetting</code> 横のメニューの編集ボタンで、<a href="../../dialogs/dataset-settings.html">Dataset Settings</a> を開いて編集できます。テーブル名・カラム名の候補は src から取ります。<a href="../../dialogs/txt-template-generate.html">Scaffold</a> で書き出した設定もこのダイアログで開いて直せます。</p>
+  <p>適用した結果は次の 2 つのボタンで確認できます。どちらも src の <code>srcType</code> と <code>src</code> を入力しているときだけ表示され、src と <code>unitSettingEncoding</code> はフォームに入力中の値を使います。</p>
+  <table>
+    <tr><th>ボタン</th><th>場所</th><th>適用する unitSetting</th></tr>
+    <tr><td>Preview Unit Settings</td><td><code>unitSetting</code> の横（<code>unitSetting</code> を指定しているとき）</td><td><code>unitSetting</code> に指定しているファイル</td></tr>
+    <tr><td>Save and Preview</td><td>編集ダイアログ（Dataset Settings）の下部</td><td>編集中の内容を保存したファイル。ダイアログは閉じず、<code>unitSetting</code> のファイル名も変わらない。ファイル名を反映するには Save を押す</td></tr>
+  </table>
+  <p>どちらも押すと次の順に確認できます。</p>
+  <ol>
+    <li>src の setting を適用したテーブルの一覧が開きます。各テーブル名の横のプレビューボタンでは、unitSetting を適用する前のデータを確認できます。</li>
+    <li>テーブル名の横の Unit Preview ボタンを押すと、そのテーブルに unitSetting を適用した後のテーブルの一覧が開きます。先頭がテンプレートの <code>rows</code> になるテーブル自身で、続く各テーブルが <code>subTable.{テーブル名}</code> として渡されるテーブルです（テーブル名順）。</li>
+    <li>一覧の各テーブル名の横のプレビューボタンで、そのテーブルの先頭 100 行と全行数を確認できます。</li>
+  </ol>
+  <p>unitSetting が読めない（ファイルが無い、書式の誤り、存在しない列の参照など）ときは、2. の一覧にエラーが表示されます。</p>
 
   <h2 id="section-notes">注意</h2>
   <ul>

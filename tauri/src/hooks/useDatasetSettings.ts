@@ -85,23 +85,24 @@ function startLoad<T>(
 	);
 }
 
-async function fetchTableNames(
+// dataset-setting/配下のエンドポイントへsrcとextraを送り、JSONの応答を返す
+async function fetchDatasetJson<T>(
 	apiUrl: string,
+	endpoint: string,
 	info: DatasetSrcInfo,
 	jdbcValues: Record<string, string>,
 	paramInputs: Record<string, string>,
+	extra: Record<string, string>,
 	signal?: AbortSignal,
 	onLog?: (line: string) => void,
-): Promise<string[]> {
-	if (!info.values.src) {
-		return [];
-	}
+): Promise<T> {
 	const fetchParams = {
-		endpoint: `${apiUrl}dataset-setting/table-names`,
+		endpoint: `${apiUrl}dataset-setting/${endpoint}`,
 		options: {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
 			body: buildDatasetRequestBody(info, jdbcValues, {
+				...extra,
 				parameters: paramInputs,
 			}),
 		},
@@ -109,6 +110,86 @@ async function fetchTableNames(
 		onLog,
 	};
 	return fetchData(fetchParams).then((r) => r.json());
+}
+
+// srcの読込準備ができていてenabledなら、endpointへextraを付けて読み込む。srcInfoやextraが変わるたびに読み直す。
+// extraは文字列だけの値にする（毎回作り直されるオブジェクトでも読み直さないよう、JSON文字列にして比較する）。
+// withLogs: 読込中のログも受け取る
+function useDatasetLoad<T>(
+	srcInfo: DatasetSrcInfo,
+	endpoint: string,
+	extra: Record<string, string>,
+	enabled: boolean,
+	idle: Load<T>,
+	withLogs: boolean,
+): Load<T> {
+	const [load, setLoad] = useState<Load<T>>(idle);
+	const { apiUrl } = useEnvironment();
+	const { jdbcValues, connectionOk } = useJdbcConnectionState();
+	const paramInputs = useParamInputs();
+
+	const ready = enabled && isSrcReady(srcInfo, connectionOk);
+	const extraKey = JSON.stringify(extra);
+
+	useEffect(() => {
+		if (!ready) {
+			setLoad(idle);
+			return;
+		}
+		const controller = new AbortController();
+		startLoad(
+			(onLog) =>
+				fetchDatasetJson<T>(
+					apiUrl,
+					endpoint,
+					srcInfo,
+					jdbcValues,
+					paramInputs,
+					JSON.parse(extraKey),
+					controller.signal,
+					withLogs ? onLog : undefined,
+				),
+			controller.signal,
+			idle,
+			setLoad,
+		);
+		return () => {
+			controller.abort();
+		};
+	}, [
+		apiUrl,
+		endpoint,
+		srcInfo,
+		ready,
+		jdbcValues,
+		paramInputs,
+		extraKey,
+		idle,
+		withLogs,
+	]);
+
+	return load;
+}
+
+async function fetchTableNames(
+	apiUrl: string,
+	info: DatasetSrcInfo,
+	jdbcValues: Record<string, string>,
+	paramInputs: Record<string, string>,
+	signal?: AbortSignal,
+): Promise<string[]> {
+	if (!info.values.src) {
+		return [];
+	}
+	return fetchDatasetJson(
+		apiUrl,
+		"table-names",
+		info,
+		jdbcValues,
+		paramInputs,
+		{},
+		signal,
+	);
 }
 
 const IDLE_TABLE_NAMES = idleLoad<string[]>([]);
@@ -123,44 +204,15 @@ export const useDatasetTableNames = (
 	logs: string[];
 	error: string;
 } => {
-	const [load, setLoad] = useState<Load<string[]>>(IDLE_TABLE_NAMES);
-	const { apiUrl } = useEnvironment();
-	const { jdbcValues, connectionOk } = useJdbcConnectionState();
-	const paramInputs = useParamInputs();
-
-	const srcReady = isSrcReady(srcInfo, connectionOk);
-
-	useEffect(() => {
-		if (!srcReady) {
-			setLoad(IDLE_TABLE_NAMES);
-			return;
-		}
-		const controller = new AbortController();
-		startLoad(
-			(onLog) =>
-				fetchTableNames(
-					apiUrl,
-					srcInfo,
-					jdbcValues,
-					paramInputs,
-					controller.signal,
-					withLogs ? onLog : undefined,
-				),
-			controller.signal,
-			IDLE_TABLE_NAMES,
-			setLoad,
-		);
-		return () => {
-			controller.abort();
-		};
-	}, [apiUrl, srcInfo, srcReady, jdbcValues, paramInputs, withLogs]);
-
-	return {
-		tableNames: load.data,
-		loading: load.loading,
-		logs: load.logs,
-		error: load.error,
-	};
+	const { data, loading, logs, error } = useDatasetLoad(
+		srcInfo,
+		"table-names",
+		{},
+		true,
+		IDLE_TABLE_NAMES,
+		withLogs,
+	);
+	return { tableNames: data, loading, logs, error };
 };
 
 // rowsは先頭の一部だけ（sidecarが件数を制限する）。totalRowsが対象テーブルの全行数
@@ -185,21 +237,45 @@ async function fetchTablePreview(
 	if (!info.values.src || !tableName) {
 		return EMPTY_PREVIEW;
 	}
-	const fetchParams = {
-		endpoint: `${apiUrl}dataset-setting/table-preview`,
-		options: {
-			method: "POST",
-			headers: { "Content-Type": "application/json" },
-			body: buildDatasetRequestBody(info, jdbcValues, {
-				tableName,
-				parameters: paramInputs,
-			}),
-		},
+	return fetchDatasetJson(
+		apiUrl,
+		"table-preview",
+		info,
+		jdbcValues,
+		paramInputs,
+		{ tableName },
 		signal,
 		onLog,
-	};
-	return fetchData(fetchParams).then((r) => r.json());
+	);
 }
+
+// generateの-unitSettingをsrcのテーブル1つに適用した結果のテーブル1つ分
+export type UnitTablePreview = TablePreview & { tableName: string };
+
+const IDLE_UNIT_PREVIEWS = idleLoad<UnitTablePreview[]>([]);
+
+// srcのtableNameのテーブルにunitSettingを適用してできたテーブルごとのプレビュー（先頭がtableName自身）
+export const useDatasetUnitTablePreview = (
+	srcInfo: DatasetSrcInfo,
+	tableName: string,
+	unitSetting: string,
+	unitSettingEncoding: string,
+): {
+	previews: UnitTablePreview[];
+	loading: boolean;
+	logs: string[];
+	error: string;
+} => {
+	const { data, loading, logs, error } = useDatasetLoad(
+		srcInfo,
+		"unit-table-preview",
+		{ tableName, unitSetting, unitSettingEncoding },
+		!!tableName && !!unitSetting,
+		IDLE_UNIT_PREVIEWS,
+		true,
+	);
+	return { previews: data, loading, logs, error };
+};
 
 export const useDatasetTablePreview = (
 	srcInfo: DatasetSrcInfo,
@@ -210,45 +286,15 @@ export const useDatasetTablePreview = (
 	logs: string[];
 	error: string;
 } => {
-	const [load, setLoad] = useState<Load<TablePreview | null>>(IDLE_PREVIEW);
-	const { apiUrl } = useEnvironment();
-	const { jdbcValues, connectionOk } = useJdbcConnectionState();
-	const paramInputs = useParamInputs();
-
-	const srcReady = isSrcReady(srcInfo, connectionOk);
-
-	useEffect(() => {
-		if (!srcReady || !tableName) {
-			setLoad(IDLE_PREVIEW);
-			return;
-		}
-		const controller = new AbortController();
-		startLoad(
-			(onLog) =>
-				fetchTablePreview(
-					apiUrl,
-					srcInfo,
-					tableName,
-					jdbcValues,
-					paramInputs,
-					controller.signal,
-					onLog,
-				),
-			controller.signal,
-			IDLE_PREVIEW,
-			setLoad,
-		);
-		return () => {
-			controller.abort();
-		};
-	}, [apiUrl, srcInfo, srcReady, jdbcValues, tableName, paramInputs]);
-
-	return {
-		preview: load.data,
-		loading: load.loading,
-		logs: load.logs,
-		error: load.error,
-	};
+	const { data, loading, logs, error } = useDatasetLoad(
+		srcInfo,
+		"table-preview",
+		{ tableName },
+		!!tableName,
+		IDLE_PREVIEW,
+		true,
+	);
+	return { preview: data, loading, logs, error };
 };
 
 // 選んだテーブルだけをresultフォームの値（-result.*）でconvertし、出力先ディレクトリを返す（DB出力なら空文字）。

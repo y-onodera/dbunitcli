@@ -8,7 +8,6 @@ import io.micronaut.json.JsonMapper;
 import io.micronaut.serde.ObjectMapper;
 import jakarta.json.Json;
 import jakarta.json.JsonReader;
-import org.dbunit.dataset.Column;
 import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.ITableMetaData;
 import org.slf4j.Logger;
@@ -18,6 +17,7 @@ import yo.dbunitcli.application.CommandParameters;
 import yo.dbunitcli.application.Option;
 import yo.dbunitcli.application.OptionValidationException;
 import yo.dbunitcli.application.command.Convert;
+import yo.dbunitcli.application.command.Generate;
 import yo.dbunitcli.application.command.ConvertOption;
 import yo.dbunitcli.application.command.GenerateType;
 import yo.dbunitcli.application.command.Type;
@@ -31,6 +31,7 @@ import yo.dbunitcli.dataset.AddSettingTableMetaData;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.dataset.ComparableDataSetProducer;
 import yo.dbunitcli.dataset.ComparableTable;
+import yo.dbunitcli.dataset.ComparableTableDto;
 import yo.dbunitcli.dataset.ComparableTableJoin;
 import yo.dbunitcli.dataset.IDataSetConverter;
 import yo.dbunitcli.dataset.MetaDataCapture;
@@ -46,6 +47,8 @@ import yo.dbunitcli.sidecar.dto.DatasetTableConvertRequestDto;
 import yo.dbunitcli.sidecar.dto.DatasetTableNamesRequestDto;
 import yo.dbunitcli.sidecar.dto.DatasetTablePreviewRequestDto;
 import yo.dbunitcli.sidecar.dto.DatasetTablePreviewResponseDto;
+import yo.dbunitcli.sidecar.dto.DatasetUnitTablePreviewRequestDto;
+import yo.dbunitcli.sidecar.dto.DatasetUnitTablePreviewResponseDto;
 import yo.dbunitcli.sidecar.dto.JsonXlsxSchemaDto;
 import yo.dbunitcli.sidecar.job.Interruptible;
 
@@ -55,12 +58,13 @@ import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 
@@ -140,6 +144,64 @@ public class DatasetSettingsController extends AbstractResourceFileController<Da
             }
         }
     }
+
+    /**
+     * generateの-unitSettingのプレビュー。srcの読込で得たtableNameのテーブルにunitSettingを適用し、
+     * できたテーブルごとに先頭{@link #PREVIEW_ROW_LIMIT}行と全行数を返す（tableName自身が先頭、残りはテーブル名順）。
+     * unitSettingの誤りを直せるよう、読めなかったときはエラーを返す
+     */
+    @Interruptible
+    @Post(uri = "unit-table-preview", produces = MediaType.APPLICATION_JSON)
+    public String unitTablePreview(@Body final DatasetUnitTablePreviewRequestDto request) {
+        try {
+            final String tableName = request.getTableName();
+            if (Strings.isEmpty(tableName)) {
+                throw new IllegalArgumentException("tableName is required");
+            }
+            if (Strings.isEmpty(request.getUnitSetting())) {
+                throw new IllegalArgumentException("unitSetting is required");
+            }
+            final TableSeparators unitSeparators = this.unitTableSeparators(request);
+            // 対象を取りこぼさない絞り込み（splitがあれば絞らない）で1回だけ読む
+            final ComparableDataSetParam.Builder param = this.toParam(request).get();
+            final TableSeparators separators = param.getTableSeparators();
+            Narrow.singlePass(separators).applyTo(param, separators, tableName);
+            try (final ComparableDataSetProducer producer = new ComparableDataSetLoader(this.buildParameter(request))
+                    .getComparableDataSetProducer(param.build())) {
+                return producer.lazyLoad(true).get(tableName) instanceof final ComparableTableDto dto
+                        ? ObjectMapper.getDefault().writeValueAsString(
+                                DatasetSettingsController.toUnitPreviews(dto.loadSeparatedTables(unitSeparators)))
+                        : "[]";
+            }
+        } catch (final Throwable th) {
+            LOGGER.error("cause:", th);
+            throw new ApplicationException(th);
+        }
+    }
+
+    // generateの実行時と同じ読み方（パスの解決・カンマ区切りの複数ファイル・文字コードの既定値）にするため、GenerateOptionに読ませる
+    private TableSeparators unitTableSeparators(final DatasetUnitTablePreviewRequestDto request) {
+        final Map<String, String> params = new LinkedHashMap<>();
+        params.put("-unitSetting", request.getUnitSetting());
+        params.put("-unitSettingEncoding", request.getUnitSettingEncoding());
+        return new Generate().parseOption(
+                AbstractCommandController.resolveSidecarFilePaths(new CommandParameters(Type.generate, params)).args(),
+                Parameter.none()).unitTableSeparators();
+    }
+
+    private static List<DatasetUnitTablePreviewResponseDto> toUnitPreviews(final ComparableTableDto.SeparatedTables tables) {
+        return Stream.concat(Stream.ofNullable(tables.target()), tables.subTables().values().stream())
+                     .map(DatasetSettingsController::toUnitPreview)
+                     .toList();
+    }
+
+    private static DatasetUnitTablePreviewResponseDto toUnitPreview(final ComparableTable table) {
+        final List<Object[]> rows = IntStream.range(0, Math.min(PREVIEW_ROW_LIMIT, table.getRowCount()))
+                                             .mapToObj(table::getRow)
+                                             .toList();
+        return DatasetUnitTablePreviewResponseDto.of(table, rows);
+    }
+
 
     /**
      * 選んだテーブルだけをresultフォームの指定でconvertし、出力先ディレクトリを返す（DB出力なら空文字）。
@@ -407,10 +469,7 @@ public class DatasetSettingsController extends AbstractResourceFileController<Da
                 return Optional.empty();
             }
             final ComparableTable table = this.builder.build();
-            final String[] headers = Arrays.stream(table.getTableMetaData().getColumns())
-                                           .map(Column::getColumnName)
-                                           .toArray(String[]::new);
-            return Optional.of(new DatasetTablePreviewResponseDto(headers, table.rows().rows(), this.totalRows));
+            return Optional.of(DatasetTablePreviewResponseDto.of(table, table.rows().rows(), this.totalRows));
         }
 
         @Override

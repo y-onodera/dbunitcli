@@ -186,9 +186,6 @@ export class DatasetSettings {
 		);
 	}
 	toJSON() {
-		const filterSettings = (settings: DatasetSetting[]) =>
-			settings.filter((setting) => setting.displayName());
-
 		const names = this.outputFilter.name?.filter((it) => it);
 		const pattern = this.outputFilter.pattern;
 		let outputFilter: object | undefined;
@@ -207,8 +204,11 @@ export class DatasetSettings {
 		}
 		const imports = this.imports.filter((it) => it.path);
 		return {
-			settings: filterSettings(this.settings),
-			commonSettings: filterSettings(this.commonSettings),
+			settings: this.settings.filter((setting) => setting.displayName()),
+			// commonSettingsは全テーブルに効くため対象テーブルを持たないのが普通。中身の無い行だけ除く
+			commonSettings: this.commonSettings.filter((setting) =>
+				hasValue(setting.toJSON()),
+			),
 			...(outputFilter ? { outputFilter } : {}),
 			...(imports.length ? { import: imports } : {}),
 		};
@@ -651,6 +651,16 @@ function target(setting: DatasetSetting): string {
 		return `innerJoin :${setting.fullJoin.left} ${setting.fullJoin.right} on ${setting.fullJoin.column ? setting.fullJoin.column.join(",") : setting.fullJoin.on}`;
 	}
 	return "";
+}
+// JSONの値が空（空文字・false・空配列・空オブジェクト、またはそれらだけの入れ子）でないか
+function hasValue(value: unknown): boolean {
+	if (Array.isArray(value)) {
+		return value.some(hasValue);
+	}
+	if (value !== null && typeof value === "object") {
+		return Object.values(value).some(hasValue);
+	}
+	return value !== "" && value !== false && value != null;
 }
 function replaceArray(
 	array: string[],
