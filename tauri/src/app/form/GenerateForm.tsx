@@ -4,6 +4,7 @@ import { DatasetSrcInfoProvider } from "../../context/DatasetSrcInfoProvider";
 import { buildDatasetSrcInfo } from "../../model/CommandOption";
 import type { GenerateOptions } from "../../model/SelectParameter";
 import { DatasetLoadForm } from "./section/DatasetLoadForm";
+import { DatasetSettingsDialogWithoutPreview } from "./section/dialog/DatasetSettingsDialog";
 import {
 	TxtTemplateGenerateButton,
 	type TxtTemplateGenerateFormValues,
@@ -64,7 +65,7 @@ export function GenerateForm(prop: {
 					/>
 				)}
 				{generate.unitSetting && (
-					// unitSettingの編集・生成ではsrc側のデータセットからテーブル名・カラム名の候補を取る
+					// unitSettingの編集ではsrc側のデータセットからテーブル名・カラム名の候補を取る
 					<DatasetSrcInfoProvider
 						key={`${prop.name}generate-unitSetting:${srcData.srcType?.value ?? ""}`}
 						initialValue={buildDatasetSrcInfo(srcData)}
@@ -72,7 +73,9 @@ export function GenerateForm(prop: {
 						<DatasetSettingText
 							prefix=""
 							element={generate.unitSetting}
+							editDialog={DatasetSettingsDialogWithoutPreview}
 							showPreview={false}
+							showGenerate={false}
 						/>
 					</DatasetSrcInfoProvider>
 				)}

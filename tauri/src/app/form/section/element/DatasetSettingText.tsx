@@ -20,7 +20,8 @@ import type { TextProp } from "./FormElementProp";
 import Text, { TextDropDownMenu } from "./Text";
 
 // editDialog: 編集ボタンで開くダイアログ、generateEditDialog: 生成結果を確認・保存するダイアログ。
-// 省略するとDataset Settingsを使う（compareの-settingはCompare Key Settingsを渡し、Previewも出さない）
+// 省略するとDataset Settingsを使う（compareの-settingはCompare Key Settingsを渡し、Previewも出さない）。
+// showGenerate=falseでgenerateボタンを出さない（generateの-unitSettingは雛型生成が用途に合わないため）
 export default function DatasetSettingText({
 	prefix,
 	element,
@@ -29,10 +30,12 @@ export default function DatasetSettingText({
 	editDialog = DatasetSettingsDialog,
 	generateEditDialog = DatasetSettingsEditDialog,
 	showPreview = true,
+	showGenerate = true,
 }: TextProp & {
 	editDialog?: ComponentType<EditResourceDialogProps>;
 	generateEditDialog?: DatasetSettingsEditDialogComponent;
 	showPreview?: boolean;
+	showGenerate?: boolean;
 }) {
 	const datasetSrcInfo = useDatasetSrcInfo();
 	const settings = useResourcesSettings();
@@ -83,11 +86,15 @@ export default function DatasetSettingText({
 								path={path}
 								setPath={handleSetPath}
 							/>,
-							<DatasetSettingGenerateButton
-								key="generate"
-								setPath={handleSetPath}
-								editDialog={generateEditDialog}
-							/>,
+							...(showGenerate
+								? [
+										<DatasetSettingGenerateButton
+											key="generate"
+											setPath={handleSetPath}
+											editDialog={generateEditDialog}
+										/>,
+									]
+								: []),
 						]}
 						removeButton={(closeMenu) => (
 							<RemoveResourceButton

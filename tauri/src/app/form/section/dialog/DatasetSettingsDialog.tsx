@@ -34,6 +34,7 @@ export default function DatasetSettingsDialog(props: {
 	fileName: string;
 	handleDialogClose: () => void;
 	handleSave: (path: string) => void;
+	showSaveAndPreview?: boolean;
 }) {
 	const { settings, loading } = useDatasetSettingsData(props.fileName);
 	if (loading) {
@@ -45,14 +46,27 @@ export default function DatasetSettingsDialog(props: {
 			fileName={props.fileName}
 			handleDialogClose={props.handleDialogClose}
 			handleSave={props.handleSave}
+			showSaveAndPreview={props.showSaveAndPreview}
 		/>
 	);
 }
+
+// generateの-unitSetting用。srcの-settingを適用した後に効く設定のため、
+// srcの-settingを差し替えるSave and Previewは実際の結果と食い違うので出さない
+export function DatasetSettingsDialogWithoutPreview(props: {
+	fileName: string;
+	handleDialogClose: () => void;
+	handleSave: (path: string) => void;
+}) {
+	return <DatasetSettingsDialog {...props} showSaveAndPreview={false} />;
+}
+
 export function DatasetSettingsEditDialog(props: {
 	settings: DatasetSettings;
 	fileName: string;
 	handleDialogClose: () => void;
 	handleSave: (path: string) => void;
+	showSaveAndPreview?: boolean;
 }) {
 	const saveSettings = useSaveDatasetSettings();
 	const [dataSettings, setDataSettings] = useState<DatasetSettings>(
@@ -70,6 +84,7 @@ export function DatasetSettingsEditDialog(props: {
 			handleSave={props.handleSave}
 			footerActions={(saveThen) =>
 				// 保存したファイルをsettingに適用してプレビューする（それ以外のsrc要素はフォームのまま）
+				(props.showSaveAndPreview ?? true) &&
 				srcTypeOf(datasetSrcInfo) && (
 					<SaveAndPreviewButton
 						saveThen={saveThen}
