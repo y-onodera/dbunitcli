@@ -10,6 +10,26 @@
   <h1>Xlsx Cell Setting</h1>
   <p>Excel シート上の任意のセル位置から値を拾い集めてテーブルを構成するための設定を編集するダイアログです。帳票・フォーマット化された Excel など、行方向に整列していないデータの抽出に利用します。全体構成は <a href="xlsx-schema.html">Xlsx Schema</a> を参照してください。</p>
 
+  <h2 id="section-simple">シンプルな使い方</h2>
+  <p>値のあるセルの位置を並べて、帳票などから 1 レコードを読み込みます。</p>
+  <p>例: 請求書の見出しのセルから、請求番号・発行日・顧客名・合計を読み込みます。</p>
+  <pre>入力 (シート Invoice):
+  B2: INV-001   B3: 2026-04-01   B4: Alice   F10: 12000
+
+指定:
+  sheetName = Invoice
+  tableName = invoice_header
+  header    = invoice_no,issue_date,customer_name,total
+  rows      = B2,B3,B4,F10
+
+結果 (テーブル invoice_header):
+  invoice_no | issue_date | customer_name | total
+  INV-001    | 2026-04-01 | Alice         | 12000</pre>
+  <ul>
+    <li><code>header</code> と <code>rows</code> のセルアドレスは同じ順に対応させる</li>
+    <li>複数の帳票が 1 シートに並ぶ場合は、<code>rows</code> に行を追加してそれぞれのセルアドレスを書く。1 行が 1 レコードになる</li>
+  </ul>
+
   <h2 id="section-open">開き方</h2>
   <p><a href="xlsx-schema.html">Xlsx Schema</a> の Random Cell Mapping Tables で、行の編集ボタンから開きます。</p>
 
@@ -22,17 +42,6 @@
     <tr><td>rows</td><td>1 レコード分のセルアドレスをカンマ区切りで指定する。行を追加することで複数レコードを定義できる。</td></tr>
     <tr><td>addFileInfo</td><td>元ファイル名などのファイル情報カラムを結果に追加するかどうか</td></tr>
   </table>
-
-  <h2 id="section-example">記述例</h2>
-  <p><strong>帳票の見出しセルから 1 レコードを抽出</strong></p>
-  <table>
-    <tr><th>項目</th><th>値</th></tr>
-    <tr><td>sheetName</td><td>Invoice</td></tr>
-    <tr><td>tableName</td><td>invoice_header</td></tr>
-    <tr><td>header</td><td><code>invoice_no,issue_date,customer_name,total</code></td></tr>
-    <tr><td>rows</td><td><code>B2,B3,B4,F10</code></td></tr>
-  </table>
-  <p>複数の帳票が 1 シートに並ぶ場合は <code>rows</code> に行を追加し、それぞれの帳票のセルアドレスをカンマ区切りで指定します。</p>
 
   <h2 id="section-preview">Preview</h2>
   <p>ダイアログ下部の Preview を押すと、編集中のこの定義で読み込まれるテーブルの一覧を表示します（<a href="../sections/dataset-load-form.html">Dataset Load Form</a> の Preview Apply Settings と同じ表示です）。一覧の preview ボタンを押すと、そのテーブルのデータを表示します。</p>

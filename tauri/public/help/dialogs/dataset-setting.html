@@ -12,6 +12,7 @@
 
   <h2 id="toc">目次</h2>
   <ol>
+    <li><a href="#section-simple">シンプルな使い方</a></li>
     <li><a href="#section-target">Target</a></li>
     <li><a href="#section-split">Split / Rename</a></li>
     <li><a href="#section-separate">Separate</a></li>
@@ -21,6 +22,28 @@
     <li><a href="#section-preview">Preview</a></li>
     <li><a href="#section-related">関連</a></li>
   </ol>
+
+  <h2 id="section-simple">シンプルな使い方</h2>
+  <p>Target で対象のテーブルを選び、Filter / Order などで適用する内容を指定します。<a href="dataset-settings.html">Dataset Settings</a> の表の行の編集ボタン（新しく作るときは追加ボタン）で開きます。</p>
+  <p>例: <code>users</code> から更新日時のカラムを外し、<code>id</code> を主キーにします。</p>
+  <pre>入力 (users):
+  id | name  | updated_at
+  1  | Alice | 2024-01-02 09:00:00
+
+指定:
+  Target の name       = users
+  Filter / Order の keys    = id
+  Filter / Order の exclude = updated_at
+  → Save
+
+結果 (users):
+  id | name
+  1  | Alice   （主キーは id）</pre>
+  <ul>
+    <li>Save を押すと Dataset Settings の表に反映される。ファイルに書き出すのは Dataset Settings の Save</li>
+    <li>Preview で、保存する前にこの設定を適用した結果を確認できる</li>
+    <li>行を絞り込む <code>filter</code> は JEXL 式で書く（下記「JEXL 式の書き方」）</li>
+  </ul>
 
   <h2 id="section-target">Target</h2>
   <p>処理対象のテーブルをどのように特定するかを選択します。</p>

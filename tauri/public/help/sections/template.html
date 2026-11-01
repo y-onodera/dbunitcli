@@ -16,6 +16,24 @@
     <li><a href="dataset-load-form.html">Dataset Load Form</a> の <code>templateGroup</code> — 入力読み込み時にテンプレートを適用（任意）</li>
   </ul>
 
+  <h2 id="section-simple">シンプルな使い方</h2>
+  <p>テンプレートの中に <code>$param.カラム名$</code> と書くと、入力データセットの値に置き換わります。設定項目はデフォルトのままで使えます。</p>
+  <pre>入力行 (1 件):
+  tableName   = USERS
+  columnNames = id, name
+  values      = 1, 'Alice'
+
+テンプレート (insert.sql):
+  INSERT INTO $param.tableName$ ($param.columnNames$) VALUES ($param.values$);
+
+結果:
+  INSERT INTO USERS (id, name) VALUES (1, 'Alice');</pre>
+  <ul>
+    <li><code>param</code> の部分は <code>templateParameterAttribute</code> で変えられる。空にすると <code>$tableName$</code> のように直接書ける</li>
+    <li><code>$</code> 以外の区切り文字にしたいときは <code>templateVarStart</code> / <code>templateVarStop</code> を変える</li>
+    <li>書式の指定（大文字化・命名規則の変換など）は <a href="../reference/st4.html">StringTemplate 4 書式リファレンス</a> を参照</li>
+  </ul>
+
   <h2 id="section-fields">設定項目</h2>
   <p>フォームの <code>template option</code> から設定します。</p>
   <table>
@@ -32,24 +50,16 @@
 
   <h2 id="section-parameter-binding">パラメータのバインド</h2>
   <p>入力データセットの各行は、テンプレートに対して <code>templateParameterAttribute</code> で指定した属性名のオブジェクトとして渡されます。</p>
-  <p><strong>例 1: <code>templateParameterAttribute = param</code>（デフォルト）</strong></p>
-  <pre>入力行 (1 件):
-  tableName = USERS
-  columnNames = id, name
-  values = 1, 'Alice'
+  <p>デフォルトの <code>templateParameterAttribute = param</code> の例は「シンプルな使い方」を参照してください。</p>
+  <p><strong>例 1: <code>templateParameterAttribute</code> を空に指定（直接バインド）</strong></p>
+  <pre>入力行と結果は「シンプルな使い方」と同じ
 
 テンプレート (insert.sql):
-  INSERT INTO $param.tableName$ ($param.columnNames$) VALUES ($param.values$);
-
-レンダリング結果:
-  INSERT INTO USERS (id, name) VALUES (1, 'Alice');</pre>
-  <p><strong>例 2: <code>templateParameterAttribute</code> を空に指定（直接バインド）</strong></p>
-  <pre>テンプレート (insert.sql):
   INSERT INTO $tableName$ ($columnNames$) VALUES ($values$);
 
 レンダリング結果:
   INSERT INTO USERS (id, name) VALUES (1, 'Alice');</pre>
-  <p><strong>例 3: <code>templateVarStart</code> / <code>templateVarStop</code> を変更</strong></p>
+  <p><strong>例 2: <code>templateVarStart</code> / <code>templateVarStop</code> を変更</strong></p>
   <p>テンプレートに <code>$</code> を多く含む SQL（PostgreSQL の <code>$$</code> 区切り等）を扱うときに、式の区切り文字を別の文字に変更できます。</p>
   <pre>指定:
   templateVarStart = &lt;

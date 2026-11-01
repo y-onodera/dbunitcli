@@ -10,6 +10,33 @@
   <h1>Xlsx Row Setting</h1>
   <p>Excel シートから行方向に整列したデータをテーブルとして抽出するための設定を編集するダイアログです。全体構成は <a href="xlsx-schema.html">Xlsx Schema</a> を参照してください。</p>
 
+  <h2 id="section-simple">シンプルな使い方</h2>
+  <p>表の見出しの位置とカラムの列を指定して、行方向に並んだデータを 1 テーブルとして読み込みます。</p>
+  <p>例: A 列〜D 列に並んだ注文明細表を読み込みます。</p>
+  <pre>入力 (シート Orders):
+  1 行目: 注文番号 | 顧客  | 品目 | 金額
+  2 行目: 1001     | Alice | Pen  | 300
+  3 行目: 1002     | Bob   | Note | 500
+  4 行目:          |       | 合計 | 800
+
+指定:
+  sheetName   = Orders
+  tableName   = orders
+  header      = order_id,customer,item,amount
+  dataStart   = 1
+  columnIndex = 0,1,2,3
+  breakKey    = order_id
+
+結果 (テーブル orders):
+  order_id | customer | item | amount
+  1001     | Alice    | Pen  | 300
+  1002     | Bob      | Note | 500</pre>
+  <ul>
+    <li><code>dataStart</code> と <code>columnIndex</code> は 0 から数える（2 行目は <code>1</code>、A 列は <code>0</code>）</li>
+    <li><code>order_id</code> が空の 4 行目（合計行）はレコードにならない</li>
+    <li>Preview で、保存する前にこの定義で読み込まれる内容を確認できる</li>
+  </ul>
+
   <h2 id="section-open">開き方</h2>
   <p><a href="xlsx-schema.html">Xlsx Schema</a> の Rows Mapping Tables で、行の編集ボタンから開きます。</p>
 
@@ -24,19 +51,6 @@
     <tr><td>breakKey</td><td>レコードとして読む行を判定するカラム名をカンマ区切りで指定する。<code>dataStart</code> 以降で、指定したカラムのどれかに値がある行だけをレコードにする。</td></tr>
     <tr><td>addFileInfo</td><td>元ファイル名などのファイル情報カラムを結果に追加するかどうか</td></tr>
   </table>
-
-  <h2 id="section-example">記述例</h2>
-  <p><strong>A 列〜D 列に並んだ注文明細表の抽出</strong></p>
-  <table>
-    <tr><th>項目</th><th>値</th></tr>
-    <tr><td>sheetName</td><td>Orders</td></tr>
-    <tr><td>tableName</td><td>orders</td></tr>
-    <tr><td>header</td><td><code>order_id,customer,item,amount</code></td></tr>
-    <tr><td>dataStart</td><td><code>1</code></td></tr>
-    <tr><td>columnIndex</td><td><code>0,1,2,3</code></td></tr>
-    <tr><td>breakKey</td><td><code>order_id</code></td></tr>
-  </table>
-  <p>1 行目が見出し、2 行目以降が明細の表です。<code>order_id</code> が空の行（合計行・空行など）はレコードになりません。</p>
 
   <h2 id="section-preview">Preview</h2>
   <p>ダイアログ下部の Preview を押すと、編集中のこの定義で読み込まれるテーブルの一覧を表示します（<a href="../sections/dataset-load-form.html">Dataset Load Form</a> の Preview Apply Settings と同じ表示です）。一覧の preview ボタンを押すと、そのテーブルのデータを表示します。</p>

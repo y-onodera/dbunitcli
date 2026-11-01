@@ -11,6 +11,21 @@
   <p>各コマンドで「出力先と出力形式」を指定するための共通フォームです。<a href="../commands/convert.html">Convert</a> の <code>convertResult</code>、<a href="../commands/compare.html">Compare</a> の出力設定などで使用されます。</p>
   <p>フォームの構成は <code>resultType</code> により変わります。選択した形式ごとに表示される項目が異なります。各形式の固有オプションと出力例は、形式名のリンク先の個別ページを参照してください。</p>
 
+  <h2 id="section-simple">シンプルな使い方</h2>
+  <p>出力の形式を <code>resultType</code> で選び、<code>result</code> に出力先のディレクトリを指定します。<code>resultType</code> のデフォルトは <code>csv</code> です。</p>
+  <p>例: テーブル <code>ORDERS</code> / <code>ITEMS</code> を CSV で出力します。</p>
+  <pre>指定:
+  result = out
+
+結果:
+  out/ORDERS.csv
+  out/ITEMS.csv</pre>
+  <ul>
+    <li>テーブルごとに <code>テーブル名.csv</code> のファイルを作る</li>
+    <li><code>result</code> の相対パスは Result Base からの相対。空なら Result Base に出力する（<a href="../dialogs/workspace.html">Workspace</a> を参照）</li>
+    <li>1 つの Excel ブックにまとめたいときは <code>resultType</code> を <code>xlsx</code> にする（<a href="result-form/types/xlsx.html">xls / xlsx</a>）</li>
+  </ul>
+
   <h2 id="section-result-type">resultType 一覧</h2>
   <p>出力データの形式を選択します。以下の 6 種類から選択できます。</p>
   <table>

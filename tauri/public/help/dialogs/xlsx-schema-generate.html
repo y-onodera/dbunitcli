@@ -12,6 +12,7 @@
 
   <h2 id="toc">目次</h2>
   <ol>
+    <li><a href="#section-simple">シンプルな使い方</a></li>
     <li><a href="#section-overview">できること</a></li>
     <li><a href="#section-input">入力</a></li>
     <li><a href="#section-flow">操作の流れ</a></li>
@@ -19,6 +20,23 @@
     <li><a href="#section-notes">注意</a></li>
     <li><a href="#section-related">関連</a></li>
   </ol>
+  <h2 id="section-simple">シンプルな使い方</h2>
+  <p>元にするデータセットを指定して Execute を押すと、テーブルごとの定義が入った <a href="xlsx-schema.html">Xlsx Schema</a> が開きます。</p>
+  <pre>入力:
+  テーブル USERS（カラム ID / NAME / EMAIL）
+
+指定:
+  srcData の src = （USERS を含むデータセット）
+  → Execute
+
+結果 (Xlsx Schema に反映される内容):
+  Rows Mapping Tables        : USERS の行が 1 件
+  Random Cell Mapping Tables : USERS の行が 1 件</pre>
+  <ul>
+    <li>使わない側の行を削除し、<code>sheetName</code> を実際の Excel のシート名に合わせる</li>
+    <li>Xlsx Schema で name にファイル名を指定して Save を押すと、そのファイル名が <code>xlsxSchema</code> に設定される</li>
+  </ul>
+
   <h2 id="section-overview">できること</h2>
   <ul>
     <li>テーブルごとに、Rows Mapping（行形式）と Random Cell Mapping（セル指定形式）の設定を一括で作成する</li>

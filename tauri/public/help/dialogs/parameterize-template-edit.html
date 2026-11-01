@@ -10,6 +10,25 @@
   <h1>Edit Parameterize Template</h1>
   <p><a href="../commands/parameterize.html">Parameterize</a> の <code>template</code> に指定する、コマンドのオプションを書いたテンプレートを作成・編集するダイアログです。</p>
 
+  <h2 id="section-simple">シンプルな使い方</h2>
+  <p><code>template</code> 横のメニューの編集ボタンで開き、繰り返し実行するコマンドのオプションを書いて保存します。</p>
+  <pre>本文:
+  -srcData.src=data/$param.MONTH$
+  -convertResult.resultType=xlsx
+  -convertResult.result=out/$param.MONTH$
+
+指定:
+  name = convert_monthly.txt
+  → Save
+
+結果:
+  template に convert_monthly.txt を設定する
+  パラメータデータの MONTH 列が 202609 の行では、src = data/202609、result = out/202609 で実行される</pre>
+  <ul>
+    <li>オプションは 1 行に 1 つ、<code>-オプション名=値</code> の形で書く</li>
+    <li>パラメータデータやコマンドの指定を含めた全体の例は <a href="../commands/parameterize.html">Parameterize</a> を参照</li>
+  </ul>
+
   <h2 id="section-open">開き方</h2>
   <p><code>template</code> のテキストボックス横のメニューにある編集ボタンから開きます。テキストボックスの値のファイル名が <code>option/parameterize/template</code> にあればその内容が読み込まれ、それ以外の場合は空のエディタが開きます。同じメニューの削除ボタンでは、候補にあるテンプレートファイルを削除できます。</p>
 

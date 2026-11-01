@@ -12,6 +12,7 @@
 
   <h2 id="toc">目次</h2>
   <ol>
+    <li><a href="#section-simple">シンプルな使い方</a></li>
     <li><a href="#section-template-writing">ST4 テンプレートの書き方</a></li>
     <li><a href="#section-syntax">書式指定の基本</a></li>
     <li><a href="#section-builtin">ST4 標準書式</a></li>
@@ -19,6 +20,24 @@
     <li><a href="#section-examples">複合例</a></li>
     <li><a href="#section-related">関連</a></li>
   </ol>
+
+  <h2 id="section-simple">シンプルな使い方</h2>
+  <p><code>$</code> で囲んだ部分が値に置き換わります。値の後ろに <code>; format="書式名"</code> を付けると、値を変換して出力します。</p>
+  <pre>入力:
+  param.tableName = order_detail
+
+テンプレート:
+  -- $param.tableName$
+  class $param.tableName; format="snakeToUpperCamel"$ {}
+
+結果:
+  -- order_detail
+  class OrderDetail {}</pre>
+  <ul>
+    <li><code>$...; format="書式名"$</code> の書式名は、下記「ST4 標準書式」「DBUnit CLI 拡張書式」から選ぶ</li>
+    <li>リストの繰り返しや条件分岐は、下記「ST4 テンプレートの書き方」を参照</li>
+    <li>テンプレートで使える変数（<code>param</code> に入る値）は <a href="../commands/generate/types/txt.html">generateType: txt</a> を参照</li>
+  </ul>
 
   <h2 id="section-template-writing">ST4 テンプレートの書き方</h2>
   <p>以下の構文は組み込みテンプレート（<code>core/src/main/resources/</code> 以下の <code>.txt</code> / <code>.stg</code>）で実際に使われているパターンです。</p>

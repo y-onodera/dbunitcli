@@ -12,6 +12,7 @@
 
   <h2 id="toc">目次</h2>
   <ol>
+    <li><a href="#section-simple">シンプルな使い方</a></li>
     <li><a href="#fields">ChangeWorkspace の入力項目</a></li>
     <li><a href="#structure">Workspace のディレクトリ構成</a></li>
     <li><a href="#scope">Workspace の影響範囲</a></li>
@@ -21,6 +22,23 @@
     <li><a href="#env">環境変数（Env）</a></li>
     <li><a href="#section-related">関連</a></li>
   </ol>
+
+  <h2 id="section-simple">シンプルな使い方</h2>
+  <p>ヘッダの ChangeWorkspace で作業ディレクトリを選びます。保存済みオプションや設定ファイルはその中に作られ、相対パスもその中を基準に解決されます。</p>
+  <pre>指定 (ChangeWorkspace):
+  Workspace = C:/work/projectA
+  （Dataset Base・Result Base・Env は空のまま）
+  → confirm
+
+結果:
+  Save した保存済みオプション → C:/work/projectA/option/&lt;command&gt;/
+  src = data/orders           → C:/work/projectA/data/orders を読み込む
+  result = out                → C:/work/projectA/out に出力する</pre>
+  <ul>
+    <li>入力データや出力先を Workspace の外に置きたいときは、Dataset Base・Result Base を指定する</li>
+    <li>接続先など環境ごとに変わる値は Env ファイルに書いて切り替える（下記「環境変数（Env）」）</li>
+    <li>Workspace を選んでから実行・保存・再利用するまでの流れは <a href="../guide/getting-started.html">基本的な使い方</a> を参照</li>
+  </ul>
 
   <h2 id="fields">ChangeWorkspace の入力項目</h2>
   <table>
