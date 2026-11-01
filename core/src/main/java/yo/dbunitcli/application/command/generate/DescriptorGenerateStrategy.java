@@ -1,6 +1,7 @@
 package yo.dbunitcli.application.command.generate;
 
 import org.dbunit.dataset.Column;
+import yo.dbunitcli.application.Option;
 import yo.dbunitcli.application.ParameterUnit;
 import yo.dbunitcli.dataset.ComparableDataSetProducer;
 import yo.dbunitcli.dataset.ComparableDataSetProducerWrapper;
@@ -17,14 +18,18 @@ public interface DescriptorGenerateStrategy extends GenerateStrategy {
     /** 記述子行を合成するproducer */
     ComparableDataSetProducerWrapper wrapDescriptor(DescriptorOption option, ComparableDataSetProducer source);
 
-    @Override
-    default ComparableDataSetProducer wrapProducer(final GenerateContext option, final ComparableDataSetProducer producer) {
-        return this.wrapDescriptor(option, producer);
+    /** 記述子producerの合成に使うオプションをパラメータに出す（Generateの固有オプションとScaffoldのbuiltin駆動.paramで共有） */
+    default void putDescriptorParameters(final DescriptorOption option, final Option.ParametersBuilder builder) {
     }
 
     @Override
-    default boolean isFixedTemplate() {
-        return true;
+    default void putOptionParameters(final GenerateContext option, final Option.ParametersBuilder builder) {
+        this.putDescriptorParameters(option, builder);
+    }
+
+    @Override
+    default ComparableDataSetProducer wrapProducer(final GenerateContext option, final ComparableDataSetProducer producer) {
+        return this.wrapDescriptor(option, producer);
     }
 
     @Override

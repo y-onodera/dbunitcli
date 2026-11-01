@@ -55,11 +55,12 @@ public interface GenerateStrategy {
         return true;
     }
 
+    /** 組み込みテンプレート専用（-template差し替え不可）か。fixedUnit()を持つ型がそう */
     default boolean isFixedTemplate() {
-        return false;
+        return this.fixedUnit() != null;
     }
 
-    /** isFixedTemplate()=trueのとき強制するunit */
+    /** 固定成果物型で強制するunit。-unitを選べる型はnull */
     default ParameterUnit fixedUnit() {
         return null;
     }
@@ -100,7 +101,8 @@ public interface GenerateStrategy {
      */
     default GenerateWriter writer(final GenerateContext option) throws IOException {
         final TemplateRender render = option.templateOption().getTemplateRender();
-        final ST template = render.compile(this.stGroup(), option.templateString());
-        return (resultFile, param) -> render.write(template, param, resultFile, option.outputEncoding());
+        final ST template = render.compile(this.stGroup(), this.templateString(option));
+        final String outputEncoding = option.outputEncoding();
+        return (resultFile, param) -> render.write(template, param, resultFile, outputEncoding);
     }
 }

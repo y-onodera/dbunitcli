@@ -16,11 +16,18 @@ public final class ExcelGenerateStrategy implements GenerateStrategy {
 
     private final boolean supportsFormulaProcess;
 
-    /**
-     * @param supportsFormulaProcess -template.formulaProcessを扱うか（xlsxのみ）
-     */
-    public ExcelGenerateStrategy(final boolean supportsFormulaProcess) {
+    private ExcelGenerateStrategy(final boolean supportsFormulaProcess) {
         this.supportsFormulaProcess = supportsFormulaProcess;
+    }
+
+    /** -template.formulaProcessを扱う */
+    public static ExcelGenerateStrategy xlsx() {
+        return new ExcelGenerateStrategy(true);
+    }
+
+    /** -template.formulaProcessを扱わない */
+    public static ExcelGenerateStrategy xls() {
+        return new ExcelGenerateStrategy(false);
     }
 
     @Override
@@ -57,13 +64,14 @@ public final class ExcelGenerateStrategy implements GenerateStrategy {
 
     @Override
     public GenerateWriter writer(final GenerateContext option) throws IOException {
+        final TemplateRenderOption templateOption = option.templateOption();
         final JxlsTemplateRender render = JxlsTemplateRender.builder()
-                .setTemplateParameterAttribute(option.templateOption().templateParameterAttribute())
-                .setFormulaProcess(Boolean.parseBoolean(option.templateOption().formulaProcess()))
-                .setEvaluateFormulas(Boolean.parseBoolean(option.templateOption().evaluateFormulas()))
-                .setForceFormulaRecalc(Boolean.parseBoolean(option.templateOption().forceFormulaRecalc()))
-                .setFastFormulaProcess(Boolean.parseBoolean(option.templateOption().fastFormulaProcess()))
-                .setDeleteBlankCells(Boolean.parseBoolean(option.templateOption().deleteBlankCells())).build();
+                .setTemplateParameterAttribute(templateOption.templateParameterAttribute())
+                .setFormulaProcess(Boolean.parseBoolean(templateOption.formulaProcess()))
+                .setEvaluateFormulas(Boolean.parseBoolean(templateOption.evaluateFormulas()))
+                .setForceFormulaRecalc(Boolean.parseBoolean(templateOption.forceFormulaRecalc()))
+                .setFastFormulaProcess(Boolean.parseBoolean(templateOption.fastFormulaProcess()))
+                .setDeleteBlankCells(Boolean.parseBoolean(templateOption.deleteBlankCells())).build();
         final byte[] template = Files.readAllBytes(option.getTemplatePath().toPath());
         final boolean useStreamingEach = option.unit() != ParameterUnit.record;
         return (resultFile, param) -> render.render(template, resultFile, param, useStreamingEach);

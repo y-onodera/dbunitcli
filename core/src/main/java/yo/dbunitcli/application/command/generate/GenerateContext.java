@@ -37,9 +37,6 @@ public interface GenerateContext extends Option, DescriptorOption {
 
     String lazyLoad();
 
-    /** generateTypeに応じたテンプレート本体（{@link GenerateStrategy#templateString}の結果） */
-    String templateString();
-
     /** -templateのファイル */
     File getTemplatePath();
 }

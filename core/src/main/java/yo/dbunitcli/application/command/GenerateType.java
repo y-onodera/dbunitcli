@@ -26,8 +26,8 @@ import java.util.List;
  */
 public enum GenerateType {
     txt(new TextGenerateStrategy()),
-    xlsx(new ExcelGenerateStrategy(true)),
-    xls(new ExcelGenerateStrategy(false)),
+    xlsx(ExcelGenerateStrategy.xlsx()),
+    xls(ExcelGenerateStrategy.xls()),
     settings(new SettingsGenerateStrategy()),
     sql(new SqlGenerateStrategy()),
     ddl(new DdlGenerateStrategy()),

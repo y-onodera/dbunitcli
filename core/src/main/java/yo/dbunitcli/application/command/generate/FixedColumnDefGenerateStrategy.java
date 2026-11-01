@@ -44,7 +44,7 @@ public final class FixedColumnDefGenerateStrategy implements DescriptorGenerateS
     }
 
     @Override
-    public void putOptionParameters(final GenerateContext option, final Option.ParametersBuilder builder) {
+    public void putDescriptorParameters(final DescriptorOption option, final Option.ParametersBuilder builder) {
         builder.put("-fixedLength", option.fixedLength())
                .put("-defaultLength", option.defaultLength()).put("-align", option.align());
     }

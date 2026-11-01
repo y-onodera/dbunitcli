@@ -29,11 +29,6 @@ public final class SqlGenerateStrategy implements GenerateStrategy {
     }
 
     @Override
-    public boolean isFixedTemplate() {
-        return true;
-    }
-
-    @Override
     public ParameterUnit fixedUnit() {
         return ParameterUnit.table;
     }

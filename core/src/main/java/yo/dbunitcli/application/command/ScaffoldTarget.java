@@ -2,6 +2,7 @@ package yo.dbunitcli.application.command;
 
 import org.dbunit.dataset.Column;
 import yo.dbunitcli.application.Option;
+import yo.dbunitcli.application.command.generate.DescriptorGenerateStrategy;
 import yo.dbunitcli.dataset.ComparableDataSetProducer;
 import yo.dbunitcli.dataset.ComparableDataSetProducerWrapper;
 import yo.dbunitcli.resource.st4.TemplateRender;
@@ -44,19 +45,16 @@ enum ScaffoldTarget {
         String customTemplateResultPath() {
             return "$param.tableName$.json";
         }
-
-        @Override
-        void putBuiltinExtraParams(final ScaffoldOption option, final Option.ParametersBuilder builder) {
-            builder.put("-fixedLength", option.fixedLength())
-                   .put("-defaultLength", option.defaultLength())
-                   .put("-align", option.align());
-        }
     };
 
     private final GenerateType generateType;
 
+    // 記述子型でないGenerateTypeを渡すとクラス初期化時に失敗する
+    private final DescriptorGenerateStrategy descriptor;
+
     ScaffoldTarget(final GenerateType generateType) {
         this.generateType = generateType;
+        this.descriptor = generateType.descriptorStrategy();
     }
 
     static ScaffoldTarget fromString(final String target) {
@@ -89,18 +87,19 @@ enum ScaffoldTarget {
 
     /** 記述子datasetの列定義（headerless出力時の-headerName用） */
     Column[] datasetSchema() {
-        return this.generateType.descriptorStrategy().descriptorSchema();
+        return this.descriptor.descriptorSchema();
     }
 
     /** 記述子dataset合成用producer。Generate側のwrapProducer()と同じDescriptorGenerateStrategy#wrapDescriptor()を使う */
     ComparableDataSetProducerWrapper wrapProducer(final ScaffoldOption option, final ComparableDataSetProducer source) {
-        return this.generateType.descriptorStrategy().wrapDescriptor(option, source);
+        return this.descriptor.wrapDescriptor(option, source);
     }
 
     /** カスタムテンプレート（generateType=txt）駆動時の-resultPathパターン */
     abstract String customTemplateResultPath();
 
-    /** 組み込みgenerateType駆動の.paramに追記するtarget固有オプション */
+    /** 組み込みgenerateType駆動の.paramに追記するtarget固有オプション（Generate側の記述子オプション出力と共有） */
     void putBuiltinExtraParams(final ScaffoldOption option, final Option.ParametersBuilder builder) {
+        this.descriptor.putDescriptorParameters(option, builder);
     }
 }

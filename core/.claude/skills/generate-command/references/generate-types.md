@@ -49,7 +49,7 @@ loadData/useJdbcMetaDataは`GenerateStrategy`実装の`loadData()`/`useJdbcMetaD
 
 | ファイル（`application/`配下） | 内容 |
 |---|---|
-| `command/generate/{Type}GenerateStrategy.java` | `GenerateStrategy`（記述子型は`DescriptorGenerateStrategy`）実装クラス追加。4軸に対応する`loadData()`/`useJdbcMetaData()`/`isFixedTemplate()`+`fixedUnit()`/`resultPathTemplate()`と、`stgPath()`/`templatePath()`/`writer()`/`defaultSettingsPath()`/`templateString()`、固有オプションがあれば`validateOption()`/`putOptionParameters()` をoverride（`writer()`はテンプレート準備を1回だけ行い`GenerateWriter`を返す。戻り値は複数スレッドから呼ばれうる）。固定成果物タイプに`-template`での差し替えは持たせない。`unit=table`で列ごとの行変換が要る場合は`DescriptorGenerateStrategy`の`wrapDescriptor()`/`descriptorSchema()`を実装 |
+| `command/generate/{Type}GenerateStrategy.java` | `GenerateStrategy`（記述子型は`DescriptorGenerateStrategy`）実装クラス追加。4軸に対応する`loadData()`/`useJdbcMetaData()`/`fixedUnit()`（非nullなら`isFixedTemplate()=true`になる）/`resultPathTemplate()`と、`stgPath()`/`templatePath()`/`writer()`/`defaultSettingsPath()`/`templateString()`、固有オプションがあれば`validateOption()`/`putOptionParameters()` をoverride（`writer()`はテンプレート準備を1回だけ行い`GenerateWriter`を返す。戻り値は複数スレッドから呼ばれうる）。固定成果物タイプに`-template`での差し替えは持たせない。`unit=table`で列ごとの行変換が要る場合は`DescriptorGenerateStrategy`の`wrapDescriptor()`/`descriptorSchema()`を実装 |
 | `command/GenerateType.java` | enum定数追加（`xxx(new XxxGenerateStrategy())`）。ロジックは書かない |
 | `command/generate/GenerateContext.java` | strategyが読む設定値。新しい固有オプションはここにaccessorを足す（`GenerateOption`が実装）。`command.generate`は`command`パッケージを参照しない（依存は`command`→`command.generate`の一方向） |
 | `command/GenerateDto.java` | `@CommandLine.Option` フィールド追加（getter/setter） |

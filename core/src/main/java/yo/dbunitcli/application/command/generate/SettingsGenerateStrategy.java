@@ -21,11 +21,6 @@ public final class SettingsGenerateStrategy implements GenerateStrategy {
     }
 
     @Override
-    public boolean isFixedTemplate() {
-        return true;
-    }
-
-    @Override
     public ParameterUnit fixedUnit() {
         return ParameterUnit.dataset;
     }

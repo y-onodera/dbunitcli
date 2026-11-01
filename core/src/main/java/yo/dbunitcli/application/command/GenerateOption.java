@@ -80,10 +80,6 @@ public record GenerateOption(Parameter parameter, String resultDir, String resul
         return dto.getGenerateType() != null ? dto.getGenerateType() : GenerateType.txt;
     }
 
-    public String templateString() {
-        return this.generateType.getTemplateString(this);
-    }
-
     /**
      * 出力単位ごとに、出力先とパラメータを渡す。unit=recordは読み込んだ行をその場で出力する（forEachRecord）。
      * unit=tableは、並列化できればテーブルごとに別スレッドで出力する（いずれも処理順は不定）。
@@ -114,9 +110,7 @@ public record GenerateOption(Parameter parameter, String resultDir, String resul
         }
         final ComparableDataSetProducer source = loader.getComparableDataSetProducer(param);
         // 行はテーブルごとの出力の中で読むため、全テーブルの出力が終わるまで接続を保つ
-        try (final ComparableDataSetProducer producer = this.generateType.isExcel()
-                ? source
-                : this.generateType().wrapProducer(this, source)) {
+        try (final ComparableDataSetProducer producer = this.generateType().wrapProducer(this, source)) {
             final List<ParameterUnit.TableTemplate> templates = this.generateType.isExcel()
                     ? ParameterUnit.streamingTableTemplates(loader, producer).toList()
                     : ParameterUnit.tableTemplates(loader, producer, this.unitTableSeparators()).toList();
