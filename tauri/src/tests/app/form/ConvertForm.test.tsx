@@ -55,6 +55,8 @@ function makeConvertProps(
 	};
 }
 
+const EXCEL_TABLE_SELECTOR = 'select[name="-result.excelTable"]';
+
 function querySelectorOrThrow(selector: string): Element {
 	const el = document.querySelector(selector);
 	if (el === null) {
@@ -187,9 +189,7 @@ describe("ConvertFormの描画テスト", () => {
 		it("resultセクションにexcelTableが含まれる", () => {
 			render(<ConvertForm {...makeConvertProps()} />);
 
-			expect(
-				document.querySelector('select[name="-result.excelTable"]'),
-			).toBeInTheDocument();
+			expect(document.querySelector(EXCEL_TABLE_SELECTOR)).toBeInTheDocument();
 		});
 	});
 
@@ -287,9 +287,7 @@ describe("ConvertFormの描画テスト", () => {
 				/>,
 			);
 
-			expect(
-				document.querySelector('select[name="-result.excelTable"]'),
-			).toBeInTheDocument();
+			expect(document.querySelector(EXCEL_TABLE_SELECTOR)).toBeInTheDocument();
 		});
 
 		it("resultセクションにoutputEncodingは含まれない", () => {
@@ -324,7 +322,7 @@ describe("ConvertFormの描画テスト", () => {
 			);
 
 			const options = Array.from(
-				document.querySelectorAll('select[name="-result.excelTable"] option'),
+				document.querySelectorAll(`${EXCEL_TABLE_SELECTOR} option`),
 			).map((it) => it.getAttribute("value"));
 			expect(options).toEqual(["SHEET", "BOOK"]);
 		});
@@ -336,7 +334,7 @@ describe("ConvertFormの描画テスト", () => {
 			render(<ConvertForm {...props} />);
 
 			await userEvent.selectOptions(
-				querySelectorOrThrow('select[name="-result.excelTable"]'),
+				querySelectorOrThrow(EXCEL_TABLE_SELECTOR),
 				"BOOK",
 			);
 			expect(props.handleTypeSelect).toHaveBeenCalledWith("BOOK");
@@ -350,12 +348,12 @@ describe("ConvertFormの描画テスト", () => {
 			);
 
 			const options = Array.from(
-				document.querySelectorAll('select[name="-result.excelTable"] option'),
+				document.querySelectorAll(`${EXCEL_TABLE_SELECTOR} option`),
 			).map((it) => it.getAttribute("value"));
 			expect(options).toEqual(["SHEET", "BOOK", "$EXCEL_TABLE"]);
-			expect(
-				querySelectorOrThrow('select[name="-result.excelTable"]'),
-			).toHaveValue("$EXCEL_TABLE");
+			expect(querySelectorOrThrow(EXCEL_TABLE_SELECTOR)).toHaveValue(
+				"$EXCEL_TABLE",
+			);
 		});
 
 		it("環境変数からBOOKに変えても再構成しない", async () => {
@@ -365,7 +363,7 @@ describe("ConvertFormの描画テスト", () => {
 			render(<ConvertForm {...props} />);
 
 			await userEvent.selectOptions(
-				querySelectorOrThrow('select[name="-result.excelTable"]'),
+				querySelectorOrThrow(EXCEL_TABLE_SELECTOR),
 				"BOOK",
 			);
 			expect(props.handleTypeSelect).not.toHaveBeenCalled();
@@ -378,7 +376,7 @@ describe("ConvertFormの描画テスト", () => {
 			render(<ConvertForm {...props} />);
 
 			await userEvent.selectOptions(
-				querySelectorOrThrow('select[name="-result.excelTable"]'),
+				querySelectorOrThrow(EXCEL_TABLE_SELECTOR),
 				"SHEET",
 			);
 			expect(props.handleTypeSelect).toHaveBeenCalledWith("SHEET");

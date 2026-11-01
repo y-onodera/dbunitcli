@@ -44,7 +44,6 @@ function FileNameField() {
 				name={fileNameField}
 				id="xlsxTemplateFileName"
 				required={true}
-				clearable
 				value={fileName}
 				handleChange={(ev) => setFileName(ev.target.value)}
 			/>

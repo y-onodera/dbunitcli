@@ -94,7 +94,6 @@ export function SettingDialog<T>(props: SettingDialogProps<T>) {
 							id="fileName"
 							required={true}
 							wStyle="col-start-2 col-span-4"
-							clearable
 							value={fileNameValue}
 							handleChange={(ev) => setFileNameValue(ev.target.value)}
 						/>
@@ -181,7 +180,6 @@ export function Text(props: {
 				id={props.name}
 				required={true}
 				wStyle="col-start-2 col-span-3"
-				clearable
 				value={props.value}
 				handleChange={props.handleChange}
 				handleBlur={props.handleBlur}
@@ -330,7 +328,6 @@ export function ArraysText(props: {
 					id={props.name}
 					required={true}
 					wStyle="col-start-2"
-					clearable
 					value={text}
 					handleChange={(ev) => setText(ev.target.value)}
 					handleBlur={handleBlur}
@@ -437,7 +434,6 @@ export function KeyValueText(props: {
 					id={props.name}
 					required={true}
 					wStyle="col-start-2"
-					clearable
 					value={key}
 					handleChange={(ev) => setKey(ev.target.value)}
 					handleBlur={handleKeyBlur}
@@ -447,7 +443,6 @@ export function KeyValueText(props: {
 					id={props.name}
 					required={true}
 					wStyle="col-start-3 col-span-2 ml-1"
-					clearable
 					value={value}
 					disabled={!key || key === ""}
 					handleChange={(ev) => setValue(ev.target.value)}

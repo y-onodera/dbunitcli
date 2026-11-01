@@ -141,6 +141,7 @@ const InputField: React.FC<{
 					name={id}
 					id={id}
 					required={required}
+					clearable={false}
 					value={value}
 					handleChange={(e) => setValue(e.target.value)}
 				/>

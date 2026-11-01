@@ -65,7 +65,6 @@ export default function Text({
 							required={element.attribute.required}
 							value={path}
 							handleChange={handleChange}
-							clearable
 						/>
 						{!hidden && hasResources && (
 							<ResourceDatalist id={id} resources={resourceFiles} />

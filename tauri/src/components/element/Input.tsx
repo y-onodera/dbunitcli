@@ -53,50 +53,38 @@ export function ControllTextBox(props: {
 	id: string;
 	required: boolean;
 	value: string;
+	/** 枠の配置と幅（格子の位置など）。入力欄そのものの見た目は変えない */
 	wStyle?: string;
 	list?: string;
 	disabled?: boolean;
 	hidden?: boolean;
-	/** trueなら入力があるとき右端に入力を消すボタンを出す */
+	/** falseなら入力を消すボタンを出さない */
 	clearable?: boolean;
 	handleChange: (ev: React.ChangeEvent<HTMLInputElement>) => void;
 	handleBlur?: (ev: React.FocusEvent<HTMLInputElement>) => void;
 }) {
 	const inputRef = useRef<HTMLInputElement>(null);
-	const wStyle = props.wStyle ? props.wStyle : "w-full";
 	const showClear =
-		props.clearable && props.value !== "" && !props.disabled && !props.hidden;
-	const input = (
-		<input
-			ref={inputRef}
-			name={props.name}
-			id={props.id}
-			type="text"
-			list={props.list ?? ""}
-			style={props.hidden ? { display: "none" } : {}}
-			className={
-				props.clearable
-					? `${inputStyle("w-full")} ${showClear ? "pe-8" : ""}`
-					: inputStyle(wStyle)
-			}
-			required={props.required}
-			disabled={!!props.disabled}
-			value={props.value}
-			onChange={props.handleChange}
-			onBlur={(ev) => props.handleBlur?.(ev)}
-			autoComplete={props.list ? "off" : "on"}
-		/>
-	);
-	if (!props.clearable) {
-		return input;
-	}
-	// 格子配置などの幅指定は、入力欄ではなくボタンを重ねるための枠に付ける
+		(props.clearable ?? true) && props.value !== "" && !props.disabled;
 	return (
 		<div
-			className={`relative ${wStyle}`}
+			className={`relative ${props.wStyle ?? "w-full"}`}
 			style={props.hidden ? { display: "none" } : {}}
 		>
-			{input}
+			<input
+				ref={inputRef}
+				name={props.name}
+				id={props.id}
+				type="text"
+				list={props.list ?? ""}
+				className={`${inputStyle("w-full")} ${showClear ? "pe-8" : ""}`}
+				required={props.required}
+				disabled={!!props.disabled}
+				value={props.value}
+				onChange={props.handleChange}
+				onBlur={(ev) => props.handleBlur?.(ev)}
+				autoComplete={props.list ? "off" : "on"}
+			/>
 			{showClear && (
 				<ClearButton
 					label={`clear ${props.name}`}
@@ -273,10 +261,7 @@ export function FilterInput({
 			{value !== "" && (
 				<ClearButton
 					label="clear filter"
-					handleClick={() => {
-						onChange("");
-						inputRef.current?.focus();
-					}}
+					handleClick={() => clearInput(inputRef.current)}
 				/>
 			)}
 		</div>

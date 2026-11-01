@@ -110,6 +110,7 @@ function MenuEdit(prop: MenuEditProp) {
 								id="menuRename"
 								required={false}
 								wStyle="w-50"
+								clearable={false}
 								value={newName}
 								handleChange={(text) =>
 									handleRenameTextOnChange(text.target.value)
