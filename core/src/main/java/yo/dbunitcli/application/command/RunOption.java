@@ -58,8 +58,11 @@ public record RunOption(
         );
     }
 
+    /**
+     * @return 実行対象ファイル。逐次実行（並列数1）のときはパス順に並べる（並列時は実行順が不定なので並べない）
+     */
     public Stream<File> targetFiles() {
-        return this.getComparableDataSetLoader().loadDataSet(
+        final Stream<File> result = this.getComparableDataSetLoader().loadDataSet(
                         this.srcData.getParam()
                                 .setSource(DataSourceType.file)
                                 .setExtension(this.scriptType.getExtension())
@@ -68,6 +71,7 @@ public record RunOption(
                                 .build())
                 .toMap()
                 .map(it -> FileResources.searchDatasetBase(it.get(ComparableFileTableMetaData.PK.getColumnName()).toString()));
+        return this.parallelism() > 1 ? result : result.sorted();
     }
 
     /**

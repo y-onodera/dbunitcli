@@ -24,7 +24,7 @@
 結果:
   recreate_orders.sql の SQL が、書かれた順に dev.properties の接続先で実行される</pre>
   <ul>
-    <li><code>src</code> にディレクトリを指定すると、配下の <code>.sql</code> ファイルを 1 ファイルずつ実行する。実行順はファイル名の順とは限らないため、順番が大事な場合はファイルを分けて別々に実行する。1 ファイルだけ実行するときはファイルのパスを指定する</li>
+    <li><code>src</code> にディレクトリを指定すると、配下の <code>.sql</code> ファイルを 1 ファイルずつ実行する。<code>parallel</code> が空欄または <code>1</code> のときはパスの順（サブディレクトリ内のファイルはそのディレクトリ名の位置）に実行するため、順番が大事な場合は <code>01_create.sql</code>・<code>02_insert.sql</code> のように名前で順番を付ける。1 ファイルだけ実行するときはファイルのパスを指定する</li>
     <li><code>jdbcProperties</code> は Workspace の <code>resources/jdbc/</code> を基準に探す。ファイルを使わずに <code>jdbcUrl</code> / <code>jdbcUser</code> / <code>jdbcPass</code> を直接入力してもよい（<a href="../sections/jdbc.html">JDBC</a> を参照）</li>
   </ul>
   <p>SQL の中の値を実行のたびに変えたい場合は、-P 値を使います（<a href="run/types/sql.html">scriptType: sql</a> の設定例を参照）。</p>
@@ -53,7 +53,7 @@
   <h3 id="section-parallel">並列実行（parallel）</h3>
   <ul>
     <li><code>2</code> 以上を指定すると、<code>srcData</code> の各ファイルを指定した数まで同時に実行します。実行順は決まりません</li>
-    <li>空欄または <code>1</code> のときは、見つかった順に 1 ファイルずつ実行します</li>
+    <li>空欄または <code>1</code> のときは、パスの順に 1 ファイルずつ実行します（文字の順で比べるため、<code>10.sql</code> は <code>2.sql</code> より先になります）</li>
     <li>並列実行中にいずれかが失敗すると、まだ始めていないファイルは実行せず、実行中のファイルが終わるのを待ってからエラーになります</li>
   </ul>
   <p>DDL を実行してから DML を実行するなど、実行順に依存するファイルは並列にしないでください。</p>

@@ -3,10 +3,14 @@ package yo.dbunitcli.application.command;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import yo.dbunitcli.application.Option;
 import yo.dbunitcli.common.Parameter;
 import yo.dbunitcli.dataset.DataSourceType;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -151,6 +155,22 @@ class RunOptionTest {
             assertEquals(3, target.parallelism());
             assertEquals("3", target.toParameters().getArg("-parallel").value());
             assertEquals("3", target.toDto().getParallel());
+        }
+
+        @Test
+        void sequentialTargetFilesAreSortedByPath(@TempDir final Path dir) throws IOException {
+            for (final String name : List.of("c.sql", "a.sql", "sub/b.sql", "b.sql", "sub/a.sql")) {
+                final Path file = dir.resolve(name);
+                Files.createDirectories(file.getParent());
+                Files.writeString(file, "select 1;");
+            }
+            RunOptionTest.this.src.setScriptType(RunOption.ScriptType.sql);
+            RunOptionTest.this.src.getSrcData().setSrc(dir.toString());
+            RunOptionTest.this.src.getSrcData().setRecursive("true");
+            final List<String> actual = RunOptionTest.this.createTarget().targetFiles()
+                    .map(it -> dir.relativize(it.toPath()).toString().replace('\\', '/'))
+                    .toList();
+            assertEquals(List.of("a.sql", "b.sql", "c.sql", "sub/a.sql", "sub/b.sql"), actual);
         }
 
         @Test
