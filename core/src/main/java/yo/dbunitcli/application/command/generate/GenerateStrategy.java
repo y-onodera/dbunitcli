@@ -2,6 +2,7 @@ package yo.dbunitcli.application.command.generate;
 
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
+import yo.dbunitcli.application.Option;
 import yo.dbunitcli.application.ParameterUnit;
 import yo.dbunitcli.application.command.GenerateOption;
 import yo.dbunitcli.dataset.ComparableDataSetProducer;
@@ -9,6 +10,7 @@ import yo.dbunitcli.resource.FileResources;
 import yo.dbunitcli.resource.st4.TemplateRender;
 
 import java.io.IOException;
+import java.util.List;
 
 /**
  * generateTypeごとの具体的な生成ロジック。{@link yo.dbunitcli.application.command.GenerateType}の各定数が
@@ -79,6 +81,19 @@ public interface GenerateStrategy {
 
     default String resultPathTemplate(final GenerateOption option) {
         return option.resultPath();
+    }
+
+    /** generateType固有オプションの検証（GenerateOption.validate()が共通の検証に加えて呼ぶ） */
+    default List<Option.Violation> validateOption(final GenerateOption option) {
+        return List.of();
+    }
+
+    /** generateType固有オプションをパラメータに出す（GenerateOption.toParametersBuilder()が呼ぶ。出す項目と順序がフォームの表示になる） */
+    default void putOptionParameters(final GenerateOption option, final Option.ParametersBuilder builder) {
+    }
+
+    /** -template.*のうちgenerateType固有の項目をパラメータに出す（isFixedTemplate()=falseの型でのみ呼ばれる） */
+    default void putTemplateOptionParameters(final GenerateOption option, final Option.ParametersBuilder builder) {
     }
 
     /**

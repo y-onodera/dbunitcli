@@ -37,9 +37,9 @@ loadData/useJdbcMetaDataは`GenerateStrategy`実装の`loadData()`/`useJdbcMetaD
 | オプション | `GenerateDto` フィールド | `GenerateOption` での用途 |
 |---|---|---|
 | `template` / `result` / `resultPath` / `outputEncoding` | 共通 | 全タイプ共通（`GenerateStrategy.resultPathTemplate()`をsql/ddl/fixedColumnDef/xlsxSchema/javaBeanの実装がoverrideし拡張子・命名を分岐） |
-| `commit` / `op` / `sqlFilePrefix` / `sqlFileSuffix` | sql/ddl用 | `GenerateType.sql/ddl` の `toParametersBuilder()` 分岐 |
-| `includeAllColumns` | settings用 | `dataSetParam()` で `ComparableDataSetParam.Builder` に反映 |
-| `lazyLoad` | xlsx/xls用 | `parameterStream()` / `forEachParameter()` の分岐 |
+| `commit` / `op` / `sqlFilePrefix` / `sqlFileSuffix` | sql/ddl用 | `SqlGenerateStrategy`/`DdlGenerateStrategy` の `validateOption()`/`putOptionParameters()` |
+| `includeAllColumns` | settings用 | `getComparableDataSetLoader()` で読込パラメータに反映（検証・出力は`SettingsGenerateStrategy`） |
+| `lazyLoad` | xlsx/xls用 | `parameterStream()` / `forEachParameter()` の分岐（検証・出力と`-template.*`のExcel固有項目は`ExcelGenerateStrategy`） |
 | `parallel` | srcが並列読込できる形式か、unit=recordのとき表示（srcType=noneを除く） | `dataSetParam()`で`setParallel`に渡し、srcの並列読込と`unit=record`・`unit=table`の並列出力の並列数になる（値の検証・解釈は`DataSetConverterOption.parallel(String)`/`parallelism(String)`を共用） |
 | `fixedLength` / `defaultLength` / `align` | fixedColumnDef用 | `FixedColumnDefGenerateStrategy.wrapDescriptor()` が `ComparableFixedColumnDefMetaDataProducer` に渡す |
 
@@ -49,10 +49,10 @@ loadData/useJdbcMetaDataは`GenerateStrategy`実装の`loadData()`/`useJdbcMetaD
 
 | ファイル（`application/`配下） | 内容 |
 |---|---|
-| `command/generate/{Type}GenerateStrategy.java` | `GenerateStrategy`（記述子型は`DescriptorGenerateStrategy`）実装クラス追加。4軸に対応する`loadData()`/`useJdbcMetaData()`/`isFixedTemplate()`+`fixedUnit()`/`resultPathTemplate()`と、`stgPath()`/`templatePath()`/`writer()`/`defaultSettingsPath()`/`templateString()` をoverride（`writer()`はテンプレート準備を1回だけ行い`GenerateWriter`を返す。戻り値は複数スレッドから呼ばれうる）。固定成果物タイプに`-template`での差し替えは持たせない。`unit=table`で列ごとの行変換が要る場合は`DescriptorGenerateStrategy`の`wrapDescriptor()`/`descriptorSchema()`を実装 |
+| `command/generate/{Type}GenerateStrategy.java` | `GenerateStrategy`（記述子型は`DescriptorGenerateStrategy`）実装クラス追加。4軸に対応する`loadData()`/`useJdbcMetaData()`/`isFixedTemplate()`+`fixedUnit()`/`resultPathTemplate()`と、`stgPath()`/`templatePath()`/`writer()`/`defaultSettingsPath()`/`templateString()`、固有オプションがあれば`validateOption()`/`putOptionParameters()` をoverride（`writer()`はテンプレート準備を1回だけ行い`GenerateWriter`を返す。戻り値は複数スレッドから呼ばれうる）。固定成果物タイプに`-template`での差し替えは持たせない。`unit=table`で列ごとの行変換が要る場合は`DescriptorGenerateStrategy`の`wrapDescriptor()`/`descriptorSchema()`を実装 |
 | `command/GenerateType.java` | enum定数追加（`xxx(new XxxGenerateStrategy())`）。ロジックは書かない |
 | `command/GenerateDto.java` | `@CommandLine.Option` フィールド追加（getter/setter） |
-| `command/GenerateOption.java` | recordフィールド追加。コンストラクタ/`toParametersBuilder()`に反映（`dataSetParam()`/`resultPath(Parameter)`は`GenerateType`の軸1/軸4メソッドを呼ぶだけなので、通常はここを直接いじらない） |
+| `command/GenerateOption.java` | 固有オプションのrecordフィールド追加とコンストラクタでの既定値設定のみ。検証・パラメータ出力は実装クラスの`validateOption()`/`putOptionParameters()`（`-template.*`固有項目は`putTemplateOptionParameters()`）に書く。`GenerateOption`は型で分岐しない |
 | `src/main/resources/{typeName}/*.stg,*.txt,*.json` | テンプレート/設定リソース（Scaffoldがbyte-for-byteコピーして流用するため、変更時はScaffold側のバイト一致検証も確認） |
 | `command/GenerateOptionTest.java` / `GenerateTest.java` | 単体（toParameters往復）/統合（`paramGenerate*.txt`+`expect/generate/**`）テスト |
 | `ParameterUnit.java` | record/table/dataset のストリーム生成（unit挙動を変える場合のみ） |

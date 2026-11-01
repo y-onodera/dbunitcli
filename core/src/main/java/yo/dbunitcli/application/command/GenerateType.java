@@ -1,6 +1,7 @@
 package yo.dbunitcli.application.command;
 
 import org.stringtemplate.v4.STGroup;
+import yo.dbunitcli.application.Option;
 import yo.dbunitcli.application.ParameterUnit;
 import yo.dbunitcli.application.command.generate.DdlGenerateStrategy;
 import yo.dbunitcli.application.command.generate.DescriptorGenerateStrategy;
@@ -17,6 +18,7 @@ import yo.dbunitcli.application.command.generate.XlsxTemplateGenerateStrategy;
 import yo.dbunitcli.dataset.ComparableDataSetProducer;
 
 import java.io.IOException;
+import java.util.List;
 
 /**
  * -generateTypeの値。具体的な生成ロジックは定数ごとの{@link GenerateStrategy}実装（command/generate/配下）が持ち、
@@ -24,8 +26,8 @@ import java.io.IOException;
  */
 public enum GenerateType {
     txt(new TextGenerateStrategy()),
-    xlsx(new ExcelGenerateStrategy()),
-    xls(new ExcelGenerateStrategy()),
+    xlsx(new ExcelGenerateStrategy(true)),
+    xls(new ExcelGenerateStrategy(false)),
     settings(new SettingsGenerateStrategy()),
     sql(new SqlGenerateStrategy()),
     ddl(new DdlGenerateStrategy()),
@@ -90,6 +92,18 @@ public enum GenerateType {
 
     protected String resultPathTemplate(final GenerateOption option) {
         return this.strategy.resultPathTemplate(option);
+    }
+
+    protected List<Option.Violation> validateOption(final GenerateOption option) {
+        return this.strategy.validateOption(option);
+    }
+
+    protected void putOptionParameters(final GenerateOption option, final Option.ParametersBuilder builder) {
+        this.strategy.putOptionParameters(option, builder);
+    }
+
+    protected void putTemplateOptionParameters(final GenerateOption option, final Option.ParametersBuilder builder) {
+        this.strategy.putTemplateOptionParameters(option, builder);
     }
 
     /**

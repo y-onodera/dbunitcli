@@ -1,10 +1,13 @@
 package yo.dbunitcli.application.command.generate;
 
 import org.dbunit.dataset.Column;
+import yo.dbunitcli.application.Option;
 import yo.dbunitcli.application.command.GenerateOption;
 import yo.dbunitcli.dataset.ComparableDataSetProducer;
 import yo.dbunitcli.dataset.ComparableDataSetProducerWrapper;
 import yo.dbunitcli.dataset.producer.ComparableFixedColumnDefMetaDataProducer;
+
+import java.util.List;
 
 /**
  * fixedColumnDef: テーブル毎に固定長ファイルの列定義（json）を生成する固定成果物型
@@ -34,5 +37,16 @@ public final class FixedColumnDefGenerateStrategy implements DescriptorGenerateS
     @Override
     public String resultPathTemplate(final GenerateOption option) {
         return ResultPaths.tableFile(option);
+    }
+
+    @Override
+    public List<Option.Violation> validateOption(final GenerateOption option) {
+        return option.validateFixedColumnDef(option.fixedLength(), option.defaultLength(), option.align());
+    }
+
+    @Override
+    public void putOptionParameters(final GenerateOption option, final Option.ParametersBuilder builder) {
+        builder.put("-fixedLength", option.fixedLength())
+               .put("-defaultLength", option.defaultLength()).put("-align", option.align());
     }
 }

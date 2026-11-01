@@ -224,21 +224,8 @@ public record GenerateOption(Parameter parameter, String resultDir, String resul
         return Option.concat(this.srcData.validate()
                 , this.validateEncoding("-outputEncoding", this.outputEncoding)
                 , this.generateType.isFixedTemplate() ? List.of() : this.validateTemplate()
-                , this.validateGenerateTypeOption()
+                , this.generateType.validateOption(this)
                 , this.validateParallel(this.parallel));
-    }
-
-    // generateTypeごとに使うオプション（toParametersBuilderで出すもの）の型
-    private List<Violation> validateGenerateTypeOption() {
-        return switch (this.generateType) {
-            case sql -> Option.concat(
-                    this.validateRequired("-op", this.operation == null ? null : this.operation.name())
-                    , this.validateBoolean("-commit", this.commit));
-            case settings -> this.validateBoolean("-includeAllColumns", this.includeAllColumns);
-            case xlsx, xls -> this.validateBoolean("-lazyLoad", this.lazyLoad);
-            case fixedColumnDef -> this.validateFixedColumnDef(this.fixedLength, this.defaultLength, this.align);
-            default -> List.of();
-        };
     }
 
     private List<Violation> validateTemplate() {
@@ -287,17 +274,7 @@ public record GenerateOption(Parameter parameter, String resultDir, String resul
         if (!this.generateType.loadData()) {
             srcComponent.remove("-src.loadData");
         }
-        switch (this.generateType) {
-            case sql -> result.put("-commit", this.commit).put("-op", this.operation, DbOperation.class)
-                              .put("-sqlFilePrefix", this.sqlFilePrefix).put("-sqlFileSuffix", this.sqlFileSuffix);
-            case ddl -> result.put("-sqlFilePrefix", this.sqlFilePrefix).put("-sqlFileSuffix", this.sqlFileSuffix);
-            case fixedColumnDef -> result.put("-fixedLength", this.fixedLength)
-                                          .put("-defaultLength", this.defaultLength).put("-align", this.align);
-            case settings -> result.put("-includeAllColumns", this.includeAllColumns);
-            case xlsx, xls -> result.put("-lazyLoad", this.lazyLoad);
-            default -> {
-            }
-        }
+        this.generateType.putOptionParameters(this, result);
         if (this.isParallelizable()) {
             result.put("-parallel", this.parallel);
         }
@@ -347,15 +324,7 @@ public record GenerateOption(Parameter parameter, String resultDir, String resul
 
     private Parameters templateOptionArgs() {
         final ParametersBuilder templateComponent = this.templateOption.toParametersBuilder();
-        if (this.generateType.isExcel()) {
-            if (this.generateType == GenerateType.xlsx) {
-                templateComponent.putFlag("-formulaProcess", this.templateOption.formulaProcess());
-            }
-            templateComponent.putFlag("-evaluateFormulas", this.templateOption.evaluateFormulas());
-            templateComponent.putFlag("-forceFormulaRecalc", this.templateOption.forceFormulaRecalc());
-            templateComponent.putFlag("-fastFormulaProcess", this.templateOption.fastFormulaProcess());
-            templateComponent.putFlag("-deleteBlankCells", this.templateOption.deleteBlankCells());
-        }
+        this.generateType.putTemplateOptionParameters(this, templateComponent);
         return templateComponent.build();
     }
 }
