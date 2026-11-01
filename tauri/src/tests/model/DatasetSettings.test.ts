@@ -80,8 +80,29 @@ describe("DatasetSettingsクラス", () => {
 		// displayName（name）が空のsettingsはJSONに反映されないこと
 		expect(json.settings.length).toBe(1);
 		expect(json.settings[0].name).toEqual(["test"]);
+		// 中身の無いcommonSettingsはJSONに反映されないこと
 		expect(json.commonSettings.length).toBe(1);
 		expect(json.commonSettings[0].name).toEqual(["common"]);
+	});
+
+	it("対象テーブルを持たないcommonSettingsも中身があればJSONに残ること", () => {
+		const settings = DatasetSettings.build({
+			settings: [],
+			commonSettings: [
+				{ string: { className: "TABLE_NAME" } },
+				{ boolean: { IS_PK: "IS_PK" } },
+				{ exclude: ["UPDATED_AT"] },
+			],
+		});
+		const json = JSON.parse(JSON.stringify(settings));
+		expect(json.commonSettings).toHaveLength(3);
+		expect(json.commonSettings[0].string).toEqual({ className: "TABLE_NAME" });
+		expect(json.commonSettings[1].boolean).toEqual({ IS_PK: "IS_PK" });
+		expect(json.commonSettings[2].exclude).toEqual(["UPDATED_AT"]);
+	});
+
+	it("新規作成時の空のcommonSettingsはJSONに出力されないこと", () => {
+		expect(DatasetSettings.create().toJSON().commonSettings).toEqual([]);
 	});
 });
 
