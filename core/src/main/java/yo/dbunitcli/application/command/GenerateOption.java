@@ -135,7 +135,7 @@ public record GenerateOption(Parameter parameter, String resultDir, String resul
             this.loadRecords(loader, param, it -> action.accept(this.resultFile(it), it));
             return;
         }
-        Workers.<RecordOutput>forEachByKey(threads, RecordOutput::resultFile
+        Workers.forEachByKey(threads, RecordOutput::resultFile
                 , it -> action.accept(it.resultFile(), it.parameter())
                 , submit -> this.loadRecords(loader, param, it -> submit.accept(new RecordOutput(this.resultFile(it), it))));
     }

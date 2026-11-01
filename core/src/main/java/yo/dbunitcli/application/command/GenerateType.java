@@ -170,7 +170,7 @@ public enum GenerateType {
 
         @Override
         protected String resultPathTemplate(final GenerateOption option) {
-            return GenerateType.tableFileResultPath(option, ".json");
+            return GenerateType.tableFileResultPath(option);
         }
 
         @Override
@@ -230,7 +230,7 @@ public enum GenerateType {
 
         @Override
         protected String resultPathTemplate(final GenerateOption option) {
-            return GenerateType.tableFileResultPath(option, ".json");
+            return GenerateType.tableFileResultPath(option);
         }
 
         @Override
@@ -307,8 +307,8 @@ public enum GenerateType {
         return option.resultPath();
     }
 
-    private static String tableFileResultPath(final GenerateOption option, final String extension) {
-        return GenerateType.tableFileResultPath(option, "", "", extension);
+    private static String tableFileResultPath(final GenerateOption option) {
+        return GenerateType.tableFileResultPath(option, "", "", ".json");
     }
 
     private static String tableFileResultPath(final GenerateOption option, final String prefix, final String suffix,
