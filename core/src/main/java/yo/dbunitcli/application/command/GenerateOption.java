@@ -7,6 +7,7 @@ import yo.dbunitcli.application.Option;
 import yo.dbunitcli.application.ParameterUnit;
 import yo.dbunitcli.application.RecordConverter;
 import yo.dbunitcli.application.command.generate.GenerateContext;
+import yo.dbunitcli.application.command.generate.GenerateStrategy;
 import yo.dbunitcli.application.command.generate.GenerateWriter;
 import yo.dbunitcli.application.json.FromJsonTableSeparatorsBuilder;
 import yo.dbunitcli.application.option.DataSetConverterOption;
@@ -22,6 +23,7 @@ import yo.dbunitcli.dataset.TableSeparators;
 import yo.dbunitcli.dataset.producer.ComparableDataSetLoader;
 import yo.dbunitcli.resource.FileResources;
 import yo.dbunitcli.resource.Workers;
+import yo.dbunitcli.resource.st4.TemplateRender;
 
 import java.io.File;
 import java.io.IOException;
@@ -31,6 +33,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 public record GenerateOption(Parameter parameter, String resultDir, String resultPath, GenerateType generateType,
@@ -44,12 +47,12 @@ public record GenerateOption(Parameter parameter, String resultDir, String resul
     public GenerateOption(final String resultFile, final GenerateDto dto, final Parameter param) {
         this(param, dto.getResultDir(),
              Optional.ofNullable(dto.getResultPath()).filter(it -> !it.isEmpty()).orElse(resultFile),
-             GenerateOption.getGenerateType(dto), GenerateOption.getGenerateType(dto).isFixedTemplate() ?
-                     GenerateOption.getGenerateType(dto).getFixedUnit() :
+             GenerateOption.getGenerateType(dto), GenerateOption.getGenerateType(dto).strategy().isFixedTemplate() ?
+                     GenerateOption.getGenerateType(dto).strategy().fixedUnit() :
                      dto.getUnit() != null ? dto.getUnit() : ParameterUnit.record,
-             !GenerateOption.getGenerateType(dto).isFixedTemplate() && Strings.isNotEmpty(dto.getUnitSetting())
+             !GenerateOption.getGenerateType(dto).strategy().isFixedTemplate() && Strings.isNotEmpty(dto.getUnitSetting())
                      ? dto.getUnitSetting() : "",
-             !GenerateOption.getGenerateType(dto).isFixedTemplate() && Strings.isNotEmpty(dto.getUnitSettingEncoding())
+             !GenerateOption.getGenerateType(dto).strategy().isFixedTemplate() && Strings.isNotEmpty(dto.getUnitSettingEncoding())
                      ? dto.getUnitSettingEncoding()
                      : Charset.defaultCharset().displayName(),
              dto.getOperation(),
@@ -80,6 +83,10 @@ public record GenerateOption(Parameter parameter, String resultDir, String resul
         return dto.getGenerateType() != null ? dto.getGenerateType() : GenerateType.txt;
     }
 
+    private GenerateStrategy strategy() {
+        return this.generateType.strategy();
+    }
+
     /**
      * 出力単位ごとに、出力先とパラメータを渡す。unit=recordは読み込んだ行をその場で出力する（forEachRecord）。
      * unit=tableは、並列化できればテーブルごとに別スレッドで出力する（いずれも処理順は不定）。
@@ -91,30 +98,31 @@ public record GenerateOption(Parameter parameter, String resultDir, String resul
      * （タスクは状態を持ちうるため同じタスクを同時に実行せず、同じ出力先は逐次と同じく最後のテーブルの内容が残る）
      */
     public void forEachParameter(final BiConsumer<File, Parameter> action) {
+        final Function<Parameter, File> resultFiles = this.resultFiles();
         if (this.unit() == ParameterUnit.record && this.srcData.srcType() != DataSourceType.none) {
-            this.forEachRecord(action);
+            this.forEachRecord(resultFiles, action);
             return;
         }
         if (this.unit() != ParameterUnit.table) {
             try (final Stream<Parameter> parameters = this.parameterStream()) {
-                parameters.forEach(it -> action.accept(this.resultFile(it), it));
+                parameters.forEach(it -> action.accept(resultFiles.apply(it), it));
             }
             return;
         }
         final ComparableDataSetLoader loader = this.getComparableDataSetLoader();
         final ComparableDataSetParam param = this.dataSetParam();
-        if (this.generateType.isExcel() && !Boolean.parseBoolean(this.lazyLoad)) {
+        if (this.strategy().isExcel() && !Boolean.parseBoolean(this.lazyLoad)) {
             this.forEachTable(ParameterUnit.loadedTableTemplates(loader, loader.loadDataSet(param)).toList(),
-                              param, ParallelTableMapping.parallelism(param) > 1, action);
+                              param, ParallelTableMapping.parallelism(param) > 1, resultFiles, action);
             return;
         }
         final ComparableDataSetProducer source = loader.getComparableDataSetProducer(param);
         // 行はテーブルごとの出力の中で読むため、全テーブルの出力が終わるまで接続を保つ
-        try (final ComparableDataSetProducer producer = this.generateType().wrapProducer(this, source)) {
-            final List<ParameterUnit.TableTemplate> templates = this.generateType.isExcel()
+        try (final ComparableDataSetProducer producer = this.strategy().wrapProducer(this, source)) {
+            final List<ParameterUnit.TableTemplate> templates = this.strategy().isExcel()
                     ? ParameterUnit.streamingTableTemplates(loader, producer).toList()
                     : ParameterUnit.tableTemplates(loader, producer, this.unitTableSeparators()).toList();
-            this.forEachTable(templates, param, ParallelTableMapping.isParallelizable(producer), action);
+            this.forEachTable(templates, param, ParallelTableMapping.isParallelizable(producer), resultFiles, action);
         }
     }
 
@@ -123,17 +131,17 @@ public record GenerateOption(Parameter parameter, String resultDir, String resul
      * srcの読込は並列化できればレーンごとに並列にし、描画・書込は並列数が2以上なら出力先ごとに決まった作業スレッドで投入順に行う。
      * 別のレーンから同じ出力先へ書く場合、書く順（残る内容）は不定
      */
-    private void forEachRecord(final BiConsumer<File, Parameter> action) {
+    private void forEachRecord(final Function<Parameter, File> resultFiles, final BiConsumer<File, Parameter> action) {
         final ComparableDataSetLoader loader = this.getComparableDataSetLoader();
         final ComparableDataSetParam param = this.dataSetParam();
         final int threads = ParallelTableMapping.parallelism(param);
         if (threads < 2) {
-            this.loadRecords(loader, param, it -> action.accept(this.resultFile(it), it));
+            this.loadRecords(loader, param, it -> action.accept(resultFiles.apply(it), it));
             return;
         }
         Workers.forEachByKey(threads, RecordOutput::resultFile
                 , it -> action.accept(it.resultFile(), it.parameter())
-                , submit -> this.loadRecords(loader, param, it -> submit.accept(new RecordOutput(this.resultFile(it), it))));
+                , submit -> this.loadRecords(loader, param, it -> submit.accept(new RecordOutput(resultFiles.apply(it), it))));
     }
 
     private void loadRecords(final ComparableDataSetLoader loader, final ComparableDataSetParam param
@@ -147,16 +155,17 @@ public record GenerateOption(Parameter parameter, String resultDir, String resul
      * dataset（またはsrcのないrecord）の出力単位。全件を読み込んでから出力する（Excelのdataset+lazyLoadは出力の中で読む）
      */
     private Stream<Parameter> parameterStream() {
-        return this.generateType.isExcel() && Boolean.parseBoolean(this.lazyLoad)
+        return this.strategy().isExcel() && Boolean.parseBoolean(this.lazyLoad)
                 ? this.unit().lazyLoadStream(this.getComparableDataSetLoader(), this.dataSetParam())
                 : this.unit().dataSetToStream(this.getComparableDataSetLoader(), this.dataSetParam());
     }
 
     private void forEachTable(final List<ParameterUnit.TableTemplate> templates, final ComparableDataSetParam param,
-                              final boolean parallelizable, final BiConsumer<File, Parameter> action) {
+                              final boolean parallelizable, final Function<Parameter, File> resultFiles,
+                              final BiConsumer<File, Parameter> action) {
         // 出力先は行を読む前に決める（行を含むパラメータで描画すると、行を文字列化する分だけ無駄になる）
         final List<TableOutput> outputs = templates.stream()
-                .map(it -> new TableOutput(it, this.resultFile(it.unloaded())))
+                .map(it -> new TableOutput(it, resultFiles.apply(it.unloaded())))
                 .toList();
         if (parallelizable) {
             final List<List<TableOutput>> lanes = Workers.groupByShared(outputs, outputs.stream()
@@ -192,33 +201,35 @@ public record GenerateOption(Parameter parameter, String resultDir, String resul
     }
 
     private TableSeparators classpathDefaultTableSeparators() {
-        final String defaultSettings = this.generateType().defaultSettingsPath();
+        final String defaultSettings = this.strategy().defaultSettingsPath();
         return defaultSettings == null ? null
                 : new FromJsonTableSeparatorsBuilder(StandardCharsets.UTF_8.toString()).loadFromClasspath(defaultSettings).build();
-    }
-
-    public File resultFile(final Parameter param) {
-        return new File(this.getResultDir(), this.resultPath(param));
     }
 
     public File getResultDir() {
         return FileResources.resultDir(this.resultDir());
     }
 
-    public String resultPath(final Parameter param) {
-        return this.templateOption.getTemplateRender().render(this.generateType().resultPathTemplate(this), param);
+    /**
+     * 出力先の決め方。パスのパターンとレンダラーは1回だけ用意し、出力ごとには描画だけを行う（複数スレッドから呼ばれうる）
+     */
+    private Function<Parameter, File> resultFiles() {
+        final File resultDir = this.getResultDir();
+        final TemplateRender render = this.templateOption.getTemplateRender();
+        final String pathTemplate = this.strategy().resultPathTemplate(this);
+        return param -> new File(resultDir, render.render(pathTemplate, param));
     }
 
     public GenerateWriter writer() throws IOException {
-        return this.generateType().writer(this);
+        return this.strategy().writer(this);
     }
 
     @Override
     public List<Violation> validate() {
         return Option.concat(this.srcData.validate()
                 , this.validateEncoding("-outputEncoding", this.outputEncoding)
-                , this.generateType.isFixedTemplate() ? List.of() : this.validateTemplate()
-                , this.generateType.validateOption(this)
+                , this.strategy().isFixedTemplate() ? List.of() : this.validateTemplate()
+                , this.strategy().validateOption(this)
                 , this.validateParallel(this.parallel));
     }
 
@@ -226,7 +237,7 @@ public record GenerateOption(Parameter parameter, String resultDir, String resul
         return Option.concat(this.validateRequired("-template", this.template)
                 , this.validateFileExists("-template", this.template, BaseDir.TEMPLATE)
                 , this.templateOption.validate()
-                , this.unit == ParameterUnit.table && !this.generateType.isExcel()
+                , this.unit == ParameterUnit.table && !this.strategy().isExcel()
                         ? Option.concat(this.validateFileExists("-unitSetting", this.unitSetting, BaseDir.SETTING)
                         , this.validateEncoding("-unitSettingEncoding", this.unitSettingEncoding))
                         : List.of());
@@ -251,33 +262,33 @@ public record GenerateOption(Parameter parameter, String resultDir, String resul
             return result;
         }
         result.put("-generateType", this.generateType, GenerateType.class);
-        if (!this.generateType.isFixedTemplate()) {
+        if (!this.strategy().isFixedTemplate()) {
             result.put("-unit", this.unit, ParameterUnit.class);
         }
-        if (this.unit == ParameterUnit.table && !this.generateType.isExcel() && !this.generateType.isFixedTemplate()) {
+        if (this.unit == ParameterUnit.table && !this.strategy().isExcel() && !this.strategy().isFixedTemplate()) {
             result.putFile("-unitSetting", this.unitSetting, BaseDir.SETTING);
             result.put("-unitSettingEncoding", this.unitSettingEncoding);
         }
-        if (!this.generateType.isFixedTemplate()) {
+        if (!this.strategy().isFixedTemplate()) {
             result.putFile("-template", this.template, true, BaseDir.TEMPLATE);
         }
         final ParametersBuilder srcComponent = this.srcData.toParametersBuilder();
-        if (this.generateType.useJdbcMetaData()) {
+        if (this.strategy().useJdbcMetaData()) {
             srcComponent.remove("-src.useJdbcMetaData");
         }
-        if (!this.generateType.loadData()) {
+        if (!this.strategy().loadData()) {
             srcComponent.remove("-src.loadData");
         }
-        this.generateType.putOptionParameters(this, result);
+        this.strategy().putOptionParameters(this, result);
         if (this.isParallelizable()) {
             result.put("-parallel", this.parallel);
         }
         result.addComponent("srcData", srcComponent.build());
-        if (!this.generateType.isFixedTemplate()) {
+        if (!this.strategy().isFixedTemplate()) {
             result.addComponent("templateOption", this.templateOptionArgs());
         }
         result.putDir("-result", this.resultDir, BaseDir.RESULT).put("-resultPath", this.resultPath);
-        if (this.generateType.isText()) {
+        if (this.strategy().isText()) {
             result.put("-outputEncoding", this.outputEncoding);
         }
         return result;
@@ -300,14 +311,14 @@ public record GenerateOption(Parameter parameter, String resultDir, String resul
 
     public ComparableDataSetParam dataSetParam() {
         final ComparableDataSetParam.Builder builder = this.srcData.getParam();
-        if (this.generateType().loadData() && Strings.isEmpty(this.srcData.getSetting())) {
+        if (this.strategy().loadData() && Strings.isEmpty(this.srcData.getSetting())) {
             final TableSeparators defaultTableSeparators = this.classpathDefaultTableSeparators();
             if (defaultTableSeparators != null) {
                 builder.setTableSeparators(defaultTableSeparators);
             }
         }
-        builder.setUseJdbcMetaData(this.generateType().useJdbcMetaData())
-               .setLoadData(this.generateType().loadData())
+        builder.setUseJdbcMetaData(this.strategy().useJdbcMetaData())
+               .setLoadData(this.strategy().loadData())
                .setParallel(this.parallelism());
         return builder.build();
     }
@@ -318,7 +329,7 @@ public record GenerateOption(Parameter parameter, String resultDir, String resul
 
     private Parameters templateOptionArgs() {
         final ParametersBuilder templateComponent = this.templateOption.toParametersBuilder();
-        this.generateType.putTemplateOptionParameters(this, templateComponent);
+        this.strategy().putTemplateOptionParameters(this, templateComponent);
         return templateComponent.build();
     }
 }

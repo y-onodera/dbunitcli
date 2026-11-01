@@ -13,7 +13,7 @@ Generateは、データセットをテンプレート（またはJavaロジッ�
 3. **unit（データ粒度）**: record（レコード毎）/ table（テーブル毎、`-unitSetting`分割やScaffold連携と相性がよい）/ dataset（全体で1回）。固定成果物型は`fixedUnit()`で強制
 4. **出力ファイル形状**: 単一ファイル / テーブル毎に複数ファイル / コード生成専用（テンプレート不要）。`GenerateStrategy.resultPathTemplate()`をオーバーライドして制御
 
-ロジックは`command/generate/`の`GenerateStrategy`実装（定数ごとに1クラス）が持ち、`GenerateType`は委譲するだけ。4軸は`GenerateStrategy`のdefaultメソッド1つずつに対応し、generateType追加 = 実装クラスで必要なものをoverrideし`GenerateType`に定数を足す、が骨格になる。
+ロジックは`command/generate/`の`GenerateStrategy`実装（定数ごとに1クラス）が持ち、`GenerateType`は定数ごとに実装を持ち`strategy()`で公開するだけ（利用側は`generateType.strategy().xxx()`）。4軸は`GenerateStrategy`のdefaultメソッド1つずつに対応し、generateType追加 = 実装クラスで必要なものをoverrideし`GenerateType`に定数を足す、が骨格になる。
 
 補助軸: Excel出力限定の`-lazyLoad`（都度ストリーム書き込み vs 全ロード後書き込み）。
 

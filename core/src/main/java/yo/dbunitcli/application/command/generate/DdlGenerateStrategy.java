@@ -23,6 +23,12 @@ public final class DdlGenerateStrategy extends DdlMetaDataGenerateStrategy {
     }
 
     @Override
+    public String extension() {
+        return ".sql";
+    }
+
+    // Generate側だけ-sqlFilePrefix/-sqlFileSuffixを付ける（Scaffoldの-resultPathはtableFileName()のまま）
+    @Override
     public String resultPathTemplate(final GenerateContext option) {
         return ResultPaths.sql(option);
     }

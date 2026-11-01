@@ -21,7 +21,12 @@ public final class JavaBeanGenerateStrategy extends DdlMetaDataGenerateStrategy 
     }
 
     @Override
-    public String resultPathTemplate(final GenerateContext option) {
-        return ResultPaths.tableFile(option, "", "", ".java", "snakeToUpperCamel");
+    public String extension() {
+        return ".java";
+    }
+
+    @Override
+    public String tableNameFormat() {
+        return "snakeToUpperCamel";
     }
 }

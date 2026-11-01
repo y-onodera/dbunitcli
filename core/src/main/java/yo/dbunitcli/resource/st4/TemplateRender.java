@@ -135,6 +135,18 @@ public record TemplateRender(File templateGroup, String templateParameterAttribu
         return token;
     }
 
+    /**
+     * テンプレート式としての参照（既定では"$param.name$"）。getAttributeName(name)はreplaceParameter()の置換トークン
+     * （"$paramname$"）で、テンプレートとして評価される場所（.paramの-resultPath等）では使えない
+     */
+    public String getAttributeExpression(final String name) {
+        String token = name;
+        if (!Optional.ofNullable(this.templateParameterAttribute()).orElse("").isEmpty()) {
+            token = this.templateParameterAttribute() + "." + name;
+        }
+        return this.templateVarStart() + token + this.templateVarStop();
+    }
+
     public String getAttributeName(final String name, final String format) {
         String token = name;
         if (!Optional.ofNullable(this.templateParameterAttribute()).orElse("").isEmpty()) {

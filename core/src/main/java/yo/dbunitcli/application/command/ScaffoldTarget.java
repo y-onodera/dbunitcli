@@ -12,38 +12,18 @@ import java.util.Arrays;
 /**
  * Scaffoldの-targetごとの差分を集約するenum。4target共通のフロー（unitSetting/template/dataset/parameterの
  * 各雛型を対応オプション指定時のみ独立出力）は{@link ScaffoldOption}が担い、targetごとに異なる
- * 「対応するGenerateType・サンプルunitSetting・カスタムテンプレート駆動時の出力パス」
- * だけをここで定義する（記述子datasetの列定義・producerはGenerateTypeのDescriptorGenerateStrategyに委譲する）。
+ * 「対応するGenerateType・サンプルunitSetting」だけをここで定義する
+ * （記述子datasetの列定義・producer・出力ファイル名はGenerateTypeのDescriptorGenerateStrategyに委譲する）。
  */
 enum ScaffoldTarget {
-    ddl(GenerateType.ddl) {
-        @Override
-        String customTemplateResultPath() {
-            return "$param.tableName$.sql";
-        }
-    },
-    javaBean(GenerateType.javaBean) {
-        @Override
-        String customTemplateResultPath() {
-            return new TemplateRender.Builder().build().getAttributeName("tableName", "snakeToUpperCamel") + ".java";
-        }
-    },
-    xlsxSchema(GenerateType.xlsxSchema) {
-        @Override
-        String customTemplateResultPath() {
-            return "$param.tableName$.json";
-        }
-    },
+    ddl(GenerateType.ddl),
+    javaBean(GenerateType.javaBean),
+    xlsxSchema(GenerateType.xlsxSchema),
     fixedColumnDef(GenerateType.fixedColumnDef) {
         // GenerateType.fixedColumnDefはdefaultSettingsPath()を持たないため、Scaffold専用のサンプルを使う
         @Override
         String sampleUnitSettingPath() {
             return "fixedcolumndef/fixedColumnDefSettings.json";
-        }
-
-        @Override
-        String customTemplateResultPath() {
-            return "$param.tableName$.json";
         }
     };
 
@@ -54,7 +34,10 @@ enum ScaffoldTarget {
 
     ScaffoldTarget(final GenerateType generateType) {
         this.generateType = generateType;
-        this.descriptor = generateType.descriptorStrategy();
+        if (!(generateType.strategy() instanceof final DescriptorGenerateStrategy descriptor)) {
+            throw new IllegalArgumentException(generateType + " is not descriptor generateType");
+        }
+        this.descriptor = descriptor;
     }
 
     static ScaffoldTarget fromString(final String target) {
@@ -69,11 +52,11 @@ enum ScaffoldTarget {
     }
 
     String stgPath() {
-        return this.generateType.getStgPath();
+        return this.descriptor.stgPath();
     }
 
     String templatePath() {
-        return this.generateType.getTemplatePath();
+        return this.descriptor.templatePath();
     }
 
     /**
@@ -82,7 +65,7 @@ enum ScaffoldTarget {
      * 各サンプルはテンプレートで利用される全列を定義しておくこと
      */
     String sampleUnitSettingPath() {
-        return this.generateType.defaultSettingsPath();
+        return this.descriptor.defaultSettingsPath();
     }
 
     /** 記述子datasetの列定義（headerless出力時の-headerName用） */
@@ -95,8 +78,10 @@ enum ScaffoldTarget {
         return this.descriptor.wrapDescriptor(option, source);
     }
 
-    /** カスタムテンプレート（generateType=txt）駆動時の-resultPathパターン */
-    abstract String customTemplateResultPath();
+    /** カスタムテンプレート（generateType=txt）駆動時の-resultPathパターン。builtin駆動と同じファイル名にする */
+    String customTemplateResultPath() {
+        return this.descriptor.tableFileName(new TemplateRender.Builder().build());
+    }
 
     /** 組み込みgenerateType駆動の.paramに追記するtarget固有オプション（Generate側の記述子オプション出力と共有） */
     void putBuiltinExtraParams(final ScaffoldOption option, final Option.ParametersBuilder builder) {

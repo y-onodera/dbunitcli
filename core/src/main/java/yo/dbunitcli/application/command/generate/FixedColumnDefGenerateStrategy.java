@@ -34,8 +34,8 @@ public final class FixedColumnDefGenerateStrategy implements DescriptorGenerateS
     }
 
     @Override
-    public String resultPathTemplate(final GenerateContext option) {
-        return ResultPaths.tableFile(option);
+    public String extension() {
+        return ".json";
     }
 
     @Override
