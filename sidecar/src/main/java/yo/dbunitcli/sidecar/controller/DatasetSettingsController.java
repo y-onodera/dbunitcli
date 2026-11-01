@@ -8,7 +8,6 @@ import io.micronaut.json.JsonMapper;
 import io.micronaut.serde.ObjectMapper;
 import jakarta.json.Json;
 import jakarta.json.JsonReader;
-import org.dbunit.dataset.Column;
 import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.ITableMetaData;
 import org.slf4j.Logger;
@@ -59,7 +58,6 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -165,10 +163,9 @@ public class DatasetSettingsController extends AbstractResourceFileController<Da
                 throw new IllegalArgumentException("unitSetting is required");
             }
             final TableSeparators unitSeparators = this.unitTableSeparators(request);
-            final Supplier<ComparableDataSetParam.Builder> params = this.toParam(request);
-            final TableSeparators separators = params.get().getTableSeparators();
             // 対象を取りこぼさない絞り込み（splitがあれば絞らない）で1回だけ読む
-            final ComparableDataSetParam.Builder param = params.get();
+            final ComparableDataSetParam.Builder param = this.toParam(request).get();
+            final TableSeparators separators = param.getTableSeparators();
             Narrow.singlePass(separators).applyTo(param, separators, tableName);
             try (final ComparableDataSetProducer producer = new ComparableDataSetLoader(this.buildParameter(request))
                     .getComparableDataSetProducer(param.build())) {
@@ -203,14 +200,9 @@ public class DatasetSettingsController extends AbstractResourceFileController<Da
         final List<Object[]> rows = IntStream.range(0, Math.min(PREVIEW_ROW_LIMIT, table.getRowCount()))
                                              .mapToObj(table::getRow)
                                              .toList();
-        return new DatasetUnitTablePreviewResponseDto(table.getTableName(), DatasetSettingsController.headersOf(table), rows, table.getRowCount());
+        return DatasetUnitTablePreviewResponseDto.of(table, rows);
     }
 
-    private static String[] headersOf(final ComparableTable table) {
-        return Arrays.stream(table.getTableMetaData().getColumns())
-                     .map(Column::getColumnName)
-                     .toArray(String[]::new);
-    }
 
     /**
      * 選んだテーブルだけをresultフォームの指定でconvertし、出力先ディレクトリを返す（DB出力なら空文字）。
@@ -478,7 +470,7 @@ public class DatasetSettingsController extends AbstractResourceFileController<Da
                 return Optional.empty();
             }
             final ComparableTable table = this.builder.build();
-            return Optional.of(new DatasetTablePreviewResponseDto(DatasetSettingsController.headersOf(table), table.rows().rows(), this.totalRows));
+            return Optional.of(DatasetTablePreviewResponseDto.of(table, table.rows().rows(), this.totalRows));
         }
 
         @Override

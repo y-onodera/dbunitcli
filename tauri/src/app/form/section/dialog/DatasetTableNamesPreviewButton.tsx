@@ -60,25 +60,31 @@ function withPreviewSetting(
 	return setting === "" ? withoutSetting(info) : withValues(info, { setting });
 }
 
-// SettingDialogのfooterActionsに置き、編集中の内容を保存できたらtoSrcInfo(保存先)で読み込まれるテーブル一覧をプレビューする（編集ダイアログは開いたまま）
+// SettingDialogのfooterActionsに置き、編集中の内容を保存できたらtoSrcInfo(保存先)で読み込まれるテーブル一覧をプレビューする（編集ダイアログは開いたまま）。
+// saveThenが保存せずにファイルを渡すだけなら、指定済みのファイルでプレビューするボタンにもなる。
+// rowActions: 各テーブル名の横に足すボタン（保存先を受け取る）
 export function SaveAndPreviewButton({
+	title = "Save and Preview",
 	saveThen,
 	toSrcInfo,
+	rowActions,
 }: {
+	title?: string;
 	saveThen: SaveThen;
 	toSrcInfo: (savedPath: string) => DatasetSrcInfo;
+	rowActions?: (savedPath: string, tableName: string) => ReactNode;
 }) {
 	const [savedPath, setSavedPath] = useState<string | null>(null);
 	return (
 		<>
-			<BlueButton
-				title="Save and Preview"
-				handleClick={() => saveThen(setSavedPath)}
-			/>
+			<BlueButton title={title} handleClick={() => saveThen(setSavedPath)} />
 			{savedPath !== null && (
 				<DatasetTableNamesPreviewDialog
 					datasetSrcInfo={toSrcInfo(savedPath)}
 					handleDialogClose={() => setSavedPath(null)}
+					rowActions={
+						rowActions && ((tableName) => rowActions(savedPath, tableName))
+					}
 				/>
 			)}
 		</>
@@ -192,19 +198,18 @@ function TableDataPreviewDialog({
 	}
 
 	return (
-		<FullDialog onClose={handleClose}>
-			<DialogBody size="fluid">
-				<DialogTitle>{tableName} — Data Preview</DialogTitle>
-				{renderContent()}
-			</DialogBody>
-			<DialogFooter>
+		<DataPreviewDialog
+			tableName={tableName}
+			handleClose={handleClose}
+			body={renderContent()}
+			footerActions={
 				<BlueButton
 					title="Export"
 					handleClick={() => setShowExport(true)}
 					disabled={loading || error !== ""}
 				/>
-				<WhiteButton title="Close" handleClick={handleClose} />
-			</DialogFooter>
+			}
+		>
 			{showExport && (
 				<TableConvertDialog
 					tableName={tableName}
@@ -214,6 +219,35 @@ function TableDataPreviewDialog({
 					onClose={() => setShowExport(false)}
 				/>
 			)}
+		</DataPreviewDialog>
+	);
+}
+
+// 「{tableName} — Data Preview」ダイアログの外枠。footerActionsはCloseの前に並べ、childrenは上に重ねるダイアログ
+export function DataPreviewDialog({
+	tableName,
+	handleClose,
+	body,
+	footerActions,
+	children,
+}: {
+	tableName: string;
+	handleClose: () => void;
+	body: ReactNode;
+	footerActions?: ReactNode;
+	children?: ReactNode;
+}) {
+	return (
+		<FullDialog onClose={handleClose}>
+			<DialogBody size="fluid">
+				<DialogTitle>{tableName} — Data Preview</DialogTitle>
+				{body}
+			</DialogBody>
+			<DialogFooter>
+				{footerActions}
+				<WhiteButton title="Close" handleClick={handleClose} />
+			</DialogFooter>
+			{children}
 		</FullDialog>
 	);
 }

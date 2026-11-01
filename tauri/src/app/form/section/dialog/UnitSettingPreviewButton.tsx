@@ -6,7 +6,7 @@ import {
 	FullDialog,
 	type SaveThen,
 } from "../../../../components/dialog";
-import { BlueButton, WhiteButton } from "../../../../components/element/Button";
+import { WhiteButton } from "../../../../components/element/Button";
 import { IconButton } from "../../../../components/element/ButtonIcon";
 import { useDatasetSrcInfo } from "../../../../context/DatasetSrcInfoProvider";
 import { useUnitSettingEncoding } from "../../../../context/UnitSettingEncodingProvider";
@@ -20,7 +20,8 @@ import {
 } from "../../../../model/CommandOption";
 import DatasetSettingsDialog from "./DatasetSettingsDialog";
 import {
-	DatasetTableNamesPreviewDialog,
+	DataPreviewDialog,
+	SaveAndPreviewButton,
 	TableNameList,
 	TablePreviewTable,
 } from "./DatasetTableNamesPreviewButton";
@@ -75,23 +76,18 @@ function UnitPreviewLauncher({
 	saveThen: SaveThen;
 }) {
 	const datasetSrcInfo = useDatasetSrcInfo();
-	const [unitSetting, setUnitSetting] = useState<string | null>(null);
 	if (!canPreview(datasetSrcInfo)) {
 		return null;
 	}
 	return (
-		<>
-			<BlueButton title={title} handleClick={() => saveThen(setUnitSetting)} />
-			{unitSetting !== null && (
-				<DatasetTableNamesPreviewDialog
-					datasetSrcInfo={datasetSrcInfo}
-					handleDialogClose={() => setUnitSetting(null)}
-					rowActions={(tableName) => (
-						<UnitTablesButton tableName={tableName} unitSetting={unitSetting} />
-					)}
-				/>
+		<SaveAndPreviewButton
+			title={title}
+			saveThen={saveThen}
+			toSrcInfo={() => datasetSrcInfo}
+			rowActions={(unitSetting, tableName) => (
+				<UnitTablesButton tableName={tableName} unitSetting={unitSetting} />
 			)}
-		</>
+		/>
 	);
 }
 
@@ -159,15 +155,11 @@ function UnitTablesDialog({
 				<WhiteButton title="Close" handleClick={handleClose} />
 			</DialogFooter>
 			{selected !== null && (
-				<FullDialog onClose={() => setSelected(null)}>
-					<DialogBody size="fluid">
-						<DialogTitle>{selected.tableName} — Data Preview</DialogTitle>
-						<TablePreviewTable preview={selected} />
-					</DialogBody>
-					<DialogFooter>
-						<WhiteButton title="Close" handleClick={() => setSelected(null)} />
-					</DialogFooter>
-				</FullDialog>
+				<DataPreviewDialog
+					tableName={selected.tableName}
+					handleClose={() => setSelected(null)}
+					body={<TablePreviewTable preview={selected} />}
+				/>
 			)}
 		</FullDialog>
 	);

@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { SectionFieldset } from "../../../components/dialog";
 import { SectionLegend } from "../../../components/dialog/SectionFieldset";
 import {
@@ -94,6 +95,26 @@ function DatasetLoadFormContent({
 	);
 }
 
+// srcDataの入力値を共有する範囲。srcTypeが変わったら初期値から作り直す
+export function DatasetSrcInfoScope({
+	name,
+	srcData,
+	children,
+}: {
+	name: string;
+	srcData: DatasetSource;
+	children: ReactNode;
+}) {
+	return (
+		<DatasetSrcInfoProvider
+			key={`${name}:${srcData.prefix}:${srcData.srcType?.value ?? ""}`}
+			initialValue={buildDatasetSrcInfo(srcData)}
+		>
+			{children}
+		</DatasetSrcInfoProvider>
+	);
+}
+
 export function DatasetLoadForm(prop: {
 	handleTypeSelect: () => Promise<void>;
 	name: string;
@@ -101,7 +122,7 @@ export function DatasetLoadForm(prop: {
 	defalutType?: SrcType;
 	helpCommand?: string;
 	helpLabel?: string;
-	// trueなら自前のDatasetSrcInfoProviderを作らず、親のものへ入力値を反映する
+	// trueなら自前のDatasetSrcInfoScopeを作らず、親のものへ入力値を反映する
 	// （generateフォームでは-unitSettingのプレビューも同じsrcの入力値を使うため）
 	parentSrcInfo?: boolean;
 }) {
@@ -134,13 +155,9 @@ export function DatasetLoadForm(prop: {
 	if (prop.parentSrcInfo) {
 		return content;
 	}
-	const initialDatasetSrcInfo = buildDatasetSrcInfo(prop.srcData);
 	return (
-		<DatasetSrcInfoProvider
-			key={`${prop.name}:${prop.srcData.prefix}:${prop.srcData.srcType?.value ?? ""}`}
-			initialValue={initialDatasetSrcInfo}
-		>
+		<DatasetSrcInfoScope name={prop.name} srcData={prop.srcData}>
 			{content}
-		</DatasetSrcInfoProvider>
+		</DatasetSrcInfoScope>
 	);
 }

@@ -186,9 +186,6 @@ export class DatasetSettings {
 		);
 	}
 	toJSON() {
-		const filterSettings = (settings: DatasetSetting[]) =>
-			settings.filter((setting) => setting.displayName());
-
 		const names = this.outputFilter.name?.filter((it) => it);
 		const pattern = this.outputFilter.pattern;
 		let outputFilter: object | undefined;
@@ -207,7 +204,7 @@ export class DatasetSettings {
 		}
 		const imports = this.imports.filter((it) => it.path);
 		return {
-			settings: filterSettings(this.settings),
+			settings: this.settings.filter((setting) => setting.displayName()),
 			// commonSettingsは全テーブルに効くため対象テーブルを持たないのが普通。中身の無い行だけ除く
 			commonSettings: this.commonSettings.filter((setting) =>
 				hasValue(setting.toJSON()),

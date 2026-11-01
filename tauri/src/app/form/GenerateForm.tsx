@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { SectionFieldset } from "../../components/dialog";
 import { SectionLegend } from "../../components/dialog/SectionFieldset";
-import { DatasetSrcInfoProvider } from "../../context/DatasetSrcInfoProvider";
 import { UnitSettingEncodingProvider } from "../../context/UnitSettingEncodingProvider";
-import { buildDatasetSrcInfo } from "../../model/CommandOption";
 import type { GenerateOptions } from "../../model/SelectParameter";
-import { DatasetLoadForm } from "./section/DatasetLoadForm";
+import {
+	DatasetLoadForm,
+	DatasetSrcInfoScope,
+} from "./section/DatasetLoadForm";
 import {
 	TxtTemplateGenerateButton,
 	type TxtTemplateGenerateFormValues,
@@ -49,10 +50,7 @@ export function GenerateForm(prop: {
 	// srcの入力値はsrcフォームとunitSettingの編集・プレビューで共有する
 	// （テーブル名・カラム名の候補とプレビューの読込元にsrcのデータセットを使う）
 	return (
-		<DatasetSrcInfoProvider
-			key={`${prop.name}:src:${srcData.srcType?.value ?? ""}`}
-			initialValue={buildDatasetSrcInfo(srcData)}
-		>
+		<DatasetSrcInfoScope name={prop.name} srcData={srcData}>
 			<SectionFieldset>
 				<SectionLegend
 					title="generate"
@@ -156,6 +154,6 @@ export function GenerateForm(prop: {
 				helpLabel="src"
 				parentSrcInfo={true}
 			/>
-		</DatasetSrcInfoProvider>
+		</DatasetSrcInfoScope>
 	);
 }
