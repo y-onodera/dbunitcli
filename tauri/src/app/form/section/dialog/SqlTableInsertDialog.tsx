@@ -262,6 +262,7 @@ function ColumnSelectDialog({
 						name="sqlColumnInsert_alias"
 						id="sqlColumnInsert_alias"
 						required={false}
+						clearable
 						value={alias}
 						handleChange={(ev) => setAlias(ev.target.value)}
 					/>

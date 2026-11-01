@@ -92,6 +92,7 @@ export default function JdbcUrlBuilderDialog({
 					<ControllTextBox
 						name="jdbcUrlBuilder_host"
 						id="jdbcUrlBuilder_host"
+						clearable
 						required={true}
 						value={state.host}
 						handleChange={(ev) =>
@@ -105,6 +106,7 @@ export default function JdbcUrlBuilderDialog({
 					<ControllTextBox
 						name="jdbcUrlBuilder_port"
 						id="jdbcUrlBuilder_port"
+						clearable
 						required={true}
 						value={state.port}
 						handleChange={(ev) =>
@@ -123,6 +125,7 @@ export default function JdbcUrlBuilderDialog({
 						name="jdbcUrlBuilder_serviceName"
 						id="jdbcUrlBuilder_serviceName"
 						required={true}
+						clearable
 						value={state.serviceName}
 						handleChange={(ev) =>
 							setState((prev) => ({ ...prev, serviceName: ev.target.value }))

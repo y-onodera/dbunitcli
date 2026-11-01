@@ -65,11 +65,7 @@ export default function Text({
 							required={element.attribute.required}
 							value={path}
 							handleChange={handleChange}
-							handleClear={() => {
-								setPath("");
-								onValueChange?.("");
-								clearFieldErrors(fieldName);
-							}}
+							clearable
 						/>
 						{!hidden && hasResources && (
 							<ResourceDatalist id={id} resources={resourceFiles} />
