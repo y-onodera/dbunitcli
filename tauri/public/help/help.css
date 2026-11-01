@@ -27,3 +27,14 @@ a.card:hover { background: #f3f4f6; }
 .cmd-desc { font-size: 0.9rem; color: #6b7280; margin-top: 0.25rem; }
 .types { font-size: 0.85rem; color: #6b7280; margin: 0.25rem 0 0 1rem; }
 .types a { margin-right: 0.5rem; }
+/* セクションから開くダイアログなど、親カードの下に字下げして並べる子カード */
+ul.cards.nested { margin: 0.5rem 0 0 1.5rem; padding-left: 0.75rem; border-left: 2px solid #e5e7eb; }
+/* ページ種別の印（セクション / ダイアログ / リファレンス） */
+.badge { display: inline-block; font-size: 0.7rem; font-weight: 600; line-height: 1.4; padding: 0 0.4rem; border-radius: 0.25rem; border: 1px solid; vertical-align: middle; }
+.cmd-name .badge { margin-left: 0.5rem; }
+.badge-section { color: #047857; background: #ecfdf5; border-color: #a7f3d0; }
+.badge-dialog { color: #b45309; background: #fffbeb; border-color: #fde68a; }
+.badge-reference { color: #4b5563; background: #f3f4f6; border-color: #d1d5db; }
+ul.legend { list-style: none; padding: 0; }
+ul.legend li { margin-bottom: 0.25rem; }
+ul.legend .badge { margin-right: 0.5rem; min-width: 5rem; text-align: center; }
