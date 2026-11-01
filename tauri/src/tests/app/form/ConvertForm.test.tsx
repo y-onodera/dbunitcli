@@ -356,7 +356,7 @@ describe("ConvertFormの描画テスト", () => {
 			);
 		});
 
-		it("環境変数からBOOKに変えても再構成しない", async () => {
+		it("環境変数からBOOKに変えると再構成する（resultPathを隠すため）", async () => {
 			const props = makeConvertProps(
 				convertRefreshExcelTableEnvResponseFixture,
 			);
@@ -366,7 +366,44 @@ describe("ConvertFormの描画テスト", () => {
 				querySelectorOrThrow(EXCEL_TABLE_SELECTOR),
 				"BOOK",
 			);
-			expect(props.handleTypeSelect).not.toHaveBeenCalled();
+			expect(props.handleTypeSelect).toHaveBeenCalledWith("BOOK");
+		});
+
+		it("環境変数からSHEETに変えると再構成する（parallelを隠すため）", async () => {
+			const props = makeConvertProps(
+				convertRefreshExcelTableEnvResponseFixture,
+			);
+			render(<ConvertForm {...props} />);
+
+			await userEvent.selectOptions(
+				querySelectorOrThrow(EXCEL_TABLE_SELECTOR),
+				"SHEET",
+			);
+			expect(props.handleTypeSelect).toHaveBeenCalledWith("SHEET");
+		});
+
+		it("excelTable=SHEETではresultPathを表示する", () => {
+			render(
+				<ConvertForm
+					{...makeConvertProps(convertRefreshResultTypeXlsxResponseFixture)}
+				/>,
+			);
+
+			expect(
+				document.querySelector('input[type="text"][name="-result.resultPath"]'),
+			).toBeInTheDocument();
+		});
+
+		it("excelTable=BOOKではresultPathを表示しない", () => {
+			render(
+				<ConvertForm
+					{...makeConvertProps(convertRefreshExcelTableBookResponseFixture)}
+				/>,
+			);
+
+			expect(
+				document.querySelector('[name="-result.resultPath"]'),
+			).not.toBeInTheDocument();
 		});
 
 		it("BOOKからSHEETにすると再構成する", async () => {
@@ -391,6 +428,23 @@ describe("ConvertFormの描画テスト", () => {
 
 			expect(
 				document.querySelector('input[type="text"][name="-result.parallel"]'),
+			).toBeInTheDocument();
+		});
+	});
+
+	describe("csvResult（resultType=csvのrefreshレスポンス）", () => {
+		it("resultPathを表示しない（テーブルごとのファイル名になるため）", () => {
+			render(
+				<ConvertForm
+					{...makeConvertProps(convertRefreshSrcTypeTableResponseFixture)}
+				/>,
+			);
+
+			expect(
+				document.querySelector('[name="-result.resultPath"]'),
+			).not.toBeInTheDocument();
+			expect(
+				document.querySelector('[name="-result.exportHeader"]'),
 			).toBeInTheDocument();
 		});
 	});

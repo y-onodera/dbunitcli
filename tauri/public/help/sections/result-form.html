@@ -28,9 +28,9 @@
   <table>
     <tr><th>項目</th><th>説明</th><th>デフォルト</th></tr>
     <tr><td>result</td><td>出力先ディレクトリのパス。相対パスは Result Base からの相対</td><td>（空）＝ Result Base</td></tr>
-    <tr><td>resultPath</td><td>出力ファイル名。xls / xlsx で <code>excelTable=SHEET</code> のときだけ使う（下記「<a href="#section-result-path-examples">result と resultPath の生成例</a>」を参照）</td><td>（空）</td></tr>
+    <tr><td>resultPath</td><td>全テーブルをまとめたブックのファイル名（拡張子なし）。xls / xlsx のときだけ表示し、<code>excelTable=BOOK</code> のときは表示しない（下記「<a href="#section-result-path-examples">result と resultPath の生成例</a>」を参照）</td><td>（空）</td></tr>
     <tr><td>exportEmptyTable</td><td>ON にすると、データ行が 0 件のテーブルも出力する</td><td>ON</td></tr>
-    <tr><td>exportHeader</td><td>ON にすると、出力ファイルにヘッダ行を含める</td><td>ON</td></tr>
+    <tr><td>exportHeader</td><td>ON にすると、出力ファイルにヘッダ行を含める。<code>format</code> / <code>fixed</code> ではヘッダ行を出力しないため表示しない</td><td>ON</td></tr>
     <tr><td>parallel</td><td>入力ソースを並列に読み込むスレッド数。並列化できる組み合わせのときだけ表示（<code>table</code> でも表示）。<code>1</code> で逐次。空欄なら並列化できる場合に CPU コア数で並列化する（Parameterize の並列実行の中では逐次）。詳細は下記「並列読込」を参照</td><td>（空）</td></tr>
   </table>
 
@@ -64,12 +64,12 @@
   <p>出力先のディレクトリがなければ作成されます。</p>
 
   <h3 id="section-result-path-convert">Convert / Compare（Result Form）</h3>
-  <p>csv / format / fixed と、xls / xlsx の <code>excelTable=BOOK</code> は <strong>テーブルごとに <code>テーブル名.拡張子</code> のファイル</strong>を作るため、<code>resultPath</code> は使われません。<code>resultPath</code> が効くのは、全テーブルを 1 ブックにまとめる xls / xlsx の <code>excelTable=SHEET</code> だけです。</p>
+  <p>csv / format / fixed と、xls / xlsx の <code>excelTable=BOOK</code> は <strong>テーブルごとに <code>テーブル名.拡張子</code> のファイル</strong>を作るため、<code>resultPath</code> は表示されません。<code>resultPath</code> を使うのは、全テーブルを 1 ブックにまとめる xls / xlsx の <code>excelTable=SHEET</code> だけです（<code>excelTable</code> に Env の変数を指定した場合も、<code>BOOK</code> と確定していないため表示されます）。</p>
   <table>
     <tr><th>resultType</th><th>result</th><th>resultPath</th><th>出力されるファイル</th></tr>
-    <tr><td>csv</td><td><code>out</code></td><td>（何を指定しても同じ）</td><td><code>C:/work/out/ORDERS.csv</code><br><code>C:/work/out/ITEMS.csv</code></td></tr>
-    <tr><td>csv（<code>outputExtension=tsv</code>）</td><td><code>out</code></td><td>—</td><td><code>C:/work/out/ORDERS.tsv</code><br><code>C:/work/out/ITEMS.tsv</code></td></tr>
-    <tr><td>xlsx（<code>excelTable=BOOK</code>）</td><td><code>out</code></td><td>（何を指定しても同じ）</td><td><code>C:/work/out/ORDERS.xlsx</code><br><code>C:/work/out/ITEMS.xlsx</code></td></tr>
+    <tr><td>csv</td><td><code>out</code></td><td>（表示されない）</td><td><code>C:/work/out/ORDERS.csv</code><br><code>C:/work/out/ITEMS.csv</code></td></tr>
+    <tr><td>csv（<code>outputExtension=tsv</code>）</td><td><code>out</code></td><td>（表示されない）</td><td><code>C:/work/out/ORDERS.tsv</code><br><code>C:/work/out/ITEMS.tsv</code></td></tr>
+    <tr><td>xlsx（<code>excelTable=BOOK</code>）</td><td><code>out</code></td><td>（表示されない）</td><td><code>C:/work/out/ORDERS.xlsx</code><br><code>C:/work/out/ITEMS.xlsx</code></td></tr>
     <tr><td>xlsx（<code>excelTable=SHEET</code>）</td><td><code>out</code></td><td><code>orders_all</code></td><td><code>C:/work/out/orders_all.xlsx</code>（シート ORDERS / ITEMS）</td></tr>
     <tr><td>xlsx（<code>excelTable=SHEET</code>）</td><td><code>out</code></td><td><code>orders_all.xlsx</code></td><td><code>C:/work/out/orders_all.xlsx.xlsx</code>（拡張子は自動で付くため、<code>resultPath</code> には付けない）</td></tr>
     <tr><td>xls（<code>excelTable=SHEET</code>）</td><td><code>out</code></td><td><code>orders_all</code></td><td><code>C:/work/out/orders_all.xls</code></td></tr>

@@ -36,9 +36,12 @@ export default function ResultFormSection({
 	const fixedColumnDef = resultOption.fixedColumnDef;
 	const fixedLengthType = resultOption.fixedLengthType;
 	const parallel = resultOption.parallel;
-	// SHEETのときだけparallelを隠すため、SHEETかどうかが変わったら再構成する
+	// SHEETのときはparallel、BOOKのときはresultPathを隠すため、どちらかの判定が変わったら再構成する
 	const handleExcelTableChange = async (value: string) => {
-		if ((value === "SHEET") !== (excelTable?.value === "SHEET")) {
+		if (
+			(value === "SHEET") !== (excelTable?.value === "SHEET") ||
+			(value === "BOOK") !== (excelTable?.value === "BOOK")
+		) {
 			await handleTypeSelect(value);
 		}
 	};

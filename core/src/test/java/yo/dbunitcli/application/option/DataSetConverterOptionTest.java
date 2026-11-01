@@ -61,4 +61,40 @@ class DataSetConverterOptionTest {
         dto.setExcelTable(null);
         Assertions.assertTrue(new DataSetConverterOption("result", dto).isParallelizable());
     }
+
+    @Test
+    void resultPathIsShownOnlyForExcelNotBook() {
+        final DataSetConverterDto dto = new DataSetConverterDto();
+        for (final ResultType type : List.of(ResultType.csv, ResultType.format, ResultType.fixed)) {
+            dto.setResultType(type);
+            Assertions.assertFalse(DataSetConverterOptionTest.options(dto).contains("-result.resultPath"), type.name());
+        }
+        for (final ResultType type : List.of(ResultType.xls, ResultType.xlsx)) {
+            dto.setResultType(type);
+            dto.setExcelTable(null);
+            Assertions.assertTrue(DataSetConverterOptionTest.options(dto).contains("-result.resultPath"), type.name());
+            dto.setExcelTable("BOOK");
+            Assertions.assertFalse(DataSetConverterOptionTest.options(dto).contains("-result.resultPath"), type.name());
+            // 環境変数など実行時に決まる値は、BOOKと確定していないので表示する
+            dto.setExcelTable("${env.excelTable}");
+            Assertions.assertTrue(DataSetConverterOptionTest.options(dto).contains("-result.resultPath"), type.name());
+        }
+    }
+
+    @Test
+    void exportHeaderIsHiddenForFormatAndFixed() {
+        final DataSetConverterDto dto = new DataSetConverterDto();
+        for (final ResultType type : List.of(ResultType.format, ResultType.fixed)) {
+            dto.setResultType(type);
+            Assertions.assertFalse(DataSetConverterOptionTest.options(dto).contains("-result.exportHeader"), type.name());
+        }
+        for (final ResultType type : List.of(ResultType.csv, ResultType.xls, ResultType.xlsx)) {
+            dto.setResultType(type);
+            Assertions.assertTrue(DataSetConverterOptionTest.options(dto).contains("-result.exportHeader"), type.name());
+        }
+    }
+
+    private static java.util.Set<String> options(final DataSetConverterDto dto) {
+        return new DataSetConverterOption("result", dto).toParameters().options().keySet();
+    }
 }
