@@ -7,6 +7,7 @@ import { environmentFixture, workspaceResourcesFixture } from "../../setup";
 import {
 	convertLoadResponseFixture,
 	convertRefreshExcelTableBookResponseFixture,
+	convertRefreshExcelTableEnvResponseFixture,
 	convertRefreshResultTypeXlsxResponseFixture,
 	convertRefreshSrcTypeTableResponseFixture,
 	convertRefreshSrcTypeXlsxResponseFixture,
@@ -187,7 +188,7 @@ describe("ConvertFormの描画テスト", () => {
 			render(<ConvertForm {...makeConvertProps()} />);
 
 			expect(
-				document.querySelector('input[type="text"][name="-result.excelTable"]'),
+				document.querySelector('select[name="-result.excelTable"]'),
 			).toBeInTheDocument();
 		});
 	});
@@ -287,7 +288,7 @@ describe("ConvertFormの描画テスト", () => {
 			);
 
 			expect(
-				document.querySelector('input[type="text"][name="-result.excelTable"]'),
+				document.querySelector('select[name="-result.excelTable"]'),
 			).toBeInTheDocument();
 		});
 
@@ -323,7 +324,7 @@ describe("ConvertFormの描画テスト", () => {
 			);
 
 			const options = Array.from(
-				document.querySelectorAll("#result_excelTable_list option"),
+				document.querySelectorAll('select[name="-result.excelTable"] option'),
 			).map((it) => it.getAttribute("value"));
 			expect(options).toEqual(["SHEET", "BOOK"]);
 		});
@@ -334,26 +335,53 @@ describe("ConvertFormの描画テスト", () => {
 			);
 			render(<ConvertForm {...props} />);
 
-			await userEvent.clear(
-				querySelectorOrThrow('input[type="text"][name="-result.excelTable"]'),
+			await userEvent.selectOptions(
+				querySelectorOrThrow('select[name="-result.excelTable"]'),
+				"BOOK",
 			);
-			expect(props.handleTypeSelect).toHaveBeenCalled();
+			expect(props.handleTypeSelect).toHaveBeenCalledWith("BOOK");
 		});
 
-		it("SHEET以外どうし（BOOK・環境変数など）の変更では再構成せず、SHEETにすると再構成する", async () => {
+		it("SHEET・BOOK以外の設定値（環境変数など）は選択肢に残して選択状態にする", () => {
+			render(
+				<ConvertForm
+					{...makeConvertProps(convertRefreshExcelTableEnvResponseFixture)}
+				/>,
+			);
+
+			const options = Array.from(
+				document.querySelectorAll('select[name="-result.excelTable"] option'),
+			).map((it) => it.getAttribute("value"));
+			expect(options).toEqual(["SHEET", "BOOK", "$EXCEL_TABLE"]);
+			expect(
+				querySelectorOrThrow('select[name="-result.excelTable"]'),
+			).toHaveValue("$EXCEL_TABLE");
+		});
+
+		it("環境変数からBOOKに変えても再構成しない", async () => {
+			const props = makeConvertProps(
+				convertRefreshExcelTableEnvResponseFixture,
+			);
+			render(<ConvertForm {...props} />);
+
+			await userEvent.selectOptions(
+				querySelectorOrThrow('select[name="-result.excelTable"]'),
+				"BOOK",
+			);
+			expect(props.handleTypeSelect).not.toHaveBeenCalled();
+		});
+
+		it("BOOKからSHEETにすると再構成する", async () => {
 			const props = makeConvertProps(
 				convertRefreshExcelTableBookResponseFixture,
 			);
 			render(<ConvertForm {...props} />);
 
-			const excelTable = querySelectorOrThrow(
-				'input[type="text"][name="-result.excelTable"]',
+			await userEvent.selectOptions(
+				querySelectorOrThrow('select[name="-result.excelTable"]'),
+				"SHEET",
 			);
-			await userEvent.clear(excelTable);
-			await userEvent.type(excelTable, "SHEE");
-			expect(props.handleTypeSelect).not.toHaveBeenCalled();
-			await userEvent.type(excelTable, "T");
-			expect(props.handleTypeSelect).toHaveBeenCalledTimes(1);
+			expect(props.handleTypeSelect).toHaveBeenCalledWith("SHEET");
 		});
 
 		it("excelTable=BOOKではparallelを表示する", () => {

@@ -718,6 +718,12 @@ export const convertRefreshExcelTableBookResponseFixture = {
 	convertResult: makeXlsxConvertResult("", "BOOK"),
 } as ConvertOptions;
 
+// excelTableに環境変数を指定してrefreshしたレスポンス相当
+export const convertRefreshExcelTableEnvResponseFixture = {
+	srcData: makeCsvSrcData("src", ""),
+	convertResult: makeXlsxConvertResult("", "$EXCEL_TABLE"),
+} as ConvertOptions;
+
 // compare-refresh-targetType-image-response.json をもとにしたフィクスチャ
 export const compareRefreshTargetTypeImageResponseFixture = {
 	prefix: "",
