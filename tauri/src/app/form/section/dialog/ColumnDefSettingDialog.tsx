@@ -21,6 +21,9 @@ export default function ColumnDefSettingDialog(props: {
 
 	return (
 		<SettingDialog
+			title="Column Def Setting"
+			helpCommand="dialogs/fixed-column-def"
+			helpLabel="Fixed Column Def"
 			setting={target}
 			handleDialogClose={props.handleDialogClose}
 			handleCommit={props.handleCommit}

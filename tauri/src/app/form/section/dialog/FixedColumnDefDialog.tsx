@@ -45,6 +45,9 @@ export function FixedColumnDefEditDialog(props: {
 
 	return (
 		<SettingDialog
+			title="Fixed Column Def"
+			helpCommand="dialogs/fixed-column-def"
+			helpLabel="Fixed Column Def"
 			handleDialogClose={props.handleDialogClose}
 			fileName={props.fileName}
 			save={(fileName) => saveDef(fileName, fixedColumnDef)}
