@@ -10,6 +10,10 @@ public class ResourcesDto {
 
     private List<String> datasetSettings = new ArrayList<>();
 
+    private List<String> compareSettings = new ArrayList<>();
+
+    private List<String> generateSettings = new ArrayList<>();
+
     private List<String> xlsxSchemas = new ArrayList<>();
 
     private List<String> jdbcFiles = new ArrayList<>();
@@ -28,6 +32,22 @@ public class ResourcesDto {
 
     public List<String> getDatasetSettings() {
         return this.datasetSettings;
+    }
+
+    public List<String> getCompareSettings() {
+        return this.compareSettings;
+    }
+
+    public void setCompareSettings(final List<String> compareSettings) {
+        this.compareSettings = compareSettings;
+    }
+
+    public List<String> getGenerateSettings() {
+        return this.generateSettings;
+    }
+
+    public void setGenerateSettings(final List<String> generateSettings) {
+        this.generateSettings = generateSettings;
     }
 
     public List<String> getXlsxSchemas() {

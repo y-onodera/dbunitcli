@@ -18,6 +18,7 @@ import {
 	useDatasetSettingsData,
 	useSaveDatasetSettings,
 } from "../../../../hooks/useDatasetSettings";
+import type { DatasetSettingKind } from "../../../../hooks/useResourceFiles";
 import { srcTypeOf, withValues } from "../../../../model/CommandOption";
 import type {
 	DatasetSetting,
@@ -31,13 +32,18 @@ import {
 import DatasetSettingDialog from "./DatasetSettingDialog";
 import { SaveAndPreviewButton } from "./DatasetTableNamesPreviewButton";
 
+// kind: 読込・保存先のリソース（省略するとresources/setting。generateの-unitSettingはgenerateSetting）
 export default function DatasetSettingsDialog(props: {
 	fileName: string;
 	handleDialogClose: () => void;
 	handleSave: (path: string) => void;
 	saveAndPreview?: (saveThen: SaveThen) => ReactNode;
+	kind?: DatasetSettingKind;
 }) {
-	const { settings, loading } = useDatasetSettingsData(props.fileName);
+	const { settings, loading } = useDatasetSettingsData(
+		props.fileName,
+		props.kind,
+	);
 	if (loading) {
 		return <StatusMessage kind="loading">Loading...</StatusMessage>;
 	}
@@ -48,6 +54,7 @@ export default function DatasetSettingsDialog(props: {
 			handleDialogClose={props.handleDialogClose}
 			handleSave={props.handleSave}
 			saveAndPreview={props.saveAndPreview}
+			kind={props.kind}
 		/>
 	);
 }
@@ -59,8 +66,9 @@ export function DatasetSettingsEditDialog(props: {
 	handleSave: (path: string) => void;
 	// 省略すると、保存したファイルをsrcのsettingに適用してプレビューする（generateの-unitSettingは適用先が違うため差し替える）
 	saveAndPreview?: (saveThen: SaveThen) => ReactNode;
+	kind?: DatasetSettingKind;
 }) {
-	const saveSettings = useSaveDatasetSettings();
+	const saveSettings = useSaveDatasetSettings(props.kind);
 	const [dataSettings, setDataSettings] = useState<DatasetSettings>(
 		props.settings,
 	);

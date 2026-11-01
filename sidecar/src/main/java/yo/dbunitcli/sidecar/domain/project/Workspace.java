@@ -115,6 +115,8 @@ public class Workspace {
         result.setParameterList(parameters);
         final ResourcesDto resources = this.resources().toDto();
         resources.setParameterizeTemplateFiles(this.options().templates().list());
+        resources.setCompareSettings(this.options().compareSettings().list());
+        resources.setGenerateSettings(this.options().generateSettings().list());
         result.setResources(resources);
 
         final ContextDto context = new ContextDto();
@@ -131,6 +133,8 @@ public class Workspace {
         final Function<Option.BaseDir, String> base = baseDir -> withRawWorkspacePrefix(
                 baseDir.dir().toPath().toAbsolutePath().normalize().toString(), expandedWorkspace, rawWorkspace);
         context.setSettingBase(base.apply(Option.BaseDir.SETTING));
+        context.setCompareSettingBase(base.apply(Option.BaseDir.COMPARE_SETTING));
+        context.setGenerateSettingBase(base.apply(Option.BaseDir.GENERATE_SETTING));
         context.setTemplateBase(base.apply(Option.BaseDir.TEMPLATE));
         context.setParameterizeTemplateBase(base.apply(Option.BaseDir.PARAMETERIZE_TEMPLATE));
         context.setJdbcBase(base.apply(Option.BaseDir.JDBC));

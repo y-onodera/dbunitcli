@@ -393,7 +393,7 @@ describe("unitSettingのPreview Unit Settings", () => {
 			...(generateLoadResponseFixture.unit as CommandOption),
 			value: "table",
 		},
-		unitSetting: option("unitSetting", "unit.json", "SETTING"),
+		unitSetting: option("unitSetting", "unit.json", "GENERATE_SETTING"),
 		unitSettingEncoding: option("unitSettingEncoding", "UTF-8"),
 		srcData: {
 			...generateLoadResponseFixture.srcData,

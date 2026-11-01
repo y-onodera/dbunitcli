@@ -42,6 +42,8 @@ class WorkspaceControllerTest {
                 new File("dataset").getAbsolutePath().replace("\\", "\\\\"),
                 new File("target/resources").getAbsolutePath().replace("\\", "\\\\"),
                 new File("target/test-temp/workspace/sample/resources/setting").getAbsolutePath().replace("\\", "\\\\"),
+                new File("target/test-temp/workspace/sample/option/compare/setting").getAbsolutePath().replace("\\", "\\\\"),
+                new File("target/test-temp/workspace/sample/option/generate/setting").getAbsolutePath().replace("\\", "\\\\"),
                 new File("target/test-temp/workspace/sample/resources/template").getAbsolutePath().replace("\\", "\\\\"),
                 new File("target/test-temp/workspace/sample/option/parameterize/template").getAbsolutePath().replace("\\", "\\\\"),
                 new File("target/test-temp/workspace/sample/resources/jdbc").getAbsolutePath().replace("\\", "\\\\"),

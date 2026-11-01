@@ -263,7 +263,7 @@ public interface Option {
     }
 
     enum BaseDir {
-        WORKSPACE, COMMAND_PARAM, DATASET, RESULT, SETTING, TEMPLATE, PARAMETERIZE_TEMPLATE, JDBC, XLSX_SCHEMA, FIXED_COLUMN_DEF, SQL, TABLE, CSVQ;
+        WORKSPACE, COMMAND_PARAM, DATASET, RESULT, SETTING, COMPARE_SETTING, GENERATE_SETTING, TEMPLATE, PARAMETERIZE_TEMPLATE, JDBC, XLSX_SCHEMA, FIXED_COLUMN_DEF, SQL, TABLE, CSVQ;
 
         /**
          * 相対パスの基準ディレクトリ
@@ -274,6 +274,8 @@ public interface Option {
                 case DATASET -> FileResources.datasetDir();
                 case RESULT -> FileResources.resultDir();
                 case SETTING -> FileResources.settingDir();
+                case COMPARE_SETTING -> FileResources.compareSettingDir();
+                case GENERATE_SETTING -> FileResources.generateSettingDir();
                 case TEMPLATE -> FileResources.templateFileDir();
                 case PARAMETERIZE_TEMPLATE -> FileResources.parameterizeTemplateDir();
                 case JDBC -> FileResources.jdbcPropDir();
@@ -294,6 +296,8 @@ public interface Option {
                 case DATASET -> FileResources.searchDatasetBase(path);
                 case RESULT -> FileResources.resultDir(path);
                 case SETTING -> FileResources.searchSetting(path);
+                case COMPARE_SETTING -> FileResources.searchCompareSetting(path);
+                case GENERATE_SETTING -> FileResources.searchGenerateSetting(path);
                 case TEMPLATE -> FileResources.searchTemplate(path);
                 case PARAMETERIZE_TEMPLATE -> FileResources.searchParameterizeTemplate(path);
                 case JDBC -> FileResources.searchJdbc(path);

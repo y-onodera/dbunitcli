@@ -39,7 +39,7 @@
     <tr><th>項目</th><th>説明</th><th>デフォルト</th></tr>
     <tr><td>target</td><td>雛型の生成対象（<code>ddl</code> / <code>javaBean</code> / <code>xlsxSchema</code> / <code>fixedColumnDef</code>）</td><td>ddl</td></tr>
     <tr><td>template（必須）</td><td>書き出すテンプレートのファイル名（<code>resources/template/{名前}.stg</code> と <code>{名前}.txt</code> を Workspace へ出力）</td><td>—</td></tr>
-    <tr><td>unitSetting</td><td>書き出すサンプル unitSetting のファイル名（省略可。<code>resources/setting/{名前}.json</code> を Workspace へ出力）</td><td>—</td></tr>
+    <tr><td>unitSetting</td><td>書き出すサンプル unitSetting のファイル名（省略可。<code>option/generate/setting/{名前}.json</code> を Workspace へ出力）</td><td>—</td></tr>
     <tr><td>datasetType</td><td>記述子データセットの出力形式（<code>csv</code> / <code>xls</code> / <code>xlsx</code> / <code>table</code> / <code>fixed</code>）</td><td>csv</td></tr>
     <tr><td>datasetEncoding</td><td>記述子データセットの出力文字コード（csv / fixed のみ）</td><td>UTF-8</td></tr>
     <tr><td>fixedLength / defaultLength / align</td><td>target が <code>fixedColumnDef</code> の場合のみ表示。記述子データセットに書き出す桁数・デフォルト桁数・寄せ方向</td><td>— / 10 / left</td></tr>
@@ -57,7 +57,7 @@
   <table>
     <tr><th>generate section</th><th>ダイアログの入力</th><th>result（generate フォームへ反映される項目）</th></tr>
     <tr><td>template</td><td>template</td><td><code>template</code>（<code>{名前}.txt</code>）、<code>template.templateGroup</code>（<code>{名前}.stg</code>）。<code>resources/template</code> 配下を基準に検索されるため、接頭辞は省略した名前が入る</td></tr>
-    <tr><td>unitSetting</td><td>unitSetting</td><td><code>unitSetting</code>（<code>{名前}.json</code>。<code>resources/setting</code> 配下を基準に検索されるため接頭辞は省略した名前が入る）</td></tr>
+    <tr><td>unitSetting</td><td>unitSetting</td><td><code>unitSetting</code>（<code>{名前}.json</code>。<code>option/generate/setting</code> 配下を基準に検索されるため接頭辞は省略した名前が入る）</td></tr>
     <tr><td>src</td><td>dataset</td><td><code>src.src</code>（書き出した記述子データセットのディレクトリ。入力した dataset のパスではない）</td></tr>
     <tr><td>src</td><td>datasetType</td><td><code>src.srcType</code></td></tr>
     <tr><td>src</td><td>datasetEncoding</td><td><code>src.encoding</code>（csv / fixed のみ）</td></tr>

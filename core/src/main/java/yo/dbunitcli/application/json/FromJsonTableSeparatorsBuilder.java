@@ -7,6 +7,7 @@ import yo.dbunitcli.resource.FileResources;
 
 import java.io.*;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -19,11 +20,18 @@ public class FromJsonTableSeparatorsBuilder extends TableSeparators.Builder {
     }
 
     public TableSeparators build(final String settings) throws IOException {
+        return this.build(settings, FileResources::searchSetting);
+    }
+
+    /**
+     * カンマ区切りの設定ファイルを、searchで解決して読む（オプションごとの探す順に合わせる）
+     */
+    public TableSeparators build(final String settings, final Function<String, File> search) throws IOException {
         if (Optional.ofNullable(settings).orElse("").isEmpty()) {
             return this.build((File) null);
         } else {
             return this.build(Arrays.stream(settings.split(","))
-                    .map(FileResources::searchSetting)
+                    .map(search)
                     .toArray(File[]::new));
         }
     }

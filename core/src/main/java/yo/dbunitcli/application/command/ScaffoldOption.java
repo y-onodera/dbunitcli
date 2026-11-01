@@ -123,7 +123,7 @@ public record ScaffoldOption(
     // 明示指定された時のみ独立に出力する（dataset雛型のみ-dataset.src/-dataset.srcTypeの指定が条件）
     private void executeTarget(final ScaffoldTarget scaffoldTarget, final File baseDir) throws IOException {
         if (Strings.isNotEmpty(this.unitSettingName)) {
-            final File settingDir = new File(baseDir, FileResources.RESOURCES_SETTING_PATH);
+            final File settingDir = new File(baseDir, FileResources.OPTION_GENERATE_SETTING_PATH);
             if (settingDir.mkdirs() || settingDir.isDirectory()) {
                 this.copyClasspathResource(scaffoldTarget.sampleUnitSettingPath(),
                                            new File(settingDir, this.unitSettingName + ".json"));
@@ -317,7 +317,7 @@ public record ScaffoldOption(
 
     private void putUnitSettingParam(final ParametersBuilder builder) {
         if (Strings.isNotEmpty(this.unitSettingName)) {
-            builder.put("-unitSetting", "resources/setting/" + this.unitSettingName + ".json");
+            builder.put("-unitSetting", FileResources.OPTION_GENERATE_SETTING_PATH + "/" + this.unitSettingName + ".json");
         }
     }
 

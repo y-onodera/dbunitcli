@@ -111,7 +111,7 @@ class JobStreamTest {
     public void tearDown() throws IOException {
         Files.deleteIfExists(Paths.get(WORKSPACE, "resources/template/scaffoldTpl.stg"));
         Files.deleteIfExists(Paths.get(WORKSPACE, "resources/template/scaffoldTpl.txt"));
-        Files.deleteIfExists(Paths.get(WORKSPACE, "resources/setting/scaffoldUnit.json"));
+        Files.deleteIfExists(Paths.get(WORKSPACE, "option/generate/setting/scaffoldUnit.json"));
         Files.deleteIfExists(Paths.get(WORKSPACE, "src/multi1.csv"));
         Files.deleteIfExists(Paths.get(WORKSPACE, "src/multi2.csv"));
         Files.deleteIfExists(Paths.get(WORKSPACE, "src"));

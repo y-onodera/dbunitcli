@@ -27,14 +27,17 @@ function renderKeySetting(setting: DatasetSetting): string {
 		: setting.displayName();
 }
 
-// compareの-setting（比較キー設定）の編集ダイアログ。
+// compareの-setting（比較キー設定）の編集ダイアログ。option/compare/settingに保存する。
 // テーブル名・カラム名の候補はDatasetSrcInfoProvider（CompareFormではold側のデータセット）から取得する
 export default function CompareKeySettingsDialog(props: {
 	fileName: string;
 	handleDialogClose: () => void;
 	handleSave: (path: string) => void;
 }) {
-	const { settings, loading } = useDatasetSettingsData(props.fileName);
+	const { settings, loading } = useDatasetSettingsData(
+		props.fileName,
+		"compareSetting",
+	);
 	if (loading) {
 		return <StatusMessage kind="loading">Loading...</StatusMessage>;
 	}
@@ -55,7 +58,7 @@ export function CompareKeySettingsEditDialog(props: {
 	handleDialogClose: () => void;
 	handleSave: (path: string) => void;
 }) {
-	const saveSettings = useSaveDatasetSettings();
+	const saveSettings = useSaveDatasetSettings("compareSetting");
 	const [dataSettings, setDataSettings] = useState<DatasetSettings>(
 		props.settings,
 	);

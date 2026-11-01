@@ -2,6 +2,10 @@ import type { ComponentType, Dispatch, ReactNode, SetStateAction } from "react";
 import { InlineActions } from "../../../../components/dialog";
 import { useDatasetSrcInfo } from "../../../../context/DatasetSrcInfoProvider";
 import { useResourcesSettings } from "../../../../context/WorkspaceResourcesProvider";
+import {
+	type DatasetSettingKind,
+	resourceFilesOf,
+} from "../../../../hooks/useResourceFiles";
 import { srcTypeOf } from "../../../../model/CommandOption";
 import {
 	DatasetSettingGenerateButton,
@@ -24,6 +28,8 @@ import Text, { TextDropDownMenu } from "./Text";
 // showGenerate=falseでgenerateボタンを出さない（generateの-unitSettingは雛型生成が用途に合わないため）。
 // preview: 横に出すプレビュー。省略するとsrcのsettingの適用前後のPreviewボタン、nullなら出さない
 // （compareの-settingはnull、generateの-unitSettingはunitSettingのプレビューを渡す）
+// kind: 候補一覧・削除の対象（compareの-settingはcompareSetting、generateの-unitSettingはgenerateSetting）。
+// 編集ダイアログの保存先は各ダイアログが決めるため、kindと合わせる
 export default function DatasetSettingText({
 	prefix,
 	element,
@@ -33,14 +39,15 @@ export default function DatasetSettingText({
 	generateEditDialog = DatasetSettingsEditDialog,
 	showGenerate = true,
 	preview = settingPreview,
+	kind = "datasetSetting",
 }: TextProp & {
 	editDialog?: ComponentType<EditResourceDialogProps>;
 	generateEditDialog?: DatasetSettingsEditDialogComponent;
 	showGenerate?: boolean;
 	preview?: ((path: string) => ReactNode) | null;
+	kind?: DatasetSettingKind;
 }) {
-	const settings = useResourcesSettings();
-	const resourceFiles = settings.datasetSettings;
+	const resourceFiles = resourceFilesOf(useResourcesSettings(), kind);
 
 	return (
 		<Text
@@ -84,7 +91,7 @@ export default function DatasetSettingText({
 						]}
 						removeButton={(closeMenu) => (
 							<RemoveResourceButton
-								kind="datasetSetting"
+								kind={kind}
 								path={path}
 								setPath={handleSetPath}
 								onRemoved={closeMenu}

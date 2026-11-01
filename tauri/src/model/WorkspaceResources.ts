@@ -3,6 +3,8 @@ export type DefaultPath =
 	| "DATASET"
 	| "RESULT"
 	| "SETTING"
+	| "COMPARE_SETTING"
+	| "GENERATE_SETTING"
 	| "TEMPLATE"
 	| "PARAMETERIZE_TEMPLATE"
 	| "JDBC"
@@ -21,6 +23,8 @@ export type WorkspaceContextBuilder = {
 	datasetBase: string;
 	resultBase: string;
 	settingBase: string;
+	compareSettingBase?: string;
+	generateSettingBase?: string;
 	templateBase: string;
 	parameterizeTemplateBase: string;
 	jdbcBase: string;
@@ -38,6 +42,8 @@ const basePathKeys: Partial<
 	DATASET: "datasetBase",
 	RESULT: "resultBase",
 	SETTING: "settingBase",
+	COMPARE_SETTING: "compareSettingBase",
+	GENERATE_SETTING: "generateSettingBase",
 	TEMPLATE: "templateBase",
 	PARAMETERIZE_TEMPLATE: "parameterizeTemplateBase",
 	JDBC: "jdbcBase",
@@ -71,6 +77,8 @@ export class WorkspaceContext {
 	readonly datasetBase: string;
 	readonly resultBase: string;
 	readonly settingBase: string;
+	readonly compareSettingBase: string;
+	readonly generateSettingBase: string;
 	readonly templateBase: string;
 	readonly parameterizeTemplateBase: string;
 	readonly jdbcBase: string;
@@ -85,6 +93,8 @@ export class WorkspaceContext {
 		this.datasetBase = builder.datasetBase;
 		this.resultBase = builder.resultBase;
 		this.settingBase = builder.settingBase;
+		this.compareSettingBase = builder.compareSettingBase ?? "";
+		this.generateSettingBase = builder.generateSettingBase ?? "";
 		this.templateBase = builder.templateBase;
 		this.parameterizeTemplateBase = builder.parameterizeTemplateBase;
 		this.jdbcBase = builder.jdbcBase;
@@ -153,6 +163,8 @@ export class ParameterList {
 }
 export type ResourcesSettingsBuilder = {
 	datasetSettings?: string[];
+	compareSettings?: string[];
+	generateSettings?: string[];
 	xlsxSchemas?: string[];
 	jdbcFiles?: string[];
 	templateFiles?: string[];
@@ -170,6 +182,8 @@ export class ResourcesSettings {
 		return new ResourcesSettings(builder);
 	}
 	readonly datasetSettings: string[];
+	readonly compareSettings: string[];
+	readonly generateSettings: string[];
 	readonly xlsxSchemas: string[];
 	readonly jdbcFiles: string[];
 	readonly templateFiles: string[];
@@ -180,6 +194,8 @@ export class ResourcesSettings {
 	readonly csvqFiles: string[];
 	constructor(builder: ResourcesSettingsBuilder) {
 		this.datasetSettings = builder.datasetSettings ?? [];
+		this.compareSettings = builder.compareSettings ?? [];
+		this.generateSettings = builder.generateSettings ?? [];
 		this.xlsxSchemas = builder.xlsxSchemas ?? [];
 		this.jdbcFiles = builder.jdbcFiles ?? [];
 		this.templateFiles = builder.templateFiles ?? [];

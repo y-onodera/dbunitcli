@@ -16,6 +16,9 @@ import {
 // リソース種類ごとのAPIの接頭辞と、応答（更新後のファイル一覧）を書き戻すResourcesSettingsのキー
 const resourceTargets = {
 	datasetSetting: { base: "dataset-setting", key: "datasetSettings" },
+	// compareの-setting（比較キー設定）とgenerateの-unitSetting。形式はdataset-settingと同じで、保存先だけ違う
+	compareSetting: { base: "compare/setting", key: "compareSettings" },
+	generateSetting: { base: "generate/setting", key: "generateSettings" },
 	xlsxSchema: { base: "xlsx-schema", key: "xlsxSchemas" },
 	jdbc: { base: "jdbc", key: "jdbcFiles" },
 	template: { base: "template", key: "templateFiles" },
@@ -33,6 +36,17 @@ const resourceTargets = {
 >;
 
 export type ResourceKind = keyof typeof resourceTargets;
+
+// dataset-setting形式のJSONを保存するリソースの種類
+export type DatasetSettingKind =
+	| "datasetSetting"
+	| "compareSetting"
+	| "generateSetting";
+
+// 種類に対応するAPIの接頭辞（`${apiUrl}${base}/load`等）
+export function resourceBaseOf(kind: ResourceKind): string {
+	return resourceTargets[kind].base;
+}
 
 // 種類に対応するResourcesSettings上のファイル一覧（入力欄の候補）
 export function resourceFilesOf(

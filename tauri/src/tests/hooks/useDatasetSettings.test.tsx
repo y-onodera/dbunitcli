@@ -147,6 +147,29 @@ describe("DatasetSettingsProviderのテスト", () => {
 				mockDatasetSettingsResponse.settings[0].name,
 			);
 		});
+		it.each([
+			{ kind: "compareSetting", endpoint: "compare/setting/load" },
+			{ kind: "generateSetting", endpoint: "generate/setting/load" },
+		] as const)(
+			"kind=$kindのときは$endpointから読み込むことを確認",
+			async ({ kind, endpoint }) => {
+				mockFetchData.mockClear();
+				const { rerender } = renderHook(
+					() => useDatasetSettingsData("test-setting", kind),
+					{ wrapper },
+				);
+				await act(async () => {
+					rerender();
+				});
+				const loads = mockFetchData.mock.calls.filter(([params]) =>
+					params.endpoint.endsWith("/load"),
+				);
+				expect(loads.map(([params]) => params.endpoint)).toStrictEqual([
+					`${mockEnvironment.apiUrl}${endpoint}`,
+				]);
+				expect(loads[0][0].options.body).toBe("test-setting");
+			},
+		);
 	});
 
 	describe("useSrcInfoColumnNamesのテスト", () => {

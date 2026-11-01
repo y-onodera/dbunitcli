@@ -194,7 +194,7 @@ public record GenerateOption(Parameter parameter, String resultDir, String resul
             }
         }
         try {
-            return new FromJsonTableSeparatorsBuilder(this.unitSettingEncoding).build(this.unitSetting);
+            return new FromJsonTableSeparatorsBuilder(this.unitSettingEncoding).build(this.unitSetting, FileResources::searchGenerateSetting);
         } catch (final IOException e) {
             throw new AssertionError(e);
         }
@@ -238,7 +238,7 @@ public record GenerateOption(Parameter parameter, String resultDir, String resul
                 , this.validateFileExists("-template", this.template, BaseDir.TEMPLATE)
                 , this.templateOption.validate()
                 , this.unit == ParameterUnit.table && !this.strategy().isExcel()
-                        ? Option.concat(this.validateFileExists("-unitSetting", this.unitSetting, BaseDir.SETTING)
+                        ? Option.concat(this.validateFileExists("-unitSetting", this.unitSetting, BaseDir.GENERATE_SETTING)
                         , this.validateEncoding("-unitSettingEncoding", this.unitSettingEncoding))
                         : List.of());
     }
@@ -266,7 +266,7 @@ public record GenerateOption(Parameter parameter, String resultDir, String resul
             result.put("-unit", this.unit, ParameterUnit.class);
         }
         if (this.unit == ParameterUnit.table && !this.strategy().isExcel() && !this.strategy().isFixedTemplate()) {
-            result.putFile("-unitSetting", this.unitSetting, BaseDir.SETTING);
+            result.putFile("-unitSetting", this.unitSetting, BaseDir.GENERATE_SETTING);
             result.put("-unitSettingEncoding", this.unitSettingEncoding);
         }
         if (!this.strategy().isFixedTemplate()) {

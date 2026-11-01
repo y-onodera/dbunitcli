@@ -50,7 +50,7 @@ export default function UnitSettingPreviewButton({
 	);
 }
 
-// unitSettingの編集ダイアログ（Dataset Settings）。Save and Previewは、保存したファイルを
+// unitSettingの編集ダイアログ（Dataset Settings）。option/generate/settingに保存する。Save and Previewは、保存したファイルを
 // srcのsettingではなくunitSettingとして適用してプレビューする（Preview Unit Settingsと同じ動作）
 export function UnitSettingsDialog(props: {
 	fileName: string;
@@ -60,6 +60,7 @@ export function UnitSettingsDialog(props: {
 	return (
 		<DatasetSettingsDialog
 			{...props}
+			kind="generateSetting"
 			saveAndPreview={(saveThen) => (
 				<UnitPreviewLauncher title="Save and Preview" saveThen={saveThen} />
 			)}

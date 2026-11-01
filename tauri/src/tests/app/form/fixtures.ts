@@ -508,7 +508,7 @@ export const compareLoadResponseFixture = {
 		"WORKSPACE",
 		false,
 	),
-	setting: makeElement("setting", "FILE", "", "SETTING", false),
+	setting: makeElement("setting", "FILE", "", "COMPARE_SETTING", false),
 	settingEncoding: makeElement(
 		"settingEncoding",
 		"TEXT",
@@ -745,7 +745,7 @@ export const compareRefreshTargetTypeImageResponseFixture = {
 		"WORKSPACE",
 		false,
 	),
-	setting: makeElement("setting", "FILE", "", "SETTING", false),
+	setting: makeElement("setting", "FILE", "", "COMPARE_SETTING", false),
 	settingEncoding: makeElement(
 		"settingEncoding",
 		"TEXT",
@@ -876,7 +876,7 @@ export const compareRefreshNewSrcTypeTableResponseFixture = {
 		"WORKSPACE",
 		false,
 	),
-	setting: makeElement("setting", "FILE", "", "SETTING", false),
+	setting: makeElement("setting", "FILE", "", "COMPARE_SETTING", false),
 	settingEncoding: makeElement(
 		"settingEncoding",
 		"TEXT",
@@ -918,7 +918,7 @@ export const compareRefreshExpectSrcTypeCsvResponseFixture = {
 		"WORKSPACE",
 		false,
 	),
-	setting: makeElement("setting", "FILE", "", "SETTING", false),
+	setting: makeElement("setting", "FILE", "", "COMPARE_SETTING", false),
 	settingEncoding: makeElement(
 		"settingEncoding",
 		"TEXT",

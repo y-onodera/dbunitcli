@@ -16,7 +16,7 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 public record Options(File baseDir, Map<yo.dbunitcli.application.CommandType, ResourceFile> parameters,
-                      ResourceFile templates) {
+                      ResourceFile templates, ResourceFile compareSettings, ResourceFile generateSettings) {
     private static final Logger LOGGER = LoggerFactory.getLogger(Options.class);
 
     public static Builder builder() {
@@ -91,9 +91,12 @@ public record Options(File baseDir, Map<yo.dbunitcli.application.CommandType, Re
         private final Map<yo.dbunitcli.application.CommandType, ResourceFile> parameters = new HashMap<>();
         private File baseDir;
         private ResourceFile templates;
+        private ResourceFile compareSettings;
+        private ResourceFile generateSettings;
 
         public Options build() {
-            return new Options(this.baseDir, new HashMap<>(this.parameters), this.templates);
+            return new Options(this.baseDir, new HashMap<>(this.parameters), this.templates,
+                    this.compareSettings, this.generateSettings);
         }
 
         public void workspace(final File workspace) {
@@ -104,6 +107,13 @@ public record Options(File baseDir, Map<yo.dbunitcli.application.CommandType, Re
             this.templates = new ResourceFile(
                     new File(this.parameters.get(Type.parameterize).baseDir(), "template")
                     , FileResources::searchTemplate);
+            // compareの-setting・generateの-unitSettingの保存先（一覧に無い名前はresources/setting等から探す）
+            this.compareSettings = new ResourceFile(
+                    new File(this.parameters.get(Type.compare).baseDir(), "setting")
+                    , FileResources::searchCompareSetting);
+            this.generateSettings = new ResourceFile(
+                    new File(this.parameters.get(Type.generate).baseDir(), "setting")
+                    , FileResources::searchGenerateSetting);
         }
 
         private Builder addParameterFiles(final Type command) {

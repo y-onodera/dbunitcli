@@ -5,7 +5,7 @@
 
 各雛型は**対応オプションを明示指定した時のみ独立出力**（名前フォールバック・target間の非対称なし）:
 
-- `-unitSetting=U` → サンプルunitSettingを`resources/setting/U.json`へコピー（`.param`には`-unitSetting=resources/setting/U.json`として書き出す）
+- `-unitSetting=U` → サンプルunitSettingを`option/generate/setting/U.json`へコピー（`.param`には`-unitSetting=option/generate/setting/U.json`として書き出す）
 - `-template=T` → 組み込みstg/txtを`resources/template/`へ無改造コピー
 - `-dataset.src`+`-dataset.srcType` → `src/`に記述子dataset（1カラム=1行。Generateと同じ`DescriptorGenerateStrategy.wrapDescriptor()`で実メタデータから合成）
 - `-parameter=P` → `option/P.param`。`-template`指定時はtxt駆動（記述子dataset入力）、未指定時はbuiltin駆動（元datasetの絶対パス入力）を書き出す
@@ -35,7 +35,7 @@
 
 補足:
 - サンプルunitSettingは、利用者が他のデータソースの列をテンプレートの読む列へマッピングする際のヒント。各サンプルはテンプレートで利用される全列を`string`/`boolean`式で定義しておく（値を変えない列は恒等マッピング）
-- 出力先はunitSetting=`resources/setting/`、template=`resources/template/`、parameter=`option/`、dataset=`src/`。`.param`内の相対パスはこの配置を前提に書き出されるため、ディレクトリ構成を変える場合は`.param`生成側も追従が必要
+- 出力先はunitSetting=`option/generate/setting/`、template=`resources/template/`、parameter=`option/`、dataset=`src/`。`.param`内の相対パスはこの配置を前提に書き出されるため、ディレクトリ構成を変える場合は`.param`生成側も追従が必要
 - `parameter` targetは`CommandParameters(Type, commandInput).shrink()`で任意コマンドの`.param`を生成。出力ファイル名は`{commandType}.param`固定で`-parameter`の名前は使われない（他targetは`-parameter`の名前で出力）
 - `-datasetType`（記述子datasetの出力形式、デフォルトcsv）に`format`は指定不可（読み戻し先の`DataSourceType`が存在しないためコンストラクタで即エラー）
 
