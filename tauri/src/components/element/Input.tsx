@@ -1,4 +1,5 @@
-import { type ReactNode, useState } from "react";
+import { type ReactNode, useRef, useState } from "react";
+import { ClearIcon } from "./Icon";
 
 export function InputLabel(props: {
 	text: string;
@@ -32,15 +33,21 @@ export function ControllTextBox(props: {
 	hidden?: boolean;
 	handleChange: (ev: React.ChangeEvent<HTMLInputElement>) => void;
 	handleBlur?: (ev: React.FocusEvent<HTMLInputElement>) => void;
+	/** 指定すると入力欄の右端に入力を消すボタンを出す */
+	handleClear?: () => void;
 }) {
-	return (
+	const inputRef = useRef<HTMLInputElement>(null);
+	const showClear =
+		props.handleClear !== undefined && props.value !== "" && !props.disabled;
+	const input = (
 		<input
+			ref={inputRef}
 			name={props.name}
 			id={props.id}
 			type="text"
 			list={props.list ?? ""}
 			style={props.hidden ? { display: "none" } : {}}
-			className={inputStyle(props.wStyle ? props.wStyle : "w-full")}
+			className={`${inputStyle(props.wStyle ? props.wStyle : "w-full")} ${showClear ? "pe-8" : ""}`}
 			required={props.required}
 			disabled={!!props.disabled}
 			value={props.value}
@@ -48,6 +55,30 @@ export function ControllTextBox(props: {
 			onBlur={(ev) => props.handleBlur?.(ev)}
 			autoComplete={props.list ? "off" : "on"}
 		/>
+	);
+	if (props.handleClear === undefined) {
+		return input;
+	}
+	const handleClear = props.handleClear;
+	return (
+		<div className="relative">
+			{input}
+			{showClear && !props.hidden && (
+				// マウス操作用。Tab移動の対象にはしない
+				<button
+					type="button"
+					tabIndex={-1}
+					aria-label={`clear ${props.name}`}
+					className="absolute inset-y-0 end-0 flex items-center pe-2 text-content-muted hover:text-link-hover"
+					onClick={() => {
+						handleClear();
+						inputRef.current?.focus();
+					}}
+				>
+					<ClearIcon title="clear" />
+				</button>
+			)}
+		</div>
 	);
 }
 export function SelectBox(props: {

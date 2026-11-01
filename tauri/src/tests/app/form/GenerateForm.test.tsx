@@ -59,7 +59,7 @@ async function templateMenuItem(name: string): Promise<HTMLElement | null> {
 	const templateInput = document.querySelector('input[name="-template"]');
 	const menuButton = templateInput
 		?.closest("div.flex")
-		?.querySelector('button[title="setting"], button:has(title)');
+		?.querySelector('button[aria-label="setting"]');
 	if (!menuButton) {
 		return null;
 	}
