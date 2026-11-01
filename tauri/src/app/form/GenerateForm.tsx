@@ -1,5 +1,7 @@
 import { SectionFieldset } from "../../components/dialog";
 import { SectionLegend } from "../../components/dialog/SectionFieldset";
+import { DatasetSrcInfoProvider } from "../../context/DatasetSrcInfoProvider";
+import { buildDatasetSrcInfo } from "../../model/CommandOption";
 import type { GenerateOptions } from "../../model/SelectParameter";
 import { DatasetLoadForm } from "./section/DatasetLoadForm";
 import {
@@ -8,6 +10,7 @@ import {
 } from "./section/dialog/TxtTemplateGenerateDialog";
 import { XlsxTemplateGenerateButton } from "./section/dialog/XlsxTemplateGenerateDialog";
 import Check from "./section/element/Check";
+import DatasetSettingText from "./section/element/DatasetSettingText";
 import EncodingText from "./section/element/EncodingText";
 import FileText from "./section/element/FileText";
 import PlainText from "./section/element/PlainText";
@@ -61,7 +64,17 @@ export function GenerateForm(prop: {
 					/>
 				)}
 				{generate.unitSetting && (
-					<FileText prefix="" element={generate.unitSetting} />
+					// unitSettingの編集・生成ではsrc側のデータセットからテーブル名・カラム名の候補を取る
+					<DatasetSrcInfoProvider
+						key={`${prop.name}generate-unitSetting:${srcData.srcType?.value ?? ""}`}
+						initialValue={buildDatasetSrcInfo(srcData)}
+					>
+						<DatasetSettingText
+							prefix=""
+							element={generate.unitSetting}
+							showPreview={false}
+						/>
+					</DatasetSrcInfoProvider>
 				)}
 				{generate.unitSettingEncoding && (
 					<EncodingText prefix="" element={generate.unitSettingEncoding} />
