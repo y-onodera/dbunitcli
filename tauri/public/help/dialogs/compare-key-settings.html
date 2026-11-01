@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <title>ヘルプ - Compare Key Settings</title>
+  <link rel="stylesheet" href="../help.css" />
+</head>
+<body>
+  <p><a href="../index.html">&larr; ヘルプ一覧に戻る</a></p>
+  <h1>Compare Key Settings</h1>
+  <p>Compare の <code>setting</code>（比較の設定ファイル）のうち、テーブルごとの比較キー（主キー）だけを編集するダイアログです。<code>targetType</code> が <code>data</code> のとき、<code>setting</code> 横のメニューの編集ボタンから開きます。</p>
+
+  <h2 id="section-simple">シンプルな使い方</h2>
+  <p>Key Settings の表の追加ボタンで Compare Key Setting を開き、対象のテーブルと <code>keys</code> を指定します。</p>
+  <pre>指定:
+  setting 横のメニューの編集ボタン → Key Settings の追加ボタン
+  Target の name = users
+  Keys の keys   = id
+  → Save（Compare Key Setting）
+  ファイル名     = compare-keys.json
+  → Save（Compare Key Settings）
+
+結果:
+  setting = compare-keys.json
+  users は id が同じ行どうしを突き合わせて比較する</pre>
+  <ul>
+    <li>テーブル名とカラム名の候補（Load Columns）は、<code>old</code> に指定したデータセットから取得する</li>
+    <li>表の行には対象テーブルと比較キーを <code>users [id]</code> の形で表示する</li>
+  </ul>
+
+  <h2 id="section-open">開き方</h2>
+  <table>
+    <tr><th>ボタン</th><th>説明</th></tr>
+    <tr><td>編集ボタン</td><td><code>setting</code> に指定したファイルを開く。空欄なら新しく作る</td></tr>
+    <tr><td>generate ボタン</td><td><a href="dataset-setting-generate.html">Dataset Setting Generate</a> で既存データセットから雛型を生成し、このダイアログで確認・保存する</td></tr>
+    <tr><td>削除ボタン</td><td><code>setting</code> に指定したファイルを削除する。候補に表示されるファイルのときだけ表示</td></tr>
+  </table>
+  <p><code>targetType</code> が <code>image</code> / <code>pdf</code> のときは <code>setting</code> を使わないため、編集ボタンと generate ボタンは表示されません。</p>
+
+  <h2 id="section-fields">記述内容</h2>
+  <table>
+    <tr><th>項目</th><th>説明</th></tr>
+    <tr><td>Key Settings</td><td>テーブルごとの比較キー。ファイルの <code>settings</code> に保存する</td></tr>
+    <tr><td>Common Key Settings</td><td>複数テーブルに共通で適用する比較キー。ファイルの <code>commonSettings</code> に保存する。Key Settings と重なったときの扱いは <a href="dataset-settings.html">Dataset Settings</a> の <code>commonSettings</code> と同じ</td></tr>
+  </table>
+  <p>行の編集ボタン（新しく作るときは追加ボタン）で開く Compare Key Setting では、次の項目だけを編集します。</p>
+  <table>
+    <tr><th>項目</th><th>説明</th></tr>
+    <tr><td>Target</td><td>対象のテーブルの指定方法（<code>name</code> / <code>pattern</code> / 結合）。書き方は <a href="dataset-setting.html">Dataset Setting</a> と同じ</td></tr>
+    <tr><td>Keys</td><td>比較キーにするカラム。Load Columns で <code>old</code> のデータセットからカラム名の候補を読み込める</td></tr>
+  </table>
+
+  <h2 id="section-save">保存</h2>
+  <p>Compare Key Settings の Save で、ファイル名に指定したファイルへ書き出し、そのファイルを <code>setting</code> に設定します。Compare Key Setting の Save は表に反映するだけで、ファイルには書き出しません。</p>
+
+  <h2 id="section-note">注意</h2>
+  <ul>
+    <li>ファイルにある <code>keys</code> 以外の設定（<code>exclude</code>・<code>filter</code>・<code>order</code>・<code>outputFilter</code>・<code>import</code> など）は、このダイアログでは表示しないが、保存しても消えずにそのまま残る</li>
+    <li>それらを編集する場合は、ファイルを直接編集するか、同じ書式の <a href="dataset-settings.html">Dataset Settings</a> を参照してください</li>
+  </ul>
+
+  <h2 id="section-related">関連</h2>
+  <ul>
+    <li><a href="../commands/compare.html">Compare</a> — <code>setting</code> を使うコマンド</li>
+    <li><a href="dataset-settings.html">Dataset Settings</a> — <code>setting</code> の書式</li>
+    <li><a href="dataset-setting.html">Dataset Setting</a> — Target と <code>keys</code> の書き方</li>
+    <li><a href="dataset-setting-generate.html">Dataset Setting Generate</a> — 雛型の生成</li>
+  </ul>
+</body>
+</html>

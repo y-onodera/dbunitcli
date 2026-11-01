@@ -1,4 +1,5 @@
-import { render } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import { CompareForm } from "../../../app/form/CompareForm";
 import type { CompareOptions } from "../../../model/SelectParameter";
@@ -32,6 +33,17 @@ vi.mock("../../../hooks/useJdbc", () => ({
 	useJdbcConnectionTest: () => vi.fn(),
 	useSaveJdbcProperties: () => vi.fn(),
 }));
+
+// -setting入力欄の横にあるドロップダウンを開く（メニューはポータルでbody直下に出る）
+async function openSettingMenu() {
+	const row = document
+		.querySelector('input[type="text"][name="-setting"]')
+		?.closest("div.flex");
+	if (!(row instanceof HTMLElement)) {
+		throw new Error("-setting row not found");
+	}
+	await userEvent.click(within(row).getByTitle("setting"));
+}
 
 function makeCompareProps(
 	fixture:
@@ -85,6 +97,14 @@ describe("CompareFormの描画テスト", () => {
 			expect(
 				document.querySelector('input[type="text"][name="-settingEncoding"]'),
 			).toBeInTheDocument();
+		});
+
+		it("settingのメニューに比較キー専用のedit・generateボタンがある", async () => {
+			render(<CompareForm {...makeCompareProps()} />);
+
+			await openSettingMenu();
+			expect(screen.getByTitle("edit")).toBeInTheDocument();
+			expect(screen.getByTitle("generate")).toBeInTheDocument();
 		});
 
 		it("compareセクションにcreatePatchSqlが含まれる", () => {
@@ -177,6 +197,18 @@ describe("CompareFormの描画テスト", () => {
 					'input[type="text"][name="-image.pixelToleranceLevel"]',
 				),
 			).toBeInTheDocument();
+		});
+
+		it("settingのメニューにedit・generateボタンは出さない", async () => {
+			render(
+				<CompareForm
+					{...makeCompareProps(compareRefreshTargetTypeImageResponseFixture)}
+				/>,
+			);
+
+			await openSettingMenu();
+			expect(screen.queryByTitle("edit")).not.toBeInTheDocument();
+			expect(screen.queryByTitle("generate")).not.toBeInTheDocument();
 		});
 
 		it("createPatchSqlは表示されない", () => {

@@ -6,7 +6,6 @@ export type Prop = {
 	element: CommandOption;
 	hidden?: boolean;
 	srcType?: string;
-	hideDatasetSettingEdit?: boolean;
 };
 export type FileProp = Prop & {
 	path: string;

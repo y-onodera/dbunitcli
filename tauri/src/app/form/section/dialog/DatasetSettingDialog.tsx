@@ -1,8 +1,5 @@
 import { useState } from "react";
 import { SettingDialog } from "../../../../components/dialog";
-import { useDatasetSrcInfo } from "../../../../context/DatasetSrcInfoProvider";
-import { useDatasetTableNames } from "../../../../hooks/useDatasetSettings";
-import { withAllTables } from "../../../../model/CommandOption";
 import type { DatasetSetting } from "../../../../model/DatasetSettings";
 import ColumnDatalistDialog from "./ColumnDatalistDialog";
 import {
@@ -12,6 +9,7 @@ import {
 	TargetFields,
 } from "./DatasetSettingFields";
 import { InlinePreviewButton } from "./DatasetTableNamesPreviewButton";
+import { useColumnCandidates } from "./useColumnCandidates";
 
 export default function DatasetSettingDialog(props: {
 	setting: DatasetSetting;
@@ -19,12 +17,7 @@ export default function DatasetSettingDialog(props: {
 	handleCommit: (newSettings: DatasetSetting) => void;
 }) {
 	const [target, setTarget] = useState(props.setting);
-	const [columnDatalist, setColumnDatalist] = useState<string[]>([]);
-	const [showColumnDialog, setShowColumnDialog] = useState(false);
-	const columnList =
-		columnDatalist.length > 0 ? "column_datalist_list" : undefined;
-	const datasetSrcInfo = useDatasetSrcInfo();
-	const { tableNames } = useDatasetTableNames(withAllTables(datasetSrcInfo));
+	const candidates = useColumnCandidates();
 
 	return (
 		<SettingDialog
@@ -42,28 +35,28 @@ export default function DatasetSettingDialog(props: {
 			<TargetFields
 				target={target}
 				setTarget={setTarget}
-				tableNames={tableNames}
+				tableNames={candidates.tableNames}
 			/>
 			<ModeFields
 				target={target}
 				setTarget={setTarget}
-				columnList={columnList}
+				columnList={candidates.columnList}
 				SeparateDialog={DatasetSettingDialog}
 			/>
 			<AdditionalColumnsFields target={target} setTarget={setTarget} />
 			<FilterOrderFields
 				target={target}
 				setTarget={setTarget}
-				columnDatalist={columnDatalist}
-				columnList={columnList}
-				onLoadColumns={() => setShowColumnDialog(true)}
+				columnDatalist={candidates.columnDatalist}
+				columnList={candidates.columnList}
+				onLoadColumns={candidates.openColumnDialog}
 			/>
-			{showColumnDialog && (
+			{candidates.showColumnDialog && (
 				<ColumnDatalistDialog
-					tableNames={tableNames}
+					tableNames={candidates.tableNames}
 					target={target}
-					onLoad={(columns) => setColumnDatalist(columns)}
-					onClose={() => setShowColumnDialog(false)}
+					onLoad={candidates.setColumnDatalist}
+					onClose={candidates.closeColumnDialog}
 				/>
 			)}
 		</SettingDialog>
