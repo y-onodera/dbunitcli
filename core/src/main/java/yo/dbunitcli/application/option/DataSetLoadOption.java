@@ -140,7 +140,7 @@ public record DataSetLoadOption(
      */
     public TableSeparators getTableSeparators() {
         try {
-            final TableSeparators result = new FromJsonTableSeparatorsBuilder(this.settingEncoding).build(this.setting);
+            final TableSeparators result = new FromJsonTableSeparatorsBuilder(this.settingEncoding).build(this.setting, BaseDir.SETTING);
             return this.isSettingTargetOnly() && Strings.isNotEmpty(this.setting) ? result.onlySettingTargets() : result;
         } catch (final IOException e) {
             throw new AssertionError(e);

@@ -40,6 +40,7 @@ function renderDialog() {
 		<DatasetSettingsEditDialog
 			settings={settings}
 			fileName="setting.json"
+			kind="datasetSetting"
 			handleDialogClose={vi.fn()}
 			handleSave={handleSave}
 		/>,

@@ -82,7 +82,6 @@ export function GenerateForm(prop: {
 							element={generate.unitSetting}
 							editDialog={UnitSettingsDialog}
 							showGenerate={false}
-							kind="generateSetting"
 							preview={(path) => (
 								<UnitSettingPreviewButton unitSetting={path} />
 							)}

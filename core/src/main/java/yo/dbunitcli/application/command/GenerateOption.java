@@ -194,7 +194,7 @@ public record GenerateOption(Parameter parameter, String resultDir, String resul
             }
         }
         try {
-            return new FromJsonTableSeparatorsBuilder(this.unitSettingEncoding).build(this.unitSetting, FileResources::searchGenerateSetting);
+            return new FromJsonTableSeparatorsBuilder(this.unitSettingEncoding).build(this.unitSetting, BaseDir.GENERATE_SETTING);
         } catch (final IOException e) {
             throw new AssertionError(e);
         }

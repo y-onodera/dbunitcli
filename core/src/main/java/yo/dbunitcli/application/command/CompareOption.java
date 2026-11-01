@@ -6,7 +6,6 @@ import yo.dbunitcli.application.Option;
 import yo.dbunitcli.application.ArgumentMapper;
 import yo.dbunitcli.application.DefaultArgumentFunction;
 import yo.dbunitcli.application.json.FromJsonTableSeparatorsBuilder;
-import yo.dbunitcli.resource.FileResources;
 import yo.dbunitcli.application.option.DataSetConverterOption;
 import yo.dbunitcli.application.option.DataSetLoadOption;
 import yo.dbunitcli.application.option.ResultOption;
@@ -189,7 +188,7 @@ public record CompareOption(
                         .build().map(separator -> separator.addSetting(TableSeparator.builder()
                                 .setComparisonKeys(List.of("NAME")).build()));
             } else {
-                return new FromJsonTableSeparatorsBuilder(this.settingEncoding).build(this.setting, FileResources::searchCompareSetting);
+                return new FromJsonTableSeparatorsBuilder(this.settingEncoding).build(this.setting, BaseDir.COMPARE_SETTING);
             }
         } catch (final IOException e) {
             throw new AssertionError(e);

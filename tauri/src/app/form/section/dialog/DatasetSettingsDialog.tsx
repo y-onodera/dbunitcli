@@ -32,13 +32,13 @@ import {
 import DatasetSettingDialog from "./DatasetSettingDialog";
 import { SaveAndPreviewButton } from "./DatasetTableNamesPreviewButton";
 
-// kind: 読込・保存先のリソース（省略するとresources/setting。generateの-unitSettingはgenerateSetting）
+// kind: 読込・保存先のリソース（DatasetSettingTextがオプションの基準ディレクトリから決めて渡す）
 export default function DatasetSettingsDialog(props: {
 	fileName: string;
 	handleDialogClose: () => void;
 	handleSave: (path: string) => void;
 	saveAndPreview?: (saveThen: SaveThen) => ReactNode;
-	kind?: DatasetSettingKind;
+	kind: DatasetSettingKind;
 }) {
 	const { settings, loading } = useDatasetSettingsData(
 		props.fileName,
@@ -66,7 +66,7 @@ export function DatasetSettingsEditDialog(props: {
 	handleSave: (path: string) => void;
 	// 省略すると、保存したファイルをsrcのsettingに適用してプレビューする（generateの-unitSettingは適用先が違うため差し替える）
 	saveAndPreview?: (saveThen: SaveThen) => ReactNode;
-	kind?: DatasetSettingKind;
+	kind: DatasetSettingKind;
 }) {
 	const saveSettings = useSaveDatasetSettings(props.kind);
 	const [dataSettings, setDataSettings] = useState<DatasetSettings>(

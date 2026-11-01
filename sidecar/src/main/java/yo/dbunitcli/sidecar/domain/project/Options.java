@@ -109,10 +109,10 @@ public record Options(File baseDir, Map<yo.dbunitcli.application.CommandType, Re
                     , FileResources::searchTemplate);
             // compareの-setting・generateの-unitSettingの保存先（一覧に無い名前はresources/setting等から探す）
             this.compareSettings = new ResourceFile(
-                    new File(this.parameters.get(Type.compare).baseDir(), "setting")
+                    new File(workspace, FileResources.OPTION_COMPARE_SETTING_PATH)
                     , FileResources::searchCompareSetting);
             this.generateSettings = new ResourceFile(
-                    new File(this.parameters.get(Type.generate).baseDir(), "setting")
+                    new File(workspace, FileResources.OPTION_GENERATE_SETTING_PATH)
                     , FileResources::searchGenerateSetting);
         }
 

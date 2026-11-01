@@ -44,6 +44,8 @@ export const workspaceResourcesFixture: WorkspaceResources = {
 	}),
 	resources: ResourcesSettings.from({
 		datasetSettings: ["setting1"],
+		compareSettings: ["compareKey1"],
+		generateSettings: ["unit1"],
 		xlsxSchemas: ["schema1"],
 		jdbcFiles: ["jdbc1"],
 		templateFiles: ["template1"],

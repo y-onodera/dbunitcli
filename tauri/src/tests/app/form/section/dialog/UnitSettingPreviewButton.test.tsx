@@ -191,6 +191,7 @@ describe("UnitSettingPreviewButtonのテスト", () => {
 			render(
 				<UnitSettingsDialog
 					fileName="unit.json"
+					kind="generateSetting"
 					handleDialogClose={vi.fn()}
 					handleSave={vi.fn()}
 				/>,
@@ -213,7 +214,7 @@ describe("UnitSettingPreviewButtonのテスト", () => {
 			});
 		});
 
-		it("option/generate/setting（generateSetting）に読込・保存する", () => {
+		it("受け取ったkind（読込・保存先）をDataset Settingsへ渡す", () => {
 			renderDialog();
 			expect(screen.getByTestId("dataset-settings-dialog")).toHaveAttribute(
 				"data-kind",

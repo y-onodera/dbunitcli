@@ -14,6 +14,7 @@ import {
 	type UnitTablePreview,
 	useDatasetUnitTablePreview,
 } from "../../../../hooks/useDatasetSettings";
+import type { DatasetSettingKind } from "../../../../hooks/useResourceFiles";
 import {
 	type DatasetSrcInfo,
 	srcTypeOf,
@@ -50,17 +51,17 @@ export default function UnitSettingPreviewButton({
 	);
 }
 
-// unitSettingの編集ダイアログ（Dataset Settings）。option/generate/settingに保存する。Save and Previewは、保存したファイルを
+// unitSettingの編集ダイアログ（Dataset Settings）。Save and Previewは、保存したファイルを
 // srcのsettingではなくunitSettingとして適用してプレビューする（Preview Unit Settingsと同じ動作）
 export function UnitSettingsDialog(props: {
 	fileName: string;
 	handleDialogClose: () => void;
 	handleSave: (path: string) => void;
+	kind: DatasetSettingKind;
 }) {
 	return (
 		<DatasetSettingsDialog
 			{...props}
-			kind="generateSetting"
 			saveAndPreview={(saveThen) => (
 				<UnitPreviewLauncher title="Save and Preview" saveThen={saveThen} />
 			)}

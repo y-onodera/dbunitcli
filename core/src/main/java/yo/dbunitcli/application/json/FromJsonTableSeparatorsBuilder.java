@@ -1,13 +1,13 @@
 package yo.dbunitcli.application.json;
 
 import jakarta.json.*;
+import yo.dbunitcli.application.Option;
 import yo.dbunitcli.common.TableMetaDataFilter;
 import yo.dbunitcli.dataset.*;
 import yo.dbunitcli.resource.FileResources;
 
 import java.io.*;
 import java.util.*;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -19,19 +19,15 @@ public class FromJsonTableSeparatorsBuilder extends TableSeparators.Builder {
         this.settingEncoding = settingEncoding;
     }
 
-    public TableSeparators build(final String settings) throws IOException {
-        return this.build(settings, FileResources::searchSetting);
-    }
-
     /**
-     * カンマ区切りの設定ファイルを、searchで解決して読む（オプションごとの探す順に合わせる）
+     * カンマ区切りの設定ファイルを、オプションの基準ディレクトリ（validate・putFileと同じBaseDir）で探して読む
      */
-    public TableSeparators build(final String settings, final Function<String, File> search) throws IOException {
+    public TableSeparators build(final String settings, final Option.BaseDir baseDir) throws IOException {
         if (Optional.ofNullable(settings).orElse("").isEmpty()) {
             return this.build((File) null);
         } else {
             return this.build(Arrays.stream(settings.split(","))
-                    .map(search)
+                    .map(baseDir::search)
                     .toArray(File[]::new));
         }
     }

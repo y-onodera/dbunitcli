@@ -137,6 +137,7 @@ describe("CompareKeySettingsEditDialogのテスト", () => {
 			<CompareKeySettingsEditDialog
 				settings={settings}
 				fileName="compare.json"
+				kind="compareSetting"
 				handleDialogClose={vi.fn()}
 				handleSave={vi.fn()}
 			/>,
@@ -151,7 +152,7 @@ describe("CompareKeySettingsEditDialogのテスト", () => {
 		).not.toBeInTheDocument();
 	});
 
-	it("Saveで編集中の設定をoption/compare/setting（compareSetting）に保存し、保存先を返す", async () => {
+	it("Saveで編集中の設定をkindの保存先に保存し、保存先を返す", async () => {
 		srcInfoFixture.current = oldSrcInfo;
 		mockSave.mockResolvedValue("success");
 		const settings = DatasetSettings.create();
@@ -161,6 +162,7 @@ describe("CompareKeySettingsEditDialogのテスト", () => {
 			<CompareKeySettingsEditDialog
 				settings={settings}
 				fileName="compare.json"
+				kind="compareSetting"
 				handleDialogClose={vi.fn()}
 				handleSave={handleSave}
 			/>,

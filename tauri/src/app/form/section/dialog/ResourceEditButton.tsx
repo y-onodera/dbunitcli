@@ -99,13 +99,16 @@ export type EditResourceDialogProps = {
 	handleSave: (path: string) => void;
 };
 
-// ファイル名で開く編集ダイアログ（保存したらパスを反映して閉じる）を持つ編集ボタン
-export function EditResourceButton({
+// ファイル名で開く編集ダイアログ（保存したらパスを反映して閉じる）を持つ編集ボタン。
+// dialogPropsはダイアログへそのまま渡す追加のprops（保存先の種類など）
+export function EditResourceButton<P extends object = object>({
 	dialog: DialogComponent,
+	dialogProps,
 	path,
 	setPath,
 }: ResourceEditButtonProp & {
-	dialog: ComponentType<EditResourceDialogProps>;
+	dialog: ComponentType<EditResourceDialogProps & P>;
+	dialogProps?: P;
 }) {
 	const renderDialog = (open: boolean, closeDialog: () => void) => {
 		if (!open) {
@@ -113,6 +116,7 @@ export function EditResourceButton({
 		}
 		return (
 			<DialogComponent
+				{...(dialogProps as P)}
 				fileName={path}
 				handleDialogClose={closeDialog}
 				handleSave={(newPath: string) => {
