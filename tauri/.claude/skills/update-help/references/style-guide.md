@@ -118,7 +118,7 @@ index は次の順に、すべてのページへのリンクを並べる。
 | 種別 | 対象 | 章立て（h2） |
 |---|---|---|
 | 使い方 | `guide/*.html` | 手順ごとの h2（「1. 〜する」の形）→ 関連 |
-| コマンド | `commands/*.html` | シンプルな使い方 → 変更できる設定（h3 で 〈項目名〉一覧 →（並列処理）→（応用例））→ 関連 |
+| コマンド | `commands/*.html` | シンプルな使い方 →（比較結果の形式）→ 変更できる設定（h3 で 〈項目名〉一覧 →（並列処理）→（応用例））→ 関連 |
 | コマンドの type | `commands/*/types/*.html` | 固有オプション →（項目ごとの詳細）→ 出力例（compare は比較結果の形式、run は設定例）→（注意）→ 関連 |
 | フォームのセクション | `sections/*.html` | 設定項目 →（項目ごとの詳細）→（例）→（注意）→ 関連 |
 | セクションの type | `sections/*/types/*.html` | 読み込み対象（出力は「出力先」）→ 固有オプション → 入出力例 →（注意） |
@@ -142,6 +142,7 @@ index は次の順に、すべてのページへのリンクを並べる。
 | Dataset Settings のフィールド | `dialogs/dataset-setting.html`（`dataset-settings.html` は全体構造と一覧表だけ） |
 | JEXL 式 | `dialogs/dataset-setting.html` |
 | StringTemplate の書式 | `reference/st4.html`（`sections/template.html` は設定項目と簡単な例だけ） |
+| Compare（`targetType=data`）の比較結果の形式 | `commands/compare.html`（`compare/types/data.html` は要約とリンクだけ） |
 | 並列処理の条件 | `sections/result-form.html`（コマンドのページは差分だけ） |
 | Env と -P の使い分け | `dialogs/parameters.html` |
 | 作業の流れ（Workspace の選択から再利用まで） | `guide/` の使い方ページ |
