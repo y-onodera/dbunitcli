@@ -43,10 +43,17 @@ vi.mock("../../../../../context/DatasetSrcInfoProvider", () => ({
 vi.mock("../../../../../context/UnitSettingEncodingProvider", () => ({
 	useUnitSettingEncoding: () => encodingFixture.current,
 }));
-// 編集ダイアログ本体は使わず、footerのSave and Previewだけを出す（保存は"saved.json"へ成功したものとする）
+// 編集ダイアログ本体は使わず、footerのSave and Previewだけを出す（保存は"saved.json"へ成功したものとする）。
+// 保存先の種類はdata-kindに出して確認する
 vi.mock("../../../../../app/form/section/dialog/DatasetSettingsDialog", () => ({
-	default: (props: { saveAndPreview?: (saveThen: SaveThen) => ReactNode }) =>
-		props.saveAndPreview?.((onSaved) => onSaved("saved.json")),
+	default: (props: {
+		saveAndPreview?: (saveThen: SaveThen) => ReactNode;
+		kind?: string;
+	}) => (
+		<div data-testid="dataset-settings-dialog" data-kind={props.kind}>
+			{props.saveAndPreview?.((onSaved) => onSaved("saved.json"))}
+		</div>
+	),
 }));
 vi.mock("../../../../../hooks/useDatasetSettings", () => ({
 	useDatasetTableNames: (srcInfo: DatasetSrcInfo) => {
@@ -184,6 +191,7 @@ describe("UnitSettingPreviewButtonのテスト", () => {
 			render(
 				<UnitSettingsDialog
 					fileName="unit.json"
+					kind="generateSetting"
 					handleDialogClose={vi.fn()}
 					handleSave={vi.fn()}
 				/>,
@@ -204,6 +212,14 @@ describe("UnitSettingPreviewButtonのテスト", () => {
 				unitSetting: "saved.json",
 				encoding: "MS932",
 			});
+		});
+
+		it("受け取ったkind（読込・保存先）をDataset Settingsへ渡す", () => {
+			renderDialog();
+			expect(screen.getByTestId("dataset-settings-dialog")).toHaveAttribute(
+				"data-kind",
+				"generateSetting",
+			);
 		});
 
 		it("srcが空ならSave and Previewを出さない", () => {

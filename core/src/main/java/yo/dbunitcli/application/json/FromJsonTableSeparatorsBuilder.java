@@ -1,6 +1,7 @@
 package yo.dbunitcli.application.json;
 
 import jakarta.json.*;
+import yo.dbunitcli.application.Option;
 import yo.dbunitcli.common.TableMetaDataFilter;
 import yo.dbunitcli.dataset.*;
 import yo.dbunitcli.resource.FileResources;
@@ -18,12 +19,15 @@ public class FromJsonTableSeparatorsBuilder extends TableSeparators.Builder {
         this.settingEncoding = settingEncoding;
     }
 
-    public TableSeparators build(final String settings) throws IOException {
+    /**
+     * カンマ区切りの設定ファイルを、オプションの基準ディレクトリ（validate・putFileと同じBaseDir）で探して読む
+     */
+    public TableSeparators build(final String settings, final Option.BaseDir baseDir) throws IOException {
         if (Optional.ofNullable(settings).orElse("").isEmpty()) {
             return this.build((File) null);
         } else {
             return this.build(Arrays.stream(settings.split(","))
-                    .map(FileResources::searchSetting)
+                    .map(baseDir::search)
                     .toArray(File[]::new));
         }
     }

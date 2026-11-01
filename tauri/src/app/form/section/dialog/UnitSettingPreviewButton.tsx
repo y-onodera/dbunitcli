@@ -14,6 +14,7 @@ import {
 	type UnitTablePreview,
 	useDatasetUnitTablePreview,
 } from "../../../../hooks/useDatasetSettings";
+import type { DatasetSettingKind } from "../../../../hooks/useResourceFiles";
 import {
 	type DatasetSrcInfo,
 	srcTypeOf,
@@ -56,6 +57,7 @@ export function UnitSettingsDialog(props: {
 	fileName: string;
 	handleDialogClose: () => void;
 	handleSave: (path: string) => void;
+	kind: DatasetSettingKind;
 }) {
 	return (
 		<DatasetSettingsDialog

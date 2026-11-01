@@ -88,7 +88,13 @@ const generatedSettingsFixture = {
 
 async function openDialog(setPath: (value: string) => void = vi.fn()) {
 	const user = userEvent.setup();
-	render(<DatasetSettingGenerateButton path="" setPath={setPath} />);
+	render(
+		<DatasetSettingGenerateButton
+			path=""
+			setPath={setPath}
+			kind="datasetSetting"
+		/>,
+	);
 	await user.click(screen.getByRole("button", { name: "generate" }));
 	await waitFor(() => {
 		expect(

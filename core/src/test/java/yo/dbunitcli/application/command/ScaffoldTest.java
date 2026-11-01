@@ -76,7 +76,7 @@ public class ScaffoldTest {
             public void testAllFiles() throws Exception {
                 TestCase.this.scaffold("ddl/all", "-target=ddl", "-unitSetting=ddlUnit",
                                        "-template=ddl", "-parameter=ddl");
-                assertTrue(TestCase.this.resultFile("ddl/all", "resources/setting/ddlUnit.json").exists());
+                assertTrue(TestCase.this.resultFile("ddl/all", "option/generate/setting/ddlUnit.json").exists());
                 assertTrue(TestCase.this.resultFile("ddl/all", "resources/template/ddl.stg").exists());
                 assertTrue(TestCase.this.resultFile("ddl/all", "resources/template/ddl.txt").exists());
                 final File paramFile = TestCase.this.resultFile("ddl/all", "option/ddl.param");
@@ -86,7 +86,7 @@ public class ScaffoldTest {
                 assertTrue(lines.stream().anyMatch(l -> l.contains("-unit=table")));
                 assertTrue(lines.stream().anyMatch(l -> l.contains("-template=resources/template/ddl.txt")));
                 assertTrue(lines.stream().anyMatch(l -> l.contains("templateGroup=resources/template/ddl.stg")));
-                assertTrue(lines.stream().anyMatch(l -> l.contains("-unitSetting=resources/setting/ddlUnit.json")));
+                assertTrue(lines.stream().anyMatch(l -> l.contains("-unitSetting=option/generate/setting/ddlUnit.json")));
                 assertFalse(lines.stream().anyMatch(l -> l.startsWith("-setting=")));
                 assertTrue(lines.stream().anyMatch(l -> l.contains("-resultPath=$param.tableName$.sql")));
             }
@@ -94,8 +94,8 @@ public class ScaffoldTest {
             @Test
             public void testUnitSettingOnly() {
                 TestCase.this.scaffold("ddl/unitSetting", "-target=ddl", "-unitSetting=ddlUnit");
-                assertTrue(TestCase.this.resultFile("ddl/unitSetting", "resources/setting/ddlUnit.json").exists());
-                assertFalse(TestCase.this.resultFile("ddl/unitSetting", "resources/setting/ddl.json").exists());
+                assertTrue(TestCase.this.resultFile("ddl/unitSetting", "option/generate/setting/ddlUnit.json").exists());
+                assertFalse(TestCase.this.resultFile("ddl/unitSetting", "option/generate/setting/ddl.json").exists());
                 assertFalse(TestCase.this.resultFile("ddl/unitSetting", "resources/template/ddl.stg").exists());
                 assertFalse(TestCase.this.resultFile("ddl/unitSetting", "option/ddl.param").exists());
             }
@@ -103,7 +103,7 @@ public class ScaffoldTest {
             @Test
             public void testTemplateOnly() {
                 TestCase.this.scaffold("ddl/template", "-target=ddl", "-template=ddl");
-                assertFalse(TestCase.this.resultFile("ddl/template", "resources/setting/ddl.json").exists());
+                assertFalse(TestCase.this.resultFile("ddl/template", "option/generate/setting/ddl.json").exists());
                 assertTrue(TestCase.this.resultFile("ddl/template", "resources/template/ddl.stg").exists());
                 assertTrue(TestCase.this.resultFile("ddl/template", "resources/template/ddl.txt").exists());
                 assertFalse(TestCase.this.resultFile("ddl/template", "option/ddl.param").exists());
@@ -112,7 +112,7 @@ public class ScaffoldTest {
             @Test
             public void testParameterOnly() throws Exception {
                 TestCase.this.scaffold("ddl/parameter", "-target=ddl", "-parameter=ddl");
-                assertFalse(TestCase.this.resultFile("ddl/parameter", "resources/setting/ddl.json").exists());
+                assertFalse(TestCase.this.resultFile("ddl/parameter", "option/generate/setting/ddl.json").exists());
                 assertFalse(TestCase.this.resultFile("ddl/parameter", "resources/template/ddl.stg").exists());
                 assertFalse(TestCase.this.resultFile("ddl/parameter", "resources/template/ddl.txt").exists());
                 final File paramFile = TestCase.this.resultFile("ddl/parameter", "option/ddl.param");
@@ -129,7 +129,7 @@ public class ScaffoldTest {
             public void testCustomFileName() throws Exception {
                 TestCase.this.scaffold("ddl/custom", "-target=ddl", "-unitSetting=myDdl", "-template=myDdl",
                                        "-parameter=myDdl");
-                assertTrue(TestCase.this.resultFile("ddl/custom", "resources/setting/myDdl.json").exists());
+                assertTrue(TestCase.this.resultFile("ddl/custom", "option/generate/setting/myDdl.json").exists());
                 assertTrue(TestCase.this.resultFile("ddl/custom", "resources/template/myDdl.stg").exists());
                 assertTrue(TestCase.this.resultFile("ddl/custom", "resources/template/myDdl.txt").exists());
                 final File paramFile = TestCase.this.resultFile("ddl/custom", "option/myDdl.param");
@@ -139,7 +139,7 @@ public class ScaffoldTest {
                 assertTrue(lines.stream().anyMatch(l -> l.contains("-unit=table")));
                 assertTrue(lines.stream().anyMatch(l -> l.contains("-template=resources/template/myDdl.txt")));
                 assertTrue(lines.stream().anyMatch(l -> l.contains("templateGroup=resources/template/myDdl.stg")));
-                assertTrue(lines.stream().anyMatch(l -> l.contains("-unitSetting=resources/setting/myDdl.json")));
+                assertTrue(lines.stream().anyMatch(l -> l.contains("-unitSetting=option/generate/setting/myDdl.json")));
                 assertTrue(lines.stream().anyMatch(l -> l.contains("-resultPath=$param.tableName$.sql")));
             }
         }
@@ -151,7 +151,7 @@ public class ScaffoldTest {
             public void testAllFiles() throws Exception {
                 TestCase.this.scaffold("javaBean/all", "-target=javaBean",
                                        "-unitSetting=javaBeanUnit", "-template=javaBean", "-parameter=javaBean");
-                assertTrue(TestCase.this.resultFile("javaBean/all", "resources/setting/javaBeanUnit.json").exists());
+                assertTrue(TestCase.this.resultFile("javaBean/all", "option/generate/setting/javaBeanUnit.json").exists());
                 assertTrue(TestCase.this.resultFile("javaBean/all", "resources/template/javaBean.stg").exists());
                 assertTrue(TestCase.this.resultFile("javaBean/all", "resources/template/javaBean.txt").exists());
                 final File paramFile = TestCase.this.resultFile("javaBean/all", "option/javaBean.param");
@@ -161,7 +161,7 @@ public class ScaffoldTest {
                 assertTrue(lines.stream().anyMatch(l -> l.contains("-unit=table")));
                 assertTrue(lines.stream().anyMatch(l -> l.contains("-template=resources/template/javaBean.txt")));
                 assertTrue(lines.stream().anyMatch(l -> l.contains("templateGroup=resources/template/javaBean.stg")));
-                assertTrue(lines.stream().anyMatch(l -> l.contains("-unitSetting=resources/setting/javaBeanUnit.json")));
+                assertTrue(lines.stream().anyMatch(l -> l.contains("-unitSetting=option/generate/setting/javaBeanUnit.json")));
                 assertTrue(lines.stream()
                                    .anyMatch(l -> l.contains(
                                            "-resultPath=$param.tableName; format=\"snakeToUpperCamel\"$.java")));
@@ -171,7 +171,7 @@ public class ScaffoldTest {
             public void testCustomFileName() throws Exception {
                 TestCase.this.scaffold("javaBean/custom", "-target=javaBean", "-unitSetting=myBean", "-template=myBean",
                                        "-parameter=myBean");
-                assertTrue(TestCase.this.resultFile("javaBean/custom", "resources/setting/myBean.json").exists());
+                assertTrue(TestCase.this.resultFile("javaBean/custom", "option/generate/setting/myBean.json").exists());
                 assertTrue(TestCase.this.resultFile("javaBean/custom", "resources/template/myBean.stg").exists());
                 assertTrue(TestCase.this.resultFile("javaBean/custom", "resources/template/myBean.txt").exists());
                 final File paramFile = TestCase.this.resultFile("javaBean/custom", "option/myBean.param");
@@ -181,7 +181,7 @@ public class ScaffoldTest {
                 assertTrue(lines.stream().anyMatch(l -> l.contains("-unit=table")));
                 assertTrue(lines.stream().anyMatch(l -> l.contains("-template=resources/template/myBean.txt")));
                 assertTrue(lines.stream().anyMatch(l -> l.contains("templateGroup=resources/template/myBean.stg")));
-                assertTrue(lines.stream().anyMatch(l -> l.contains("-unitSetting=resources/setting/myBean.json")));
+                assertTrue(lines.stream().anyMatch(l -> l.contains("-unitSetting=option/generate/setting/myBean.json")));
                 assertTrue(lines.stream()
                                    .anyMatch(l -> l.contains(
                                            "-resultPath=$param.tableName; format=\"snakeToUpperCamel\"$.java")));
@@ -203,7 +203,7 @@ public class ScaffoldTest {
                 assertTrue(srcLines.stream().anyMatch(l -> l.contains("id")));
                 assertTrue(TestCase.this.resultFile("xlsxSchema/all", "resources/template/xlsxSchema.stg").exists());
                 assertTrue(TestCase.this.resultFile("xlsxSchema/all", "resources/template/xlsxSchema.txt").exists());
-                assertTrue(TestCase.this.resultFile("xlsxSchema/all", "resources/setting/xlsxSchema.json").exists());
+                assertTrue(TestCase.this.resultFile("xlsxSchema/all", "option/generate/setting/xlsxSchema.json").exists());
                 final File paramFile = TestCase.this.resultFile("xlsxSchema/all", "option/xlsxSchema.param");
                 assertTrue(paramFile.exists());
                 final List<String> lines = Files.readAllLines(paramFile.toPath(), StandardCharsets.UTF_8);
@@ -213,7 +213,7 @@ public class ScaffoldTest {
                 assertTrue(lines.stream().anyMatch(l -> l.contains(
                         "templateGroup=resources/template/xlsxSchema.stg")));
                 assertTrue(lines.stream().anyMatch(l -> l.contains(
-                        "-unitSetting=resources/setting/xlsxSchema.json")));
+                        "-unitSetting=option/generate/setting/xlsxSchema.json")));
                 assertTrue(lines.stream().anyMatch(l -> l.contains("-resultPath=$param.tableName$.json")));
                 assertTrue(lines.stream().anyMatch(l -> l.equals("-src.src=src")));
             }
@@ -223,7 +223,7 @@ public class ScaffoldTest {
                 TestCase.this.scaffold("xlsxSchema/unitSetting-only", "-target=xlsxSchema",
                                        "-unitSetting=xlsxSchema");
                 assertTrue(TestCase.this.resultFile("xlsxSchema/unitSetting-only",
-                                                    "resources/setting/xlsxSchema.json").exists());
+                                                    "option/generate/setting/xlsxSchema.json").exists());
                 assertFalse(TestCase.this.resultFile("xlsxSchema/unitSetting-only",
                                                      "resources/template/xlsxSchema.stg").exists());
                 assertFalse(TestCase.this.resultFile("xlsxSchema/unitSetting-only", "src").exists());
@@ -239,7 +239,7 @@ public class ScaffoldTest {
                 assertTrue(TestCase.this.resultFile("xlsxSchema/template-only",
                                                     "resources/template/xlsxSchema.txt").exists());
                 assertFalse(TestCase.this.resultFile("xlsxSchema/template-only",
-                                                     "resources/setting/xlsxSchema.json").exists());
+                                                     "option/generate/setting/xlsxSchema.json").exists());
                 assertFalse(TestCase.this.resultFile("xlsxSchema/template-only", "option/xlsxSchema.param")
                                     .exists());
             }
@@ -252,7 +252,7 @@ public class ScaffoldTest {
                 assertFalse(TestCase.this.resultFile("xlsxSchema/dataset-only",
                                                      "resources/template/xlsxSchema.stg").exists());
                 assertFalse(TestCase.this.resultFile("xlsxSchema/dataset-only",
-                                                     "resources/setting/xlsxSchema.json").exists());
+                                                     "option/generate/setting/xlsxSchema.json").exists());
                 assertFalse(TestCase.this.resultFile("xlsxSchema/dataset-only", "option/xlsxSchema.param").exists());
             }
 
@@ -290,13 +290,13 @@ public class ScaffoldTest {
                 TestCase.this.scaffold("xlsxSchema/unitSetting", "-target=xlsxSchema", "-parameter=xlsxSchema",
                                        "-template=xlsxSchema", "-unitSetting=xlsxSchemaUnit",
                                        "-dataset.src=" + SRC_DIR, "-dataset.srcType=csv");
-                assertTrue(TestCase.this.resultFile("xlsxSchema/unitSetting", "resources/setting/xlsxSchemaUnit.json")
+                assertTrue(TestCase.this.resultFile("xlsxSchema/unitSetting", "option/generate/setting/xlsxSchemaUnit.json")
                                    .exists());
                 final List<String> lines = Files.readAllLines(
                         TestCase.this.resultFile("xlsxSchema/unitSetting", "option/xlsxSchema.param").toPath(),
                         StandardCharsets.UTF_8);
                 assertTrue(lines.stream().anyMatch(l -> l.contains(
-                        "-unitSetting=resources/setting/xlsxSchemaUnit.json")));
+                        "-unitSetting=option/generate/setting/xlsxSchemaUnit.json")));
             }
         }
 
@@ -318,7 +318,7 @@ public class ScaffoldTest {
                                    .exists());
                 assertTrue(TestCase.this.resultFile("fixedColumnDef/all", "resources/template/fixedColumnDef.txt")
                                    .exists());
-                assertTrue(TestCase.this.resultFile("fixedColumnDef/all", "resources/setting/fixedColumnDef.json")
+                assertTrue(TestCase.this.resultFile("fixedColumnDef/all", "option/generate/setting/fixedColumnDef.json")
                                    .exists());
                 final File paramFile = TestCase.this.resultFile("fixedColumnDef/all", "option/fixedColumnDef.param");
                 assertTrue(paramFile.exists());
@@ -330,7 +330,7 @@ public class ScaffoldTest {
                 assertTrue(lines.stream().anyMatch(l -> l.contains(
                         "templateGroup=resources/template/fixedColumnDef.stg")));
                 assertTrue(lines.stream().anyMatch(l -> l.contains(
-                        "-unitSetting=resources/setting/fixedColumnDef.json")));
+                        "-unitSetting=option/generate/setting/fixedColumnDef.json")));
                 assertTrue(lines.stream().anyMatch(l -> l.contains("-resultPath=$param.tableName$.json")));
             }
 
@@ -369,7 +369,7 @@ public class ScaffoldTest {
                                        "-parameter=fixedColumnDef", "-unitSetting=fixedColumnDefUnit",
                                        "-dataset.src=" + SRC_DIR, "-dataset.srcType=csv");
                 assertTrue(TestCase.this.resultFile("fixedColumnDef/unitSetting",
-                                                     "resources/setting/fixedColumnDefUnit.json").exists());
+                                                     "option/generate/setting/fixedColumnDefUnit.json").exists());
             }
 
             @Test
@@ -598,7 +598,7 @@ public class ScaffoldTest {
                                        "-dataset.src=" + SRC_DIR, "-dataset.srcType=csv");
                 final File paramFile = TestCase.this.resultFile(subDir, "option/" + target + ".param");
                 assertTrue(paramFile.exists());
-                assertTrue(TestCase.this.resultFile(subDir, "resources/setting/" + target + "Unit.json").exists());
+                assertTrue(TestCase.this.resultFile(subDir, "option/generate/setting/" + target + "Unit.json").exists());
 
                 final File scaffoldDir = Path.of(TestCase.this.getResultBase(), subDir).toFile();
                 final Properties saved = (Properties) System.getProperties().clone();
@@ -622,7 +622,7 @@ public class ScaffoldTest {
             @Test
             public void testNoOutputWhenNoParams() {
                 TestCase.this.scaffold("nooutput/ddl", "-target=ddl");
-                assertFalse(TestCase.this.resultFile("nooutput/ddl", "resources/setting/ddl.json").exists());
+                assertFalse(TestCase.this.resultFile("nooutput/ddl", "option/generate/setting/ddl.json").exists());
                 assertFalse(TestCase.this.resultFile("nooutput/ddl", "resources/template/ddl.stg").exists());
                 assertFalse(TestCase.this.resultFile("nooutput/ddl", "option/ddl.param").exists());
             }
@@ -636,8 +636,8 @@ public class ScaffoldTest {
                 TestCase.this.scaffold("parameter/generate", "-target=parameter", "-commandType=generate");
                 final File paramFile = TestCase.this.resultFile("parameter/generate", "option/generate.param");
                 this.assertParamFileExists(paramFile);
-                assertFalse(TestCase.this.resultFile("parameter/generate", "resources/setting/ddl.json").exists());
-                assertFalse(TestCase.this.resultFile("parameter/generate", "resources/setting/javaBean.json").exists());
+                assertFalse(TestCase.this.resultFile("parameter/generate", "option/generate/setting/ddl.json").exists());
+                assertFalse(TestCase.this.resultFile("parameter/generate", "option/generate/setting/javaBean.json").exists());
             }
 
             @ParameterizedTest
@@ -701,8 +701,8 @@ public class ScaffoldTest {
             @Test
             public void testNoOutputWhenNoTarget() {
                 TestCase.this.scaffold("empty");
-                assertFalse(TestCase.this.resultFile("empty", "resources/setting/ddl.json").exists());
-                assertFalse(TestCase.this.resultFile("empty", "resources/setting/javaBean.json").exists());
+                assertFalse(TestCase.this.resultFile("empty", "option/generate/setting/ddl.json").exists());
+                assertFalse(TestCase.this.resultFile("empty", "option/generate/setting/javaBean.json").exists());
                 assertFalse(TestCase.this.resultFile("empty", "resources/template/ddl.stg").exists());
                 assertFalse(TestCase.this.resultFile("empty", "resources/template/javaBean.stg").exists());
             }
@@ -740,7 +740,7 @@ public class ScaffoldTest {
                     , "-template=resources/template/myDdl.txt"
                     , "-template.templateGroup=resources/template/myDdl.stg"
                     , "-resultPath=$param.tableName$.sql"
-                    , "-unitSetting=resources/setting/myUnit.json"
+                    , "-unitSetting=option/generate/setting/myUnit.json"
                     , "-src.src=src"
                     , "-src.srcType=csv"
                     , "-encoding=UTF-8"), lines);

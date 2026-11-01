@@ -2,7 +2,12 @@ import type { ComponentType, Dispatch, ReactNode, SetStateAction } from "react";
 import { InlineActions } from "../../../../components/dialog";
 import { useDatasetSrcInfo } from "../../../../context/DatasetSrcInfoProvider";
 import { useResourcesSettings } from "../../../../context/WorkspaceResourcesProvider";
+import {
+	type DatasetSettingKind,
+	resourceFilesOf,
+} from "../../../../hooks/useResourceFiles";
 import { srcTypeOf } from "../../../../model/CommandOption";
+import type { DefaultPath } from "../../../../model/WorkspaceResources";
 import {
 	DatasetSettingGenerateButton,
 	type DatasetSettingsEditDialogComponent,
@@ -24,6 +29,13 @@ import Text, { TextDropDownMenu } from "./Text";
 // showGenerate=falseでgenerateボタンを出さない（generateの-unitSettingは雛型生成が用途に合わないため）。
 // preview: 横に出すプレビュー。省略するとsrcのsettingの適用前後のPreviewボタン、nullなら出さない
 // （compareの-settingはnull、generateの-unitSettingはunitSettingのプレビューを渡す）
+// 候補一覧・削除・編集ダイアログの読込と保存の対象は、オプションの基準ディレクトリ（defaultPath）で決まる
+// （compareの-settingはoption/compare/setting、generateの-unitSettingはoption/generate/setting）
+const kindByDefaultPath: Partial<Record<DefaultPath, DatasetSettingKind>> = {
+	COMPARE_SETTING: "compareSetting",
+	GENERATE_SETTING: "generateSetting",
+};
+
 export default function DatasetSettingText({
 	prefix,
 	element,
@@ -34,13 +46,16 @@ export default function DatasetSettingText({
 	showGenerate = true,
 	preview = settingPreview,
 }: TextProp & {
-	editDialog?: ComponentType<EditResourceDialogProps>;
+	editDialog?: ComponentType<
+		EditResourceDialogProps & { kind: DatasetSettingKind }
+	>;
 	generateEditDialog?: DatasetSettingsEditDialogComponent;
 	showGenerate?: boolean;
 	preview?: ((path: string) => ReactNode) | null;
 }) {
-	const settings = useResourcesSettings();
-	const resourceFiles = settings.datasetSettings;
+	const kind =
+		kindByDefaultPath[element.attribute.defaultPath] ?? "datasetSetting";
+	const resourceFiles = resourceFilesOf(useResourcesSettings(), kind);
 
 	return (
 		<Text
@@ -68,6 +83,7 @@ export default function DatasetSettingText({
 						editButtons={[
 							<EditResourceButton
 								dialog={editDialog}
+								dialogProps={{ kind }}
 								key="edit"
 								path={path}
 								setPath={handleSetPath}
@@ -78,13 +94,14 @@ export default function DatasetSettingText({
 											key="generate"
 											setPath={handleSetPath}
 											editDialog={generateEditDialog}
+											kind={kind}
 										/>,
 									]
 								: []),
 						]}
 						removeButton={(closeMenu) => (
 							<RemoveResourceButton
-								kind="datasetSetting"
+								kind={kind}
 								path={path}
 								setPath={handleSetPath}
 								onRemoved={closeMenu}

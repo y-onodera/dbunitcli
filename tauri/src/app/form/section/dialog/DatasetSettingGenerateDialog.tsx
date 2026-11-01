@@ -1,4 +1,5 @@
 import type { ComponentType } from "react";
+import type { DatasetSettingKind } from "../../../../hooks/useResourceFiles";
 import {
 	DatasetSettings,
 	type DatasetSettingsBuilder,
@@ -15,11 +16,13 @@ export type DatasetSettingsEditDialogComponent = ComponentType<{
 	fileName: string;
 	handleDialogClose: () => void;
 	handleSave: (fileName: string) => void;
+	kind: DatasetSettingKind;
 }>;
 
-// 生成後は渡された編集ダイアログで内容確認・命名保存する
+// 生成後は渡された編集ダイアログで内容確認し、kindの保存先へ命名保存する
 function datasetSettingGenerateConfig(
 	EditDialog: DatasetSettingsEditDialogComponent,
+	kind: DatasetSettingKind,
 ): ModelGenerateConfig<DatasetSettingsBuilder, DatasetSettings> {
 	return {
 		generateType: "settings",
@@ -31,7 +34,7 @@ function datasetSettingGenerateConfig(
 		endpoint: "dataset-setting/generate",
 		build: DatasetSettings.build,
 		renderEditDialog: (settings, props) => (
-			<EditDialog settings={settings} {...props} />
+			<EditDialog settings={settings} kind={kind} {...props} />
 		),
 	};
 }
@@ -40,10 +43,14 @@ function datasetSettingGenerateConfig(
 export function DatasetSettingGenerateButton({
 	setPath,
 	editDialog = DatasetSettingsEditDialog,
-}: GenerateButtonProps & { editDialog?: DatasetSettingsEditDialogComponent }) {
+	kind,
+}: GenerateButtonProps & {
+	editDialog?: DatasetSettingsEditDialogComponent;
+	kind: DatasetSettingKind;
+}) {
 	return (
 		<ModelGenerateButton
-			config={datasetSettingGenerateConfig(editDialog)}
+			config={datasetSettingGenerateConfig(editDialog, kind)}
 			setPath={setPath}
 		/>
 	);

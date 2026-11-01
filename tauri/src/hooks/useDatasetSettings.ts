@@ -19,7 +19,11 @@ import {
 import type { FormValues } from "../utils/formValues";
 import type { JobContext } from "./useJob";
 import { appendLogLines } from "./useJobLog";
-import { useUpdateResourceFiles } from "./useResourceFiles";
+import {
+	type DatasetSettingKind,
+	resourceBaseOf,
+	useUpdateResourceFiles,
+} from "./useResourceFiles";
 
 // jdbcは接続テストに成功した値を優先する
 function buildDatasetRequestBody(
@@ -326,14 +330,17 @@ export const useDatasetTableConvert = () => {
 	};
 };
 
-export const useSaveDatasetSettings = () => {
-	const updateResourceFiles = useUpdateResourceFiles("datasetSetting");
+export const useSaveDatasetSettings = (
+	kind: DatasetSettingKind = "datasetSetting",
+) => {
+	const updateResourceFiles = useUpdateResourceFiles(kind);
 	return (name: string, input: DatasetSettings) =>
 		updateResourceFiles("save", JSON.stringify({ name, input }));
 };
 
 export const useDatasetSettingsData = (
 	fileName: string,
+	kind: DatasetSettingKind = "datasetSetting",
 ): { settings: DatasetSettings; loading: boolean } => {
 	const { apiUrl } = useEnvironment();
 	const [settings, setSettings] = useState(DatasetSettings.create());
@@ -347,7 +354,7 @@ export const useDatasetSettingsData = (
 		}
 		const controller = new AbortController();
 		setLoading(true);
-		loadDatasetSettings(apiUrl, fileName).then((result) => {
+		loadDatasetSettings(apiUrl, fileName, kind).then((result) => {
 			if (!controller.signal.aborted) {
 				setSettings(result);
 				setLoading(false);
@@ -356,7 +363,7 @@ export const useDatasetSettingsData = (
 		return () => {
 			controller.abort();
 		};
-	}, [fileName, apiUrl]);
+	}, [fileName, apiUrl, kind]);
 
 	return { settings, loading };
 };
@@ -463,12 +470,13 @@ export const useColumnNamesFetcher = () => {
 async function loadDatasetSettings(
 	apiUrl: string,
 	name: string,
+	kind: DatasetSettingKind,
 ): Promise<DatasetSettings> {
 	if (name === "") {
 		return DatasetSettings.create();
 	}
 	const fetchParams = {
-		endpoint: `${apiUrl}dataset-setting/load`,
+		endpoint: `${apiUrl}${resourceBaseOf(kind)}/load`,
 		options: {
 			method: "POST",
 			headers: { "Content-Type": "text/plain" },

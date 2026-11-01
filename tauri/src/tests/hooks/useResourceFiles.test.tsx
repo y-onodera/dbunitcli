@@ -85,6 +85,16 @@ describe("useDeleteResourceのテスト", () => {
 			endpoint: "dataset-setting/delete",
 			key: "datasetSettings",
 		},
+		{
+			kind: "compareSetting",
+			endpoint: "compare/setting/delete",
+			key: "compareSettings",
+		},
+		{
+			kind: "generateSetting",
+			endpoint: "generate/setting/delete",
+			key: "generateSettings",
+		},
 		{ kind: "xlsxSchema", endpoint: "xlsx-schema/delete", key: "xlsxSchemas" },
 		{ kind: "jdbc", endpoint: "jdbc/delete", key: "jdbcFiles" },
 		{ kind: "template", endpoint: "template/delete", key: "templateFiles" },
@@ -164,6 +174,29 @@ describe("保存フックのテスト", () => {
 			input: datasetSettings,
 			key: "datasetSettings",
 		},
+		...(
+			[
+				{
+					kind: "compareSetting",
+					endpoint: "compare/setting/save",
+					key: "compareSettings",
+				},
+				{
+					kind: "generateSetting",
+					endpoint: "generate/setting/save",
+					key: "generateSettings",
+				},
+			] as const
+		).map(({ kind, endpoint, key }) => ({
+			name: `useSaveDatasetSettings(${kind})`,
+			useSave: () => {
+				const save = useSaveDatasetSettings(kind);
+				return (name: string) => save(name, datasetSettings);
+			},
+			endpoint,
+			input: datasetSettings,
+			key,
+		})),
 		...(
 			[
 				{ kind: "template", endpoint: "template/save", key: "templateFiles" },

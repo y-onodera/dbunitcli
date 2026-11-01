@@ -12,13 +12,19 @@ import {
 } from "../../../../../model/DatasetSettings";
 
 // （mockReset:trueで実装が毎回リセットされるため、resolve値は各テスト内で設定する）
-const { mockSave, mockTableNames, srcInfoFixture } = vi.hoisted(() => ({
-	mockSave: vi.fn(),
-	mockTableNames: vi.fn(),
-	srcInfoFixture: { current: {} as DatasetSrcInfo },
-}));
+const { mockSave, mockSaveKind, mockTableNames, srcInfoFixture } = vi.hoisted(
+	() => ({
+		mockSave: vi.fn(),
+		mockSaveKind: vi.fn(),
+		mockTableNames: vi.fn(),
+		srcInfoFixture: { current: {} as DatasetSrcInfo },
+	}),
+);
 vi.mock("../../../../../hooks/useDatasetSettings", () => ({
-	useSaveDatasetSettings: () => mockSave,
+	useSaveDatasetSettings: (kind?: string) => {
+		mockSaveKind(kind);
+		return mockSave;
+	},
 	useDatasetTableNames: (srcInfo: DatasetSrcInfo) => {
 		mockTableNames(srcInfo);
 		return { tableNames: ["users"], loading: false, logs: [] };
@@ -131,6 +137,7 @@ describe("CompareKeySettingsEditDialogのテスト", () => {
 			<CompareKeySettingsEditDialog
 				settings={settings}
 				fileName="compare.json"
+				kind="compareSetting"
 				handleDialogClose={vi.fn()}
 				handleSave={vi.fn()}
 			/>,
@@ -145,7 +152,7 @@ describe("CompareKeySettingsEditDialogのテスト", () => {
 		).not.toBeInTheDocument();
 	});
 
-	it("Saveで編集中の設定をファイルに保存し、保存先を返す", async () => {
+	it("Saveで編集中の設定をkindの保存先に保存し、保存先を返す", async () => {
 		srcInfoFixture.current = oldSrcInfo;
 		mockSave.mockResolvedValue("success");
 		const settings = DatasetSettings.create();
@@ -155,6 +162,7 @@ describe("CompareKeySettingsEditDialogのテスト", () => {
 			<CompareKeySettingsEditDialog
 				settings={settings}
 				fileName="compare.json"
+				kind="compareSetting"
 				handleDialogClose={vi.fn()}
 				handleSave={handleSave}
 			/>,
@@ -166,5 +174,6 @@ describe("CompareKeySettingsEditDialogのテスト", () => {
 			expect(handleSave).toHaveBeenCalledWith("compare.json");
 		});
 		expect(mockSave).toHaveBeenCalledWith("compare.json", settings);
+		expect(mockSaveKind).toHaveBeenCalledWith("compareSetting");
 	});
 });

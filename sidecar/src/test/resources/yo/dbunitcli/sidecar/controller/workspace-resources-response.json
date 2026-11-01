@@ -19,6 +19,8 @@
     "datasetBase": "%s",
     "resultBase": "%s",
     "settingBase": "%s",
+    "compareSettingBase": "%s",
+    "generateSettingBase": "%s",
     "templateBase": "%s",
     "parameterizeTemplateBase": "%s",
     "jdbcBase": "%s",

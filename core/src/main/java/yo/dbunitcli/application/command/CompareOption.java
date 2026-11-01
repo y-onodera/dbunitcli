@@ -111,7 +111,7 @@ public record CompareOption(
 
     @Override
     public List<Violation> validate() {
-        return Option.concat(this.validateFilesExist("-setting", this.setting, BaseDir.SETTING)
+        return Option.concat(this.validateFilesExist("-setting", this.setting, BaseDir.COMPARE_SETTING)
                 , this.validateEncoding("-settingEncoding", this.settingEncoding)
                 , this.newData.validate()
                 , this.oldData.validate()
@@ -138,7 +138,7 @@ public record CompareOption(
             oldDataCommandLineArgs.put("-srcType", DataSourceType.file, DataSourceType.class, Filter.include(DataSourceType.file), true);
         }
         return result
-                .putFile("-setting", this.setting, BaseDir.SETTING)
+                .putFile("-setting", this.setting, BaseDir.COMPARE_SETTING)
                 .put("-settingEncoding", this.settingEncoding)
                 .addComponent("newData", newDataCommandLineArgs.build())
                 .addComponent("oldData", oldDataCommandLineArgs.build())
@@ -188,7 +188,7 @@ public record CompareOption(
                         .build().map(separator -> separator.addSetting(TableSeparator.builder()
                                 .setComparisonKeys(List.of("NAME")).build()));
             } else {
-                return new FromJsonTableSeparatorsBuilder(this.settingEncoding).build(this.setting);
+                return new FromJsonTableSeparatorsBuilder(this.settingEncoding).build(this.setting, BaseDir.COMPARE_SETTING);
             }
         } catch (final IOException e) {
             throw new AssertionError(e);

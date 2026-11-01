@@ -8,6 +8,7 @@ import {
 	useDatasetSettingsData,
 	useSaveDatasetSettings,
 } from "../../../../hooks/useDatasetSettings";
+import type { DatasetSettingKind } from "../../../../hooks/useResourceFiles";
 import {
 	type DatasetSetting,
 	type DatasetSettings,
@@ -27,14 +28,18 @@ function renderKeySetting(setting: DatasetSetting): string {
 		: setting.displayName();
 }
 
-// compareの-setting（比較キー設定）の編集ダイアログ。
+// compareの-setting（比較キー設定）の編集ダイアログ。kindの保存先（option/compare/setting）を読み書きする。
 // テーブル名・カラム名の候補はDatasetSrcInfoProvider（CompareFormではold側のデータセット）から取得する
 export default function CompareKeySettingsDialog(props: {
 	fileName: string;
 	handleDialogClose: () => void;
 	handleSave: (path: string) => void;
+	kind: DatasetSettingKind;
 }) {
-	const { settings, loading } = useDatasetSettingsData(props.fileName);
+	const { settings, loading } = useDatasetSettingsData(
+		props.fileName,
+		props.kind,
+	);
 	if (loading) {
 		return <StatusMessage kind="loading">Loading...</StatusMessage>;
 	}
@@ -44,6 +49,7 @@ export default function CompareKeySettingsDialog(props: {
 			fileName={props.fileName}
 			handleDialogClose={props.handleDialogClose}
 			handleSave={props.handleSave}
+			kind={props.kind}
 		/>
 	);
 }
@@ -54,8 +60,9 @@ export function CompareKeySettingsEditDialog(props: {
 	fileName: string;
 	handleDialogClose: () => void;
 	handleSave: (path: string) => void;
+	kind: DatasetSettingKind;
 }) {
-	const saveSettings = useSaveDatasetSettings();
+	const saveSettings = useSaveDatasetSettings(props.kind);
 	const [dataSettings, setDataSettings] = useState<DatasetSettings>(
 		props.settings,
 	);

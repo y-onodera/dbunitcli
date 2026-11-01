@@ -25,6 +25,8 @@ public record FileResources() {
     public static final String RESOURCES_TABLE_PATH = "resources/table";
     public static final String RESOURCES_CSVQ_PATH = "resources/csvq";
     public static final String OPTION_PARAMETERIZE_TEMPLATE_PATH = "option/parameterize/template";
+    public static final String OPTION_COMPARE_SETTING_PATH = "option/compare/setting";
+    public static final String OPTION_GENERATE_SETTING_PATH = "option/generate/setting";
 
     private static final ScopedValue<Context> CONTEXT = ScopedValue.newInstance();
 
@@ -113,6 +115,16 @@ public record FileResources() {
 
     public static File searchSetting(final String settingPath) {
         return FileResources.searchInOrder(settingPath, settingDir().toPath().normalize().toString(), FileResources::searchWorkspace);
+    }
+
+    // compareの-setting（比較キーの設定）はoption/compare/setting→resources/setting→workspaceの順に探す
+    public static File searchCompareSetting(final String settingPath) {
+        return FileResources.searchInOrder(settingPath, compareSettingDir().toPath().normalize().toString(), FileResources::searchSetting);
+    }
+
+    // generateの-unitSettingはoption/generate/setting→resources/setting→workspaceの順に探す
+    public static File searchGenerateSetting(final String settingPath) {
+        return FileResources.searchInOrder(settingPath, generateSettingDir().toPath().normalize().toString(), FileResources::searchSetting);
     }
 
     // 設定ファイルのimport先は、絶対パス→取り込み元の設定ファイルのディレクトリ→カレントディレクトリの順に探す
@@ -258,6 +270,14 @@ public record FileResources() {
 
     public static File parameterizeTemplateDir() {
         return new File(baseDir(), OPTION_PARAMETERIZE_TEMPLATE_PATH);
+    }
+
+    public static File compareSettingDir() {
+        return new File(baseDir(), OPTION_COMPARE_SETTING_PATH);
+    }
+
+    public static File generateSettingDir() {
+        return new File(baseDir(), OPTION_GENERATE_SETTING_PATH);
     }
 
 }

@@ -464,6 +464,62 @@ class FileResourcesTest {
     }
 
     @Nested
+    class SearchOptionSettingTest {
+        @TempDir
+        Path workspace;
+
+        @BeforeEach
+        void setProperty() throws IOException {
+            final Properties newProperty = new Properties();
+            newProperty.putAll(FileResourcesTest.backup);
+            newProperty.put(FileResources.PROPERTY_WORKSPACE, this.workspace.toString());
+            System.setProperties(newProperty);
+            Files.createDirectories(this.workspace.resolve(FileResources.OPTION_COMPARE_SETTING_PATH));
+            Files.createDirectories(this.workspace.resolve(FileResources.OPTION_GENERATE_SETTING_PATH));
+            Files.createDirectories(this.workspace.resolve(FileResources.RESOURCES_SETTING_PATH));
+        }
+
+        @AfterEach
+        void restore() {
+            FileResourcesTest.restore();
+        }
+
+        @Test
+        void searchCompareSettingDir() throws IOException {
+            final Path expected = Files.createFile(this.workspace.resolve(FileResources.OPTION_COMPARE_SETTING_PATH).resolve("key.json"));
+            Files.createFile(this.workspace.resolve(FileResources.RESOURCES_SETTING_PATH).resolve("key.json"));
+            Assertions.assertEquals(expected.toFile(), FileResources.searchCompareSetting("key.json"));
+        }
+
+        @Test
+        void searchGenerateSettingDir() throws IOException {
+            final Path expected = Files.createFile(this.workspace.resolve(FileResources.OPTION_GENERATE_SETTING_PATH).resolve("unit.json"));
+            Files.createFile(this.workspace.resolve(FileResources.RESOURCES_SETTING_PATH).resolve("unit.json"));
+            Assertions.assertEquals(expected.toFile(), FileResources.searchGenerateSetting("unit.json"));
+        }
+
+        @Test
+        void searchSettingDirIfNotFoundOptionSettingDir() throws IOException {
+            final Path expected = Files.createFile(this.workspace.resolve(FileResources.RESOURCES_SETTING_PATH).resolve("old.json"));
+            Assertions.assertEquals(expected.toFile(), FileResources.searchCompareSetting("old.json"));
+            Assertions.assertEquals(expected.toFile(), FileResources.searchGenerateSetting("old.json"));
+        }
+
+        @Test
+        void searchWorkspaceIfNotFoundSettingDir() throws IOException {
+            final Path expected = Files.createFile(this.workspace.resolve("ws.json"));
+            Assertions.assertEquals(expected.toFile(), FileResources.searchCompareSetting("ws.json"));
+            Assertions.assertEquals(expected.toFile(), FileResources.searchGenerateSetting("ws.json"));
+        }
+
+        @Test
+        void compareAndGenerateDoNotSearchEachOther() throws IOException {
+            Files.createFile(this.workspace.resolve(FileResources.OPTION_GENERATE_SETTING_PATH).resolve("unit.json"));
+            Assertions.assertFalse(FileResources.searchCompareSetting("unit.json").exists());
+        }
+    }
+
+    @Nested
     class SearchQueryResourceTest {
         @TempDir
         Path workspace;

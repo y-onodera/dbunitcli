@@ -32,7 +32,7 @@ class ScaffoldControllerTest {
     public void tearDown() throws IOException {
         Files.deleteIfExists(Paths.get(WORKSPACE, "resources/template/scaffoldTpl.stg"));
         Files.deleteIfExists(Paths.get(WORKSPACE, "resources/template/scaffoldTpl.txt"));
-        Files.deleteIfExists(Paths.get(WORKSPACE, "resources/setting/scaffoldUnit.json"));
+        Files.deleteIfExists(Paths.get(WORKSPACE, "option/generate/setting/scaffoldUnit.json"));
         Files.deleteIfExists(Paths.get(WORKSPACE, "src/multi1.csv"));
         Files.deleteIfExists(Paths.get(WORKSPACE, "src/multi2.csv"));
         Files.deleteIfExists(Paths.get(WORKSPACE, "src"));
@@ -73,8 +73,8 @@ class ScaffoldControllerTest {
                 "テンプレート.stgがworkspaceのresources/templateに作成されること");
         Assertions.assertTrue(Files.exists(Paths.get(WORKSPACE, "resources/template/scaffoldTpl.txt")),
                 "テンプレート.txtがworkspaceのresources/templateに作成されること");
-        Assertions.assertTrue(Files.exists(Paths.get(WORKSPACE, "resources/setting/scaffoldUnit.json")),
-                "unitSettingがworkspaceのresources/settingに作成されること");
+        Assertions.assertTrue(Files.exists(Paths.get(WORKSPACE, "option/generate/setting/scaffoldUnit.json")),
+                "unitSettingがworkspaceのoption/generate/settingに作成されること");
         Assertions.assertTrue(Files.exists(Paths.get(WORKSPACE, "src/multi1.csv")),
                 "記述子datasetがworkspaceのsrcに作成されること");
         Assertions.assertTrue(Files.exists(Paths.get(WORKSPACE, "src/multi2.csv")),

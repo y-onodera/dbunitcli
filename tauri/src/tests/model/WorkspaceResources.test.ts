@@ -1,6 +1,47 @@
 import { describe, expect, it } from "vitest";
 import type { ParameterListBuilder } from "../../model/WorkspaceResources";
-import { ParameterList } from "../../model/WorkspaceResources";
+import {
+	ParameterList,
+	WorkspaceContext,
+} from "../../model/WorkspaceResources";
+
+describe("WorkspaceContextクラス", () => {
+	const context = WorkspaceContext.from({
+		workspace: "ws",
+		datasetBase: "ws/dataset",
+		resultBase: "ws/result",
+		settingBase: "ws/resources/setting",
+		compareSettingBase: "ws/option/compare/setting",
+		generateSettingBase: "ws/option/generate/setting",
+		templateBase: "ws/resources/template",
+		parameterizeTemplateBase: "ws/option/parameterize/template",
+		jdbcBase: "ws/resources/jdbc",
+		xlsxSchemaBase: "ws/resources/xlsxSchema",
+	});
+
+	it.each([
+		["SETTING", "ws/resources/setting"],
+		["COMPARE_SETTING", "ws/option/compare/setting"],
+		["GENERATE_SETTING", "ws/option/generate/setting"],
+	] as const)("getPath(%s)は%sを返すこと", (defaultPath, expected) => {
+		expect(context.getPath(defaultPath)).toBe(expected);
+	});
+
+	it("compareSettingBase・generateSettingBaseが無いときは空文字になること", () => {
+		const old = WorkspaceContext.from({
+			workspace: "ws",
+			datasetBase: "",
+			resultBase: "",
+			settingBase: "",
+			templateBase: "",
+			parameterizeTemplateBase: "",
+			jdbcBase: "",
+			xlsxSchemaBase: "",
+		});
+		expect(old.compareSettingBase).toBe("");
+		expect(old.generateSettingBase).toBe("");
+	});
+});
 
 describe("ParameterListクラス", () => {
 	it("空のパラメータリストを作成できること", () => {

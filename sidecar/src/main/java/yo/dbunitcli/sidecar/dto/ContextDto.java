@@ -9,6 +9,8 @@ public class ContextDto {
     private String resultBase;
     private String env;
     private String settingBase;
+    private String compareSettingBase;
+    private String generateSettingBase;
     private String templateBase;
     private String parameterizeTemplateBase;
     private String jdbcBase;
@@ -56,6 +58,22 @@ public class ContextDto {
 
     public void setSettingBase(final String settingBase) {
         this.settingBase = settingBase;
+    }
+
+    public String getCompareSettingBase() {
+        return this.compareSettingBase;
+    }
+
+    public void setCompareSettingBase(final String compareSettingBase) {
+        this.compareSettingBase = compareSettingBase;
+    }
+
+    public String getGenerateSettingBase() {
+        return this.generateSettingBase;
+    }
+
+    public void setGenerateSettingBase(final String generateSettingBase) {
+        this.generateSettingBase = generateSettingBase;
     }
 
     public String getTemplateBase() {
