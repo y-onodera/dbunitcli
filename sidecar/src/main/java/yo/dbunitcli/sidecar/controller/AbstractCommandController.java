@@ -52,11 +52,6 @@ public abstract class AbstractCommandController implements ControllerExceptionHa
                         : value);
     }
 
-    /** 1つの値を{@link #resolveSidecarFilePaths}と同じ規則で解決する（絶対パスはそのまま） */
-    static File resolveSidecarFile(final Option.BaseDir baseDir, final String value) {
-        return new File(value).isAbsolute() ? new File(value) : resolveSidecarFilePath(baseDir, value);
-    }
-
     // GUIのファイル選択は基準ディレクトリ外のworkspace配下をworkspaceからの相対パスにするため、
     // 基準ディレクトリ→workspaceの順に探す
     private static File resolveSidecarFilePath(final Option.BaseDir baseDir, final String value) {

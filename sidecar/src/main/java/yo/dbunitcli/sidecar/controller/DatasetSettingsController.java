@@ -17,6 +17,7 @@ import yo.dbunitcli.application.CommandParameters;
 import yo.dbunitcli.application.Option;
 import yo.dbunitcli.application.OptionValidationException;
 import yo.dbunitcli.application.command.Convert;
+import yo.dbunitcli.application.command.Generate;
 import yo.dbunitcli.application.command.ConvertOption;
 import yo.dbunitcli.application.command.GenerateType;
 import yo.dbunitcli.application.command.Type;
@@ -54,7 +55,6 @@ import yo.dbunitcli.sidecar.job.Interruptible;
 import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -63,7 +63,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.TreeMap;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import java.util.function.Supplier;
@@ -171,7 +170,7 @@ public class DatasetSettingsController extends AbstractResourceFileController<Da
                     .getComparableDataSetProducer(param.build())) {
                 return producer.lazyLoad(true).get(tableName) instanceof final ComparableTableDto dto
                         ? ObjectMapper.getDefault().writeValueAsString(
-                                DatasetSettingsController.toUnitPreviews(tableName, dto.loadSeparatedTables(unitSeparators)))
+                                DatasetSettingsController.toUnitPreviews(dto.loadSeparatedTables(unitSeparators)))
                         : "[]";
             }
         } catch (final Throwable th) {
@@ -180,18 +179,18 @@ public class DatasetSettingsController extends AbstractResourceFileController<Da
         }
     }
 
+    // generateの実行時と同じ読み方（パスの解決・カンマ区切りの複数ファイル・文字コードの既定値）にするため、GenerateOptionに読ませる
     private TableSeparators unitTableSeparators(final DatasetUnitTablePreviewRequestDto request) {
-        final String encoding = Strings.isNotEmpty(request.getUnitSettingEncoding())
-                ? request.getUnitSettingEncoding()
-                : Charset.defaultCharset().displayName();
-        return new FromJsonTableSeparatorsBuilder(encoding)
-                .build(AbstractCommandController.resolveSidecarFile(Option.BaseDir.SETTING, request.getUnitSetting()));
+        final Map<String, String> params = new LinkedHashMap<>();
+        params.put("-unitSetting", request.getUnitSetting());
+        params.put("-unitSettingEncoding", request.getUnitSettingEncoding());
+        return new Generate().parseOption(
+                AbstractCommandController.resolveSidecarFilePaths(new CommandParameters(Type.generate, params)).args(),
+                Parameter.none()).unitTableSeparators();
     }
 
-    private static List<DatasetUnitTablePreviewResponseDto> toUnitPreviews(final String tableName,
-                                                                           final TreeMap<String, ComparableTable> tables) {
-        return Stream.concat(Stream.ofNullable(tables.get(tableName)),
-                             tables.values().stream().filter(it -> !it.getTableName().equals(tableName)))
+    private static List<DatasetUnitTablePreviewResponseDto> toUnitPreviews(final ComparableTableDto.SeparatedTables tables) {
+        return Stream.concat(Stream.ofNullable(tables.target()), tables.subTables().values().stream())
                      .map(DatasetSettingsController::toUnitPreview)
                      .toList();
     }

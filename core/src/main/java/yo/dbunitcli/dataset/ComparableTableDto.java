@@ -115,27 +115,30 @@ public class ComparableTableDto extends HashMap<String, Object> {
      * 行は読まれたときに列名→値のMapにする（行ごとのMapを保持しない）
      */
     public ComparableTableDto applyDataSetSeparators(final TableSeparators dataSetSeparators) {
-        final String tableName = this.task.targetTableName();
-        final TreeMap<String, ComparableTable> tables = this.loadSeparatedTables(dataSetSeparators);
+        final SeparatedTables tables = this.loadSeparatedTables(dataSetSeparators);
         final ComparableTableDto result = new ComparableTableDto(this);
-        final ComparableTable target = tables.get(tableName);
-        result.setRows(target == null ? new ArrayList<>() : target.toMap(false));
-        tables.entrySet().stream()
-              .filter(it -> !it.getKey().equals(tableName))
-              .forEach(it -> result.getSubTables().put(it.getKey(), it.getValue().toMap(true).getFirst()));
+        result.setRows(tables.target() == null ? new ArrayList<>() : tables.target().toMap(false));
+        tables.subTables().forEach((name, table) -> result.getSubTables().put(name, table.toMap(true).getFirst()));
         return result;
     }
 
     /**
-     * このテーブルの行を読み込み、dataSetSeparatorsを適用した結果をテーブル名→テーブルで返す（このDTOは変更しない）。
-     * このテーブル自身（{@link #getTableName()}）と、dataSetSeparatorsでできた他のテーブルを含む
+     * このテーブルの行を読み込み、dataSetSeparatorsを適用した結果を、このテーブル自身と他のテーブルに分けて返す（このDTOは変更しない）
      */
-    public TreeMap<String, ComparableTable> loadSeparatedTables(final TableSeparators dataSetSeparators) {
+    public SeparatedTables loadSeparatedTables(final TableSeparators dataSetSeparators) {
         final String tableName = this.task.targetTableName();
         final Consumer<TableSeparators.Builder> builder = origin ->
                 origin.setFilter(origin.getFilter().and(new SplitOrNameFilter(tableName)))
                       .setNext(origin.getNext().then(dataSetSeparators));
-        return this.task.runWith(builder, null);
+        final TreeMap<String, ComparableTable> tables = this.task.runWith(builder, null);
+        final ComparableTable target = tables.remove(tableName);
+        return new SeparatedTables(target, tables);
+    }
+
+    /**
+     * dataSetSeparatorsを適用した結果。targetはこのテーブル自身（行が無ければnull）、subTablesはそれ以外のテーブル（テーブル名順）
+     */
+    public record SeparatedTables(ComparableTable target, SortedMap<String, ComparableTable> subTables) {
     }
 
 }
