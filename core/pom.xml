@@ -113,6 +113,7 @@
                     <include>**/*.xml</include>
                     <include>**/*.json</include>
                     <include>**/*.scmo</include>
+                    <include>META-INF/services/**</include>
                 </includes>
             </resource>
         </resources>

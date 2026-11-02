@@ -4,6 +4,7 @@ import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
 import ch.qos.logback.classic.spi.Configurator;
+import ch.qos.logback.classic.spi.ConfiguratorRank;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.classic.tyler.TylerConfiguratorBase;
 import ch.qos.logback.core.ConsoleAppender;
@@ -56,6 +57,8 @@ import ch.qos.logback.core.rolling.TimeBasedRollingPolicy;
  * logback-tyler will fail during the translation.</p>
  *
  */
+// coreのjarにもcore用のConfiguratorが登録されているため、sidecar用を優先させる
+@ConfiguratorRank(ConfiguratorRank.CUSTOM_NORMAL_PRIORITY)
 public class LogbackTylerConfigurator extends TylerConfiguratorBase implements Configurator {
     /**
      * Appender variable referencing the appender named "console".
@@ -74,6 +77,9 @@ public class LogbackTylerConfigurator extends TylerConfiguratorBase implements C
      */
     @Override
     public Configurator.ExecutionStatus configure(LoggerContext loggerContext) {
+        if (yo.dbunitcli.LogbackTylerConfigurator.configureByConfigurationFile(loggerContext)) {
+            return ExecutionStatus.DO_NOT_INVOKE_NEXT_IF_ANY;
+        }
         this.setContext(loggerContext);
         this.appenderFile = this.setupAppenderFile();
         this.appenderConsole = this.setupAppenderConsole();
