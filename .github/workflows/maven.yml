@@ -5,7 +5,7 @@ name: Java-CI
 on:
   push:
     paths:
-      - './pom.xml'
+      - 'pom.xml'
       - 'core/src/**'
       - 'core/pom.xml'
       - 'sidecar/src/**'
