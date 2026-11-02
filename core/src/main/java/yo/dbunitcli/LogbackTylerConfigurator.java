@@ -1,11 +1,13 @@
 package yo.dbunitcli;
 
+import ch.qos.logback.classic.ClassicConstants;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
 import ch.qos.logback.classic.spi.Configurator;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.classic.tyler.TylerConfiguratorBase;
+import ch.qos.logback.classic.util.DefaultJoranConfigurator;
 import ch.qos.logback.core.ConsoleAppender;
 import ch.qos.logback.core.rolling.RollingFileAppender;
 import ch.qos.logback.core.rolling.TimeBasedRollingPolicy;
@@ -73,8 +75,26 @@ public class LogbackTylerConfigurator extends TylerConfiguratorBase implements C
      * <p>If <code>TylerConfigurator</code> is installed as a configurator service, this
      * method will be called by logback-classic during initialization.</p>
      */
+    /**
+     * システムプロパティ logback.configurationFile が指定されていれば、logback標準の
+     * DefaultJoranConfigurator でそのファイルを読んで設定する。
+     *
+     * @return 指定ファイルで設定できたらtrue。未指定・ファイルが見つからない場合はfalse
+     */
+    public static boolean configureByConfigurationFile(final LoggerContext loggerContext) {
+        if (System.getProperty(ClassicConstants.CONFIG_FILE_PROPERTY) == null) {
+            return false;
+        }
+        final DefaultJoranConfigurator joranConfigurator = new DefaultJoranConfigurator();
+        joranConfigurator.setContext(loggerContext);
+        return joranConfigurator.configure(loggerContext) == ExecutionStatus.DO_NOT_INVOKE_NEXT_IF_ANY;
+    }
+
     @Override
     public Configurator.ExecutionStatus configure(LoggerContext loggerContext) {
+        if (configureByConfigurationFile(loggerContext)) {
+            return ExecutionStatus.DO_NOT_INVOKE_NEXT_IF_ANY;
+        }
         this.setContext(loggerContext);
         this.appenderFile = this.setupAppenderFile();
         this.appenderConsole = this.setupAppenderConsole();
