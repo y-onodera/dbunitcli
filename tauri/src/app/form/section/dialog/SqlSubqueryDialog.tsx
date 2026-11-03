@@ -123,22 +123,17 @@ function CsvSubqueryTable({
 	const csv = useCsvFile(encoding, (path) =>
 		uniqueAlias(csvFileAlias(path), usedAliases),
 	);
+	const columnLoad = useColumnLoad(csv.fetchColumns);
 
 	return (
-		renderSubqueryColumns(
-			csv.columnLoad,
-			mode,
-			csv.alias,
-			onComplete,
-			onClose,
-		) ?? (
+		renderSubqueryColumns(columnLoad, mode, csv.alias, onComplete, onClose) ?? (
 			<NestedDialogFrame title="Subquery Table">
 				<CsvFileFields idPrefix="sqlSubquery" {...csv.fields} />
 				<SubqueryTableActions
 					alias={csv.alias}
 					onAliasChange={csv.setAlias}
 					canProceed={csv.ready}
-					onNext={() => csv.columnLoad.open(csv.expression)}
+					onNext={() => columnLoad.open(csv.expression)}
 					onClose={onClose}
 				/>
 			</NestedDialogFrame>

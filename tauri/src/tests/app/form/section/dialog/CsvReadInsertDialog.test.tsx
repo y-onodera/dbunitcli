@@ -130,6 +130,31 @@ describe("CsvReadInsertDialog", () => {
 		]);
 	});
 
+	it("Select Tablesと同じく、Source=SubqueryでCSVからサブクエリを作ってFROMに置ける", async () => {
+		const { user, onInsert } = renderDialog();
+		await user.click(screen.getByRole("button", { name: "Choose" }));
+		await user.selectOptions(screen.getByLabelText("Source"), "subquery");
+		expect(screen.getByRole("button", { name: "Next" })).toBeDisabled();
+		await user.type(screen.getByLabelText("Subquery alias*"), "S");
+		await user.click(screen.getByRole("button", { name: "Next" }));
+
+		await screen.findByText("Subquery Columns");
+		await user.click(fromLast(screen.getAllByText("NAME"), 2));
+		await user.click(fromLast(screen.getAllByRole("button", { name: "Next" })));
+		await screen.findByText("Select Columns");
+		await user.click(screen.getByRole("button", { name: "All Columns" }));
+		expect(onInsert).toHaveBeenCalledWith([
+			"SELECT",
+			"    S.NAME",
+			"FROM (",
+			"    SELECT",
+			"        UA.NAME",
+			"    FROM",
+			"        CSVREAD('dataset/user_account.csv',null,'charset=MS932') UA",
+			") S",
+		]);
+	});
+
 	it("cross joinは列を読まずにそのまま挿入する", async () => {
 		const { user, onInsert } = renderDialog();
 		await user.click(screen.getByRole("button", { name: "Choose" }));

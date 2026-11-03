@@ -1,9 +1,8 @@
 import { useState } from "react";
 import { useCsvColumnNamesFetcher } from "../../../../hooks/useDatasetSettings";
 import { csvReadExpression } from "../../../../utils/textInsert";
-import { useColumnLoad } from "./useColumnLoad";
 
-// CSVREADで読むファイル・文字コード・別名と、そのファイルの列の読込。
+// CSVREADで読むファイル・文字コード・別名と、その列の取得。
 // aliasOfはファイル選択ボタンで選んだファイルから別名を作る。fieldsはCsvFileFieldsへ渡す
 export function useCsvFile(
 	encoding: string,
@@ -12,15 +11,15 @@ export function useCsvFile(
 	const [path, setPath] = useState("");
 	const [charset, setCharset] = useState(encoding);
 	const [alias, setAlias] = useState("");
-	const fetchCsvColumnNames = useCsvColumnNamesFetcher();
-	const columnLoad = useColumnLoad(fetchCsvColumnNames);
+	const fetchColumns = useCsvColumnNamesFetcher();
 	return {
 		alias,
 		setAlias,
 		expression: csvReadExpression(path, charset),
 		ready: path.trim() !== "" && charset.trim() !== "",
 		charset,
-		columnLoad,
+		// 引数はexpression（CSVREADの式）
+		fetchColumns,
 		fields: {
 			path,
 			charset,
