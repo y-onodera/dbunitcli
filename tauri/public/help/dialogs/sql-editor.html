@@ -119,7 +119,32 @@ FROM (
     <tr><td>On</td><td>JOIN の結合先テーブルの下に揃えて、<code>          ON  UA.ID = </code>、2 行目以降は <code>          AND UA.NAME = </code>。演算子などは「条件（Where / On）」を参照</td></tr>
     <tr><td>Update set (=, ,)</td><td><code>SET</code> の行に続けて、<code>    UA.ID = </code>、2 行目以降は <code>  , UA.NAME = </code></td></tr>
     <tr><td>Insert</td><td><code>    ID</code>、2 行目以降は <code>  , NAME</code></td></tr>
+    <tr><td>Scalar value</td><td>1 つの値になる式（カラム・CASE 式・サブクエリ）を挿入する。「スカラー値（Scalar value）」を参照</td></tr>
   </table>
+
+  <h3>スカラー値（Scalar value）</h3>
+  <p>Usage が Scalar value のときは、条件の右辺・SELECT の列・ORDER BY に書く 1 つの値の式を挿入します。テーブル名の横の Select columns アイコンから開いた Select Columns で選べます（Next から開いたときは選べません）。</p>
+  <table>
+    <tr><th>項目</th><th>説明</th><th>デフォルト</th></tr>
+    <tr><td>Source</td><td>式の元。Column は選んだ 1 カラム、CASE は選んだ 1 カラムの CASE 式、Subquery は Next で選ぶサブクエリ（IN のサブクエリと同じ手順で、SELECT するカラムは 1 つ）</td><td>Column</td></tr>
+    <tr><td>Place in</td><td>挿入する場所。Select column / Order by は列の位置（<code>    </code>、Separator on first line が ON なら <code>  , </code>）から始める。Condition right side は改行を足さずにカーソル位置へ入れ、2 行目以降はカーソルのある行の条件の位置に揃える</td><td>Select column</td></tr>
+    <tr><td>WHEN count</td><td>CASE 式の <code>WHEN カラム =  THEN </code> の行の数。値は空で入れる。Source が CASE のときだけ表示される</td><td>1</td></tr>
+    <tr><td>COALESCE</td><td>ON にすると、式を <code>COALESCE</code> で囲み、Fallback value を代替値にする。1 行の式は <code>COALESCE(UA.NAME, '')</code>、複数行の式は <code>COALESCE(</code> の下に式を字下げし、<code>  , 代替値</code> と <code>)</code> を続ける</td><td>OFF</td></tr>
+    <tr><td>AS name</td><td>指定すると、式の最後に <code>AS 名前</code> を付ける。Place in が Select column のときだけ表示される</td><td>（空）</td></tr>
+  </table>
+  <p>例: Source が Subquery、COALESCE が ON（Fallback value は <code>0</code>）、Place in が Select column、AS name が <code>CNT</code> のとき</p>
+  <pre>    COALESCE(
+        (
+            SELECT
+                COUNT(O.ID)
+            FROM
+                ORDERS O
+            WHERE
+                O.USER_ID = 
+        )
+      , 0
+    ) AS CNT</pre>
+  <p>（<code>COUNT(...)</code> は挿入後に書き換えた例です）</p>
 
   <h3>条件（Where / On）</h3>
   <p>Usage が Where / On のときは、最初に Operator を選びます。Left join / Inner join の Next から開いた Select Columns でも選べます。</p>

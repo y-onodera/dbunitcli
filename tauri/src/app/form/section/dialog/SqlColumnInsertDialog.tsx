@@ -17,8 +17,13 @@ import {
 	conditionLines,
 	isConditionUsage,
 	isMultiColumnOperator,
+	placeScalar,
 	qualifyColumn,
+	type ScalarPlace,
+	type ScalarSource,
+	scalarExpression,
 	usesColumnQualifier,
+	withCoalesce,
 } from "../../../../utils/textInsert";
 import SelectableTable from "./SelectableTable";
 import {
@@ -42,6 +47,29 @@ const COLUMN_USAGE_GROUPS: SelectGroup<ColumnUsage>[] = [
 			{ value: "on", label: "On" },
 			{ value: "update", label: "Update set (=, ,)" },
 			{ value: "insert", label: "Insert" },
+			{ value: "scalar", label: "Scalar value" },
+		],
+	},
+];
+
+const SCALAR_SOURCE_GROUPS: SelectGroup<ScalarSource>[] = [
+	{
+		label: "",
+		options: [
+			{ value: "column", label: "Column" },
+			{ value: "case", label: "CASE" },
+			{ value: "subquery", label: "Subquery" },
+		],
+	},
+];
+
+const SCALAR_PLACE_GROUPS: SelectGroup<ScalarPlace>[] = [
+	{
+		label: "",
+		options: [
+			{ value: "select", label: "Select column" },
+			{ value: "orderBy", label: "Order by" },
+			{ value: "condition", label: "Condition right side" },
 		],
 	},
 ];
@@ -113,7 +141,8 @@ export default function SqlColumnInsertDialog({
 	// サブクエリのテーブルの候補と、その列の読込
 	tables: string[];
 	onQueryColumns: (table: string, context: JobContext) => Promise<string[]>;
-	onInsert: (lines: string[]) => void;
+	// inlineなら改行を足さずにカーソル位置へ入れる（条件の右辺）
+	onInsert: (lines: string[], inline?: boolean) => void;
 	onClose: () => void;
 }) {
 	const { selected, toggle, toggleOnly, toggleAll } = useTableSelection();
@@ -133,6 +162,12 @@ export default function SqlColumnInsertDialog({
 	const [subqueryMode, setSubqueryMode] = useState<"in" | "exists" | null>(
 		null,
 	);
+	const [scalarSource, setScalarSource] = useState<ScalarSource>("column");
+	const [scalarPlace, setScalarPlace] = useState<ScalarPlace>("select");
+	const [whenCount, setWhenCount] = useState("1");
+	const [coalesce, setCoalesce] = useState(false);
+	const [fallback, setFallback] = useState("");
+	const [asName, setAsName] = useState("");
 
 	const loadState = renderColumnLoadState({
 		title: "Select Columns",
@@ -149,11 +184,16 @@ export default function SqlColumnInsertDialog({
 
 	const condition = !plain && isConditionUsage(usage);
 	const conditionOperator = condition ? operator : "equals";
-	const singleColumn = conditionOperator === "in";
-	const noColumns = conditionOperator === "exists";
+	const scalar = !plain && usage === "scalar";
+	const scalarFromSubquery = scalar && scalarSource === "subquery";
+	const inline = scalar && scalarPlace === "condition";
+	const singleColumn =
+		conditionOperator === "in" || (scalar && !scalarFromSubquery);
+	const noColumns = conditionOperator === "exists" || scalarFromSubquery;
 	const needsSubquery =
 		conditionOperator === "exists" ||
-		(conditionOperator === "in" && inSource === "subquery");
+		(conditionOperator === "in" && inSource === "subquery") ||
+		scalarFromSubquery;
 	const qualifying = qualify && usesColumnQualifier(usage) && alias !== "";
 	const qualifier = qualifying ? alias : "";
 	// 先頭の条件として挿入するときだけキーワード行を付けられる
@@ -162,6 +202,9 @@ export default function SqlColumnInsertDialog({
 	const linesOf = (targets: string[], subquery: string[] | null) => {
 		if (plain) {
 			return targets;
+		}
+		if (scalar) {
+			return scalarLines(targets[0] ?? "", subquery);
 		}
 		const formatted = isConditionUsage(usage)
 			? conditionLines(
@@ -186,6 +229,18 @@ export default function SqlColumnInsertDialog({
 				});
 		return statement === undefined ? formatted : statement.wrap(formatted);
 	};
+	const scalarLines = (column: string, subquery: string[] | null) => {
+		const expression = scalarExpression(
+			scalarSource,
+			qualifyColumn(column, qualifier),
+			{ whenCount: Number.parseInt(whenCount, 10) || 1, subquery },
+		);
+		const value = coalesce ? withCoalesce(expression, fallback) : expression;
+		if (scalarPlace === "condition") {
+			return value;
+		}
+		return placeScalar(value, scalarPlace, { continued, asName });
+	};
 	const selectedColumns = columns.filter((c) => selected.has(c));
 	const keywordOfUsage = columnKeyword(usage);
 	const previewSubquery = needsSubquery ? SUBQUERY_PLACEHOLDER : null;
@@ -193,9 +248,17 @@ export default function SqlColumnInsertDialog({
 		noColumns ||
 		(singleColumn ? selectedColumns.length === 1 : selectedColumns.length > 0);
 
+	// 1列だけ選ぶ指定に変えたら、選択済みの列を外す
 	const handleOperatorChange = (next: ConditionOperator) => {
 		setOperator(next);
 		if (next === "in") {
+			toggleAll(columns, false);
+		}
+	};
+
+	const handleUsageChange = (next: ColumnUsage) => {
+		setUsage(next);
+		if (next === "scalar") {
 			toggleAll(columns, false);
 		}
 	};
@@ -210,8 +273,26 @@ export default function SqlColumnInsertDialog({
 								id="sqlColumnInsert_usage"
 								label="Usage"
 								groups={COLUMN_USAGE_GROUPS}
-								onChange={setUsage}
+								onChange={handleUsageChange}
 							/>
+						</DialogField>
+					)}
+					{scalar && (
+						<DialogField>
+							<div className="flex gap-3">
+								<OptionSelect
+									id="sqlColumnInsert_scalarSource"
+									label="Source"
+									groups={SCALAR_SOURCE_GROUPS}
+									onChange={setScalarSource}
+								/>
+								<OptionSelect
+									id="sqlColumnInsert_scalarPlace"
+									label="Place in"
+									groups={SCALAR_PLACE_GROUPS}
+									onChange={setScalarPlace}
+								/>
+							</div>
 						</DialogField>
 					)}
 					{condition && (
@@ -249,6 +330,20 @@ export default function SqlColumnInsertDialog({
 			)}
 			{!plain && (
 				<>
+					{scalar && (
+						<ScalarOptions
+							source={scalarSource}
+							place={scalarPlace}
+							whenCount={whenCount}
+							coalesce={coalesce}
+							fallback={fallback}
+							asName={asName}
+							onWhenCountChange={setWhenCount}
+							onCoalesceChange={setCoalesce}
+							onFallbackChange={setFallback}
+							onAsNameChange={setAsName}
+						/>
+					)}
 					{condition && operator === "in" && (
 						<DialogField>
 							<div className="flex gap-3">
@@ -336,7 +431,7 @@ export default function SqlColumnInsertDialog({
 							/>
 						</DialogField>
 					)}
-					{statement === undefined && !condition && (
+					{statement === undefined && !condition && !inline && (
 						<DialogField>
 							<OptionCheck
 								id="sqlColumnInsert_continued"
@@ -356,14 +451,16 @@ export default function SqlColumnInsertDialog({
 					<BlueButton
 						title="Next"
 						handleClick={() =>
-							setSubqueryMode(operator === "in" ? "in" : "exists")
+							setSubqueryMode(
+								condition && operator === "exists" ? "exists" : "in",
+							)
 						}
 						disabled={!canInsert}
 					/>
 				) : (
 					<BlueButton
-						title="Insert Columns"
-						handleClick={() => onInsert(linesOf(selectedColumns, null))}
+						title={scalar ? "Insert Scalar" : "Insert Columns"}
+						handleClick={() => onInsert(linesOf(selectedColumns, null), inline)}
 						disabled={!canInsert}
 					/>
 				)}
@@ -383,11 +480,100 @@ export default function SqlColumnInsertDialog({
 					usedAliases={alias === "" ? [] : [alias]}
 					onQueryColumns={onQueryColumns}
 					onComplete={(subquery) =>
-						onInsert(linesOf(selectedColumns, subquery))
+						onInsert(linesOf(selectedColumns, subquery), inline)
 					}
 					onClose={() => setSubqueryMode(null)}
 				/>
 			)}
 		</NestedDialogFrame>
+	);
+}
+
+// CASE の WHEN の数、COALESCE の代替値、SELECT に置くときの AS の名前
+function ScalarOptions({
+	source,
+	place,
+	whenCount,
+	coalesce,
+	fallback,
+	asName,
+	onWhenCountChange,
+	onCoalesceChange,
+	onFallbackChange,
+	onAsNameChange,
+}: {
+	source: ScalarSource;
+	place: ScalarPlace;
+	whenCount: string;
+	coalesce: boolean;
+	fallback: string;
+	asName: string;
+	onWhenCountChange: (value: string) => void;
+	onCoalesceChange: (checked: boolean) => void;
+	onFallbackChange: (value: string) => void;
+	onAsNameChange: (value: string) => void;
+}) {
+	return (
+		<>
+			{source === "case" && (
+				<DialogField>
+					<InputLabel
+						text="WHEN count"
+						id="sqlColumnInsert_whenCount"
+						required={false}
+					/>
+					<ControllTextBox
+						name="sqlColumnInsert_whenCount"
+						id="sqlColumnInsert_whenCount"
+						required={false}
+						clearable={false}
+						value={whenCount}
+						handleChange={(ev) =>
+							onWhenCountChange(ev.target.value.replace(/[^0-9]/g, ""))
+						}
+					/>
+				</DialogField>
+			)}
+			<DialogField>
+				<OptionCheck
+					id="sqlColumnInsert_coalesce"
+					label="COALESCE"
+					checked={coalesce}
+					onChange={onCoalesceChange}
+				/>
+				{coalesce && (
+					<>
+						<InputLabel
+							text="Fallback value"
+							id="sqlColumnInsert_fallback"
+							required={false}
+						/>
+						<ControllTextBox
+							name="sqlColumnInsert_fallback"
+							id="sqlColumnInsert_fallback"
+							required={false}
+							value={fallback}
+							handleChange={(ev) => onFallbackChange(ev.target.value)}
+						/>
+					</>
+				)}
+			</DialogField>
+			{place === "select" && (
+				<DialogField>
+					<InputLabel
+						text="AS name"
+						id="sqlColumnInsert_asName"
+						required={false}
+					/>
+					<ControllTextBox
+						name="sqlColumnInsert_asName"
+						id="sqlColumnInsert_asName"
+						required={false}
+						value={asName}
+						handleChange={(ev) => onAsNameChange(ev.target.value)}
+					/>
+				</DialogField>
+			)}
+		</>
 	);
 }

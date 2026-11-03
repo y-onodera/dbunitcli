@@ -17,6 +17,33 @@ export function insertAtCursor(
 	};
 }
 
+// 行頭の字下げと、つなぎ（AND / OR / ON / ,）の後ろまでを、その行の要素の位置とする
+const ITEM_POSITION = /^\s*(?:(?:AND|OR|ON)\s+|,\s*)?/i;
+
+// 改行を足さずにカーソル位置へ挿入する（条件の右辺など行の途中に入れるとき）。
+// 2行目以降は、カーソルのある行の要素の位置に揃える
+export function insertInlineAtCursor(
+	value: string,
+	lines: string[],
+	start: number,
+	end: number,
+): InsertResult {
+	const before = value.slice(0, start);
+	const after = value.slice(end);
+	const currentLine = before.slice(before.lastIndexOf("\n") + 1);
+	const position = " ".repeat(
+		(ITEM_POSITION.exec(currentLine)?.[0] ?? "").length,
+	);
+	const [first = "", ...rest] = lines;
+	const inserted = [first, ...rest.map((line) => `${position}${line}`)].join(
+		"\n",
+	);
+	return {
+		value: before + inserted + after,
+		cursor: before.length + inserted.length,
+	};
+}
+
 export type TableUsage =
 	| "select"
 	| "insert"
@@ -161,7 +188,8 @@ export type ColumnUsage =
 	| "where"
 	| "on"
 	| "update"
-	| "insert";
+	| "insert"
+	| "scalar";
 
 // keywordは列の前の行に置く句。first/nextは1行目・2行目以降の行頭
 type ColumnFormat = { keyword: string | null; first: string; next: string };
@@ -175,6 +203,7 @@ const COLUMN_FORMATS: Record<ColumnUsage, ColumnFormat> = {
 	on: { keyword: null, first: `${ON_INDENT}ON  `, next: `${ON_INDENT}AND ` },
 	update: { keyword: "SET", ...LIST },
 	insert: { keyword: null, ...LIST },
+	scalar: { keyword: null, ...LIST },
 };
 
 export function columnKeyword(usage: ColumnUsage): string | null {
@@ -370,4 +399,56 @@ export function uniqueAlias(alias: string, used: string[]): string {
 
 export function subqueryColumnLine(column: string): string {
 	return `${INDENT}${column}`;
+}
+
+export type ScalarSource = "column" | "case" | "subquery";
+export type ScalarPlace = "select" | "orderBy" | "condition";
+
+// 式の行。columnは修飾済みの列（subqueryでは使わない）、subqueryはsubqueryLinesの行
+export function scalarExpression(
+	source: ScalarSource,
+	column: string,
+	options: { whenCount: number; subquery: string[] | null },
+): string[] {
+	switch (source) {
+		case "column":
+			return [column];
+		case "case":
+			return [
+				"CASE",
+				...Array.from(
+					{ length: Math.max(1, options.whenCount) },
+					() => `${INDENT}WHEN ${column} =  THEN `,
+				),
+				`${INDENT}ELSE `,
+				"END",
+			];
+		case "subquery":
+			return ["(", ...subqueryBody(options.subquery ?? []), ")"];
+	}
+}
+
+// 1行の式は1行にまとめ、複数行の式はCOALESCEの括弧を外側で開いて字下げする
+export function withCoalesce(expression: string[], fallback: string): string[] {
+	const value = fallback.trim();
+	if (expression.length === 1) {
+		return [`COALESCE(${expression[0]}, ${value})`];
+	}
+	return ["COALESCE(", ...subqueryBody(expression), `  , ${value}`, ")"];
+}
+
+// SELECT / ORDER BY の列の位置に置く。continuedなら1行目を「  , 」で始める。asNameはSELECTのときだけ付ける
+export function placeScalar(
+	expression: string[],
+	place: Exclude<ScalarPlace, "condition">,
+	options: { continued: boolean; asName: string },
+): string[] {
+	const head = options.continued ? LIST.next : LIST.first;
+	const asName = options.asName.trim();
+	const last = expression.length - 1;
+	return expression.map((line, i) => {
+		const suffix =
+			place === "select" && i === last && asName !== "" ? ` AS ${asName}` : "";
+		return `${i === 0 ? head : INDENT}${line}${suffix}`;
+	});
 }

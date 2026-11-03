@@ -516,3 +516,91 @@ describe("SqlTableInsertDialogのサブクエリをテーブルにする挿入",
 		expect(screen.queryByLabelText(/Subquery alias/)).toBeNull();
 	});
 });
+
+describe("SqlTableInsertDialogのスカラー値の挿入", () => {
+	async function openScalar() {
+		const loaded = await renderLoaded();
+		await loaded.user.click(screen.getByText("USER_ACCOUNT"));
+		await loaded.user.click(screen.getAllByTitle("Select columns")[0]);
+		await screen.findByText("Select Columns");
+		await loaded.user.selectOptions(
+			screen.getAllByLabelText("Usage")[1],
+			"scalar",
+		);
+		return loaded;
+	}
+
+	it("カラムを1つ選び、COALESCE と AS を付けて SELECT の列に置く", async () => {
+		const { user, onInsertColumn } = await openScalar();
+		await user.click(screen.getByText("ID"));
+		await user.click(screen.getByText("NAME"));
+		await user.click(screen.getByLabelText("COALESCE"));
+		await user.type(screen.getByLabelText("Fallback value"), "''");
+		await user.type(screen.getByLabelText("AS name"), "USER_NAME");
+		await user.click(screen.getByLabelText("Separator on first line (,)"));
+
+		await user.click(screen.getByRole("button", { name: "Insert Scalar" }));
+		expect(onInsertColumn).toHaveBeenCalledWith([
+			"  , COALESCE(UA.NAME, '') AS USER_NAME",
+		]);
+	});
+
+	it("CASE を ORDER BY に置く", async () => {
+		const { user, onInsertColumn } = await openScalar();
+		await user.selectOptions(
+			screen.getByLabelText("Source", {
+				selector: "#sqlColumnInsert_scalarSource",
+			}),
+			"case",
+		);
+		await user.selectOptions(screen.getByLabelText("Place in"), "orderBy");
+		expect(screen.queryByLabelText("AS name")).toBeNull();
+		await user.clear(screen.getByLabelText("WHEN count"));
+		await user.type(screen.getByLabelText("WHEN count"), "2");
+		await user.click(screen.getByText("ID"));
+
+		await user.click(screen.getByRole("button", { name: "Insert Scalar" }));
+		expect(onInsertColumn).toHaveBeenCalledWith([
+			"    CASE",
+			"        WHEN UA.ID =  THEN ",
+			"        WHEN UA.ID =  THEN ",
+			"        ELSE ",
+			"    END",
+		]);
+	});
+
+	it("サブクエリを条件の右辺に置くときは、改行を足さずに挿入する", async () => {
+		const { user, onInsertColumn } = await openScalar();
+		await user.selectOptions(
+			screen.getByLabelText("Source", {
+				selector: "#sqlColumnInsert_scalarSource",
+			}),
+			"subquery",
+		);
+		await user.selectOptions(screen.getByLabelText("Place in"), "condition");
+		expect(screen.queryByPlaceholderText("Filter columns...")).toBeNull();
+		expect(screen.queryByText(/Separator on first line/)).toBeNull();
+		const columnDialog = await findDialog("Select Columns");
+		await user.click(columnDialog.getByRole("button", { name: "Next" }));
+
+		const tableStep = await findDialog("Subquery Table");
+		await user.click(tableStep.getByText("ORDERS"));
+		await user.click(tableStep.getByRole("button", { name: "Next" }));
+		const columnStep = await findDialog("Subquery Columns");
+		const [selectList] = columnStep.getAllByRole("table");
+		await user.click(within(selectList).getByText("NAME"));
+		await user.click(columnStep.getByRole("button", { name: "Insert" }));
+
+		expect(onInsertColumn).toHaveBeenCalledWith(
+			[
+				"(",
+				"    SELECT",
+				"        O.NAME",
+				"    FROM",
+				"        ORDERS O",
+				")",
+			],
+			true,
+		);
+	});
+});

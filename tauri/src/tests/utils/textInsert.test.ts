@@ -5,10 +5,14 @@ import {
 	defaultTableAlias,
 	derivedTableLines,
 	insertAtCursor,
+	insertInlineAtCursor,
+	placeScalar,
 	qualifyColumn,
+	scalarExpression,
 	subqueryLines,
 	tableLines,
 	uniqueAlias,
+	withCoalesce,
 } from "../../utils/textInsert";
 
 describe("insertAtCursor", () => {
@@ -291,6 +295,79 @@ describe("derivedTableLines", () => {
 		expect(derivedTableLines("crossJoin", sub, "S", ["x"]).slice(-1)[0]).toBe(
 			"    ) S",
 		);
+	});
+});
+
+describe("insertInlineAtCursor", () => {
+	it("改行を足さずに入れ、2行目以降は行の要素の位置に揃える", () => {
+		const value = "WHERE\n    T.A = \nAND T.B = ";
+		const cursor = value.length;
+		expect(
+			insertInlineAtCursor(value, ["(", "    SELECT", ")"], cursor, cursor),
+		).toEqual({
+			value: "WHERE\n    T.A = \nAND T.B = (\n        SELECT\n    )",
+			cursor: value.length + "(\n        SELECT\n    )".length,
+		});
+	});
+
+	it("1行ならカーソル位置にそのまま入れ、選択範囲は置き換える", () => {
+		expect(insertInlineAtCursor("T.A = X;", ["1"], 6, 7)).toEqual({
+			value: "T.A = 1;",
+			cursor: 7,
+		});
+	});
+});
+
+describe("scalarExpression / withCoalesce / placeScalar", () => {
+	const none = { whenCount: 1, subquery: null };
+
+	it("CASE は指定した数の WHEN を並べる", () => {
+		expect(scalarExpression("case", "T.A", { ...none, whenCount: 2 })).toEqual([
+			"CASE",
+			"    WHEN T.A =  THEN ",
+			"    WHEN T.A =  THEN ",
+			"    ELSE ",
+			"END",
+		]);
+	});
+
+	it("サブクエリは括弧を単独の行にして字下げする", () => {
+		expect(
+			scalarExpression("subquery", "", {
+				whenCount: 1,
+				subquery: ["SELECT", "    X.B", "FROM", "    T2 X"],
+			}),
+		).toEqual([
+			"(",
+			"    SELECT",
+			"        X.B",
+			"    FROM",
+			"        T2 X",
+			")",
+		]);
+	});
+
+	it("COALESCE は1行なら1行、複数行なら外側で開く", () => {
+		expect(withCoalesce(["T.A"], " 0 ")).toEqual(["COALESCE(T.A, 0)"]);
+		expect(withCoalesce(["CASE", "END"], "0")).toEqual([
+			"COALESCE(",
+			"    CASE",
+			"    END",
+			"  , 0",
+			")",
+		]);
+	});
+
+	it("SELECT の列に置き、最後の行に AS を付ける。ORDER BY では付けない", () => {
+		expect(
+			placeScalar(["(", "    SELECT", ")"], "select", {
+				continued: true,
+				asName: "CNT",
+			}),
+		).toEqual(["  , (", "        SELECT", "    ) AS CNT"]);
+		expect(
+			placeScalar(["T.A"], "orderBy", { continued: false, asName: "X" }),
+		).toEqual(["    T.A"]);
 	});
 });
 

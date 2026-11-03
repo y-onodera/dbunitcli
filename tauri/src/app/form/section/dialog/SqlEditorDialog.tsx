@@ -15,7 +15,10 @@ import {
 } from "../../../../hooks/useResourceFiles";
 import { withoutSetting, withValues } from "../../../../model/CommandOption";
 import type { QueryDatasourceType } from "../../../../model/QueryDatasource";
-import { insertAtCursor } from "../../../../utils/textInsert";
+import {
+	insertAtCursor,
+	insertInlineAtCursor,
+} from "../../../../utils/textInsert";
 import { SaveAndPreviewButton } from "./DatasetTableNamesPreviewButton";
 import type { EditResourceDialogProps } from "./ResourceEditButton";
 import SqlTableInsertDialog from "./SqlTableInsertDialog";
@@ -57,11 +60,13 @@ function Dialog(props: SqlEditorDialogProps & { value: string }) {
 
 	const datasetSrcInfo = useDatasetSrcInfo();
 
-	const insertToContent = (text: string) => {
+	const insertToContent = (lines: string[], inline = false) => {
 		const textarea = textareaRef.current;
 		const start = textarea?.selectionStart ?? content.length;
 		const end = textarea?.selectionEnd ?? content.length;
-		const result = insertAtCursor(content, text, start, end);
+		const result = inline
+			? insertInlineAtCursor(content, lines, start, end)
+			: insertAtCursor(content, lines.join("\n"), start, end);
 		pendingCursorRef.current = result.cursor;
 		setContent(result.value);
 	};
@@ -76,12 +81,12 @@ function Dialog(props: SqlEditorDialogProps & { value: string }) {
 	});
 
 	const handleInsert = (tables: string[]) => {
-		insertToContent(tables.join("\n"));
+		insertToContent(tables);
 		setShowTableSelector(false);
 	};
 
-	const handleInsertColumn = (columns: string[]) => {
-		insertToContent(columns.join("\n"));
+	const handleInsertColumn = (columns: string[], inline?: boolean) => {
+		insertToContent(columns, inline);
 	};
 
 	return (

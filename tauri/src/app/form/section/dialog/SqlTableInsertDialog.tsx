@@ -73,7 +73,8 @@ const TABLE_SOURCE_GROUPS: SelectGroup<TableSource>[] = [
 interface SqlTableInsertDialogProps {
 	jdbcValues: Record<string, string>;
 	onInsert: (tables: string[]) => void;
-	onInsertColumn: (columns: string[]) => void;
+	// inlineなら改行を足さずにカーソル位置へ入れる
+	onInsertColumn: (columns: string[], inline?: boolean) => void;
 	plain?: boolean;
 	onClose: () => void;
 }
@@ -155,7 +156,7 @@ function TablesContent({
 }: {
 	tables: string[];
 	onInsert: (tables: string[]) => void;
-	onInsertColumn: (columns: string[]) => void;
+	onInsertColumn: (columns: string[], inline?: boolean) => void;
 	plain: boolean;
 	onQueryColumns: (table: string, context: JobContext) => Promise<string[]>;
 	onClose: () => void;
@@ -392,9 +393,13 @@ function TablesContent({
 					statement={statementOf(columnDialog.table, columnDialog.statement)}
 					tables={tables}
 					onQueryColumns={onQueryColumns}
-					onInsert={(lines) => {
+					onInsert={(lines, inline) => {
 						if (columnDialog.statement === null) {
-							onInsertColumn(lines);
+							if (inline) {
+								onInsertColumn(lines, true);
+							} else {
+								onInsertColumn(lines);
+							}
 						} else {
 							onInsert(lines);
 						}
