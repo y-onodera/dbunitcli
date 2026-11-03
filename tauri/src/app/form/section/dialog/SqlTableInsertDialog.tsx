@@ -1,4 +1,4 @@
-import { type ReactNode, useState } from "react";
+import { useRef, useState } from "react";
 import {
 	DialogActions,
 	DialogField,
@@ -8,33 +8,66 @@ import {
 	StatusMessage,
 } from "../../../../components/dialog";
 import { BlueButton, WhiteButton } from "../../../../components/element/Button";
-import {
-	ControllTextBox,
-	InputLabel,
-	SelectBox,
-} from "../../../../components/element/Input";
 import { JobProgress } from "../../../../components/element/JobProgress";
 import { useJdbcColumns, useJdbcTables } from "../../../../hooks/useJdbc";
 import { type JobContext, useJob } from "../../../../hooks/useJob";
 import { useTableSelection } from "../../../../hooks/useTableSelection";
-import { decorateLines, qualifyColumn } from "../../../../utils/textInsert";
-import SelectableTable from "./SelectableTable";
+import {
+	type DerivedTableUsage,
+	defaultTableAlias,
+	derivedTableLines,
+	isJoin,
+	isStatementUsage,
+	type StatementUsage,
+	statementColumnUsage,
+	type TableUsage,
+	tableLines,
+	usesDerivedTable,
+	usesTableAlias,
+} from "../../../../utils/textInsert";
+import SqlColumnInsertDialog from "./SqlColumnInsertDialog";
+import {
+	InsertPreview,
+	OptionSelect,
+	OptionText,
+	type SelectGroup,
+	type SelectOption,
+} from "./SqlInsertParts";
+import { SubqueryColumns } from "./SqlSubqueryDialog";
 import TableList from "./TableList";
+import { useColumnLoad } from "./useColumnLoad";
 
-type AffixOption = { label: string; value: string };
+const TABLE_USAGE_GROUPS: SelectGroup<TableUsage>[] = [
+	{
+		label: "Statement",
+		options: [
+			{ value: "select", label: "Select" },
+			{ value: "insert", label: "Insert" },
+			{ value: "update", label: "Update" },
+			{ value: "delete", label: "Delete" },
+		],
+	},
+	{
+		label: "Join",
+		options: [
+			{ value: "leftJoin", label: "Left join" },
+			{ value: "innerJoin", label: "Inner join" },
+			{ value: "crossJoin", label: "Cross join" },
+		],
+	},
+];
 
-const NONE: AffixOption = { label: "None", value: "" };
-const AS: AffixOption = { label: "as", value: " as " };
-const COMMA: AffixOption = { label: ",", value: "," };
-const TABLE_PREFIXES = [NONE, COMMA];
-const TABLE_SUFFIXES = [NONE, COMMA, AS];
-const COLUMN_PREFIXES = [NONE, COMMA, { label: "and", value: "and " }];
-const COLUMN_SUFFIXES = [NONE, COMMA, AS, { label: "=", value: " = " }];
+type TableSource = "table" | "subquery";
+const TABLE_SOURCE_OPTIONS: SelectOption<TableSource>[] = [
+	{ value: "table", label: "Table" },
+	{ value: "subquery", label: "Subquery" },
+];
 
 interface SqlTableInsertDialogProps {
 	jdbcValues: Record<string, string>;
 	onInsert: (tables: string[]) => void;
-	onInsertColumn: (columns: string[]) => void;
+	// inlineなら改行を足さずにカーソル位置へ入れる
+	onInsertColumn: (columns: string[], inline?: boolean) => void;
 	plain?: boolean;
 	onClose: () => void;
 }
@@ -56,6 +89,7 @@ export default function SqlTableInsertDialog({
 		if (job.running) {
 			return;
 		}
+		columnCache.current.clear();
 		const result = await job.run((context) =>
 			getJdbcTables(jdbcValues, context),
 		);
@@ -64,8 +98,18 @@ export default function SqlTableInsertDialog({
 		}
 	};
 
-	const queryColumns = (table: string, context: JobContext) =>
-		getJdbcColumns(jdbcValues, table, context);
+	// 同じテーブルの列は、テーブル一覧を読み直すまで問い合わせ直さない
+	const columnCache = useRef(new Map<string, string[]>());
+
+	const queryColumns = async (table: string, context: JobContext) => {
+		const cached = columnCache.current.get(table);
+		if (cached !== undefined) {
+			return cached;
+		}
+		const columns = await getJdbcColumns(jdbcValues, table, context);
+		columnCache.current.set(table, columns);
+		return columns;
+	};
 
 	function renderBody() {
 		if (job.running) {
@@ -116,44 +160,101 @@ function TablesContent({
 }: {
 	tables: string[];
 	onInsert: (tables: string[]) => void;
-	onInsertColumn: (columns: string[]) => void;
+	onInsertColumn: (columns: string[], inline?: boolean) => void;
 	plain: boolean;
 	onQueryColumns: (table: string, context: JobContext) => Promise<string[]>;
 	onClose: () => void;
 }) {
-	const { selected, toggle, toggleAll } = useTableSelection();
-	// 列選択ダイアログの対象テーブルと、読み込めた列（読込中・失敗中はnull）
-	const [columnDialog, setColumnDialog] = useState<{
-		table: string;
-		columns: string[] | null;
+	// plainは名前だけを複数行で挿入する。それ以外は句を組み立てるため1テーブルだけ選ぶ
+	const { selected, toggle, toggleOnly, toggleAll } = useTableSelection();
+	// 列選択ダイアログの列の読込と、テーブル側の用途から文全体を挿入するときの用途（行の列選択アイコンから開いたときはnull）
+	const columnLoad = useColumnLoad(onQueryColumns);
+	const [columnStatement, setColumnStatement] = useState<StatementUsage | null>(
+		null,
+	);
+	const [usage, setUsage] = useState<TableUsage>("select");
+	const [alias, setAlias] = useState("");
+	const [source, setSource] = useState<TableSource>("table");
+	// サブクエリにするときの、サブクエリ全体の別名（選んだテーブルの別名はalias）
+	const [subqueryAlias, setSubqueryAlias] = useState("");
+	// サブクエリにするとき: サブクエリで使う列の読込と、その後の外側の列の選択
+	const derivedLoad = useColumnLoad(onQueryColumns);
+	const [derivedOuter, setDerivedOuter] = useState<{
+		usage: Exclude<DerivedTableUsage, "crossJoin">;
+		subquery: string[];
+		columns: string[];
 	} | null>(null);
-	// 列の読込。別のテーブルを選ぶと前回を中断し、閉じても中断する（ダイアログ全体のアンマウントでも中断される）
-	const columnJob = useJob();
-	const [prefix, setPrefix] = useState("");
-	const [suffix, setSuffix] = useState("");
+	const selectedTable = plain
+		? null
+		: (tables.find((t) => selected.has(t)) ?? null);
+	const derived = !plain && usesDerivedTable(usage) && source === "subquery";
+	const aliasMissing = derived
+		? subqueryAlias.trim() === ""
+		: isJoin(usage) && alias.trim() === "";
 
-	const handleInsert = () => {
-		const selectedTables = tables.filter((t) => selected.has(t));
-		onInsert(decorateLines(selectedTables, prefix, suffix));
+	const handleUsageChange = (next: TableUsage) => {
+		setUsage(next);
+		setSource("table");
 	};
 
-	const handleSelectTable = async (table: string) => {
-		if (columnDialog?.table === table && columnJob.running) {
+	const handleToggle = (table: string) => {
+		if (plain) {
+			toggle(table);
 			return;
 		}
-		setColumnDialog({ table, columns: null });
-		const result = await columnJob.run((context) =>
-			onQueryColumns(table, context),
-		);
-		if (result) {
-			setColumnDialog({ table, columns: result.value });
-		}
+		toggleOnly(table);
+		setAlias(selected.has(table) ? "" : defaultTableAlias(table));
 	};
 
-	const closeColumnDialog = () => {
-		columnJob.cancel();
-		setColumnDialog(null);
+	const handleInsert = () => {
+		if (selectedTable === null) {
+			onInsert(tables.filter((t) => selected.has(t)));
+			return;
+		}
+		if (derived) {
+			derivedLoad.open(selectedTable);
+			return;
+		}
+		if (isStatementUsage(usage)) {
+			openColumnDialog(selectedTable, usage);
+			return;
+		}
+		onInsert(tableLines(selectedTable, usage, alias, []));
 	};
+
+	const openColumnDialog = (
+		table: string,
+		statement: StatementUsage | null,
+	) => {
+		setColumnStatement(statement);
+		columnLoad.open(table);
+	};
+
+	const handleDerivedSubquery = (subquery: string[], columns: string[]) => {
+		derivedLoad.close();
+		if (!usesDerivedTable(usage)) {
+			return;
+		}
+		if (usage === "crossJoin") {
+			onInsert(derivedTableLines(usage, subquery, subqueryAlias, []));
+			return;
+		}
+		setDerivedOuter({ usage, subquery, columns });
+	};
+
+	const statementOf = (table: string, statement: StatementUsage | null) =>
+		statement === null
+			? undefined
+			: {
+					usage: statementColumnUsage(statement),
+					wrap: (lines: string[]) => tableLines(table, statement, alias, lines),
+				};
+
+	// 列の修飾には、選択中のテーブルなら入力済みの別名を使い（空なら修飾しない）、別名があれば最初から修飾する
+	const columnAliasOf = (table: string) =>
+		table === selectedTable && usesTableAlias(usage)
+			? { alias: alias.trim(), qualify: alias.trim() !== "" }
+			: { alias: defaultTableAlias(table), qualify: false };
 
 	return (
 		<>
@@ -164,230 +265,142 @@ function TablesContent({
 					<TableList
 						tables={tables}
 						selected={selected}
-						onToggleAll={toggleAll}
-						onToggle={toggle}
-						onSelectTable={handleSelectTable}
+						onToggleAll={plain ? toggleAll : undefined}
+						onToggle={handleToggle}
+						onSelectTable={(table) => openColumnDialog(table, null)}
 					/>
 				)}
 			</DialogField>
 			{!plain && (
-				<AffixSelects
-					idPrefix="sqlTableInsert"
-					prefixOptions={TABLE_PREFIXES}
-					suffixOptions={TABLE_SUFFIXES}
-					onPrefixChange={setPrefix}
-					onSuffixChange={setSuffix}
-				/>
+				<>
+					<DialogField>
+						<div className="flex gap-3">
+							<OptionSelect
+								id="sqlTableInsert_usage"
+								label="Usage"
+								groups={TABLE_USAGE_GROUPS}
+								onChange={handleUsageChange}
+							/>
+							<OptionText
+								id="sqlTableInsert_alias"
+								label="Table alias"
+								required={isJoin(usage) && !derived}
+								disabled={!usesTableAlias(usage)}
+								value={usesTableAlias(usage) ? alias : ""}
+								onChange={setAlias}
+							/>
+						</div>
+					</DialogField>
+					{usesDerivedTable(usage) && (
+						<DialogField>
+							<div className="flex gap-3">
+								<OptionSelect
+									key={usage}
+									id="sqlTableInsert_source"
+									label="Source"
+									options={TABLE_SOURCE_OPTIONS}
+									onChange={setSource}
+								/>
+								{derived && (
+									<OptionText
+										id="sqlTableInsert_subqueryAlias"
+										label="Subquery alias"
+										required
+										value={subqueryAlias}
+										onChange={setSubqueryAlias}
+									/>
+								)}
+							</div>
+						</DialogField>
+					)}
+					<InsertPreview
+						lines={
+							// 列まで選ぶ用途は、列選択ダイアログで文全体を見せる
+							selectedTable === null || isStatementUsage(usage) || derived
+								? []
+								: tableLines(selectedTable, usage, alias, [])
+						}
+					/>
+				</>
 			)}
 			<DialogActions>
 				<BlueButton
-					title="Insert"
+					title={
+						!plain && (isStatementUsage(usage) || derived) ? "Next" : "Insert"
+					}
 					handleClick={handleInsert}
-					disabled={selected.size === 0}
+					disabled={selected.size === 0 || (!plain && aliasMissing)}
 				/>
 				<WhiteButton title="Cancel" handleClick={onClose} />
 			</DialogActions>
-			{columnDialog !== null && (
-				<ColumnSelectDialog
-					table={columnDialog.table}
-					columns={columnDialog.columns}
-					loading={columnJob.running}
-					error={columnJob.error}
-					logs={columnJob.logs}
+			{columnLoad.target !== null && (
+				<SqlColumnInsertDialog
+					table={columnLoad.target.table}
+					columns={columnLoad.target.columns}
+					loading={columnLoad.job.running}
+					error={columnLoad.job.error}
+					logs={columnLoad.job.logs}
 					plain={plain}
-					onInsert={(columns) => {
-						onInsertColumn(columns);
-						setColumnDialog(null);
+					{...columnAliasOf(columnLoad.target.table)}
+					statement={statementOf(columnLoad.target.table, columnStatement)}
+					tables={tables}
+					onQueryColumns={onQueryColumns}
+					onInsert={(lines, inline) => {
+						if (columnStatement === null) {
+							if (inline) {
+								onInsertColumn(lines, true);
+							} else {
+								onInsertColumn(lines);
+							}
+						} else {
+							onInsert(lines);
+						}
+						columnLoad.close();
 					}}
-					onClose={closeColumnDialog}
+					onClose={columnLoad.close}
+				/>
+			)}
+			{derivedLoad.target !== null &&
+				(derivedLoad.renderState("Subquery Columns") ?? (
+					<SubqueryColumns
+						mode="from"
+						table={derivedLoad.target.table}
+						alias={alias.trim()}
+						columns={derivedLoad.target.columns ?? []}
+						completeTitle={usage === "crossJoin" ? "Insert" : "Next"}
+						onComplete={handleDerivedSubquery}
+						onClose={derivedLoad.close}
+					/>
+				))}
+			{derivedOuter !== null && (
+				<SqlColumnInsertDialog
+					table={`(subquery) ${subqueryAlias.trim()}`}
+					columns={derivedOuter.columns}
+					loading={false}
+					error=""
+					logs={[]}
+					plain={false}
+					alias={subqueryAlias.trim()}
+					qualify
+					statement={{
+						usage: statementColumnUsage(derivedOuter.usage),
+						wrap: (lines) =>
+							derivedTableLines(
+								derivedOuter.usage,
+								derivedOuter.subquery,
+								subqueryAlias,
+								lines,
+							),
+					}}
+					tables={tables}
+					onQueryColumns={onQueryColumns}
+					onInsert={(lines) => {
+						onInsert(lines);
+						setDerivedOuter(null);
+					}}
+					onClose={() => setDerivedOuter(null)}
 				/>
 			)}
 		</>
-	);
-}
-
-function ColumnSelectDialog({
-	table,
-	columns,
-	loading,
-	error,
-	logs,
-	plain,
-	onInsert,
-	onClose,
-}: {
-	table: string;
-	columns: string[] | null;
-	loading: boolean;
-	error: string;
-	logs: string[];
-	plain: boolean;
-	onInsert: (columns: string[]) => void;
-	onClose: () => void;
-}) {
-	const { selected, toggle, toggleAll } = useTableSelection();
-	const [prefix, setPrefix] = useState("");
-	const [suffix, setSuffix] = useState("");
-	const [alias, setAlias] = useState("");
-
-	if (loading) {
-		return (
-			<ModalOverlay width="w-80" zClass="z-modal-nested">
-				<JobProgress title="Loading..." lines={logs} onAbandon={onClose} />
-			</ModalOverlay>
-		);
-	}
-
-	if (error || columns === null) {
-		return (
-			<ColumnDialogFrame table={table}>
-				{error && <JobFailure message={error} lines={logs} />}
-				<DialogActions>
-					<WhiteButton title="Close" handleClick={onClose} />
-				</DialogActions>
-			</ColumnDialogFrame>
-		);
-	}
-
-	return (
-		<ColumnDialogFrame table={table}>
-			{!plain && (
-				<DialogField>
-					<InputLabel
-						text="Table alias"
-						id="sqlColumnInsert_alias"
-						required={false}
-					/>
-					<ControllTextBox
-						name="sqlColumnInsert_alias"
-						id="sqlColumnInsert_alias"
-						required={false}
-						value={alias}
-						handleChange={(ev) => setAlias(ev.target.value)}
-					/>
-				</DialogField>
-			)}
-			<DialogField last={plain}>
-				<SelectableTable
-					items={columns}
-					selected={selected}
-					onToggle={toggle}
-					onToggleAll={toggleAll}
-					columnLabel="Column Name"
-					filterPlaceholder="Filter columns..."
-					emptyMessage="No columns found"
-				/>
-			</DialogField>
-			{!plain && (
-				<AffixSelects
-					idPrefix="sqlColumnInsert"
-					prefixOptions={COLUMN_PREFIXES}
-					suffixOptions={COLUMN_SUFFIXES}
-					onPrefixChange={setPrefix}
-					onSuffixChange={setSuffix}
-				/>
-			)}
-			<DialogActions>
-				<BlueButton
-					title="Insert Columns"
-					handleClick={() =>
-						onInsert(
-							decorateLines(
-								columns
-									.filter((c) => selected.has(c))
-									.map((c) => qualifyColumn(c, alias)),
-								prefix,
-								suffix,
-							),
-						)
-					}
-					disabled={selected.size === 0}
-				/>
-				<WhiteButton title="Cancel" handleClick={onClose} />
-			</DialogActions>
-		</ColumnDialogFrame>
-	);
-}
-
-// 列選択ダイアログの枠: 見出しと対象のテーブル名
-function ColumnDialogFrame({
-	table,
-	children,
-}: {
-	table: string;
-	children: ReactNode;
-}) {
-	return (
-		<ModalOverlay width="w-80" zClass="z-modal-nested">
-			<DialogTitle>Select Columns</DialogTitle>
-			<p className="text-caption mb-4 truncate" title={table}>
-				{table}
-			</p>
-			{children}
-		</ModalOverlay>
-	);
-}
-
-function AffixSelects({
-	idPrefix,
-	prefixOptions,
-	suffixOptions,
-	onPrefixChange,
-	onSuffixChange,
-}: {
-	idPrefix: string;
-	prefixOptions: AffixOption[];
-	suffixOptions: AffixOption[];
-	onPrefixChange: (value: string) => void;
-	onSuffixChange: (value: string) => void;
-}) {
-	return (
-		<DialogField last>
-			<div className="flex gap-3">
-				<AffixSelect
-					id={`${idPrefix}_prefix`}
-					label="Prefix"
-					options={prefixOptions}
-					onChange={onPrefixChange}
-				/>
-				<AffixSelect
-					id={`${idPrefix}_suffix`}
-					label="Suffix"
-					options={suffixOptions}
-					onChange={onSuffixChange}
-				/>
-			</div>
-		</DialogField>
-	);
-}
-
-function AffixSelect({
-	id,
-	label,
-	options,
-	onChange,
-}: {
-	id: string;
-	label: string;
-	options: AffixOption[];
-	onChange: (value: string) => void;
-}) {
-	return (
-		<div className="flex-1">
-			<InputLabel text={label} id={id} required={false} />
-			<SelectBox
-				name={id}
-				id={id}
-				required={false}
-				wStyle="w-full"
-				handleOnChange={onChange}
-			>
-				{options.map((o) => (
-					<option key={o.label} value={o.value}>
-						{o.label}
-					</option>
-				))}
-			</SelectBox>
-		</div>
 	);
 }

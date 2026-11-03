@@ -45,16 +45,146 @@
   <p>JDBC 接続が確認済み（<a href="../sections/jdbc.html">JDBC</a> セクションの接続テスト成功）のときのみ、Select Tables ボタンが表示されます。</p>
   <ol>
     <li>Select Tables を押し、Load Tables でデータベースのテーブル一覧を取得します。</li>
-    <li>挿入したいテーブルにチェックを入れ、Insert を押すと、テーブル名が本文のカーソル位置に 1 行 1 テーブルで挿入され、Select Tables が閉じます。本文で範囲を選択していた場合は、その範囲を置き換えます。</li>
-    <li>テーブル名の横の Select columns アイコンを押すと、そのテーブルのカラム選択ダイアログ（Select Columns）が開きます。カラムにチェックを入れて Insert Columns を押すと、カラム名がカーソル位置に 1 行 1 カラムで挿入されます。Select Tables は開いたままなので、続けて別のテーブルを選べます。</li>
+    <li>挿入したいテーブルにチェックを入れ、Insert を押すと、本文のカーソル位置に挿入され、Select Tables が閉じます。本文で範囲を選択していた場合は、その範囲を置き換えます。</li>
+    <li>テーブル名の横の Select columns アイコンを押すと、そのテーブルのカラム選択ダイアログ（Select Columns）が開きます。カラムにチェックを入れて Insert Columns を押すと、カーソル位置に 1 行 1 カラムで挿入されます。All Columns を押すと、チェックに関わらずすべてのカラムを 1 行ずつ書き出して挿入します（<code>*</code> は使いません）。Select Tables は開いたままなので、続けて別のテーブルを選べます。</li>
   </ol>
-  <p><code>srcType</code> が <code>sql</code> / <code>csvq</code> の場合は、挿入する名前の前後に付ける文字を選べます。<code>table</code> の場合はこれらの項目は表示されず、名前だけを挿入します。</p>
+  <p><code>srcType</code> が <code>table</code> の場合は、テーブルを複数選べ、テーブル名・カラム名だけを 1 行ずつ挿入します。以降の項目は表示されません。</p>
+  <p><code>srcType</code> が <code>sql</code> / <code>csvq</code> の場合は、使い道（Usage）を選ぶと、それに合った形で挿入します。挿入される内容は Insert の上に表示されます。</p>
+  <p>挿入する SQL は次の形に揃えます。キーワードは大文字で行頭に置き、句の中身は 4 文字下げ、2 行目以降は <code>  , </code> または <code>AND </code> で始めます。テーブル名・カラム名は取得した表記のままです。</p>
+  <pre>SELECT
+    T.COLUMNA AS COLUMNA
+  , T.COLUMNB AS COLUMNB
+FROM
+    TABLE T
+    INNER JOIN
+        TABLE2 T2
+          ON  T2.COLUMNA = 
+          AND T2.COLUMNB = 
+WHERE
+    T.COLUMNA = 
+AND T.COLUMNB = </pre>
+
+  <h3>テーブル（Select Tables）</h3>
+  <p>選べるテーブルは 1 つです。別のテーブルを選ぶと置き換わります。</p>
+  <p>Usage が Select / Insert / Update / Left join / Inner join のときは、Insert ボタンが Next に変わります。Next を押すと Select Columns が開き、選んだカラム（All Columns なら全カラム）と合わせた文全体を挿入して、Select Tables が閉じます。このとき Select Columns の Usage はテーブル側に合わせて固定され、Keyword line と Separator on first line は表示されません。</p>
   <table>
-    <tr><th>項目</th><th>表示する場所</th><th>内容</th></tr>
-    <tr><td>Prefix</td><td>Select Tables・Select Columns</td><td>各行の前に付ける文字。テーブルは None / <code>,</code>、カラムは None / <code>,</code> / <code>and</code></td></tr>
-    <tr><td>Suffix</td><td>Select Tables・Select Columns</td><td>各行の後に付ける文字。テーブルは None / <code>,</code> / <code>as</code>、カラムは None / <code>,</code> / <code>as</code> / <code>=</code></td></tr>
-    <tr><td>Table alias</td><td>Select Columns</td><td>指定すると、カラム名を <code>別名.カラム名</code> の形で挿入する</td></tr>
+    <tr><th>項目</th><th>説明</th><th>デフォルト</th></tr>
+    <tr><td>Usage</td><td>テーブルの使い道。挿入する文の形が決まる</td><td>Select</td></tr>
+    <tr><td>Table alias</td><td>テーブルの別名。空ならテーブル名だけを挿入する。Select Columns でカラムに付ける別名にも使う。Usage が join で Source が Table のときは必須。Source が Subquery のときはサブクエリの中のテーブルの別名になる。Insert のときは入力できない</td><td>テーブル名の <code>_</code> 区切りの各語の先頭文字を大文字でつなげたもの（例: <code>USER_ACCOUNT</code> → <code>UA</code>）。スキーマ名は除く</td></tr>
+    <tr><td>Source</td><td>Table ならテーブルをそのまま使い、Subquery なら選んだテーブルからサブクエリを作って置く。Usage が Select / Left join / Inner join / Cross join のときだけ表示される。Usage を変えると Table に戻る</td><td>Table</td></tr>
+    <tr><td>Subquery alias（必須）</td><td>サブクエリ全体の別名。閉じ括弧の後ろに付け、外側のカラムの修飾にも使う。Source が Subquery のときだけ表示される</td><td>（空）</td></tr>
   </table>
+  <table>
+    <tr><th>値</th><th>説明</th></tr>
+    <tr><td>Select</td><td><code>SELECT</code>、カラム、<code>FROM</code>、テーブルの順に挿入する</td></tr>
+    <tr><td>Insert</td><td><code>INSERT INTO</code>、テーブル、<code>(</code>、カラム、<code>)</code>、<code>VALUES</code>、<code>(</code>、<code>)</code> の順に挿入する。<code>VALUES</code> の中身は空</td></tr>
+    <tr><td>Update</td><td><code>UPDATE</code>、テーブル、<code>SET</code>、カラム（<code>ID = </code> の形）の順に挿入する。<code>WHERE</code> は付けない</td></tr>
+    <tr><td>Delete</td><td><code>DELETE FROM</code>、テーブルの順に挿入する</td></tr>
+    <tr><td>Left join / Inner join</td><td><code>LEFT JOIN</code> / <code>INNER JOIN</code>、テーブル、ON の条件（Select Columns の On と同じ形）の順に挿入する。右辺は空</td></tr>
+    <tr><td>Cross join</td><td><code>CROSS JOIN</code>、テーブルの順に挿入する</td></tr>
+  </table>
+
+  <p>Source が Subquery のときは、Next を押すと次の順に選びます。</p>
+  <ol>
+    <li>Subquery Columns で、SELECT columns にサブクエリで SELECT するカラム（複数可）を、WHERE columns にサブクエリの条件にするカラムを選びます。All Columns を押すと、すべてのカラムを SELECT します。</li>
+    <li>Usage が Select / Left join / Inner join のときは Next を押すと Select Columns が開き、サブクエリで SELECT したカラムから外側の SELECT のカラム、または ON の条件を選びます。カラムはサブクエリの別名で修飾されます（Prefix table alias は最初から ON）。</li>
+    <li>Cross join のときは、Subquery Columns の Insert で挿入します。</li>
+  </ol>
+  <pre>SELECT
+    S.ID
+FROM (
+    SELECT
+        UA.ID
+    FROM
+        USER_ACCOUNT UA
+    WHERE
+        UA.NAME = 
+) S</pre>
+  <p>join では、<code>    INNER JOIN (</code> のように JOIN の行末で括弧を開き、<code>    ) S</code> の下に ON の条件を続けます。</p>
+
+  <h3>カラム（Select Columns）</h3>
+  <table>
+    <tr><th>項目</th><th>説明</th><th>デフォルト</th></tr>
+    <tr><td>Usage</td><td>カラムの使い道。キーワード行・区切り・<code>=</code> の有無が決まる</td><td>Select</td></tr>
+    <tr><td>Prefix table alias</td><td>ON にすると、カラム名を <code>別名.カラム名</code> の形にする。項目名の後ろに使う別名を表示する。別名は Select Tables で選択中のテーブルなら Table alias の入力値、それ以外は Table alias のデフォルトと同じ規則の別名。Select Tables で選択中のテーブルの Table alias が空のとき、または Usage が Insert のときは表示されない</td><td>Select Tables で選択中のテーブルなら ON、それ以外は OFF</td></tr>
+    <tr><td>AS column name</td><td>ON にすると、各カラムに <code>AS カラム名</code> を付ける。Usage が Select のときだけ表示される</td><td>OFF</td></tr>
+    <tr><td>Keyword line</td><td>ON にすると、カラムの前にキーワードの行（<code>ORDER BY</code> / <code>GROUP BY</code> / <code>WHERE</code> / <code>SET</code>）を付ける。Usage が Order by / Group by / Where / Update set のときだけ表示される。Separator on first line が ON のとき、または Connect to main query が None 以外のときは付けない</td><td>ON</td></tr>
+    <tr><td>Separator on first line</td><td>ON にすると、1 行目にも区切り（<code>,</code>）を付ける。挿入済みのカラムの後ろに続けて挿入するときに使う。Usage が Where / On のときは表示されない</td><td>OFF</td></tr>
+  </table>
+  <table>
+    <tr><th>値</th><th>説明</th></tr>
+    <tr><td>Select</td><td><code>    UA.ID</code>、2 行目以降は <code>  , UA.NAME</code>（AS column name が ON なら <code>    UA.ID AS ID</code>）</td></tr>
+    <tr><td>Order by / Group by</td><td><code>ORDER BY</code> / <code>GROUP BY</code> の行に続けて、<code>    UA.ID</code>、2 行目以降は <code>  , UA.NAME</code></td></tr>
+    <tr><td>Where</td><td><code>WHERE</code> の行に続けて、<code>    UA.ID = </code>、2 行目以降は <code>AND UA.NAME = </code>。演算子などは「条件（Where / On）」を参照</td></tr>
+    <tr><td>On</td><td>JOIN の結合先テーブルの下に揃えて、<code>          ON  UA.ID = </code>、2 行目以降は <code>          AND UA.NAME = </code>。演算子などは「条件（Where / On）」を参照</td></tr>
+    <tr><td>Update set (=, ,)</td><td><code>SET</code> の行に続けて、<code>    UA.ID = </code>、2 行目以降は <code>  , UA.NAME = </code></td></tr>
+    <tr><td>Insert</td><td><code>    ID</code>、2 行目以降は <code>  , NAME</code></td></tr>
+    <tr><td>Scalar value</td><td>1 つの値になる式（カラム・CASE 式・サブクエリ）を挿入する。「スカラー値（Scalar value）」を参照</td></tr>
+  </table>
+
+  <h3>スカラー値（Scalar value）</h3>
+  <p>Usage が Scalar value のときは、条件の右辺・SELECT の列・ORDER BY に書く 1 つの値の式を挿入します。テーブル名の横の Select columns アイコンから開いた Select Columns で選べます（Next から開いたときは選べません）。</p>
+  <table>
+    <tr><th>項目</th><th>説明</th><th>デフォルト</th></tr>
+    <tr><td>Source</td><td>式の元。Column は選んだ 1 カラム、CASE は選んだ 1 カラムの CASE 式、Subquery は Next で選ぶサブクエリ（IN のサブクエリと同じ手順で、SELECT するカラムは 1 つ）</td><td>Column</td></tr>
+    <tr><td>Place in</td><td>挿入する場所。Select column / Order by は列の位置（<code>    </code>、Separator on first line が ON なら <code>  , </code>）から始める。Condition right side は改行を足さずにカーソル位置へ入れ、2 行目以降はカーソルのある行の条件の位置に揃える</td><td>Select column</td></tr>
+    <tr><td>WHEN count</td><td>CASE 式の <code>WHEN カラム =  THEN </code> の行の数。値は空で入れる。Source が CASE のときだけ表示される</td><td>1</td></tr>
+    <tr><td>COALESCE</td><td>ON にすると、式を <code>COALESCE</code> で囲み、Fallback value を代替値にする。1 行の式は <code>COALESCE(UA.NAME, '')</code>、複数行の式は <code>COALESCE(</code> の下に式を字下げし、<code>  , 代替値</code> と <code>)</code> を続ける</td><td>OFF</td></tr>
+    <tr><td>AS name</td><td>指定すると、式の最後に <code>AS 名前</code> を付ける。Place in が Select column のときだけ表示される</td><td>（空）</td></tr>
+  </table>
+  <p>例: Source が Subquery、COALESCE が ON（Fallback value は <code>0</code>）、Place in が Select column、AS name が <code>CNT</code> のとき</p>
+  <pre>    COALESCE(
+        (
+            SELECT
+                COUNT(O.ID)
+            FROM
+                ORDERS O
+            WHERE
+                O.USER_ID = 
+        )
+      , 0
+    ) AS CNT</pre>
+  <p>（<code>COUNT(...)</code> は挿入後に書き換えた例です）</p>
+
+  <h3>条件（Where / On）</h3>
+  <p>Usage が Where / On のときは、最初に Operator を選びます。Left join / Inner join の Next から開いた Select Columns でも選べます。</p>
+  <table>
+    <tr><th>項目</th><th>説明</th><th>デフォルト</th></tr>
+    <tr><td>Operator</td><td>条件の演算子。選べるカラムの数が決まる</td><td>=</td></tr>
+    <tr><td>NOT</td><td>ON にすると、<code>!=</code> / <code>IS NOT NULL</code> / <code>NOT IN</code> / <code>NOT EXISTS</code> にする</td><td>OFF</td></tr>
+    <tr><td>Join columns with</td><td>カラムどうしの条件をつなぐ <code>AND</code> / <code>OR</code>。Operator が = / IS NULL のときだけ表示される</td><td>AND</td></tr>
+    <tr><td>Group with ( )</td><td>ON にすると、カラムの条件を <code>( )</code> でまとめる。Operator が = / IS NULL のときだけ表示される</td><td>OFF</td></tr>
+    <tr><td>Connect to main query</td><td>挿入済みの条件の後ろに続けるときのつなぎ。None なら先頭の条件として挿入する（Where では Keyword line で <code>WHERE</code> の行を付けられる）。AND / OR なら 1 行目をそれで始める。Next から開いたときは表示されない</td><td>None (first condition)</td></tr>
+    <tr><td>IN source</td><td>IN の右辺。Values なら Values に入力した値を <code>IN (1, 2)</code> のように 1 行で入れる。Subquery なら Next でサブクエリを選ぶ。Operator が IN のときだけ表示される</td><td>Values</td></tr>
+  </table>
+  <table>
+    <tr><th>値</th><th>説明</th></tr>
+    <tr><td>=</td><td><code>UA.ID = </code>（NOT が ON なら <code>UA.ID != </code>）。複数のカラムを選べる</td></tr>
+    <tr><td>IS NULL</td><td><code>UA.ID IS NULL</code>。複数のカラムを選べる</td></tr>
+    <tr><td>IN</td><td><code>UA.ID IN (...)</code>。カラムは 1 つだけ選べる。All Columns は表示されない</td></tr>
+    <tr><td>EXISTS</td><td><code>EXISTS (...)</code>。カラムは選ばない。Next でサブクエリを選ぶ</td></tr>
+  </table>
+  <p>例: Operator が IS NULL、NOT が ON、Join columns with が OR、Group with ( ) が ON、Connect to main query が AND のとき</p>
+  <pre>AND (
+        UA.ID IS NOT NULL
+    OR  UA.NAME IS NOT NULL
+    )</pre>
+  <p>IN の Subquery と EXISTS では、Next を押すと次の順に選びます。</p>
+  <ol>
+    <li>Subquery Table でサブクエリのテーブルを 1 つ選び、Table alias を確認して Next を押します。別名のデフォルトは Table alias と同じ規則で、外側の別名と同じになる場合は数字を付けます（例: <code>UA</code> → <code>UA2</code>）。</li>
+    <li>Subquery Columns で、IN なら SELECT column に SELECT するカラムを 1 つ選びます。EXISTS では <code>SELECT 1</code> になります。</li>
+    <li>WHERE columns にサブクエリの条件にするカラムを選びます（<code>カラム = </code> の形。右辺は空）。選ばなければ <code>WHERE</code> は付けません。条件のつなぎは Join conditions with で、別名を付けるかは Prefix table alias で選べます。</li>
+    <li>Insert を押すと、サブクエリを含む条件を挿入します。</li>
+  </ol>
+  <pre>WHERE
+    UA.ID NOT IN (
+        SELECT
+            O.USER_ID
+        FROM
+            ORDERS O
+        WHERE
+            O.STATUS = 
+    )</pre>
   <p>テーブル一覧やカラムの取得に失敗したときは、ダイアログ内にエラーメッセージと読込中に出ていたログを表示します。</p>
 
   <h2 id="section-save">保存</h2>

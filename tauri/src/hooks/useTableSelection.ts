@@ -15,6 +15,13 @@ export function useTableSelection(initial: string[] = []) {
 		});
 	};
 
+	// 選択済みなら外し、そうでなければそれだけを選ぶ
+	const toggleOnly = (table: string) => {
+		setSelected((prev) =>
+			prev.has(table) && prev.size === 1 ? new Set() : new Set([table]),
+		);
+	};
+
 	const toggleAll = (targets: string[], checked: boolean) => {
 		setSelected((prev) => {
 			const next = new Set(prev);
@@ -31,5 +38,5 @@ export function useTableSelection(initial: string[] = []) {
 		});
 	};
 
-	return { selected, toggle, toggleAll };
+	return { selected, toggle, toggleOnly, toggleAll };
 }
