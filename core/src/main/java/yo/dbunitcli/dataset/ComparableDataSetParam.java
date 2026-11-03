@@ -443,7 +443,7 @@ public record ComparableDataSetParam(
         }
 
         /**
-         * @param inlineSource 指定すればsrcのファイルの代わりに読む内容（{@link DataSourceType#supportsInlineSource()}の形式のみ）。nullならsrcを読む
+         * @param inlineSource srcのファイルの代わりに読む内容（{@link DataSourceType#supportsInlineSource()}の形式のみ）
          */
         public Builder setInlineSource(final InlineSource inlineSource) {
             this.inlineSource = inlineSource;

@@ -26,6 +26,7 @@ import yo.dbunitcli.dataset.producer.ComparableDataSetLoader;
 import yo.dbunitcli.dataset.producer.ComparableQueryDataSetProducer;
 import yo.dbunitcli.dataset.producer.ComparableXlsDataSetProducer;
 import yo.dbunitcli.dataset.producer.ComparableXlsxDataSetProducer;
+import yo.dbunitcli.dataset.producer.InlineSourceDataSetProducer;
 import yo.dbunitcli.resource.FileResources;
 import yo.dbunitcli.resource.TestThreadContextPropagator;
 import yo.dbunitcli.resource.Workers;
@@ -477,9 +478,9 @@ public class ParallelTableMappingTest {
                     .setFixedLength("1")
                     .setDatabaseConnectionLoader(this.connectionLoader("jdbc:h2:mem:sourceType;DB_CLOSE_DELAY=-1"))
                     .build();
-            Assertions.assertEquals(type.isParallelizable()
-                    , new ComparableDataSetLoader(Parameter.none()).getComparableDataSetProducer(param).isParallelizableSource()
-                    , type.name());
+            final ComparableDataSetProducer producer = new ComparableDataSetLoader(Parameter.none()).getComparableDataSetProducer(param);
+            Assertions.assertEquals(type.isParallelizable(), producer.isParallelizableSource(), type.name());
+            Assertions.assertEquals(type.supportsInlineSource(), producer instanceof InlineSourceDataSetProducer, type.name());
         }
     }
 

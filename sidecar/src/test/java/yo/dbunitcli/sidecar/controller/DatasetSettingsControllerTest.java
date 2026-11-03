@@ -520,7 +520,7 @@ class DatasetSettingsControllerTest {
     }
 
     @Test
-    void testTableColumns_srcTypeがsql_table_csvq以外ならinlineSourceはエラーを返す() throws IOException {
+    void testTableColumns_inlineSourceを読めない形式ならエラーを返す() throws IOException {
         this.createPreviewSrc();
         final Map<String, Object> body = this.inlineSourceBody(DatasetTableNamesRequestDto.INLINE_SOURCE_TABLE_NAME);
         body.put("srcOptions", Map.of("srcType", "csv", "src", PREVIEW_SRC_DIR.toAbsolutePath().toString()));

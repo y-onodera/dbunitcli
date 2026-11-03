@@ -13,7 +13,6 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -89,8 +88,6 @@ public class InlineSourceTest {
 
     @Test
     public void inlineSourceを読めない形式ではbuildできない() {
-        Assertions.assertEquals(List.of(DataSourceType.table, DataSourceType.sql, DataSourceType.csvq),
-                Arrays.stream(DataSourceType.values()).filter(DataSourceType::supportsInlineSource).toList());
         final ComparableDataSetParam.Builder builder = this.param(DataSourceType.csv)
                 .setInlineSource(new InlineSource("inline", "SELECT 1"));
         Assertions.assertThrows(IllegalArgumentException.class, builder::build);
