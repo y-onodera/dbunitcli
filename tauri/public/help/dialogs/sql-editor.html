@@ -88,18 +88,58 @@ AND T.COLUMNB = </pre>
     <tr><td>Usage</td><td>カラムの使い道。キーワード行・区切り・<code>=</code> の有無が決まる</td><td>Select</td></tr>
     <tr><td>Prefix table alias</td><td>ON にすると、カラム名を <code>別名.カラム名</code> の形にする。項目名の後ろに使う別名を表示する。別名は Select Tables で選択中のテーブルなら Table alias の入力値、それ以外は Table alias のデフォルトと同じ規則の別名。Select Tables で選択中のテーブルの Table alias が空のとき、または Usage が Insert のときは表示されない</td><td>Select Tables で選択中のテーブルなら ON、それ以外は OFF</td></tr>
     <tr><td>AS column name</td><td>ON にすると、各カラムに <code>AS カラム名</code> を付ける。Usage が Select のときだけ表示される</td><td>OFF</td></tr>
-    <tr><td>Keyword line</td><td>ON にすると、カラムの前にキーワードの行（<code>ORDER BY</code> / <code>GROUP BY</code> / <code>WHERE</code> / <code>SET</code>）を付ける。Usage が Order by / Group by / Where / Update set のときだけ表示される。Separator on first line が ON のときは付けない</td><td>ON</td></tr>
-    <tr><td>Separator on first line</td><td>ON にすると、1 行目にも区切り（<code>,</code> または <code>AND</code>）を付ける。挿入済みのカラムの後ろに続けて挿入するときに使う</td><td>OFF</td></tr>
+    <tr><td>Keyword line</td><td>ON にすると、カラムの前にキーワードの行（<code>ORDER BY</code> / <code>GROUP BY</code> / <code>WHERE</code> / <code>SET</code>）を付ける。Usage が Order by / Group by / Where / Update set のときだけ表示される。Separator on first line が ON のとき、または Connect to main query が None 以外のときは付けない</td><td>ON</td></tr>
+    <tr><td>Separator on first line</td><td>ON にすると、1 行目にも区切り（<code>,</code>）を付ける。挿入済みのカラムの後ろに続けて挿入するときに使う。Usage が Where / On のときは表示されない</td><td>OFF</td></tr>
   </table>
   <table>
     <tr><th>値</th><th>説明</th></tr>
     <tr><td>Select</td><td><code>    UA.ID</code>、2 行目以降は <code>  , UA.NAME</code>（AS column name が ON なら <code>    UA.ID AS ID</code>）</td></tr>
     <tr><td>Order by / Group by</td><td><code>ORDER BY</code> / <code>GROUP BY</code> の行に続けて、<code>    UA.ID</code>、2 行目以降は <code>  , UA.NAME</code></td></tr>
-    <tr><td>Where (=, AND)</td><td><code>WHERE</code> の行に続けて、<code>    UA.ID = </code>、2 行目以降は <code>AND UA.NAME = </code></td></tr>
-    <tr><td>On (=, AND)</td><td>JOIN の結合先テーブルの下に揃えて、<code>          ON  UA.ID = </code>、2 行目以降は <code>          AND UA.NAME = </code></td></tr>
+    <tr><td>Where</td><td><code>WHERE</code> の行に続けて、<code>    UA.ID = </code>、2 行目以降は <code>AND UA.NAME = </code>。演算子などは「条件（Where / On）」を参照</td></tr>
+    <tr><td>On</td><td>JOIN の結合先テーブルの下に揃えて、<code>          ON  UA.ID = </code>、2 行目以降は <code>          AND UA.NAME = </code>。演算子などは「条件（Where / On）」を参照</td></tr>
     <tr><td>Update set (=, ,)</td><td><code>SET</code> の行に続けて、<code>    UA.ID = </code>、2 行目以降は <code>  , UA.NAME = </code></td></tr>
     <tr><td>Insert</td><td><code>    ID</code>、2 行目以降は <code>  , NAME</code></td></tr>
   </table>
+
+  <h3>条件（Where / On）</h3>
+  <p>Usage が Where / On のときは、最初に Operator を選びます。Left join / Inner join の Next から開いた Select Columns でも選べます。</p>
+  <table>
+    <tr><th>項目</th><th>説明</th><th>デフォルト</th></tr>
+    <tr><td>Operator</td><td>条件の演算子。選べるカラムの数が決まる</td><td>=</td></tr>
+    <tr><td>NOT</td><td>ON にすると、<code>IS NOT NULL</code> / <code>NOT IN</code> / <code>NOT EXISTS</code> にする。Operator が = のときは表示されない</td><td>OFF</td></tr>
+    <tr><td>Join columns with</td><td>カラムどうしの条件をつなぐ <code>AND</code> / <code>OR</code>。Operator が = / IS NULL のときだけ表示される</td><td>AND</td></tr>
+    <tr><td>Group with ( )</td><td>ON にすると、カラムの条件を <code>( )</code> でまとめる。Operator が = / IS NULL のときだけ表示される</td><td>OFF</td></tr>
+    <tr><td>Connect to main query</td><td>挿入済みの条件の後ろに続けるときのつなぎ。None なら先頭の条件として挿入する（Where では Keyword line で <code>WHERE</code> の行を付けられる）。AND / OR なら 1 行目をそれで始める。Next から開いたときは表示されない</td><td>None (first condition)</td></tr>
+    <tr><td>IN source</td><td>IN の右辺。Values なら Values に入力した値を <code>IN (1, 2)</code> のように 1 行で入れる。Subquery なら Next でサブクエリを選ぶ。Operator が IN のときだけ表示される</td><td>Values</td></tr>
+  </table>
+  <table>
+    <tr><th>値</th><th>説明</th></tr>
+    <tr><td>=</td><td><code>UA.ID = </code>。複数のカラムを選べる</td></tr>
+    <tr><td>IS NULL</td><td><code>UA.ID IS NULL</code>。複数のカラムを選べる</td></tr>
+    <tr><td>IN</td><td><code>UA.ID IN (...)</code>。カラムは 1 つだけ選べる。All Columns は表示されない</td></tr>
+    <tr><td>EXISTS</td><td><code>EXISTS (...)</code>。カラムは選ばない。Next でサブクエリを選ぶ</td></tr>
+  </table>
+  <p>例: Operator が IS NULL、NOT が ON、Join columns with が OR、Group with ( ) が ON、Connect to main query が AND のとき</p>
+  <pre>AND (
+        UA.ID IS NOT NULL
+    OR  UA.NAME IS NOT NULL
+    )</pre>
+  <p>IN の Subquery と EXISTS では、Next を押すと次の順に選びます。</p>
+  <ol>
+    <li>Subquery Table でサブクエリのテーブルを 1 つ選び、Table alias を確認して Next を押します。別名のデフォルトは Table alias と同じ規則で、外側の別名と同じになる場合は数字を付けます（例: <code>UA</code> → <code>UA2</code>）。</li>
+    <li>Subquery Columns で、IN なら SELECT column に SELECT するカラムを 1 つ選びます。EXISTS では <code>SELECT 1</code> になります。</li>
+    <li>WHERE columns にサブクエリの条件にするカラムを選びます（<code>カラム = </code> の形。右辺は空）。選ばなければ <code>WHERE</code> は付けません。条件のつなぎは Join conditions with で、別名を付けるかは Prefix table alias で選べます。</li>
+    <li>Insert を押すと、サブクエリを含む条件を挿入します。</li>
+  </ol>
+  <pre>WHERE
+    UA.ID NOT IN (
+        SELECT
+            O.USER_ID
+        FROM
+            ORDERS O
+        WHERE
+            O.STATUS = 
+    )</pre>
   <p>テーブル一覧やカラムの取得に失敗したときは、ダイアログ内にエラーメッセージと読込中に出ていたログを表示します。</p>
 
   <h2 id="section-save">保存</h2>

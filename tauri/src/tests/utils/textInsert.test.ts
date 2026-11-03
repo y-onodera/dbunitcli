@@ -1,9 +1,13 @@
 import {
+	type ConditionOptions,
 	columnLines,
+	conditionLines,
 	defaultTableAlias,
 	insertAtCursor,
 	qualifyColumn,
+	subqueryLines,
 	tableLines,
+	uniqueAlias,
 } from "../../utils/textInsert";
 
 describe("insertAtCursor", () => {
@@ -184,6 +188,79 @@ describe("columnLines", () => {
 		expect(
 			columnLines(["ID", "NAME"], "insert", { alias: "U", columnAs: true }),
 		).toEqual(["    ID", "  , NAME"]);
+	});
+});
+
+describe("conditionLines", () => {
+	const base: ConditionOptions = {
+		operator: "equals",
+		not: false,
+		conjunction: "AND",
+		group: false,
+		connector: null,
+		keyword: false,
+		inValues: "",
+		subquery: null,
+	};
+
+	it("ON の () は ON の後ろで開き、中の条件をさらに字下げする", () => {
+		expect(
+			conditionLines(["T2.A", "T2.B"], "on", {
+				...base,
+				conjunction: "OR",
+				group: true,
+			}),
+		).toEqual([
+			"          ON  (",
+			"                  T2.A = ",
+			"              OR  T2.B = ",
+			"              )",
+		]);
+	});
+
+	it("ON に続けるときは AND / OR を ON の位置に置く", () => {
+		expect(
+			conditionLines(["T2.A"], "on", { ...base, connector: "OR" }),
+		).toEqual(["          OR  T2.A = "]);
+	});
+
+	it("WHERE の NOT EXISTS はサブクエリを条件の位置から字下げする", () => {
+		expect(
+			conditionLines([], "where", {
+				...base,
+				operator: "exists",
+				not: true,
+				keyword: true,
+				subquery: subqueryLines("T2", "X", ["    1"], []),
+			}),
+		).toEqual([
+			"WHERE",
+			"    NOT EXISTS (",
+			"        SELECT",
+			"            1",
+			"        FROM",
+			"            T2 X",
+			"    )",
+		]);
+	});
+
+	it("IN の値は1行にまとめ、NOT を付けられる", () => {
+		expect(
+			conditionLines(["T.A"], "where", {
+				...base,
+				operator: "in",
+				not: true,
+				inValues: " 'a', 'b' ",
+			}),
+		).toEqual(["    T.A NOT IN ('a', 'b')"]);
+	});
+});
+
+describe("uniqueAlias", () => {
+	it("使われている別名と重なるときは数字を付ける", () => {
+		expect(uniqueAlias("T", ["T"])).toBe("T2");
+		expect(uniqueAlias("T", ["T", "T2"])).toBe("T3");
+		expect(uniqueAlias("U", ["T"])).toBe("U");
 	});
 });
 

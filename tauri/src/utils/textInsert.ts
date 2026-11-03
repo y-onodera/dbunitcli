@@ -188,3 +188,146 @@ export function qualifyColumn(column: string, alias: string): string {
 	const trimmed = alias.trim();
 	return trimmed === "" ? column : `${trimmed}.${column}`;
 }
+
+export function isConditionUsage(usage: ColumnUsage): usage is ConditionUsage {
+	return usage === "where" || usage === "on";
+}
+
+export type ConditionUsage = Extract<ColumnUsage, "where" | "on">;
+export type ConditionOperator = "equals" | "isNull" | "in" | "exists";
+export type Conjunction = "AND" | "OR";
+
+// 複数の列を条件にできる演算子。INは1列、EXISTSは列を使わない
+export function isMultiColumnOperator(operator: ConditionOperator): boolean {
+	return operator === "equals" || operator === "isNull";
+}
+
+export function usesNot(operator: ConditionOperator): boolean {
+	return operator !== "equals";
+}
+
+export type ConditionOptions = {
+	operator: ConditionOperator;
+	not: boolean;
+	// 列どうしのつなぎ
+	conjunction: Conjunction;
+	// 列の条件を () でまとめる（isMultiColumnOperatorのときだけ使う）
+	group: boolean;
+	// 既存の条件の後ろに続けるときのつなぎ。nullなら先頭の条件として WHERE / ON から始める
+	connector: Conjunction | null;
+	keyword: boolean;
+	// IN の値（1行にまとめて入れる）。subqueryがあればそちらを使う
+	inValues: string;
+	// IN / EXISTS のサブクエリ（subqueryLinesの行）
+	subquery: string[] | null;
+};
+
+const CONDITION_BASE: Record<ConditionUsage, string> = {
+	where: "",
+	on: ON_INDENT,
+};
+
+// 行頭のつなぎは4文字幅に揃え、条件の位置を合わせる
+function connectorHead(base: string, connector: string): string {
+	return `${base}${connector.padEnd(INDENT.length)}`;
+}
+
+// 1つの条件。サブクエリを含むときは複数行になり、2行目以降は条件の位置からの字下げで返す
+function conditionExpression(
+	column: string,
+	options: ConditionOptions,
+): string[] {
+	const not = options.not ? "NOT " : "";
+	switch (options.operator) {
+		case "equals":
+			return [`${column} = `];
+		case "isNull":
+			return [`${column} IS ${not}NULL`];
+		case "in":
+			if (options.subquery === null) {
+				return [`${column} ${not}IN (${options.inValues.trim()})`];
+			}
+			return [`${column} ${not}IN (`, ...subqueryBody(options.subquery), ")"];
+		case "exists":
+			return [`${not}EXISTS (`, ...subqueryBody(options.subquery ?? []), ")"];
+	}
+}
+
+function subqueryBody(lines: string[]): string[] {
+	return lines.map((line) => `${INDENT}${line}`);
+}
+
+// columnsは修飾済みの列。EXISTSでは使わない
+export function conditionLines(
+	columns: string[],
+	usage: ConditionUsage,
+	options: ConditionOptions,
+): string[] {
+	const base = CONDITION_BASE[usage];
+	const firstConnector = options.connector ?? (usage === "on" ? "ON" : "");
+	const firstHead = connectorHead(base, firstConnector);
+	const position = " ".repeat(firstHead.length);
+	const targets = options.operator === "exists" ? [""] : columns;
+	const lines =
+		isMultiColumnOperator(options.operator) && options.group
+			? groupedLines(targets, firstHead, position, options)
+			: targets.flatMap((column, i) => {
+					const [first, ...rest] = conditionExpression(column, options);
+					const head =
+						i === 0 ? firstHead : connectorHead(base, options.conjunction);
+					return [
+						`${head}${first}`,
+						...rest.map((line) => `${position}${line}`),
+					];
+				});
+	if (usage === "where" && options.keyword && options.connector === null) {
+		return ["WHERE", ...lines];
+	}
+	return lines;
+}
+
+function groupedLines(
+	columns: string[],
+	firstHead: string,
+	position: string,
+	options: ConditionOptions,
+): string[] {
+	const inner = `${position}${INDENT}`;
+	return [
+		`${firstHead}(`,
+		...columns.map((column, i) => {
+			const head =
+				i === 0 ? inner : connectorHead(position, options.conjunction);
+			return `${head}${conditionExpression(column, options)[0]}`;
+		}),
+		`${position})`,
+	];
+}
+
+// サブクエリのSELECT文。selectListとwhereは字下げ済みの行（whereは空なら付けない）
+export function subqueryLines(
+	table: string,
+	alias: string,
+	selectList: string[],
+	where: string[],
+): string[] {
+	const trimmed = alias.trim();
+	const named = trimmed === "" ? table : `${table} ${trimmed}`;
+	return ["SELECT", ...selectList, "FROM", `${INDENT}${named}`, ...where];
+}
+
+// 外側の別名と重ならないよう、重なるときは数字を付ける（T → T2）
+export function uniqueAlias(alias: string, used: string[]): string {
+	if (alias === "" || !used.includes(alias)) {
+		return alias;
+	}
+	let n = 2;
+	while (used.includes(`${alias}${n}`)) {
+		n++;
+	}
+	return `${alias}${n}`;
+}
+
+export function subqueryColumnLine(column: string): string {
+	return `${INDENT}${column}`;
+}

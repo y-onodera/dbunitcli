@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import SqlTableInsertDialog from "../../../../../app/form/section/dialog/SqlTableInsertDialog";
@@ -254,14 +254,154 @@ describe("SqlTableInsertDialogのカラム挿入", () => {
 		expect(onInsertColumn).toHaveBeenCalledWith(["    ID"]);
 	});
 
-	it("Separator on first line をONにすると1行目にも区切りを付け、キーワード行は付けない", async () => {
+	it("Order by では Separator on first line で1行目にも区切りを付け、キーワード行は付けない", async () => {
 		const { user, onInsertColumn } = await openColumnsOfOrders();
 		await user.click(screen.getByText("ID"));
-		await user.selectOptions(screen.getAllByLabelText("Usage")[1], "where");
-		await user.click(screen.getByLabelText("Separator on first line (AND)"));
-		expect(screen.getByLabelText("Keyword line (WHERE)")).toBeDisabled();
+		await user.selectOptions(screen.getAllByLabelText("Usage")[1], "orderBy");
+		await user.click(screen.getByLabelText("Separator on first line (,)"));
+		expect(screen.getByLabelText("Keyword line (ORDER BY)")).toBeDisabled();
 
 		await user.click(screen.getByRole("button", { name: "Insert Columns" }));
-		expect(onInsertColumn).toHaveBeenCalledWith(["AND ID = "]);
+		expect(onInsertColumn).toHaveBeenCalledWith(["  , ID"]);
+	});
+});
+
+// 入れ子のダイアログは見出しの親（ダイアログ本体）の中だけを探す
+async function findDialog(title: string) {
+	const heading = await screen.findByRole("heading", { name: title });
+	return within(heading.parentElement as HTMLElement);
+}
+
+describe("SqlTableInsertDialogの条件の挿入", () => {
+	async function openWhere() {
+		const loaded = await renderLoaded();
+		await loaded.user.click(screen.getAllByTitle("Select columns")[1]);
+		await screen.findByText("Select Columns");
+		await loaded.user.selectOptions(
+			screen.getAllByLabelText("Usage")[1],
+			"where",
+		);
+		return loaded;
+	}
+
+	it("IS NOT NULL を OR でつなぎ、() でまとめて AND でメインクエリにつなぐ", async () => {
+		const { user, onInsertColumn } = await openWhere();
+		await user.selectOptions(screen.getByLabelText("Operator"), "isNull");
+		await user.click(screen.getByLabelText("NOT"));
+		await user.selectOptions(screen.getByLabelText("Join columns with"), "OR");
+		await user.click(screen.getByLabelText("Group with ( )"));
+		await user.selectOptions(
+			screen.getByLabelText("Connect to main query"),
+			"AND",
+		);
+		expect(screen.getByLabelText("Keyword line (WHERE)")).toBeDisabled();
+
+		await user.click(screen.getByRole("button", { name: "All Columns" }));
+		expect(onInsertColumn).toHaveBeenCalledWith([
+			"AND (",
+			"        ID IS NOT NULL",
+			"    OR  NAME IS NOT NULL",
+			"    )",
+		]);
+	});
+
+	it("= では NOT を出さない", async () => {
+		await openWhere();
+		expect(screen.queryByLabelText("NOT")).toBeNull();
+	});
+
+	it("IN は1カラムだけ選べ、値を1行で入れる", async () => {
+		const { user, onInsertColumn } = await openWhere();
+		await user.selectOptions(screen.getByLabelText("Operator"), "in");
+		expect(screen.queryByRole("button", { name: "All Columns" })).toBeNull();
+		await user.click(screen.getByText("ID"));
+		await user.click(screen.getByText("NAME"));
+		await user.type(screen.getByLabelText("Values"), "1, 2");
+
+		await user.click(screen.getByRole("button", { name: "Insert Columns" }));
+		expect(onInsertColumn).toHaveBeenCalledWith([
+			"WHERE",
+			"    NAME IN (1, 2)",
+		]);
+	});
+
+	it("IN のサブクエリは、テーブル・SELECTする列・WHEREの列を続けて選ぶ", async () => {
+		const { user, onInsertColumn } = await openWhere();
+		await user.selectOptions(screen.getByLabelText("Operator"), "in");
+		await user.click(screen.getByLabelText("NOT"));
+		await user.selectOptions(screen.getByLabelText("IN source"), "subquery");
+		await user.click(screen.getByText("ID"));
+		const columnDialog = await findDialog("Select Columns");
+		await user.click(columnDialog.getByRole("button", { name: "Next" }));
+
+		const tableStep = await findDialog("Subquery Table");
+		await user.click(tableStep.getByText("USER_ACCOUNT"));
+		expect(tableStep.getByLabelText("Table alias")).toHaveValue("UA");
+		await user.click(tableStep.getByRole("button", { name: "Next" }));
+
+		const columnStep = await findDialog("Subquery Columns");
+		const [selectList, whereList] = columnStep.getAllByRole("table");
+		await user.click(within(selectList).getByText("ID"));
+		await user.click(within(whereList).getByText("NAME"));
+		await user.click(columnStep.getByRole("button", { name: "Insert" }));
+
+		expect(onInsertColumn).toHaveBeenCalledWith([
+			"WHERE",
+			"    ID NOT IN (",
+			"        SELECT",
+			"            UA.ID",
+			"        FROM",
+			"            USER_ACCOUNT UA",
+			"        WHERE",
+			"            UA.NAME = ",
+			"    )",
+		]);
+	});
+
+	it("EXISTS はカラムを選ばず、サブクエリのテーブルを選んで SELECT 1 にする", async () => {
+		const { user, onInsertColumn } = await openWhere();
+		await user.selectOptions(screen.getByLabelText("Operator"), "exists");
+		await user.selectOptions(
+			screen.getByLabelText("Connect to main query"),
+			"OR",
+		);
+		expect(screen.queryByPlaceholderText("Filter columns...")).toBeNull();
+		const columnDialog = await findDialog("Select Columns");
+		await user.click(columnDialog.getByRole("button", { name: "Next" }));
+
+		const tableStep = await findDialog("Subquery Table");
+		// 外側の別名（O）と重なるときは数字を付ける
+		await user.click(tableStep.getByText("ORDERS"));
+		expect(tableStep.getByLabelText("Table alias")).toHaveValue("O2");
+		await user.click(tableStep.getByRole("button", { name: "Next" }));
+		const columnStep = await findDialog("Subquery Columns");
+		await user.click(columnStep.getByRole("button", { name: "Insert" }));
+
+		expect(onInsertColumn).toHaveBeenCalledWith([
+			"OR  EXISTS (",
+			"        SELECT",
+			"            1",
+			"        FROM",
+			"            ORDERS O2",
+			"    )",
+		]);
+	});
+
+	it("join の ON でも演算子を選べ、ON の位置に揃える", async () => {
+		const { user, onInsert } = await renderLoaded();
+		await user.click(screen.getByText("ORDERS"));
+		await user.selectOptions(screen.getByLabelText("Usage"), "leftJoin");
+		await user.click(screen.getByRole("button", { name: "Next" }));
+		await screen.findByText("Select Columns");
+		await user.selectOptions(screen.getByLabelText("Operator"), "isNull");
+		expect(screen.queryByLabelText("Connect to main query")).toBeNull();
+
+		await user.click(screen.getByRole("button", { name: "All Columns" }));
+		expect(onInsert).toHaveBeenCalledWith([
+			"    LEFT JOIN",
+			"        ORDERS O",
+			"          ON  O.ID IS NULL",
+			"          AND O.NAME IS NULL",
+		]);
 	});
 });

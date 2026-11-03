@@ -1,4 +1,4 @@
-import { type ReactNode, useState } from "react";
+import { useState } from "react";
 import {
 	DialogActions,
 	DialogField,
@@ -11,17 +11,12 @@ import { BlueButton, WhiteButton } from "../../../../components/element/Button";
 import {
 	ControllTextBox,
 	InputLabel,
-	SelectBox,
 } from "../../../../components/element/Input";
 import { JobProgress } from "../../../../components/element/JobProgress";
 import { useJdbcColumns, useJdbcTables } from "../../../../hooks/useJdbc";
 import { type JobContext, useJob } from "../../../../hooks/useJob";
 import { useTableSelection } from "../../../../hooks/useTableSelection";
 import {
-	type ColumnUsage,
-	columnKeyword,
-	columnLines,
-	columnSeparator,
 	defaultTableAlias,
 	isJoin,
 	isStatementUsage,
@@ -29,13 +24,17 @@ import {
 	statementColumnUsage,
 	type TableUsage,
 	tableLines,
-	usesColumnQualifier,
 	usesTableAlias,
 } from "../../../../utils/textInsert";
-import SelectableTable from "./SelectableTable";
+import SqlColumnInsertDialog from "./SqlColumnInsertDialog";
+import {
+	InsertPreview,
+	OptionSelect,
+	type SelectGroup,
+} from "./SqlInsertParts";
 import TableList from "./TableList";
 
-const TABLE_USAGE_GROUPS: UsageGroup<TableUsage>[] = [
+const TABLE_USAGE_GROUPS: SelectGroup<TableUsage>[] = [
 	{
 		label: "Statement",
 		options: [
@@ -54,26 +53,6 @@ const TABLE_USAGE_GROUPS: UsageGroup<TableUsage>[] = [
 		],
 	},
 ];
-
-const COLUMN_USAGE_GROUPS: UsageGroup<ColumnUsage>[] = [
-	{
-		label: "Usage",
-		options: [
-			{ value: "select", label: "Select" },
-			{ value: "orderBy", label: "Order by" },
-			{ value: "groupBy", label: "Group by" },
-			{ value: "where", label: "Where (=, AND)" },
-			{ value: "on", label: "On (=, AND)" },
-			{ value: "update", label: "Update set (=, ,)" },
-			{ value: "insert", label: "Insert" },
-		],
-	},
-];
-
-type UsageGroup<T extends string> = {
-	label: string;
-	options: { value: T; label: string }[];
-};
 
 interface SqlTableInsertDialogProps {
 	jdbcValues: Record<string, string>;
@@ -258,13 +237,12 @@ function TablesContent({
 				<>
 					<DialogField>
 						<div className="flex gap-3">
-							<div className="flex-1">
-								<UsageSelect
-									id="sqlTableInsert_usage"
-									groups={TABLE_USAGE_GROUPS}
-									onChange={setUsage}
-								/>
-							</div>
+							<OptionSelect
+								id="sqlTableInsert_usage"
+								label="Usage"
+								groups={TABLE_USAGE_GROUPS}
+								onChange={setUsage}
+							/>
 							<div className="flex-1">
 								<InputLabel
 									text="Table alias"
@@ -301,7 +279,7 @@ function TablesContent({
 				<WhiteButton title="Cancel" handleClick={onClose} />
 			</DialogActions>
 			{columnDialog !== null && (
-				<ColumnSelectDialog
+				<SqlColumnInsertDialog
 					table={columnDialog.table}
 					columns={columnDialog.columns}
 					loading={columnJob.running}
@@ -310,6 +288,8 @@ function TablesContent({
 					plain={plain}
 					{...columnAliasOf(columnDialog.table)}
 					statement={statementOf(columnDialog.table, columnDialog.statement)}
+					tables={tables}
+					onQueryColumns={onQueryColumns}
 					onInsert={(lines) => {
 						if (columnDialog.statement === null) {
 							onInsertColumn(lines);
@@ -322,260 +302,5 @@ function TablesContent({
 				/>
 			)}
 		</>
-	);
-}
-
-function ColumnSelectDialog({
-	table,
-	columns,
-	loading,
-	error,
-	logs,
-	plain,
-	alias,
-	qualify: initialQualify,
-	statement,
-	onInsert,
-	onClose,
-}: {
-	table: string;
-	columns: string[] | null;
-	loading: boolean;
-	error: string;
-	logs: string[];
-	plain: boolean;
-	// 修飾に使う別名（入力はSelect Tables側）と、修飾の初期状態
-	alias: string;
-	qualify: boolean;
-	// 指定時は用途を固定し、選んだ列をwrapで文全体にして挿入する
-	statement?: { usage: ColumnUsage; wrap: (lines: string[]) => string[] };
-	onInsert: (lines: string[]) => void;
-	onClose: () => void;
-}) {
-	const { selected, toggle, toggleAll } = useTableSelection();
-	const [selectedUsage, setUsage] = useState<ColumnUsage>("select");
-	const usage = statement?.usage ?? selectedUsage;
-	const [qualify, setQualify] = useState(initialQualify);
-	const [columnAs, setColumnAs] = useState(false);
-	const [continued, setContinued] = useState(false);
-	const [keyword, setKeyword] = useState(true);
-
-	if (loading) {
-		return (
-			<ModalOverlay width="w-80" zClass="z-modal-nested">
-				<JobProgress title="Loading..." lines={logs} onAbandon={onClose} />
-			</ModalOverlay>
-		);
-	}
-
-	if (error || columns === null) {
-		return (
-			<ColumnDialogFrame table={table}>
-				{error && <JobFailure message={error} lines={logs} />}
-				<DialogActions>
-					<WhiteButton title="Close" handleClick={onClose} />
-				</DialogActions>
-			</ColumnDialogFrame>
-		);
-	}
-
-	const qualifying = qualify && usesColumnQualifier(usage) && alias !== "";
-	const linesOf = (targets: string[]) => {
-		if (plain) {
-			return targets;
-		}
-		const formatted = columnLines(targets, usage, {
-			alias: qualifying ? alias : "",
-			columnAs,
-			continued: statement === undefined && continued,
-			keyword: statement === undefined && keyword,
-		});
-		return statement === undefined ? formatted : statement.wrap(formatted);
-	};
-	const selectedColumns = columns.filter((c) => selected.has(c));
-	const keywordOfUsage = columnKeyword(usage);
-
-	return (
-		<ColumnDialogFrame table={table}>
-			<DialogField last={plain}>
-				<SelectableTable
-					items={columns}
-					selected={selected}
-					onToggle={toggle}
-					onToggleAll={toggleAll}
-					columnLabel="Column Name"
-					filterPlaceholder="Filter columns..."
-					emptyMessage="No columns found"
-				/>
-			</DialogField>
-			{!plain && (
-				<>
-					{statement === undefined && (
-						<DialogField>
-							<UsageSelect
-								id="sqlColumnInsert_usage"
-								groups={COLUMN_USAGE_GROUPS}
-								onChange={setUsage}
-							/>
-						</DialogField>
-					)}
-					{usesColumnQualifier(usage) && alias !== "" && (
-						<DialogField>
-							<OptionCheck
-								id="sqlColumnInsert_qualify"
-								label={`Prefix table alias (${alias})`}
-								checked={qualify}
-								onChange={setQualify}
-							/>
-						</DialogField>
-					)}
-					{usage === "select" && (
-						<DialogField>
-							<OptionCheck
-								id="sqlColumnInsert_as"
-								label="AS column name"
-								checked={columnAs}
-								onChange={setColumnAs}
-							/>
-						</DialogField>
-					)}
-					{statement === undefined && keywordOfUsage !== null && (
-						<DialogField>
-							<OptionCheck
-								id="sqlColumnInsert_keyword"
-								label={`Keyword line (${keywordOfUsage})`}
-								checked={keyword && !continued}
-								disabled={continued}
-								onChange={setKeyword}
-							/>
-						</DialogField>
-					)}
-					{statement === undefined && (
-						<DialogField>
-							<OptionCheck
-								id="sqlColumnInsert_continued"
-								label={`Separator on first line (${columnSeparator(usage)})`}
-								checked={continued}
-								onChange={setContinued}
-							/>
-						</DialogField>
-					)}
-					<InsertPreview
-						lines={selectedColumns.length === 0 ? [] : linesOf(selectedColumns)}
-					/>
-				</>
-			)}
-			<DialogActions>
-				<BlueButton
-					title="Insert Columns"
-					handleClick={() => onInsert(linesOf(selectedColumns))}
-					disabled={selectedColumns.length === 0}
-				/>
-				<BlueButton
-					title="All Columns"
-					handleClick={() => onInsert(linesOf(columns))}
-					disabled={columns.length === 0}
-				/>
-				<WhiteButton title="Cancel" handleClick={onClose} />
-			</DialogActions>
-		</ColumnDialogFrame>
-	);
-}
-
-// 列選択ダイアログの枠: 見出しと対象のテーブル名
-function ColumnDialogFrame({
-	table,
-	children,
-}: {
-	table: string;
-	children: ReactNode;
-}) {
-	return (
-		<ModalOverlay width="w-80" zClass="z-modal-nested">
-			<DialogTitle>Select Columns</DialogTitle>
-			<p className="text-caption mb-4 truncate" title={table}>
-				{table}
-			</p>
-			{children}
-		</ModalOverlay>
-	);
-}
-
-function UsageSelect<T extends string>({
-	id,
-	groups,
-	onChange,
-}: {
-	id: string;
-	groups: UsageGroup<T>[];
-	onChange: (value: T) => void;
-}) {
-	return (
-		<>
-			<InputLabel text="Usage" id={id} required={false} />
-			<SelectBox
-				name={id}
-				id={id}
-				required={false}
-				wStyle="w-full"
-				defaultValue={groups[0].options[0].value}
-				handleOnChange={(value) => onChange(value as T)}
-			>
-				{groups.map((group) => (
-					<optgroup key={group.label} label={group.label}>
-						{group.options.map((o) => (
-							<option key={o.value} value={o.value}>
-								{o.label}
-							</option>
-						))}
-					</optgroup>
-				))}
-			</SelectBox>
-		</>
-	);
-}
-
-function OptionCheck({
-	id,
-	label,
-	checked,
-	disabled = false,
-	onChange,
-}: {
-	id: string;
-	label: string;
-	checked: boolean;
-	disabled?: boolean;
-	onChange: (checked: boolean) => void;
-}) {
-	return (
-		<label htmlFor={id} className="flex items-center gap-1 mb-1 text-sm">
-			<input
-				id={id}
-				type="checkbox"
-				checked={checked}
-				disabled={disabled}
-				onChange={(e) => onChange(e.target.checked)}
-				className="w-4 h-4 text-primary"
-			/>
-			{label}
-		</label>
-	);
-}
-
-// 挿入される内容を先に見せ、用途の選び間違いに気付けるようにする
-function InsertPreview({ lines }: { lines: string[] }) {
-	if (lines.length === 0) {
-		return null;
-	}
-	return (
-		<DialogField last>
-			<pre
-				data-testid="insert-preview"
-				className="text-caption whitespace-pre-wrap break-all"
-			>
-				{lines.join("\n")}
-			</pre>
-		</DialogField>
 	);
 }
