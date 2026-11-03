@@ -1,7 +1,8 @@
 ---
-description: core/application・core/resource変更時のsidecar・tauri影響確認
-TRIGGER when: core/src/main/java/yo/dbunitcli/application/ または resource/ 配下のファイル変更を含む実装タスクが完了したとき。
-DO NOT TRIGGER when: 上記以外のファイルのみの変更、またはファイルの読み取りのみの場合。
+description: >-
+  core/application・core/resource変更時のsidecar・tauri影響確認
+  TRIGGER when: core/src/main/java/yo/dbunitcli/application/ または resource/ 配下のファイル変更を含む実装タスクが完了したとき。
+  DO NOT TRIGGER when: 上記以外のファイルのみの変更、またはファイルの読み取りのみの場合。
 ---
 
 以下を順に実施すること。
@@ -19,7 +20,7 @@ DO NOT TRIGGER when: 上記以外のファイルのみの変更、またはフ�
 
 ## 2. tauri フィクスチャ更新
 
-レスポンス構造変更時、`tauri/src/tests/app/form/fixtures.ts` を更新し `CommandForm.test.tsx` / `ConvertForm.test.tsx` が通ることを確認する。
+レスポンス構造変更時、`tauri/src/tests/app/form/fixtures.ts` を更新し、それを参照するテストが通ることを確認する。
 
 ## 3. ヘルプ更新
 

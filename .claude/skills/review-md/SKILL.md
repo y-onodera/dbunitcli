@@ -1,7 +1,8 @@
 ---
-description: CLAUDE.md / .claude/rules/*.md / .claude/skills/*/SKILL.md / .claude/agents/*.md を変更したら必ず実行。再利用性・品質・効率の3観点で品質確認する。
-TRIGGER when: CLAUDE.md、.claude/rules/*.md、.claude/skills/*/SKILL.md、.claude/agents/*.md の変更・追加・修正を含む実装タスクが完了したとき。
-DO NOT TRIGGER when: コードファイル（.ts/.tsx/.js/.jsx/.java/.rs）のみの変更、またはmdを読み取りのみの場合。
+description: >-
+  CLAUDE.md / .claude/rules/*.md / .claude/skills/*/SKILL.md / .claude/agents/*.md を変更したら必ず実行。再利用性・品質・効率の3観点で品質確認する。
+  TRIGGER when: CLAUDE.md、.claude/rules/*.md、.claude/skills/*/SKILL.md、.claude/agents/*.md の変更・追加・修正を含む実装タスクが完了したとき。
+  DO NOT TRIGGER when: コードファイル（.ts/.tsx/.js/.jsx/.java/.rs）のみの変更、またはmdを読み取りのみの場合。
 ---
 
 以下の数値基準と3観点でセルフチェックを行い、超過・問題があれば即座に修正すること。
