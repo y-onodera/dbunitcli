@@ -7,6 +7,11 @@ import java.util.Map;
 @Serdeable
 public class DatasetTableNamesRequestDto {
 
+    /**
+     * sql・csvqのinlineSourceを読み込んだテーブルの名前
+     */
+    public static final String INLINE_SOURCE_TABLE_NAME = "inlineSource";
+
     private Map<String, String> parameters;
 
     /**
@@ -23,6 +28,12 @@ public class DatasetTableNamesRequestDto {
      * 未保存のxlsxスキーマ。指定時はxlsxSchemaより優先し、このスキーマの対象のシート・テーブルだけを読み込む（xlsxスキーマの設定ダイアログのプレビュー用）
      */
     private JsonXlsxSchemaDto inlineXlsxSchema;
+
+    /**
+     * 未保存のsrcの内容。指定時はsrcのファイルの代わりに読む（{@link yo.dbunitcli.dataset.InlineSource}。
+     * 読めない形式ならエラー）。sql・csvqのテーブル名は{@link #INLINE_SOURCE_TABLE_NAME}になる
+     */
+    private String inlineSource;
 
     public Map<String, String> getParameters() {
         return this.parameters;
@@ -54,5 +65,13 @@ public class DatasetTableNamesRequestDto {
 
     public void setInlineXlsxSchema(final JsonXlsxSchemaDto inlineXlsxSchema) {
         this.inlineXlsxSchema = inlineXlsxSchema;
+    }
+
+    public String getInlineSource() {
+        return this.inlineSource;
+    }
+
+    public void setInlineSource(final String inlineSource) {
+        this.inlineSource = inlineSource;
     }
 }

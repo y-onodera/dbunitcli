@@ -6,6 +6,8 @@ import {
 } from "../../context/EnvironmentProvider";
 import WorkspaceResourcesProvider from "../../context/WorkspaceResourcesProvider";
 import {
+	useColumnNamesFetcher,
+	useCsvColumnNamesFetcher,
 	useDatasetSettingsData,
 	useDatasetTableConvert,
 	useDatasetTableNames,
@@ -64,6 +66,22 @@ const { mockFetchData, mockFetchAndUpdate } = vi.hoisted(() => {
 		if (params.endpoint.includes("/dataset-setting/load")) {
 			return Promise.resolve(
 				new Response(JSON.stringify(mockDatasetSettingsResponse)),
+			);
+		}
+		if (params.endpoint.includes("/dataset-setting/table-columns")) {
+			const { tableName, inlineSource } = JSON.parse(
+				String(params.options.body),
+			);
+			// inlineSourceはsrcの代わりに読み、テーブル名はinlineSourceになる
+			const columns: Record<string, string[]> = inlineSource
+				? { inlineSource: ["code", "label"] }
+				: { t1: ["id", "name"], t2: ["id", "age"] };
+			return Promise.resolve(
+				new Response(
+					JSON.stringify(
+						tableName ? { [tableName]: columns[tableName] } : columns,
+					),
+				),
 			);
 		}
 		if (params.endpoint.includes("/dataset-setting/table-names")) {
@@ -184,7 +202,8 @@ describe("DatasetSettingsProviderのテスト", () => {
 			await waitFor(() => {
 				expect(result.current).toStrictEqual(["id", "name", "age"]);
 			});
-			expect(callsTo("/dataset-setting/table-preview")).toHaveLength(2);
+			// 全テーブルの列名を1回で取得する
+			expect(callsTo("/dataset-setting/table-columns")).toHaveLength(1);
 		});
 
 		// 入力は毎レンダー同一参照にする（新規オブジェクトだとeffectが再発火し続ける）
@@ -203,7 +222,7 @@ describe("DatasetSettingsProviderのテスト", () => {
 				rerender();
 			});
 			expect(result.current).toStrictEqual([]);
-			expect(callsTo("/dataset-setting/table-names")).toHaveLength(0);
+			expect(callsTo("/dataset-setting/table-columns")).toHaveLength(0);
 		});
 
 		it("src・srcType以外の項目が変わっても再取得されることを確認", async () => {
@@ -212,15 +231,52 @@ describe("DatasetSettingsProviderのテスト", () => {
 				{ wrapper: envWrapper, initialProps: srcInfo },
 			);
 			await waitFor(() => {
-				expect(callsTo("/dataset-setting/table-names")).toHaveLength(1);
+				expect(callsTo("/dataset-setting/table-columns")).toHaveLength(1);
 			});
 			rerender({ values: { ...srcInfo.values, regTableInclude: "^t1$" } });
 			await waitFor(() => {
-				expect(callsTo("/dataset-setting/table-names")).toHaveLength(2);
+				expect(callsTo("/dataset-setting/table-columns")).toHaveLength(2);
 			});
-			const [lastParams] = callsTo("/dataset-setting/table-names")[1];
+			const [lastParams] = callsTo("/dataset-setting/table-columns")[1];
 			expect(JSON.parse(String(lastParams.options.body))).toMatchObject({
 				srcOptions: { regTableInclude: "^t1$" },
+			});
+		});
+	});
+
+	describe("列名の取得（useColumnNamesFetcher・useCsvColumnNamesFetcher）のテスト", () => {
+		const context = { signal: new AbortController().signal, onLog: vi.fn() };
+		const lastBody = () => {
+			const calls = mockFetchData.mock.calls.filter(([params]) =>
+				params.endpoint.includes("/dataset-setting/table-columns"),
+			);
+			return JSON.parse(String(calls[calls.length - 1][0].options.body));
+		};
+
+		it("テーブル名を指定して、settingの対象外でもそのテーブルの列名を取得することを確認", async () => {
+			const { result } = renderHook(() => useColumnNamesFetcher(), {
+				wrapper: envWrapper,
+			});
+			expect(await result.current(srcInfo, "t2", context)).toStrictEqual([
+				"id",
+				"age",
+			]);
+			expect(lastBody()).toMatchObject({
+				tableName: "t2",
+				srcOptions: { settingTargetOnly: "false" },
+			});
+		});
+
+		it("CSVREADの式をcsvqのSQLとして読み、その列名を取得することを確認", async () => {
+			const { result } = renderHook(() => useCsvColumnNamesFetcher(), {
+				wrapper: envWrapper,
+			});
+			expect(
+				await result.current("CSVREAD('a.csv',null,'charset=MS932')", context),
+			).toStrictEqual(["code", "label"]);
+			expect(lastBody()).toMatchObject({
+				tableName: "inlineSource",
+				inlineSource: "SELECT * FROM CSVREAD('a.csv',null,'charset=MS932')",
 			});
 		});
 	});
@@ -275,7 +331,44 @@ describe("DatasetSettingsProviderのテスト", () => {
 			},
 		);
 
-		it("入力候補（useSrcInfoColumnNames）は、テーブル一覧の読込に失敗しても空配列のままにすることを確認", async () => {
+		it("inlineSourceがあれば、srcが空でもその内容を送ってテーブル一覧を読むことを確認", async () => {
+			const info: DatasetSrcInfo = {
+				values: { srcType: "csvq", src: "" },
+				inlineSource: "SELECT 1",
+			};
+			const { result } = renderHook(() => useDatasetTableNames(info), {
+				wrapper: envWrapper,
+			});
+			await waitFor(() => {
+				expect(result.current.tableNames).toStrictEqual(["t1", "t2"]);
+			});
+			const [params] = mockFetchData.mock.calls.filter(([p]) =>
+				p.endpoint.includes("/dataset-setting/table-names"),
+			)[0];
+			expect(JSON.parse(String(params.options.body))).toMatchObject({
+				srcOptions: { srcType: "csvq", src: "" },
+				inlineSource: "SELECT 1",
+			});
+		});
+
+		it("inlineSourceの内容が空白だけなら、srcがあっても読まないことを確認", async () => {
+			const info: DatasetSrcInfo = {
+				values: { ...srcInfo.values },
+				inlineSource: " \n",
+			};
+			const { result } = renderHook(() => useDatasetTableNames(info), {
+				wrapper: envWrapper,
+			});
+			await act(async () => {});
+			expect(result.current.tableNames).toStrictEqual([]);
+			expect(
+				mockFetchData.mock.calls.filter(([p]) =>
+					p.endpoint.includes("/dataset-setting/table-names"),
+				),
+			).toHaveLength(0);
+		});
+
+		it("入力候補（useSrcInfoColumnNames）は、列名の読込に失敗しても空配列のままにすることを確認", async () => {
 			failWithLogs();
 			const { result } = renderHook(() => useSrcInfoColumnNames(srcInfo), {
 				wrapper: envWrapper,

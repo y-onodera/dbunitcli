@@ -1,0 +1,6 @@
+SELECT
+    table1.*
+FROM
+    CSVREAD('csv/header.csv',null,'charset=UTF-8') table1
+ORDER BY
+    table1.keycolumn

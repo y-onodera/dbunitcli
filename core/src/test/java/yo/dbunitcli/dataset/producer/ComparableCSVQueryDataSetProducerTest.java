@@ -1,18 +1,22 @@
 package yo.dbunitcli.dataset.producer;
 
 import org.dbunit.dataset.DataSetException;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import yo.dbunitcli.common.Parameter;
 import yo.dbunitcli.dataset.ComparableDataSet;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.dataset.ComparableTable;
+import yo.dbunitcli.resource.FileResources;
 
 import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.util.Properties;
 
 public class ComparableCSVQueryDataSetProducerTest {
 
@@ -185,5 +189,104 @@ public class ComparableCSVQueryDataSetProducerTest {
         Assertions.assertEquals("太郎", actualTable.getValue(1, "NAME"));
         Assertions.assertEquals("30000", actualTable.getValue(0, "VALUE"));
         Assertions.assertEquals("10000", actualTable.getValue(1, "VALUE"));
+    }
+    @Test
+    public void loadDataFalseReturnsColumnsWithoutExecutingQuery() throws DataSetException {
+        // 実行すればCASTで失敗する行があっても、行を読まなければ列だけ求められる
+        final File src = new File(this.resource, "csvquery/metadataonly/castQuery.txt");
+        final ComparableDataSet actual = new ComparableCSVQueryDataSetProducer(
+                ComparableDataSetParam.builder()
+                        .setSrc(src)
+                        .setEncoding("UTF8")
+                        .setLoadData(false)
+                        .build()
+                , Parameter.none()).loadDataSet();
+        final ComparableTable actualTable = actual.getTable("castQuery");
+        Assertions.assertEquals(2, actualTable.getTableMetaData().getColumns().length);
+        Assertions.assertEquals(0, actualTable.getTableMetaData().getColumnIndex("A"));
+        Assertions.assertEquals(1, actualTable.getTableMetaData().getColumnIndex("B"));
+        Assertions.assertEquals(0, actualTable.getRowCount());
+    }
+
+    @Nested
+    class ResolveCsvReadPathsTest {
+
+        private final Properties backup = new Properties();
+
+        private File csvquery;
+
+        @BeforeEach
+        void setProperty() {
+            this.backup.putAll(System.getProperties());
+            this.csvquery = new File(ComparableCSVQueryDataSetProducerTest.this.resource, "csvquery");
+        }
+
+        @AfterEach
+        void restore() {
+            System.setProperties(this.backup);
+        }
+
+        private void setDirs(final File workspace, final File datasetBase) {
+            final Properties newProperty = new Properties();
+            newProperty.putAll(this.backup);
+            newProperty.put(FileResources.PROPERTY_WORKSPACE, workspace.getPath());
+            newProperty.put(FileResources.PROPERTY_DATASET_BASE, datasetBase.getPath());
+            System.setProperties(newProperty);
+        }
+
+        private String expected(final File file) {
+            return file.getAbsolutePath().replace('\\', '/');
+        }
+
+        @Test
+        void datasetBaseFirst() {
+            this.setDirs(new File("."), this.csvquery);
+            Assertions.assertEquals(
+                    "SELECT * FROM CSVREAD('" + this.expected(new File(this.csvquery, "csv/header.csv")) + "',null,'charset=UTF-8')"
+                    , ComparableCSVQueryDataSetProducer.resolveCsvReadPaths(
+                            "SELECT * FROM CSVREAD('csv/header.csv',null,'charset=UTF-8')"));
+        }
+
+        @Test
+        void workspaceWhenNotInDatasetBase() {
+            this.setDirs(this.csvquery, new File(this.csvquery, "csv"));
+            Assertions.assertEquals(
+                    "select * from csvread ( '" + this.expected(new File(this.csvquery, "csv/header.csv")) + "')"
+                    , ComparableCSVQueryDataSetProducer.resolveCsvReadPaths(
+                            "select * from csvread ( 'csv/header.csv')"));
+        }
+
+        @Test
+        void currentDirectoryWhenNotInDatasetBaseOrWorkspace() {
+            this.setDirs(this.csvquery, new File(this.csvquery, "csv"));
+            final String path = "src/test/resources/yo/dbunitcli/dataset/producer/csvquery/csv/header.csv";
+            Assertions.assertEquals(
+                    "CSVREAD('" + this.expected(new File(path)) + "')"
+                    , ComparableCSVQueryDataSetProducer.resolveCsvReadPaths("CSVREAD('" + path + "')"));
+        }
+
+        @Test
+        void quotedPathAndNonLiteralArgument() {
+            // 見つからないファイルはカレントディレクトリからの絶対パスになる
+            this.setDirs(new File("."), this.csvquery);
+            Assertions.assertEquals(
+                    "CSVREAD('" + this.expected(new File("it's.csv")).replace("'", "''") + "') CSVREAD(?)"
+                    , ComparableCSVQueryDataSetProducer.resolveCsvReadPaths("CSVREAD('it''s.csv') CSVREAD(?)"));
+        }
+
+        @Test
+        void loadDataSetWithDatasetBaseRelativePath() throws DataSetException {
+            this.setDirs(new File("."), this.csvquery);
+            final File src = new File(this.csvquery, "datasetbase/relativeQuery.txt");
+            final ComparableDataSet actual = new ComparableCSVQueryDataSetProducer(
+                    ComparableDataSetParam.builder()
+                            .setSrc(src)
+                            .setEncoding("UTF8")
+                            .build()
+                    , Parameter.none()).loadDataSet();
+            final ComparableTable actualTable = actual.getTable("relativeQuery");
+            Assertions.assertTrue(actualTable.getRowCount() > 0);
+            Assertions.assertEquals(0, actualTable.getTableMetaData().getColumnIndex("KEYCOLUMN"));
+        }
     }
 }

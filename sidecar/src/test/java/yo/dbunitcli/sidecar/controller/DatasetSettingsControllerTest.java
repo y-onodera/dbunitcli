@@ -23,6 +23,7 @@ import org.slf4j.LoggerFactory;
 import yo.dbunitcli.dataset.producer.ComparableCsvDataSetProducer;
 import yo.dbunitcli.dataset.producer.ComparableXlsxDataSetProducer;
 import yo.dbunitcli.resource.FileResources;
+import yo.dbunitcli.sidecar.dto.DatasetTableNamesRequestDto;
 import yo.dbunitcli.sidecar.dto.DatasetTablePreviewResponseDto;
 import yo.dbunitcli.sidecar.dto.DatasetUnitTablePreviewResponseDto;
 
@@ -33,6 +34,7 @@ import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -452,6 +454,103 @@ class DatasetSettingsControllerTest {
     }
 
     @Test
+    void testTableColumns_テーブル名未指定なら全テーブルの列名を返す() throws IOException {
+        this.createPreviewSrc();
+
+        Assertions.assertEquals(Map.of("big", List.of("key", "value"), "small", List.of("key", "other")),
+                this.tableColumns(this.tableBody("csv", "", "")));
+    }
+
+    @Test
+    void testTableColumns_設定を適用した後のテーブル名と列名を返す() throws IOException {
+        this.createPreviewSrc();
+
+        Assertions.assertEquals(Map.of("joined", List.of("big_key", "big_value", "small_key", "small_other")),
+                this.tableColumns(this.tableBody("csv", this.writeJoinSetting(), "joined")));
+    }
+
+    @Test
+    void testTableColumns_テーブル名を指定すれば対象外のソースを開かない() throws IOException {
+        this.createPreviewSrc();
+        final String setting = this.writeRenameSetting();
+
+        this.assertOpensOnly("big.csv", () -> Assertions.assertEquals(Map.of("renamed", List.of("key", "value")),
+                this.tableColumns(this.tableBody("csv", setting, "renamed"))));
+    }
+
+    @Test
+    void testTableColumns_inlineSourceはcsvqとして実行したときの列を返す() throws IOException {
+        this.createPreviewSrc();
+
+        Assertions.assertEquals(Map.of(DatasetTableNamesRequestDto.INLINE_SOURCE_TABLE_NAME, List.of("LABEL", "KEY", "OTHER")),
+                this.tableColumns(this.inlineSourceBody(DatasetTableNamesRequestDto.INLINE_SOURCE_TABLE_NAME)));
+    }
+
+    @Test
+    void testTableNames_inlineSourceはsrcの代わりにinlineSourceのテーブルだけを返す() throws IOException {
+        this.createPreviewSrc();
+
+        Assertions.assertEquals(List.of(DatasetTableNamesRequestDto.INLINE_SOURCE_TABLE_NAME),
+                this.tableNames(this.inlineSourceBody("")));
+    }
+
+    @Test
+    void testTablePreview_inlineSourceの行を読み込む() throws IOException {
+        this.createPreviewSrc();
+
+        final DatasetTablePreviewResponseDto actual = this.tablePreview(
+                this.inlineSourceBody(DatasetTableNamesRequestDto.INLINE_SOURCE_TABLE_NAME));
+
+        Assertions.assertArrayEquals(new String[]{"LABEL", "KEY", "OTHER"}, actual.getHeaders());
+        Assertions.assertEquals(3, actual.getTotalRows());
+        Assertions.assertEquals(List.of("a", "1", "a"),
+                Arrays.stream(actual.getRows().getFirst()).map(String::valueOf).toList());
+    }
+
+    @Test
+    void testTablePreview_inlineSourceが読めなければエラーを返す() throws IOException {
+        final Map<String, Object> body = new LinkedHashMap<>();
+        body.put("srcOptions", Map.of("srcType", "csvq"));
+        body.put("inlineSource", "SELECT * FROM");
+        body.put("tableName", DatasetTableNamesRequestDto.INLINE_SOURCE_TABLE_NAME);
+
+        final HttpClientResponseException ex = Assertions.assertThrows(HttpClientResponseException.class,
+                () -> this.tablePreview(body));
+        Assertions.assertEquals(HttpStatus.BAD_REQUEST, ex.getStatus());
+    }
+
+    @Test
+    void testTableColumns_inlineSourceを読めない形式ならエラーを返す() throws IOException {
+        this.createPreviewSrc();
+        final Map<String, Object> body = this.inlineSourceBody(DatasetTableNamesRequestDto.INLINE_SOURCE_TABLE_NAME);
+        body.put("srcOptions", Map.of("srcType", "csv", "src", PREVIEW_SRC_DIR.toAbsolutePath().toString()));
+
+        final HttpClientResponseException ex = Assertions.assertThrows(HttpClientResponseException.class,
+                () -> this.tableColumns(body));
+        Assertions.assertEquals(HttpStatus.BAD_REQUEST, ex.getStatus());
+    }
+
+    /**
+     * srcのファイルの代わりに読むことを確かめるため、srcにはcsvのあるディレクトリを指定する（csvqとして読めばSQLとして失敗する）
+     */
+    private Map<String, Object> inlineSourceBody(final String tableName) {
+        final Map<String, Object> body = this.tableBody("csvq", "", tableName);
+        body.put("inlineSource", "SELECT S.OTHER AS LABEL, S.* FROM CSVREAD('"
+                + PREVIEW_SRC_DIR.resolve("small.csv").toAbsolutePath().toString().replace('\\', '/')
+                + "',null,'charset=UTF-8') S");
+        return body;
+    }
+
+    @Test
+    void testTableColumns_読み込めなければエラーを返す() throws IOException {
+        this.createPreviewSrc();
+
+        final HttpClientResponseException ex = Assertions.assertThrows(HttpClientResponseException.class,
+                () -> this.tableColumns(this.tableBody("csv", "missingSetting.json", "big")));
+        Assertions.assertEquals(HttpStatus.BAD_REQUEST, ex.getStatus());
+    }
+
+    @Test
     void testTableConvert_選んだテーブルだけを出力して出力先を返す() throws IOException {
         this.createPreviewSrc();
 
@@ -763,6 +862,13 @@ class DatasetSettingsControllerTest {
         final String response = this.client.toBlocking().retrieve(
                 HttpRequest.POST("dbunit-cli/dataset-setting/table-names", ObjectMapper.getDefault().writeValueAsString(body)));
         return List.of(ObjectMapper.getDefault().readValue(response, String[].class)).stream().sorted().toList();
+    }
+
+    @SuppressWarnings("unchecked")
+    private Map<String, List<String>> tableColumns(final Map<String, Object> body) throws IOException {
+        final String response = this.client.toBlocking().retrieve(
+                HttpRequest.POST("dbunit-cli/dataset-setting/table-columns", ObjectMapper.getDefault().writeValueAsString(body)));
+        return ObjectMapper.getDefault().readValue(response, Map.class);
     }
 
     private DatasetTablePreviewResponseDto tablePreview(final String setting, final String tableName) throws IOException {

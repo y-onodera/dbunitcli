@@ -7,12 +7,14 @@ import {
 	type Conjunction,
 	columnLines,
 	conditionLines,
+	csvFileAlias,
 	DEFAULT_CONDITION_OPTIONS,
 	defaultTableAlias,
 	qualifyColumn,
 	subqueryLines,
 	uniqueAlias,
 } from "../../../../utils/textInsert";
+import CsvFileFields from "./CsvFileFields";
 import SelectableTable from "./SelectableTable";
 import {
 	CONJUNCTION_OPTIONS,
@@ -23,25 +25,43 @@ import {
 	OptionText,
 } from "./SqlInsertParts";
 import { useColumnLoad } from "./useColumnLoad";
+import { useCsvFile } from "./useCsvFile";
 
 // IN は SELECT する1列、FROM / JOIN に置くときは複数列を選び、EXISTS は SELECT 1 にする
 export type SubqueryMode = "in" | "exists" | "from";
 
-export default function SqlSubqueryDialog({
-	mode,
-	tables,
-	usedAliases,
-	onQueryColumns,
-	onComplete,
-	onClose,
-}: {
+// テーブルの選び方と、選んだテーブルの列の取り方（文のテーブルとサブクエリのテーブルで共通）。
+// tablesはDBのテーブル一覧から、csvはCSVファイルをCSVREADで読む（encodingは文字コードの初期値）
+export type SubquerySource = {
+	onQueryColumns: (table: string, context: JobContext) => Promise<string[]>;
+} & ({ kind: "tables"; tables: string[] } | { kind: "csv"; encoding: string });
+
+type SubqueryDialogProps = {
 	mode: Exclude<SubqueryMode, "from">;
-	tables: string[];
 	// 外側の別名。サブクエリの別名のデフォルトが重ならないようにする
 	usedAliases: string[];
-	onQueryColumns: (table: string, context: JobContext) => Promise<string[]>;
 	onComplete: (lines: string[]) => void;
 	onClose: () => void;
+};
+
+export default function SqlSubqueryDialog({
+	source,
+	...props
+}: SubqueryDialogProps & { source: SubquerySource }) {
+	if (source.kind === "csv") {
+		return <CsvSubqueryTable source={source} {...props} />;
+	}
+	return <ListSubqueryTable source={source} {...props} />;
+}
+
+function ListSubqueryTable({
+	mode,
+	source: { tables, onQueryColumns },
+	usedAliases,
+	onComplete,
+	onClose,
+}: SubqueryDialogProps & {
+	source: Extract<SubquerySource, { kind: "tables" }>;
 }) {
 	const { selected, toggleOnly } = useTableSelection();
 	const [alias, setAlias] = useState("");
@@ -57,50 +77,115 @@ export default function SqlSubqueryDialog({
 		);
 	};
 
-	const { target } = columnLoad;
-	if (target !== null) {
-		return (
-			columnLoad.renderState("Subquery Columns") ?? (
-				<SubqueryColumns
-					mode={mode}
-					table={target.table}
-					alias={alias.trim()}
-					columns={target.columns ?? []}
-					onComplete={onComplete}
+	return (
+		renderSubqueryColumns(columnLoad, mode, alias, onComplete, onClose) ?? (
+			<NestedDialogFrame title="Subquery Table">
+				<DialogField>
+					<SelectableTable
+						items={tables}
+						selected={selected}
+						onToggle={handleToggle}
+						columnLabel="Table Name"
+						filterPlaceholder="Filter tables..."
+					/>
+				</DialogField>
+				<SubqueryTableActions
+					alias={alias}
+					onAliasChange={setAlias}
+					canProceed={selectedTable !== null}
+					onNext={() => selectedTable && columnLoad.open(selectedTable)}
 					onClose={onClose}
 				/>
-			)
-		);
-	}
+			</NestedDialogFrame>
+		)
+	);
+}
+
+// csvqにはDBのテーブル一覧が無いため、ファイルを1つ選んでCSVREADで読む
+function CsvSubqueryTable({
+	mode,
+	source: { encoding, onQueryColumns },
+	usedAliases,
+	onComplete,
+	onClose,
+}: SubqueryDialogProps & {
+	source: Extract<SubquerySource, { kind: "csv" }>;
+}) {
+	const csv = useCsvFile(encoding, (path) =>
+		uniqueAlias(csvFileAlias(path), usedAliases),
+	);
+	const columnLoad = useColumnLoad(onQueryColumns);
 
 	return (
-		<NestedDialogFrame title="Subquery Table">
-			<DialogField>
-				<SelectableTable
-					items={tables}
-					selected={selected}
-					onToggle={handleToggle}
-					columnLabel="Table Name"
-					filterPlaceholder="Filter tables..."
+		renderSubqueryColumns(columnLoad, mode, csv.alias, onComplete, onClose) ?? (
+			<NestedDialogFrame title="Subquery Table">
+				<CsvFileFields idPrefix="sqlSubquery" {...csv.fields} />
+				<SubqueryTableActions
+					alias={csv.alias}
+					onAliasChange={csv.setAlias}
+					canProceed={csv.ready}
+					onNext={() => columnLoad.open(csv.expression)}
+					onClose={onClose}
 				/>
-			</DialogField>
+			</NestedDialogFrame>
+		)
+	);
+}
+
+// テーブルを選んだ後の列の選択。列を読む前ならnull
+function renderSubqueryColumns(
+	columnLoad: ReturnType<typeof useColumnLoad>,
+	mode: Exclude<SubqueryMode, "from">,
+	alias: string,
+	onComplete: (lines: string[]) => void,
+	onClose: () => void,
+) {
+	const { target } = columnLoad;
+	if (target === null) {
+		return null;
+	}
+	return (
+		columnLoad.renderState("Subquery Columns") ?? (
+			<SubqueryColumns
+				mode={mode}
+				table={target.table}
+				alias={alias.trim()}
+				columns={target.columns ?? []}
+				onComplete={onComplete}
+				onClose={onClose}
+			/>
+		)
+	);
+}
+
+function SubqueryTableActions({
+	alias,
+	onAliasChange,
+	canProceed,
+	onNext,
+	onClose,
+}: {
+	alias: string;
+	onAliasChange: (value: string) => void;
+	canProceed: boolean;
+	onNext: () => void;
+	onClose: () => void;
+}) {
+	return (
+		<>
 			<DialogField last>
 				<OptionText
 					id="sqlSubquery_alias"
 					label="Table alias"
 					value={alias}
-					onChange={setAlias}
+					onChange={onAliasChange}
 				/>
 			</DialogField>
 			<DialogActions>
-				<BlueButton
-					title="Next"
-					handleClick={() => selectedTable && columnLoad.open(selectedTable)}
-					disabled={selectedTable === null}
-				/>
+				<BlueButton title="Next" handleClick={onNext} disabled={!canProceed} />
 				<WhiteButton title="Cancel" handleClick={onClose} />
 			</DialogActions>
-		</NestedDialogFrame>
+		</>
 	);
 }
 

@@ -10,13 +10,26 @@
   <h1>SQL Editor</h1>
   <p><code>srcType</code> が <code>sql</code> / <code>table</code> / <code>csvq</code> のときに、SQL ファイル・テーブル名の一覧ファイルを編集するダイアログです。</p>
 
+  <h2 id="toc">目次</h2>
+  <ol>
+    <li><a href="#section-simple">シンプルな使い方</a></li>
+    <li><a href="#section-open">開き方</a></li>
+    <li><a href="#section-content">記述内容</a></li>
+    <li><a href="#section-select-tables">Select Tables</a></li>
+    <li><a href="#section-select-csv">Select CSV</a></li>
+    <li><a href="#section-preview">Preview</a></li>
+    <li><a href="#section-save">保存</a></li>
+    <li><a href="#section-related">関連</a></li>
+  </ol>
+
   <h2 id="section-simple">シンプルな使い方</h2>
-  <p><code>src</code> 横のメニューの編集ボタンで開き、SQL を書いて保存します。</p>
+  <p><code>src</code> 横のメニューの編集ボタンで開き、SQL を書いて Preview で読み込まれる内容を確認してから保存します。</p>
   <p>例: <code>srcType</code> が <code>sql</code> のとき、有効なユーザだけを読み込む SQL を作ります。</p>
   <pre>本文:
   select * from USERS where STATUS = 'ACTIVE'
 
 指定:
+  → Preview（一覧の preview ボタンで読み込まれる行を確認し、Close で閉じる）
   name = active_users.sql
   → Save
 
@@ -25,8 +38,9 @@
   実行すると、SQL の結果がテーブル active_users として読み込まれる</pre>
   <ul>
     <li>テーブル名は SQL ファイル名（拡張子を除く）になる</li>
-    <li>JDBC の接続テストが成功していれば、Select Tables でテーブル名・カラム名を挿入できる</li>
-    <li>Save and Preview で、保存したうえで読み込まれる内容を確認できる</li>
+    <li><code>srcType</code> が <code>sql</code> / <code>table</code> で JDBC の接続テストが成功していれば、Select Tables でテーブル名・カラム名を挿入できる</li>
+    <li><code>srcType</code> が <code>csvq</code> なら、Select CSV で CSV ファイルを選んで <code>CSVREAD()</code> を挿入できる</li>
+    <li>Preview は保存しない。SQL を直しては Preview で確かめ、よければ Save する</li>
   </ul>
 
   <h2 id="section-open">開き方</h2>
@@ -42,14 +56,14 @@
   <p>各 <code>srcType</code> の詳細は <a href="../sections/dataset-load-form/types/sql.html">sql</a> / <a href="../sections/dataset-load-form/types/table.html">table</a> / <a href="../sections/dataset-load-form/types/csvq.html">csvq</a> を参照してください。</p>
 
   <h2 id="section-select-tables">Select Tables</h2>
-  <p>JDBC 接続が確認済み（<a href="../sections/jdbc.html">JDBC</a> セクションの接続テスト成功）のときのみ、Select Tables ボタンが表示されます。</p>
+  <p><code>srcType</code> が <code>sql</code> / <code>table</code> で、JDBC 接続が確認済み（<a href="../sections/jdbc.html">JDBC</a> セクションの接続テスト成功）のときのみ、Select Tables ボタンが表示されます。<code>csvq</code> はデータベースを読まないため、代わりに <a href="#section-select-csv">Select CSV</a> が表示されます。</p>
   <ol>
     <li>Select Tables を押し、Load Tables でデータベースのテーブル一覧を取得します。</li>
     <li>挿入したいテーブルにチェックを入れ、Insert を押すと、本文のカーソル位置に挿入され、Select Tables が閉じます。本文で範囲を選択していた場合は、その範囲を置き換えます。</li>
     <li>テーブル名の横の Select columns アイコンを押すと、そのテーブルのカラム選択ダイアログ（Select Columns）が開きます。カラムにチェックを入れて Insert Columns を押すと、カーソル位置に 1 行 1 カラムで挿入されます。All Columns を押すと、チェックに関わらずすべてのカラムを 1 行ずつ書き出して挿入します（<code>*</code> は使いません）。Select Tables は開いたままなので、続けて別のテーブルを選べます。</li>
   </ol>
   <p><code>srcType</code> が <code>table</code> の場合は、テーブルを複数選べ、テーブル名・カラム名だけを 1 行ずつ挿入します。以降の項目は表示されません。</p>
-  <p><code>srcType</code> が <code>sql</code> / <code>csvq</code> の場合は、使い道（Usage）を選ぶと、それに合った形で挿入します。挿入される内容は Insert の上に表示されます。</p>
+  <p><code>srcType</code> が <code>sql</code> の場合は、使い道（Usage）を選ぶと、それに合った形で挿入します。挿入される内容は Insert の上に表示されます。</p>
   <p>挿入する SQL は次の形に揃えます。キーワードは大文字で行頭に置き、句の中身は 4 文字下げ、2 行目以降は <code>  , </code> または <code>AND </code> で始めます。テーブル名・カラム名は取得した表記のままです。</p>
   <pre>SELECT
     T.COLUMNA AS COLUMNA
@@ -187,10 +201,42 @@ FROM (
     )</pre>
   <p>テーブル一覧やカラムの取得に失敗したときは、ダイアログ内にエラーメッセージと読込中に出ていたログを表示します。</p>
 
+  <h2 id="section-select-csv">Select CSV</h2>
+  <p><code>srcType</code> が <code>csvq</code> のときだけ、Select CSV ボタンが表示されます。CSV ファイルを選び、<code>CSVREAD()</code> でそのファイルを読む文を本文のカーソル位置に挿入します。テーブル一覧の代わりに CSV ファイルを 1 つ選ぶほかは、上の「テーブル（Select Tables）」と同じ流れです（Usage・Table alias・Source・Subquery alias の意味も同じ）。</p>
+  <ol>
+    <li>Select CSV を押し、Insert CSVREAD で CSV file と Charset を指定し、Usage・Table alias などを指定します。</li>
+    <li>Next を押すと、挿入する <code>CSVREAD()</code> を csvq の実行時と同じように読んでカラムを取得し、Select Columns が開きます。カラム名は実行時と同じく大文字になります（例: <code>name</code> → <code>NAME</code>）。データ行は読みません。</li>
+    <li>カラムを選んで Insert Columns（All Columns なら全カラム）を押すと、文全体を挿入して Insert CSVREAD が閉じます。Select Columns の Usage は Insert CSVREAD の Usage に合わせて固定されます。</li>
+  </ol>
+  <p>Usage が Cross join のときは、カラムを読み込まずに Insert ですぐ挿入します。Source を Subquery にすると、選んだ CSV ファイルからサブクエリを作って <code>FROM</code> / <code>JOIN</code> に置きます。</p>
+  <p>Usage が Left join / Inner join のときに Select Columns の Operator で IN（IN source が Subquery）または EXISTS を選ぶと、Subquery Table ではテーブル一覧の代わりに CSV file と Charset を指定して CSV ファイルを 1 つ選びます。Charset のデフォルトは Insert CSVREAD の Charset、Table alias のデフォルトはファイル選択ボタンで選んだファイル名から作ります。</p>
+  <table>
+    <tr><th>項目</th><th>説明</th><th>デフォルト</th></tr>
+    <tr><td>CSV file（必須）</td><td>読み込む CSV ファイル。ファイル選択ボタンで選ぶと、Dataset Base 配下なら Dataset Base から、それ以外の Workspace 配下なら Workspace からの相対パスになる（どちらでもなければ絶対パス）。実行時の相対パスの探し方は <a href="../sections/dataset-load-form/types/csvq.html">csvq</a> を参照。パスの区切りは <code>/</code> にして挿入する</td><td>（空）</td></tr>
+    <tr><td>Charset（必須）</td><td>CSV ファイルの文字コード。<code>CSVREAD()</code> の <code>charset</code> に入れ、カラムの読込にも使う</td><td>Dataset Load Form の <code>encoding</code>。未指定なら <code>UTF-8</code></td></tr>
+    <tr><td>Usage</td><td>Select / Left join / Inner join / Cross join（CSV は書き込めないため Insert / Update / Delete は無い）。挿入する文の形は Select Tables の同じ値と同じ</td><td>Select</td></tr>
+    <tr><td>Table alias</td><td>CSV ファイルを読んだテーブルの別名。Select Columns でカラムに付ける別名にも使う。Usage が join で Source が Table のときは必須</td><td>ファイル選択ボタンで選んだファイル名（拡張子を除く）から、Select Tables の Table alias と同じ規則で作る</td></tr>
+  </table>
+  <pre>SELECT
+    UA.ID
+  , UA.NAME
+FROM
+    CSVREAD('dataset/user_account.csv',null,'charset=UTF-8') UA</pre>
+  <p><code>CSVREAD()</code> の書き方は <a href="../sections/dataset-load-form/types/csvq.html">csvq</a> を参照してください。</p>
+
+  <h2 id="section-preview">Preview</h2>
+  <p>ダイアログ下部の Preview を押すと、編集中の内容を <code>src</code> のファイルの代わりにして、読み込まれるテーブルの一覧を表示します（<a href="../sections/dataset-load-form.html">Dataset Load Form</a> の Preview Before Settings と同じ表示です）。一覧の preview ボタンを押すと、そのテーブルのデータを表示します。</p>
+  <ul>
+    <li>Save を押す前の内容でも確認でき、プレビューしてもファイルは保存されません。SQL Editor は閉じず、元のテキストボックスのファイル名も変わりません。</li>
+    <li>フォームの <code>src</code> 以外の項目（JDBC の接続先、-P 値など）は実行時と同じものを使います。<code>setting</code> は指定していても適用しません。</li>
+    <li><code>srcType</code> が <code>sql</code> / <code>csvq</code> のとき、一覧のテーブル名は <code>inlineSource</code> と表示します。保存して実行したときのテーブル名は、保存したファイル名（拡張子を除く）です。</li>
+    <li><code>srcType</code> が <code>table</code> のとき、本文の 1 行を 1 テーブルとして表示します。空行は飛ばします。</li>
+    <li><code>srcType</code> が <code>sql</code> / <code>table</code> のときは JDBC の接続先から読みます。<code>sql</code> は接続テストに成功するまで何も読み込みません。</li>
+    <li>本文が空のときは何も読み込みません。Preview はフォームで <code>srcType</code> を指定しているときだけ表示されます。</li>
+  </ul>
+
   <h2 id="section-save">保存</h2>
   <p>ダイアログ下部の name に保存先のファイル名を指定して Save を押すと、内容がファイルとして書き出され、元のテキストボックスにそのファイル名が設定されます。保存先は <code>srcType</code> ごとに Workspace の <code>resources/sql</code> / <code>resources/table</code> / <code>resources/csvq</code> です。</p>
-  <p>Save and Preview を押すと、同じように保存したうえで、保存したファイルを <code>src</code> として読み込まれるテーブルの一覧を表示します（<a href="../sections/dataset-load-form.html">Dataset Load Form</a> の Preview Before Settings と同じ表示です）。<code>setting</code> は指定していても適用しません。一覧の preview ボタンを押すと、そのテーブルのデータを表示します。</p>
-  <p>Save and Preview では SQL Editor は閉じず、元のテキストボックスのファイル名も変わりません。続けて編集でき、ファイル名を反映するには Save を押してください。</p>
 
   <h2 id="section-related">関連</h2>
   <ul>

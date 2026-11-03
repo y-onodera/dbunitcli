@@ -1,0 +1,5 @@
+SELECT
+    CAST(A AS INT) AS A
+  , B
+FROM
+    CSVREAD('src/test/resources/yo/dbunitcli/dataset/producer/csvquery/metadataonly/notNumber.csv',null,'charset=UTF-8')

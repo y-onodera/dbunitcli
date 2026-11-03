@@ -35,14 +35,19 @@ function buildDatasetRequestBody(
 		srcOptions: { ...info.values, ...jdbcValues },
 		inlineSetting: info.inlineSetting,
 		inlineXlsxSchema: info.inlineXlsxSchema,
+		inlineSource: info.inlineSource,
 		...extra,
 	});
 }
 
-// ソース未指定・none・JDBC未接続のsqlではsidecarへ問い合わせない
+// ソース未指定（inlineSourceならその内容が空）・none・JDBC未接続のsqlではsidecarへ問い合わせない
 function isSrcReady(info: DatasetSrcInfo, connectionOk: boolean): boolean {
 	const srcType = srcTypeOf(info);
-	if (!info.values.src || !srcType || srcType === "none") {
+	const hasSrc =
+		info.inlineSource === undefined
+			? !!info.values.src
+			: info.inlineSource.trim() !== "";
+	if (!hasSrc || !srcType || srcType === "none") {
 		return false;
 	}
 	return srcType !== "sql" || connectionOk;
@@ -175,27 +180,6 @@ function useDatasetLoad<T>(
 	return load;
 }
 
-async function fetchTableNames(
-	apiUrl: string,
-	info: DatasetSrcInfo,
-	jdbcValues: Record<string, string>,
-	paramInputs: Record<string, string>,
-	signal?: AbortSignal,
-): Promise<string[]> {
-	if (!info.values.src) {
-		return [];
-	}
-	return fetchDatasetJson(
-		apiUrl,
-		"table-names",
-		info,
-		jdbcValues,
-		paramInputs,
-		{},
-		signal,
-	);
-}
-
 const IDLE_TABLE_NAMES = idleLoad<string[]>([]);
 
 // withLogs: 読込中のログも受け取る（読込中の表示に使う場合）
@@ -226,32 +210,7 @@ export type TablePreview = {
 	totalRows: number;
 };
 
-const EMPTY_PREVIEW: TablePreview = { headers: [], rows: [], totalRows: 0 };
 const IDLE_PREVIEW = idleLoad<TablePreview | null>(null);
-
-async function fetchTablePreview(
-	apiUrl: string,
-	info: DatasetSrcInfo,
-	tableName: string,
-	jdbcValues: Record<string, string>,
-	paramInputs: Record<string, string>,
-	signal?: AbortSignal,
-	onLog?: (line: string) => void,
-): Promise<TablePreview> {
-	if (!info.values.src || !tableName) {
-		return EMPTY_PREVIEW;
-	}
-	return fetchDatasetJson(
-		apiUrl,
-		"table-preview",
-		info,
-		jdbcValues,
-		paramInputs,
-		{ tableName },
-		signal,
-		onLog,
-	);
-}
 
 // generateの-unitSettingをsrcのテーブル1つに適用した結果のテーブル1つ分
 export type UnitTablePreview = TablePreview & { tableName: string };
@@ -401,7 +360,32 @@ export const useSrcInfoColumnNames = (srcInfo: DatasetSrcInfo): string[] => {
 	return columnNames;
 };
 
-// 入力候補なので、settingの対象外のテーブルのカラムも含める
+// sidecarのDatasetTableNamesRequestDto.INLINE_SOURCE_TABLE_NAMEと揃える
+const INLINE_SOURCE_TABLE_NAME = "inlineSource";
+
+// テーブル名→列名。tableNameを指定すればそのテーブルだけを読む。失敗は投げる
+async function fetchTableColumns(
+	apiUrl: string,
+	info: DatasetSrcInfo,
+	tableName: string,
+	jdbcValues: Record<string, string>,
+	paramInputs: Record<string, string>,
+	signal?: AbortSignal,
+	onLog?: (line: string) => void,
+): Promise<Record<string, string[]>> {
+	return fetchDatasetJson(
+		apiUrl,
+		"table-columns",
+		info,
+		jdbcValues,
+		paramInputs,
+		{ tableName },
+		signal,
+		onLog,
+	);
+}
+
+// 入力候補なので、settingの対象外のテーブルのカラムも含め、取得できなければ候補なしとする
 async function loadAllColumnNames(
 	apiUrl: string,
 	srcInfo: DatasetSrcInfo,
@@ -409,38 +393,15 @@ async function loadAllColumnNames(
 	paramInputs: Record<string, string>,
 	signal: AbortSignal,
 ): Promise<string[]> {
-	const info = withAllTables(srcInfo);
-	// 入力候補なので、取得できなかったテーブルは候補なしとして続ける
-	const tableNames: string[] = await fetchTableNames(
+	const columns = await fetchTableColumns(
 		apiUrl,
-		info,
+		withAllTables(srcInfo),
+		"",
 		jdbcValues,
 		paramInputs,
 		signal,
-	).catch(() => []);
-	const previews = await Promise.all(
-		tableNames.map((tableName) =>
-			fetchTablePreview(
-				apiUrl,
-				info,
-				tableName,
-				jdbcValues,
-				paramInputs,
-				signal,
-			).catch(() => EMPTY_PREVIEW),
-		),
-	);
-	const seen = new Set<string>();
-	const allColumns: string[] = [];
-	for (const preview of previews) {
-		for (const col of preview.headers) {
-			if (!seen.has(col)) {
-				seen.add(col);
-				allColumns.push(col);
-			}
-		}
-	}
-	return allColumns;
+	).catch(() => ({}));
+	return [...new Set(Object.values(columns).flat())];
 }
 
 export const useColumnNamesFetcher = () => {
@@ -454,7 +415,7 @@ export const useColumnNamesFetcher = () => {
 	): Promise<string[]> => {
 		// 失敗は投げる（呼び出し元がエラーと実行中のログを表示する）。
 		// 入力候補なので、settingの対象外のテーブルでも取得する
-		const preview = await fetchTablePreview(
+		const columns = await fetchTableColumns(
 			apiUrl,
 			withAllTables(srcInfo),
 			tableName,
@@ -463,7 +424,31 @@ export const useColumnNamesFetcher = () => {
 			signal,
 			onLog,
 		);
-		return preview.headers;
+		return columns[tableName] ?? [];
+	};
+};
+
+// csvqのCSVREADの式1つの列名（CSVREADの列の選択用）。実行時と同じくcsvqのSQLとして読むため、CSVREADのオプションも反映される。失敗は投げる
+export const useCsvColumnNamesFetcher = () => {
+	const { apiUrl } = useEnvironment();
+	const paramInputs = useParamInputs();
+	return async (
+		csvReadExpression: string,
+		{ signal, onLog }: JobContext,
+	): Promise<string[]> => {
+		const columns = await fetchTableColumns(
+			apiUrl,
+			{
+				values: { srcType: "csvq" },
+				inlineSource: `SELECT * FROM ${csvReadExpression}`,
+			},
+			INLINE_SOURCE_TABLE_NAME,
+			{},
+			paramInputs,
+			signal,
+			onLog,
+		);
+		return columns[INLINE_SOURCE_TABLE_NAME] ?? [];
 	};
 };
 

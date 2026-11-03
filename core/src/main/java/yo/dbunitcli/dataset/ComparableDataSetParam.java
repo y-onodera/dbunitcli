@@ -40,6 +40,7 @@ public record ComparableDataSetParam(
         , DatabaseConnectionLoader databaseConnectionLoader
         , IDataSetConverter converter
         , Integer parallel
+        , InlineSource inlineSource
 ) {
 
     public static Builder builder() {
@@ -72,6 +73,7 @@ public record ComparableDataSetParam(
                 , builder.getDatabaseConnectionLoader()
                 , builder.getConverter()
                 , builder.getParallel()
+                , builder.getInlineSource()
         );
     }
 
@@ -133,7 +135,8 @@ public record ComparableDataSetParam(
                 .setSTTemplateLoader(this.templateRender)
                 .setDatabaseConnectionLoader(this.databaseConnectionLoader)
                 .setConverter(this.converter)
-                .setParallel(this.parallel);
+                .setParallel(this.parallel)
+                .setInlineSource(this.inlineSource);
     }
 
     public static class Builder {
@@ -164,8 +167,12 @@ public record ComparableDataSetParam(
         private String regTableExclude;
         private boolean ignoreQuoted = false;
         private Integer parallel;
+        private InlineSource inlineSource;
 
         public ComparableDataSetParam build() {
+            if (this.inlineSource != null && (this.source == null || !this.source.supportsInlineSource())) {
+                throw new IllegalArgumentException("inlineSource is not supported by srcType: " + this.source);
+            }
             return new ComparableDataSetParam(this);
         }
 
@@ -275,6 +282,10 @@ public record ComparableDataSetParam(
 
         public Integer getParallel() {
             return this.parallel;
+        }
+
+        public InlineSource getInlineSource() {
+            return this.inlineSource;
         }
 
         public Builder ifMatch(final boolean condition, final Function<Builder, Builder> function) {
@@ -428,6 +439,14 @@ public record ComparableDataSetParam(
          */
         public Builder setParallel(final Integer parallel) {
             this.parallel = parallel;
+            return this;
+        }
+
+        /**
+         * @param inlineSource srcのファイルの代わりに読む内容（{@link DataSourceType#supportsInlineSource()}の形式のみ）
+         */
+        public Builder setInlineSource(final InlineSource inlineSource) {
+            this.inlineSource = inlineSource;
             return this;
         }
 

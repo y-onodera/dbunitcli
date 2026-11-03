@@ -11,9 +11,10 @@ import yo.dbunitcli.dataset.ComparableTableMappingContext;
 import yo.dbunitcli.dataset.ComparableTableMappingTask;
 import yo.dbunitcli.resource.FileResources;
 
-import java.io.File;
 import java.sql.*;
 import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.IntStream;
 
 public record ComparableCSVQueryDataSetProducer(ComparableDataSetParam param,
@@ -21,8 +22,28 @@ public record ComparableCSVQueryDataSetProducer(ComparableDataSetParam param,
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ComparableCSVQueryDataSetProducer.class);
 
+    // CSVREADの第1引数が文字列リテラルのもの（'' は ' のエスケープ）
+    private static final Pattern CSVREAD_FILE = Pattern.compile("(?i)(\\bCSVREAD\\s*\\(\\s*)'((?:[^']|'')*)'");
+
     private static String url() {
         return "jdbc:h2:file:" + FileResources.datasetDir().getAbsolutePath() + ";MODE=Oracle";
+    }
+
+    /**
+     * H2は相対パスを起動時のカレントディレクトリから解決するため、
+     * CSVREADの相対パスをsrcの他のファイルと同じ探索順（{@link FileResources#searchDatasetBase}）で絶対パスにする
+     */
+    static String resolveCsvReadPaths(final String query) {
+        final Matcher matcher = CSVREAD_FILE.matcher(query);
+        final StringBuilder result = new StringBuilder();
+        while (matcher.find()) {
+            final String path = matcher.group(2).replace("''", "'");
+            final String resolved = FileResources.searchDatasetBase(path).getAbsolutePath().replace('\\', '/');
+            matcher.appendReplacement(result, Matcher.quoteReplacement(
+                    matcher.group(1) + "'" + resolved.replace("'", "''") + "'"));
+        }
+        matcher.appendTail(result);
+        return result.toString();
     }
 
     private static String[] columnNames(final ResultSetMetaData metaData) throws SQLException {
@@ -52,34 +73,38 @@ public record ComparableCSVQueryDataSetProducer(ComparableDataSetParam param,
         @Override
         public void run(final ComparableTableMappingContext context) {
             try {
-                final String query = this.param.templateRender().render(new File(this.source.filePath()), this.parameter);
+                final String query = ComparableCSVQueryDataSetProducer.resolveCsvReadPaths(
+                        QueryDataSetProducer.renderQuery(this.param, this.source, this.parameter));
                 ComparableCSVQueryDataSetProducer.LOGGER.info("produce - start filePath={},query={}", this.source.filePath(), query);
                 try (final Connection conn = DriverManager.getConnection(ComparableCSVQueryDataSetProducer.url());
-                     final Statement stmt = conn.createStatement();
-                     final ResultSet rst = stmt.executeQuery(query)
+                     final PreparedStatement stmt = conn.prepareStatement(query)
                 ) {
-                    final int resultColumnCount = rst.getMetaData().getColumnCount();
+                    // 列は文の準備で決まり、CSVREADは見出し行だけを読む。行を読まないなら実行しない
+                    final ResultSetMetaData resultMetaData = stmt.getMetaData();
+                    final int resultColumnCount = resultMetaData.getColumnCount();
                     final TableMetaDataWithSource metaData = this.source.createMetaData(this.param.headerNames() != null
                             ? this.param.headerNames()
-                            : ComparableCSVQueryDataSetProducer.columnNames(rst.getMetaData()));
+                            : ComparableCSVQueryDataSetProducer.columnNames(resultMetaData));
                     final ComparableTableMapper mapper = context.createMapper(metaData);
                     mapper.startTable();
                     if (this.param.loadData() && mapper.hasOutput()) {
-                        int readRows = 0;
-                        while (rst.next()) {
-                            mapper.addRow(metaData.toRow(IntStream.rangeClosed(1, resultColumnCount)
-                                    .mapToObj(i -> {
-                                        try {
-                                            return Optional.ofNullable(rst.getString(i))
-                                                    .orElse("");
-                                        } catch (final SQLException e) {
-                                            throw new RuntimeException(e);
-                                        }
-                                    })
-                                    .toArray()));
-                            readRows++;
+                        try (final ResultSet rst = stmt.executeQuery()) {
+                            int readRows = 0;
+                            while (rst.next()) {
+                                mapper.addRow(metaData.toRow(IntStream.rangeClosed(1, resultColumnCount)
+                                        .mapToObj(i -> {
+                                            try {
+                                                return Optional.ofNullable(rst.getString(i))
+                                                        .orElse("");
+                                            } catch (final SQLException e) {
+                                                throw new RuntimeException(e);
+                                            }
+                                        })
+                                        .toArray()));
+                                readRows++;
+                            }
+                            ComparableCSVQueryDataSetProducer.LOGGER.info("produce - rows={}", readRows);
                         }
-                        ComparableCSVQueryDataSetProducer.LOGGER.info("produce - rows={}", readRows);
                     }
                     mapper.endTable();
                     ComparableCSVQueryDataSetProducer.LOGGER.info("produce - end   filePath={}", this.source.filePath());

@@ -33,6 +33,13 @@ public enum DataSourceType {
     }
 
     /**
+     * srcのファイルの代わりに未保存の内容（{@link InlineSource}）を読めるか（{@link yo.dbunitcli.dataset.producer.InlineSourceDataSetProducer}を使う形式）
+     */
+    public boolean supportsInlineSource() {
+        return this == table || this == sql || this == csvq;
+    }
+
+    /**
      * ソースを並列に読み込めるか（{@link ComparableDataSetProducer#isParallelizableSource()}がtrueのproducerを使う形式）。
      * 画面でparallelを表示するかの判定に使う
      */

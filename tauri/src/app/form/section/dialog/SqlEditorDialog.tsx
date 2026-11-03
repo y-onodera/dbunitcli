@@ -13,13 +13,13 @@ import {
 	useResourceContent,
 	useSaveResourceContent,
 } from "../../../../hooks/useResourceFiles";
-import { withoutSetting, withValues } from "../../../../model/CommandOption";
 import type { QueryDatasourceType } from "../../../../model/QueryDatasource";
 import {
 	insertAtCursor,
 	insertInlineAtCursor,
 } from "../../../../utils/textInsert";
-import { SaveAndPreviewButton } from "./DatasetTableNamesPreviewButton";
+import CsvReadInsertDialog from "./CsvReadInsertDialog";
+import { InlinePreviewButton } from "./DatasetTableNamesPreviewButton";
 import type { EditResourceDialogProps } from "./ResourceEditButton";
 import SqlTableInsertDialog from "./SqlTableInsertDialog";
 
@@ -52,7 +52,7 @@ export const sqlEditorDialogs: Record<
 
 function Dialog(props: SqlEditorDialogProps & { value: string }) {
 	const [content, setContent] = useState<string>(props.value);
-	const [showTableSelector, setShowTableSelector] = useState(false);
+	const [showSelector, setShowSelector] = useState(false);
 	const textareaRef = useRef<HTMLTextAreaElement>(null);
 	const pendingCursorRef = useRef<number | null>(null);
 	const saveDataSource = useSaveResourceContent(props.type);
@@ -80,43 +80,60 @@ function Dialog(props: SqlEditorDialogProps & { value: string }) {
 		textareaRef.current?.setSelectionRange(cursor, cursor);
 	});
 
-	const handleInsert = (tables: string[]) => {
-		insertToContent(tables);
-		setShowTableSelector(false);
+	const handleInsert = (lines: string[]) => {
+		insertToContent(lines);
+		setShowSelector(false);
 	};
 
 	const handleInsertColumn = (columns: string[], inline?: boolean) => {
 		insertToContent(columns, inline);
 	};
 
+	// csvqはDBではなくCSVを読むため、DBのテーブル一覧の代わりにCSVファイルを選ぶ
+	const csvq = props.type === "csvq";
+
+	function renderSelector() {
+		if (csvq) {
+			return (
+				// CSVREADには文字コードの明示が要るため、encoding未指定ならUTF-8を初期値にする
+				<CsvReadInsertDialog
+					encoding={datasetSrcInfo.values.encoding || "UTF-8"}
+					onInsert={handleInsert}
+					onClose={() => setShowSelector(false)}
+				/>
+			);
+		}
+		return (
+			<SqlTableInsertDialog
+				jdbcValues={jdbcValues}
+				onInsert={handleInsert}
+				onInsertColumn={handleInsertColumn}
+				plain={props.type === "table"}
+				onClose={() => setShowSelector(false)}
+			/>
+		);
+	}
+
 	return (
 		<SettingDialog
-			title={props.type === "sql" ? "Edit SQL" : "Edit Table Definition"}
+			title={props.type === "table" ? "Edit Table Definition" : "Edit SQL"}
 			helpCommand="dialogs/sql-editor"
 			helpLabel="SQL Editor"
 			handleDialogClose={props.handleDialogClose}
 			fileName={props.fileName}
 			save={(path) => saveDataSource(path, content)}
 			handleSave={props.handleSave}
-			footerActions={(saveThen) => (
-				// 保存したファイルをsrcにしてプレビューする（settingは適用しない）
-				<SaveAndPreviewButton
-					saveThen={saveThen}
-					toSrcInfo={(path) =>
-						withValues(withoutSetting(datasetSrcInfo), {
-							srcType: props.type,
-							src: path,
-						})
-					}
-				/>
+			footerActions={() => (
+				// 保存せず、編集中の内容をsrcのファイルの代わりにしてプレビューする（settingは適用しない）
+				<InlinePreviewButton toInline={() => ({ inlineSource: content })} />
 			)}
 		>
 			<DialogBody size="md">
-				{connectionOk && (
+				{(csvq || connectionOk) && (
 					<DialogField>
 						<BlueButton
-							title="Select Tables"
-							handleClick={() => setShowTableSelector(true)}
+							title={csvq ? "Select CSV" : "Select Tables"}
+							handleClick={() => setShowSelector(true)}
 						/>
 					</DialogField>
 				)}
@@ -126,22 +143,14 @@ function Dialog(props: SqlEditorDialogProps & { value: string }) {
 					value={content}
 					onChange={(e) => setContent(e.target.value)}
 					placeholder={
-						props.type === "sql"
-							? "Enter SQL query..."
-							: "Enter table definition..."
+						props.type === "table"
+							? "Enter table definition..."
+							: "Enter SQL query..."
 					}
 					spellCheck={false}
 				/>
 			</DialogBody>
-			{showTableSelector && (
-				<SqlTableInsertDialog
-					jdbcValues={jdbcValues}
-					onInsert={handleInsert}
-					onInsertColumn={handleInsertColumn}
-					plain={props.type === "table"}
-					onClose={() => setShowTableSelector(false)}
-				/>
-			)}
+			{showSelector && renderSelector()}
 		</SettingDialog>
 	);
 }
