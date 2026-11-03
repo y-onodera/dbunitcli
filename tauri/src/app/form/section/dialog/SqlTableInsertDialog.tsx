@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import {
 	DialogActions,
 	DialogField,
@@ -8,10 +8,6 @@ import {
 	StatusMessage,
 } from "../../../../components/dialog";
 import { BlueButton, WhiteButton } from "../../../../components/element/Button";
-import {
-	ControllTextBox,
-	InputLabel,
-} from "../../../../components/element/Input";
 import { JobProgress } from "../../../../components/element/JobProgress";
 import { useJdbcColumns, useJdbcTables } from "../../../../hooks/useJdbc";
 import { type JobContext, useJob } from "../../../../hooks/useJob";
@@ -33,11 +29,13 @@ import SqlColumnInsertDialog from "./SqlColumnInsertDialog";
 import {
 	InsertPreview,
 	OptionSelect,
-	renderColumnLoadState,
+	OptionText,
 	type SelectGroup,
+	type SelectOption,
 } from "./SqlInsertParts";
 import { SubqueryColumns } from "./SqlSubqueryDialog";
 import TableList from "./TableList";
+import { useColumnLoad } from "./useColumnLoad";
 
 const TABLE_USAGE_GROUPS: SelectGroup<TableUsage>[] = [
 	{
@@ -60,14 +58,9 @@ const TABLE_USAGE_GROUPS: SelectGroup<TableUsage>[] = [
 ];
 
 type TableSource = "table" | "subquery";
-const TABLE_SOURCE_GROUPS: SelectGroup<TableSource>[] = [
-	{
-		label: "",
-		options: [
-			{ value: "table", label: "Table" },
-			{ value: "subquery", label: "Subquery" },
-		],
-	},
+const TABLE_SOURCE_OPTIONS: SelectOption<TableSource>[] = [
+	{ value: "table", label: "Table" },
+	{ value: "subquery", label: "Subquery" },
 ];
 
 interface SqlTableInsertDialogProps {
@@ -96,6 +89,7 @@ export default function SqlTableInsertDialog({
 		if (job.running) {
 			return;
 		}
+		columnCache.current.clear();
 		const result = await job.run((context) =>
 			getJdbcTables(jdbcValues, context),
 		);
@@ -104,8 +98,18 @@ export default function SqlTableInsertDialog({
 		}
 	};
 
-	const queryColumns = (table: string, context: JobContext) =>
-		getJdbcColumns(jdbcValues, table, context);
+	// 同じテーブルの列は、テーブル一覧を読み直すまで問い合わせ直さない
+	const columnCache = useRef(new Map<string, string[]>());
+
+	const queryColumns = async (table: string, context: JobContext) => {
+		const cached = columnCache.current.get(table);
+		if (cached !== undefined) {
+			return cached;
+		}
+		const columns = await getJdbcColumns(jdbcValues, table, context);
+		columnCache.current.set(table, columns);
+		return columns;
+	};
 
 	function renderBody() {
 		if (job.running) {
@@ -163,25 +167,18 @@ function TablesContent({
 }) {
 	// plainは名前だけを複数行で挿入する。それ以外は句を組み立てるため1テーブルだけ選ぶ
 	const { selected, toggle, toggleOnly, toggleAll } = useTableSelection();
-	// 列選択ダイアログの対象テーブルと、読み込めた列（読込中・失敗中はnull）
-	// statementはテーブル側の用途から文全体を挿入するときの用途（行の列選択アイコンから開いたときはnull）
-	const [columnDialog, setColumnDialog] = useState<{
-		table: string;
-		columns: string[] | null;
-		statement: StatementUsage | null;
-	} | null>(null);
-	// 列の読込。別のテーブルを選ぶと前回を中断し、閉じても中断する（ダイアログ全体のアンマウントでも中断される）
-	const columnJob = useJob();
+	// 列選択ダイアログの列の読込と、テーブル側の用途から文全体を挿入するときの用途（行の列選択アイコンから開いたときはnull）
+	const columnLoad = useColumnLoad(onQueryColumns);
+	const [columnStatement, setColumnStatement] = useState<StatementUsage | null>(
+		null,
+	);
 	const [usage, setUsage] = useState<TableUsage>("select");
 	const [alias, setAlias] = useState("");
 	const [source, setSource] = useState<TableSource>("table");
 	// サブクエリにするときの、サブクエリ全体の別名（選んだテーブルの別名はalias）
 	const [subqueryAlias, setSubqueryAlias] = useState("");
-	// サブクエリにするとき: サブクエリで使う列の選択（読込中・失敗中はcolumnsがnull）と、その後の外側の列の選択
-	const [derivedSource, setDerivedSource] = useState<{
-		table: string;
-		columns: string[] | null;
-	} | null>(null);
+	// サブクエリにするとき: サブクエリで使う列の読込と、その後の外側の列の選択
+	const derivedLoad = useColumnLoad(onQueryColumns);
 	const [derivedOuter, setDerivedOuter] = useState<{
 		usage: Exclude<DerivedTableUsage, "crossJoin">;
 		subquery: string[];
@@ -215,7 +212,7 @@ function TablesContent({
 			return;
 		}
 		if (derived) {
-			openDerivedSource(selectedTable);
+			derivedLoad.open(selectedTable);
 			return;
 		}
 		if (isStatementUsage(usage)) {
@@ -225,47 +222,16 @@ function TablesContent({
 		onInsert(tableLines(selectedTable, usage, alias, []));
 	};
 
-	const openColumnDialog = async (
+	const openColumnDialog = (
 		table: string,
 		statement: StatementUsage | null,
 	) => {
-		if (columnDialog?.table === table && columnJob.running) {
-			return;
-		}
-		setColumnDialog({ table, columns: null, statement });
-		const result = await columnJob.run((context) =>
-			onQueryColumns(table, context),
-		);
-		if (result) {
-			setColumnDialog({ table, columns: result.value, statement });
-		}
-	};
-
-	const closeColumnDialog = () => {
-		columnJob.cancel();
-		setColumnDialog(null);
-	};
-
-	const openDerivedSource = async (table: string) => {
-		if (columnJob.running) {
-			return;
-		}
-		setDerivedSource({ table, columns: null });
-		const result = await columnJob.run((context) =>
-			onQueryColumns(table, context),
-		);
-		if (result) {
-			setDerivedSource({ table, columns: result.value });
-		}
-	};
-
-	const closeDerivedSource = () => {
-		columnJob.cancel();
-		setDerivedSource(null);
+		setColumnStatement(statement);
+		columnLoad.open(table);
 	};
 
 	const handleDerivedSubquery = (subquery: string[], columns: string[]) => {
-		setDerivedSource(null);
+		derivedLoad.close();
 		if (!usesDerivedTable(usage)) {
 			return;
 		}
@@ -315,21 +281,14 @@ function TablesContent({
 								groups={TABLE_USAGE_GROUPS}
 								onChange={handleUsageChange}
 							/>
-							<div className="flex-1">
-								<InputLabel
-									text="Table alias"
-									id="sqlTableInsert_alias"
-									required={isJoin(usage) && !derived}
-								/>
-								<ControllTextBox
-									name="sqlTableInsert_alias"
-									id="sqlTableInsert_alias"
-									required={isJoin(usage) && !derived}
-									disabled={!usesTableAlias(usage)}
-									value={usesTableAlias(usage) ? alias : ""}
-									handleChange={(ev) => setAlias(ev.target.value)}
-								/>
-							</div>
+							<OptionText
+								id="sqlTableInsert_alias"
+								label="Table alias"
+								required={isJoin(usage) && !derived}
+								disabled={!usesTableAlias(usage)}
+								value={usesTableAlias(usage) ? alias : ""}
+								onChange={setAlias}
+							/>
 						</div>
 					</DialogField>
 					{usesDerivedTable(usage) && (
@@ -339,24 +298,17 @@ function TablesContent({
 									key={usage}
 									id="sqlTableInsert_source"
 									label="Source"
-									groups={TABLE_SOURCE_GROUPS}
+									options={TABLE_SOURCE_OPTIONS}
 									onChange={setSource}
 								/>
 								{derived && (
-									<div className="flex-1">
-										<InputLabel
-											text="Subquery alias"
-											id="sqlTableInsert_subqueryAlias"
-											required
-										/>
-										<ControllTextBox
-											name="sqlTableInsert_subqueryAlias"
-											id="sqlTableInsert_subqueryAlias"
-											required
-											value={subqueryAlias}
-											handleChange={(ev) => setSubqueryAlias(ev.target.value)}
-										/>
-									</div>
+									<OptionText
+										id="sqlTableInsert_subqueryAlias"
+										label="Subquery alias"
+										required
+										value={subqueryAlias}
+										onChange={setSubqueryAlias}
+									/>
 								)}
 							</div>
 						</DialogField>
@@ -381,20 +333,20 @@ function TablesContent({
 				/>
 				<WhiteButton title="Cancel" handleClick={onClose} />
 			</DialogActions>
-			{columnDialog !== null && (
+			{columnLoad.target !== null && (
 				<SqlColumnInsertDialog
-					table={columnDialog.table}
-					columns={columnDialog.columns}
-					loading={columnJob.running}
-					error={columnJob.error}
-					logs={columnJob.logs}
+					table={columnLoad.target.table}
+					columns={columnLoad.target.columns}
+					loading={columnLoad.job.running}
+					error={columnLoad.job.error}
+					logs={columnLoad.job.logs}
 					plain={plain}
-					{...columnAliasOf(columnDialog.table)}
-					statement={statementOf(columnDialog.table, columnDialog.statement)}
+					{...columnAliasOf(columnLoad.target.table)}
+					statement={statementOf(columnLoad.target.table, columnStatement)}
 					tables={tables}
 					onQueryColumns={onQueryColumns}
 					onInsert={(lines, inline) => {
-						if (columnDialog.statement === null) {
+						if (columnStatement === null) {
 							if (inline) {
 								onInsertColumn(lines, true);
 							} else {
@@ -403,29 +355,21 @@ function TablesContent({
 						} else {
 							onInsert(lines);
 						}
-						setColumnDialog(null);
+						columnLoad.close();
 					}}
-					onClose={closeColumnDialog}
+					onClose={columnLoad.close}
 				/>
 			)}
-			{derivedSource !== null &&
-				(renderColumnLoadState({
-					title: "Subquery Columns",
-					table: derivedSource.table,
-					columns: derivedSource.columns,
-					loading: columnJob.running,
-					error: columnJob.error,
-					logs: columnJob.logs,
-					onClose: closeDerivedSource,
-				}) ?? (
+			{derivedLoad.target !== null &&
+				(derivedLoad.renderState("Subquery Columns") ?? (
 					<SubqueryColumns
 						mode="from"
-						table={derivedSource.table}
+						table={derivedLoad.target.table}
 						alias={alias.trim()}
-						columns={derivedSource.columns ?? []}
+						columns={derivedLoad.target.columns ?? []}
 						completeTitle={usage === "crossJoin" ? "Insert" : "Next"}
 						onComplete={handleDerivedSubquery}
-						onClose={closeDerivedSource}
+						onClose={derivedLoad.close}
 					/>
 				))}
 			{derivedOuter !== null && (

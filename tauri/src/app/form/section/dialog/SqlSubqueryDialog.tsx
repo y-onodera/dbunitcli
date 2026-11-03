@@ -1,40 +1,28 @@
 import { useState } from "react";
 import { DialogActions, DialogField } from "../../../../components/dialog";
 import { BlueButton, WhiteButton } from "../../../../components/element/Button";
-import {
-	ControllTextBox,
-	InputLabel,
-} from "../../../../components/element/Input";
-import { type JobContext, useJob } from "../../../../hooks/useJob";
+import type { JobContext } from "../../../../hooks/useJob";
 import { useTableSelection } from "../../../../hooks/useTableSelection";
 import {
 	type Conjunction,
 	columnLines,
 	conditionLines,
+	DEFAULT_CONDITION_OPTIONS,
 	defaultTableAlias,
 	qualifyColumn,
-	subqueryColumnLine,
 	subqueryLines,
 	uniqueAlias,
 } from "../../../../utils/textInsert";
 import SelectableTable from "./SelectableTable";
 import {
+	CONJUNCTION_OPTIONS,
 	InsertPreview,
 	NestedDialogFrame,
 	OptionCheck,
 	OptionSelect,
-	renderColumnLoadState,
+	OptionText,
 } from "./SqlInsertParts";
-
-export const CONJUNCTION_GROUPS = [
-	{
-		label: "",
-		options: [
-			{ value: "AND" as const, label: "AND" },
-			{ value: "OR" as const, label: "OR" },
-		],
-	},
-];
+import { useColumnLoad } from "./useColumnLoad";
 
 // IN は SELECT する1列、FROM / JOIN に置くときは複数列を選び、EXISTS は SELECT 1 にする
 export type SubqueryMode = "in" | "exists" | "from";
@@ -57,11 +45,7 @@ export default function SqlSubqueryDialog({
 }) {
 	const { selected, toggleOnly } = useTableSelection();
 	const [alias, setAlias] = useState("");
-	const [target, setTarget] = useState<{
-		table: string;
-		columns: string[] | null;
-	} | null>(null);
-	const columnJob = useJob();
+	const columnLoad = useColumnLoad(onQueryColumns);
 	const selectedTable = tables.find((t) => selected.has(t)) ?? null;
 
 	const handleToggle = (table: string) => {
@@ -73,30 +57,10 @@ export default function SqlSubqueryDialog({
 		);
 	};
 
-	const handleNext = async () => {
-		if (selectedTable === null) {
-			return;
-		}
-		setTarget({ table: selectedTable, columns: null });
-		const result = await columnJob.run((context) =>
-			onQueryColumns(selectedTable, context),
-		);
-		if (result) {
-			setTarget({ table: selectedTable, columns: result.value });
-		}
-	};
-
+	const { target } = columnLoad;
 	if (target !== null) {
 		return (
-			renderColumnLoadState({
-				title: "Subquery Columns",
-				table: target.table,
-				columns: target.columns,
-				loading: columnJob.running,
-				error: columnJob.error,
-				logs: columnJob.logs,
-				onClose,
-			}) ?? (
+			columnLoad.renderState("Subquery Columns") ?? (
 				<SubqueryColumns
 					mode={mode}
 					table={target.table}
@@ -121,23 +85,17 @@ export default function SqlSubqueryDialog({
 				/>
 			</DialogField>
 			<DialogField last>
-				<InputLabel
-					text="Table alias"
+				<OptionText
 					id="sqlSubquery_alias"
-					required={false}
-				/>
-				<ControllTextBox
-					name="sqlSubquery_alias"
-					id="sqlSubquery_alias"
-					required={false}
+					label="Table alias"
 					value={alias}
-					handleChange={(ev) => setAlias(ev.target.value)}
+					onChange={setAlias}
 				/>
 			</DialogField>
 			<DialogActions>
 				<BlueButton
 					title="Next"
-					handleClick={handleNext}
+					handleClick={() => selectedTable && columnLoad.open(selectedTable)}
 					disabled={selectedTable === null}
 				/>
 				<WhiteButton title="Cancel" handleClick={onClose} />
@@ -170,38 +128,34 @@ export function SubqueryColumns({
 	const [conjunction, setConjunction] = useState<Conjunction>("AND");
 	const qualifier = qualify ? alias : "";
 	const selectedColumns = columns.filter((c) => selectColumn.selected.has(c));
-	const selectedColumn = selectedColumns[0];
 	const conditions = columns
 		.filter((c) => whereColumns.selected.has(c))
 		.map((c) => qualifyColumn(c, qualifier));
 
+	// EXISTS（と列を選ぶ前）は 1 を、IN は先頭の1列を SELECT する
 	const selectListOf = (targets: string[]) => {
-		if (mode === "from") {
-			return columnLines(targets, "select", {
+		if (mode === "exists" || targets.length === 0) {
+			return columnLines(["1"], "select", { alias: "", columnAs: false });
+		}
+		return columnLines(
+			mode === "in" ? targets.slice(0, 1) : targets,
+			"select",
+			{
 				alias: qualifier,
 				columnAs: false,
-			});
-		}
-		return mode === "exists" || targets.length === 0
-			? [subqueryColumnLine("1")]
-			: [subqueryColumnLine(qualifyColumn(targets[0], qualifier))];
+			},
+		);
 	};
 	const where =
 		conditions.length === 0
 			? []
 			: conditionLines(conditions, "where", {
-					operator: "equals",
-					not: false,
+					...DEFAULT_CONDITION_OPTIONS,
 					conjunction,
-					group: false,
-					connector: null,
-					keyword: true,
-					inValues: "",
-					subquery: null,
 				});
 	const linesOf = (targets: string[]) =>
 		subqueryLines(table, alias, selectListOf(targets), where);
-	const missingSelect = mode !== "exists" && selectedColumn === undefined;
+	const missingSelect = mode !== "exists" && selectedColumns.length === 0;
 
 	return (
 		<NestedDialogFrame title="Subquery Columns" table={table}>
@@ -236,14 +190,12 @@ export function SubqueryColumns({
 				/>
 			</DialogField>
 			<DialogField>
-				<div className="flex gap-3">
-					<OptionSelect
-						id="sqlSubquery_conjunction"
-						label="Join conditions with"
-						groups={CONJUNCTION_GROUPS}
-						onChange={setConjunction}
-					/>
-				</div>
+				<OptionSelect
+					id="sqlSubquery_conjunction"
+					label="Join conditions with"
+					options={CONJUNCTION_OPTIONS}
+					onChange={setConjunction}
+				/>
 			</DialogField>
 			{alias !== "" && (
 				<DialogField>

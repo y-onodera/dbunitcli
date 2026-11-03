@@ -236,6 +236,15 @@ describe("SqlTableInsertDialogのカラム挿入", () => {
 		]);
 	});
 
+	it("同じテーブルの列は開き直しても問い合わせ直さない", async () => {
+		const { user } = await openColumnsOfOrders();
+		const columnDialog = await findDialog("Select Columns");
+		await user.click(columnDialog.getByRole("button", { name: "Cancel" }));
+		await user.click(screen.getAllByTitle("Select columns")[1]);
+		await screen.findByText("Select Columns");
+		expect(mockJdbcColumns).toHaveBeenCalledTimes(1);
+	});
+
 	it("All Columnsは選択に関わらず全カラムを書き出す", async () => {
 		const { user, onInsertColumn } = await openColumnsOfOrders();
 		await user.click(screen.getByText("ID"));

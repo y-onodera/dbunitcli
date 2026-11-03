@@ -35,9 +35,7 @@ export function insertInlineAtCursor(
 		(ITEM_POSITION.exec(currentLine)?.[0] ?? "").length,
 	);
 	const [first = "", ...rest] = lines;
-	const inserted = [first, ...rest.map((line) => `${position}${line}`)].join(
-		"\n",
-	);
+	const inserted = [first, ...indentLines(rest, position)].join("\n");
 	return {
 		value: before + inserted + after,
 		cursor: before.length + inserted.length,
@@ -104,8 +102,7 @@ export function tableLines(
 	alias: string,
 	columns: string[],
 ): string[] {
-	const trimmed = usesTableAlias(usage) ? alias.trim() : "";
-	const named = trimmed === "" ? table : `${table} ${trimmed}`;
+	const named = namedTable(table, usesTableAlias(usage) ? alias : "");
 	switch (usage) {
 		case "select":
 			return ["SELECT", ...columns, "FROM", `${INDENT}${named}`];
@@ -124,17 +121,30 @@ export function tableLines(
 			return ["UPDATE", `${INDENT}${named}`, "SET", ...columns];
 		case "delete":
 			return ["DELETE FROM", `${INDENT}${named}`];
-		case "leftJoin":
-			return [`${INDENT}LEFT JOIN`, `${JOIN_TABLE_INDENT}${named}`, ...columns];
-		case "innerJoin":
+		default:
 			return [
-				`${INDENT}INNER JOIN`,
+				`${INDENT}${JOIN_KEYWORDS[usage]}`,
 				`${JOIN_TABLE_INDENT}${named}`,
-				...columns,
+				...joinColumns(usage, columns),
 			];
-		case "crossJoin":
-			return [`${INDENT}CROSS JOIN`, `${JOIN_TABLE_INDENT}${named}`];
 	}
+}
+
+function namedTable(table: string, alias: string): string {
+	const trimmed = alias.trim();
+	return trimmed === "" ? table : `${table} ${trimmed}`;
+}
+
+function indentLines(lines: string[], indent: string = INDENT): string[] {
+	return lines.map((line) => `${indent}${line}`);
+}
+
+// CROSS JOIN は ON を持たない
+function joinColumns(
+	usage: Exclude<DerivedTableUsage, "select">,
+	columns: string[],
+): string[] {
+	return usage === "crossJoin" ? [] : columns;
 }
 
 // テーブルの代わりにサブクエリを置ける用途
@@ -165,19 +175,13 @@ export function derivedTableLines(
 ): string[] {
 	const close = `) ${alias.trim()}`;
 	if (usage === "select") {
-		return [
-			"SELECT",
-			...columns,
-			"FROM (",
-			...subquery.map((line) => `${INDENT}${line}`),
-			close,
-		];
+		return ["SELECT", ...columns, "FROM (", ...indentLines(subquery), close];
 	}
 	return [
 		`${INDENT}${JOIN_KEYWORDS[usage]} (`,
-		...subquery.map((line) => `${JOIN_TABLE_INDENT}${line}`),
+		...indentLines(subquery, JOIN_TABLE_INDENT),
 		`${INDENT}${close}`,
-		...(usage === "crossJoin" ? [] : columns),
+		...joinColumns(usage, columns),
 	];
 }
 
@@ -275,6 +279,18 @@ export function isMultiColumnOperator(operator: ConditionOperator): boolean {
 	return operator === "equals" || operator === "isNull";
 }
 
+// 先頭の条件として = を AND でつなぐ（WHERE の行付き）。サブクエリの WHERE などはこれを元に変える
+export const DEFAULT_CONDITION_OPTIONS: ConditionOptions = {
+	operator: "equals",
+	not: false,
+	conjunction: "AND",
+	group: false,
+	connector: null,
+	keyword: true,
+	inValues: "",
+	subquery: null,
+};
+
 export type ConditionOptions = {
 	operator: ConditionOperator;
 	not: boolean;
@@ -316,14 +332,10 @@ function conditionExpression(
 			if (options.subquery === null) {
 				return [`${column} ${not}IN (${options.inValues.trim()})`];
 			}
-			return [`${column} ${not}IN (`, ...subqueryBody(options.subquery), ")"];
+			return [`${column} ${not}IN (`, ...indentLines(options.subquery), ")"];
 		case "exists":
-			return [`${not}EXISTS (`, ...subqueryBody(options.subquery ?? []), ")"];
+			return [`${not}EXISTS (`, ...indentLines(options.subquery ?? []), ")"];
 	}
-}
-
-function subqueryBody(lines: string[]): string[] {
-	return lines.map((line) => `${INDENT}${line}`);
 }
 
 // columnsは修飾済みの列。EXISTSでは使わない
@@ -344,10 +356,7 @@ export function conditionLines(
 					const [first, ...rest] = conditionExpression(column, options);
 					const head =
 						i === 0 ? firstHead : connectorHead(base, options.conjunction);
-					return [
-						`${head}${first}`,
-						...rest.map((line) => `${position}${line}`),
-					];
+					return [`${head}${first}`, ...indentLines(rest, position)];
 				});
 	if (usage === "where" && options.keyword && options.connector === null) {
 		return ["WHERE", ...lines];
@@ -380,9 +389,13 @@ export function subqueryLines(
 	selectList: string[],
 	where: string[],
 ): string[] {
-	const trimmed = alias.trim();
-	const named = trimmed === "" ? table : `${table} ${trimmed}`;
-	return ["SELECT", ...selectList, "FROM", `${INDENT}${named}`, ...where];
+	return [
+		"SELECT",
+		...selectList,
+		"FROM",
+		`${INDENT}${namedTable(table, alias)}`,
+		...where,
+	];
 }
 
 // 外側の別名と重ならないよう、重なるときは数字を付ける（T → T2）
@@ -395,10 +408,6 @@ export function uniqueAlias(alias: string, used: string[]): string {
 		n++;
 	}
 	return `${alias}${n}`;
-}
-
-export function subqueryColumnLine(column: string): string {
-	return `${INDENT}${column}`;
 }
 
 export type ScalarSource = "column" | "case" | "subquery";
@@ -424,7 +433,7 @@ export function scalarExpression(
 				"END",
 			];
 		case "subquery":
-			return ["(", ...subqueryBody(options.subquery ?? []), ")"];
+			return ["(", ...indentLines(options.subquery ?? []), ")"];
 	}
 }
 
@@ -434,7 +443,7 @@ export function withCoalesce(expression: string[], fallback: string): string[] {
 	if (expression.length === 1) {
 		return [`COALESCE(${expression[0]}, ${value})`];
 	}
-	return ["COALESCE(", ...subqueryBody(expression), `  , ${value}`, ")"];
+	return ["COALESCE(", ...indentLines(expression), `  , ${value}`, ")"];
 }
 
 // SELECT / ORDER BY の列の位置に置く。continuedなら1行目を「  , 」で始める。asNameはSELECTのときだけ付ける

@@ -7,8 +7,13 @@ import {
 	ModalOverlay,
 } from "../../../../components/dialog";
 import { WhiteButton } from "../../../../components/element/Button";
-import { InputLabel, SelectBox } from "../../../../components/element/Input";
+import {
+	ControllTextBox,
+	InputLabel,
+	SelectBox,
+} from "../../../../components/element/Input";
 import { JobProgress } from "../../../../components/element/JobProgress";
+import type { Conjunction } from "../../../../utils/textInsert";
 
 export type SelectOption<T extends string> = { value: T; label: string };
 export type SelectGroup<T extends string> = {
@@ -16,16 +21,24 @@ export type SelectGroup<T extends string> = {
 	options: SelectOption<T>[];
 };
 
-// 先頭の選択肢が初期値になる。groupsのlabelが空ならoptgroupで囲まない
+export const CONJUNCTION_OPTIONS: SelectOption<Conjunction>[] = [
+	{ value: "AND", label: "AND" },
+	{ value: "OR", label: "OR" },
+];
+
+// 先頭の選択肢が初期値になる。optgroupで分けるときはgroups、分けないときはoptionsを渡す。
+// groupsのlabelが空ならoptgroupで囲まない
 export function OptionSelect<T extends string>({
 	id,
 	label,
-	groups,
+	options,
+	groups = [{ label: "", options: options ?? [] }],
 	onChange,
 }: {
 	id: string;
 	label: string;
-	groups: SelectGroup<T>[];
+	options?: SelectOption<T>[];
+	groups?: SelectGroup<T>[];
 	onChange: (value: T) => void;
 }) {
 	return (
@@ -59,6 +72,39 @@ function renderOptions<T extends string>(options: SelectOption<T>[]) {
 			{o.label}
 		</option>
 	));
+}
+
+export function OptionText({
+	id,
+	label,
+	value,
+	required = false,
+	disabled = false,
+	clearable,
+	onChange,
+}: {
+	id: string;
+	label: string;
+	value: string;
+	required?: boolean;
+	disabled?: boolean;
+	clearable?: boolean;
+	onChange: (value: string) => void;
+}) {
+	return (
+		<div className="flex-1">
+			<InputLabel text={label} id={id} required={required} />
+			<ControllTextBox
+				name={id}
+				id={id}
+				required={required}
+				disabled={disabled}
+				clearable={clearable}
+				value={value}
+				handleChange={(ev) => onChange(ev.target.value)}
+			/>
+		</div>
+	);
 }
 
 export function OptionCheck({

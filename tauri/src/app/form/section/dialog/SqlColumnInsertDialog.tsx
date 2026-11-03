@@ -1,10 +1,6 @@
 import { useState } from "react";
 import { DialogActions, DialogField } from "../../../../components/dialog";
 import { BlueButton, WhiteButton } from "../../../../components/element/Button";
-import {
-	ControllTextBox,
-	InputLabel,
-} from "../../../../components/element/Input";
 import type { JobContext } from "../../../../hooks/useJob";
 import { useTableSelection } from "../../../../hooks/useTableSelection";
 import {
@@ -27,86 +23,57 @@ import {
 } from "../../../../utils/textInsert";
 import SelectableTable from "./SelectableTable";
 import {
+	CONJUNCTION_OPTIONS,
 	InsertPreview,
 	NestedDialogFrame,
 	OptionCheck,
 	OptionSelect,
+	OptionText,
 	renderColumnLoadState,
-	type SelectGroup,
+	type SelectOption,
 } from "./SqlInsertParts";
-import SqlSubqueryDialog, { CONJUNCTION_GROUPS } from "./SqlSubqueryDialog";
+import SqlSubqueryDialog from "./SqlSubqueryDialog";
 
-const COLUMN_USAGE_GROUPS: SelectGroup<ColumnUsage>[] = [
-	{
-		label: "",
-		options: [
-			{ value: "select", label: "Select" },
-			{ value: "orderBy", label: "Order by" },
-			{ value: "groupBy", label: "Group by" },
-			{ value: "where", label: "Where" },
-			{ value: "on", label: "On" },
-			{ value: "update", label: "Update set (=, ,)" },
-			{ value: "insert", label: "Insert" },
-			{ value: "scalar", label: "Scalar value" },
-		],
-	},
+const COLUMN_USAGE_OPTIONS: SelectOption<ColumnUsage>[] = [
+	{ value: "select", label: "Select" },
+	{ value: "orderBy", label: "Order by" },
+	{ value: "groupBy", label: "Group by" },
+	{ value: "where", label: "Where" },
+	{ value: "on", label: "On" },
+	{ value: "update", label: "Update set (=, ,)" },
+	{ value: "insert", label: "Insert" },
+	{ value: "scalar", label: "Scalar value" },
 ];
 
-const SCALAR_SOURCE_GROUPS: SelectGroup<ScalarSource>[] = [
-	{
-		label: "",
-		options: [
-			{ value: "column", label: "Column" },
-			{ value: "case", label: "CASE" },
-			{ value: "subquery", label: "Subquery" },
-		],
-	},
+const SCALAR_SOURCE_OPTIONS: SelectOption<ScalarSource>[] = [
+	{ value: "column", label: "Column" },
+	{ value: "case", label: "CASE" },
+	{ value: "subquery", label: "Subquery" },
 ];
 
-const SCALAR_PLACE_GROUPS: SelectGroup<ScalarPlace>[] = [
-	{
-		label: "",
-		options: [
-			{ value: "select", label: "Select column" },
-			{ value: "orderBy", label: "Order by" },
-			{ value: "condition", label: "Condition right side" },
-		],
-	},
+const SCALAR_PLACE_OPTIONS: SelectOption<ScalarPlace>[] = [
+	{ value: "select", label: "Select column" },
+	{ value: "orderBy", label: "Order by" },
+	{ value: "condition", label: "Condition right side" },
 ];
 
-const OPERATOR_GROUPS: SelectGroup<ConditionOperator>[] = [
-	{
-		label: "",
-		options: [
-			{ value: "equals", label: "=" },
-			{ value: "isNull", label: "IS NULL" },
-			{ value: "in", label: "IN" },
-			{ value: "exists", label: "EXISTS" },
-		],
-	},
+const OPERATOR_OPTIONS: SelectOption<ConditionOperator>[] = [
+	{ value: "equals", label: "=" },
+	{ value: "isNull", label: "IS NULL" },
+	{ value: "in", label: "IN" },
+	{ value: "exists", label: "EXISTS" },
 ];
 
 type InSource = "values" | "subquery";
-const IN_SOURCE_GROUPS: SelectGroup<InSource>[] = [
-	{
-		label: "",
-		options: [
-			{ value: "values", label: "Values" },
-			{ value: "subquery", label: "Subquery" },
-		],
-	},
+const IN_SOURCE_OPTIONS: SelectOption<InSource>[] = [
+	{ value: "values", label: "Values" },
+	{ value: "subquery", label: "Subquery" },
 ];
 
 type Connector = "none" | Conjunction;
-const CONNECTOR_GROUPS: SelectGroup<Connector>[] = [
-	{
-		label: "",
-		options: [
-			{ value: "none", label: "None (first condition)" },
-			{ value: "AND", label: "AND" },
-			{ value: "OR", label: "OR" },
-		],
-	},
+const CONNECTOR_OPTIONS: SelectOption<Connector>[] = [
+	{ value: "none", label: "None (first condition)" },
+	...CONJUNCTION_OPTIONS,
 ];
 
 // サブクエリの「...」は、選ぶ前のプレビューでサブクエリの位置を示す
@@ -272,7 +239,7 @@ export default function SqlColumnInsertDialog({
 							<OptionSelect
 								id="sqlColumnInsert_usage"
 								label="Usage"
-								groups={COLUMN_USAGE_GROUPS}
+								options={COLUMN_USAGE_OPTIONS}
 								onChange={handleUsageChange}
 							/>
 						</DialogField>
@@ -283,13 +250,13 @@ export default function SqlColumnInsertDialog({
 								<OptionSelect
 									id="sqlColumnInsert_scalarSource"
 									label="Source"
-									groups={SCALAR_SOURCE_GROUPS}
+									options={SCALAR_SOURCE_OPTIONS}
 									onChange={setScalarSource}
 								/>
 								<OptionSelect
 									id="sqlColumnInsert_scalarPlace"
 									label="Place in"
-									groups={SCALAR_PLACE_GROUPS}
+									options={SCALAR_PLACE_OPTIONS}
 									onChange={setScalarPlace}
 								/>
 							</div>
@@ -301,7 +268,7 @@ export default function SqlColumnInsertDialog({
 								<OptionSelect
 									id="sqlColumnInsert_operator"
 									label="Operator"
-									groups={OPERATOR_GROUPS}
+									options={OPERATOR_OPTIONS}
 									onChange={handleOperatorChange}
 								/>
 								<OptionCheck
@@ -344,41 +311,33 @@ export default function SqlColumnInsertDialog({
 							onAsNameChange={setAsName}
 						/>
 					)}
-					{condition && operator === "in" && (
+					{conditionOperator === "in" && (
 						<DialogField>
 							<div className="flex gap-3">
 								<OptionSelect
 									id="sqlColumnInsert_inSource"
 									label="IN source"
-									groups={IN_SOURCE_GROUPS}
+									options={IN_SOURCE_OPTIONS}
 									onChange={setInSource}
 								/>
 								{inSource === "values" && (
-									<div className="flex-1">
-										<InputLabel
-											text="Values"
-											id="sqlColumnInsert_inValues"
-											required={false}
-										/>
-										<ControllTextBox
-											name="sqlColumnInsert_inValues"
-											id="sqlColumnInsert_inValues"
-											required={false}
-											value={inValues}
-											handleChange={(ev) => setInValues(ev.target.value)}
-										/>
-									</div>
+									<OptionText
+										id="sqlColumnInsert_inValues"
+										label="Values"
+										value={inValues}
+										onChange={setInValues}
+									/>
 								)}
 							</div>
 						</DialogField>
 					)}
-					{condition && isMultiColumnOperator(operator) && (
+					{condition && isMultiColumnOperator(conditionOperator) && (
 						<DialogField>
 							<div className="flex gap-3 items-end">
 								<OptionSelect
 									id="sqlColumnInsert_conjunction"
 									label="Join columns with"
-									groups={CONJUNCTION_GROUPS}
+									options={CONJUNCTION_OPTIONS}
 									onChange={setConjunction}
 								/>
 								<OptionCheck
@@ -395,7 +354,7 @@ export default function SqlColumnInsertDialog({
 							<OptionSelect
 								id="sqlColumnInsert_connector"
 								label="Connect to main query"
-								groups={CONNECTOR_GROUPS}
+								options={CONNECTOR_OPTIONS}
 								onChange={setConnector}
 							/>
 						</DialogField>
@@ -517,19 +476,13 @@ function ScalarOptions({
 		<>
 			{source === "case" && (
 				<DialogField>
-					<InputLabel
-						text="WHEN count"
+					<OptionText
 						id="sqlColumnInsert_whenCount"
-						required={false}
-					/>
-					<ControllTextBox
-						name="sqlColumnInsert_whenCount"
-						id="sqlColumnInsert_whenCount"
-						required={false}
+						label="WHEN count"
 						clearable={false}
 						value={whenCount}
-						handleChange={(ev) =>
-							onWhenCountChange(ev.target.value.replace(/[^0-9]/g, ""))
+						onChange={(value) =>
+							onWhenCountChange(value.replace(/[^0-9]/g, ""))
 						}
 					/>
 				</DialogField>
@@ -542,35 +495,21 @@ function ScalarOptions({
 					onChange={onCoalesceChange}
 				/>
 				{coalesce && (
-					<>
-						<InputLabel
-							text="Fallback value"
-							id="sqlColumnInsert_fallback"
-							required={false}
-						/>
-						<ControllTextBox
-							name="sqlColumnInsert_fallback"
-							id="sqlColumnInsert_fallback"
-							required={false}
-							value={fallback}
-							handleChange={(ev) => onFallbackChange(ev.target.value)}
-						/>
-					</>
+					<OptionText
+						id="sqlColumnInsert_fallback"
+						label="Fallback value"
+						value={fallback}
+						onChange={onFallbackChange}
+					/>
 				)}
 			</DialogField>
 			{place === "select" && (
 				<DialogField>
-					<InputLabel
-						text="AS name"
+					<OptionText
 						id="sqlColumnInsert_asName"
-						required={false}
-					/>
-					<ControllTextBox
-						name="sqlColumnInsert_asName"
-						id="sqlColumnInsert_asName"
-						required={false}
+						label="AS name"
 						value={asName}
-						handleChange={(ev) => onAsNameChange(ev.target.value)}
+						onChange={onAsNameChange}
 					/>
 				</DialogField>
 			)}
