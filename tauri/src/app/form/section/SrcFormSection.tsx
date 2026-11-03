@@ -15,11 +15,14 @@ export default function SrcFormSection({
 	srcType,
 	jdbcOption,
 	handleValueChange,
+	queryOnly = false,
 }: {
 	srcElements: SrcElements;
 	srcType?: SrcType;
 	jdbcOption?: JdbcOption;
 	handleValueChange: (param: CommandOption) => (newValue: string) => void;
+	// SQLエディタの挿入の用途からDMLを除く
+	queryOnly?: boolean;
 }) {
 	const prefix = srcElements.prefix;
 
@@ -33,6 +36,7 @@ export default function SrcFormSection({
 					handleValueChange={handleValueChange(srcElements.src)}
 					hidden={false}
 					srcType={srcType}
+					queryOnly={queryOnly}
 				/>
 			)) || (
 				<FileText

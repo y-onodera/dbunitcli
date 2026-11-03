@@ -19,7 +19,10 @@ import {
 } from "../../../../utils/textInsert";
 import SqlColumnInsertDialog from "./SqlColumnInsertDialog";
 import type { SubquerySource } from "./SqlSubqueryDialog";
-import TableInsertForm from "./TableInsertForm";
+import TableInsertForm, {
+	QUERY_TABLE_USAGE_GROUPS,
+	TABLE_USAGE_GROUPS,
+} from "./TableInsertForm";
 import TableList from "./TableList";
 import { useColumnLoad } from "./useColumnLoad";
 
@@ -29,6 +32,8 @@ interface SqlTableInsertDialogProps {
 	// inlineなら改行を足さずにカーソル位置へ入れる
 	onInsertColumn: (columns: string[], inline?: boolean) => void;
 	plain?: boolean;
+	// テーブル・列の用途からDMLを除く
+	queryOnly?: boolean;
 	onClose: () => void;
 }
 
@@ -37,6 +42,7 @@ export default function SqlTableInsertDialog({
 	onInsert,
 	onInsertColumn,
 	plain = false,
+	queryOnly = false,
 	onClose,
 }: SqlTableInsertDialogProps) {
 	const [tables, setTables] = useState<string[] | null>(null);
@@ -93,6 +99,7 @@ export default function SqlTableInsertDialog({
 				onInsert={onInsert}
 				onInsertColumn={onInsertColumn}
 				plain={plain}
+				queryOnly={queryOnly}
 				onQueryColumns={queryColumns}
 				onClose={onClose}
 			/>
@@ -115,6 +122,7 @@ function TablesContent({
 	onInsert,
 	onInsertColumn,
 	plain,
+	queryOnly,
 	onQueryColumns,
 	onClose,
 }: {
@@ -122,6 +130,7 @@ function TablesContent({
 	onInsert: (tables: string[]) => void;
 	onInsertColumn: (columns: string[], inline?: boolean) => void;
 	plain: boolean;
+	queryOnly: boolean;
 	onQueryColumns: (table: string, context: JobContext) => Promise<string[]>;
 	onClose: () => void;
 }) {
@@ -185,7 +194,11 @@ function TablesContent({
 					onUsageChange={setUsage}
 					alias={alias}
 					onAliasChange={setAlias}
+					usageGroups={
+						queryOnly ? QUERY_TABLE_USAGE_GROUPS : TABLE_USAGE_GROUPS
+					}
 					subquerySource={subquerySource}
+					queryOnly={queryOnly}
 					onInsert={onInsert}
 					onClose={onClose}
 				/>
@@ -200,6 +213,7 @@ function TablesContent({
 					plain={plain}
 					{...columnAliasOf(columnLoad.target.table)}
 					subquerySource={subquerySource}
+					queryOnly={queryOnly}
 					onInsert={(lines, inline) => {
 						if (inline) {
 							onInsertColumn(lines, true);

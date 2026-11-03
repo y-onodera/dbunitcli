@@ -43,6 +43,15 @@ export const TABLE_USAGE_GROUPS: SelectGroup<TableUsage>[] = [
 	},
 ];
 
+// 読み込み専用のSQL（データセットの読込元）に置かない用途
+const DML_TABLE_USAGES: TableUsage[] = ["insert", "update", "delete"];
+
+export const QUERY_TABLE_USAGE_GROUPS: SelectGroup<TableUsage>[] =
+	TABLE_USAGE_GROUPS.map((group) => ({
+		label: group.label,
+		options: group.options.filter((o) => !DML_TABLE_USAGES.includes(o.value)),
+	}));
+
 type TableSource = "table" | "subquery";
 const TABLE_SOURCE_OPTIONS: SelectOption<TableSource>[] = [
 	{ value: "table", label: "Table" },
@@ -61,6 +70,7 @@ export default function TableInsertForm({
 	onAliasChange,
 	usageGroups = TABLE_USAGE_GROUPS,
 	subquerySource,
+	queryOnly = false,
 	onInsert,
 	onClose,
 }: {
@@ -74,6 +84,8 @@ export default function TableInsertForm({
 	usageGroups?: SelectGroup<TableUsage>[];
 	// tableの選び方と列の取り方。サブクエリのテーブルも同じ選び方で選ぶ
 	subquerySource: SubquerySource;
+	// 列選択ダイアログの用途からDMLを除く
+	queryOnly?: boolean;
 	onInsert: (lines: string[]) => void;
 	onClose: () => void;
 }) {
@@ -202,6 +214,7 @@ export default function TableInsertForm({
 							tableLines(columnTarget.table, statement, alias, lines),
 					}}
 					subquerySource={subquerySource}
+					queryOnly={queryOnly}
 					onInsert={(lines) => {
 						onInsert(lines);
 						columnLoad.close();
@@ -242,6 +255,7 @@ export default function TableInsertForm({
 							),
 					}}
 					subquerySource={subquerySource}
+					queryOnly={queryOnly}
 					onInsert={(lines) => {
 						onInsert(lines);
 						setDerivedOuter(null);

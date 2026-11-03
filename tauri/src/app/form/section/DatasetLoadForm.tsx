@@ -63,6 +63,7 @@ function DatasetLoadFormContent({
 				srcType={defaultType ?? srcData.srcType?.value}
 				jdbcOption={jdbcOption}
 				handleValueChange={handleValueChange}
+				queryOnly
 			/>
 			<TraversalFormSection
 				srcElements={srcData}

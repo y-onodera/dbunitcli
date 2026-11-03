@@ -23,9 +23,13 @@ import { InlinePreviewButton } from "./DatasetTableNamesPreviewButton";
 import type { EditResourceDialogProps } from "./ResourceEditButton";
 import SqlTableInsertDialog from "./SqlTableInsertDialog";
 
-type SqlEditorDialogProps = EditResourceDialogProps & {
-	type: QueryDatasourceType;
-};
+// queryOnlyはデータセットの読込元のSQL。テーブル・列の挿入の用途からDMLを除く
+type SqlEditorOptions = { queryOnly?: boolean };
+
+type SqlEditorDialogProps = EditResourceDialogProps &
+	SqlEditorOptions & {
+		type: QueryDatasourceType;
+	};
 
 export default function SqlEditorDialog(props: SqlEditorDialogProps) {
 	const { content, loading } = useResourceContent(props.type, props.fileName);
@@ -38,12 +42,12 @@ export default function SqlEditorDialog(props: SqlEditorDialogProps) {
 // EditResourceButtonへ渡すため、srcTypeごとに種類を固定した編集ダイアログ（モジュールで1度だけ作り、再マウントを防ぐ）
 function sqlEditorDialogOf(
 	type: QueryDatasourceType,
-): ComponentType<EditResourceDialogProps> {
+): ComponentType<EditResourceDialogProps & SqlEditorOptions> {
 	return (props) => <SqlEditorDialog type={type} {...props} />;
 }
 export const sqlEditorDialogs: Record<
 	QueryDatasourceType,
-	ComponentType<EditResourceDialogProps>
+	ComponentType<EditResourceDialogProps & SqlEditorOptions>
 > = {
 	sql: sqlEditorDialogOf("sql"),
 	table: sqlEditorDialogOf("table"),
@@ -109,6 +113,7 @@ function Dialog(props: SqlEditorDialogProps & { value: string }) {
 				onInsert={handleInsert}
 				onInsertColumn={handleInsertColumn}
 				plain={props.type === "table"}
+				queryOnly={props.queryOnly}
 				onClose={() => setShowSelector(false)}
 			/>
 		);
