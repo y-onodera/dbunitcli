@@ -1,11 +1,9 @@
-import { describe, expect, it } from "vitest";
 import {
 	columnLines,
 	defaultTableAlias,
 	insertAtCursor,
 	qualifyColumn,
-	statementLines,
-	tableClause,
+	tableLines,
 } from "../../utils/textInsert";
 
 describe("insertAtCursor", () => {
@@ -57,108 +55,135 @@ describe("insertAtCursor", () => {
 });
 
 describe("defaultTableAlias", () => {
-	it("スネークケースの各語の先頭文字を小文字でつなげる", () => {
-		expect(defaultTableAlias("USER_ACCOUNT")).toBe("ua");
-		expect(defaultTableAlias("USERS")).toBe("u");
+	it("スネークケースの各語の先頭文字を大文字でつなげる", () => {
+		expect(defaultTableAlias("user_account")).toBe("UA");
+		expect(defaultTableAlias("USERS")).toBe("U");
 	});
 
 	it("スキーマ修飾と連続・前後の_は無視する", () => {
-		expect(defaultTableAlias("PUBLIC.ORDER__DETAIL_")).toBe("od");
+		expect(defaultTableAlias("PUBLIC.ORDER__DETAIL_")).toBe("OD");
 	});
 });
 
-describe("tableClause", () => {
-	it("用途ごとのキーワードとエイリアスを付ける", () => {
-		expect(tableClause("USERS", "select", "u")).toBe("from USERS u");
-		expect(tableClause("USERS", "update", "u")).toBe("update USERS u");
-		expect(tableClause("USERS", "delete", "u")).toBe("delete from USERS u");
-		expect(tableClause("ORDERS", "leftJoin", "o")).toBe(
-			"left join ORDERS o on",
-		);
-		expect(tableClause("ORDERS", "innerJoin", "o")).toBe(
-			"inner join ORDERS o on",
-		);
-		expect(tableClause("ORDERS", "crossJoin", "o")).toBe("cross join ORDERS o");
+describe("tableLines", () => {
+	it("SELECTは列の後ろにFROMとテーブルを置く", () => {
+		expect(
+			tableLines("TABLE", "select", "T", [
+				"    T.COLUMNA AS A",
+				"  , T.COLUMNB",
+			]),
+		).toEqual([
+			"SELECT",
+			"    T.COLUMNA AS A",
+			"  , T.COLUMNB",
+			"FROM",
+			"    TABLE T",
+		]);
 	});
 
-	it("エイリアスが空ならテーブル名だけ、insertではエイリアスを付けない", () => {
-		expect(tableClause("USERS", "select", " ")).toBe("from USERS");
-		expect(tableClause("USERS", "insert", "u")).toBe("insert into USERS");
+	it("INSERTはエイリアスを付けず、列を括弧で囲みVALUESを続ける", () => {
+		expect(tableLines("TABLE", "insert", "T", ["    A", "  , B"])).toEqual([
+			"INSERT INTO",
+			"    TABLE",
+			"(",
+			"    A",
+			"  , B",
+			")",
+			"VALUES",
+			"(",
+			")",
+		]);
+	});
+
+	it("UPDATEはSETに続けて列を置く", () => {
+		expect(tableLines("TABLE", "update", "T", ["    T.A = "])).toEqual([
+			"UPDATE",
+			"    TABLE T",
+			"SET",
+			"    T.A = ",
+		]);
+	});
+
+	it("DELETEはテーブルだけ、エイリアスが空ならテーブル名だけ", () => {
+		expect(tableLines("TABLE", "delete", " ", [])).toEqual([
+			"DELETE FROM",
+			"    TABLE",
+		]);
+	});
+
+	it("JOINはFROMの中身の位置に置き、結合先とONの列を字下げする", () => {
+		expect(
+			tableLines("TABLE2", "innerJoin", "T2", ["          ON  T2.COLUMNA = "]),
+		).toEqual([
+			"    INNER JOIN",
+			"        TABLE2 T2",
+			"          ON  T2.COLUMNA = ",
+		]);
+		expect(tableLines("TABLE2", "leftJoin", "T2", [])[0]).toBe("    LEFT JOIN");
+		expect(tableLines("TABLE2", "crossJoin", "T2", [])).toEqual([
+			"    CROSS JOIN",
+			"        TABLE2 T2",
+		]);
 	});
 });
 
 describe("columnLines", () => {
 	const noAlias = { alias: "", columnAs: false };
 
-	it("selectは2行目以降を , でつなぎ、指定時は列名で as を付ける", () => {
+	it("SELECTは4字下げし、2行目以降を  , でつなぎ、指定時は AS を付ける", () => {
 		expect(
-			columnLines(["ID", "NAME"], "select", { alias: "u", columnAs: true }),
-		).toEqual(["u.ID as ID", ", u.NAME as NAME"]);
-		expect(columnLines(["ID", "NAME"], "select", noAlias)).toEqual([
-			"ID",
-			", NAME",
-		]);
-	});
-
-	it("order by は , でつなぎ、as は付けない", () => {
-		expect(
-			columnLines(["ID", "NAME"], "orderBy", { alias: "u", columnAs: true }),
-		).toEqual(["u.ID", ", u.NAME"]);
-	});
-
-	it("where/on は = を付けて and でつなぐ", () => {
-		expect(
-			columnLines(["ID", "NAME"], "condition", { alias: "u", columnAs: false }),
-		).toEqual(["u.ID = ", "and u.NAME = "]);
-	});
-
-	it("update は = を付けて , でつなぐ", () => {
-		expect(columnLines(["ID", "NAME"], "update", noAlias)).toEqual([
-			"ID = ",
-			", NAME = ",
-		]);
-	});
-
-	it("continued なら1行目にも区切りを付ける", () => {
-		expect(
-			columnLines(["ID", "NAME"], "condition", {
-				alias: "",
-				columnAs: false,
-				continued: true,
+			columnLines(["COLUMNA", "COLUMNB"], "select", {
+				alias: "T",
+				columnAs: true,
 			}),
-		).toEqual(["and ID = ", "and NAME = "]);
+		).toEqual(["    T.COLUMNA AS COLUMNA", "  , T.COLUMNB AS COLUMNB"]);
+	});
+
+	it("keyword指定時はキーワード行を先頭に置く", () => {
 		expect(
-			columnLines(["ID"], "select", {
-				alias: "u",
+			columnLines(["A", "B"], "orderBy", { ...noAlias, keyword: true }),
+		).toEqual(["ORDER BY", "    A", "  , B"]);
+		expect(
+			columnLines(["A"], "groupBy", { ...noAlias, keyword: true }),
+		).toEqual(["GROUP BY", "    A"]);
+		expect(columnLines(["A"], "update", { ...noAlias, keyword: true })).toEqual(
+			["SET", "    A = "],
+		);
+	});
+
+	it("WHEREは = を付け、2行目以降はANDを行頭に置く", () => {
+		expect(
+			columnLines(["COLUMNA", "COLUMNB"], "where", {
+				alias: "T",
 				columnAs: false,
-				continued: true,
+				keyword: true,
 			}),
-		).toEqual([", u.ID"]);
+		).toEqual(["WHERE", "    T.COLUMNA = ", "AND T.COLUMNB = "]);
 	});
 
-	it("insert はエイリアスを指定しても付けない", () => {
+	it("ONは結合先の下に字下げし、2行目以降はONの位置にANDを置く", () => {
 		expect(
-			columnLines(["ID", "NAME"], "insert", { alias: "u", columnAs: true }),
-		).toEqual(["ID", ", NAME"]);
+			columnLines(["A", "B"], "on", { alias: "T2", columnAs: false }),
+		).toEqual(["          ON  T2.A = ", "          AND T2.B = "]);
 	});
-});
 
-describe("statementLines", () => {
-	it("用途ごとにテーブルの句とカラムの行を組み合わせる", () => {
+	it("continued なら1行目にも区切りを付け、キーワード行は付けない", () => {
 		expect(
-			statementLines("USERS", "select", "u", ["u.ID", ", u.NAME"]),
-		).toEqual(["select", "u.ID", ", u.NAME", "from USERS u"]);
-		expect(statementLines("USERS", "insert", "u", ["ID", ", NAME"])).toEqual([
-			"insert into USERS (",
-			"ID",
-			", NAME",
-			") values (",
-			")",
-		]);
-		expect(statementLines("USERS", "update", "u", ["u.ID = "])).toEqual([
-			"update USERS u set",
-			"u.ID = ",
-		]);
+			columnLines(["A"], "where", {
+				...noAlias,
+				continued: true,
+				keyword: true,
+			}),
+		).toEqual(["AND A = "]);
+		expect(
+			columnLines(["A"], "select", { ...noAlias, continued: true }),
+		).toEqual(["  , A"]);
+	});
+
+	it("INSERT はエイリアスを指定しても付けない", () => {
+		expect(
+			columnLines(["ID", "NAME"], "insert", { alias: "U", columnAs: true }),
+		).toEqual(["    ID", "  , NAME"]);
 	});
 });
 

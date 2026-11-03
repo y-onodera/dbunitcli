@@ -19,15 +19,16 @@ import { type JobContext, useJob } from "../../../../hooks/useJob";
 import { useTableSelection } from "../../../../hooks/useTableSelection";
 import {
 	type ColumnUsage,
+	columnKeyword,
 	columnLines,
 	columnSeparator,
 	defaultTableAlias,
 	isJoin,
 	isStatementUsage,
 	type StatementUsage,
-	statementLines,
+	statementColumnUsage,
 	type TableUsage,
-	tableClause,
+	tableLines,
 	usesColumnQualifier,
 	usesTableAlias,
 } from "../../../../utils/textInsert";
@@ -38,10 +39,10 @@ const TABLE_USAGE_GROUPS: UsageGroup<TableUsage>[] = [
 	{
 		label: "Statement",
 		options: [
-			{ value: "select", label: "Select (from)" },
-			{ value: "insert", label: "Insert (insert into)" },
-			{ value: "update", label: "Update (update)" },
-			{ value: "delete", label: "Delete (delete from)" },
+			{ value: "select", label: "Select" },
+			{ value: "insert", label: "Insert" },
+			{ value: "update", label: "Update" },
+			{ value: "delete", label: "Delete" },
 		],
 	},
 	{
@@ -59,8 +60,10 @@ const COLUMN_USAGE_GROUPS: UsageGroup<ColumnUsage>[] = [
 		label: "Usage",
 		options: [
 			{ value: "select", label: "Select" },
-			{ value: "orderBy", label: "Order by / Group by" },
-			{ value: "condition", label: "Where / On (=, and)" },
+			{ value: "orderBy", label: "Order by" },
+			{ value: "groupBy", label: "Group by" },
+			{ value: "where", label: "Where (=, AND)" },
+			{ value: "on", label: "On (=, AND)" },
 			{ value: "update", label: "Update set (=, ,)" },
 			{ value: "insert", label: "Insert" },
 		],
@@ -198,7 +201,7 @@ function TablesContent({
 			openColumnDialog(selectedTable, usage);
 			return;
 		}
-		onInsert([tableClause(selectedTable, usage, alias)]);
+		onInsert(tableLines(selectedTable, usage, alias, []));
 	};
 
 	const openColumnDialog = async (
@@ -226,9 +229,8 @@ function TablesContent({
 		statement === null
 			? undefined
 			: {
-					usage: statement,
-					wrap: (lines: string[]) =>
-						statementLines(table, statement, alias, lines),
+					usage: statementColumnUsage(statement),
+					wrap: (lines: string[]) => tableLines(table, statement, alias, lines),
 				};
 
 	// 列の修飾には、選択中のテーブルなら入力済みの別名を使う
@@ -282,9 +284,10 @@ function TablesContent({
 					</DialogField>
 					<InsertPreview
 						lines={
-							selectedTable === null
+							// 列まで選ぶ用途は、列選択ダイアログで文全体を見せる
+							selectedTable === null || isStatementUsage(usage)
 								? []
-								: [tableClause(selectedTable, usage, alias)]
+								: tableLines(selectedTable, usage, alias, [])
 						}
 					/>
 				</>
@@ -353,6 +356,7 @@ function ColumnSelectDialog({
 	const [alias, setAlias] = useState(defaultAlias);
 	const [columnAs, setColumnAs] = useState(false);
 	const [continued, setContinued] = useState(false);
+	const [keyword, setKeyword] = useState(true);
 
 	if (loading) {
 		return (
@@ -383,10 +387,12 @@ function ColumnSelectDialog({
 			alias: qualifying ? alias : "",
 			columnAs,
 			continued: statement === undefined && continued,
+			keyword: statement === undefined && keyword,
 		});
 		return statement === undefined ? formatted : statement.wrap(formatted);
 	};
 	const selectedColumns = columns.filter((c) => selected.has(c));
+	const keywordOfUsage = columnKeyword(usage);
 
 	return (
 		<ColumnDialogFrame table={table}>
@@ -434,9 +440,20 @@ function ColumnSelectDialog({
 						<DialogField>
 							<OptionCheck
 								id="sqlColumnInsert_as"
-								label="as column name"
+								label="AS column name"
 								checked={columnAs}
 								onChange={setColumnAs}
+							/>
+						</DialogField>
+					)}
+					{statement === undefined && keywordOfUsage !== null && (
+						<DialogField>
+							<OptionCheck
+								id="sqlColumnInsert_keyword"
+								label={`Keyword line (${keywordOfUsage})`}
+								checked={keyword && !continued}
+								disabled={continued}
+								onChange={setKeyword}
 							/>
 						</DialogField>
 					)}
@@ -529,11 +546,13 @@ function OptionCheck({
 	id,
 	label,
 	checked,
+	disabled = false,
 	onChange,
 }: {
 	id: string;
 	label: string;
 	checked: boolean;
+	disabled?: boolean;
 	onChange: (checked: boolean) => void;
 }) {
 	return (
@@ -542,6 +561,7 @@ function OptionCheck({
 				id={id}
 				type="checkbox"
 				checked={checked}
+				disabled={disabled}
 				onChange={(e) => onChange(e.target.checked)}
 				className="w-4 h-4 text-primary"
 			/>

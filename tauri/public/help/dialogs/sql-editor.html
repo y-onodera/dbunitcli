@@ -50,42 +50,56 @@
   </ol>
   <p><code>srcType</code> が <code>table</code> の場合は、テーブルを複数選べ、テーブル名・カラム名だけを 1 行ずつ挿入します。以降の項目は表示されません。</p>
   <p><code>srcType</code> が <code>sql</code> / <code>csvq</code> の場合は、使い道（Usage）を選ぶと、それに合った形で挿入します。挿入される内容は Insert の上に表示されます。</p>
+  <p>挿入する SQL は次の形に揃えます。キーワードは大文字で行頭に置き、句の中身は 4 文字下げ、2 行目以降は <code>  , </code> または <code>AND </code> で始めます。テーブル名・カラム名は取得した表記のままです。</p>
+  <pre>SELECT
+    T.COLUMNA AS COLUMNA
+  , T.COLUMNB AS COLUMNB
+FROM
+    TABLE T
+    INNER JOIN
+        TABLE2 T2
+          ON  T2.COLUMNA = 
+          AND T2.COLUMNB = 
+WHERE
+    T.COLUMNA = 
+AND T.COLUMNB = </pre>
 
   <h3>テーブル（Select Tables）</h3>
   <p>選べるテーブルは 1 つです。別のテーブルを選ぶと置き換わります。</p>
-  <p>Usage が Select / Insert / Update のときは、Insert ボタンが Next に変わります。Next を押すと Select Columns が開き、選んだカラム（All Columns なら全カラム）と合わせた文全体を挿入して、Select Tables が閉じます。このとき Select Columns の Usage はテーブル側に合わせて固定され、Separator on first line は表示されません。</p>
+  <p>Usage が Select / Insert / Update / Left join / Inner join のときは、Insert ボタンが Next に変わります。Next を押すと Select Columns が開き、選んだカラム（All Columns なら全カラム）と合わせた文全体を挿入して、Select Tables が閉じます。このとき Select Columns の Usage はテーブル側に合わせて固定され、Keyword line と Separator on first line は表示されません。</p>
   <table>
     <tr><th>項目</th><th>説明</th><th>デフォルト</th></tr>
-    <tr><td>Usage</td><td>テーブルの使い道。挿入するキーワードが決まる</td><td>Select (from)</td></tr>
-    <tr><td>Table alias</td><td>テーブルの別名。空ならテーブル名だけを挿入する。Usage が join のときは必須。Insert のときは入力できない</td><td>テーブル名の <code>_</code> 区切りの各語の先頭文字を小文字でつなげたもの（例: <code>USER_ACCOUNT</code> → <code>ua</code>）。スキーマ名は除く</td></tr>
+    <tr><td>Usage</td><td>テーブルの使い道。挿入する文の形が決まる</td><td>Select</td></tr>
+    <tr><td>Table alias</td><td>テーブルの別名。空ならテーブル名だけを挿入する。Usage が join のときは必須。Insert のときは入力できない</td><td>テーブル名の <code>_</code> 区切りの各語の先頭文字を大文字でつなげたもの（例: <code>USER_ACCOUNT</code> → <code>UA</code>）。スキーマ名は除く</td></tr>
   </table>
   <table>
     <tr><th>値</th><th>説明</th></tr>
-    <tr><td>Select (from)</td><td><code>select</code>、カラム、<code>from USER_ACCOUNT ua</code> の順に挿入する</td></tr>
-    <tr><td>Insert (insert into)</td><td><code>insert into USER_ACCOUNT (</code>、カラム、<code>) values (</code>、<code>)</code> の順に挿入する。<code>values</code> の中身は空</td></tr>
-    <tr><td>Update (update)</td><td><code>update USER_ACCOUNT ua set</code>、カラム（<code>ID = </code> の形）の順に挿入する。<code>where</code> は付けない</td></tr>
-    <tr><td>Delete (delete from)</td><td><code>delete from USER_ACCOUNT ua</code></td></tr>
-    <tr><td>Left join</td><td><code>left join USER_ACCOUNT ua on</code></td></tr>
-    <tr><td>Inner join</td><td><code>inner join USER_ACCOUNT ua on</code></td></tr>
-    <tr><td>Cross join</td><td><code>cross join USER_ACCOUNT ua</code></td></tr>
+    <tr><td>Select</td><td><code>SELECT</code>、カラム、<code>FROM</code>、テーブルの順に挿入する</td></tr>
+    <tr><td>Insert</td><td><code>INSERT INTO</code>、テーブル、<code>(</code>、カラム、<code>)</code>、<code>VALUES</code>、<code>(</code>、<code>)</code> の順に挿入する。<code>VALUES</code> の中身は空</td></tr>
+    <tr><td>Update</td><td><code>UPDATE</code>、テーブル、<code>SET</code>、カラム（<code>ID = </code> の形）の順に挿入する。<code>WHERE</code> は付けない</td></tr>
+    <tr><td>Delete</td><td><code>DELETE FROM</code>、テーブルの順に挿入する</td></tr>
+    <tr><td>Left join / Inner join</td><td><code>LEFT JOIN</code> / <code>INNER JOIN</code>、テーブル、ON の条件（Select Columns の On と同じ形）の順に挿入する。右辺は空</td></tr>
+    <tr><td>Cross join</td><td><code>CROSS JOIN</code>、テーブルの順に挿入する</td></tr>
   </table>
 
   <h3>カラム（Select Columns）</h3>
   <table>
     <tr><th>項目</th><th>説明</th><th>デフォルト</th></tr>
-    <tr><td>Usage</td><td>カラムの使い道。2 行目以降の区切りと <code>=</code> の有無が決まる</td><td>Select</td></tr>
+    <tr><td>Usage</td><td>カラムの使い道。キーワード行・区切り・<code>=</code> の有無が決まる</td><td>Select</td></tr>
     <tr><td>Prefix table alias</td><td>ON にすると、入力した別名でカラム名を <code>別名.カラム名</code> の形にする。Usage が Insert のときは表示されない</td><td>OFF</td></tr>
     <tr><td>（別名の入力欄）</td><td>Prefix table alias が ON のときに使う別名。ON で空なら挿入できない</td><td>Select Tables で選択中のテーブルなら、そこで入力した Table alias。それ以外は Table alias のデフォルトと同じ規則の別名</td></tr>
-    <tr><td>as column name</td><td>ON にすると、各カラムに <code>as カラム名</code> を付ける。Usage が Select のときだけ表示される</td><td>OFF</td></tr>
-    <tr><td>Separator on first line</td><td>ON にすると、1 行目にも区切り（<code>,</code> または <code>and</code>）を付ける。挿入済みのカラムの後ろに続けて挿入するときに使う</td><td>OFF</td></tr>
+    <tr><td>AS column name</td><td>ON にすると、各カラムに <code>AS カラム名</code> を付ける。Usage が Select のときだけ表示される</td><td>OFF</td></tr>
+    <tr><td>Keyword line</td><td>ON にすると、カラムの前にキーワードの行（<code>ORDER BY</code> / <code>GROUP BY</code> / <code>WHERE</code> / <code>SET</code>）を付ける。Usage が Order by / Group by / Where / Update set のときだけ表示される。Separator on first line が ON のときは付けない</td><td>ON</td></tr>
+    <tr><td>Separator on first line</td><td>ON にすると、1 行目にも区切り（<code>,</code> または <code>AND</code>）を付ける。挿入済みのカラムの後ろに続けて挿入するときに使う</td><td>OFF</td></tr>
   </table>
   <table>
     <tr><th>値</th><th>説明</th></tr>
-    <tr><td>Select</td><td><code>ua.ID</code>、2 行目以降は <code>, ua.NAME</code>（as column name が ON なら <code>ua.ID as ID</code>）</td></tr>
-    <tr><td>Order by / Group by</td><td><code>ua.ID</code>、2 行目以降は <code>, ua.NAME</code></td></tr>
-    <tr><td>Where / On (=, and)</td><td><code>ua.ID = </code>、2 行目以降は <code>and ua.NAME = </code></td></tr>
-    <tr><td>Update set (=, ,)</td><td><code>ua.ID = </code>、2 行目以降は <code>, ua.NAME = </code></td></tr>
-    <tr><td>Insert</td><td><code>ID</code>、2 行目以降は <code>, NAME</code></td></tr>
+    <tr><td>Select</td><td><code>    UA.ID</code>、2 行目以降は <code>  , UA.NAME</code>（AS column name が ON なら <code>    UA.ID AS ID</code>）</td></tr>
+    <tr><td>Order by / Group by</td><td><code>ORDER BY</code> / <code>GROUP BY</code> の行に続けて、<code>    UA.ID</code>、2 行目以降は <code>  , UA.NAME</code></td></tr>
+    <tr><td>Where (=, AND)</td><td><code>WHERE</code> の行に続けて、<code>    UA.ID = </code>、2 行目以降は <code>AND UA.NAME = </code></td></tr>
+    <tr><td>On (=, AND)</td><td>JOIN の結合先テーブルの下に揃えて、<code>          ON  UA.ID = </code>、2 行目以降は <code>          AND UA.NAME = </code></td></tr>
+    <tr><td>Update set (=, ,)</td><td><code>SET</code> の行に続けて、<code>    UA.ID = </code>、2 行目以降は <code>  , UA.NAME = </code></td></tr>
+    <tr><td>Insert</td><td><code>    ID</code>、2 行目以降は <code>  , NAME</code></td></tr>
   </table>
   <p>テーブル一覧やカラムの取得に失敗したときは、ダイアログ内にエラーメッセージと読込中に出ていたログを表示します。</p>
 
