@@ -46,13 +46,14 @@
   <ol>
     <li>Select Tables を押し、Load Tables でデータベースのテーブル一覧を取得します。</li>
     <li>挿入したいテーブルにチェックを入れ、Insert を押すと、本文のカーソル位置に挿入され、Select Tables が閉じます。本文で範囲を選択していた場合は、その範囲を置き換えます。</li>
-    <li>テーブル名の横の Select columns アイコンを押すと、そのテーブルのカラム選択ダイアログ（Select Columns）が開きます。カラムにチェックを入れて Insert Columns を押すと、カーソル位置に 1 行 1 カラムで挿入されます。Select Tables は開いたままなので、続けて別のテーブルを選べます。</li>
+    <li>テーブル名の横の Select columns アイコンを押すと、そのテーブルのカラム選択ダイアログ（Select Columns）が開きます。カラムにチェックを入れて Insert Columns を押すと、カーソル位置に 1 行 1 カラムで挿入されます。All Columns を押すと、チェックに関わらずすべてのカラムを 1 行ずつ書き出して挿入します（<code>*</code> は使いません）。Select Tables は開いたままなので、続けて別のテーブルを選べます。</li>
   </ol>
   <p><code>srcType</code> が <code>table</code> の場合は、テーブルを複数選べ、テーブル名・カラム名だけを 1 行ずつ挿入します。以降の項目は表示されません。</p>
   <p><code>srcType</code> が <code>sql</code> / <code>csvq</code> の場合は、使い道（Usage）を選ぶと、それに合った形で挿入します。挿入される内容は Insert の上に表示されます。</p>
 
   <h3>テーブル（Select Tables）</h3>
   <p>選べるテーブルは 1 つです。別のテーブルを選ぶと置き換わります。</p>
+  <p>Usage が Select / Insert / Update のときは、Insert ボタンが Next に変わります。Next を押すと Select Columns が開き、選んだカラム（All Columns なら全カラム）と合わせた文全体を挿入して、Select Tables が閉じます。このとき Select Columns の Usage はテーブル側に合わせて固定され、Separator on first line は表示されません。</p>
   <table>
     <tr><th>項目</th><th>説明</th><th>デフォルト</th></tr>
     <tr><td>Usage</td><td>テーブルの使い道。挿入するキーワードが決まる</td><td>Select (from)</td></tr>
@@ -60,9 +61,9 @@
   </table>
   <table>
     <tr><th>値</th><th>説明</th></tr>
-    <tr><td>Select (from)</td><td><code>from USER_ACCOUNT ua</code></td></tr>
-    <tr><td>Insert (insert into)</td><td><code>insert into USER_ACCOUNT</code></td></tr>
-    <tr><td>Update (update)</td><td><code>update USER_ACCOUNT ua</code></td></tr>
+    <tr><td>Select (from)</td><td><code>select</code>、カラム、<code>from USER_ACCOUNT ua</code> の順に挿入する</td></tr>
+    <tr><td>Insert (insert into)</td><td><code>insert into USER_ACCOUNT (</code>、カラム、<code>) values (</code>、<code>)</code> の順に挿入する。<code>values</code> の中身は空</td></tr>
+    <tr><td>Update (update)</td><td><code>update USER_ACCOUNT ua set</code>、カラム（<code>ID = </code> の形）の順に挿入する。<code>where</code> は付けない</td></tr>
     <tr><td>Delete (delete from)</td><td><code>delete from USER_ACCOUNT ua</code></td></tr>
     <tr><td>Left join</td><td><code>left join USER_ACCOUNT ua on</code></td></tr>
     <tr><td>Inner join</td><td><code>inner join USER_ACCOUNT ua on</code></td></tr>

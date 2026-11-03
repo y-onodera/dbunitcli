@@ -53,8 +53,9 @@ describe("SqlTableInsertDialogのテーブル挿入", () => {
 		await user.click(screen.getByText("ORDERS"));
 		expect(screen.getByLabelText("Table alias")).toHaveValue("o");
 
+		await user.selectOptions(screen.getByLabelText("Usage"), "crossJoin");
 		await user.click(screen.getByRole("button", { name: "Insert" }));
-		expect(onInsert).toHaveBeenCalledWith(["from ORDERS o"]);
+		expect(onInsert).toHaveBeenCalledWith(["cross join ORDERS o"]);
 	});
 
 	it("joinではエイリアスが空なら挿入できない", async () => {
@@ -69,14 +70,57 @@ describe("SqlTableInsertDialogのテーブル挿入", () => {
 		expect(onInsert).toHaveBeenCalledWith(["left join ORDERS od on"]);
 	});
 
-	it("insertではエイリアスを入力できず、付けずに挿入する", async () => {
+	it("selectでは続けて選んだカラムと合わせ、文全体を挿入する", async () => {
+		const { user, onInsert, onInsertColumn } = await renderLoaded();
+		await user.click(screen.getByText("USER_ACCOUNT"));
+		await user.click(screen.getByRole("button", { name: "Next" }));
+		await screen.findByText("Select Columns");
+		// 用途はテーブル側に合わせて固定し、1行目の区切りの指定も出さない
+		expect(screen.getAllByLabelText("Usage")).toHaveLength(1);
+		expect(screen.queryByText(/Separator on first line/)).toBeNull();
+		await user.click(screen.getByText("NAME"));
+		await user.click(screen.getByLabelText("Prefix table alias"));
+
+		await user.click(screen.getByRole("button", { name: "Insert Columns" }));
+		expect(onInsert).toHaveBeenCalledWith([
+			"select",
+			"ua.NAME",
+			"from USER_ACCOUNT ua",
+		]);
+		expect(onInsertColumn).not.toHaveBeenCalled();
+	});
+
+	it("insertではエイリアスを入力できず、All Columnsで全カラムを書き出す", async () => {
 		const { user, onInsert } = await renderLoaded();
 		await user.click(screen.getByText("ORDERS"));
 		await user.selectOptions(screen.getByLabelText("Usage"), "insert");
 		expect(screen.getByLabelText("Table alias")).toBeDisabled();
+		await user.click(screen.getByRole("button", { name: "Next" }));
+		await screen.findByText("Select Columns");
 
-		await user.click(screen.getByRole("button", { name: "Insert" }));
-		expect(onInsert).toHaveBeenCalledWith(["insert into ORDERS"]);
+		await user.click(screen.getByRole("button", { name: "All Columns" }));
+		expect(onInsert).toHaveBeenCalledWith([
+			"insert into ORDERS (",
+			"ID",
+			", NAME",
+			") values (",
+			")",
+		]);
+	});
+
+	it("updateでは set に続けてカラムを = 付きで挿入する", async () => {
+		const { user, onInsert } = await renderLoaded();
+		await user.click(screen.getByText("ORDERS"));
+		await user.selectOptions(screen.getByLabelText("Usage"), "update");
+		await user.click(screen.getByRole("button", { name: "Next" }));
+		await screen.findByText("Select Columns");
+
+		await user.click(screen.getByRole("button", { name: "All Columns" }));
+		expect(onInsert).toHaveBeenCalledWith([
+			"update ORDERS o set",
+			"ID = ",
+			", NAME = ",
+		]);
 	});
 
 	it("plainでは用途を出さず、複数テーブルを名前だけで挿入する", async () => {
@@ -121,6 +165,16 @@ describe("SqlTableInsertDialogのカラム挿入", () => {
 
 		await user.click(screen.getByRole("button", { name: "Insert Columns" }));
 		expect(onInsertColumn).toHaveBeenCalledWith(["ID = ", "and NAME = "]);
+	});
+
+	it("All Columnsは選択に関わらず全カラムを書き出す", async () => {
+		const { user, onInsertColumn } = await renderLoaded();
+		await user.click(screen.getAllByTitle("Select columns")[1]);
+		await screen.findByText("Select Columns");
+		await user.click(screen.getByText("ID"));
+
+		await user.click(screen.getByRole("button", { name: "All Columns" }));
+		expect(onInsertColumn).toHaveBeenCalledWith(["ID", ", NAME"]);
 	});
 
 	it("insertでは修飾の指定を出さない", async () => {

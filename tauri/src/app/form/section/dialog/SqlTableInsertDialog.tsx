@@ -23,6 +23,9 @@ import {
 	columnSeparator,
 	defaultTableAlias,
 	isJoin,
+	isStatementUsage,
+	type StatementUsage,
+	statementLines,
 	type TableUsage,
 	tableClause,
 	usesColumnQualifier,
@@ -162,9 +165,11 @@ function TablesContent({
 	// plainは名前だけを複数行で挿入する。それ以外は句を組み立てるため1テーブルだけ選ぶ
 	const { selected, toggle, toggleOnly, toggleAll } = useTableSelection();
 	// 列選択ダイアログの対象テーブルと、読み込めた列（読込中・失敗中はnull）
+	// statementはテーブル側の用途から文全体を挿入するときの用途（行の列選択アイコンから開いたときはnull）
 	const [columnDialog, setColumnDialog] = useState<{
 		table: string;
 		columns: string[] | null;
+		statement: StatementUsage | null;
 	} | null>(null);
 	// 列の読込。別のテーブルを選ぶと前回を中断し、閉じても中断する（ダイアログ全体のアンマウントでも中断される）
 	const columnJob = useJob();
@@ -189,19 +194,26 @@ function TablesContent({
 			onInsert(tables.filter((t) => selected.has(t)));
 			return;
 		}
+		if (isStatementUsage(usage)) {
+			openColumnDialog(selectedTable, usage);
+			return;
+		}
 		onInsert([tableClause(selectedTable, usage, alias)]);
 	};
 
-	const handleSelectTable = async (table: string) => {
+	const openColumnDialog = async (
+		table: string,
+		statement: StatementUsage | null,
+	) => {
 		if (columnDialog?.table === table && columnJob.running) {
 			return;
 		}
-		setColumnDialog({ table, columns: null });
+		setColumnDialog({ table, columns: null, statement });
 		const result = await columnJob.run((context) =>
 			onQueryColumns(table, context),
 		);
 		if (result) {
-			setColumnDialog({ table, columns: result.value });
+			setColumnDialog({ table, columns: result.value, statement });
 		}
 	};
 
@@ -209,6 +221,15 @@ function TablesContent({
 		columnJob.cancel();
 		setColumnDialog(null);
 	};
+
+	const statementOf = (table: string, statement: StatementUsage | null) =>
+		statement === null
+			? undefined
+			: {
+					usage: statement,
+					wrap: (lines: string[]) =>
+						statementLines(table, statement, alias, lines),
+				};
 
 	// 列の修飾には、選択中のテーブルなら入力済みの別名を使う
 	const columnAliasOf = (table: string) =>
@@ -227,7 +248,7 @@ function TablesContent({
 						selected={selected}
 						onToggleAll={plain ? toggleAll : undefined}
 						onToggle={handleToggle}
-						onSelectTable={handleSelectTable}
+						onSelectTable={(table) => openColumnDialog(table, null)}
 					/>
 				)}
 			</DialogField>
@@ -270,7 +291,7 @@ function TablesContent({
 			)}
 			<DialogActions>
 				<BlueButton
-					title="Insert"
+					title={!plain && isStatementUsage(usage) ? "Next" : "Insert"}
 					handleClick={handleInsert}
 					disabled={selected.size === 0 || (!plain && aliasMissing)}
 				/>
@@ -285,8 +306,13 @@ function TablesContent({
 					logs={columnJob.logs}
 					plain={plain}
 					defaultAlias={columnAliasOf(columnDialog.table)}
-					onInsert={(columns) => {
-						onInsertColumn(columns);
+					statement={statementOf(columnDialog.table, columnDialog.statement)}
+					onInsert={(lines) => {
+						if (columnDialog.statement === null) {
+							onInsertColumn(lines);
+						} else {
+							onInsert(lines);
+						}
 						setColumnDialog(null);
 					}}
 					onClose={closeColumnDialog}
@@ -304,6 +330,7 @@ function ColumnSelectDialog({
 	logs,
 	plain,
 	defaultAlias,
+	statement,
 	onInsert,
 	onClose,
 }: {
@@ -314,11 +341,14 @@ function ColumnSelectDialog({
 	logs: string[];
 	plain: boolean;
 	defaultAlias: string;
-	onInsert: (columns: string[]) => void;
+	// 指定時は用途を固定し、選んだ列をwrapで文全体にして挿入する
+	statement?: { usage: ColumnUsage; wrap: (lines: string[]) => string[] };
+	onInsert: (lines: string[]) => void;
 	onClose: () => void;
 }) {
 	const { selected, toggle, toggleAll } = useTableSelection();
-	const [usage, setUsage] = useState<ColumnUsage>("select");
+	const [selectedUsage, setUsage] = useState<ColumnUsage>("select");
+	const usage = statement?.usage ?? selectedUsage;
 	const [qualify, setQualify] = useState(false);
 	const [alias, setAlias] = useState(defaultAlias);
 	const [columnAs, setColumnAs] = useState(false);
@@ -343,15 +373,20 @@ function ColumnSelectDialog({
 		);
 	}
 
-	const selectedColumns = columns.filter((c) => selected.has(c));
 	const qualifying = qualify && usesColumnQualifier(usage);
-	const lines = plain
-		? selectedColumns
-		: columnLines(selectedColumns, usage, {
-				alias: qualifying ? alias : "",
-				columnAs,
-				continued,
-			});
+	const aliasMissing = qualifying && alias.trim() === "";
+	const linesOf = (targets: string[]) => {
+		if (plain) {
+			return targets;
+		}
+		const formatted = columnLines(targets, usage, {
+			alias: qualifying ? alias : "",
+			columnAs,
+			continued: statement === undefined && continued,
+		});
+		return statement === undefined ? formatted : statement.wrap(formatted);
+	};
+	const selectedColumns = columns.filter((c) => selected.has(c));
 
 	return (
 		<ColumnDialogFrame table={table}>
@@ -368,13 +403,15 @@ function ColumnSelectDialog({
 			</DialogField>
 			{!plain && (
 				<>
-					<DialogField>
-						<UsageSelect
-							id="sqlColumnInsert_usage"
-							groups={COLUMN_USAGE_GROUPS}
-							onChange={setUsage}
-						/>
-					</DialogField>
+					{statement === undefined && (
+						<DialogField>
+							<UsageSelect
+								id="sqlColumnInsert_usage"
+								groups={COLUMN_USAGE_GROUPS}
+								onChange={setUsage}
+							/>
+						</DialogField>
+					)}
 					{usesColumnQualifier(usage) && (
 						<DialogField>
 							<OptionCheck
@@ -403,22 +440,31 @@ function ColumnSelectDialog({
 							/>
 						</DialogField>
 					)}
-					<DialogField>
-						<OptionCheck
-							id="sqlColumnInsert_continued"
-							label={`Separator on first line (${columnSeparator(usage)})`}
-							checked={continued}
-							onChange={setContinued}
-						/>
-					</DialogField>
-					<InsertPreview lines={lines} />
+					{statement === undefined && (
+						<DialogField>
+							<OptionCheck
+								id="sqlColumnInsert_continued"
+								label={`Separator on first line (${columnSeparator(usage)})`}
+								checked={continued}
+								onChange={setContinued}
+							/>
+						</DialogField>
+					)}
+					<InsertPreview
+						lines={selectedColumns.length === 0 ? [] : linesOf(selectedColumns)}
+					/>
 				</>
 			)}
 			<DialogActions>
 				<BlueButton
 					title="Insert Columns"
-					handleClick={() => onInsert(lines)}
-					disabled={selected.size === 0 || (qualifying && alias.trim() === "")}
+					handleClick={() => onInsert(linesOf(selectedColumns))}
+					disabled={selectedColumns.length === 0 || aliasMissing}
+				/>
+				<BlueButton
+					title="All Columns"
+					handleClick={() => onInsert(linesOf(columns))}
+					disabled={columns.length === 0 || aliasMissing}
 				/>
 				<WhiteButton title="Cancel" handleClick={onClose} />
 			</DialogActions>

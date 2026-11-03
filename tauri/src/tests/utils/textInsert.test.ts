@@ -4,6 +4,7 @@ import {
 	defaultTableAlias,
 	insertAtCursor,
 	qualifyColumn,
+	statementLines,
 	tableClause,
 } from "../../utils/textInsert";
 
@@ -139,6 +140,25 @@ describe("columnLines", () => {
 		expect(
 			columnLines(["ID", "NAME"], "insert", { alias: "u", columnAs: true }),
 		).toEqual(["ID", ", NAME"]);
+	});
+});
+
+describe("statementLines", () => {
+	it("用途ごとにテーブルの句とカラムの行を組み合わせる", () => {
+		expect(
+			statementLines("USERS", "select", "u", ["u.ID", ", u.NAME"]),
+		).toEqual(["select", "u.ID", ", u.NAME", "from USERS u"]);
+		expect(statementLines("USERS", "insert", "u", ["ID", ", NAME"])).toEqual([
+			"insert into USERS (",
+			"ID",
+			", NAME",
+			") values (",
+			")",
+		]);
+		expect(statementLines("USERS", "update", "u", ["u.ID = "])).toEqual([
+			"update USERS u set",
+			"u.ID = ",
+		]);
 	});
 });
 

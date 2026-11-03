@@ -69,6 +69,38 @@ export function tableClause(
 		: clause;
 }
 
+// テーブルに続けて列を選び、文全体を組み立てる用途
+export type StatementUsage = Extract<
+	TableUsage,
+	"select" | "insert" | "update"
+>;
+
+export function isStatementUsage(usage: TableUsage): usage is StatementUsage {
+	return usage === "select" || usage === "insert" || usage === "update";
+}
+
+// columnsはcolumnLinesで用途（StatementUsageと同名のColumnUsage）に合わせて整えた行
+export function statementLines(
+	table: string,
+	usage: StatementUsage,
+	alias: string,
+	columns: string[],
+): string[] {
+	switch (usage) {
+		case "select":
+			return ["select", ...columns, tableClause(table, "select", alias)];
+		case "insert":
+			return [
+				`${tableClause(table, "insert", alias)} (`,
+				...columns,
+				") values (",
+				")",
+			];
+		case "update":
+			return [`${tableClause(table, "update", alias)} set`, ...columns];
+	}
+}
+
 export type ColumnUsage =
 	| "select"
 	| "orderBy"
