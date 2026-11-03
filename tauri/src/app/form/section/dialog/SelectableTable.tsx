@@ -25,7 +25,8 @@ export default function SelectableTable({
 	items: string[];
 	selected: Set<string>;
 	onToggle: (item: string) => void;
-	onToggleAll: (items: string[], checked: boolean) => void;
+	// 省略時は全選択チェックを出さない（1件だけ選ぶ一覧）
+	onToggleAll?: (items: string[], checked: boolean) => void;
 	columnLabel: string;
 	filterPlaceholder: string;
 	maxHeightClass?: string;
@@ -55,12 +56,16 @@ export default function SelectableTable({
 					head={
 						<>
 							<Th narrow>
-								<input
-									type="checkbox"
-									checked={allSelected}
-									onChange={(e) => onToggleAll(filteredItems, e.target.checked)}
-									className="w-4 h-4 text-primary"
-								/>
+								{onToggleAll && (
+									<input
+										type="checkbox"
+										checked={allSelected}
+										onChange={(e) =>
+											onToggleAll(filteredItems, e.target.checked)
+										}
+										className="w-4 h-4 text-primary"
+									/>
+								)}
 							</Th>
 							<Th>{columnLabel}</Th>
 						</>

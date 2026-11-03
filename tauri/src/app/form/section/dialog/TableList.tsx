@@ -5,7 +5,7 @@ import SelectableTable from "./SelectableTable";
 export interface TableListProps {
 	tables: string[];
 	selected: Set<string>;
-	onToggleAll: (tables: string[], checked: boolean) => void;
+	onToggleAll?: (tables: string[], checked: boolean) => void;
 	onToggle: (table: string) => void;
 	// 行の「Select columns」アイコンで、そのテーブルの列選択を開く
 	onSelectTable: (table: string) => void;

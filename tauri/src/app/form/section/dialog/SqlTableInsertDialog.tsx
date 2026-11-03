@@ -17,19 +17,56 @@ import { JobProgress } from "../../../../components/element/JobProgress";
 import { useJdbcColumns, useJdbcTables } from "../../../../hooks/useJdbc";
 import { type JobContext, useJob } from "../../../../hooks/useJob";
 import { useTableSelection } from "../../../../hooks/useTableSelection";
-import { decorateLines, qualifyColumn } from "../../../../utils/textInsert";
+import {
+	type ColumnUsage,
+	columnLines,
+	defaultTableAlias,
+	isJoin,
+	type TableUsage,
+	tableClause,
+	usesColumnQualifier,
+	usesTableAlias,
+} from "../../../../utils/textInsert";
 import SelectableTable from "./SelectableTable";
 import TableList from "./TableList";
 
-type AffixOption = { label: string; value: string };
+const TABLE_USAGE_GROUPS: UsageGroup<TableUsage>[] = [
+	{
+		label: "Statement",
+		options: [
+			{ value: "select", label: "Select (from)" },
+			{ value: "insert", label: "Insert (insert into)" },
+			{ value: "update", label: "Update (update)" },
+			{ value: "delete", label: "Delete (delete from)" },
+		],
+	},
+	{
+		label: "Join",
+		options: [
+			{ value: "leftJoin", label: "Left join" },
+			{ value: "innerJoin", label: "Inner join" },
+			{ value: "crossJoin", label: "Cross join" },
+		],
+	},
+];
 
-const NONE: AffixOption = { label: "None", value: "" };
-const AS: AffixOption = { label: "as", value: " as " };
-const COMMA: AffixOption = { label: ",", value: "," };
-const TABLE_PREFIXES = [NONE, COMMA];
-const TABLE_SUFFIXES = [NONE, COMMA, AS];
-const COLUMN_PREFIXES = [NONE, COMMA, { label: "and", value: "and " }];
-const COLUMN_SUFFIXES = [NONE, COMMA, AS, { label: "=", value: " = " }];
+const COLUMN_USAGE_GROUPS: UsageGroup<ColumnUsage>[] = [
+	{
+		label: "Usage",
+		options: [
+			{ value: "select", label: "Select" },
+			{ value: "orderBy", label: "Order by / Group by" },
+			{ value: "condition", label: "Where / On (=, and)" },
+			{ value: "update", label: "Update set (=, ,)" },
+			{ value: "insert", label: "Insert" },
+		],
+	},
+];
+
+type UsageGroup<T extends string> = {
+	label: string;
+	options: { value: T; label: string }[];
+};
 
 interface SqlTableInsertDialogProps {
 	jdbcValues: Record<string, string>;
@@ -121,7 +158,8 @@ function TablesContent({
 	onQueryColumns: (table: string, context: JobContext) => Promise<string[]>;
 	onClose: () => void;
 }) {
-	const { selected, toggle, toggleAll } = useTableSelection();
+	// plainは名前だけを複数行で挿入する。それ以外は句を組み立てるため1テーブルだけ選ぶ
+	const { selected, toggle, toggleOnly, toggleAll } = useTableSelection();
 	// 列選択ダイアログの対象テーブルと、読み込めた列（読込中・失敗中はnull）
 	const [columnDialog, setColumnDialog] = useState<{
 		table: string;
@@ -129,12 +167,28 @@ function TablesContent({
 	} | null>(null);
 	// 列の読込。別のテーブルを選ぶと前回を中断し、閉じても中断する（ダイアログ全体のアンマウントでも中断される）
 	const columnJob = useJob();
-	const [prefix, setPrefix] = useState("");
-	const [suffix, setSuffix] = useState("");
+	const [usage, setUsage] = useState<TableUsage>("select");
+	const [alias, setAlias] = useState("");
+	const selectedTable = plain
+		? null
+		: (tables.find((t) => selected.has(t)) ?? null);
+	const aliasMissing = isJoin(usage) && alias.trim() === "";
+
+	const handleToggle = (table: string) => {
+		if (plain) {
+			toggle(table);
+			return;
+		}
+		toggleOnly(table);
+		setAlias(selected.has(table) ? "" : defaultTableAlias(table));
+	};
 
 	const handleInsert = () => {
-		const selectedTables = tables.filter((t) => selected.has(t));
-		onInsert(decorateLines(selectedTables, prefix, suffix));
+		if (selectedTable === null) {
+			onInsert(tables.filter((t) => selected.has(t)));
+			return;
+		}
+		onInsert([tableClause(selectedTable, usage, alias)]);
 	};
 
 	const handleSelectTable = async (table: string) => {
@@ -155,6 +209,12 @@ function TablesContent({
 		setColumnDialog(null);
 	};
 
+	// 列の修飾には、選択中のテーブルなら入力済みの別名を使う
+	const columnAliasOf = (table: string) =>
+		table === selectedTable && usesTableAlias(usage) && alias.trim() !== ""
+			? alias.trim()
+			: defaultTableAlias(table);
+
 	return (
 		<>
 			<DialogField last={plain}>
@@ -164,26 +224,54 @@ function TablesContent({
 					<TableList
 						tables={tables}
 						selected={selected}
-						onToggleAll={toggleAll}
-						onToggle={toggle}
+						onToggleAll={plain ? toggleAll : undefined}
+						onToggle={handleToggle}
 						onSelectTable={handleSelectTable}
 					/>
 				)}
 			</DialogField>
 			{!plain && (
-				<AffixSelects
-					idPrefix="sqlTableInsert"
-					prefixOptions={TABLE_PREFIXES}
-					suffixOptions={TABLE_SUFFIXES}
-					onPrefixChange={setPrefix}
-					onSuffixChange={setSuffix}
-				/>
+				<>
+					<DialogField>
+						<div className="flex gap-3">
+							<div className="flex-1">
+								<UsageSelect
+									id="sqlTableInsert_usage"
+									groups={TABLE_USAGE_GROUPS}
+									onChange={setUsage}
+								/>
+							</div>
+							<div className="flex-1">
+								<InputLabel
+									text="Table alias"
+									id="sqlTableInsert_alias"
+									required={isJoin(usage)}
+								/>
+								<ControllTextBox
+									name="sqlTableInsert_alias"
+									id="sqlTableInsert_alias"
+									required={isJoin(usage)}
+									disabled={!usesTableAlias(usage)}
+									value={usesTableAlias(usage) ? alias : ""}
+									handleChange={(ev) => setAlias(ev.target.value)}
+								/>
+							</div>
+						</div>
+					</DialogField>
+					<InsertPreview
+						lines={
+							selectedTable === null
+								? []
+								: [tableClause(selectedTable, usage, alias)]
+						}
+					/>
+				</>
 			)}
 			<DialogActions>
 				<BlueButton
 					title="Insert"
 					handleClick={handleInsert}
-					disabled={selected.size === 0}
+					disabled={selected.size === 0 || (!plain && aliasMissing)}
 				/>
 				<WhiteButton title="Cancel" handleClick={onClose} />
 			</DialogActions>
@@ -195,6 +283,7 @@ function TablesContent({
 					error={columnJob.error}
 					logs={columnJob.logs}
 					plain={plain}
+					defaultAlias={columnAliasOf(columnDialog.table)}
 					onInsert={(columns) => {
 						onInsertColumn(columns);
 						setColumnDialog(null);
@@ -213,6 +302,7 @@ function ColumnSelectDialog({
 	error,
 	logs,
 	plain,
+	defaultAlias,
 	onInsert,
 	onClose,
 }: {
@@ -222,13 +312,15 @@ function ColumnSelectDialog({
 	error: string;
 	logs: string[];
 	plain: boolean;
+	defaultAlias: string;
 	onInsert: (columns: string[]) => void;
 	onClose: () => void;
 }) {
 	const { selected, toggle, toggleAll } = useTableSelection();
-	const [prefix, setPrefix] = useState("");
-	const [suffix, setSuffix] = useState("");
-	const [alias, setAlias] = useState("");
+	const [usage, setUsage] = useState<ColumnUsage>("select");
+	const [qualify, setQualify] = useState(false);
+	const [alias, setAlias] = useState(defaultAlias);
+	const [columnAs, setColumnAs] = useState(false);
 
 	if (loading) {
 		return (
@@ -249,24 +341,17 @@ function ColumnSelectDialog({
 		);
 	}
 
+	const selectedColumns = columns.filter((c) => selected.has(c));
+	const qualifying = qualify && usesColumnQualifier(usage);
+	const lines = plain
+		? selectedColumns
+		: columnLines(selectedColumns, usage, {
+				alias: qualifying ? alias : "",
+				columnAs,
+			});
+
 	return (
 		<ColumnDialogFrame table={table}>
-			{!plain && (
-				<DialogField>
-					<InputLabel
-						text="Table alias"
-						id="sqlColumnInsert_alias"
-						required={false}
-					/>
-					<ControllTextBox
-						name="sqlColumnInsert_alias"
-						id="sqlColumnInsert_alias"
-						required={false}
-						value={alias}
-						handleChange={(ev) => setAlias(ev.target.value)}
-					/>
-				</DialogField>
-			)}
 			<DialogField last={plain}>
 				<SelectableTable
 					items={columns}
@@ -279,29 +364,50 @@ function ColumnSelectDialog({
 				/>
 			</DialogField>
 			{!plain && (
-				<AffixSelects
-					idPrefix="sqlColumnInsert"
-					prefixOptions={COLUMN_PREFIXES}
-					suffixOptions={COLUMN_SUFFIXES}
-					onPrefixChange={setPrefix}
-					onSuffixChange={setSuffix}
-				/>
+				<>
+					<DialogField>
+						<UsageSelect
+							id="sqlColumnInsert_usage"
+							groups={COLUMN_USAGE_GROUPS}
+							onChange={setUsage}
+						/>
+					</DialogField>
+					{usesColumnQualifier(usage) && (
+						<DialogField>
+							<OptionCheck
+								id="sqlColumnInsert_qualify"
+								label="Prefix table alias"
+								checked={qualify}
+								onChange={setQualify}
+							/>
+							<ControllTextBox
+								name="sqlColumnInsert_alias"
+								id="sqlColumnInsert_alias"
+								required={qualify}
+								disabled={!qualify}
+								value={alias}
+								handleChange={(ev) => setAlias(ev.target.value)}
+							/>
+						</DialogField>
+					)}
+					{usage === "select" && (
+						<DialogField>
+							<OptionCheck
+								id="sqlColumnInsert_as"
+								label="as column name"
+								checked={columnAs}
+								onChange={setColumnAs}
+							/>
+						</DialogField>
+					)}
+					<InsertPreview lines={lines} />
+				</>
 			)}
 			<DialogActions>
 				<BlueButton
 					title="Insert Columns"
-					handleClick={() =>
-						onInsert(
-							decorateLines(
-								columns
-									.filter((c) => selected.has(c))
-									.map((c) => qualifyColumn(c, alias)),
-								prefix,
-								suffix,
-							),
-						)
-					}
-					disabled={selected.size === 0}
+					handleClick={() => onInsert(lines)}
+					disabled={selected.size === 0 || (qualifying && alias.trim() === "")}
 				/>
 				<WhiteButton title="Cancel" handleClick={onClose} />
 			</DialogActions>
@@ -328,66 +434,78 @@ function ColumnDialogFrame({
 	);
 }
 
-function AffixSelects({
-	idPrefix,
-	prefixOptions,
-	suffixOptions,
-	onPrefixChange,
-	onSuffixChange,
-}: {
-	idPrefix: string;
-	prefixOptions: AffixOption[];
-	suffixOptions: AffixOption[];
-	onPrefixChange: (value: string) => void;
-	onSuffixChange: (value: string) => void;
-}) {
-	return (
-		<DialogField last>
-			<div className="flex gap-3">
-				<AffixSelect
-					id={`${idPrefix}_prefix`}
-					label="Prefix"
-					options={prefixOptions}
-					onChange={onPrefixChange}
-				/>
-				<AffixSelect
-					id={`${idPrefix}_suffix`}
-					label="Suffix"
-					options={suffixOptions}
-					onChange={onSuffixChange}
-				/>
-			</div>
-		</DialogField>
-	);
-}
-
-function AffixSelect({
+function UsageSelect<T extends string>({
 	id,
-	label,
-	options,
+	groups,
 	onChange,
 }: {
 	id: string;
-	label: string;
-	options: AffixOption[];
-	onChange: (value: string) => void;
+	groups: UsageGroup<T>[];
+	onChange: (value: T) => void;
 }) {
 	return (
-		<div className="flex-1">
-			<InputLabel text={label} id={id} required={false} />
+		<>
+			<InputLabel text="Usage" id={id} required={false} />
 			<SelectBox
 				name={id}
 				id={id}
 				required={false}
 				wStyle="w-full"
-				handleOnChange={onChange}
+				defaultValue={groups[0].options[0].value}
+				handleOnChange={(value) => onChange(value as T)}
 			>
-				{options.map((o) => (
-					<option key={o.label} value={o.value}>
-						{o.label}
-					</option>
+				{groups.map((group) => (
+					<optgroup key={group.label} label={group.label}>
+						{group.options.map((o) => (
+							<option key={o.value} value={o.value}>
+								{o.label}
+							</option>
+						))}
+					</optgroup>
 				))}
 			</SelectBox>
-		</div>
+		</>
+	);
+}
+
+function OptionCheck({
+	id,
+	label,
+	checked,
+	onChange,
+}: {
+	id: string;
+	label: string;
+	checked: boolean;
+	onChange: (checked: boolean) => void;
+}) {
+	return (
+		<label htmlFor={id} className="flex items-center gap-1 mb-1 text-sm">
+			<input
+				id={id}
+				type="checkbox"
+				checked={checked}
+				onChange={(e) => onChange(e.target.checked)}
+				className="w-4 h-4 text-primary"
+			/>
+			{label}
+		</label>
+	);
+}
+
+// 挿入される内容を先に見せ、用途の選び間違いに気付けるようにする
+function InsertPreview({ lines }: { lines: string[] }) {
+	if (lines.length === 0) {
+		return null;
+	}
+	return (
+		<DialogField last>
+			<pre
+				data-testid="insert-preview"
+				className="text-caption whitespace-pre-wrap break-all"
+			>
+				{lines.join("\n")}
+			</pre>
+		</DialogField>
 	);
 }

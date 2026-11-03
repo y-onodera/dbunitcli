@@ -17,12 +17,101 @@ export function insertAtCursor(
 	};
 }
 
-export function decorateLines(
-	items: string[],
-	prefix: string,
-	suffix: string,
+export type TableUsage =
+	| "select"
+	| "insert"
+	| "update"
+	| "delete"
+	| "leftJoin"
+	| "innerJoin"
+	| "crossJoin";
+
+const TABLE_KEYWORDS: Record<TableUsage, string> = {
+	select: "from",
+	insert: "insert into",
+	update: "update",
+	delete: "delete from",
+	leftJoin: "left join",
+	innerJoin: "inner join",
+	crossJoin: "cross join",
+};
+
+export function isJoin(usage: TableUsage): boolean {
+	return usage === "leftJoin" || usage === "innerJoin" || usage === "crossJoin";
+}
+
+// insert into の対象に別名を付けられないDBがあるため、insertでは別名を使わない
+export function usesTableAlias(usage: TableUsage): boolean {
+	return usage !== "insert";
+}
+
+// スキーマ修飾は除き、スネークケースの各語の先頭文字をつなげる（USER_ACCOUNT → ua）
+export function defaultTableAlias(table: string): string {
+	const name = table.slice(table.lastIndexOf(".") + 1);
+	return name
+		.split("_")
+		.filter((word) => word !== "")
+		.map((word) => word[0])
+		.join("")
+		.toLowerCase();
+}
+
+export function tableClause(
+	table: string,
+	usage: TableUsage,
+	alias: string,
+): string {
+	const trimmed = usesTableAlias(usage) ? alias.trim() : "";
+	const named = trimmed === "" ? table : `${table} ${trimmed}`;
+	const clause = `${TABLE_KEYWORDS[usage]} ${named}`;
+	return usage === "leftJoin" || usage === "innerJoin"
+		? `${clause} on`
+		: clause;
+}
+
+export type ColumnUsage =
+	| "select"
+	| "orderBy"
+	| "condition"
+	| "update"
+	| "insert";
+
+export function usesColumnQualifier(usage: ColumnUsage): boolean {
+	return usage !== "insert";
+}
+
+// aliasは空なら修飾しない。columnAsはselectのときだけ使う
+export function columnLines(
+	columns: string[],
+	usage: ColumnUsage,
+	options: { alias: string; columnAs: boolean },
 ): string[] {
-	return items.map((item) => `${prefix}${item}${suffix}`);
+	const alias = usesColumnQualifier(usage) ? options.alias : "";
+	const separator = usage === "condition" ? "and " : ", ";
+	return columns.map((column, i) => {
+		const body = columnBody(
+			qualifyColumn(column, alias),
+			column,
+			usage,
+			options,
+		);
+		return i === 0 ? body : `${separator}${body}`;
+	});
+}
+
+function columnBody(
+	qualified: string,
+	column: string,
+	usage: ColumnUsage,
+	options: { columnAs: boolean },
+): string {
+	if (usage === "select" && options.columnAs) {
+		return `${qualified} as ${column}`;
+	}
+	if (usage === "condition" || usage === "update") {
+		return `${qualified} = `;
+	}
+	return qualified;
 }
 
 export function qualifyColumn(column: string, alias: string): string {
