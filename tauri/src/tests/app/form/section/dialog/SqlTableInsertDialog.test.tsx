@@ -13,7 +13,7 @@ vi.mock("../../../../../hooks/useJdbc", () => ({
 	useJdbcColumns: () => mockJdbcColumns,
 }));
 
-async function renderLoaded(plain = false) {
+async function renderLoaded(plain = false, queryOnly = false) {
 	mockJdbcTables.mockResolvedValue(["USER_ACCOUNT", "ORDERS"]);
 	mockJdbcColumns.mockResolvedValue(["ID", "NAME"]);
 	const onInsert = vi.fn();
@@ -25,6 +25,7 @@ async function renderLoaded(plain = false) {
 			onInsert={onInsert}
 			onInsertColumn={onInsertColumn}
 			plain={plain}
+			queryOnly={queryOnly}
 			onClose={vi.fn()}
 		/>,
 	);
@@ -156,6 +157,48 @@ describe("SqlTableInsertDialogのテーブル挿入", () => {
 
 		await user.click(screen.getByRole("button", { name: "Insert" }));
 		expect(onInsert).toHaveBeenCalledWith(["USER_ACCOUNT", "ORDERS"]);
+	});
+});
+
+describe("SqlTableInsertDialogのqueryOnly", () => {
+	const optionValues = (select: HTMLElement) =>
+		within(select)
+			.getAllByRole("option")
+			.map((o) => (o as HTMLOptionElement).value);
+
+	it("テーブルの用途からDMLを除く", async () => {
+		await renderLoaded(false, true);
+		await screen.findByText("USER_ACCOUNT");
+		expect(optionValues(screen.getByLabelText("Usage"))).toEqual([
+			"select",
+			"leftJoin",
+			"innerJoin",
+			"crossJoin",
+		]);
+	});
+
+	it("列の用途からDMLを除く", async () => {
+		const { user } = await renderLoaded(false, true);
+		await user.click(screen.getAllByTitle("Select columns")[0]);
+		await screen.findByText("Select Columns");
+		const usages = optionValues(
+			document.getElementById("sqlColumnInsert_usage") as HTMLElement,
+		);
+		expect(usages).not.toContain("update");
+		expect(usages).not.toContain("insert");
+		expect(usages).toContain("where");
+	});
+
+	it("指定しなければDMLも選べる", async () => {
+		const { user } = await renderLoaded();
+		expect(optionValues(screen.getByLabelText("Usage"))).toContain("delete");
+		await user.click(screen.getAllByTitle("Select columns")[0]);
+		await screen.findByText("Select Columns");
+		expect(
+			optionValues(
+				document.getElementById("sqlColumnInsert_usage") as HTMLElement,
+			),
+		).toContain("update");
 	});
 });
 

@@ -44,6 +44,13 @@ const COLUMN_USAGE_OPTIONS: SelectOption<ColumnUsage>[] = [
 	{ value: "scalar", label: "Scalar value" },
 ];
 
+// 読み込み専用のSQL（データセットの読込元）に置かない用途
+const DML_COLUMN_USAGES: ColumnUsage[] = ["update", "insert"];
+
+const QUERY_COLUMN_USAGE_OPTIONS = COLUMN_USAGE_OPTIONS.filter(
+	(o) => !DML_COLUMN_USAGES.includes(o.value),
+);
+
 const SCALAR_SOURCE_OPTIONS: SelectOption<ScalarSource>[] = [
 	{ value: "column", label: "Column" },
 	{ value: "case", label: "CASE" },
@@ -89,6 +96,7 @@ export default function SqlColumnInsertDialog({
 	qualify: initialQualify,
 	statement,
 	subquerySource,
+	queryOnly = false,
 	onInsert,
 	onClose,
 }: {
@@ -104,6 +112,8 @@ export default function SqlColumnInsertDialog({
 	// 指定時は用途を固定し、選んだ列をwrapで文全体にして挿入する
 	statement?: { usage: ColumnUsage; wrap: (lines: string[]) => string[] };
 	subquerySource: SubquerySource;
+	// 用途の選択肢からDMLを除く
+	queryOnly?: boolean;
 	// inlineなら改行を足さずにカーソル位置へ入れる（条件の右辺）
 	onInsert: (lines: string[], inline?: boolean) => void;
 	onClose: () => void;
@@ -235,7 +245,9 @@ export default function SqlColumnInsertDialog({
 							<OptionSelect
 								id="sqlColumnInsert_usage"
 								label="Usage"
-								options={COLUMN_USAGE_OPTIONS}
+								options={
+									queryOnly ? QUERY_COLUMN_USAGE_OPTIONS : COLUMN_USAGE_OPTIONS
+								}
 								onChange={handleUsageChange}
 							/>
 						</DialogField>

@@ -63,7 +63,7 @@
     <li>テーブル名の横の Select columns アイコンを押すと、そのテーブルのカラム選択ダイアログ（Select Columns）が開きます。カラムにチェックを入れて Insert Columns を押すと、カーソル位置に 1 行 1 カラムで挿入されます。All Columns を押すと、チェックに関わらずすべてのカラムを 1 行ずつ書き出して挿入します（<code>*</code> は使いません）。Select Tables は開いたままなので、続けて別のテーブルを選べます。</li>
   </ol>
   <p><code>srcType</code> が <code>table</code> の場合は、テーブルを複数選べ、テーブル名・カラム名だけを 1 行ずつ挿入します。以降の項目は表示されません。</p>
-  <p><code>srcType</code> が <code>sql</code> の場合は、使い道（Usage）を選ぶと、それに合った形で挿入します。挿入される内容は Insert の上に表示されます。</p>
+  <p><code>srcType</code> が <code>sql</code> の場合は、使い道（Usage）を選ぶと、それに合った形で挿入します。挿入される内容は Insert の上に表示されます。データセットを読み込むフォーム（src など）から開いたときは、読み込みにしか使わないため、Select Tables の Usage に Insert / Update / Delete、Select Columns の Usage に Update set / Insert は表示されません。</p>
   <p>挿入する SQL は次の形に揃えます。キーワードは大文字で行頭に置き、句の中身は 4 文字下げ、2 行目以降は <code>  , </code> または <code>AND </code> で始めます。テーブル名・カラム名は取得した表記のままです。</p>
   <pre>SELECT
     T.COLUMNA AS COLUMNA

@@ -15,7 +15,8 @@ export default function SqlSrcText({
 	hidden,
 	srcType,
 	handleValueChange,
-}: TextProp) {
+	queryOnly = false,
+}: TextProp & { queryOnly?: boolean }) {
 	const settings = useResourcesSettings();
 	const type = srcType as QueryDatasourceType;
 
@@ -40,6 +41,7 @@ export default function SqlSrcText({
 						<EditResourceButton
 							key="edit"
 							dialog={sqlEditorDialogs[type]}
+							dialogProps={{ queryOnly }}
 							path={path}
 							setPath={setPath}
 						/>,
