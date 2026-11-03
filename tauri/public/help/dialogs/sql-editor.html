@@ -70,7 +70,9 @@ AND T.COLUMNB = </pre>
   <table>
     <tr><th>項目</th><th>説明</th><th>デフォルト</th></tr>
     <tr><td>Usage</td><td>テーブルの使い道。挿入する文の形が決まる</td><td>Select</td></tr>
-    <tr><td>Table alias</td><td>テーブルの別名。空ならテーブル名だけを挿入する。Select Columns でカラムに付ける別名にも使う。Usage が join のときは必須。Insert のときは入力できない</td><td>テーブル名の <code>_</code> 区切りの各語の先頭文字を大文字でつなげたもの（例: <code>USER_ACCOUNT</code> → <code>UA</code>）。スキーマ名は除く</td></tr>
+    <tr><td>Table alias</td><td>テーブルの別名。空ならテーブル名だけを挿入する。Select Columns でカラムに付ける別名にも使う。Usage が join で Source が Table のときは必須。Source が Subquery のときはサブクエリの中のテーブルの別名になる。Insert のときは入力できない</td><td>テーブル名の <code>_</code> 区切りの各語の先頭文字を大文字でつなげたもの（例: <code>USER_ACCOUNT</code> → <code>UA</code>）。スキーマ名は除く</td></tr>
+    <tr><td>Source</td><td>Table ならテーブルをそのまま使い、Subquery なら選んだテーブルからサブクエリを作って置く。Usage が Select / Left join / Inner join / Cross join のときだけ表示される。Usage を変えると Table に戻る</td><td>Table</td></tr>
+    <tr><td>Subquery alias（必須）</td><td>サブクエリ全体の別名。閉じ括弧の後ろに付け、外側のカラムの修飾にも使う。Source が Subquery のときだけ表示される</td><td>（空）</td></tr>
   </table>
   <table>
     <tr><th>値</th><th>説明</th></tr>
@@ -81,6 +83,24 @@ AND T.COLUMNB = </pre>
     <tr><td>Left join / Inner join</td><td><code>LEFT JOIN</code> / <code>INNER JOIN</code>、テーブル、ON の条件（Select Columns の On と同じ形）の順に挿入する。右辺は空</td></tr>
     <tr><td>Cross join</td><td><code>CROSS JOIN</code>、テーブルの順に挿入する</td></tr>
   </table>
+
+  <p>Source が Subquery のときは、Next を押すと次の順に選びます。</p>
+  <ol>
+    <li>Subquery Columns で、SELECT columns にサブクエリで SELECT するカラム（複数可）を、WHERE columns にサブクエリの条件にするカラムを選びます。All Columns を押すと、すべてのカラムを SELECT します。</li>
+    <li>Usage が Select / Left join / Inner join のときは Next を押すと Select Columns が開き、サブクエリで SELECT したカラムから外側の SELECT のカラム、または ON の条件を選びます。カラムはサブクエリの別名で修飾されます（Prefix table alias は最初から ON）。</li>
+    <li>Cross join のときは、Subquery Columns の Insert で挿入します。</li>
+  </ol>
+  <pre>SELECT
+    S.ID
+FROM (
+    SELECT
+        UA.ID
+    FROM
+        USER_ACCOUNT UA
+    WHERE
+        UA.NAME = 
+) S</pre>
+  <p>join では、<code>    INNER JOIN (</code> のように JOIN の行末で括弧を開き、<code>    ) S</code> の下に ON の条件を続けます。</p>
 
   <h3>カラム（Select Columns）</h3>
   <table>
