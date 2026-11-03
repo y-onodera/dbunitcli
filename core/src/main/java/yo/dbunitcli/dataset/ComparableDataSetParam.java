@@ -40,7 +40,7 @@ public record ComparableDataSetParam(
         , DatabaseConnectionLoader databaseConnectionLoader
         , IDataSetConverter converter
         , Integer parallel
-        , InlineQuery inlineQuery
+        , InlineSource inlineSource
 ) {
 
     public static Builder builder() {
@@ -73,7 +73,7 @@ public record ComparableDataSetParam(
                 , builder.getDatabaseConnectionLoader()
                 , builder.getConverter()
                 , builder.getParallel()
-                , builder.getInlineQuery()
+                , builder.getInlineSource()
         );
     }
 
@@ -136,7 +136,7 @@ public record ComparableDataSetParam(
                 .setDatabaseConnectionLoader(this.databaseConnectionLoader)
                 .setConverter(this.converter)
                 .setParallel(this.parallel)
-                .setInlineQuery(this.inlineQuery);
+                .setInlineSource(this.inlineSource);
     }
 
     public static class Builder {
@@ -167,9 +167,12 @@ public record ComparableDataSetParam(
         private String regTableExclude;
         private boolean ignoreQuoted = false;
         private Integer parallel;
-        private InlineQuery inlineQuery;
+        private InlineSource inlineSource;
 
         public ComparableDataSetParam build() {
+            if (this.inlineSource != null && (this.source == null || !this.source.supportsInlineSource())) {
+                throw new IllegalArgumentException("inlineSource is not supported by srcType: " + this.source);
+            }
             return new ComparableDataSetParam(this);
         }
 
@@ -281,8 +284,8 @@ public record ComparableDataSetParam(
             return this.parallel;
         }
 
-        public InlineQuery getInlineQuery() {
-            return this.inlineQuery;
+        public InlineSource getInlineSource() {
+            return this.inlineSource;
         }
 
         public Builder ifMatch(final boolean condition, final Function<Builder, Builder> function) {
@@ -440,10 +443,10 @@ public record ComparableDataSetParam(
         }
 
         /**
-         * @param inlineQuery 指定すればsrcのファイルの代わりに読む内容（sql・csvq・tableのみ）。nullならsrcを読む
+         * @param inlineSource 指定すればsrcのファイルの代わりに読む内容（{@link DataSourceType#supportsInlineSource()}の形式のみ）。nullならsrcを読む
          */
-        public Builder setInlineQuery(final InlineQuery inlineQuery) {
-            this.inlineQuery = inlineQuery;
+        public Builder setInlineSource(final InlineSource inlineSource) {
+            this.inlineSource = inlineSource;
             return this;
         }
 

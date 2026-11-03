@@ -34,8 +34,7 @@ import yo.dbunitcli.dataset.ComparableDataSetProducer;
 import yo.dbunitcli.dataset.ComparableTable;
 import yo.dbunitcli.dataset.ComparableTableDto;
 import yo.dbunitcli.dataset.ComparableTableJoin;
-import yo.dbunitcli.dataset.DataSourceType;
-import yo.dbunitcli.dataset.InlineQuery;
+import yo.dbunitcli.dataset.InlineSource;
 import yo.dbunitcli.dataset.IDataSetConverter;
 import yo.dbunitcli.dataset.MetaDataCapture;
 import yo.dbunitcli.dataset.TableSeparators;
@@ -76,7 +75,6 @@ import java.util.function.UnaryOperator;
 public class DatasetSettingsController extends AbstractResourceFileController<DatasetRequestDto> {
     private static final Logger LOGGER = LoggerFactory.getLogger(DatasetSettingsController.class);
     static final int PREVIEW_ROW_LIMIT = 100;
-    private static final Set<DataSourceType> INLINE_QUERY_TYPES = Set.of(DataSourceType.sql, DataSourceType.table, DataSourceType.csvq);
 
     public DatasetSettingsController(final Workspace workspace) {
         super(workspace);
@@ -351,25 +349,22 @@ public class DatasetSettingsController extends AbstractResourceFileController<Da
     private Supplier<ComparableDataSetParam.Builder> toParam(final DatasetTableNamesRequestDto request) throws IOException {
         final DataSetLoadDto dto = this.toLoadDto(request.getSrcOptions());
         dto.setLoadData("true");
-        final UnaryOperator<ComparableDataSetParam.Builder> inlineQuery = this.inlineQuery(dto, request.getInlineQuery());
+        final UnaryOperator<ComparableDataSetParam.Builder> inlineSource = this.inlineSource(dto, request.getInlineSource());
         final UnaryOperator<ComparableDataSetParam.Builder> inlineXlsxSchema = this.inlineXlsxSchema(dto, request.getInlineXlsxSchema());
         final UnaryOperator<ComparableDataSetParam.Builder> inlineSetting = this.inlineSetting(dto, request.getInlineSetting());
-        return () -> inlineSetting.apply(inlineXlsxSchema.apply(inlineQuery.apply(new DataSetLoadOption("", dto).getParam())));
+        return () -> inlineSetting.apply(inlineXlsxSchema.apply(inlineSource.apply(new DataSetLoadOption("", dto).getParam())));
     }
 
     /**
      * inlineの内容があれば、srcのファイルの代わりに使う
      */
-    private UnaryOperator<ComparableDataSetParam.Builder> inlineQuery(final DataSetLoadDto dto, final String query) {
-        if (Strings.isEmpty(query)) {
+    private UnaryOperator<ComparableDataSetParam.Builder> inlineSource(final DataSetLoadDto dto, final String content) {
+        if (Strings.isEmpty(content)) {
             return UnaryOperator.identity();
         }
-        if (!INLINE_QUERY_TYPES.contains(dto.getSrcType())) {
-            throw new IllegalArgumentException("inlineQuery requires srcType sql, table or csvq: " + dto.getSrcType());
-        }
         dto.setSrc("");
-        final InlineQuery inline = new InlineQuery(DatasetTableNamesRequestDto.INLINE_QUERY_TABLE_NAME, query);
-        return param -> param.setInlineQuery(inline);
+        final InlineSource inline = new InlineSource(DatasetTableNamesRequestDto.INLINE_SOURCE_TABLE_NAME, content);
+        return param -> param.setInlineSource(inline);
     }
 
     /**

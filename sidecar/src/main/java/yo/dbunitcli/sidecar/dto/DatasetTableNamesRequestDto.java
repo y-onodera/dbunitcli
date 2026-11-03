@@ -8,9 +8,9 @@ import java.util.Map;
 public class DatasetTableNamesRequestDto {
 
     /**
-     * sql・csvqのinlineQueryを読み込んだテーブルの名前
+     * sql・csvqのinlineSourceを読み込んだテーブルの名前
      */
-    public static final String INLINE_QUERY_TABLE_NAME = "inlineQuery";
+    public static final String INLINE_SOURCE_TABLE_NAME = "inlineSource";
 
     private Map<String, String> parameters;
 
@@ -30,10 +30,10 @@ public class DatasetTableNamesRequestDto {
     private JsonXlsxSchemaDto inlineXlsxSchema;
 
     /**
-     * 未保存のsrcの内容（srcTypeがsql・table・csvqのときのみ）。指定時はsrcのファイルの代わりに読む（{@link yo.dbunitcli.dataset.InlineQuery}）。
-     * sql・csvqのテーブル名は{@link #INLINE_QUERY_TABLE_NAME}になる
+     * 未保存のsrcの内容。指定時はsrcのファイルの代わりに読む（{@link yo.dbunitcli.dataset.InlineSource}。
+     * 読めない形式ならエラー）。sql・csvqのテーブル名は{@link #INLINE_SOURCE_TABLE_NAME}になる
      */
-    private String inlineQuery;
+    private String inlineSource;
 
     public Map<String, String> getParameters() {
         return this.parameters;
@@ -67,11 +67,11 @@ public class DatasetTableNamesRequestDto {
         this.inlineXlsxSchema = inlineXlsxSchema;
     }
 
-    public String getInlineQuery() {
-        return this.inlineQuery;
+    public String getInlineSource() {
+        return this.inlineSource;
     }
 
-    public void setInlineQuery(final String inlineQuery) {
-        this.inlineQuery = inlineQuery;
+    public void setInlineSource(final String inlineSource) {
+        this.inlineSource = inlineSource;
     }
 }

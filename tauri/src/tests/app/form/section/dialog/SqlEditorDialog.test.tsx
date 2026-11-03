@@ -70,7 +70,7 @@ describe("SqlEditorDialogのテスト", () => {
 				setting: "",
 				settingTargetOnly: "true",
 			},
-			inlineQuery: "select 1 from dual",
+			inlineSource: "select 1 from dual",
 		});
 		expect(screen.getByText("result")).toBeInTheDocument();
 		expect(mockSave).not.toHaveBeenCalled();

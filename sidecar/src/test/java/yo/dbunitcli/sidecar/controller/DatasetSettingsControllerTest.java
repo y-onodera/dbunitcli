@@ -479,27 +479,27 @@ class DatasetSettingsControllerTest {
     }
 
     @Test
-    void testTableColumns_inlineQueryはcsvqとして実行したときの列を返す() throws IOException {
+    void testTableColumns_inlineSourceはcsvqとして実行したときの列を返す() throws IOException {
         this.createPreviewSrc();
 
-        Assertions.assertEquals(Map.of(DatasetTableNamesRequestDto.INLINE_QUERY_TABLE_NAME, List.of("LABEL", "KEY", "OTHER")),
-                this.tableColumns(this.inlineQueryBody(DatasetTableNamesRequestDto.INLINE_QUERY_TABLE_NAME)));
+        Assertions.assertEquals(Map.of(DatasetTableNamesRequestDto.INLINE_SOURCE_TABLE_NAME, List.of("LABEL", "KEY", "OTHER")),
+                this.tableColumns(this.inlineSourceBody(DatasetTableNamesRequestDto.INLINE_SOURCE_TABLE_NAME)));
     }
 
     @Test
-    void testTableNames_inlineQueryはsrcの代わりにinlineQueryのテーブルだけを返す() throws IOException {
+    void testTableNames_inlineSourceはsrcの代わりにinlineSourceのテーブルだけを返す() throws IOException {
         this.createPreviewSrc();
 
-        Assertions.assertEquals(List.of(DatasetTableNamesRequestDto.INLINE_QUERY_TABLE_NAME),
-                this.tableNames(this.inlineQueryBody("")));
+        Assertions.assertEquals(List.of(DatasetTableNamesRequestDto.INLINE_SOURCE_TABLE_NAME),
+                this.tableNames(this.inlineSourceBody("")));
     }
 
     @Test
-    void testTablePreview_inlineQueryの行を読み込む() throws IOException {
+    void testTablePreview_inlineSourceの行を読み込む() throws IOException {
         this.createPreviewSrc();
 
         final DatasetTablePreviewResponseDto actual = this.tablePreview(
-                this.inlineQueryBody(DatasetTableNamesRequestDto.INLINE_QUERY_TABLE_NAME));
+                this.inlineSourceBody(DatasetTableNamesRequestDto.INLINE_SOURCE_TABLE_NAME));
 
         Assertions.assertArrayEquals(new String[]{"LABEL", "KEY", "OTHER"}, actual.getHeaders());
         Assertions.assertEquals(3, actual.getTotalRows());
@@ -508,11 +508,11 @@ class DatasetSettingsControllerTest {
     }
 
     @Test
-    void testTablePreview_inlineQueryが読めなければエラーを返す() throws IOException {
+    void testTablePreview_inlineSourceが読めなければエラーを返す() throws IOException {
         final Map<String, Object> body = new LinkedHashMap<>();
         body.put("srcOptions", Map.of("srcType", "csvq"));
-        body.put("inlineQuery", "SELECT * FROM");
-        body.put("tableName", DatasetTableNamesRequestDto.INLINE_QUERY_TABLE_NAME);
+        body.put("inlineSource", "SELECT * FROM");
+        body.put("tableName", DatasetTableNamesRequestDto.INLINE_SOURCE_TABLE_NAME);
 
         final HttpClientResponseException ex = Assertions.assertThrows(HttpClientResponseException.class,
                 () -> this.tablePreview(body));
@@ -520,9 +520,9 @@ class DatasetSettingsControllerTest {
     }
 
     @Test
-    void testTableColumns_srcTypeがsql_table_csvq以外ならinlineQueryはエラーを返す() throws IOException {
+    void testTableColumns_srcTypeがsql_table_csvq以外ならinlineSourceはエラーを返す() throws IOException {
         this.createPreviewSrc();
-        final Map<String, Object> body = this.inlineQueryBody(DatasetTableNamesRequestDto.INLINE_QUERY_TABLE_NAME);
+        final Map<String, Object> body = this.inlineSourceBody(DatasetTableNamesRequestDto.INLINE_SOURCE_TABLE_NAME);
         body.put("srcOptions", Map.of("srcType", "csv", "src", PREVIEW_SRC_DIR.toAbsolutePath().toString()));
 
         final HttpClientResponseException ex = Assertions.assertThrows(HttpClientResponseException.class,
@@ -533,9 +533,9 @@ class DatasetSettingsControllerTest {
     /**
      * srcのファイルの代わりに読むことを確かめるため、srcにはcsvのあるディレクトリを指定する（csvqとして読めばSQLとして失敗する）
      */
-    private Map<String, Object> inlineQueryBody(final String tableName) {
+    private Map<String, Object> inlineSourceBody(final String tableName) {
         final Map<String, Object> body = this.tableBody("csvq", "", tableName);
-        body.put("inlineQuery", "SELECT S.OTHER AS LABEL, S.* FROM CSVREAD('"
+        body.put("inlineSource", "SELECT S.OTHER AS LABEL, S.* FROM CSVREAD('"
                 + PREVIEW_SRC_DIR.resolve("small.csv").toAbsolutePath().toString().replace('\\', '/')
                 + "',null,'charset=UTF-8') S");
         return body;

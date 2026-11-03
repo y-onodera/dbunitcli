@@ -18,10 +18,12 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.sql.SQLException;
 import java.util.Arrays;
-import java.util.List;
 import java.util.stream.Stream;
 
-public class ComparableDBDataSetProducer implements ComparableDataSetProducer {
+/**
+ * テーブル名の一覧を読み、各テーブルを読む形式（table）。inlineSourceは1行1テーブル名の一覧として読む
+ */
+public class ComparableDBDataSetProducer implements InlineSourceDataSetProducer {
     private static final Logger LOGGER = LoggerFactory.getLogger(ComparableDBDataSetProducer.class);
     protected final IDatabaseConnection connection;
     protected final ComparableDataSetParam param;
@@ -42,25 +44,10 @@ public class ComparableDBDataSetProducer implements ComparableDataSetProducer {
     }
 
     /**
-     * srcの各ファイル（inlineQueryがあればその文字列）の1行を1テーブルとして読む
+     * srcの各ファイルの1行を1テーブルとして読む
      */
     @Override
-    public Stream<? extends Source> getSourceStream() {
-        return this.tableNameLists()
-                .flatMap(it -> it.getRight()
-                        .stream()
-                        .map(tableName -> it.getLeft().tableName(tableName))
-                )
-                .filter(it -> this.param().tableNameFilter().predicate(it.tableName()));
-    }
-
-    // 編集中の未保存の内容は末尾などに空行を含みやすいため、空行はテーブルにしない
-    private Stream<Pair<Source, List<String>>> tableNameLists() {
-        final InlineQuery inlineQuery = this.param.inlineQuery();
-        if (inlineQuery != null) {
-            return Stream.of(Pair.of(inlineQuery.source(this.param.addFileInfo())
-                    , inlineQuery.query().lines().filter(it -> !it.isBlank()).toList()));
-        }
+    public Stream<? extends Source> getSrcFileSourceStream() {
         return this.getSrcFiles()
                 .map(it -> {
                     try {
@@ -71,7 +58,23 @@ public class ComparableDBDataSetProducer implements ComparableDataSetProducer {
                     } catch (final IOException e) {
                         throw new AssertionError(e);
                     }
-                });
+                })
+                .flatMap(it -> it.getRight()
+                        .stream()
+                        .map(tableName -> it.getLeft().tableName(tableName))
+                )
+                .filter(it -> this.param().tableNameFilter().predicate(it.tableName()));
+    }
+
+    /**
+     * 編集中の未保存の内容は末尾などに空行を含みやすいため、空行はテーブルにしない
+     */
+    @Override
+    public Stream<Source> getInlineSourceStream(final InlineSource inlineSource) {
+        final Source source = inlineSource.source(this.param.addFileInfo());
+        return inlineSource.content().lines()
+                           .filter(it -> !it.isBlank())
+                           .map(source::tableName);
     }
 
     /**

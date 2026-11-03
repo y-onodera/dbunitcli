@@ -3,33 +3,38 @@ package yo.dbunitcli.dataset.producer;
 import yo.dbunitcli.common.Parameter;
 import yo.dbunitcli.common.Source;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
-import yo.dbunitcli.dataset.ComparableDataSetProducer;
-import yo.dbunitcli.dataset.InlineQuery;
+import yo.dbunitcli.dataset.InlineSource;
 
 import java.io.File;
 import java.util.stream.Stream;
 
-public interface QueryDataSetProducer extends ComparableDataSetProducer {
+/**
+ * SQLを読む形式（sql・csvq）。inlineSourceはSQL1つで、tableNameのテーブルとして読む
+ */
+public interface QueryDataSetProducer extends InlineSourceDataSetProducer {
 
     /**
-     * sourceのSQLをテンプレートとして描画する。inlineQueryがあればsrcのファイルの代わりにそのSQLを使う
+     * sourceのSQLをテンプレートとして描画する。inlineSourceがあればsrcのファイルの代わりにその内容を使う
      */
     static String renderQuery(final ComparableDataSetParam param, final Source source, final Parameter parameter) {
-        final InlineQuery inlineQuery = param.inlineQuery();
-        return inlineQuery != null
-                ? param.templateRender().render(inlineQuery.query(), parameter)
+        final InlineSource inlineSource = param.inlineSource();
+        return inlineSource != null
+                ? param.templateRender().render(inlineSource.content(), parameter)
                 : param.templateRender().render(new File(source.filePath()), parameter);
     }
 
     Parameter parameter();
 
+    /**
+     * srcの各ファイルをSQL1つとして読む
+     */
     @Override
-    default Stream<? extends Source> getSourceStream() {
-        final InlineQuery inlineQuery = this.param().inlineQuery();
-        if (inlineQuery == null) {
-            return ComparableDataSetProducer.super.getSourceStream();
-        }
-        return Stream.of(inlineQuery.source(this.param().addFileInfo()))
-                     .filter(it -> this.param().tableNameFilter().predicate(it.getTableName()));
+    default Stream<? extends Source> getSrcFileSourceStream() {
+        return InlineSourceDataSetProducer.super.getSrcFileSourceStream();
+    }
+
+    @Override
+    default Stream<Source> getInlineSourceStream(final InlineSource inlineSource) {
+        return Stream.of(inlineSource.source(this.param().addFileInfo()));
     }
 }

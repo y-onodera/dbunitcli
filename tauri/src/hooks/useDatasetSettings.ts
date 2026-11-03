@@ -35,18 +35,18 @@ function buildDatasetRequestBody(
 		srcOptions: { ...info.values, ...jdbcValues },
 		inlineSetting: info.inlineSetting,
 		inlineXlsxSchema: info.inlineXlsxSchema,
-		inlineQuery: info.inlineQuery,
+		inlineSource: info.inlineSource,
 		...extra,
 	});
 }
 
-// ソース未指定（inlineQueryならその内容が空）・none・JDBC未接続のsqlではsidecarへ問い合わせない
+// ソース未指定（inlineSourceならその内容が空）・none・JDBC未接続のsqlではsidecarへ問い合わせない
 function isSrcReady(info: DatasetSrcInfo, connectionOk: boolean): boolean {
 	const srcType = srcTypeOf(info);
 	const hasSrc =
-		info.inlineQuery === undefined
+		info.inlineSource === undefined
 			? !!info.values.src
-			: info.inlineQuery.trim() !== "";
+			: info.inlineSource.trim() !== "";
 	if (!hasSrc || !srcType || srcType === "none") {
 		return false;
 	}
@@ -360,8 +360,8 @@ export const useSrcInfoColumnNames = (srcInfo: DatasetSrcInfo): string[] => {
 	return columnNames;
 };
 
-// sidecarのDatasetTableNamesRequestDto.INLINE_QUERY_TABLE_NAMEと揃える
-const INLINE_QUERY_TABLE_NAME = "inlineQuery";
+// sidecarのDatasetTableNamesRequestDto.INLINE_SOURCE_TABLE_NAMEと揃える
+const INLINE_SOURCE_TABLE_NAME = "inlineSource";
 
 // テーブル名→列名。tableNameを指定すればそのテーブルだけを読む。失敗は投げる
 async function fetchTableColumns(
@@ -440,15 +440,15 @@ export const useCsvColumnNamesFetcher = () => {
 			apiUrl,
 			{
 				values: { srcType: "csvq" },
-				inlineQuery: `SELECT * FROM ${csvReadExpression}`,
+				inlineSource: `SELECT * FROM ${csvReadExpression}`,
 			},
-			INLINE_QUERY_TABLE_NAME,
+			INLINE_SOURCE_TABLE_NAME,
 			{},
 			paramInputs,
 			signal,
 			onLog,
 		);
-		return columns[INLINE_QUERY_TABLE_NAME] ?? [];
+		return columns[INLINE_SOURCE_TABLE_NAME] ?? [];
 	};
 };
 

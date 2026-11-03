@@ -229,7 +229,7 @@ FROM
   <ul>
     <li>Save を押す前の内容でも確認でき、プレビューしてもファイルは保存されません。SQL Editor は閉じず、元のテキストボックスのファイル名も変わりません。</li>
     <li>フォームの <code>src</code> 以外の項目（JDBC の接続先、-P 値など）は実行時と同じものを使います。<code>setting</code> は指定していても適用しません。</li>
-    <li><code>srcType</code> が <code>sql</code> / <code>csvq</code> のとき、一覧のテーブル名は <code>inlineQuery</code> と表示します。保存して実行したときのテーブル名は、保存したファイル名（拡張子を除く）です。</li>
+    <li><code>srcType</code> が <code>sql</code> / <code>csvq</code> のとき、一覧のテーブル名は <code>inlineSource</code> と表示します。保存して実行したときのテーブル名は、保存したファイル名（拡張子を除く）です。</li>
     <li><code>srcType</code> が <code>table</code> のとき、本文の 1 行を 1 テーブルとして表示します。空行は飛ばします。</li>
     <li><code>srcType</code> が <code>sql</code> / <code>table</code> のときは JDBC の接続先から読みます。<code>sql</code> は接続テストに成功するまで何も読み込みません。</li>
     <li>本文が空のときは何も読み込みません。Preview はフォームで <code>srcType</code> を指定しているときだけ表示されます。</li>

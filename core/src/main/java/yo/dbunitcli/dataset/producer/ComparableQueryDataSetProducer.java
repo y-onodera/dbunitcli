@@ -11,6 +11,7 @@ import yo.dbunitcli.common.Source;
 import yo.dbunitcli.common.TableMetaDataWithSource;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.dataset.ComparableTableMappingTask;
+import yo.dbunitcli.dataset.InlineSource;
 
 import java.sql.SQLException;
 import java.util.stream.Stream;
@@ -30,9 +31,15 @@ public class ComparableQueryDataSetProducer extends ComparableDBDataSetProducer 
         return this.parameter;
     }
 
+    // 継承したtableの読み方ではなく、SQLとして読む
     @Override
-    public Stream<? extends Source> getSourceStream() {
-        return QueryDataSetProducer.super.getSourceStream();
+    public Stream<? extends Source> getSrcFileSourceStream() {
+        return QueryDataSetProducer.super.getSrcFileSourceStream();
+    }
+
+    @Override
+    public Stream<Source> getInlineSourceStream(final InlineSource inlineSource) {
+        return QueryDataSetProducer.super.getInlineSourceStream(inlineSource);
     }
 
     @Override

@@ -69,12 +69,12 @@ const { mockFetchData, mockFetchAndUpdate } = vi.hoisted(() => {
 			);
 		}
 		if (params.endpoint.includes("/dataset-setting/table-columns")) {
-			const { tableName, inlineQuery } = JSON.parse(
+			const { tableName, inlineSource } = JSON.parse(
 				String(params.options.body),
 			);
-			// inlineQueryはsrcの代わりに読み、テーブル名はinlineQueryになる
-			const columns: Record<string, string[]> = inlineQuery
-				? { inlineQuery: ["code", "label"] }
+			// inlineSourceはsrcの代わりに読み、テーブル名はinlineSourceになる
+			const columns: Record<string, string[]> = inlineSource
+				? { inlineSource: ["code", "label"] }
 				: { t1: ["id", "name"], t2: ["id", "age"] };
 			return Promise.resolve(
 				new Response(
@@ -275,8 +275,8 @@ describe("DatasetSettingsProviderのテスト", () => {
 				await result.current("CSVREAD('a.csv',null,'charset=MS932')", context),
 			).toStrictEqual(["code", "label"]);
 			expect(lastBody()).toMatchObject({
-				tableName: "inlineQuery",
-				inlineQuery: "SELECT * FROM CSVREAD('a.csv',null,'charset=MS932')",
+				tableName: "inlineSource",
+				inlineSource: "SELECT * FROM CSVREAD('a.csv',null,'charset=MS932')",
 			});
 		});
 	});
@@ -331,10 +331,10 @@ describe("DatasetSettingsProviderのテスト", () => {
 			},
 		);
 
-		it("inlineQueryがあれば、srcが空でもその内容を送ってテーブル一覧を読むことを確認", async () => {
+		it("inlineSourceがあれば、srcが空でもその内容を送ってテーブル一覧を読むことを確認", async () => {
 			const info: DatasetSrcInfo = {
 				values: { srcType: "csvq", src: "" },
-				inlineQuery: "SELECT 1",
+				inlineSource: "SELECT 1",
 			};
 			const { result } = renderHook(() => useDatasetTableNames(info), {
 				wrapper: envWrapper,
@@ -347,14 +347,14 @@ describe("DatasetSettingsProviderのテスト", () => {
 			)[0];
 			expect(JSON.parse(String(params.options.body))).toMatchObject({
 				srcOptions: { srcType: "csvq", src: "" },
-				inlineQuery: "SELECT 1",
+				inlineSource: "SELECT 1",
 			});
 		});
 
-		it("inlineQueryの内容が空白だけなら、srcがあっても読まないことを確認", async () => {
+		it("inlineSourceの内容が空白だけなら、srcがあっても読まないことを確認", async () => {
 			const info: DatasetSrcInfo = {
 				values: { ...srcInfo.values },
-				inlineQuery: " \n",
+				inlineSource: " \n",
 			};
 			const { result } = renderHook(() => useDatasetTableNames(info), {
 				wrapper: envWrapper,

@@ -125,7 +125,7 @@ function Dialog(props: SqlEditorDialogProps & { value: string }) {
 			handleSave={props.handleSave}
 			footerActions={() => (
 				// 保存せず、編集中の内容をsrcのファイルの代わりにしてプレビューする（settingは適用しない）
-				<InlinePreviewButton toInline={() => ({ inlineQuery: content })} />
+				<InlinePreviewButton toInline={() => ({ inlineSource: content })} />
 			)}
 		>
 			<DialogBody size="md">
