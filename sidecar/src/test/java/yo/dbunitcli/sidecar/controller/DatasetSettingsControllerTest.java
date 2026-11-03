@@ -432,6 +432,15 @@ class DatasetSettingsControllerTest {
     }
 
     @Test
+    void testTablePreview_読み込めなければエラーを返す() throws IOException {
+        this.createPreviewSrc();
+
+        final HttpClientResponseException ex = Assertions.assertThrows(HttpClientResponseException.class,
+                () -> this.tablePreview("missingSetting.json", "big"));
+        Assertions.assertEquals(HttpStatus.BAD_REQUEST, ex.getStatus());
+    }
+
+    @Test
     void testTablePreview_存在しないテーブルは空を返す() throws IOException {
         this.createPreviewSrc();
 
