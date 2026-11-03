@@ -134,4 +134,16 @@ describe("SqlTableInsertDialogのカラム挿入", () => {
 		await user.click(screen.getByRole("button", { name: "Insert Columns" }));
 		expect(onInsertColumn).toHaveBeenCalledWith(["ID"]);
 	});
+
+	it("Separator on first line をONにすると1行目にも区切りを付ける", async () => {
+		const { user, onInsertColumn } = await renderLoaded();
+		await user.click(screen.getAllByTitle("Select columns")[1]);
+		await screen.findByText("Select Columns");
+		await user.click(screen.getByText("ID"));
+		await user.selectOptions(screen.getAllByLabelText("Usage")[1], "condition");
+		await user.click(screen.getByLabelText("Separator on first line (and)"));
+
+		await user.click(screen.getByRole("button", { name: "Insert Columns" }));
+		expect(onInsertColumn).toHaveBeenCalledWith(["and ID = "]);
+	});
 });

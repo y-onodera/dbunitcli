@@ -76,18 +76,22 @@ export type ColumnUsage =
 	| "update"
 	| "insert";
 
+export function columnSeparator(usage: ColumnUsage): string {
+	return usage === "condition" ? "and" : ",";
+}
+
 export function usesColumnQualifier(usage: ColumnUsage): boolean {
 	return usage !== "insert";
 }
 
-// aliasは空なら修飾しない。columnAsはselectのときだけ使う
+// aliasは空なら修飾しない。columnAsはselectのときだけ使う。continuedなら1行目にも区切りを付ける（既存の列の後ろに続けるとき）
 export function columnLines(
 	columns: string[],
 	usage: ColumnUsage,
-	options: { alias: string; columnAs: boolean },
+	options: { alias: string; columnAs: boolean; continued?: boolean },
 ): string[] {
 	const alias = usesColumnQualifier(usage) ? options.alias : "";
-	const separator = usage === "condition" ? "and " : ", ";
+	const separator = `${columnSeparator(usage)} `;
 	return columns.map((column, i) => {
 		const body = columnBody(
 			qualifyColumn(column, alias),
@@ -95,7 +99,7 @@ export function columnLines(
 			usage,
 			options,
 		);
-		return i === 0 ? body : `${separator}${body}`;
+		return i === 0 && !options.continued ? body : `${separator}${body}`;
 	});
 }
 

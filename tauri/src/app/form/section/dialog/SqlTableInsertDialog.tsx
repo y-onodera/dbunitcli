@@ -20,6 +20,7 @@ import { useTableSelection } from "../../../../hooks/useTableSelection";
 import {
 	type ColumnUsage,
 	columnLines,
+	columnSeparator,
 	defaultTableAlias,
 	isJoin,
 	type TableUsage,
@@ -321,6 +322,7 @@ function ColumnSelectDialog({
 	const [qualify, setQualify] = useState(false);
 	const [alias, setAlias] = useState(defaultAlias);
 	const [columnAs, setColumnAs] = useState(false);
+	const [continued, setContinued] = useState(false);
 
 	if (loading) {
 		return (
@@ -348,6 +350,7 @@ function ColumnSelectDialog({
 		: columnLines(selectedColumns, usage, {
 				alias: qualifying ? alias : "",
 				columnAs,
+				continued,
 			});
 
 	return (
@@ -400,6 +403,14 @@ function ColumnSelectDialog({
 							/>
 						</DialogField>
 					)}
+					<DialogField>
+						<OptionCheck
+							id="sqlColumnInsert_continued"
+							label={`Separator on first line (${columnSeparator(usage)})`}
+							checked={continued}
+							onChange={setContinued}
+						/>
+					</DialogField>
 					<InsertPreview lines={lines} />
 				</>
 			)}

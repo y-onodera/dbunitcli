@@ -118,6 +118,23 @@ describe("columnLines", () => {
 		]);
 	});
 
+	it("continued なら1行目にも区切りを付ける", () => {
+		expect(
+			columnLines(["ID", "NAME"], "condition", {
+				alias: "",
+				columnAs: false,
+				continued: true,
+			}),
+		).toEqual(["and ID = ", "and NAME = "]);
+		expect(
+			columnLines(["ID"], "select", {
+				alias: "u",
+				columnAs: false,
+				continued: true,
+			}),
+		).toEqual([", u.ID"]);
+	});
+
 	it("insert はエイリアスを指定しても付けない", () => {
 		expect(
 			columnLines(["ID", "NAME"], "insert", { alias: "u", columnAs: true }),
