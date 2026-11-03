@@ -155,7 +155,7 @@ public record FileResources() {
         return FileResources.searchInOrder(xlsxSchemaPath, xlsxSchemaDir().toPath().normalize().toString(), FileResources::searchWorkspace);
     }
 
-    // 以前はdataset直下に保存していたため、resources配下→dataset→workspaceの順に探す
+    // datasetディレクトリに置いたsrcも解決できるようにする
     public static File searchSql(final String path) {
         return FileResources.searchInOrder(path, sqlDir().toPath().normalize().toString(), FileResources::searchDatasetBase);
     }
