@@ -118,7 +118,7 @@ public record FileResources() {
     }
 
     public static File searchCompareSetting(final String settingPath) {
-        return FileResources.searchInOrder(settingPath, compareSettingDir().toPath().normalize().toString(), FileResources::searchSetting);
+        return FileResources.searchInOrder(settingPath, compareSettingDir().toPath().normalize().toString(), FileResources::searchWorkspace);
     }
 
     public static File searchGenerateSetting(final String settingPath) {
