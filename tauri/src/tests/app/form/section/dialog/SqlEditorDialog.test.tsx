@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import SqlEditorDialog from "../../../../../app/form/section/dialog/SqlEditorDialog";
@@ -54,26 +54,30 @@ function renderDialog() {
 }
 
 describe("SqlEditorDialogのテスト", () => {
-	it("Save and Previewで保存したファイルをsrcに、settingなしでテーブル一覧をプレビューする", async () => {
-		mockSave.mockResolvedValue("success");
+	it("Previewは保存せず、編集中の内容をsrcの代わりに、settingなしでテーブル一覧をプレビューする", async () => {
 		const { user, handleSave } = renderDialog();
-		await user.click(screen.getByRole("button", { name: "Save and Preview" }));
+		await user.type(
+			screen.getByPlaceholderText("Enter SQL query..."),
+			" from dual",
+		);
+		await user.click(screen.getByRole("button", { name: "Preview" }));
 
-		await waitFor(() => {
-			expect(screen.getByText("Table List Preview")).toBeInTheDocument();
-		});
-		expect(mockSave).toHaveBeenCalledWith("query.sql", "select 1");
+		expect(screen.getByText("Table List Preview")).toBeInTheDocument();
 		expect(mockTableNames).toHaveBeenLastCalledWith({
 			values: {
 				srcType: "sql",
-				src: "query.sql",
+				src: "old.sql",
 				setting: "",
 				settingTargetOnly: "true",
 			},
+			inlineQuery: "select 1 from dual",
 		});
 		expect(screen.getByText("result")).toBeInTheDocument();
-		// 編集ダイアログは開いたまま（保存後に閉じるhandleSaveは呼ばない）
+		expect(mockSave).not.toHaveBeenCalled();
 		expect(handleSave).not.toHaveBeenCalled();
+		expect(
+			screen.queryByRole("button", { name: "Save and Preview" }),
+		).not.toBeInTheDocument();
 	});
 
 	it.each([
@@ -127,16 +131,5 @@ describe("SqlEditorDialogのテスト", () => {
 		).toContain(
 			"    CROSS JOIN\n        CSVREAD('a.csv',null,'charset=UTF-8') A\n",
 		);
-	});
-
-	it("保存に失敗したときはプレビューを開かない", async () => {
-		mockSave.mockResolvedValue("failed");
-		const { user } = renderDialog();
-		await user.click(screen.getByRole("button", { name: "Save and Preview" }));
-
-		await waitFor(() => {
-			expect(mockSave).toHaveBeenCalled();
-		});
-		expect(screen.queryByText("Table List Preview")).not.toBeInTheDocument();
 	});
 });

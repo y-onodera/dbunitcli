@@ -10,13 +10,26 @@
   <h1>SQL Editor</h1>
   <p><code>srcType</code> が <code>sql</code> / <code>table</code> / <code>csvq</code> のときに、SQL ファイル・テーブル名の一覧ファイルを編集するダイアログです。</p>
 
+  <h2 id="toc">目次</h2>
+  <ol>
+    <li><a href="#section-simple">シンプルな使い方</a></li>
+    <li><a href="#section-open">開き方</a></li>
+    <li><a href="#section-content">記述内容</a></li>
+    <li><a href="#section-select-tables">Select Tables</a></li>
+    <li><a href="#section-select-csv">Select CSV</a></li>
+    <li><a href="#section-preview">Preview</a></li>
+    <li><a href="#section-save">保存</a></li>
+    <li><a href="#section-related">関連</a></li>
+  </ol>
+
   <h2 id="section-simple">シンプルな使い方</h2>
-  <p><code>src</code> 横のメニューの編集ボタンで開き、SQL を書いて保存します。</p>
+  <p><code>src</code> 横のメニューの編集ボタンで開き、SQL を書いて Preview で読み込まれる内容を確認してから保存します。</p>
   <p>例: <code>srcType</code> が <code>sql</code> のとき、有効なユーザだけを読み込む SQL を作ります。</p>
   <pre>本文:
   select * from USERS where STATUS = 'ACTIVE'
 
 指定:
+  → Preview（一覧の preview ボタンで読み込まれる行を確認し、Close で閉じる）
   name = active_users.sql
   → Save
 
@@ -27,7 +40,7 @@
     <li>テーブル名は SQL ファイル名（拡張子を除く）になる</li>
     <li><code>srcType</code> が <code>sql</code> / <code>table</code> で JDBC の接続テストが成功していれば、Select Tables でテーブル名・カラム名を挿入できる</li>
     <li><code>srcType</code> が <code>csvq</code> なら、Select CSV で CSV ファイルを選んで <code>CSVREAD()</code> を挿入できる</li>
-    <li>Save and Preview で、保存したうえで読み込まれる内容を確認できる</li>
+    <li>Preview は保存しない。SQL を直しては Preview で確かめ、よければ Save する</li>
   </ul>
 
   <h2 id="section-open">開き方</h2>
@@ -211,10 +224,19 @@ FROM
     CSVREAD('dataset/user_account.csv',null,'charset=UTF-8') UA</pre>
   <p><code>CSVREAD()</code> の書き方は <a href="../sections/dataset-load-form/types/csvq.html">csvq</a> を参照してください。</p>
 
+  <h2 id="section-preview">Preview</h2>
+  <p>ダイアログ下部の Preview を押すと、編集中の内容を <code>src</code> のファイルの代わりにして、読み込まれるテーブルの一覧を表示します（<a href="../sections/dataset-load-form.html">Dataset Load Form</a> の Preview Before Settings と同じ表示です）。一覧の preview ボタンを押すと、そのテーブルのデータを表示します。</p>
+  <ul>
+    <li>Save を押す前の内容でも確認でき、プレビューしてもファイルは保存されません。SQL Editor は閉じず、元のテキストボックスのファイル名も変わりません。</li>
+    <li>フォームの <code>src</code> 以外の項目（JDBC の接続先、-P 値など）は実行時と同じものを使います。<code>setting</code> は指定していても適用しません。</li>
+    <li><code>srcType</code> が <code>sql</code> / <code>csvq</code> のとき、一覧のテーブル名は <code>inlineQuery</code> と表示します。保存して実行したときのテーブル名は、保存したファイル名（拡張子を除く）です。</li>
+    <li><code>srcType</code> が <code>table</code> のとき、本文の 1 行を 1 テーブルとして表示します。空行は飛ばします。</li>
+    <li><code>srcType</code> が <code>sql</code> / <code>table</code> のときは JDBC の接続先から読みます。<code>sql</code> は接続テストに成功するまで何も読み込みません。</li>
+    <li>本文が空のときは何も読み込みません。Preview はフォームで <code>srcType</code> を指定しているときだけ表示されます。</li>
+  </ul>
+
   <h2 id="section-save">保存</h2>
   <p>ダイアログ下部の name に保存先のファイル名を指定して Save を押すと、内容がファイルとして書き出され、元のテキストボックスにそのファイル名が設定されます。保存先は <code>srcType</code> ごとに Workspace の <code>resources/sql</code> / <code>resources/table</code> / <code>resources/csvq</code> です。</p>
-  <p>Save and Preview を押すと、同じように保存したうえで、保存したファイルを <code>src</code> として読み込まれるテーブルの一覧を表示します（<a href="../sections/dataset-load-form.html">Dataset Load Form</a> の Preview Before Settings と同じ表示です）。<code>setting</code> は指定していても適用しません。一覧の preview ボタンを押すと、そのテーブルのデータを表示します。</p>
-  <p>Save and Preview では SQL Editor は閉じず、元のテキストボックスのファイル名も変わりません。続けて編集でき、ファイル名を反映するには Save を押してください。</p>
 
   <h2 id="section-related">関連</h2>
   <ul>

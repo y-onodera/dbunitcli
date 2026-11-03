@@ -8,7 +8,7 @@ import java.util.Map;
 public class DatasetTableNamesRequestDto {
 
     /**
-     * inlineQueryを読み込んだテーブルの名前
+     * sql・csvqのinlineQueryを読み込んだテーブルの名前
      */
     public static final String INLINE_QUERY_TABLE_NAME = "inlineQuery";
 
@@ -30,7 +30,8 @@ public class DatasetTableNamesRequestDto {
     private JsonXlsxSchemaDto inlineXlsxSchema;
 
     /**
-     * 未保存のcsvqのSQL。指定時はsrcType・srcより優先し、このSQLをcsvqとして読んだ{@link #INLINE_QUERY_TABLE_NAME}のテーブルだけを読み込む（CSVREADの列の選択用）
+     * 未保存のsrcの内容（srcTypeがsql・table・csvqのときのみ）。指定時はsrcのファイルの代わりに読む。
+     * sql・csvqはSQLを{@link #INLINE_QUERY_TABLE_NAME}のテーブルとして、tableは1行1テーブル名として読む（SQL Editorのプレビュー・CSVREADの列の選択用）
      */
     private String inlineQuery;
 

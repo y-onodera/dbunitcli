@@ -3,7 +3,8 @@ package yo.dbunitcli.dataset;
 import yo.dbunitcli.common.Source;
 
 /**
- * ファイルに保存していないSQL。srcのファイルの代わりに、このSQLをtableNameのテーブルとして読む（sql・csvq）
+ * ファイルに保存していないsrcの内容。srcのファイルの代わりに読む。
+ * sql・csvqはSQLをtableNameのテーブルとして、tableは1行1テーブル名の一覧として読む（tableNameはファイル名の代わり）
  */
 public record InlineQuery(String tableName, String query) {
 

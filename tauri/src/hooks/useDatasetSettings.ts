@@ -35,14 +35,19 @@ function buildDatasetRequestBody(
 		srcOptions: { ...info.values, ...jdbcValues },
 		inlineSetting: info.inlineSetting,
 		inlineXlsxSchema: info.inlineXlsxSchema,
+		inlineQuery: info.inlineQuery,
 		...extra,
 	});
 }
 
-// ソース未指定・none・JDBC未接続のsqlではsidecarへ問い合わせない
+// ソース未指定（inlineQueryならその内容が空）・none・JDBC未接続のsqlではsidecarへ問い合わせない
 function isSrcReady(info: DatasetSrcInfo, connectionOk: boolean): boolean {
 	const srcType = srcTypeOf(info);
-	if (!info.values.src || !srcType || srcType === "none") {
+	const hasSrc =
+		info.inlineQuery === undefined
+			? !!info.values.src
+			: info.inlineQuery.trim() !== "";
+	if (!hasSrc || !srcType || srcType === "none") {
 		return false;
 	}
 	return srcType !== "sql" || connectionOk;
@@ -358,11 +363,11 @@ export const useSrcInfoColumnNames = (srcInfo: DatasetSrcInfo): string[] => {
 // sidecarのDatasetTableNamesRequestDto.INLINE_QUERY_TABLE_NAMEと揃える
 const INLINE_QUERY_TABLE_NAME = "inlineQuery";
 
-// テーブル名→列名。requestのtableNameを指定すればそのテーブルだけを、inlineQueryを指定すればsrcの代わりにそのcsvqのSQLを読む。失敗は投げる
+// テーブル名→列名。tableNameを指定すればそのテーブルだけを読む。失敗は投げる
 async function fetchTableColumns(
 	apiUrl: string,
 	info: DatasetSrcInfo,
-	request: { tableName: string; inlineQuery?: string },
+	request: { tableName: string },
 	jdbcValues: Record<string, string>,
 	paramInputs: Record<string, string>,
 	signal?: AbortSignal,
@@ -433,11 +438,11 @@ export const useCsvColumnNamesFetcher = () => {
 	): Promise<string[]> => {
 		const columns = await fetchTableColumns(
 			apiUrl,
-			{ values: {} },
 			{
-				tableName: INLINE_QUERY_TABLE_NAME,
+				values: { srcType: "csvq" },
 				inlineQuery: `SELECT * FROM ${csvReadExpression}`,
 			},
+			{ tableName: INLINE_QUERY_TABLE_NAME },
 			{},
 			paramInputs,
 			signal,

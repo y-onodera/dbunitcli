@@ -13,14 +13,13 @@ import {
 	useResourceContent,
 	useSaveResourceContent,
 } from "../../../../hooks/useResourceFiles";
-import { withoutSetting, withValues } from "../../../../model/CommandOption";
 import type { QueryDatasourceType } from "../../../../model/QueryDatasource";
 import {
 	insertAtCursor,
 	insertInlineAtCursor,
 } from "../../../../utils/textInsert";
 import CsvReadInsertDialog from "./CsvReadInsertDialog";
-import { SaveAndPreviewButton } from "./DatasetTableNamesPreviewButton";
+import { InlinePreviewButton } from "./DatasetTableNamesPreviewButton";
 import type { EditResourceDialogProps } from "./ResourceEditButton";
 import SqlTableInsertDialog from "./SqlTableInsertDialog";
 
@@ -124,17 +123,9 @@ function Dialog(props: SqlEditorDialogProps & { value: string }) {
 			fileName={props.fileName}
 			save={(path) => saveDataSource(path, content)}
 			handleSave={props.handleSave}
-			footerActions={(saveThen) => (
-				// 保存したファイルをsrcにしてプレビューする（settingは適用しない）
-				<SaveAndPreviewButton
-					saveThen={saveThen}
-					toSrcInfo={(path) =>
-						withValues(withoutSetting(datasetSrcInfo), {
-							srcType: props.type,
-							src: path,
-						})
-					}
-				/>
+			footerActions={() => (
+				// 保存せず、編集中の内容をsrcのファイルの代わりにしてプレビューする（settingは適用しない）
+				<InlinePreviewButton toInline={() => ({ inlineQuery: content })} />
 			)}
 		>
 			<DialogBody size="md">

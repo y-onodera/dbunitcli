@@ -116,6 +116,8 @@ export type DatasetSrcInfo = {
 	inlineSetting?: DatasetSetting;
 	// 未保存のxlsxスキーマ。指定時はxlsxSchemaより優先してこのスキーマの対象だけを読む
 	inlineXlsxSchema?: XlsxSchema;
+	// 未保存のsrcの内容（srcTypeがsql・table・csvqのとき）。指定時はsrcのファイルの代わりに読む
+	inlineQuery?: string;
 };
 export type JdbcOption = CommandOptions & {
 	jdbcProperties: CommandOption;

@@ -440,7 +440,7 @@ public record ComparableDataSetParam(
         }
 
         /**
-         * @param inlineQuery 指定すればsrcのファイルの代わりに読むSQL（sql・csvqのみ）。nullならsrcを読む
+         * @param inlineQuery 指定すればsrcのファイルの代わりに読む内容（sql・csvq・tableのみ）。nullならsrcを読む
          */
         public Builder setInlineQuery(final InlineQuery inlineQuery) {
             this.inlineQuery = inlineQuery;

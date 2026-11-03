@@ -331,6 +331,43 @@ describe("DatasetSettingsProviderのテスト", () => {
 			},
 		);
 
+		it("inlineQueryがあれば、srcが空でもその内容を送ってテーブル一覧を読むことを確認", async () => {
+			const info: DatasetSrcInfo = {
+				values: { srcType: "csvq", src: "" },
+				inlineQuery: "SELECT 1",
+			};
+			const { result } = renderHook(() => useDatasetTableNames(info), {
+				wrapper: envWrapper,
+			});
+			await waitFor(() => {
+				expect(result.current.tableNames).toStrictEqual(["t1", "t2"]);
+			});
+			const [params] = mockFetchData.mock.calls.filter(([p]) =>
+				p.endpoint.includes("/dataset-setting/table-names"),
+			)[0];
+			expect(JSON.parse(String(params.options.body))).toMatchObject({
+				srcOptions: { srcType: "csvq", src: "" },
+				inlineQuery: "SELECT 1",
+			});
+		});
+
+		it("inlineQueryの内容が空白だけなら、srcがあっても読まないことを確認", async () => {
+			const info: DatasetSrcInfo = {
+				values: { ...srcInfo.values },
+				inlineQuery: " \n",
+			};
+			const { result } = renderHook(() => useDatasetTableNames(info), {
+				wrapper: envWrapper,
+			});
+			await act(async () => {});
+			expect(result.current.tableNames).toStrictEqual([]);
+			expect(
+				mockFetchData.mock.calls.filter(([p]) =>
+					p.endpoint.includes("/dataset-setting/table-names"),
+				),
+			).toHaveLength(0);
+		});
+
 		it("入力候補（useSrcInfoColumnNames）は、列名の読込に失敗しても空配列のままにすることを確認", async () => {
 			failWithLogs();
 			const { result } = renderHook(() => useSrcInfoColumnNames(srcInfo), {

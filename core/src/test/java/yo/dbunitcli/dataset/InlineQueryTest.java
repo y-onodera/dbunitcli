@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import yo.dbunitcli.common.Parameter;
 import yo.dbunitcli.dataset.producer.ComparableCSVQueryDataSetProducer;
+import yo.dbunitcli.dataset.producer.ComparableDBDataSetProducer;
 import yo.dbunitcli.dataset.producer.ComparableQueryDataSetProducer;
 import yo.dbunitcli.resource.jdbc.DatabaseConnectionLoader;
 
@@ -62,6 +63,26 @@ public class InlineQueryTest {
                                                             .map(it -> it.getColumnName().toUpperCase()).toList());
             Assertions.assertEquals(1, table.getRowCount());
             Assertions.assertEquals("2", table.getValue(0, "VAL"));
+        }
+    }
+
+    @Test
+    public void tableはsrcのファイルの代わりにinlineQueryの各行をテーブル名として読み空行は飛ばす() throws SQLException {
+        final String url = "jdbc:h2:mem:inlineTable;DB_CLOSE_DELAY=-1";
+        try (final Connection conn = DriverManager.getConnection(url, "sa", "");
+             final Statement stmt = conn.createStatement()) {
+            stmt.execute("create table T1 (ID varchar(10) primary key)");
+            stmt.execute("create table T2 (ID varchar(10) primary key)");
+            stmt.execute("insert into T1 values ('a'), ('b')");
+            stmt.execute("insert into T2 values ('c')");
+            final ComparableDataSet actual = new ComparableDBDataSetProducer(this.param(DataSourceType.table)
+                    .setDatabaseConnectionLoader(this.connectionLoader(url))
+                    .setInlineQuery(new InlineQuery("inline", "T1\n\nT2\n"))
+                    .build()).loadDataSet();
+
+            Assertions.assertArrayEquals(new String[]{"T1", "T2"}, actual.getTableNames());
+            Assertions.assertEquals(2, actual.getTable("T1").getRowCount());
+            Assertions.assertEquals(1, actual.getTable("T2").getRowCount());
         }
     }
 

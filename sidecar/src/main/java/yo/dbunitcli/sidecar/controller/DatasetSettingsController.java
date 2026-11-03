@@ -76,6 +76,7 @@ import java.util.function.UnaryOperator;
 public class DatasetSettingsController extends AbstractResourceFileController<DatasetRequestDto> {
     private static final Logger LOGGER = LoggerFactory.getLogger(DatasetSettingsController.class);
     static final int PREVIEW_ROW_LIMIT = 100;
+    private static final Set<DataSourceType> INLINE_QUERY_TYPES = Set.of(DataSourceType.sql, DataSourceType.table, DataSourceType.csvq);
 
     public DatasetSettingsController(final Workspace workspace) {
         super(workspace);
@@ -358,13 +359,15 @@ public class DatasetSettingsController extends AbstractResourceFileController<Da
     }
 
     /**
-     * inlineのSQLがあれば、srcのファイルの代わりにcsvqとして読む
+     * inlineの内容があれば、srcのファイルの代わりに使う
      */
     private UnaryOperator<ComparableDataSetParam.Builder> inlineQuery(final DataSetLoadDto dto, final String query) {
         if (Strings.isEmpty(query)) {
             return UnaryOperator.identity();
         }
-        dto.setSrcType(DataSourceType.csvq);
+        if (!INLINE_QUERY_TYPES.contains(dto.getSrcType())) {
+            throw new IllegalArgumentException("inlineQuery requires srcType sql, table or csvq: " + dto.getSrcType());
+        }
         dto.setSrc("");
         final InlineQuery inline = new InlineQuery(DatasetTableNamesRequestDto.INLINE_QUERY_TABLE_NAME, query);
         return param -> param.setInlineQuery(inline);

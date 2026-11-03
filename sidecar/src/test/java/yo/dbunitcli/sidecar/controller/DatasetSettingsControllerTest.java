@@ -510,6 +510,7 @@ class DatasetSettingsControllerTest {
     @Test
     void testTablePreview_inlineQueryが読めなければエラーを返す() throws IOException {
         final Map<String, Object> body = new LinkedHashMap<>();
+        body.put("srcOptions", Map.of("srcType", "csvq"));
         body.put("inlineQuery", "SELECT * FROM");
         body.put("tableName", DatasetTableNamesRequestDto.INLINE_QUERY_TABLE_NAME);
 
@@ -518,11 +519,22 @@ class DatasetSettingsControllerTest {
         Assertions.assertEquals(HttpStatus.BAD_REQUEST, ex.getStatus());
     }
 
+    @Test
+    void testTableColumns_srcTypeがsql_table_csvq以外ならinlineQueryはエラーを返す() throws IOException {
+        this.createPreviewSrc();
+        final Map<String, Object> body = this.inlineQueryBody(DatasetTableNamesRequestDto.INLINE_QUERY_TABLE_NAME);
+        body.put("srcOptions", Map.of("srcType", "csv", "src", PREVIEW_SRC_DIR.toAbsolutePath().toString()));
+
+        final HttpClientResponseException ex = Assertions.assertThrows(HttpClientResponseException.class,
+                () -> this.tableColumns(body));
+        Assertions.assertEquals(HttpStatus.BAD_REQUEST, ex.getStatus());
+    }
+
     /**
-     * srcOptionsのcsvより優先されることを確かめるため、srcOptionsにはプレビュー用のcsvを指定する
+     * srcのファイルの代わりに読むことを確かめるため、srcにはcsvのあるディレクトリを指定する（csvqとして読めばSQLとして失敗する）
      */
     private Map<String, Object> inlineQueryBody(final String tableName) {
-        final Map<String, Object> body = this.tableBody("csv", "", tableName);
+        final Map<String, Object> body = this.tableBody("csvq", "", tableName);
         body.put("inlineQuery", "SELECT S.OTHER AS LABEL, S.* FROM CSVREAD('"
                 + PREVIEW_SRC_DIR.resolve("small.csv").toAbsolutePath().toString().replace('\\', '/')
                 + "',null,'charset=UTF-8') S");
