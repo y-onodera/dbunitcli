@@ -33,7 +33,7 @@ import {
 	type SelectGroup,
 	type SelectOption,
 } from "./SqlInsertParts";
-import { SubqueryColumns } from "./SqlSubqueryDialog";
+import { SubqueryColumns, type SubquerySource } from "./SqlSubqueryDialog";
 import TableList from "./TableList";
 import { useColumnLoad } from "./useColumnLoad";
 
@@ -173,6 +173,11 @@ function TablesContent({
 		null,
 	);
 	const [usage, setUsage] = useState<TableUsage>("select");
+	const subquerySource: SubquerySource = {
+		kind: "tables",
+		tables,
+		onQueryColumns,
+	};
 	const [alias, setAlias] = useState("");
 	const [source, setSource] = useState<TableSource>("table");
 	// サブクエリにするときの、サブクエリ全体の別名（選んだテーブルの別名はalias）
@@ -343,8 +348,7 @@ function TablesContent({
 					plain={plain}
 					{...columnAliasOf(columnLoad.target.table)}
 					statement={statementOf(columnLoad.target.table, columnStatement)}
-					tables={tables}
-					onQueryColumns={onQueryColumns}
+					subquerySource={subquerySource}
 					onInsert={(lines, inline) => {
 						if (columnStatement === null) {
 							if (inline) {
@@ -392,8 +396,7 @@ function TablesContent({
 								lines,
 							),
 					}}
-					tables={tables}
-					onQueryColumns={onQueryColumns}
+					subquerySource={subquerySource}
 					onInsert={(lines) => {
 						onInsert(lines);
 						setDerivedOuter(null);

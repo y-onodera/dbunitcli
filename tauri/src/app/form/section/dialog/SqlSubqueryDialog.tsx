@@ -1,18 +1,22 @@
 import { useState } from "react";
 import { DialogActions, DialogField } from "../../../../components/dialog";
 import { BlueButton, WhiteButton } from "../../../../components/element/Button";
+import { useCsvColumnNamesFetcher } from "../../../../hooks/useDatasetSettings";
 import type { JobContext } from "../../../../hooks/useJob";
 import { useTableSelection } from "../../../../hooks/useTableSelection";
 import {
 	type Conjunction,
 	columnLines,
 	conditionLines,
+	csvFileAlias,
+	csvReadExpression,
 	DEFAULT_CONDITION_OPTIONS,
 	defaultTableAlias,
 	qualifyColumn,
 	subqueryLines,
 	uniqueAlias,
 } from "../../../../utils/textInsert";
+import CsvFileFields from "./CsvFileFields";
 import SelectableTable from "./SelectableTable";
 import {
 	CONJUNCTION_OPTIONS,
@@ -27,21 +31,49 @@ import { useColumnLoad } from "./useColumnLoad";
 // IN は SELECT する1列、FROM / JOIN に置くときは複数列を選び、EXISTS は SELECT 1 にする
 export type SubqueryMode = "in" | "exists" | "from";
 
+// サブクエリのテーブルの選び方。tablesはDBのテーブル一覧から、csvはCSVファイルをCSVREADで読む（encodingは文字コードの初期値）
+export type SubquerySource =
+	| {
+			kind: "tables";
+			tables: string[];
+			onQueryColumns: (table: string, context: JobContext) => Promise<string[]>;
+	  }
+	| { kind: "csv"; encoding: string };
+
+type SubqueryDialogProps = {
+	mode: Exclude<SubqueryMode, "from">;
+	// 外側の別名。サブクエリの別名のデフォルトが重ならないようにする
+	usedAliases: string[];
+	onComplete: (lines: string[]) => void;
+	onClose: () => void;
+};
+
 export default function SqlSubqueryDialog({
+	source,
+	...props
+}: SubqueryDialogProps & { source: SubquerySource }) {
+	if (source.kind === "csv") {
+		return <CsvSubqueryTable encoding={source.encoding} {...props} />;
+	}
+	return (
+		<ListSubqueryTable
+			tables={source.tables}
+			onQueryColumns={source.onQueryColumns}
+			{...props}
+		/>
+	);
+}
+
+function ListSubqueryTable({
 	mode,
 	tables,
 	usedAliases,
 	onQueryColumns,
 	onComplete,
 	onClose,
-}: {
-	mode: Exclude<SubqueryMode, "from">;
+}: SubqueryDialogProps & {
 	tables: string[];
-	// 外側の別名。サブクエリの別名のデフォルトが重ならないようにする
-	usedAliases: string[];
 	onQueryColumns: (table: string, context: JobContext) => Promise<string[]>;
-	onComplete: (lines: string[]) => void;
-	onClose: () => void;
 }) {
 	const { selected, toggleOnly } = useTableSelection();
 	const [alias, setAlias] = useState("");
@@ -57,50 +89,128 @@ export default function SqlSubqueryDialog({
 		);
 	};
 
-	const { target } = columnLoad;
-	if (target !== null) {
-		return (
-			columnLoad.renderState("Subquery Columns") ?? (
-				<SubqueryColumns
-					mode={mode}
-					table={target.table}
-					alias={alias.trim()}
-					columns={target.columns ?? []}
-					onComplete={onComplete}
+	return (
+		renderSubqueryColumns(columnLoad, mode, alias, onComplete, onClose) ?? (
+			<NestedDialogFrame title="Subquery Table">
+				<DialogField>
+					<SelectableTable
+						items={tables}
+						selected={selected}
+						onToggle={handleToggle}
+						columnLabel="Table Name"
+						filterPlaceholder="Filter tables..."
+					/>
+				</DialogField>
+				<SubqueryTableActions
+					alias={alias}
+					onAliasChange={setAlias}
+					canProceed={selectedTable !== null}
+					onNext={() => selectedTable && columnLoad.open(selectedTable)}
 					onClose={onClose}
 				/>
-			)
-		);
-	}
+			</NestedDialogFrame>
+		)
+	);
+}
+
+// csvqにはDBのテーブル一覧が無いため、ファイルを1つ選んでCSVREADで読む
+function CsvSubqueryTable({
+	mode,
+	encoding,
+	usedAliases,
+	onComplete,
+	onClose,
+}: SubqueryDialogProps & { encoding: string }) {
+	const [path, setPath] = useState("");
+	const [charset, setCharset] = useState(encoding);
+	const [alias, setAlias] = useState("");
+	const fetchCsvColumnNames = useCsvColumnNamesFetcher();
+	const columnLoad = useColumnLoad((_table: string, context: JobContext) =>
+		fetchCsvColumnNames(path.trim(), charset.trim(), context),
+	);
+
+	const handleChoose = (next: string) => {
+		setPath(next);
+		setAlias(uniqueAlias(csvFileAlias(next), usedAliases));
+	};
 
 	return (
-		<NestedDialogFrame title="Subquery Table">
-			<DialogField>
-				<SelectableTable
-					items={tables}
-					selected={selected}
-					onToggle={handleToggle}
-					columnLabel="Table Name"
-					filterPlaceholder="Filter tables..."
+		renderSubqueryColumns(columnLoad, mode, alias, onComplete, onClose) ?? (
+			<NestedDialogFrame title="Subquery Table">
+				<CsvFileFields
+					idPrefix="sqlSubquery"
+					path={path}
+					charset={charset}
+					onPathChange={setPath}
+					onChoose={handleChoose}
+					onCharsetChange={setCharset}
 				/>
-			</DialogField>
+				<SubqueryTableActions
+					alias={alias}
+					onAliasChange={setAlias}
+					canProceed={path.trim() !== "" && charset.trim() !== ""}
+					onNext={() => columnLoad.open(csvReadExpression(path, charset))}
+					onClose={onClose}
+				/>
+			</NestedDialogFrame>
+		)
+	);
+}
+
+// テーブルを選んだ後の列の選択。列を読む前ならnull
+function renderSubqueryColumns(
+	columnLoad: ReturnType<typeof useColumnLoad>,
+	mode: Exclude<SubqueryMode, "from">,
+	alias: string,
+	onComplete: (lines: string[]) => void,
+	onClose: () => void,
+) {
+	const { target } = columnLoad;
+	if (target === null) {
+		return null;
+	}
+	return (
+		columnLoad.renderState("Subquery Columns") ?? (
+			<SubqueryColumns
+				mode={mode}
+				table={target.table}
+				alias={alias.trim()}
+				columns={target.columns ?? []}
+				onComplete={onComplete}
+				onClose={onClose}
+			/>
+		)
+	);
+}
+
+function SubqueryTableActions({
+	alias,
+	onAliasChange,
+	canProceed,
+	onNext,
+	onClose,
+}: {
+	alias: string;
+	onAliasChange: (value: string) => void;
+	canProceed: boolean;
+	onNext: () => void;
+	onClose: () => void;
+}) {
+	return (
+		<>
 			<DialogField last>
 				<OptionText
 					id="sqlSubquery_alias"
 					label="Table alias"
 					value={alias}
-					onChange={setAlias}
+					onChange={onAliasChange}
 				/>
 			</DialogField>
 			<DialogActions>
-				<BlueButton
-					title="Next"
-					handleClick={() => selectedTable && columnLoad.open(selectedTable)}
-					disabled={selectedTable === null}
-				/>
+				<BlueButton title="Next" handleClick={onNext} disabled={!canProceed} />
 				<WhiteButton title="Cancel" handleClick={onClose} />
 			</DialogActions>
-		</NestedDialogFrame>
+		</>
 	);
 }
 

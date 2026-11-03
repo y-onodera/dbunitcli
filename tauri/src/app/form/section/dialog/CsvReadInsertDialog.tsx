@@ -1,4 +1,4 @@
-import { type SetStateAction, useState } from "react";
+import { useState } from "react";
 import {
 	DialogActions,
 	DialogField,
@@ -8,7 +8,6 @@ import {
 import { BlueButton, WhiteButton } from "../../../../components/element/Button";
 import { useCsvColumnNamesFetcher } from "../../../../hooks/useDatasetSettings";
 import type { JobContext } from "../../../../hooks/useJob";
-import type { CommandOption } from "../../../../model/CommandOption";
 import {
 	csvFileAlias,
 	csvReadExpression,
@@ -17,7 +16,7 @@ import {
 	statementColumnUsage,
 	tableLines,
 } from "../../../../utils/textInsert";
-import { FileChooser } from "../element/Chooser";
+import CsvFileFields from "./CsvFileFields";
 import SqlColumnInsertDialog from "./SqlColumnInsertDialog";
 import {
 	InsertPreview,
@@ -41,19 +40,6 @@ const CSV_USAGE_GROUPS: SelectGroup<DerivedTableUsage>[] = [
 		],
 	},
 ];
-
-// csvq実行時にCSVREADの相対パスを探す基準（datasetBase→workspace）と同じ基準で相対パスにする
-const CSV_FILE_ELEMENT: CommandOption = {
-	name: "csvFile",
-	value: "",
-	optional: true,
-	attribute: {
-		type: "FILE",
-		required: false,
-		selectOption: [],
-		defaultPath: "DATASET",
-	},
-};
 
 export default function CsvReadInsertDialog({
 	encoding,
@@ -80,8 +66,7 @@ export default function CsvReadInsertDialog({
 		(!isJoin(usage) || alias.trim() !== "");
 
 	// ファイルを選び直したら、別名をファイル名から付け直す
-	const handleChoose = (value: SetStateAction<string>) => {
-		const next = typeof value === "function" ? value(path) : value;
+	const handleChoose = (next: string) => {
 		setPath(next);
 		setAlias(csvFileAlias(next));
 	};
@@ -97,34 +82,14 @@ export default function CsvReadInsertDialog({
 	return (
 		<ModalOverlay>
 			<DialogTitle>Insert CSVREAD</DialogTitle>
-			<DialogField>
-				<div className="flex gap-2 items-end">
-					<OptionText
-						id="csvReadInsert_file"
-						label="CSV file"
-						required
-						value={path}
-						onChange={setPath}
-					/>
-					<div className="mb-1">
-						<FileChooser
-							prefix="csvReadInsert"
-							element={CSV_FILE_ELEMENT}
-							path={path}
-							setPath={handleChoose}
-						/>
-					</div>
-				</div>
-			</DialogField>
-			<DialogField>
-				<OptionText
-					id="csvReadInsert_charset"
-					label="Charset"
-					required
-					value={charset}
-					onChange={setCharset}
-				/>
-			</DialogField>
+			<CsvFileFields
+				idPrefix="csvReadInsert"
+				path={path}
+				charset={charset}
+				onPathChange={setPath}
+				onChoose={handleChoose}
+				onCharsetChange={setCharset}
+			/>
 			<DialogField>
 				<div className="flex gap-3">
 					<OptionSelect
@@ -173,9 +138,7 @@ export default function CsvReadInsertDialog({
 						wrap: (lines) =>
 							tableLines(columnLoad.target?.table ?? "", usage, alias, lines),
 					}}
-					// サブクエリの候補になるテーブルは無い（csvqにDBのテーブル一覧は無い）
-					tables={[]}
-					onQueryColumns={async () => []}
+					subquerySource={{ kind: "csv", encoding: charset }}
 					onInsert={(lines) => {
 						columnLoad.close();
 						onInsert(lines);

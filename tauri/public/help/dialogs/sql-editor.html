@@ -196,6 +196,7 @@ FROM (
     <li>カラムを選んで Insert Columns（All Columns なら全カラム）を押すと、文全体を挿入して Insert CSVREAD が閉じます。Select Columns の Usage は Insert CSVREAD の Usage に合わせて固定されます。</li>
   </ol>
   <p>Usage が Cross join のときは、カラムを読み込まずに Insert ですぐ挿入します。</p>
+  <p>Usage が Left join / Inner join のときに Select Columns の Operator で IN（IN source が Subquery）または EXISTS を選ぶと、Subquery Table ではテーブル一覧の代わりに CSV file と Charset を指定して CSV ファイルを 1 つ選びます。Charset のデフォルトは Insert CSVREAD の Charset、Table alias のデフォルトはファイル選択ボタンで選んだファイル名から作ります。</p>
   <table>
     <tr><th>項目</th><th>説明</th><th>デフォルト</th></tr>
     <tr><td>CSV file（必須）</td><td>読み込む CSV ファイル。ファイル選択ボタンで選ぶと、Dataset Base 配下なら Dataset Base から、それ以外の Workspace 配下なら Workspace からの相対パスになる（どちらでもなければ絶対パス）。実行時の相対パスの探し方は <a href="../sections/dataset-load-form/types/csvq.html">csvq</a> を参照。パスの区切りは <code>/</code> にして挿入する</td><td>（空）</td></tr>

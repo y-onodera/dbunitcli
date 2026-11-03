@@ -98,7 +98,7 @@ function Dialog(props: SqlEditorDialogProps & { value: string }) {
 
 	return (
 		<SettingDialog
-			title={props.type === "sql" ? "Edit SQL" : "Edit Table Definition"}
+			title={props.type === "table" ? "Edit Table Definition" : "Edit SQL"}
 			helpCommand="dialogs/sql-editor"
 			helpLabel="SQL Editor"
 			handleDialogClose={props.handleDialogClose}
@@ -143,9 +143,9 @@ function Dialog(props: SqlEditorDialogProps & { value: string }) {
 					value={content}
 					onChange={(e) => setContent(e.target.value)}
 					placeholder={
-						props.type === "sql"
-							? "Enter SQL query..."
-							: "Enter table definition..."
+						props.type === "table"
+							? "Enter table definition..."
+							: "Enter SQL query..."
 					}
 					spellCheck={false}
 				/>

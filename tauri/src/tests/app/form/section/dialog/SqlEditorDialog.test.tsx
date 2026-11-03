@@ -89,6 +89,7 @@ describe("SqlEditorDialogのテスト", () => {
 				handleSave={vi.fn()}
 			/>,
 		);
+		expect(screen.getByText("Edit SQL")).toBeInTheDocument();
 		await user.click(screen.getByRole("button", { name: "Select CSV" }));
 		expect(screen.getByText("Insert CSVREAD")).toBeInTheDocument();
 		// フォームのencodingが未指定ならUTF-8

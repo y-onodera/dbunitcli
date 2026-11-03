@@ -23,6 +23,11 @@ vi.mock("../../../../../app/form/section/element/Chooser", () => ({
 	),
 }));
 
+// 入れ子のダイアログが重なるため、後ろ（手前のダイアログ）から数えて取る
+function fromLast(elements: HTMLElement[], n = 1): HTMLElement {
+	return elements[elements.length - n];
+}
+
 function renderDialog() {
 	mockCsvColumns.mockResolvedValue(["ID", "NAME"]);
 	const onInsert = vi.fn();
@@ -82,6 +87,50 @@ describe("CsvReadInsertDialog", () => {
 			"    LEFT JOIN",
 			"        CSVREAD('orders.csv',null,'charset=UTF-8') O",
 			"          ON  O.ID = ",
+		]);
+	});
+
+	it("ONのINのサブクエリは、テーブルの代わりにCSVファイルを1つ選んで組み立てる", async () => {
+		const { user, onInsert } = renderDialog();
+		await user.type(screen.getByLabelText("CSV file*"), "orders.csv");
+		await user.selectOptions(screen.getByLabelText("Usage"), "innerJoin");
+		await user.type(screen.getByLabelText("Table alias*"), "O");
+		await user.click(screen.getByRole("button", { name: "Next" }));
+		await screen.findByText("Select Columns");
+		await user.selectOptions(screen.getByLabelText("Operator"), "in");
+		await user.selectOptions(screen.getByLabelText("IN source"), "subquery");
+		await user.click(screen.getByText("ID"));
+		await user.click(
+			fromLast(screen.getAllByRole("button", { name: "Next" })),
+		);
+
+		await screen.findByText("Subquery Table");
+		const chooseButtons = screen.getAllByRole("button", { name: "Choose" });
+		await user.click(chooseButtons[chooseButtons.length - 1]);
+		// 文字コードの初期値は外側で指定したもの、別名はファイル名から
+		expect(fromLast(screen.getAllByLabelText("Charset*"))).toHaveValue("MS932");
+		expect(screen.getByLabelText("Table alias")).toHaveValue("UA");
+		const nexts = screen.getAllByRole("button", { name: "Next" });
+		await user.click(nexts[nexts.length - 1]);
+
+		await screen.findByText("Subquery Columns");
+		expect(mockCsvColumns).toHaveBeenLastCalledWith(
+			"dataset\\user_account.csv",
+			"MS932",
+			expect.anything(),
+		);
+		// 後ろ2つがSubquery ColumnsのSELECT columnとWHERE columns
+		await user.click(fromLast(screen.getAllByText("NAME"), 2));
+		await user.click(screen.getByRole("button", { name: "Insert" }));
+		expect(onInsert).toHaveBeenCalledWith([
+			"    INNER JOIN",
+			"        CSVREAD('orders.csv',null,'charset=MS932') O",
+			"          ON  O.ID IN (",
+			"                  SELECT",
+			"                      UA.NAME",
+			"                  FROM",
+			"                      CSVREAD('dataset/user_account.csv',null,'charset=MS932') UA",
+			"              )",
 		]);
 	});
 

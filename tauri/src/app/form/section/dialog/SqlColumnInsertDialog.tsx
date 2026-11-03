@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { DialogActions, DialogField } from "../../../../components/dialog";
 import { BlueButton, WhiteButton } from "../../../../components/element/Button";
-import type { JobContext } from "../../../../hooks/useJob";
 import { useTableSelection } from "../../../../hooks/useTableSelection";
 import {
 	type ColumnUsage,
@@ -32,7 +31,7 @@ import {
 	renderColumnLoadState,
 	type SelectOption,
 } from "./SqlInsertParts";
-import SqlSubqueryDialog from "./SqlSubqueryDialog";
+import SqlSubqueryDialog, { type SubquerySource } from "./SqlSubqueryDialog";
 
 const COLUMN_USAGE_OPTIONS: SelectOption<ColumnUsage>[] = [
 	{ value: "select", label: "Select" },
@@ -89,8 +88,7 @@ export default function SqlColumnInsertDialog({
 	alias,
 	qualify: initialQualify,
 	statement,
-	tables,
-	onQueryColumns,
+	subquerySource,
 	onInsert,
 	onClose,
 }: {
@@ -105,9 +103,7 @@ export default function SqlColumnInsertDialog({
 	qualify: boolean;
 	// 指定時は用途を固定し、選んだ列をwrapで文全体にして挿入する
 	statement?: { usage: ColumnUsage; wrap: (lines: string[]) => string[] };
-	// サブクエリのテーブルの候補と、その列の読込
-	tables: string[];
-	onQueryColumns: (table: string, context: JobContext) => Promise<string[]>;
+	subquerySource: SubquerySource;
 	// inlineなら改行を足さずにカーソル位置へ入れる（条件の右辺）
 	onInsert: (lines: string[], inline?: boolean) => void;
 	onClose: () => void;
@@ -435,9 +431,8 @@ export default function SqlColumnInsertDialog({
 			{subqueryMode !== null && (
 				<SqlSubqueryDialog
 					mode={subqueryMode}
-					tables={tables}
+					source={subquerySource}
 					usedAliases={alias === "" ? [] : [alias]}
-					onQueryColumns={onQueryColumns}
 					onComplete={(subquery) =>
 						onInsert(linesOf(selectedColumns, subquery), inline)
 					}
