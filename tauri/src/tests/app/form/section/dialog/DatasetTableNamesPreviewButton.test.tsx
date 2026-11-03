@@ -16,7 +16,6 @@ import {
 } from "../../../../setup";
 import { convertRefreshSrcTypeXlsxResponseFixture } from "../../fixtures";
 
-// Tauri API モック
 vi.mock("@tauri-apps/plugin-dialog", () => ({ open: vi.fn() }));
 vi.mock("@tauri-apps/api", () => ({ core: { invoke: vi.fn() } }));
 vi.mock("@tauri-apps/api/path", () => ({

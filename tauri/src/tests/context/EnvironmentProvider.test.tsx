@@ -5,7 +5,6 @@ import EnvironmentProvider, {
 	useEnvironment,
 } from "../../context/EnvironmentProvider";
 
-// Tauri Plugin CLIのモック
 const mockArgs: {
 	args: {
 		port?: { value: string };
@@ -28,12 +27,10 @@ vi.mock("@tauri-apps/plugin-cli", () => ({
 	getMatches: () => mockGetMatches(),
 }));
 
-// テストコンポーネント
 const TestComponent = () => {
 	return <div data-testid="test-component">'Loaded Content'</div>;
 };
 
-// カスタムラッパーコンポーネント
 const wrapper = ({ children }: { children: ReactNode }) => (
 	<EnvironmentProvider>{children}</EnvironmentProvider>
 );

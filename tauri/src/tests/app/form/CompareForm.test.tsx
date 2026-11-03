@@ -11,7 +11,6 @@ import {
 	compareRefreshTargetTypeImageResponseFixture,
 } from "./fixtures";
 
-// Tauri API モック
 vi.mock("@tauri-apps/plugin-dialog", () => ({ open: vi.fn() }));
 vi.mock("@tauri-apps/api", () => ({ core: { invoke: vi.fn() } }));
 vi.mock("@tauri-apps/api/path", () => ({
@@ -19,7 +18,6 @@ vi.mock("@tauri-apps/api/path", () => ({
 	sep: vi.fn().mockReturnValue("/"),
 }));
 
-// コンテキストフックのモック
 vi.mock("../../../context/WorkspaceResourcesProvider", () => ({
 	useWorkspaceContext: () => workspaceResourcesFixture.context,
 	useResourcesSettings: () => workspaceResourcesFixture.resources,
@@ -28,7 +26,6 @@ vi.mock("../../../context/EnvironmentProvider", () => ({
 	useEnvironment: () => environmentFixture,
 }));
 
-// JDBC API フックのモック
 vi.mock("../../../hooks/useJdbc", () => ({
 	useJdbcConnectionTest: () => vi.fn(),
 	useSaveJdbcProperties: () => vi.fn(),

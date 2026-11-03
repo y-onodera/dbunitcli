@@ -9,7 +9,6 @@ import {
 } from "../../../../setup";
 import { generateRefreshFixedColumnDefResponseFixture } from "../../fixtures";
 
-// Tauri API モック
 vi.mock("@tauri-apps/plugin-dialog", () => ({ open: vi.fn() }));
 vi.mock("@tauri-apps/api", () => ({ core: { invoke: vi.fn() } }));
 vi.mock("@tauri-apps/api/path", () => ({
@@ -17,7 +16,6 @@ vi.mock("@tauri-apps/api/path", () => ({
 	sep: vi.fn().mockReturnValue("/"),
 }));
 
-// コンテキストフックのモック
 vi.mock("../../../../../context/WorkspaceResourcesProvider", () => ({
 	useWorkspaceContext: () => workspaceResourcesFixture.context,
 	useResourcesSettings: () => workspaceResourcesFixture.resources,
@@ -26,7 +24,6 @@ vi.mock("../../../../../context/EnvironmentProvider", () => ({
 	useEnvironment: () => environmentFixture,
 }));
 
-// JDBC API フックのモック
 vi.mock("../../../../../hooks/useJdbc", () => ({
 	useJdbcConnectionTest: () => vi.fn(),
 	useSaveJdbcProperties: () => vi.fn(),
@@ -37,7 +34,7 @@ vi.mock("../../../../../hooks/useWorkspaceResources", () => ({
 	useResolveAbsolutePath: () => vi.fn(async (path: string) => path),
 }));
 
-// 保存フローは編集ダイアログ内の既存フックが担うためモックで検証する
+// 保存フローは編集ダイアログ内のフックが担うためモックで検証する
 // （mockReset:trueで実装が毎回リセットされるため、resolve値は各テスト内で設定する）
 const { mockSaveDef } = vi.hoisted(() => ({
 	mockSaveDef: vi.fn(),
@@ -126,7 +123,7 @@ describe("FixedColumnDefGenerateDialogの実行テスト", () => {
 		await user.type(srcInput, "resources/src/csv");
 		await user.click(screen.getByRole("button", { name: "Execute" }));
 
-		// 生成結果が既存の編集ダイアログにプリフィルされる
+		// 生成結果が編集ダイアログにプリフィルされる
 		await waitFor(() => {
 			expect(screen.getAllByText(/key \(10\)/).length).toBeGreaterThan(0);
 		});

@@ -28,8 +28,8 @@ function renderKeySetting(setting: DatasetSetting): string {
 		: setting.displayName();
 }
 
-// compareの-setting（比較キー設定）の編集ダイアログ。kindの保存先（option/compare/setting）を読み書きする。
-// テーブル名・カラム名の候補はDatasetSrcInfoProvider（CompareFormではold側のデータセット）から取得する
+// compareの-setting（比較キー設定）の編集ダイアログ。kindの保存先を読み書きする。
+// テーブル名・カラム名の候補はDatasetSrcInfoProviderから取得する
 export default function CompareKeySettingsDialog(props: {
 	fileName: string;
 	handleDialogClose: () => void;

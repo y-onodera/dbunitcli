@@ -73,7 +73,6 @@ HTMLDialogElement.prototype.close = vi.fn(function (this: HTMLDialogElement) {
 	this.removeAttribute("open");
 });
 
-// テスト後のクリーンアップ
 afterEach(() => {
 	cleanup();
 	vi.clearAllMocks();

@@ -12,7 +12,7 @@ import { BlueButton, WhiteButton } from "../../../../components/element/Button";
 import { JobProgress } from "../../../../components/element/JobProgress";
 import type { DialogLoadState } from "./refreshableDialogForm";
 
-// refresh系ダイアログ（Generate・Scaffold）共通の枠: タイトル・読込/エラー表示・form・Execute/Closeフッタ
+// refresh系ダイアログ共通の枠: タイトル・読込/エラー表示・form・Execute/Closeフッタ
 export function RefreshableDialogShell<OPTIONS>({
 	command,
 	label,

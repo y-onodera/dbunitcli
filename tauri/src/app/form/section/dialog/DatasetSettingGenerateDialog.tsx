@@ -39,7 +39,7 @@ function datasetSettingGenerateConfig(
 	};
 }
 
-// editDialogを省略するとDataset Settingsで確認する（compareの比較キーはCompare Key Settingsを渡す）
+// editDialogを省略するとDataset Settingsで確認する
 export function DatasetSettingGenerateButton({
 	setPath,
 	editDialog = DatasetSettingsEditDialog,

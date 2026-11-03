@@ -25,7 +25,6 @@ import {
 import type { FetchParams } from "../../utils/fetchUtils";
 import { environmentFixture, workspaceResourcesFixture } from "../setup";
 
-// モックデータ
 const mockWorkspaceResources: WorkspaceResources = {
 	...workspaceResourcesFixture,
 };

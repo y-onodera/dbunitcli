@@ -57,12 +57,11 @@ export default defineConfig(async ({ mode }) => ({
 			ignored: ["**/src-tauri/**"],
 		},
 	},
-	// Vitestの設定
 	test: {
-		globals: true, // グローバルなテストAPI（describe, it, expect）を有効化
-		environment: "jsdom", // テスト環境としてjsdomを使用
-		setupFiles: ["./src/tests/setup.tsx"], // テストのセットアップファイル
-		include: ["src/**/*.{test,spec}.{ts,tsx}"], // テスト対象ファイル
-		mockReset: true, // 各テスト前にモックをリセット
+		globals: true,
+		environment: "jsdom",
+		setupFiles: ["./src/tests/setup.tsx"],
+		include: ["src/**/*.{test,spec}.{ts,tsx}"],
+		mockReset: true,
 	},
 }));

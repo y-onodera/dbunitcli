@@ -25,12 +25,10 @@ import type { TextProp } from "./FormElementProp";
 import Text, { TextDropDownMenu } from "./Text";
 
 // editDialog: 編集ボタンで開くダイアログ、generateEditDialog: 生成結果を確認・保存するダイアログ。
-// 省略するとDataset Settingsを使う（compareの-settingはCompare Key Settingsを渡す）。
-// showGenerate=falseでgenerateボタンを出さない（generateの-unitSettingは雛型生成が用途に合わないため）。
+// 省略するとDataset Settingsを使う。
+// showGenerate=falseでgenerateボタンを出さない。
 // preview: 横に出すプレビュー。省略するとsrcのsettingの適用前後のPreviewボタン、nullなら出さない
-// （compareの-settingはnull、generateの-unitSettingはunitSettingのプレビューを渡す）
 // 候補一覧・削除・編集ダイアログの読込と保存の対象は、オプションの基準ディレクトリ（defaultPath）で決まる
-// （compareの-settingはoption/compare/setting、generateの-unitSettingはoption/generate/setting）
 const kindByDefaultPath: Partial<Record<DefaultPath, DatasetSettingKind>> = {
 	COMPARE_SETTING: "compareSetting",
 	GENERATE_SETTING: "generateSetting",
