@@ -452,6 +452,40 @@ class DatasetSettingsControllerTest {
     }
 
     @Test
+    void testTableColumns_テーブル名未指定なら全テーブルの列名を返す() throws IOException {
+        this.createPreviewSrc();
+
+        Assertions.assertEquals(Map.of("big", List.of("key", "value"), "small", List.of("key", "other")),
+                this.tableColumns(this.tableBody("csv", "", "")));
+    }
+
+    @Test
+    void testTableColumns_設定を適用した後のテーブル名と列名を返す() throws IOException {
+        this.createPreviewSrc();
+
+        Assertions.assertEquals(Map.of("joined", List.of("big_key", "big_value", "small_key", "small_other")),
+                this.tableColumns(this.tableBody("csv", this.writeJoinSetting(), "joined")));
+    }
+
+    @Test
+    void testTableColumns_テーブル名を指定すれば対象外のソースを開かない() throws IOException {
+        this.createPreviewSrc();
+        final String setting = this.writeRenameSetting();
+
+        this.assertOpensOnly("big.csv", () -> Assertions.assertEquals(Map.of("renamed", List.of("key", "value")),
+                this.tableColumns(this.tableBody("csv", setting, "renamed"))));
+    }
+
+    @Test
+    void testTableColumns_読み込めなければエラーを返す() throws IOException {
+        this.createPreviewSrc();
+
+        final HttpClientResponseException ex = Assertions.assertThrows(HttpClientResponseException.class,
+                () -> this.tableColumns(this.tableBody("csv", "missingSetting.json", "big")));
+        Assertions.assertEquals(HttpStatus.BAD_REQUEST, ex.getStatus());
+    }
+
+    @Test
     void testTableConvert_選んだテーブルだけを出力して出力先を返す() throws IOException {
         this.createPreviewSrc();
 
@@ -763,6 +797,13 @@ class DatasetSettingsControllerTest {
         final String response = this.client.toBlocking().retrieve(
                 HttpRequest.POST("dbunit-cli/dataset-setting/table-names", ObjectMapper.getDefault().writeValueAsString(body)));
         return List.of(ObjectMapper.getDefault().readValue(response, String[].class)).stream().sorted().toList();
+    }
+
+    @SuppressWarnings("unchecked")
+    private Map<String, List<String>> tableColumns(final Map<String, Object> body) throws IOException {
+        final String response = this.client.toBlocking().retrieve(
+                HttpRequest.POST("dbunit-cli/dataset-setting/table-columns", ObjectMapper.getDefault().writeValueAsString(body)));
+        return ObjectMapper.getDefault().readValue(response, Map.class);
     }
 
     private DatasetTablePreviewResponseDto tablePreview(final String setting, final String tableName) throws IOException {

@@ -8,6 +8,7 @@ import io.micronaut.json.JsonMapper;
 import io.micronaut.serde.ObjectMapper;
 import jakarta.json.Json;
 import jakarta.json.JsonReader;
+import org.dbunit.dataset.Column;
 import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.ITableMetaData;
 import org.slf4j.Logger;
@@ -58,6 +59,7 @@ import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -115,6 +117,39 @@ public class DatasetSettingsController extends AbstractResourceFileController<Da
         } catch (final Throwable th) {
             LOGGER.warn("Could not get table names", th);
             return "[]";
+        }
+    }
+
+    /**
+     * 読み込まれるテーブルごとの列名を返す（テーブル名→列名）。table-namesと同じくlazyLoadで求めるため、
+     * データ行は分割（split）後の名前を求める場合だけ読む。tableNameを指定すればそのテーブルだけを返し、
+     * 対象外のソースはなるべく開かない（{@link Narrow#singlePass}）。読めなかったときはエラーを返す
+     */
+    @Interruptible
+    @Post(uri = "table-columns", produces = MediaType.APPLICATION_JSON)
+    public String tableColumns(@Body final DatasetTablePreviewRequestDto request) {
+        try {
+            final String tableName = request.getTableName();
+            final ComparableDataSetParam.Builder param = this.toParam(request).get();
+            if (Strings.isNotEmpty(tableName)) {
+                final TableSeparators separators = param.getTableSeparators();
+                Narrow.singlePass(separators).applyTo(param, separators, tableName);
+            }
+            try (final ComparableDataSetProducer producer = new ComparableDataSetLoader(this.buildParameter(request))
+                    .getComparableDataSetProducer(param.build())) {
+                final Map<String, List<String>> result = new LinkedHashMap<>();
+                producer.lazyLoad(true).forEach((name, table) -> {
+                    if (Strings.isEmpty(tableName) || tableName.equals(name)) {
+                        result.put(name, Arrays.stream(((ComparableTableDto) table).getColumns())
+                                               .map(Column::getColumnName)
+                                               .toList());
+                    }
+                });
+                return ObjectMapper.getDefault().writeValueAsString(result);
+            }
+        } catch (final Throwable th) {
+            LOGGER.error("cause:", th);
+            throw new ApplicationException(th);
         }
     }
 

@@ -175,27 +175,6 @@ function useDatasetLoad<T>(
 	return load;
 }
 
-async function fetchTableNames(
-	apiUrl: string,
-	info: DatasetSrcInfo,
-	jdbcValues: Record<string, string>,
-	paramInputs: Record<string, string>,
-	signal?: AbortSignal,
-): Promise<string[]> {
-	if (!info.values.src) {
-		return [];
-	}
-	return fetchDatasetJson(
-		apiUrl,
-		"table-names",
-		info,
-		jdbcValues,
-		paramInputs,
-		{},
-		signal,
-	);
-}
-
 const IDLE_TABLE_NAMES = idleLoad<string[]>([]);
 
 // withLogs: 読込中のログも受け取る（読込中の表示に使う場合）
@@ -226,32 +205,7 @@ export type TablePreview = {
 	totalRows: number;
 };
 
-const EMPTY_PREVIEW: TablePreview = { headers: [], rows: [], totalRows: 0 };
 const IDLE_PREVIEW = idleLoad<TablePreview | null>(null);
-
-async function fetchTablePreview(
-	apiUrl: string,
-	info: DatasetSrcInfo,
-	tableName: string,
-	jdbcValues: Record<string, string>,
-	paramInputs: Record<string, string>,
-	signal?: AbortSignal,
-	onLog?: (line: string) => void,
-): Promise<TablePreview> {
-	if (!info.values.src || !tableName) {
-		return EMPTY_PREVIEW;
-	}
-	return fetchDatasetJson(
-		apiUrl,
-		"table-preview",
-		info,
-		jdbcValues,
-		paramInputs,
-		{ tableName },
-		signal,
-		onLog,
-	);
-}
 
 // generateの-unitSettingをsrcのテーブル1つに適用した結果のテーブル1つ分
 export type UnitTablePreview = TablePreview & { tableName: string };
@@ -401,7 +355,29 @@ export const useSrcInfoColumnNames = (srcInfo: DatasetSrcInfo): string[] => {
 	return columnNames;
 };
 
-// 入力候補なので、settingの対象外のテーブルのカラムも含める
+// テーブル名→列名。tableNameを指定すればそのテーブルだけを読む。失敗は投げる
+async function fetchTableColumns(
+	apiUrl: string,
+	info: DatasetSrcInfo,
+	tableName: string,
+	jdbcValues: Record<string, string>,
+	paramInputs: Record<string, string>,
+	signal?: AbortSignal,
+	onLog?: (line: string) => void,
+): Promise<Record<string, string[]>> {
+	return fetchDatasetJson(
+		apiUrl,
+		"table-columns",
+		info,
+		jdbcValues,
+		paramInputs,
+		{ tableName },
+		signal,
+		onLog,
+	);
+}
+
+// 入力候補なので、settingの対象外のテーブルのカラムも含め、取得できなければ候補なしとする
 async function loadAllColumnNames(
 	apiUrl: string,
 	srcInfo: DatasetSrcInfo,
@@ -409,38 +385,15 @@ async function loadAllColumnNames(
 	paramInputs: Record<string, string>,
 	signal: AbortSignal,
 ): Promise<string[]> {
-	const info = withAllTables(srcInfo);
-	// 入力候補なので、取得できなかったテーブルは候補なしとして続ける
-	const tableNames: string[] = await fetchTableNames(
+	const columns = await fetchTableColumns(
 		apiUrl,
-		info,
+		withAllTables(srcInfo),
+		"",
 		jdbcValues,
 		paramInputs,
 		signal,
-	).catch(() => []);
-	const previews = await Promise.all(
-		tableNames.map((tableName) =>
-			fetchTablePreview(
-				apiUrl,
-				info,
-				tableName,
-				jdbcValues,
-				paramInputs,
-				signal,
-			).catch(() => EMPTY_PREVIEW),
-		),
-	);
-	const seen = new Set<string>();
-	const allColumns: string[] = [];
-	for (const preview of previews) {
-		for (const col of preview.headers) {
-			if (!seen.has(col)) {
-				seen.add(col);
-				allColumns.push(col);
-			}
-		}
-	}
-	return allColumns;
+	).catch(() => ({}));
+	return [...new Set(Object.values(columns).flat())];
 }
 
 export const useColumnNamesFetcher = () => {
@@ -454,7 +407,7 @@ export const useColumnNamesFetcher = () => {
 	): Promise<string[]> => {
 		// 失敗は投げる（呼び出し元がエラーと実行中のログを表示する）。
 		// 入力候補なので、settingの対象外のテーブルでも取得する
-		const preview = await fetchTablePreview(
+		const columns = await fetchTableColumns(
 			apiUrl,
 			withAllTables(srcInfo),
 			tableName,
@@ -463,7 +416,7 @@ export const useColumnNamesFetcher = () => {
 			signal,
 			onLog,
 		);
-		return preview.headers;
+		return columns[tableName] ?? [];
 	};
 };
 
@@ -476,29 +429,16 @@ export const useCsvColumnNamesFetcher = () => {
 		encoding: string,
 		{ signal, onLog }: JobContext,
 	): Promise<string[]> => {
-		const info: DatasetSrcInfo = {
-			values: { srcType: "csv", src: path, encoding },
-		};
-		const [tableName] = await fetchTableNames(
+		const columns = await fetchTableColumns(
 			apiUrl,
-			info,
-			{},
-			paramInputs,
-			signal,
-		);
-		if (tableName === undefined) {
-			return [];
-		}
-		const preview = await fetchTablePreview(
-			apiUrl,
-			info,
-			tableName,
+			{ values: { srcType: "csv", src: path, encoding } },
+			"",
 			{},
 			paramInputs,
 			signal,
 			onLog,
 		);
-		return preview.headers;
+		return Object.values(columns)[0] ?? [];
 	};
 };
 
