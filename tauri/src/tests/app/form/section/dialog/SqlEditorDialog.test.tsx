@@ -5,9 +5,10 @@ import SqlEditorDialog from "../../../../../app/form/section/dialog/SqlEditorDia
 import type { DatasetSrcInfo } from "../../../../../model/CommandOption";
 
 // （mockReset:trueで実装が毎回リセットされるため、resolve値は各テスト内で設定する）
-const { mockSave, mockTableNames } = vi.hoisted(() => ({
+const { mockSave, mockTableNames, jdbcState } = vi.hoisted(() => ({
 	mockSave: vi.fn(),
 	mockTableNames: vi.fn(),
+	jdbcState: { connectionOk: false },
 }));
 vi.mock("../../../../../hooks/useResourceFiles", () => ({
 	useResourceContent: () => ({ content: "select 1", loading: false }),
@@ -33,7 +34,10 @@ vi.mock("../../../../../context/DatasetSrcInfoProvider", () => ({
 	}),
 }));
 vi.mock("../../../../../context/JdbcConnectionProvider", () => ({
-	useJdbcConnectionState: () => ({ jdbcValues: {}, connectionOk: false }),
+	useJdbcConnectionState: () => ({
+		jdbcValues: {},
+		connectionOk: jdbcState.connectionOk,
+	}),
 }));
 
 function renderDialog() {
@@ -72,12 +76,30 @@ describe("SqlEditorDialogのテスト", () => {
 		expect(handleSave).not.toHaveBeenCalled();
 	});
 
-	it("Select CSVはsrcTypeがcsvqのときだけ出る", () => {
-		renderDialog();
-		expect(
-			screen.queryByRole("button", { name: "Select CSV" }),
-		).not.toBeInTheDocument();
-	});
+	it.each([
+		{ type: "sql", connectionOk: true, expected: "Select Tables" },
+		{ type: "sql", connectionOk: false, expected: null },
+		// csvqはDBを読まないため、JDBCに接続できていてもSelect Tablesは出さない
+		{ type: "csvq", connectionOk: true, expected: "Select CSV" },
+	] as const)(
+		"srcType=$type・JDBC接続$connectionOkのときのテーブル選択ボタンは$expected",
+		({ type, connectionOk, expected }) => {
+			jdbcState.connectionOk = connectionOk;
+			render(
+				<SqlEditorDialog
+					type={type}
+					fileName="query.sql"
+					handleDialogClose={vi.fn()}
+					handleSave={vi.fn()}
+				/>,
+			);
+			const buttons = ["Select Tables", "Select CSV"].filter(
+				(name) => screen.queryByRole("button", { name }) !== null,
+			);
+			jdbcState.connectionOk = false;
+			expect(buttons).toStrictEqual(expected === null ? [] : [expected]);
+		},
+	);
 
 	it("Select CSVで挿入した行をカーソル位置に入れる", async () => {
 		const user = userEvent.setup();

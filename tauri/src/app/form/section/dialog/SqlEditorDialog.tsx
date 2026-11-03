@@ -96,6 +96,31 @@ function Dialog(props: SqlEditorDialogProps & { value: string }) {
 		insertToContent(columns, inline);
 	};
 
+	// csvqはDBではなくCSVを読むため、DBのテーブル一覧の代わりにCSVファイルを選ぶ
+	function renderTableSelectorButton() {
+		if (props.type === "csvq") {
+			return (
+				<DialogField>
+					<BlueButton
+						title="Select CSV"
+						handleClick={() => setShowCsvSelector(true)}
+					/>
+				</DialogField>
+			);
+		}
+		if (!connectionOk) {
+			return null;
+		}
+		return (
+			<DialogField>
+				<BlueButton
+					title="Select Tables"
+					handleClick={() => setShowTableSelector(true)}
+				/>
+			</DialogField>
+		);
+	}
+
 	return (
 		<SettingDialog
 			title={props.type === "table" ? "Edit Table Definition" : "Edit SQL"}
@@ -119,24 +144,7 @@ function Dialog(props: SqlEditorDialogProps & { value: string }) {
 			)}
 		>
 			<DialogBody size="md">
-				{(connectionOk || props.type === "csvq") && (
-					<DialogField>
-						<div className="flex gap-2">
-							{connectionOk && (
-								<BlueButton
-									title="Select Tables"
-									handleClick={() => setShowTableSelector(true)}
-								/>
-							)}
-							{props.type === "csvq" && (
-								<BlueButton
-									title="Select CSV"
-									handleClick={() => setShowCsvSelector(true)}
-								/>
-							)}
-						</div>
-					</DialogField>
-				)}
+				{renderTableSelectorButton()}
 				<TextArea
 					id="contents"
 					ref={textareaRef}

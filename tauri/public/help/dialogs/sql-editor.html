@@ -25,7 +25,7 @@
   実行すると、SQL の結果がテーブル active_users として読み込まれる</pre>
   <ul>
     <li>テーブル名は SQL ファイル名（拡張子を除く）になる</li>
-    <li>JDBC の接続テストが成功していれば、Select Tables でテーブル名・カラム名を挿入できる</li>
+    <li><code>srcType</code> が <code>sql</code> / <code>table</code> で JDBC の接続テストが成功していれば、Select Tables でテーブル名・カラム名を挿入できる</li>
     <li><code>srcType</code> が <code>csvq</code> なら、Select CSV で CSV ファイルを選んで <code>CSVREAD()</code> を挿入できる</li>
     <li>Save and Preview で、保存したうえで読み込まれる内容を確認できる</li>
   </ul>
@@ -43,14 +43,14 @@
   <p>各 <code>srcType</code> の詳細は <a href="../sections/dataset-load-form/types/sql.html">sql</a> / <a href="../sections/dataset-load-form/types/table.html">table</a> / <a href="../sections/dataset-load-form/types/csvq.html">csvq</a> を参照してください。</p>
 
   <h2 id="section-select-tables">Select Tables</h2>
-  <p>JDBC 接続が確認済み（<a href="../sections/jdbc.html">JDBC</a> セクションの接続テスト成功）のときのみ、Select Tables ボタンが表示されます。</p>
+  <p><code>srcType</code> が <code>sql</code> / <code>table</code> で、JDBC 接続が確認済み（<a href="../sections/jdbc.html">JDBC</a> セクションの接続テスト成功）のときのみ、Select Tables ボタンが表示されます。<code>csvq</code> はデータベースを読まないため、代わりに <a href="#section-select-csv">Select CSV</a> が表示されます。</p>
   <ol>
     <li>Select Tables を押し、Load Tables でデータベースのテーブル一覧を取得します。</li>
     <li>挿入したいテーブルにチェックを入れ、Insert を押すと、本文のカーソル位置に挿入され、Select Tables が閉じます。本文で範囲を選択していた場合は、その範囲を置き換えます。</li>
     <li>テーブル名の横の Select columns アイコンを押すと、そのテーブルのカラム選択ダイアログ（Select Columns）が開きます。カラムにチェックを入れて Insert Columns を押すと、カーソル位置に 1 行 1 カラムで挿入されます。All Columns を押すと、チェックに関わらずすべてのカラムを 1 行ずつ書き出して挿入します（<code>*</code> は使いません）。Select Tables は開いたままなので、続けて別のテーブルを選べます。</li>
   </ol>
   <p><code>srcType</code> が <code>table</code> の場合は、テーブルを複数選べ、テーブル名・カラム名だけを 1 行ずつ挿入します。以降の項目は表示されません。</p>
-  <p><code>srcType</code> が <code>sql</code> / <code>csvq</code> の場合は、使い道（Usage）を選ぶと、それに合った形で挿入します。挿入される内容は Insert の上に表示されます。</p>
+  <p><code>srcType</code> が <code>sql</code> の場合は、使い道（Usage）を選ぶと、それに合った形で挿入します。挿入される内容は Insert の上に表示されます。</p>
   <p>挿入する SQL は次の形に揃えます。キーワードは大文字で行頭に置き、句の中身は 4 文字下げ、2 行目以降は <code>  , </code> または <code>AND </code> で始めます。テーブル名・カラム名は取得した表記のままです。</p>
   <pre>SELECT
     T.COLUMNA AS COLUMNA
