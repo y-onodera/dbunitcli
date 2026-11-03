@@ -29,10 +29,7 @@ import {
 	renderColumnLoadState,
 	type SelectGroup,
 } from "./SqlInsertParts";
-import SqlSubqueryDialog, {
-	CONJUNCTION_GROUPS,
-	type SubqueryMode,
-} from "./SqlSubqueryDialog";
+import SqlSubqueryDialog, { CONJUNCTION_GROUPS } from "./SqlSubqueryDialog";
 
 const COLUMN_USAGE_GROUPS: SelectGroup<ColumnUsage>[] = [
 	{
@@ -133,7 +130,9 @@ export default function SqlColumnInsertDialog({
 	const [connector, setConnector] = useState<Connector>("none");
 	const [inSource, setInSource] = useState<InSource>("values");
 	const [inValues, setInValues] = useState("");
-	const [subqueryMode, setSubqueryMode] = useState<SubqueryMode | null>(null);
+	const [subqueryMode, setSubqueryMode] = useState<"in" | "exists" | null>(
+		null,
+	);
 
 	const loadState = renderColumnLoadState({
 		title: "Select Columns",

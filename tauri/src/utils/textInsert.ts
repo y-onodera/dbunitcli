@@ -110,6 +110,50 @@ export function tableLines(
 	}
 }
 
+// テーブルの代わりにサブクエリを置ける用途
+export type DerivedTableUsage = Extract<
+	TableUsage,
+	"select" | "leftJoin" | "innerJoin" | "crossJoin"
+>;
+
+export function usesDerivedTable(
+	usage: TableUsage,
+): usage is DerivedTableUsage {
+	return usage === "select" || isJoin(usage);
+}
+
+const JOIN_KEYWORDS: Record<Exclude<DerivedTableUsage, "select">, string> = {
+	leftJoin: "LEFT JOIN",
+	innerJoin: "INNER JOIN",
+	crossJoin: "CROSS JOIN",
+};
+
+// 括弧はFROM / JOINの行末で開き、閉じ括弧の後ろにサブクエリの別名を置く。
+// subqueryはsubqueryLinesの行、columnsはtableLinesと同じく外側の列の行
+export function derivedTableLines(
+	usage: DerivedTableUsage,
+	subquery: string[],
+	alias: string,
+	columns: string[],
+): string[] {
+	const close = `) ${alias.trim()}`;
+	if (usage === "select") {
+		return [
+			"SELECT",
+			...columns,
+			"FROM (",
+			...subquery.map((line) => `${INDENT}${line}`),
+			close,
+		];
+	}
+	return [
+		`${INDENT}${JOIN_KEYWORDS[usage]} (`,
+		...subquery.map((line) => `${JOIN_TABLE_INDENT}${line}`),
+		`${INDENT}${close}`,
+		...(usage === "crossJoin" ? [] : columns),
+	];
+}
+
 export type ColumnUsage =
 	| "select"
 	| "orderBy"

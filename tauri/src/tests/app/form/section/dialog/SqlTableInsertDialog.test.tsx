@@ -412,3 +412,107 @@ describe("SqlTableInsertDialogの条件の挿入", () => {
 		]);
 	});
 });
+
+describe("SqlTableInsertDialogのサブクエリをテーブルにする挿入", () => {
+	async function chooseSubquery(table: string, usage: string) {
+		const loaded = await renderLoaded();
+		await loaded.user.click(screen.getByText(table));
+		await loaded.user.selectOptions(screen.getByLabelText("Usage"), usage);
+		await loaded.user.selectOptions(
+			screen.getByLabelText("Source"),
+			"subquery",
+		);
+		return loaded;
+	}
+
+	it("サブクエリの別名が空なら進めない", async () => {
+		const { user } = await chooseSubquery("USER_ACCOUNT", "select");
+		expect(screen.getByRole("button", { name: "Next" })).toBeDisabled();
+		await user.type(screen.getByLabelText("Subquery alias*"), "S");
+		expect(screen.getByRole("button", { name: "Next" })).toBeEnabled();
+	});
+
+	it("Selectはサブクエリの列を選び、続けてその列から外側の列を選ぶ", async () => {
+		const { user, onInsert } = await chooseSubquery("USER_ACCOUNT", "select");
+		await user.type(screen.getByLabelText("Subquery alias*"), "S");
+		await user.click(screen.getByRole("button", { name: "Next" }));
+
+		const subquery = await findDialog("Subquery Columns");
+		const [selectList, whereList] = subquery.getAllByRole("table");
+		await user.click(within(selectList).getByText("ID"));
+		await user.click(within(whereList).getByText("NAME"));
+		await user.click(subquery.getByRole("button", { name: "Next" }));
+
+		const outer = await findDialog("Select Columns");
+		expect(outer.getByText("(subquery) S")).toBeInTheDocument();
+		expect(outer.queryByText("NAME")).toBeNull();
+		await user.click(outer.getByRole("button", { name: "All Columns" }));
+
+		expect(onInsert).toHaveBeenCalledWith([
+			"SELECT",
+			"    S.ID",
+			"FROM (",
+			"    SELECT",
+			"        UA.ID",
+			"    FROM",
+			"        USER_ACCOUNT UA",
+			"    WHERE",
+			"        UA.NAME = ",
+			") S",
+		]);
+	});
+
+	it("Inner joinはJOINの行末で括弧を開き、ONをサブクエリの別名で組み立てる", async () => {
+		const { user, onInsert } = await chooseSubquery("ORDERS", "innerJoin");
+		// 選んだテーブルの別名は任意になり、サブクエリの別名が必須になる
+		expect(screen.getByLabelText("Table alias")).toBeInTheDocument();
+		await user.type(screen.getByLabelText("Subquery alias*"), "OS");
+		await user.click(screen.getByRole("button", { name: "Next" }));
+
+		const subquery = await findDialog("Subquery Columns");
+		await user.click(subquery.getByRole("button", { name: "All Columns" }));
+		const outer = await findDialog("Select Columns");
+		await user.click(outer.getByText("ID"));
+		await user.click(outer.getByRole("button", { name: "Insert Columns" }));
+
+		expect(onInsert).toHaveBeenCalledWith([
+			"    INNER JOIN (",
+			"        SELECT",
+			"            O.ID",
+			"          , O.NAME",
+			"        FROM",
+			"            ORDERS O",
+			"    ) OS",
+			"          ON  OS.ID = ",
+		]);
+	});
+
+	it("Cross joinはサブクエリの列を選んだら挿入する", async () => {
+		const { user, onInsert } = await chooseSubquery("ORDERS", "crossJoin");
+		await user.type(screen.getByLabelText("Subquery alias*"), "OS");
+		await user.click(screen.getByRole("button", { name: "Next" }));
+
+		const subquery = await findDialog("Subquery Columns");
+		const [selectList] = subquery.getAllByRole("table");
+		await user.click(within(selectList).getByText("ID"));
+		await user.click(subquery.getByRole("button", { name: "Insert" }));
+
+		expect(onInsert).toHaveBeenCalledWith([
+			"    CROSS JOIN (",
+			"        SELECT",
+			"            O.ID",
+			"        FROM",
+			"            ORDERS O",
+			"    ) OS",
+		]);
+	});
+
+	it("Usageを変えるとSourceはTableに戻り、Insert/Update/Deleteでは出さない", async () => {
+		const { user } = await chooseSubquery("ORDERS", "select");
+		await user.selectOptions(screen.getByLabelText("Usage"), "update");
+		expect(screen.queryByLabelText("Source")).toBeNull();
+		await user.selectOptions(screen.getByLabelText("Usage"), "leftJoin");
+		expect(screen.getByLabelText("Source")).toHaveValue("table");
+		expect(screen.queryByLabelText(/Subquery alias/)).toBeNull();
+	});
+});

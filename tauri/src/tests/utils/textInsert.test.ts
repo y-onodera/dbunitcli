@@ -3,6 +3,7 @@ import {
 	columnLines,
 	conditionLines,
 	defaultTableAlias,
+	derivedTableLines,
 	insertAtCursor,
 	qualifyColumn,
 	subqueryLines,
@@ -253,6 +254,43 @@ describe("conditionLines", () => {
 				inValues: " 'a', 'b' ",
 			}),
 		).toEqual(["    T.A NOT IN ('a', 'b')"]);
+	});
+});
+
+describe("derivedTableLines", () => {
+	const sub = ["SELECT", "    A", "FROM", "    T"];
+
+	it("SELECTはFROMの行末で括弧を開き、閉じ括弧の後ろに別名を置く", () => {
+		expect(derivedTableLines("select", sub, " S ", ["    S.A"])).toEqual([
+			"SELECT",
+			"    S.A",
+			"FROM (",
+			"    SELECT",
+			"        A",
+			"    FROM",
+			"        T",
+			") S",
+		]);
+	});
+
+	it("LEFT JOINは結合先の位置にサブクエリを置き、ONの列を続ける", () => {
+		expect(
+			derivedTableLines("leftJoin", sub, "S", ["          ON  S.A = "]),
+		).toEqual([
+			"    LEFT JOIN (",
+			"        SELECT",
+			"            A",
+			"        FROM",
+			"            T",
+			"    ) S",
+			"          ON  S.A = ",
+		]);
+	});
+
+	it("CROSS JOINは列を付けない", () => {
+		expect(derivedTableLines("crossJoin", sub, "S", ["x"]).slice(-1)[0]).toBe(
+			"    ) S",
+		);
 	});
 });
 

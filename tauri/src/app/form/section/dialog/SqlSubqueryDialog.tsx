@@ -9,6 +9,7 @@ import { type JobContext, useJob } from "../../../../hooks/useJob";
 import { useTableSelection } from "../../../../hooks/useTableSelection";
 import {
 	type Conjunction,
+	columnLines,
 	conditionLines,
 	defaultTableAlias,
 	qualifyColumn,
@@ -35,8 +36,8 @@ export const CONJUNCTION_GROUPS = [
 	},
 ];
 
-// IN は SELECT する1列を選び、EXISTS は SELECT 1 にする
-export type SubqueryMode = "in" | "exists";
+// IN は SELECT する1列、FROM / JOIN に置くときは複数列を選び、EXISTS は SELECT 1 にする
+export type SubqueryMode = "in" | "exists" | "from";
 
 export default function SqlSubqueryDialog({
 	mode,
@@ -46,7 +47,7 @@ export default function SqlSubqueryDialog({
 	onComplete,
 	onClose,
 }: {
-	mode: SubqueryMode;
+	mode: Exclude<SubqueryMode, "from">;
 	tables: string[];
 	// 外側の別名。サブクエリの別名のデフォルトが重ならないようにする
 	usedAliases: string[];
@@ -145,11 +146,12 @@ export default function SqlSubqueryDialog({
 	);
 }
 
-function SubqueryColumns({
+export function SubqueryColumns({
 	mode,
 	table,
 	alias,
 	columns,
+	completeTitle = "Insert",
 	onComplete,
 	onClose,
 }: {
@@ -157,7 +159,9 @@ function SubqueryColumns({
 	table: string;
 	alias: string;
 	columns: string[];
-	onComplete: (lines: string[]) => void;
+	completeTitle?: string;
+	// selectedはSELECTした列名（修飾なし）
+	onComplete: (lines: string[], selected: string[]) => void;
 	onClose: () => void;
 }) {
 	const selectColumn = useTableSelection();
@@ -165,15 +169,23 @@ function SubqueryColumns({
 	const [qualify, setQualify] = useState(alias !== "");
 	const [conjunction, setConjunction] = useState<Conjunction>("AND");
 	const qualifier = qualify ? alias : "";
-	const selectedColumn = columns.find((c) => selectColumn.selected.has(c));
+	const selectedColumns = columns.filter((c) => selectColumn.selected.has(c));
+	const selectedColumn = selectedColumns[0];
 	const conditions = columns
 		.filter((c) => whereColumns.selected.has(c))
 		.map((c) => qualifyColumn(c, qualifier));
 
-	const selectList =
-		mode === "exists" || selectedColumn === undefined
+	const selectListOf = (targets: string[]) => {
+		if (mode === "from") {
+			return columnLines(targets, "select", {
+				alias: qualifier,
+				columnAs: false,
+			});
+		}
+		return mode === "exists" || targets.length === 0
 			? [subqueryColumnLine("1")]
-			: [subqueryColumnLine(qualifyColumn(selectedColumn, qualifier))];
+			: [subqueryColumnLine(qualifyColumn(targets[0], qualifier))];
+	};
 	const where =
 		conditions.length === 0
 			? []
@@ -187,18 +199,24 @@ function SubqueryColumns({
 					inValues: "",
 					subquery: null,
 				});
-	const lines = subqueryLines(table, alias, selectList, where);
-	const missingSelect = mode === "in" && selectedColumn === undefined;
+	const linesOf = (targets: string[]) =>
+		subqueryLines(table, alias, selectListOf(targets), where);
+	const missingSelect = mode !== "exists" && selectedColumn === undefined;
 
 	return (
 		<NestedDialogFrame title="Subquery Columns" table={table}>
-			{mode === "in" && (
+			{mode !== "exists" && (
 				<DialogField>
-					<p className="text-sm font-medium mb-1">SELECT column</p>
+					<p className="text-sm font-medium mb-1">
+						{mode === "in" ? "SELECT column" : "SELECT columns"}
+					</p>
 					<SelectableTable
 						items={columns}
 						selected={selectColumn.selected}
-						onToggle={selectColumn.toggleOnly}
+						onToggle={
+							mode === "in" ? selectColumn.toggleOnly : selectColumn.toggle
+						}
+						onToggleAll={mode === "in" ? undefined : selectColumn.toggleAll}
 						columnLabel="Column Name"
 						filterPlaceholder="Filter columns..."
 						emptyMessage="No columns found"
@@ -237,13 +255,22 @@ function SubqueryColumns({
 					/>
 				</DialogField>
 			)}
-			<InsertPreview lines={lines} />
+			<InsertPreview lines={linesOf(selectedColumns)} />
 			<DialogActions>
 				<BlueButton
-					title="Insert"
-					handleClick={() => onComplete(lines)}
+					title={completeTitle}
+					handleClick={() =>
+						onComplete(linesOf(selectedColumns), selectedColumns)
+					}
 					disabled={missingSelect}
 				/>
+				{mode === "from" && (
+					<BlueButton
+						title="All Columns"
+						handleClick={() => onComplete(linesOf(columns), columns)}
+						disabled={columns.length === 0}
+					/>
+				)}
 				<WhiteButton title="Cancel" handleClick={onClose} />
 			</DialogActions>
 		</NestedDialogFrame>
