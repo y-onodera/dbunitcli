@@ -69,11 +69,13 @@ const { mockFetchData, mockFetchAndUpdate } = vi.hoisted(() => {
 			);
 		}
 		if (params.endpoint.includes("/dataset-setting/table-columns")) {
-			const { tableName } = JSON.parse(String(params.options.body));
-			const columns: Record<string, string[]> = {
-				t1: ["id", "name"],
-				t2: ["id", "age"],
-			};
+			const { tableName, inlineQuery } = JSON.parse(
+				String(params.options.body),
+			);
+			// inlineQueryはsrcの代わりに読み、テーブル名はinlineQueryになる
+			const columns: Record<string, string[]> = inlineQuery
+				? { inlineQuery: ["code", "label"] }
+				: { t1: ["id", "name"], t2: ["id", "age"] };
 			return Promise.resolve(
 				new Response(
 					JSON.stringify(
@@ -271,8 +273,9 @@ describe("DatasetSettingsProviderのテスト", () => {
 			});
 			expect(
 				await result.current("CSVREAD('a.csv',null,'charset=MS932')", context),
-			).toStrictEqual(["id", "name"]);
+			).toStrictEqual(["code", "label"]);
 			expect(lastBody()).toMatchObject({
+				tableName: "inlineQuery",
 				inlineQuery: "SELECT * FROM CSVREAD('a.csv',null,'charset=MS932')",
 			});
 		});

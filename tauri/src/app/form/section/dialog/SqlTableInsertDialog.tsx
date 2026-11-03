@@ -186,7 +186,6 @@ function TablesContent({
 					alias={alias}
 					onAliasChange={setAlias}
 					subquerySource={subquerySource}
-					onQueryColumns={onQueryColumns}
 					onInsert={onInsert}
 					onClose={onClose}
 				/>

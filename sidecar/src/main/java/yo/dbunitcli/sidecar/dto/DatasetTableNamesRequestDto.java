@@ -7,6 +7,11 @@ import java.util.Map;
 @Serdeable
 public class DatasetTableNamesRequestDto {
 
+    /**
+     * inlineQueryを読み込んだテーブルの名前
+     */
+    public static final String INLINE_QUERY_TABLE_NAME = "inlineQuery";
+
     private Map<String, String> parameters;
 
     /**
@@ -23,6 +28,11 @@ public class DatasetTableNamesRequestDto {
      * 未保存のxlsxスキーマ。指定時はxlsxSchemaより優先し、このスキーマの対象のシート・テーブルだけを読み込む（xlsxスキーマの設定ダイアログのプレビュー用）
      */
     private JsonXlsxSchemaDto inlineXlsxSchema;
+
+    /**
+     * 未保存のcsvqのSQL。指定時はsrcType・src・encodingより優先し、このSQLをcsvqとして読んだ{@link #INLINE_QUERY_TABLE_NAME}のテーブルだけを読み込む（CSVREADの列の選択用）
+     */
+    private String inlineQuery;
 
     public Map<String, String> getParameters() {
         return this.parameters;
@@ -54,5 +64,13 @@ public class DatasetTableNamesRequestDto {
 
     public void setInlineXlsxSchema(final JsonXlsxSchemaDto inlineXlsxSchema) {
         this.inlineXlsxSchema = inlineXlsxSchema;
+    }
+
+    public String getInlineQuery() {
+        return this.inlineQuery;
+    }
+
+    public void setInlineQuery(final String inlineQuery) {
+        this.inlineQuery = inlineQuery;
     }
 }

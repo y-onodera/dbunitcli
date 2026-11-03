@@ -30,14 +30,11 @@ import { useCsvFile } from "./useCsvFile";
 // IN は SELECT する1列、FROM / JOIN に置くときは複数列を選び、EXISTS は SELECT 1 にする
 export type SubqueryMode = "in" | "exists" | "from";
 
-// サブクエリのテーブルの選び方。tablesはDBのテーブル一覧から、csvはCSVファイルをCSVREADで読む（encodingは文字コードの初期値）
-export type SubquerySource =
-	| {
-			kind: "tables";
-			tables: string[];
-			onQueryColumns: (table: string, context: JobContext) => Promise<string[]>;
-	  }
-	| { kind: "csv"; encoding: string };
+// テーブルの選び方と、選んだテーブルの列の取り方（文のテーブルとサブクエリのテーブルで共通）。
+// tablesはDBのテーブル一覧から、csvはCSVファイルをCSVREADで読む（encodingは文字コードの初期値）
+export type SubquerySource = {
+	onQueryColumns: (table: string, context: JobContext) => Promise<string[]>;
+} & ({ kind: "tables"; tables: string[] } | { kind: "csv"; encoding: string });
 
 type SubqueryDialogProps = {
 	mode: Exclude<SubqueryMode, "from">;
@@ -107,7 +104,7 @@ function ListSubqueryTable({
 // csvqにはDBのテーブル一覧が無いため、ファイルを1つ選んでCSVREADで読む
 function CsvSubqueryTable({
 	mode,
-	source: { encoding },
+	source: { encoding, onQueryColumns },
 	usedAliases,
 	onComplete,
 	onClose,
@@ -117,7 +114,7 @@ function CsvSubqueryTable({
 	const csv = useCsvFile(encoding, (path) =>
 		uniqueAlias(csvFileAlias(path), usedAliases),
 	);
-	const columnLoad = useColumnLoad(csv.fetchColumns);
+	const columnLoad = useColumnLoad(onQueryColumns);
 
 	return (
 		renderSubqueryColumns(columnLoad, mode, csv.alias, onComplete, onClose) ?? (

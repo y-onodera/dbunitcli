@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { DialogActions, DialogField } from "../../../../components/dialog";
 import { BlueButton, WhiteButton } from "../../../../components/element/Button";
-import type { JobContext } from "../../../../hooks/useJob";
 import {
 	type DerivedTableUsage,
 	derivedTableLines,
@@ -51,7 +50,7 @@ const TABLE_SOURCE_OPTIONS: SelectOption<TableSource>[] = [
 ];
 
 // 選んだテーブル1つの用途・別名を決め、句（列まで選ぶ用途は列も選んで文全体）を挿入する。
-// テーブルの選び方（一覧・CSVファイル）は呼び出し側で、別名のデフォルトもそこで付ける。
+// テーブルを選ぶ画面は呼び出し側で、別名のデフォルトもそこで付ける。
 // 用途と別名は、呼び出し側の列選択（テーブル一覧の行の列選択アイコン）でも使うため呼び出し側が持つ
 export default function TableInsertForm({
 	idPrefix,
@@ -62,7 +61,6 @@ export default function TableInsertForm({
 	onAliasChange,
 	usageGroups = TABLE_USAGE_GROUPS,
 	subquerySource,
-	onQueryColumns,
 	onInsert,
 	onClose,
 }: {
@@ -74,18 +72,18 @@ export default function TableInsertForm({
 	alias: string;
 	onAliasChange: (value: string) => void;
 	usageGroups?: SelectGroup<TableUsage>[];
+	// tableの選び方と列の取り方。サブクエリのテーブルも同じ選び方で選ぶ
 	subquerySource: SubquerySource;
-	onQueryColumns: (table: string, context: JobContext) => Promise<string[]>;
 	onInsert: (lines: string[]) => void;
 	onClose: () => void;
 }) {
 	// 列まで選ぶ用途のときの、選んだテーブルの列の読込
-	const columnLoad = useColumnLoad(onQueryColumns);
+	const columnLoad = useColumnLoad(subquerySource.onQueryColumns);
 	const [source, setSource] = useState<TableSource>("table");
 	// サブクエリにするときの、サブクエリ全体の別名（選んだテーブルの別名はalias）
 	const [subqueryAlias, setSubqueryAlias] = useState("");
 	// サブクエリにするとき: サブクエリで使う列の読込と、その後の外側の列の選択
-	const derivedLoad = useColumnLoad(onQueryColumns);
+	const derivedLoad = useColumnLoad(subquerySource.onQueryColumns);
 	const [derivedOuter, setDerivedOuter] = useState<{
 		usage: Exclude<DerivedTableUsage, "crossJoin">;
 		subquery: string[];

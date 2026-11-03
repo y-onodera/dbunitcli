@@ -44,7 +44,6 @@ import yo.dbunitcli.sidecar.domain.project.ResourceFile;
 import yo.dbunitcli.sidecar.domain.project.Workspace;
 import yo.dbunitcli.sidecar.dto.DatasetRequestDto;
 import yo.dbunitcli.sidecar.dto.DatasetSettingDto;
-import yo.dbunitcli.sidecar.dto.DatasetTableColumnsRequestDto;
 import yo.dbunitcli.sidecar.dto.DatasetTableConvertRequestDto;
 import yo.dbunitcli.sidecar.dto.DatasetTableNamesRequestDto;
 import yo.dbunitcli.sidecar.dto.DatasetTablePreviewRequestDto;
@@ -112,8 +111,9 @@ public class DatasetSettingsController extends AbstractResourceFileController<Da
     @Interruptible
     @Post(uri = "table-names", produces = MediaType.APPLICATION_JSON)
     public String tableNames(@Body final DatasetTableNamesRequestDto request) {
-        try (final ComparableDataSetProducer producer = new ComparableDataSetLoader(this.buildParameter(request))
-                .getComparableDataSetProducer(this.toParam(request).get().build())) {
+        try (final SrcParams params = this.toParam(request);
+             final ComparableDataSetProducer producer = new ComparableDataSetLoader(this.buildParameter(request))
+                     .getComparableDataSetProducer(params.newBuilder().build())) {
             return ObjectMapper.getDefault().writeValueAsString(producer.lazyLoad(false).keySet());
         } catch (final Throwable th) {
             LOGGER.warn("Could not get table names", th);
@@ -124,25 +124,14 @@ public class DatasetSettingsController extends AbstractResourceFileController<Da
     /**
      * 読み込まれるテーブルごとの列名を返す（テーブル名→列名）。table-namesと同じくlazyLoadで求めるため、
      * データ行は分割（split）後の名前を求める場合だけ読む。tableNameを指定すればそのテーブルだけを返し、
-     * 対象外のソースはなるべく開かない（{@link Narrow#singlePass}）。読めなかったときはエラーを返す。
-     * inlineQueryは保存前のSQLをファイルに書き出して読むため、終わったら消す
+     * 対象外のソースはなるべく開かない（{@link Narrow#singlePass}）。読めなかったときはエラーを返す
      */
     @Interruptible
     @Post(uri = "table-columns", produces = MediaType.APPLICATION_JSON)
-    public String tableColumns(@Body final DatasetTableColumnsRequestDto request) {
-        Path inlineQueryDir = null;
-        try {
-            if (Strings.isNotEmpty(request.getInlineQuery())) {
-                inlineQueryDir = Files.createTempDirectory("inlineQuery");
-                final Path query = Files.writeString(inlineQueryDir.resolve("inlineQuery.sql"), request.getInlineQuery());
-                final Map<String, String> srcOptions = new LinkedHashMap<>();
-                srcOptions.put("srcType", "csvq");
-                srcOptions.put("src", query.toAbsolutePath().toString());
-                srcOptions.put("encoding", StandardCharsets.UTF_8.name());
-                request.setSrcOptions(srcOptions);
-            }
+    public String tableColumns(@Body final DatasetTablePreviewRequestDto request) {
+        try (final SrcParams params = this.toParam(request)) {
             final String tableName = request.getTableName();
-            final ComparableDataSetParam.Builder param = this.toParam(request).get();
+            final ComparableDataSetParam.Builder param = params.newBuilder();
             if (Strings.isNotEmpty(tableName)) {
                 final TableSeparators separators = param.getTableSeparators();
                 Narrow.singlePass(separators).applyTo(param, separators, tableName);
@@ -162,10 +151,6 @@ public class DatasetSettingsController extends AbstractResourceFileController<Da
         } catch (final Throwable th) {
             LOGGER.error("cause:", th);
             throw new ApplicationException(th);
-        } finally {
-            if (inlineQueryDir != null) {
-                GenerateTemplateSupport.deleteRecursively(inlineQueryDir);
-            }
         }
     }
 
@@ -177,11 +162,10 @@ public class DatasetSettingsController extends AbstractResourceFileController<Da
     @Interruptible
     @Post(uri = "table-preview", produces = MediaType.APPLICATION_JSON)
     public String tablePreview(@Body final DatasetTablePreviewRequestDto request) {
-        try {
-            final Supplier<ComparableDataSetParam.Builder> params = this.toParam(request);
-            final TableSeparators separators = params.get().getTableSeparators();
+        try (final SrcParams params = this.toParam(request)) {
+            final TableSeparators separators = params.newBuilder().getTableSeparators();
             for (final Narrow narrow : Narrow.attempts(separators)) {
-                final Optional<DatasetTablePreviewResponseDto> preview = this.loadPreview(request, params.get(), narrow, separators);
+                final Optional<DatasetTablePreviewResponseDto> preview = this.loadPreview(request, params.newBuilder(), narrow, separators);
                 if (preview.isPresent()) {
                     return ObjectMapper.getDefault().writeValueAsString(preview.get());
                 }
@@ -201,7 +185,7 @@ public class DatasetSettingsController extends AbstractResourceFileController<Da
     @Interruptible
     @Post(uri = "unit-table-preview", produces = MediaType.APPLICATION_JSON)
     public String unitTablePreview(@Body final DatasetUnitTablePreviewRequestDto request) {
-        try {
+        try (final SrcParams params = this.toParam(request)) {
             final String tableName = request.getTableName();
             if (Strings.isEmpty(tableName)) {
                 throw new IllegalArgumentException("tableName is required");
@@ -211,7 +195,7 @@ public class DatasetSettingsController extends AbstractResourceFileController<Da
             }
             final TableSeparators unitSeparators = this.unitTableSeparators(request);
             // 対象を取りこぼさない絞り込み（splitがあれば絞らない）で1回だけ読む
-            final ComparableDataSetParam.Builder param = this.toParam(request).get();
+            final ComparableDataSetParam.Builder param = params.newBuilder();
             final TableSeparators separators = param.getTableSeparators();
             Narrow.singlePass(separators).applyTo(param, separators, tableName);
             try (final ComparableDataSetProducer producer = new ComparableDataSetLoader(this.buildParameter(request))
@@ -272,15 +256,17 @@ public class DatasetSettingsController extends AbstractResourceFileController<Da
             if (!violations.isEmpty()) {
                 throw new OptionValidationException(violations);
             }
-            final ComparableDataSetParam.Builder param = this.toParam(request).get();
-            final TableSeparators separators = param.getTableSeparators();
-            Narrow.singlePass(separators).applyTo(param, separators, tableName);
-            FileResources.runInContext(() -> {
-                try (final IDataSetConverter converter = new TargetTableConverter(tableName,
-                        result.converter(it -> it.setResultPath(result.getResultPath())))) {
-                    new ComparableDataSetLoader(this.buildParameter(request)).loadDataSet(param.setConverter(converter).build());
-                }
-            });
+            try (final SrcParams params = this.toParam(request)) {
+                final ComparableDataSetParam.Builder param = params.newBuilder();
+                final TableSeparators separators = param.getTableSeparators();
+                Narrow.singlePass(separators).applyTo(param, separators, tableName);
+                FileResources.runInContext(() -> {
+                    try (final IDataSetConverter converter = new TargetTableConverter(tableName,
+                            result.converter(it -> it.setResultPath(result.getResultPath())))) {
+                        new ComparableDataSetLoader(this.buildParameter(request)).loadDataSet(param.setConverter(converter).build());
+                    }
+                });
+            }
             return result.resultDir();
         } catch (final OptionValidationException ex) {
             throw ex;
@@ -362,12 +348,62 @@ public class DatasetSettingsController extends AbstractResourceFileController<Da
      * フォームの解釈とinline設定の読込はリクエストごとに1回だけ行い、読み直すたびに新しい読込パラメータを作る。
      * 行は常に読む設定にする（フォームのloadDataは使わない）。テーブル名の一覧はlazyLoadがタスクごとに行を読むかを決める
      */
-    private Supplier<ComparableDataSetParam.Builder> toParam(final DatasetTableNamesRequestDto request) throws IOException {
-        final DataSetLoadDto dto = this.toLoadDto(request.getSrcOptions());
-        dto.setLoadData("true");
-        final UnaryOperator<ComparableDataSetParam.Builder> inlineXlsxSchema = this.inlineXlsxSchema(dto, request.getInlineXlsxSchema());
-        final UnaryOperator<ComparableDataSetParam.Builder> inlineSetting = this.inlineSetting(dto, request.getInlineSetting());
-        return () -> inlineSetting.apply(inlineXlsxSchema.apply(new DataSetLoadOption("", dto).getParam()));
+    private SrcParams toParam(final DatasetTableNamesRequestDto request) throws IOException {
+        final Path inlineQuery = DatasetSettingsController.writeInlineQuery(request.getInlineQuery());
+        try {
+            final DataSetLoadDto dto = this.toLoadDto(DatasetSettingsController.srcOptions(request, inlineQuery));
+            dto.setLoadData("true");
+            final UnaryOperator<ComparableDataSetParam.Builder> inlineXlsxSchema = this.inlineXlsxSchema(dto, request.getInlineXlsxSchema());
+            final UnaryOperator<ComparableDataSetParam.Builder> inlineSetting = this.inlineSetting(dto, request.getInlineSetting());
+            return new SrcParams(() -> inlineSetting.apply(inlineXlsxSchema.apply(new DataSetLoadOption("", dto).getParam())),
+                    inlineQuery);
+        } catch (final IOException | RuntimeException ex) {
+            SrcParams.delete(inlineQuery);
+            throw ex;
+        }
+    }
+
+    /**
+     * csvqはファイルのSQLを読み、ファイル名をテーブル名にするため、inlineQueryは
+     * {@link DatasetTableNamesRequestDto#INLINE_QUERY_TABLE_NAME}の名前で一時ディレクトリに書き出す。無ければnull
+     */
+    private static Path writeInlineQuery(final String inlineQuery) throws IOException {
+        if (Strings.isEmpty(inlineQuery)) {
+            return null;
+        }
+        return Files.writeString(Files.createTempDirectory("inlineQuery")
+                                      .resolve(DatasetTableNamesRequestDto.INLINE_QUERY_TABLE_NAME + ".sql"), inlineQuery);
+    }
+
+    private static Map<String, String> srcOptions(final DatasetTableNamesRequestDto request, final Path inlineQuery) {
+        if (inlineQuery == null) {
+            return request.getSrcOptions();
+        }
+        final Map<String, String> result = new LinkedHashMap<>(Optional.ofNullable(request.getSrcOptions()).orElse(Map.of()));
+        result.put("srcType", "csvq");
+        result.put("src", inlineQuery.toAbsolutePath().toString());
+        result.put("encoding", StandardCharsets.UTF_8.name());
+        return result;
+    }
+
+    /**
+     * 読込パラメータの作り方と、inlineQueryを書き出したファイル（読み終えたら一時ディレクトリごと消す）
+     */
+    private record SrcParams(Supplier<ComparableDataSetParam.Builder> builders, Path inlineQuery) implements AutoCloseable {
+        static void delete(final Path inlineQuery) {
+            if (inlineQuery != null) {
+                GenerateTemplateSupport.deleteRecursively(inlineQuery.getParent());
+            }
+        }
+
+        ComparableDataSetParam.Builder newBuilder() {
+            return this.builders.get();
+        }
+
+        @Override
+        public void close() {
+            SrcParams.delete(this.inlineQuery);
+        }
     }
 
     /**

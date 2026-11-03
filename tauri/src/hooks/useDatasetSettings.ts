@@ -355,11 +355,14 @@ export const useSrcInfoColumnNames = (srcInfo: DatasetSrcInfo): string[] => {
 	return columnNames;
 };
 
-// テーブル名→列名。requestのtableNameを指定すればそのテーブルだけを、inlineQueryを指定すればそのcsvqのSQLを読む。失敗は投げる
+// sidecarのDatasetTableNamesRequestDto.INLINE_QUERY_TABLE_NAMEと揃える
+const INLINE_QUERY_TABLE_NAME = "inlineQuery";
+
+// テーブル名→列名。requestのtableNameを指定すればそのテーブルだけを、inlineQueryを指定すればsrcの代わりにそのcsvqのSQLを読む。失敗は投げる
 async function fetchTableColumns(
 	apiUrl: string,
 	info: DatasetSrcInfo,
-	request: { tableName: string } | { inlineQuery: string },
+	request: { tableName: string; inlineQuery?: string },
 	jdbcValues: Record<string, string>,
 	paramInputs: Record<string, string>,
 	signal?: AbortSignal,
@@ -431,13 +434,16 @@ export const useCsvColumnNamesFetcher = () => {
 		const columns = await fetchTableColumns(
 			apiUrl,
 			{ values: {} },
-			{ inlineQuery: `SELECT * FROM ${csvReadExpression}` },
+			{
+				tableName: INLINE_QUERY_TABLE_NAME,
+				inlineQuery: `SELECT * FROM ${csvReadExpression}`,
+			},
 			{},
 			paramInputs,
 			signal,
 			onLog,
 		);
-		return Object.values(columns)[0] ?? [];
+		return columns[INLINE_QUERY_TABLE_NAME] ?? [];
 	};
 };
 
