@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { DialogTitle, ModalOverlay } from "../../../../components/dialog";
 import {
 	csvFileAlias,
@@ -29,6 +30,7 @@ export default function CsvReadInsertDialog({
 	onClose: () => void;
 }) {
 	const csv = useCsvFile(encoding, csvFileAlias);
+	const [usage, setUsage] = useState<TableUsage>("select");
 	return (
 		<ModalOverlay>
 			<DialogTitle>Insert CSVREAD</DialogTitle>
@@ -36,10 +38,12 @@ export default function CsvReadInsertDialog({
 			<TableInsertForm
 				idPrefix="csvReadInsert"
 				table={csv.ready ? csv.expression : null}
+				usage={usage}
+				onUsageChange={setUsage}
 				alias={csv.alias}
 				onAliasChange={csv.setAlias}
 				usageGroups={CSV_USAGE_GROUPS}
-				subquerySource={{ kind: "csv", encoding: csv.charset }}
+				subquerySource={{ kind: "csv", encoding: csv.fields.charset }}
 				onQueryColumns={csv.fetchColumns}
 				onInsert={onInsert}
 				onClose={onClose}

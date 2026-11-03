@@ -355,11 +355,11 @@ export const useSrcInfoColumnNames = (srcInfo: DatasetSrcInfo): string[] => {
 	return columnNames;
 };
 
-// テーブル名→列名。tableNameを指定すればそのテーブルだけを読む。失敗は投げる
+// テーブル名→列名。requestのtableNameを指定すればそのテーブルだけを、inlineQueryを指定すればそのcsvqのSQLを読む。失敗は投げる
 async function fetchTableColumns(
 	apiUrl: string,
 	info: DatasetSrcInfo,
-	tableName: string,
+	request: { tableName: string } | { inlineQuery: string },
 	jdbcValues: Record<string, string>,
 	paramInputs: Record<string, string>,
 	signal?: AbortSignal,
@@ -371,7 +371,7 @@ async function fetchTableColumns(
 		info,
 		jdbcValues,
 		paramInputs,
-		{ tableName },
+		request,
 		signal,
 		onLog,
 	);
@@ -388,7 +388,7 @@ async function loadAllColumnNames(
 	const columns = await fetchTableColumns(
 		apiUrl,
 		withAllTables(srcInfo),
-		"",
+		{ tableName: "" },
 		jdbcValues,
 		paramInputs,
 		signal,
@@ -410,7 +410,7 @@ export const useColumnNamesFetcher = () => {
 		const columns = await fetchTableColumns(
 			apiUrl,
 			withAllTables(srcInfo),
-			tableName,
+			{ tableName },
 			jdbcValues,
 			paramInputs,
 			signal,
@@ -428,13 +428,12 @@ export const useCsvColumnNamesFetcher = () => {
 		csvReadExpression: string,
 		{ signal, onLog }: JobContext,
 	): Promise<string[]> => {
-		const columns = await fetchDatasetJson<Record<string, string[]>>(
+		const columns = await fetchTableColumns(
 			apiUrl,
-			"table-columns",
 			{ values: {} },
+			{ inlineQuery: `SELECT * FROM ${csvReadExpression}` },
 			{},
 			paramInputs,
-			{ inlineQuery: `SELECT * FROM ${csvReadExpression}` },
 			signal,
 			onLog,
 		);

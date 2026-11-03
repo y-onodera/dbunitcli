@@ -12,7 +12,11 @@ import { JobProgress } from "../../../../components/element/JobProgress";
 import { useJdbcColumns, useJdbcTables } from "../../../../hooks/useJdbc";
 import { type JobContext, useJob } from "../../../../hooks/useJob";
 import { useTableSelection } from "../../../../hooks/useTableSelection";
-import { defaultTableAlias } from "../../../../utils/textInsert";
+import {
+	defaultTableAlias,
+	type TableUsage,
+	usesTableAlias,
+} from "../../../../utils/textInsert";
 import SqlColumnInsertDialog from "./SqlColumnInsertDialog";
 import type { SubquerySource } from "./SqlSubqueryDialog";
 import TableInsertForm from "./TableInsertForm";
@@ -125,6 +129,7 @@ function TablesContent({
 	const { selected, toggle, toggleOnly, toggleAll } = useTableSelection();
 	// 行の列選択アイコンから開く列選択ダイアログ（用途は列選択ダイアログで選ぶ）
 	const columnLoad = useColumnLoad(onQueryColumns);
+	const [usage, setUsage] = useState<TableUsage>("select");
 	const [alias, setAlias] = useState("");
 	const subquerySource: SubquerySource = {
 		kind: "tables",
@@ -144,7 +149,7 @@ function TablesContent({
 
 	// 選択中のテーブルなら入力済みの別名で修飾し（空なら修飾しない）、それ以外はデフォルトの別名を候補にする
 	const columnAliasOf = (table: string) =>
-		table === selectedTable && !plain
+		table === selectedTable && !plain && usesTableAlias(usage)
 			? { alias: alias.trim(), qualify: alias.trim() !== "" }
 			: { alias: defaultTableAlias(table), qualify: false };
 
@@ -176,6 +181,8 @@ function TablesContent({
 				<TableInsertForm
 					idPrefix="sqlTableInsert"
 					table={selectedTable}
+					usage={usage}
+					onUsageChange={setUsage}
 					alias={alias}
 					onAliasChange={setAlias}
 					subquerySource={subquerySource}

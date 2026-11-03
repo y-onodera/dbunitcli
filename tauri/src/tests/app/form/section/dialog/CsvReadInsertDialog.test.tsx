@@ -102,13 +102,13 @@ describe("CsvReadInsertDialog", () => {
 		await user.click(fromLast(screen.getAllByRole("button", { name: "Next" })));
 
 		await screen.findByText("Subquery Table");
-		const chooseButtons = screen.getAllByRole("button", { name: "Choose" });
-		await user.click(chooseButtons[chooseButtons.length - 1]);
+		await user.click(
+			fromLast(screen.getAllByRole("button", { name: "Choose" })),
+		);
 		// 文字コードの初期値は外側で指定したもの、別名はファイル名から
 		expect(fromLast(screen.getAllByLabelText("Charset*"))).toHaveValue("MS932");
 		expect(screen.getByLabelText("Table alias")).toHaveValue("UA");
-		const nexts = screen.getAllByRole("button", { name: "Next" });
-		await user.click(nexts[nexts.length - 1]);
+		await user.click(fromLast(screen.getAllByRole("button", { name: "Next" })));
 
 		await screen.findByText("Subquery Columns");
 		expect(mockCsvColumns).toHaveBeenLastCalledWith(

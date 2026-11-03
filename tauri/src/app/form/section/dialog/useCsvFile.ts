@@ -17,8 +17,6 @@ export function useCsvFile(
 		setAlias,
 		expression: csvReadExpression(path, charset),
 		ready: path.trim() !== "" && charset.trim() !== "",
-		charset,
-		// 引数はexpression（CSVREADの式）
 		fetchColumns,
 		fields: {
 			path,

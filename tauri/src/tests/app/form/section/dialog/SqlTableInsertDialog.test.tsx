@@ -207,6 +207,16 @@ describe("SqlTableInsertDialogのカラム挿入", () => {
 		expect(onInsertColumn).toHaveBeenCalledWith(["    ID"]);
 	});
 
+	it("テーブル側の用途が別名を使わない（Insert）なら、選択中のテーブルでも修飾は最初OFF", async () => {
+		const { user } = await renderLoaded();
+		await user.click(screen.getByText("USER_ACCOUNT"));
+		await user.selectOptions(screen.getByLabelText("Usage"), "insert");
+		await user.click(screen.getAllByTitle("Select columns")[0]);
+		await screen.findByText("Select Columns");
+
+		expect(screen.getByLabelText("Prefix table alias (UA)")).not.toBeChecked();
+	});
+
 	it("選択中でないテーブルは別名のデフォルトを表示し、修飾は最初OFF", async () => {
 		const { user, onInsertColumn } = await openColumnsOfOrders();
 		await user.click(screen.getByText("ID"));

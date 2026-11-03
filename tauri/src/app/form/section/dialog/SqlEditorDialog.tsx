@@ -53,8 +53,7 @@ export const sqlEditorDialogs: Record<
 
 function Dialog(props: SqlEditorDialogProps & { value: string }) {
 	const [content, setContent] = useState<string>(props.value);
-	const [showTableSelector, setShowTableSelector] = useState(false);
-	const [showCsvSelector, setShowCsvSelector] = useState(false);
+	const [showSelector, setShowSelector] = useState(false);
 	const textareaRef = useRef<HTMLTextAreaElement>(null);
 	const pendingCursorRef = useRef<number | null>(null);
 	const saveDataSource = useSaveResourceContent(props.type);
@@ -82,14 +81,9 @@ function Dialog(props: SqlEditorDialogProps & { value: string }) {
 		textareaRef.current?.setSelectionRange(cursor, cursor);
 	});
 
-	const handleInsert = (tables: string[]) => {
-		insertToContent(tables);
-		setShowTableSelector(false);
-	};
-
-	const handleInsertCsv = (lines: string[]) => {
+	const handleInsert = (lines: string[]) => {
 		insertToContent(lines);
-		setShowCsvSelector(false);
+		setShowSelector(false);
 	};
 
 	const handleInsertColumn = (columns: string[], inline?: boolean) => {
@@ -97,27 +91,27 @@ function Dialog(props: SqlEditorDialogProps & { value: string }) {
 	};
 
 	// csvqはDBではなくCSVを読むため、DBのテーブル一覧の代わりにCSVファイルを選ぶ
-	function renderTableSelectorButton() {
-		if (props.type === "csvq") {
+	const csvq = props.type === "csvq";
+
+	function renderSelector() {
+		if (csvq) {
 			return (
-				<DialogField>
-					<BlueButton
-						title="Select CSV"
-						handleClick={() => setShowCsvSelector(true)}
-					/>
-				</DialogField>
+				// CSVREADには文字コードの明示が要るため、encoding未指定ならUTF-8を初期値にする
+				<CsvReadInsertDialog
+					encoding={datasetSrcInfo.values.encoding || "UTF-8"}
+					onInsert={handleInsert}
+					onClose={() => setShowSelector(false)}
+				/>
 			);
 		}
-		if (!connectionOk) {
-			return null;
-		}
 		return (
-			<DialogField>
-				<BlueButton
-					title="Select Tables"
-					handleClick={() => setShowTableSelector(true)}
-				/>
-			</DialogField>
+			<SqlTableInsertDialog
+				jdbcValues={jdbcValues}
+				onInsert={handleInsert}
+				onInsertColumn={handleInsertColumn}
+				plain={props.type === "table"}
+				onClose={() => setShowSelector(false)}
+			/>
 		);
 	}
 
@@ -144,7 +138,14 @@ function Dialog(props: SqlEditorDialogProps & { value: string }) {
 			)}
 		>
 			<DialogBody size="md">
-				{renderTableSelectorButton()}
+				{(csvq || connectionOk) && (
+					<DialogField>
+						<BlueButton
+							title={csvq ? "Select CSV" : "Select Tables"}
+							handleClick={() => setShowSelector(true)}
+						/>
+					</DialogField>
+				)}
 				<TextArea
 					id="contents"
 					ref={textareaRef}
@@ -158,23 +159,7 @@ function Dialog(props: SqlEditorDialogProps & { value: string }) {
 					spellCheck={false}
 				/>
 			</DialogBody>
-			{showTableSelector && (
-				<SqlTableInsertDialog
-					jdbcValues={jdbcValues}
-					onInsert={handleInsert}
-					onInsertColumn={handleInsertColumn}
-					plain={props.type === "table"}
-					onClose={() => setShowTableSelector(false)}
-				/>
-			)}
-			{showCsvSelector && (
-				// CSVREADには文字コードの明示が要るため、encoding未指定ならUTF-8を初期値にする
-				<CsvReadInsertDialog
-					encoding={datasetSrcInfo.values.encoding || "UTF-8"}
-					onInsert={handleInsertCsv}
-					onClose={() => setShowCsvSelector(false)}
-				/>
-			)}
+			{showSelector && renderSelector()}
 		</SettingDialog>
 	);
 }

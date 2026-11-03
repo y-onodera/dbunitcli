@@ -51,10 +51,13 @@ const TABLE_SOURCE_OPTIONS: SelectOption<TableSource>[] = [
 ];
 
 // 選んだテーブル1つの用途・別名を決め、句（列まで選ぶ用途は列も選んで文全体）を挿入する。
-// テーブルの選び方（一覧・CSVファイル）は呼び出し側で、別名のデフォルトもそこで付ける
+// テーブルの選び方（一覧・CSVファイル）は呼び出し側で、別名のデフォルトもそこで付ける。
+// 用途と別名は、呼び出し側の列選択（テーブル一覧の行の列選択アイコン）でも使うため呼び出し側が持つ
 export default function TableInsertForm({
 	idPrefix,
 	table,
+	usage,
+	onUsageChange,
 	alias,
 	onAliasChange,
 	usageGroups = TABLE_USAGE_GROUPS,
@@ -66,6 +69,8 @@ export default function TableInsertForm({
 	idPrefix: string;
 	// 選んでいなければnull
 	table: string | null;
+	usage: TableUsage;
+	onUsageChange: (value: TableUsage) => void;
 	alias: string;
 	onAliasChange: (value: string) => void;
 	usageGroups?: SelectGroup<TableUsage>[];
@@ -74,9 +79,6 @@ export default function TableInsertForm({
 	onInsert: (lines: string[]) => void;
 	onClose: () => void;
 }) {
-	const [usage, setUsage] = useState<TableUsage>(
-		usageGroups[0].options[0].value,
-	);
 	// 列まで選ぶ用途のときの、選んだテーブルの列の読込
 	const columnLoad = useColumnLoad(onQueryColumns);
 	const [source, setSource] = useState<TableSource>("table");
@@ -94,9 +96,10 @@ export default function TableInsertForm({
 		? subqueryAlias.trim() === ""
 		: isJoin(usage) && alias.trim() === "";
 	const statement = isStatementUsage(usage) ? usage : null;
+	const columnTarget = columnLoad.target;
 
 	const handleUsageChange = (next: TableUsage) => {
-		setUsage(next);
+		onUsageChange(next);
 		setSource("table");
 	};
 
@@ -185,10 +188,10 @@ export default function TableInsertForm({
 				/>
 				<WhiteButton title="Cancel" handleClick={onClose} />
 			</DialogActions>
-			{columnLoad.target !== null && statement !== null && (
+			{columnTarget !== null && statement !== null && (
 				<SqlColumnInsertDialog
-					table={columnLoad.target.table}
-					columns={columnLoad.target.columns}
+					table={columnTarget.table}
+					columns={columnTarget.columns}
 					loading={columnLoad.job.running}
 					error={columnLoad.job.error}
 					logs={columnLoad.job.logs}
@@ -198,12 +201,7 @@ export default function TableInsertForm({
 					statement={{
 						usage: statementColumnUsage(statement),
 						wrap: (lines) =>
-							tableLines(
-								columnLoad.target?.table ?? "",
-								statement,
-								alias,
-								lines,
-							),
+							tableLines(columnTarget.table, statement, alias, lines),
 					}}
 					subquerySource={subquerySource}
 					onInsert={(lines) => {

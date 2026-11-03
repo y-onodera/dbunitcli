@@ -52,27 +52,19 @@ export default function SqlSubqueryDialog({
 	...props
 }: SubqueryDialogProps & { source: SubquerySource }) {
 	if (source.kind === "csv") {
-		return <CsvSubqueryTable encoding={source.encoding} {...props} />;
+		return <CsvSubqueryTable source={source} {...props} />;
 	}
-	return (
-		<ListSubqueryTable
-			tables={source.tables}
-			onQueryColumns={source.onQueryColumns}
-			{...props}
-		/>
-	);
+	return <ListSubqueryTable source={source} {...props} />;
 }
 
 function ListSubqueryTable({
 	mode,
-	tables,
+	source: { tables, onQueryColumns },
 	usedAliases,
-	onQueryColumns,
 	onComplete,
 	onClose,
 }: SubqueryDialogProps & {
-	tables: string[];
-	onQueryColumns: (table: string, context: JobContext) => Promise<string[]>;
+	source: Extract<SubquerySource, { kind: "tables" }>;
 }) {
 	const { selected, toggleOnly } = useTableSelection();
 	const [alias, setAlias] = useState("");
@@ -115,11 +107,13 @@ function ListSubqueryTable({
 // csvqにはDBのテーブル一覧が無いため、ファイルを1つ選んでCSVREADで読む
 function CsvSubqueryTable({
 	mode,
-	encoding,
+	source: { encoding },
 	usedAliases,
 	onComplete,
 	onClose,
-}: SubqueryDialogProps & { encoding: string }) {
+}: SubqueryDialogProps & {
+	source: Extract<SubquerySource, { kind: "csv" }>;
+}) {
 	const csv = useCsvFile(encoding, (path) =>
 		uniqueAlias(csvFileAlias(path), usedAliases),
 	);
