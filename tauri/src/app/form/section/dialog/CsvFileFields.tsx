@@ -4,7 +4,7 @@ import type { CommandOption } from "../../../../model/CommandOption";
 import { FileChooser } from "../element/Chooser";
 import { OptionText } from "./SqlInsertParts";
 
-// csvq実行時にCSVREADの相対パスを探す基準（datasetBase→workspace）と同じ基準で相対パスにする
+// csvq実行時にCSVREADの相対パスを探す基準（core: FileResources#searchDatasetBase）に合わせる
 const CSV_FILE_ELEMENT: CommandOption = {
 	name: "csvFile",
 	value: "",

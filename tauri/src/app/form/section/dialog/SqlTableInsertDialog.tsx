@@ -37,7 +37,7 @@ import { SubqueryColumns, type SubquerySource } from "./SqlSubqueryDialog";
 import TableList from "./TableList";
 import { useColumnLoad } from "./useColumnLoad";
 
-const TABLE_USAGE_GROUPS: SelectGroup<TableUsage>[] = [
+export const TABLE_USAGE_GROUPS: SelectGroup<TableUsage>[] = [
 	{
 		label: "Statement",
 		options: [

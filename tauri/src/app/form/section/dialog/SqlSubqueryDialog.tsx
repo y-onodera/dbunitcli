@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { DialogActions, DialogField } from "../../../../components/dialog";
 import { BlueButton, WhiteButton } from "../../../../components/element/Button";
-import { useCsvColumnNamesFetcher } from "../../../../hooks/useDatasetSettings";
 import type { JobContext } from "../../../../hooks/useJob";
 import { useTableSelection } from "../../../../hooks/useTableSelection";
 import {
@@ -9,7 +8,6 @@ import {
 	columnLines,
 	conditionLines,
 	csvFileAlias,
-	csvReadExpression,
 	DEFAULT_CONDITION_OPTIONS,
 	defaultTableAlias,
 	qualifyColumn,
@@ -27,6 +25,7 @@ import {
 	OptionText,
 } from "./SqlInsertParts";
 import { useColumnLoad } from "./useColumnLoad";
+import { useCsvFile } from "./useCsvFile";
 
 // IN は SELECT する1列、FROM / JOIN に置くときは複数列を選び、EXISTS は SELECT 1 にする
 export type SubqueryMode = "in" | "exists" | "from";
@@ -121,35 +120,25 @@ function CsvSubqueryTable({
 	onComplete,
 	onClose,
 }: SubqueryDialogProps & { encoding: string }) {
-	const [path, setPath] = useState("");
-	const [charset, setCharset] = useState(encoding);
-	const [alias, setAlias] = useState("");
-	const fetchCsvColumnNames = useCsvColumnNamesFetcher();
-	const columnLoad = useColumnLoad((_table: string, context: JobContext) =>
-		fetchCsvColumnNames(path.trim(), charset.trim(), context),
+	const csv = useCsvFile(encoding, (path) =>
+		uniqueAlias(csvFileAlias(path), usedAliases),
 	);
 
-	const handleChoose = (next: string) => {
-		setPath(next);
-		setAlias(uniqueAlias(csvFileAlias(next), usedAliases));
-	};
-
 	return (
-		renderSubqueryColumns(columnLoad, mode, alias, onComplete, onClose) ?? (
+		renderSubqueryColumns(
+			csv.columnLoad,
+			mode,
+			csv.alias,
+			onComplete,
+			onClose,
+		) ?? (
 			<NestedDialogFrame title="Subquery Table">
-				<CsvFileFields
-					idPrefix="sqlSubquery"
-					path={path}
-					charset={charset}
-					onPathChange={setPath}
-					onChoose={handleChoose}
-					onCharsetChange={setCharset}
-				/>
+				<CsvFileFields idPrefix="sqlSubquery" {...csv.fields} />
 				<SubqueryTableActions
-					alias={alias}
-					onAliasChange={setAlias}
-					canProceed={path.trim() !== "" && charset.trim() !== ""}
-					onNext={() => columnLoad.open(csvReadExpression(path, charset))}
+					alias={csv.alias}
+					onAliasChange={csv.setAlias}
+					canProceed={csv.ready}
+					onNext={() => csv.columnLoad.open(csv.expression)}
 					onClose={onClose}
 				/>
 			</NestedDialogFrame>

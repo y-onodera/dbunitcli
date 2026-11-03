@@ -6,15 +6,13 @@ import {
 	ModalOverlay,
 } from "../../../../components/dialog";
 import { BlueButton, WhiteButton } from "../../../../components/element/Button";
-import { useCsvColumnNamesFetcher } from "../../../../hooks/useDatasetSettings";
-import type { JobContext } from "../../../../hooks/useJob";
 import {
 	csvFileAlias,
-	csvReadExpression,
 	type DerivedTableUsage,
 	isJoin,
 	statementColumnUsage,
 	tableLines,
+	usesDerivedTable,
 } from "../../../../utils/textInsert";
 import CsvFileFields from "./CsvFileFields";
 import SqlColumnInsertDialog from "./SqlColumnInsertDialog";
@@ -24,22 +22,18 @@ import {
 	OptionText,
 	type SelectGroup,
 } from "./SqlInsertParts";
-import { useColumnLoad } from "./useColumnLoad";
+import { TABLE_USAGE_GROUPS } from "./SqlTableInsertDialog";
+import { useCsvFile } from "./useCsvFile";
 
-const CSV_USAGE_GROUPS: SelectGroup<DerivedTableUsage>[] = [
-	{
-		label: "Statement",
-		options: [{ value: "select", label: "Select" }],
-	},
-	{
-		label: "Join",
-		options: [
-			{ value: "leftJoin", label: "Left join" },
-			{ value: "innerJoin", label: "Inner join" },
-			{ value: "crossJoin", label: "Cross join" },
-		],
-	},
-];
+// CSVは書き込めないため、Select Tablesの用途のうちFROM / JOINに置くものだけ
+const CSV_USAGE_GROUPS: SelectGroup<DerivedTableUsage>[] =
+	TABLE_USAGE_GROUPS.map((group) => ({
+		label: group.label,
+		options: group.options.filter(
+			(o): o is { value: DerivedTableUsage; label: string } =>
+				usesDerivedTable(o.value),
+		),
+	}));
 
 export default function CsvReadInsertDialog({
 	encoding,
@@ -51,29 +45,16 @@ export default function CsvReadInsertDialog({
 	onInsert: (lines: string[]) => void;
 	onClose: () => void;
 }) {
-	const [path, setPath] = useState("");
-	const [charset, setCharset] = useState(encoding);
+	const csv = useCsvFile(encoding, csvFileAlias);
+	const { alias, expression, columnLoad } = csv;
 	const [usage, setUsage] = useState<DerivedTableUsage>("select");
-	const [alias, setAlias] = useState("");
-	const fetchCsvColumnNames = useCsvColumnNamesFetcher();
-	const columnLoad = useColumnLoad((_table: string, context: JobContext) =>
-		fetchCsvColumnNames(path.trim(), charset.trim(), context),
-	);
-	const expression = csvReadExpression(path, charset);
-	const canProceed =
-		path.trim() !== "" &&
-		charset.trim() !== "" &&
-		(!isJoin(usage) || alias.trim() !== "");
-
-	// ファイルを選び直したら、別名をファイル名から付け直す
-	const handleChoose = (next: string) => {
-		setPath(next);
-		setAlias(csvFileAlias(next));
-	};
+	const crossJoin = usage === "crossJoin";
+	const crossJoinLines = tableLines(expression, usage, alias, []);
+	const canProceed = csv.ready && (!isJoin(usage) || alias.trim() !== "");
 
 	const handleNext = () => {
-		if (usage === "crossJoin") {
-			onInsert(tableLines(expression, usage, alias, []));
+		if (crossJoin) {
+			onInsert(crossJoinLines);
 			return;
 		}
 		columnLoad.open(expression);
@@ -82,14 +63,7 @@ export default function CsvReadInsertDialog({
 	return (
 		<ModalOverlay>
 			<DialogTitle>Insert CSVREAD</DialogTitle>
-			<CsvFileFields
-				idPrefix="csvReadInsert"
-				path={path}
-				charset={charset}
-				onPathChange={setPath}
-				onChoose={handleChoose}
-				onCharsetChange={setCharset}
-			/>
+			<CsvFileFields idPrefix="csvReadInsert" {...csv.fields} />
 			<DialogField>
 				<div className="flex gap-3">
 					<OptionSelect
@@ -103,27 +77,23 @@ export default function CsvReadInsertDialog({
 						label="Table alias"
 						required={isJoin(usage)}
 						value={alias}
-						onChange={setAlias}
+						onChange={csv.setAlias}
 					/>
 				</div>
 			</DialogField>
 			<InsertPreview
-				lines={
-					// 列まで選ぶ用途は、列選択ダイアログで文全体を見せる
-					canProceed && usage === "crossJoin"
-						? tableLines(expression, usage, alias, [])
-						: []
-				}
+				// 列まで選ぶ用途は、列選択ダイアログで文全体を見せる
+				lines={canProceed && crossJoin ? crossJoinLines : []}
 			/>
 			<DialogActions>
 				<BlueButton
-					title={usage === "crossJoin" ? "Insert" : "Next"}
+					title={crossJoin ? "Insert" : "Next"}
 					handleClick={handleNext}
 					disabled={!canProceed}
 				/>
 				<WhiteButton title="Cancel" handleClick={onClose} />
 			</DialogActions>
-			{columnLoad.target !== null && usage !== "crossJoin" && (
+			{columnLoad.target !== null && !crossJoin && (
 				<SqlColumnInsertDialog
 					table={columnLoad.target.table}
 					columns={columnLoad.target.columns}
@@ -135,10 +105,9 @@ export default function CsvReadInsertDialog({
 					qualify={alias.trim() !== ""}
 					statement={{
 						usage: statementColumnUsage(usage),
-						wrap: (lines) =>
-							tableLines(columnLoad.target?.table ?? "", usage, alias, lines),
+						wrap: (lines) => tableLines(expression, usage, alias, lines),
 					}}
-					subquerySource={{ kind: "csv", encoding: charset }}
+					subquerySource={{ kind: "csv", encoding: csv.charset }}
 					onInsert={(lines) => {
 						columnLoad.close();
 						onInsert(lines);
