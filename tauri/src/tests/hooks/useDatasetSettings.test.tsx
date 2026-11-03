@@ -265,16 +265,15 @@ describe("DatasetSettingsProviderのテスト", () => {
 			});
 		});
 
-		it("CSVファイル1つをsrcType=csvとして読み、その列名を取得することを確認", async () => {
+		it("CSVREADの式をcsvqのSQLとして読み、その列名を取得することを確認", async () => {
 			const { result } = renderHook(() => useCsvColumnNamesFetcher(), {
 				wrapper: envWrapper,
 			});
 			expect(
-				await result.current("dataset/a.csv", "MS932", context),
+				await result.current("CSVREAD('a.csv',null,'charset=MS932')", context),
 			).toStrictEqual(["id", "name"]);
 			expect(lastBody()).toMatchObject({
-				tableName: "",
-				srcOptions: { srcType: "csv", src: "dataset/a.csv", encoding: "MS932" },
+				inlineQuery: "SELECT * FROM CSVREAD('a.csv',null,'charset=MS932')",
 			});
 		});
 	});

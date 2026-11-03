@@ -420,21 +420,21 @@ export const useColumnNamesFetcher = () => {
 	};
 };
 
-// CSVファイル1つの列名（csvqのCSVREADに置くファイルの列の選択用）。失敗は投げる
+// csvqのCSVREADの式1つの列名（CSVREADの列の選択用）。実行時と同じくcsvqのSQLとして読むため、CSVREADのオプションも反映される。失敗は投げる
 export const useCsvColumnNamesFetcher = () => {
 	const { apiUrl } = useEnvironment();
 	const paramInputs = useParamInputs();
 	return async (
-		path: string,
-		encoding: string,
+		csvReadExpression: string,
 		{ signal, onLog }: JobContext,
 	): Promise<string[]> => {
-		const columns = await fetchTableColumns(
+		const columns = await fetchDatasetJson<Record<string, string[]>>(
 			apiUrl,
-			{ values: { srcType: "csv", src: path, encoding } },
-			"",
+			"table-columns",
+			{ values: {} },
 			{},
 			paramInputs,
+			{ inlineQuery: `SELECT * FROM ${csvReadExpression}` },
 			signal,
 			onLog,
 		);

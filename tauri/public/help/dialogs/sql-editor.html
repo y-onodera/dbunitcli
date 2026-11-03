@@ -192,7 +192,7 @@ FROM (
   <p><code>srcType</code> が <code>csvq</code> のときだけ、Select CSV ボタンが表示されます。CSV ファイルを選び、<code>CSVREAD()</code> でそのファイルを読む文を本文のカーソル位置に挿入します。</p>
   <ol>
     <li>Select CSV を押し、Insert CSVREAD で CSV file・Charset・Usage・Table alias を指定します。</li>
-    <li>Next を押すと、CSV ファイルの先頭行からカラムを読み込み、Select Columns が開きます。</li>
+    <li>Next を押すと、挿入する <code>CSVREAD()</code> を csvq の実行時と同じように読んでカラムを取得し、Select Columns が開きます。カラム名は実行時と同じく大文字になります（例: <code>name</code> → <code>NAME</code>）。データ行は読みません。</li>
     <li>カラムを選んで Insert Columns（All Columns なら全カラム）を押すと、文全体を挿入して Insert CSVREAD が閉じます。Select Columns の Usage は Insert CSVREAD の Usage に合わせて固定されます。</li>
   </ol>
   <p>Usage が Cross join のときは、カラムを読み込まずに Insert ですぐ挿入します。</p>

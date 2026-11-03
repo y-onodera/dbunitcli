@@ -78,31 +78,34 @@ public record ComparableCSVQueryDataSetProducer(ComparableDataSetParam param,
                         this.param.templateRender().render(new File(this.source.filePath()), this.parameter));
                 ComparableCSVQueryDataSetProducer.LOGGER.info("produce - start filePath={},query={}", this.source.filePath(), query);
                 try (final Connection conn = DriverManager.getConnection(ComparableCSVQueryDataSetProducer.url());
-                     final Statement stmt = conn.createStatement();
-                     final ResultSet rst = stmt.executeQuery(query)
+                     final PreparedStatement stmt = conn.prepareStatement(query)
                 ) {
-                    final int resultColumnCount = rst.getMetaData().getColumnCount();
+                    // 列は文の準備で決まり、CSVREADは見出し行だけを読む。行を読まないなら実行しない
+                    final ResultSetMetaData resultMetaData = stmt.getMetaData();
+                    final int resultColumnCount = resultMetaData.getColumnCount();
                     final TableMetaDataWithSource metaData = this.source.createMetaData(this.param.headerNames() != null
                             ? this.param.headerNames()
-                            : ComparableCSVQueryDataSetProducer.columnNames(rst.getMetaData()));
+                            : ComparableCSVQueryDataSetProducer.columnNames(resultMetaData));
                     final ComparableTableMapper mapper = context.createMapper(metaData);
                     mapper.startTable();
                     if (this.param.loadData() && mapper.hasOutput()) {
-                        int readRows = 0;
-                        while (rst.next()) {
-                            mapper.addRow(metaData.toRow(IntStream.rangeClosed(1, resultColumnCount)
-                                    .mapToObj(i -> {
-                                        try {
-                                            return Optional.ofNullable(rst.getString(i))
-                                                    .orElse("");
-                                        } catch (final SQLException e) {
-                                            throw new RuntimeException(e);
-                                        }
-                                    })
-                                    .toArray()));
-                            readRows++;
+                        try (final ResultSet rst = stmt.executeQuery()) {
+                            int readRows = 0;
+                            while (rst.next()) {
+                                mapper.addRow(metaData.toRow(IntStream.rangeClosed(1, resultColumnCount)
+                                        .mapToObj(i -> {
+                                            try {
+                                                return Optional.ofNullable(rst.getString(i))
+                                                        .orElse("");
+                                            } catch (final SQLException e) {
+                                                throw new RuntimeException(e);
+                                            }
+                                        })
+                                        .toArray()));
+                                readRows++;
+                            }
+                            ComparableCSVQueryDataSetProducer.LOGGER.info("produce - rows={}", readRows);
                         }
-                        ComparableCSVQueryDataSetProducer.LOGGER.info("produce - rows={}", readRows);
                     }
                     mapper.endTable();
                     ComparableCSVQueryDataSetProducer.LOGGER.info("produce - end   filePath={}", this.source.filePath());

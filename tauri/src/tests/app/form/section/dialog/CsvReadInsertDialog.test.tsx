@@ -55,8 +55,7 @@ describe("CsvReadInsertDialog", () => {
 		await user.click(screen.getByRole("button", { name: "Next" }));
 		await screen.findByText("Select Columns");
 		expect(mockCsvColumns).toHaveBeenCalledWith(
-			"dataset\\user_account.csv",
-			"MS932",
+			"CSVREAD('dataset/user_account.csv',null,'charset=MS932')",
 			expect.anything(),
 		);
 
@@ -100,9 +99,7 @@ describe("CsvReadInsertDialog", () => {
 		await user.selectOptions(screen.getByLabelText("Operator"), "in");
 		await user.selectOptions(screen.getByLabelText("IN source"), "subquery");
 		await user.click(screen.getByText("ID"));
-		await user.click(
-			fromLast(screen.getAllByRole("button", { name: "Next" })),
-		);
+		await user.click(fromLast(screen.getAllByRole("button", { name: "Next" })));
 
 		await screen.findByText("Subquery Table");
 		const chooseButtons = screen.getAllByRole("button", { name: "Choose" });
@@ -115,8 +112,7 @@ describe("CsvReadInsertDialog", () => {
 
 		await screen.findByText("Subquery Columns");
 		expect(mockCsvColumns).toHaveBeenLastCalledWith(
-			"dataset\\user_account.csv",
-			"MS932",
+			"CSVREAD('dataset/user_account.csv',null,'charset=MS932')",
 			expect.anything(),
 		);
 		// 後ろ2つがSubquery ColumnsのSELECT columnとWHERE columns

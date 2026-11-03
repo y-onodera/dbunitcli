@@ -477,6 +477,27 @@ class DatasetSettingsControllerTest {
     }
 
     @Test
+    void testTableColumns_inlineQueryはcsvqとして実行したときの列を返し一時ファイルを残さない() throws IOException {
+        this.createPreviewSrc();
+        final Map<String, Object> body = new LinkedHashMap<>();
+        body.put("srcOptions", Map.of());
+        body.put("inlineQuery", "SELECT S.OTHER AS LABEL, S.* FROM CSVREAD('"
+                + PREVIEW_SRC_DIR.resolve("small.csv").toAbsolutePath().toString().replace('\\', '/')
+                + "',null,'charset=UTF-8') S");
+
+        final List<Path> before = this.inlineQueryTempDirs();
+
+        Assertions.assertEquals(Map.of("inlineQuery", List.of("LABEL", "KEY", "OTHER")), this.tableColumns(body));
+        Assertions.assertEquals(before, this.inlineQueryTempDirs());
+    }
+
+    private List<Path> inlineQueryTempDirs() throws IOException {
+        try (final var dirs = Files.list(Paths.get(System.getProperty("java.io.tmpdir")))) {
+            return dirs.filter(it -> it.getFileName().toString().startsWith("inlineQuery")).sorted().toList();
+        }
+    }
+
+    @Test
     void testTableColumns_読み込めなければエラーを返す() throws IOException {
         this.createPreviewSrc();
 

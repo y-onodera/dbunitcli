@@ -190,6 +190,24 @@ public class ComparableCSVQueryDataSetProducerTest {
         Assertions.assertEquals("30000", actualTable.getValue(0, "VALUE"));
         Assertions.assertEquals("10000", actualTable.getValue(1, "VALUE"));
     }
+    @Test
+    public void loadDataFalseReturnsColumnsWithoutExecutingQuery() throws DataSetException {
+        // 実行すればCASTで失敗する行があっても、行を読まなければ列だけ求められる
+        final File src = new File(this.resource, "csvquery/metadataonly/castQuery.txt");
+        final ComparableDataSet actual = new ComparableCSVQueryDataSetProducer(
+                ComparableDataSetParam.builder()
+                        .setSrc(src)
+                        .setEncoding("UTF8")
+                        .setLoadData(false)
+                        .build()
+                , Parameter.none()).loadDataSet();
+        final ComparableTable actualTable = actual.getTable("castQuery");
+        Assertions.assertEquals(2, actualTable.getTableMetaData().getColumns().length);
+        Assertions.assertEquals(0, actualTable.getTableMetaData().getColumnIndex("A"));
+        Assertions.assertEquals(1, actualTable.getTableMetaData().getColumnIndex("B"));
+        Assertions.assertEquals(0, actualTable.getRowCount());
+    }
+
     @Nested
     class ResolveCsvReadPathsTest {
 

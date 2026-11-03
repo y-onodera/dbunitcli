@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { useCsvColumnNamesFetcher } from "../../../../hooks/useDatasetSettings";
-import type { JobContext } from "../../../../hooks/useJob";
 import { csvReadExpression } from "../../../../utils/textInsert";
 import { useColumnLoad } from "./useColumnLoad";
 
@@ -14,9 +13,7 @@ export function useCsvFile(
 	const [charset, setCharset] = useState(encoding);
 	const [alias, setAlias] = useState("");
 	const fetchCsvColumnNames = useCsvColumnNamesFetcher();
-	const columnLoad = useColumnLoad((_table: string, context: JobContext) =>
-		fetchCsvColumnNames(path.trim(), charset.trim(), context),
-	);
+	const columnLoad = useColumnLoad(fetchCsvColumnNames);
 	return {
 		alias,
 		setAlias,

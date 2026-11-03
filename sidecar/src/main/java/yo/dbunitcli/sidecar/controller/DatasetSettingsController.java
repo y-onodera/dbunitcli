@@ -44,6 +44,7 @@ import yo.dbunitcli.sidecar.domain.project.ResourceFile;
 import yo.dbunitcli.sidecar.domain.project.Workspace;
 import yo.dbunitcli.sidecar.dto.DatasetRequestDto;
 import yo.dbunitcli.sidecar.dto.DatasetSettingDto;
+import yo.dbunitcli.sidecar.dto.DatasetTableColumnsRequestDto;
 import yo.dbunitcli.sidecar.dto.DatasetTableConvertRequestDto;
 import yo.dbunitcli.sidecar.dto.DatasetTableNamesRequestDto;
 import yo.dbunitcli.sidecar.dto.DatasetTablePreviewRequestDto;
@@ -123,12 +124,23 @@ public class DatasetSettingsController extends AbstractResourceFileController<Da
     /**
      * 読み込まれるテーブルごとの列名を返す（テーブル名→列名）。table-namesと同じくlazyLoadで求めるため、
      * データ行は分割（split）後の名前を求める場合だけ読む。tableNameを指定すればそのテーブルだけを返し、
-     * 対象外のソースはなるべく開かない（{@link Narrow#singlePass}）。読めなかったときはエラーを返す
+     * 対象外のソースはなるべく開かない（{@link Narrow#singlePass}）。読めなかったときはエラーを返す。
+     * inlineQueryは保存前のSQLをファイルに書き出して読むため、終わったら消す
      */
     @Interruptible
     @Post(uri = "table-columns", produces = MediaType.APPLICATION_JSON)
-    public String tableColumns(@Body final DatasetTablePreviewRequestDto request) {
+    public String tableColumns(@Body final DatasetTableColumnsRequestDto request) {
+        Path inlineQueryDir = null;
         try {
+            if (Strings.isNotEmpty(request.getInlineQuery())) {
+                inlineQueryDir = Files.createTempDirectory("inlineQuery");
+                final Path query = Files.writeString(inlineQueryDir.resolve("inlineQuery.sql"), request.getInlineQuery());
+                final Map<String, String> srcOptions = new LinkedHashMap<>();
+                srcOptions.put("srcType", "csvq");
+                srcOptions.put("src", query.toAbsolutePath().toString());
+                srcOptions.put("encoding", StandardCharsets.UTF_8.name());
+                request.setSrcOptions(srcOptions);
+            }
             final String tableName = request.getTableName();
             final ComparableDataSetParam.Builder param = this.toParam(request).get();
             if (Strings.isNotEmpty(tableName)) {
@@ -150,6 +162,10 @@ public class DatasetSettingsController extends AbstractResourceFileController<Da
         } catch (final Throwable th) {
             LOGGER.error("cause:", th);
             throw new ApplicationException(th);
+        } finally {
+            if (inlineQueryDir != null) {
+                GenerateTemplateSupport.deleteRecursively(inlineQueryDir);
+            }
         }
     }
 
