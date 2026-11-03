@@ -117,12 +117,10 @@ public record FileResources() {
         return FileResources.searchInOrder(settingPath, settingDir().toPath().normalize().toString(), FileResources::searchWorkspace);
     }
 
-    // compareの-setting（比較キーの設定）はoption/compare/setting→resources/setting→workspaceの順に探す
     public static File searchCompareSetting(final String settingPath) {
         return FileResources.searchInOrder(settingPath, compareSettingDir().toPath().normalize().toString(), FileResources::searchSetting);
     }
 
-    // generateの-unitSettingはoption/generate/setting→resources/setting→workspaceの順に探す
     public static File searchGenerateSetting(final String settingPath) {
         return FileResources.searchInOrder(settingPath, generateSettingDir().toPath().normalize().toString(), FileResources::searchSetting);
     }
@@ -139,7 +137,6 @@ public record FileResources() {
         return FileResources.searchInOrder(templatePath, templateFileDir().toPath().normalize().toString(), FileResources::searchWorkspace);
     }
 
-    // GUIと同じくoption/parameterize/template→resources/template→workspaceの順に探す
     public static File searchParameterizeTemplate(final String templatePath) {
         if (Strings.isEmpty(templatePath)) {
             return null;

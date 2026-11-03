@@ -68,7 +68,7 @@ class ComparableDdlMetaDataProducerTest {
         final ComparableTable table = producer.loadDataSet().getTable("SAMPLE");
         assertEquals(1, table.getRowCount());
 
-        // CSV等メタデータの無いソースでは、従来のScaffoldダミー行と同じ「列名とテーブル名以外すべて空」になる
+        // CSV等メタデータの無いソースでは、列名とテーブル名以外すべて空になる
         final var row = table.getRowToMap(0);
         assertEquals("id", row.get("COLUMN_NAME"));
         assertEquals("SAMPLE", row.get("TABLE_NAME"));

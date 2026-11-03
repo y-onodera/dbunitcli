@@ -52,7 +52,7 @@ public record DataSetConverterOption(
     }
 
     /**
-     * -parallelの値を整える。未指定は空文字（未指定時の並列数はコマンドごとに決める。convert/compare/generateはCPUコア数で自動（作業スレッドの中では逐次）、run/parameterizeは逐次）。
+     * -parallelの値を整える。未指定は空文字（未指定時の並列数はコマンドごとに決める）。
      * 値の検証は{@link Option#validateParallel(String)}で行う
      */
     public static String parallel(final String parallel) {
