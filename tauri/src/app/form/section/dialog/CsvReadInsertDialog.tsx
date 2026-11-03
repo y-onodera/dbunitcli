@@ -42,7 +42,7 @@ const CSV_USAGE_GROUPS: SelectGroup<DerivedTableUsage>[] = [
 	},
 ];
 
-// ファイル選択の起点と、選んだファイルを相対パスにする基準をworkspaceにする
+// csvq実行時にCSVREADの相対パスを探す基準（datasetBase→workspace）と同じ基準で相対パスにする
 const CSV_FILE_ELEMENT: CommandOption = {
 	name: "csvFile",
 	value: "",
@@ -51,7 +51,7 @@ const CSV_FILE_ELEMENT: CommandOption = {
 		type: "FILE",
 		required: false,
 		selectOption: [],
-		defaultPath: "WORKSPACE",
+		defaultPath: "DATASET",
 	},
 };
 

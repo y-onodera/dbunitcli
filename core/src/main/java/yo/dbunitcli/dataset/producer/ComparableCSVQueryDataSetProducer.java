@@ -14,6 +14,8 @@ import yo.dbunitcli.resource.FileResources;
 import java.io.File;
 import java.sql.*;
 import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.IntStream;
 
 public record ComparableCSVQueryDataSetProducer(ComparableDataSetParam param,
@@ -21,8 +23,28 @@ public record ComparableCSVQueryDataSetProducer(ComparableDataSetParam param,
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ComparableCSVQueryDataSetProducer.class);
 
+    // CSVREADの第1引数が文字列リテラルのもの（'' は ' のエスケープ）
+    private static final Pattern CSVREAD_FILE = Pattern.compile("(?i)(\\bCSVREAD\\s*\\(\\s*)'((?:[^']|'')*)'");
+
     private static String url() {
         return "jdbc:h2:file:" + FileResources.datasetDir().getAbsolutePath() + ";MODE=Oracle";
+    }
+
+    /**
+     * H2は相対パスを起動時のカレントディレクトリから解決するため、
+     * CSVREADの相対パスをsrcの他のファイルと同じ探索順（{@link FileResources#searchDatasetBase}）で絶対パスにする
+     */
+    static String resolveCsvReadPaths(final String query) {
+        final Matcher matcher = CSVREAD_FILE.matcher(query);
+        final StringBuilder result = new StringBuilder();
+        while (matcher.find()) {
+            final String path = matcher.group(2).replace("''", "'");
+            final String resolved = FileResources.searchDatasetBase(path).getAbsolutePath().replace('\\', '/');
+            matcher.appendReplacement(result, Matcher.quoteReplacement(
+                    matcher.group(1) + "'" + resolved.replace("'", "''") + "'"));
+        }
+        matcher.appendTail(result);
+        return result.toString();
     }
 
     private static String[] columnNames(final ResultSetMetaData metaData) throws SQLException {
@@ -52,7 +74,8 @@ public record ComparableCSVQueryDataSetProducer(ComparableDataSetParam param,
         @Override
         public void run(final ComparableTableMappingContext context) {
             try {
-                final String query = this.param.templateRender().render(new File(this.source.filePath()), this.parameter);
+                final String query = ComparableCSVQueryDataSetProducer.resolveCsvReadPaths(
+                        this.param.templateRender().render(new File(this.source.filePath()), this.parameter));
                 ComparableCSVQueryDataSetProducer.LOGGER.info("produce - start filePath={},query={}", this.source.filePath(), query);
                 try (final Connection conn = DriverManager.getConnection(ComparableCSVQueryDataSetProducer.url());
                      final Statement stmt = conn.createStatement();

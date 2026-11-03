@@ -58,6 +58,7 @@ SQL (joinQuery.sql):
   [3, C1, 花子, 30000]
   [1, A1, 太郎, 10000]</pre>
   <p><code>CSVREAD(fileName, columns, csvOptions)</code> の第 2 引数を <code>null</code> にすると、先頭行がヘッダとして扱われます。第 3 引数では <code>charset</code>・<code>fieldSeparator</code>・<code>fieldDelimiter</code> などの H2 の CSV オプションを指定できます（例: TSV を読む場合は <code>'charset=UTF-8 fieldSeparator=\t'</code>）。</p>
+  <p><code>CSVREAD()</code> の第 1 引数に文字列で書いた相対パスは、Dataset Base、Workspace、起動時のカレントディレクトリの順に探し、最初に見つかったファイルを読みます。どこにも無い場合は起動時のカレントディレクトリからのパスとして扱います。</p>
 
   <h2 id="section-notes">注意</h2>
   <ul>
