@@ -35,7 +35,7 @@ export function DialogField({
 	return <div className={last ? "mb-4" : "mb-3"}>{children}</div>;
 }
 
-// ボタンを横並びにする行（gap-3 に統一）
+// ボタンを横並びにする行
 export function InlineActions({ children }: { children: ReactNode }) {
 	return <div className="mt-2 flex items-center gap-3">{children}</div>;
 }

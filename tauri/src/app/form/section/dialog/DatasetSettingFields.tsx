@@ -182,7 +182,7 @@ const filterOrderFields = [
 
 type FilterOrderFieldName = (typeof filterOrderFields)[number]["name"];
 
-// fieldNamesで表示する項目を絞れる（省略時はすべて。compareの比較キー設定ではkeysだけを使う）
+// fieldNamesで表示する項目を絞れる（省略時はすべて）
 export function FilterOrderFields({
 	target,
 	setTarget,

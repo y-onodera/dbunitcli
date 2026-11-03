@@ -39,7 +39,6 @@ import {
 	workspaceResourcesFixture,
 } from "../setup";
 
-// モックデータ
 const createDatasetSource = (prefix: string) =>
 	({
 		prefix,
@@ -167,7 +166,6 @@ vi.mock("../../utils/fetchUtils", async (importOriginal) => ({
 
 const mockEnvironment: Environment = { ...environmentFixture };
 
-// カスタムラッパーコンポーネント
 const wrapper = ({ children }: { children: ReactNode }) => (
 	<environmentContext.Provider value={mockEnvironment}>
 		<SelectParameterProvider>{children}</SelectParameterProvider>

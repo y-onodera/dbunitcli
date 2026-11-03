@@ -24,7 +24,6 @@ import {
 } from "../helpers/jobFailure";
 import { environmentFixture, workspaceResourcesFixture } from "../setup";
 
-// モックデータ
 const mockDatasetSettingsResponse: {
 	settings: { name: string[] }[];
 	commonSettings: unknown[];

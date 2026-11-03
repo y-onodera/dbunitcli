@@ -11,7 +11,7 @@ import { FilterInput } from "../../../../components/element/Input";
 // 引数の既定値にアロー関数を書くとReact Compilerが未対応のため、モジュールレベルで定義する
 const renderAsText = (item: string): ReactNode => item;
 
-// フィルタ入力・全選択チェック・行クリックでの選択切替を持つ一覧（テーブル名・カラム名選択で共通）
+// フィルタ入力・全選択チェック・行クリックでの選択切替を持つ一覧
 export default function SelectableTable({
 	items,
 	selected,

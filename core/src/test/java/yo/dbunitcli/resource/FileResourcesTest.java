@@ -499,10 +499,10 @@ class FileResourcesTest {
         }
 
         @Test
-        void searchSettingDirIfNotFoundOptionSettingDir() throws IOException {
-            final Path expected = Files.createFile(this.workspace.resolve(FileResources.RESOURCES_SETTING_PATH).resolve("old.json"));
-            Assertions.assertEquals(expected.toFile(), FileResources.searchCompareSetting("old.json"));
-            Assertions.assertEquals(expected.toFile(), FileResources.searchGenerateSetting("old.json"));
+        void doNotSearchSettingDir() throws IOException {
+            Files.createFile(this.workspace.resolve(FileResources.RESOURCES_SETTING_PATH).resolve("old.json"));
+            Assertions.assertFalse(FileResources.searchCompareSetting("old.json").exists());
+            Assertions.assertFalse(FileResources.searchGenerateSetting("old.json").exists());
         }
 
         @Test

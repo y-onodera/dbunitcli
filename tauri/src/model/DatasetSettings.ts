@@ -4,7 +4,7 @@ export type Pattern = {
 	exclude?: string[];
 	filePath?: string;
 };
-// 他の設定ファイルの取り込み。outputFilterCombineは未指定ならand
+// 他の設定ファイルの取り込み
 export type ImportSetting = {
 	path: string;
 	outputFilterCombine?: "and" | "or";

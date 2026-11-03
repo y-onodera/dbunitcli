@@ -1,6 +1,5 @@
 package yo.dbunitcli.common.filter;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -22,11 +21,6 @@ public class SourceFilterTest {
     private static final String USER_INFO = "user_info";
     private static final String USER_ADMIN = "user_admin";
     private static final String CUSTOMER = "customer";
-
-    @BeforeEach
-    protected void setUp() {
-        // 将来の拡張に備えて用意
-    }
 
     @Test
     public void regexWhenValidPatternShouldMatchTables() {

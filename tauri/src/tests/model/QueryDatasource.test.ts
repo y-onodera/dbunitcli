@@ -31,7 +31,6 @@ describe("QueryDatasourceのテスト", () => {
 			}
 
 			if (isSqlRelatedType(testType2)) {
-				// この分岐には入らない
 				expect.fail(
 					"unknownはSQL関連タイプではないため、この分岐に入るべきではない",
 				);

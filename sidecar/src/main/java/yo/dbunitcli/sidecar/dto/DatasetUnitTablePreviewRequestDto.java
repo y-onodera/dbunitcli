@@ -9,7 +9,7 @@ import io.micronaut.serde.annotation.Serdeable;
 public class DatasetUnitTablePreviewRequestDto extends DatasetTablePreviewRequestDto {
 
     /**
-     * generateの-unitSettingの値（settingの基準ディレクトリ→workspaceの順に探す）
+     * generateの-unitSettingの値
      */
     private String unitSetting;
 

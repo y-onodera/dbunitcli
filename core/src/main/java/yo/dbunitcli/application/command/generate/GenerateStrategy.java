@@ -73,8 +73,7 @@ public interface GenerateStrategy {
         return false;
     }
 
-    // GenerateOption.forEachParameter()のunit=table（Excel以外）だけがこの戻り値を消費する(ParameterUnit.tableTemplates()経由)。
-    // ここをoverrideしてもunit=table以外では反映されない。
+    // unit=table以外の出力では呼ばれない（呼び出し元はGenerateOption#forEachParameter）
     default ComparableDataSetProducer wrapProducer(final GenerateContext option, final ComparableDataSetProducer producer) {
         return producer;
     }

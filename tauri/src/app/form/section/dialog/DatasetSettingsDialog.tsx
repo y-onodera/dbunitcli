@@ -32,7 +32,7 @@ import {
 import DatasetSettingDialog from "./DatasetSettingDialog";
 import { SaveAndPreviewButton } from "./DatasetTableNamesPreviewButton";
 
-// kind: 読込・保存先のリソース（DatasetSettingTextがオプションの基準ディレクトリから決めて渡す）
+// kind: 読込・保存先のリソース
 export default function DatasetSettingsDialog(props: {
 	fileName: string;
 	handleDialogClose: () => void;
@@ -136,7 +136,7 @@ export function DatasetSettingsEditDialog(props: {
 	);
 }
 
-// 他の設定ファイルの取り込み。outputFilterCombineは取り込み先のoutputFilterとの結合方法(既定and)
+// 他の設定ファイルの取り込み。outputFilterCombineは取り込み先のoutputFilterとの結合方法
 function ImportFields(props: {
 	imports: ImportSetting[];
 	setImports: (imports: ImportSetting[]) => void;

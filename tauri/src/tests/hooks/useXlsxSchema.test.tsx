@@ -12,7 +12,6 @@ import { XlsxSchema } from "../../model/XlsxSchema";
 import type { FetchParams } from "../../utils/fetchUtils";
 import { environmentFixture, workspaceResourcesFixture } from "../setup";
 
-// モックデータ
 const mockXlsxSchema: XlsxSchemaBuilder = {
 	rows: [
 		{

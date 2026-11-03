@@ -1,5 +1,10 @@
 package yo.dbunitcli.application.command;
 
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.taskdefs.Copy;
 import org.apache.tools.ant.taskdefs.Delete;
@@ -8,9 +13,17 @@ import org.apache.tools.ant.types.FileSet;
 import org.junit.jupiter.api.*;
 import yo.dbunitcli.resource.FileResources;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.UnsupportedEncodingException;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.UncheckedIOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Properties;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 public class CompareTest {
 
@@ -37,8 +50,43 @@ public class CompareTest {
         delete.execute();
     }
 
+    private static final Pattern RESOURCES_PATH = Pattern.compile("src[\\\\/]test[\\\\/]resources");
+
+    // xlsxはReplaceで置換できないため、セルの値の比較元パスを置換先のパスに書き換える
+    private static void replaceXlsxPaths(final String dir, final String resourcesPath) {
+        final String replacement = Matcher.quoteReplacement(resourcesPath);
+        try (final Stream<Path> files = Files.walk(Path.of(dir))) {
+            for (final Path file : files.filter(it -> it.toString().endsWith(".xlsx")).toList()) {
+                try (final XSSFWorkbook book = new XSSFWorkbook(new ByteArrayInputStream(Files.readAllBytes(file)))) {
+                    boolean changed = false;
+                    for (final Sheet sheet : book) {
+                        for (final Row row : sheet) {
+                            for (final Cell cell : row) {
+                                if (cell.getCellType() == CellType.STRING) {
+                                    final String value = cell.getStringCellValue();
+                                    final String replaced = RESOURCES_PATH.matcher(value).replaceAll(replacement);
+                                    if (!replaced.equals(value)) {
+                                        cell.setCellValue(replaced);
+                                        changed = true;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    if (changed) {
+                        try (final OutputStream out = Files.newOutputStream(file)) {
+                            book.write(out);
+                        }
+                    }
+                }
+            }
+        } catch (final IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
     @BeforeAll
-    public static void setUp() throws UnsupportedEncodingException {
+    public static void setUp() {
         CompareTest.PROJECT.setName("compareTest");
         CompareTest.PROJECT.setBaseDir(new File("."));
         CompareTest.PROJECT.setProperty("java.io.tmpdir", System.getProperty("java.io.tmpdir"));
@@ -240,6 +288,7 @@ public class CompareTest {
             CompareTest.copy(RESOURCES_DIR + "/src", TOP_DIR + "dataset/" + RESOURCES_DIR + "/src");
             CompareTest.copy(RESOURCES_DIR + "/expect", TOP_DIR + "dataset/" + RESOURCES_DIR + "/expect");
             getReplace().execute();
+            CompareTest.replaceXlsxPaths(TOP_DIR + "dataset/" + RESOURCES_DIR + "/expect", TOP_DIR + "dataset/src/test/resources");
         }
 
         private static Replace getReplace() {
@@ -255,12 +304,6 @@ public class CompareTest {
             replace.setProject(CompareTest.PROJECT);
             return replace;
         }
-
-        @Test
-        @Override
-        public void testResultXlsx() {
-            //super.testResultXlsx();
-        }
     }
 
     @Nested
@@ -274,6 +317,7 @@ public class CompareTest {
             CompareTest.clean(TEMP_DIR + "/base");
             CompareTest.copy(RESOURCES_DIR, TEMP_DIR + "/base/" + RESOURCES_DIR);
             getReplace().execute();
+            CompareTest.replaceXlsxPaths(TEMP_DIR + "/base/" + RESOURCES_DIR + "/expect", TEMP_DIR + "/base/src/test/resources");
         }
 
         private static Replace getReplace() {
@@ -288,12 +332,6 @@ public class CompareTest {
             filter2.setValue("target\\\\test-temp\\\\compare\\\\base\\\\src\\\\test\\\\resources");
             replace.setProject(CompareTest.PROJECT);
             return replace;
-        }
-
-        @Test
-        @Override
-        public void testResultXlsx() {
-            //super.testResultXlsx();
         }
 
     }
@@ -323,6 +361,7 @@ public class CompareTest {
             CompareTest.copy(RESOURCES_DIR + "/src", TEMP_DIR + "/dataset/" + RESOURCES_DIR + "/src");
             CompareTest.copy(RESOURCES_DIR + "/expect", TEMP_DIR + "/dataset/" + RESOURCES_DIR + "/expect");
             getReplace().execute();
+            CompareTest.replaceXlsxPaths(TEMP_DIR + "/dataset/" + RESOURCES_DIR + "/expect", TEMP_DIR + "/dataset/src/test/resources");
         }
 
         private static Replace getReplace() {
@@ -337,12 +376,6 @@ public class CompareTest {
             filter2.setValue("target\\\\test-temp\\\\compare\\\\dataset\\\\src\\\\test\\\\resources");
             replace.setProject(CompareTest.PROJECT);
             return replace;
-        }
-
-        @Test
-        @Override
-        public void testResultXlsx() {
-            //super.testResultXlsx();
         }
     }
 

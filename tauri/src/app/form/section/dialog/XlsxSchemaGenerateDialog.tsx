@@ -21,7 +21,7 @@ const xlsxSchemaGenerateConfig: ModelGenerateConfig<
 	title: "Generate Xlsx Schema",
 	endpoint: "xlsx-schema/generate",
 	build: XlsxSchema.build,
-	// 生成後は既存の編集ダイアログで内容確認・命名保存する
+	// 生成後は編集ダイアログで内容確認・命名保存する
 	renderEditDialog: (schema, props) => (
 		<XlsxSchemaEditDialog schema={schema} {...props} />
 	),

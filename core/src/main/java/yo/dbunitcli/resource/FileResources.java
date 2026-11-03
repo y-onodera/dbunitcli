@@ -117,14 +117,12 @@ public record FileResources() {
         return FileResources.searchInOrder(settingPath, settingDir().toPath().normalize().toString(), FileResources::searchWorkspace);
     }
 
-    // compareの-setting（比較キーの設定）はoption/compare/setting→resources/setting→workspaceの順に探す
     public static File searchCompareSetting(final String settingPath) {
-        return FileResources.searchInOrder(settingPath, compareSettingDir().toPath().normalize().toString(), FileResources::searchSetting);
+        return FileResources.searchInOrder(settingPath, compareSettingDir().toPath().normalize().toString(), FileResources::searchWorkspace);
     }
 
-    // generateの-unitSettingはoption/generate/setting→resources/setting→workspaceの順に探す
     public static File searchGenerateSetting(final String settingPath) {
-        return FileResources.searchInOrder(settingPath, generateSettingDir().toPath().normalize().toString(), FileResources::searchSetting);
+        return FileResources.searchInOrder(settingPath, generateSettingDir().toPath().normalize().toString(), FileResources::searchWorkspace);
     }
 
     // 設定ファイルのimport先は、絶対パス→取り込み元の設定ファイルのディレクトリ→カレントディレクトリの順に探す
@@ -139,7 +137,6 @@ public record FileResources() {
         return FileResources.searchInOrder(templatePath, templateFileDir().toPath().normalize().toString(), FileResources::searchWorkspace);
     }
 
-    // GUIと同じくoption/parameterize/template→resources/template→workspaceの順に探す
     public static File searchParameterizeTemplate(final String templatePath) {
         if (Strings.isEmpty(templatePath)) {
             return null;
@@ -158,7 +155,7 @@ public record FileResources() {
         return FileResources.searchInOrder(xlsxSchemaPath, xlsxSchemaDir().toPath().normalize().toString(), FileResources::searchWorkspace);
     }
 
-    // 以前はdataset直下に保存していたため、resources配下→dataset→workspaceの順に探す
+    // datasetディレクトリに置いたsrcも解決できるようにする
     public static File searchSql(final String path) {
         return FileResources.searchInOrder(path, sqlDir().toPath().normalize().toString(), FileResources::searchDatasetBase);
     }

@@ -2,7 +2,7 @@ import type { JobContext } from "../../../../hooks/useJob";
 import { fetchData, getErrorMessage } from "../../../../utils/fetchUtils";
 import type { FormValues } from "../../../../utils/formValues";
 
-// refresh系エンドポイントで再構成するダイアログフォーム（Scaffold・XlsxSchema生成）の共通基盤
+// refresh系エンドポイントで再構成するダイアログフォームの共通基盤
 export type DialogLoadState<OPTIONS> =
 	| { status: "loading" }
 	| { status: "error"; message: string }

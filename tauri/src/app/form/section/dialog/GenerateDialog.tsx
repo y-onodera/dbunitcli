@@ -119,7 +119,7 @@ function GenerateButton({
 	);
 }
 
-// 既存の呼び出し元はpathも渡すため、編集ボタンと同じpropsを受け付ける（pathは未使用）
+// 編集ボタンと並べて同じpropsで呼ばれるため、pathも受け付ける（未使用）
 export type GenerateButtonProps = Partial<ResourceEditButtonProp> &
 	Pick<ResourceEditButtonProp, "setPath">;
 
@@ -170,7 +170,7 @@ function ModelGenerateDialog<BUILDER, MODEL>({
 	);
 }
 
-// 生成結果を既存の編集ダイアログで確認・命名保存する形式（Settings・XlsxSchema・FixedColumnDef）
+// 生成結果を編集ダイアログで確認・命名保存する形式
 export function ModelGenerateButton<BUILDER, MODEL>({
 	config,
 	setPath,
@@ -195,7 +195,7 @@ type FileGenerate = (
 	context: GenerateExecuteContext,
 ) => Promise<string>;
 
-// 生成のみで完結しパスを返す形式（XlsxTemplate）。generateは保存したファイル名を返す
+// 生成のみで完結しパスを返す形式。generateは保存したファイル名を返す
 export function FileGenerateButton({
 	setPath,
 	config,

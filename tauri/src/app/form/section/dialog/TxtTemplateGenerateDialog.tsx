@@ -29,7 +29,7 @@ function withoutParameterTarget(target: CommandOption): CommandOption {
 	};
 }
 
-// 反映には-templateが必須（sidecarのexecも-template必須で検証する）
+// 反映には-templateが必須
 function requiredOption(element: CommandOption): CommandOption {
 	return { ...element, attribute: { ...element.attribute, required: true } };
 }

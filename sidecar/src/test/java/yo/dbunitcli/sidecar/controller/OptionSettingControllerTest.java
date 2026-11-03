@@ -65,10 +65,10 @@ class OptionSettingControllerTest {
 
     @ParameterizedTest
     @CsvSource({"compare", "generate"})
-    void testLoad_resourcesのsettingにある以前のファイルも読める(final String command) {
+    void testLoad_resourcesのsettingにあるファイルは読まない(final String command) {
         final String loaded = this.client.toBlocking()
                 .retrieve(HttpRequest.POST("dbunit-cli/" + command + "/setting/load", "test.json")
                         .contentType(MediaType.TEXT_PLAIN_TYPE));
-        Assertions.assertNotEquals("{}", loaded);
+        Assertions.assertEquals("{}", loaded);
     }
 }
