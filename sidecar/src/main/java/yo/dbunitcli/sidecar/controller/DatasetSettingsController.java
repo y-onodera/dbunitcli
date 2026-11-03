@@ -121,6 +121,7 @@ public class DatasetSettingsController extends AbstractResourceFileController<Da
     /**
      * 選んだテーブルの先頭{@link #PREVIEW_ROW_LIMIT}行と全行数を返す。対象外のテーブルはなるべく読まないよう、
      * 絞り込みの強い順に試し、対象が見つからなければ絞り込みを緩めて読み直す（{@link Narrow}）。
+     * SQLの構文エラー等を直せるよう、読めなかったときはエラーを返す
      */
     @Interruptible
     @Post(uri = "table-preview", produces = MediaType.APPLICATION_JSON)
@@ -136,12 +137,8 @@ public class DatasetSettingsController extends AbstractResourceFileController<Da
             }
             return ObjectMapper.getDefault().writeValueAsString(DatasetTablePreviewResponseDto.empty());
         } catch (final Throwable th) {
-            LOGGER.warn("Could not get table preview", th);
-            try {
-                return ObjectMapper.getDefault().writeValueAsString(DatasetTablePreviewResponseDto.empty());
-            } catch (final Exception ex) {
-                return "{\"headers\":[],\"rows\":[],\"totalRows\":0}";
-            }
+            LOGGER.error("cause:", th);
+            throw new ApplicationException(th);
         }
     }
 
