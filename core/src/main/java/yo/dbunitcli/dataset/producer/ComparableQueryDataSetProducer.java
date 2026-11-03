@@ -12,7 +12,6 @@ import yo.dbunitcli.common.TableMetaDataWithSource;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.dataset.ComparableTableMappingTask;
 
-import java.io.File;
 import java.sql.SQLException;
 import java.util.stream.Stream;
 
@@ -73,21 +72,14 @@ public class ComparableQueryDataSetProducer extends ComparableDBDataSetProducer 
         @Override
         protected ITable getTable(final String tableName) {
             try {
-                final File file = new File(this.source.filePath());
-                final String query = this.loadQuery(file);
-                ComparableQueryDataSetProducer.LOGGER.info("produce - start fileName={},query={}", file.getName(), query);
+                final String query = QueryDataSetProducer.renderQuery(this.param, this.source, this.parameter).replace(";", "");
+                ComparableQueryDataSetProducer.LOGGER.info("produce - start fileName={},query={}", this.source.fileName(), query);
                 final ITable table = this.connection.createQueryTable(this.source.getTableName(), query);
-                ComparableQueryDataSetProducer.LOGGER.info("produce - end   fileName={}", file.getName());
+                ComparableQueryDataSetProducer.LOGGER.info("produce - end   fileName={}", this.source.fileName());
                 return table;
             } catch (final SQLException | DataSetException e) {
                 throw new AssertionError(e);
             }
-        }
-
-        protected String loadQuery(final File aFile) {
-            return this.param.templateRender()
-                    .render(aFile, this.parameter)
-                    .replace(";", "");
         }
     }
 }

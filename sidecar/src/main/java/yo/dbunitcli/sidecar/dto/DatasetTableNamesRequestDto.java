@@ -30,7 +30,7 @@ public class DatasetTableNamesRequestDto {
     private JsonXlsxSchemaDto inlineXlsxSchema;
 
     /**
-     * 未保存のcsvqのSQL。指定時はsrcType・src・encodingより優先し、このSQLをcsvqとして読んだ{@link #INLINE_QUERY_TABLE_NAME}のテーブルだけを読み込む（CSVREADの列の選択用）
+     * 未保存のcsvqのSQL。指定時はsrcType・srcより優先し、このSQLをcsvqとして読んだ{@link #INLINE_QUERY_TABLE_NAME}のテーブルだけを読み込む（CSVREADの列の選択用）
      */
     private String inlineQuery;
 

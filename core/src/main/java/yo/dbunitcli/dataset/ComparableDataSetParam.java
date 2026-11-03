@@ -40,6 +40,7 @@ public record ComparableDataSetParam(
         , DatabaseConnectionLoader databaseConnectionLoader
         , IDataSetConverter converter
         , Integer parallel
+        , InlineQuery inlineQuery
 ) {
 
     public static Builder builder() {
@@ -72,6 +73,7 @@ public record ComparableDataSetParam(
                 , builder.getDatabaseConnectionLoader()
                 , builder.getConverter()
                 , builder.getParallel()
+                , builder.getInlineQuery()
         );
     }
 
@@ -133,7 +135,8 @@ public record ComparableDataSetParam(
                 .setSTTemplateLoader(this.templateRender)
                 .setDatabaseConnectionLoader(this.databaseConnectionLoader)
                 .setConverter(this.converter)
-                .setParallel(this.parallel);
+                .setParallel(this.parallel)
+                .setInlineQuery(this.inlineQuery);
     }
 
     public static class Builder {
@@ -164,6 +167,7 @@ public record ComparableDataSetParam(
         private String regTableExclude;
         private boolean ignoreQuoted = false;
         private Integer parallel;
+        private InlineQuery inlineQuery;
 
         public ComparableDataSetParam build() {
             return new ComparableDataSetParam(this);
@@ -275,6 +279,10 @@ public record ComparableDataSetParam(
 
         public Integer getParallel() {
             return this.parallel;
+        }
+
+        public InlineQuery getInlineQuery() {
+            return this.inlineQuery;
         }
 
         public Builder ifMatch(final boolean condition, final Function<Builder, Builder> function) {
@@ -428,6 +436,14 @@ public record ComparableDataSetParam(
          */
         public Builder setParallel(final Integer parallel) {
             this.parallel = parallel;
+            return this;
+        }
+
+        /**
+         * @param inlineQuery 指定すればsrcのファイルの代わりに読むSQL（sql・csvqのみ）。nullならsrcを読む
+         */
+        public Builder setInlineQuery(final InlineQuery inlineQuery) {
+            this.inlineQuery = inlineQuery;
             return this;
         }
 

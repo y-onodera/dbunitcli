@@ -479,29 +479,24 @@ class DatasetSettingsControllerTest {
     }
 
     @Test
-    void testTableColumns_inlineQueryはcsvqとして実行したときの列を返し一時ファイルを残さない() throws IOException {
+    void testTableColumns_inlineQueryはcsvqとして実行したときの列を返す() throws IOException {
         this.createPreviewSrc();
-        final List<Path> before = this.inlineQueryTempDirs();
 
         Assertions.assertEquals(Map.of(DatasetTableNamesRequestDto.INLINE_QUERY_TABLE_NAME, List.of("LABEL", "KEY", "OTHER")),
                 this.tableColumns(this.inlineQueryBody(DatasetTableNamesRequestDto.INLINE_QUERY_TABLE_NAME)));
-        Assertions.assertEquals(before, this.inlineQueryTempDirs());
     }
 
     @Test
     void testTableNames_inlineQueryはsrcの代わりにinlineQueryのテーブルだけを返す() throws IOException {
         this.createPreviewSrc();
-        final List<Path> before = this.inlineQueryTempDirs();
 
         Assertions.assertEquals(List.of(DatasetTableNamesRequestDto.INLINE_QUERY_TABLE_NAME),
                 this.tableNames(this.inlineQueryBody("")));
-        Assertions.assertEquals(before, this.inlineQueryTempDirs());
     }
 
     @Test
-    void testTablePreview_inlineQueryの行を読み込み一時ファイルを残さない() throws IOException {
+    void testTablePreview_inlineQueryの行を読み込む() throws IOException {
         this.createPreviewSrc();
-        final List<Path> before = this.inlineQueryTempDirs();
 
         final DatasetTablePreviewResponseDto actual = this.tablePreview(
                 this.inlineQueryBody(DatasetTableNamesRequestDto.INLINE_QUERY_TABLE_NAME));
@@ -510,18 +505,17 @@ class DatasetSettingsControllerTest {
         Assertions.assertEquals(3, actual.getTotalRows());
         Assertions.assertEquals(List.of("a", "1", "a"),
                 Arrays.stream(actual.getRows().getFirst()).map(String::valueOf).toList());
-        Assertions.assertEquals(before, this.inlineQueryTempDirs());
     }
 
     @Test
-    void testTablePreview_inlineQueryが読めなくても一時ファイルを残さない() throws IOException {
+    void testTablePreview_inlineQueryが読めなければエラーを返す() throws IOException {
         final Map<String, Object> body = new LinkedHashMap<>();
         body.put("inlineQuery", "SELECT * FROM");
         body.put("tableName", DatasetTableNamesRequestDto.INLINE_QUERY_TABLE_NAME);
-        final List<Path> before = this.inlineQueryTempDirs();
 
-        Assertions.assertThrows(HttpClientResponseException.class, () -> this.tablePreview(body));
-        Assertions.assertEquals(before, this.inlineQueryTempDirs());
+        final HttpClientResponseException ex = Assertions.assertThrows(HttpClientResponseException.class,
+                () -> this.tablePreview(body));
+        Assertions.assertEquals(HttpStatus.BAD_REQUEST, ex.getStatus());
     }
 
     /**
@@ -533,12 +527,6 @@ class DatasetSettingsControllerTest {
                 + PREVIEW_SRC_DIR.resolve("small.csv").toAbsolutePath().toString().replace('\\', '/')
                 + "',null,'charset=UTF-8') S");
         return body;
-    }
-
-    private List<Path> inlineQueryTempDirs() throws IOException {
-        try (final var dirs = Files.list(Paths.get(System.getProperty("java.io.tmpdir")))) {
-            return dirs.filter(it -> it.getFileName().toString().startsWith("inlineQuery")).sorted().toList();
-        }
     }
 
     @Test

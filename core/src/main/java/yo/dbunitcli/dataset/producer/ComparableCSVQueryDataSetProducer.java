@@ -11,7 +11,6 @@ import yo.dbunitcli.dataset.ComparableTableMappingContext;
 import yo.dbunitcli.dataset.ComparableTableMappingTask;
 import yo.dbunitcli.resource.FileResources;
 
-import java.io.File;
 import java.sql.*;
 import java.util.Optional;
 import java.util.regex.Matcher;
@@ -75,7 +74,7 @@ public record ComparableCSVQueryDataSetProducer(ComparableDataSetParam param,
         public void run(final ComparableTableMappingContext context) {
             try {
                 final String query = ComparableCSVQueryDataSetProducer.resolveCsvReadPaths(
-                        this.param.templateRender().render(new File(this.source.filePath()), this.parameter));
+                        QueryDataSetProducer.renderQuery(this.param, this.source, this.parameter));
                 ComparableCSVQueryDataSetProducer.LOGGER.info("produce - start filePath={},query={}", this.source.filePath(), query);
                 try (final Connection conn = DriverManager.getConnection(ComparableCSVQueryDataSetProducer.url());
                      final PreparedStatement stmt = conn.prepareStatement(query)
