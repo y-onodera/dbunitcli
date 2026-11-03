@@ -202,10 +202,6 @@ export function isMultiColumnOperator(operator: ConditionOperator): boolean {
 	return operator === "equals" || operator === "isNull";
 }
 
-export function usesNot(operator: ConditionOperator): boolean {
-	return operator !== "equals";
-}
-
 export type ConditionOptions = {
 	operator: ConditionOperator;
 	not: boolean;
@@ -240,7 +236,7 @@ function conditionExpression(
 	const not = options.not ? "NOT " : "";
 	switch (options.operator) {
 		case "equals":
-			return [`${column} = `];
+			return [options.not ? `${column} != ` : `${column} = `];
 		case "isNull":
 			return [`${column} IS ${not}NULL`];
 		case "in":

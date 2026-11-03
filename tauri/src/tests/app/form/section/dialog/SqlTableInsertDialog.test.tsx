@@ -305,9 +305,16 @@ describe("SqlTableInsertDialogの条件の挿入", () => {
 		]);
 	});
 
-	it("= では NOT を出さない", async () => {
-		await openWhere();
-		expect(screen.queryByLabelText("NOT")).toBeNull();
+	it("= で NOT を ON にすると != にする", async () => {
+		const { user, onInsertColumn } = await openWhere();
+		await user.click(screen.getByLabelText("NOT"));
+
+		await user.click(screen.getByRole("button", { name: "All Columns" }));
+		expect(onInsertColumn).toHaveBeenCalledWith([
+			"WHERE",
+			"    ID != ",
+			"AND NAME != ",
+		]);
 	});
 
 	it("IN は1カラムだけ選べ、値を1行で入れる", async () => {

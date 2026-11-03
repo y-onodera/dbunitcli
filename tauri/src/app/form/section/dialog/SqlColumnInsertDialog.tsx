@@ -19,7 +19,6 @@ import {
 	isMultiColumnOperator,
 	qualifyColumn,
 	usesColumnQualifier,
-	usesNot,
 } from "../../../../utils/textInsert";
 import SelectableTable from "./SelectableTable";
 import {
@@ -225,14 +224,12 @@ export default function SqlColumnInsertDialog({
 									groups={OPERATOR_GROUPS}
 									onChange={handleOperatorChange}
 								/>
-								{usesNot(operator) && (
-									<OptionCheck
-										id="sqlColumnInsert_not"
-										label="NOT"
-										checked={not}
-										onChange={setNot}
-									/>
-								)}
+								<OptionCheck
+									id="sqlColumnInsert_not"
+									label="NOT"
+									checked={not}
+									onChange={setNot}
+								/>
 							</div>
 						</DialogField>
 					)}

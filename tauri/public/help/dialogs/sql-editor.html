@@ -106,7 +106,7 @@ AND T.COLUMNB = </pre>
   <table>
     <tr><th>項目</th><th>説明</th><th>デフォルト</th></tr>
     <tr><td>Operator</td><td>条件の演算子。選べるカラムの数が決まる</td><td>=</td></tr>
-    <tr><td>NOT</td><td>ON にすると、<code>IS NOT NULL</code> / <code>NOT IN</code> / <code>NOT EXISTS</code> にする。Operator が = のときは表示されない</td><td>OFF</td></tr>
+    <tr><td>NOT</td><td>ON にすると、<code>!=</code> / <code>IS NOT NULL</code> / <code>NOT IN</code> / <code>NOT EXISTS</code> にする</td><td>OFF</td></tr>
     <tr><td>Join columns with</td><td>カラムどうしの条件をつなぐ <code>AND</code> / <code>OR</code>。Operator が = / IS NULL のときだけ表示される</td><td>AND</td></tr>
     <tr><td>Group with ( )</td><td>ON にすると、カラムの条件を <code>( )</code> でまとめる。Operator が = / IS NULL のときだけ表示される</td><td>OFF</td></tr>
     <tr><td>Connect to main query</td><td>挿入済みの条件の後ろに続けるときのつなぎ。None なら先頭の条件として挿入する（Where では Keyword line で <code>WHERE</code> の行を付けられる）。AND / OR なら 1 行目をそれで始める。Next から開いたときは表示されない</td><td>None (first condition)</td></tr>
@@ -114,7 +114,7 @@ AND T.COLUMNB = </pre>
   </table>
   <table>
     <tr><th>値</th><th>説明</th></tr>
-    <tr><td>=</td><td><code>UA.ID = </code>。複数のカラムを選べる</td></tr>
+    <tr><td>=</td><td><code>UA.ID = </code>（NOT が ON なら <code>UA.ID != </code>）。複数のカラムを選べる</td></tr>
     <tr><td>IS NULL</td><td><code>UA.ID IS NULL</code>。複数のカラムを選べる</td></tr>
     <tr><td>IN</td><td><code>UA.ID IN (...)</code>。カラムは 1 つだけ選べる。All Columns は表示されない</td></tr>
     <tr><td>EXISTS</td><td><code>EXISTS (...)</code>。カラムは選ばない。Next でサブクエリを選ぶ</td></tr>
