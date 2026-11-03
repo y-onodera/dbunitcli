@@ -2,6 +2,8 @@ import {
 	type ConditionOptions,
 	columnLines,
 	conditionLines,
+	csvFileAlias,
+	csvReadExpression,
 	defaultTableAlias,
 	derivedTableLines,
 	insertAtCursor,
@@ -71,6 +73,19 @@ describe("defaultTableAlias", () => {
 
 	it("スキーマ修飾と連続・前後の_は無視する", () => {
 		expect(defaultTableAlias("PUBLIC.ORDER__DETAIL_")).toBe("OD");
+	});
+});
+
+describe("csvReadExpression / csvFileAlias", () => {
+	it("パスの区切りを / に揃え、' を重ねて文字列リテラルにする", () => {
+		expect(csvReadExpression("dataset\\it's.csv", " MS932 ")).toBe(
+			"CSVREAD('dataset/it''s.csv',null,'charset=MS932')",
+		);
+	});
+
+	it("拡張子を除いたファイル名から別名を作る", () => {
+		expect(csvFileAlias("dataset/user_account.csv")).toBe("UA");
+		expect(csvFileAlias("C:\\data\\orders.csv")).toBe("O");
 	});
 });
 

@@ -76,6 +76,21 @@ export function defaultTableAlias(table: string): string {
 		.toUpperCase();
 }
 
+// csvqでCSVファイルをテーブルとして読む式。パスはSQLの文字列リテラルにするため ' を重ね、区切りは / に揃える
+export function csvReadExpression(path: string, charset: string): string {
+	const literal = (value: string) => `'${value.replace(/'/g, "''")}'`;
+	return `CSVREAD(${literal(path.replace(/\\/g, "/"))},null,${literal(`charset=${charset.trim()}`)})`;
+}
+
+// ファイル名（拡張子を除く）から defaultTableAlias と同じ規則で別名を作る
+export function csvFileAlias(path: string): string {
+	const fileName = path.slice(
+		Math.max(path.lastIndexOf("/"), path.lastIndexOf("\\")) + 1,
+	);
+	const dot = fileName.lastIndexOf(".");
+	return defaultTableAlias(dot > 0 ? fileName.slice(0, dot) : fileName);
+}
+
 // テーブルに続けて列を選び、文全体を組み立てる用途
 export type StatementUsage = Exclude<TableUsage, "delete" | "crossJoin">;
 

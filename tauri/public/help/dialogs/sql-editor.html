@@ -26,6 +26,7 @@
   <ul>
     <li>テーブル名は SQL ファイル名（拡張子を除く）になる</li>
     <li>JDBC の接続テストが成功していれば、Select Tables でテーブル名・カラム名を挿入できる</li>
+    <li><code>srcType</code> が <code>csvq</code> なら、Select CSV で CSV ファイルを選んで <code>CSVREAD()</code> を挿入できる</li>
     <li>Save and Preview で、保存したうえで読み込まれる内容を確認できる</li>
   </ul>
 
@@ -186,6 +187,28 @@ FROM (
             O.STATUS = 
     )</pre>
   <p>テーブル一覧やカラムの取得に失敗したときは、ダイアログ内にエラーメッセージと読込中に出ていたログを表示します。</p>
+
+  <h2 id="section-select-csv">Select CSV</h2>
+  <p><code>srcType</code> が <code>csvq</code> のときだけ、Select CSV ボタンが表示されます。CSV ファイルを選び、<code>CSVREAD()</code> でそのファイルを読む文を本文のカーソル位置に挿入します。</p>
+  <ol>
+    <li>Select CSV を押し、Insert CSVREAD で CSV file・Charset・Usage・Table alias を指定します。</li>
+    <li>Next を押すと、CSV ファイルの先頭行からカラムを読み込み、Select Columns が開きます。</li>
+    <li>カラムを選んで Insert Columns（All Columns なら全カラム）を押すと、文全体を挿入して Insert CSVREAD が閉じます。Select Columns の Usage は Insert CSVREAD の Usage に合わせて固定されます。</li>
+  </ol>
+  <p>Usage が Cross join のときは、カラムを読み込まずに Insert ですぐ挿入します。</p>
+  <table>
+    <tr><th>項目</th><th>説明</th><th>デフォルト</th></tr>
+    <tr><td>CSV file（必須）</td><td>読み込む CSV ファイル。ファイル選択ボタンで選ぶと、Workspace 配下のファイルは Workspace からの相対パスになる。パスの区切りは <code>/</code> にして挿入する</td><td>（空）</td></tr>
+    <tr><td>Charset（必須）</td><td>CSV ファイルの文字コード。<code>CSVREAD()</code> の <code>charset</code> に入れ、カラムの読込にも使う</td><td>Dataset Load Form の <code>encoding</code>。未指定なら <code>UTF-8</code></td></tr>
+    <tr><td>Usage</td><td>Select / Left join / Inner join / Cross join。挿入する文の形は Select Tables の同じ値と同じ</td><td>Select</td></tr>
+    <tr><td>Table alias</td><td>CSV ファイルを読んだテーブルの別名。Select Columns でカラムに付ける別名にも使う。Usage が join のときは必須</td><td>ファイル選択ボタンで選んだファイル名（拡張子を除く）から、Select Tables の Table alias と同じ規則で作る</td></tr>
+  </table>
+  <pre>SELECT
+    UA.ID
+  , UA.NAME
+FROM
+    CSVREAD('dataset/user_account.csv',null,'charset=UTF-8') UA</pre>
+  <p><code>CSVREAD()</code> の書き方は <a href="../sections/dataset-load-form/types/csvq.html">csvq</a> を参照してください。</p>
 
   <h2 id="section-save">保存</h2>
   <p>ダイアログ下部の name に保存先のファイル名を指定して Save を押すと、内容がファイルとして書き出され、元のテキストボックスにそのファイル名が設定されます。保存先は <code>srcType</code> ごとに Workspace の <code>resources/sql</code> / <code>resources/table</code> / <code>resources/csvq</code> です。</p>

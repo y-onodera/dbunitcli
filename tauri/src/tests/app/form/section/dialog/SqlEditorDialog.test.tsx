@@ -20,6 +20,7 @@ vi.mock("../../../../../hooks/useDatasetSettings", () => ({
 	},
 	useDatasetTablePreview: () => ({ preview: null, loading: false, logs: [] }),
 	useDatasetTableConvert: () => vi.fn(),
+	useCsvColumnNamesFetcher: () => vi.fn(),
 }));
 vi.mock("../../../../../context/DatasetSrcInfoProvider", () => ({
 	useDatasetSrcInfo: () => ({
@@ -69,6 +70,40 @@ describe("SqlEditorDialogのテスト", () => {
 		expect(screen.getByText("result")).toBeInTheDocument();
 		// 編集ダイアログは開いたまま（保存後に閉じるhandleSaveは呼ばない）
 		expect(handleSave).not.toHaveBeenCalled();
+	});
+
+	it("Select CSVはsrcTypeがcsvqのときだけ出る", () => {
+		renderDialog();
+		expect(
+			screen.queryByRole("button", { name: "Select CSV" }),
+		).not.toBeInTheDocument();
+	});
+
+	it("Select CSVで挿入した行をカーソル位置に入れる", async () => {
+		const user = userEvent.setup();
+		render(
+			<SqlEditorDialog
+				type="csvq"
+				fileName="query.txt"
+				handleDialogClose={vi.fn()}
+				handleSave={vi.fn()}
+			/>,
+		);
+		await user.click(screen.getByRole("button", { name: "Select CSV" }));
+		expect(screen.getByText("Insert CSVREAD")).toBeInTheDocument();
+		// フォームのencodingが未指定ならUTF-8
+		expect(screen.getByLabelText("Charset*")).toHaveValue("UTF-8");
+		await user.type(screen.getByLabelText("CSV file*"), "a.csv");
+		await user.selectOptions(screen.getByLabelText("Usage"), "crossJoin");
+		await user.type(screen.getByLabelText("Table alias*"), "A");
+		await user.click(screen.getByRole("button", { name: "Insert" }));
+
+		expect(screen.queryByText("Insert CSVREAD")).not.toBeInTheDocument();
+		expect(
+			(document.getElementById("contents") as HTMLTextAreaElement).value,
+		).toContain(
+			"    CROSS JOIN\n        CSVREAD('a.csv',null,'charset=UTF-8') A\n",
+		);
 	});
 
 	it("保存に失敗したときはプレビューを開かない", async () => {

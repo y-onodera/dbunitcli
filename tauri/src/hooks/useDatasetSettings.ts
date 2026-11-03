@@ -467,6 +467,41 @@ export const useColumnNamesFetcher = () => {
 	};
 };
 
+// CSVファイル1つの列名（csvqのCSVREADに置くファイルの列の選択用）。失敗は投げる
+export const useCsvColumnNamesFetcher = () => {
+	const { apiUrl } = useEnvironment();
+	const paramInputs = useParamInputs();
+	return async (
+		path: string,
+		encoding: string,
+		{ signal, onLog }: JobContext,
+	): Promise<string[]> => {
+		const info: DatasetSrcInfo = {
+			values: { srcType: "csv", src: path, encoding },
+		};
+		const [tableName] = await fetchTableNames(
+			apiUrl,
+			info,
+			{},
+			paramInputs,
+			signal,
+		);
+		if (tableName === undefined) {
+			return [];
+		}
+		const preview = await fetchTablePreview(
+			apiUrl,
+			info,
+			tableName,
+			{},
+			paramInputs,
+			signal,
+			onLog,
+		);
+		return preview.headers;
+	};
+};
+
 async function loadDatasetSettings(
 	apiUrl: string,
 	name: string,

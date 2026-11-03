@@ -19,6 +19,7 @@ import {
 	insertAtCursor,
 	insertInlineAtCursor,
 } from "../../../../utils/textInsert";
+import CsvReadInsertDialog from "./CsvReadInsertDialog";
 import { SaveAndPreviewButton } from "./DatasetTableNamesPreviewButton";
 import type { EditResourceDialogProps } from "./ResourceEditButton";
 import SqlTableInsertDialog from "./SqlTableInsertDialog";
@@ -53,6 +54,7 @@ export const sqlEditorDialogs: Record<
 function Dialog(props: SqlEditorDialogProps & { value: string }) {
 	const [content, setContent] = useState<string>(props.value);
 	const [showTableSelector, setShowTableSelector] = useState(false);
+	const [showCsvSelector, setShowCsvSelector] = useState(false);
 	const textareaRef = useRef<HTMLTextAreaElement>(null);
 	const pendingCursorRef = useRef<number | null>(null);
 	const saveDataSource = useSaveResourceContent(props.type);
@@ -85,6 +87,11 @@ function Dialog(props: SqlEditorDialogProps & { value: string }) {
 		setShowTableSelector(false);
 	};
 
+	const handleInsertCsv = (lines: string[]) => {
+		insertToContent(lines);
+		setShowCsvSelector(false);
+	};
+
 	const handleInsertColumn = (columns: string[], inline?: boolean) => {
 		insertToContent(columns, inline);
 	};
@@ -112,12 +119,22 @@ function Dialog(props: SqlEditorDialogProps & { value: string }) {
 			)}
 		>
 			<DialogBody size="md">
-				{connectionOk && (
+				{(connectionOk || props.type === "csvq") && (
 					<DialogField>
-						<BlueButton
-							title="Select Tables"
-							handleClick={() => setShowTableSelector(true)}
-						/>
+						<div className="flex gap-2">
+							{connectionOk && (
+								<BlueButton
+									title="Select Tables"
+									handleClick={() => setShowTableSelector(true)}
+								/>
+							)}
+							{props.type === "csvq" && (
+								<BlueButton
+									title="Select CSV"
+									handleClick={() => setShowCsvSelector(true)}
+								/>
+							)}
+						</div>
 					</DialogField>
 				)}
 				<TextArea
@@ -140,6 +157,14 @@ function Dialog(props: SqlEditorDialogProps & { value: string }) {
 					onInsertColumn={handleInsertColumn}
 					plain={props.type === "table"}
 					onClose={() => setShowTableSelector(false)}
+				/>
+			)}
+			{showCsvSelector && (
+				// CSVREADには文字コードの明示が要るため、encoding未指定ならUTF-8を初期値にする
+				<CsvReadInsertDialog
+					encoding={datasetSrcInfo.values.encoding || "UTF-8"}
+					onInsert={handleInsertCsv}
+					onClose={() => setShowCsvSelector(false)}
 				/>
 			)}
 		</SettingDialog>
