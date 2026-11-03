@@ -233,11 +233,11 @@ function TablesContent({
 					wrap: (lines: string[]) => tableLines(table, statement, alias, lines),
 				};
 
-	// 列の修飾には、選択中のテーブルなら入力済みの別名を使う
+	// 列の修飾には、選択中のテーブルなら入力済みの別名を使い（空なら修飾しない）、別名があれば最初から修飾する
 	const columnAliasOf = (table: string) =>
-		table === selectedTable && usesTableAlias(usage) && alias.trim() !== ""
-			? alias.trim()
-			: defaultTableAlias(table);
+		table === selectedTable && usesTableAlias(usage)
+			? { alias: alias.trim(), qualify: alias.trim() !== "" }
+			: { alias: defaultTableAlias(table), qualify: false };
 
 	return (
 		<>
@@ -308,7 +308,7 @@ function TablesContent({
 					error={columnJob.error}
 					logs={columnJob.logs}
 					plain={plain}
-					defaultAlias={columnAliasOf(columnDialog.table)}
+					{...columnAliasOf(columnDialog.table)}
 					statement={statementOf(columnDialog.table, columnDialog.statement)}
 					onInsert={(lines) => {
 						if (columnDialog.statement === null) {
@@ -332,7 +332,8 @@ function ColumnSelectDialog({
 	error,
 	logs,
 	plain,
-	defaultAlias,
+	alias,
+	qualify: initialQualify,
 	statement,
 	onInsert,
 	onClose,
@@ -343,7 +344,9 @@ function ColumnSelectDialog({
 	error: string;
 	logs: string[];
 	plain: boolean;
-	defaultAlias: string;
+	// 修飾に使う別名（入力はSelect Tables側）と、修飾の初期状態
+	alias: string;
+	qualify: boolean;
 	// 指定時は用途を固定し、選んだ列をwrapで文全体にして挿入する
 	statement?: { usage: ColumnUsage; wrap: (lines: string[]) => string[] };
 	onInsert: (lines: string[]) => void;
@@ -352,8 +355,7 @@ function ColumnSelectDialog({
 	const { selected, toggle, toggleAll } = useTableSelection();
 	const [selectedUsage, setUsage] = useState<ColumnUsage>("select");
 	const usage = statement?.usage ?? selectedUsage;
-	const [qualify, setQualify] = useState(false);
-	const [alias, setAlias] = useState(defaultAlias);
+	const [qualify, setQualify] = useState(initialQualify);
 	const [columnAs, setColumnAs] = useState(false);
 	const [continued, setContinued] = useState(false);
 	const [keyword, setKeyword] = useState(true);
@@ -377,8 +379,7 @@ function ColumnSelectDialog({
 		);
 	}
 
-	const qualifying = qualify && usesColumnQualifier(usage);
-	const aliasMissing = qualifying && alias.trim() === "";
+	const qualifying = qualify && usesColumnQualifier(usage) && alias !== "";
 	const linesOf = (targets: string[]) => {
 		if (plain) {
 			return targets;
@@ -418,21 +419,13 @@ function ColumnSelectDialog({
 							/>
 						</DialogField>
 					)}
-					{usesColumnQualifier(usage) && (
+					{usesColumnQualifier(usage) && alias !== "" && (
 						<DialogField>
 							<OptionCheck
 								id="sqlColumnInsert_qualify"
-								label="Prefix table alias"
+								label={`Prefix table alias (${alias})`}
 								checked={qualify}
 								onChange={setQualify}
-							/>
-							<ControllTextBox
-								name="sqlColumnInsert_alias"
-								id="sqlColumnInsert_alias"
-								required={qualify}
-								disabled={!qualify}
-								value={alias}
-								handleChange={(ev) => setAlias(ev.target.value)}
 							/>
 						</DialogField>
 					)}
@@ -476,12 +469,12 @@ function ColumnSelectDialog({
 				<BlueButton
 					title="Insert Columns"
 					handleClick={() => onInsert(linesOf(selectedColumns))}
-					disabled={selectedColumns.length === 0 || aliasMissing}
+					disabled={selectedColumns.length === 0}
 				/>
 				<BlueButton
 					title="All Columns"
 					handleClick={() => onInsert(linesOf(columns))}
-					disabled={columns.length === 0 || aliasMissing}
+					disabled={columns.length === 0}
 				/>
 				<WhiteButton title="Cancel" handleClick={onClose} />
 			</DialogActions>

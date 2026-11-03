@@ -74,7 +74,7 @@ describe("SqlTableInsertDialogのテーブル挿入", () => {
 		await user.type(screen.getByLabelText("Table alias*"), "O2");
 		await user.click(screen.getByRole("button", { name: "Next" }));
 		await screen.findByText("Select Columns");
-		await user.click(screen.getByLabelText("Prefix table alias"));
+		expect(screen.getByLabelText("Prefix table alias (O2)")).toBeChecked();
 		await user.click(screen.getByRole("button", { name: "All Columns" }));
 		expect(onInsert).toHaveBeenCalledWith([
 			"    INNER JOIN",
@@ -95,7 +95,7 @@ describe("SqlTableInsertDialogのテーブル挿入", () => {
 		expect(screen.queryByText(/Keyword line/)).toBeNull();
 		await user.click(screen.getByText("ID"));
 		await user.click(screen.getByText("NAME"));
-		await user.click(screen.getByLabelText("Prefix table alias"));
+		expect(screen.getByLabelText("Prefix table alias (UA)")).toBeChecked();
 		await user.click(screen.getByLabelText("AS column name"));
 
 		await user.click(screen.getByRole("button", { name: "Insert Columns" }));
@@ -143,8 +143,8 @@ describe("SqlTableInsertDialogのテーブル挿入", () => {
 			"UPDATE",
 			"    ORDERS O",
 			"SET",
-			"    ID = ",
-			"  , NAME = ",
+			"    O.ID = ",
+			"  , O.NAME = ",
 		]);
 	});
 
@@ -176,7 +176,7 @@ describe("SqlTableInsertDialogのカラム挿入", () => {
 		await screen.findByText("Select Columns");
 		await user.click(screen.getByText("ID"));
 		await user.click(screen.getByText("NAME"));
-		await user.click(screen.getByLabelText("Prefix table alias"));
+		expect(screen.getByLabelText("Prefix table alias (ACC)")).toBeChecked();
 
 		await user.click(screen.getByRole("button", { name: "Insert Columns" }));
 		expect(onInsertColumn).toHaveBeenCalledWith(["    ACC.ID", "  , ACC.NAME"]);
@@ -207,6 +207,35 @@ describe("SqlTableInsertDialogのカラム挿入", () => {
 		expect(onInsertColumn).toHaveBeenCalledWith(["    ID"]);
 	});
 
+	it("選択中でないテーブルは別名のデフォルトを表示し、修飾は最初OFF", async () => {
+		const { user, onInsertColumn } = await openColumnsOfOrders();
+		await user.click(screen.getByText("ID"));
+		const qualify = screen.getByLabelText("Prefix table alias (O)");
+		expect(qualify).not.toBeChecked();
+		await user.click(qualify);
+
+		await user.click(screen.getByRole("button", { name: "Insert Columns" }));
+		expect(onInsertColumn).toHaveBeenCalledWith(["    O.ID"]);
+	});
+
+	it("テーブル側の別名を空にすると修飾の指定を出さない", async () => {
+		const { user, onInsert } = await renderLoaded();
+		await user.click(screen.getByText("ORDERS"));
+		await user.clear(screen.getByLabelText("Table alias"));
+		await user.click(screen.getByRole("button", { name: "Next" }));
+		await screen.findByText("Select Columns");
+		expect(screen.queryByLabelText(/Prefix table alias/)).toBeNull();
+
+		await user.click(screen.getByRole("button", { name: "All Columns" }));
+		expect(onInsert).toHaveBeenCalledWith([
+			"SELECT",
+			"    ID",
+			"  , NAME",
+			"FROM",
+			"    ORDERS",
+		]);
+	});
+
 	it("All Columnsは選択に関わらず全カラムを書き出す", async () => {
 		const { user, onInsertColumn } = await openColumnsOfOrders();
 		await user.click(screen.getByText("ID"));
@@ -219,7 +248,7 @@ describe("SqlTableInsertDialogのカラム挿入", () => {
 		const { user, onInsertColumn } = await openColumnsOfOrders();
 		await user.click(screen.getByText("ID"));
 		await user.selectOptions(screen.getAllByLabelText("Usage")[1], "insert");
-		expect(screen.queryByLabelText("Prefix table alias")).toBeNull();
+		expect(screen.queryByLabelText(/Prefix table alias/)).toBeNull();
 
 		await user.click(screen.getByRole("button", { name: "Insert Columns" }));
 		expect(onInsertColumn).toHaveBeenCalledWith(["    ID"]);

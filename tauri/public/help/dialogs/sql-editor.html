@@ -70,7 +70,7 @@ AND T.COLUMNB = </pre>
   <table>
     <tr><th>項目</th><th>説明</th><th>デフォルト</th></tr>
     <tr><td>Usage</td><td>テーブルの使い道。挿入する文の形が決まる</td><td>Select</td></tr>
-    <tr><td>Table alias</td><td>テーブルの別名。空ならテーブル名だけを挿入する。Usage が join のときは必須。Insert のときは入力できない</td><td>テーブル名の <code>_</code> 区切りの各語の先頭文字を大文字でつなげたもの（例: <code>USER_ACCOUNT</code> → <code>UA</code>）。スキーマ名は除く</td></tr>
+    <tr><td>Table alias</td><td>テーブルの別名。空ならテーブル名だけを挿入する。Select Columns でカラムに付ける別名にも使う。Usage が join のときは必須。Insert のときは入力できない</td><td>テーブル名の <code>_</code> 区切りの各語の先頭文字を大文字でつなげたもの（例: <code>USER_ACCOUNT</code> → <code>UA</code>）。スキーマ名は除く</td></tr>
   </table>
   <table>
     <tr><th>値</th><th>説明</th></tr>
@@ -86,8 +86,7 @@ AND T.COLUMNB = </pre>
   <table>
     <tr><th>項目</th><th>説明</th><th>デフォルト</th></tr>
     <tr><td>Usage</td><td>カラムの使い道。キーワード行・区切り・<code>=</code> の有無が決まる</td><td>Select</td></tr>
-    <tr><td>Prefix table alias</td><td>ON にすると、入力した別名でカラム名を <code>別名.カラム名</code> の形にする。Usage が Insert のときは表示されない</td><td>OFF</td></tr>
-    <tr><td>（別名の入力欄）</td><td>Prefix table alias が ON のときに使う別名。ON で空なら挿入できない</td><td>Select Tables で選択中のテーブルなら、そこで入力した Table alias。それ以外は Table alias のデフォルトと同じ規則の別名</td></tr>
+    <tr><td>Prefix table alias</td><td>ON にすると、カラム名を <code>別名.カラム名</code> の形にする。項目名の後ろに使う別名を表示する。別名は Select Tables で選択中のテーブルなら Table alias の入力値、それ以外は Table alias のデフォルトと同じ規則の別名。Select Tables で選択中のテーブルの Table alias が空のとき、または Usage が Insert のときは表示されない</td><td>Select Tables で選択中のテーブルなら ON、それ以外は OFF</td></tr>
     <tr><td>AS column name</td><td>ON にすると、各カラムに <code>AS カラム名</code> を付ける。Usage が Select のときだけ表示される</td><td>OFF</td></tr>
     <tr><td>Keyword line</td><td>ON にすると、カラムの前にキーワードの行（<code>ORDER BY</code> / <code>GROUP BY</code> / <code>WHERE</code> / <code>SET</code>）を付ける。Usage が Order by / Group by / Where / Update set のときだけ表示される。Separator on first line が ON のときは付けない</td><td>ON</td></tr>
     <tr><td>Separator on first line</td><td>ON にすると、1 行目にも区切り（<code>,</code> または <code>AND</code>）を付ける。挿入済みのカラムの後ろに続けて挿入するときに使う</td><td>OFF</td></tr>
