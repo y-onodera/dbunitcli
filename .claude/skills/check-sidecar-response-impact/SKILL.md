@@ -1,7 +1,8 @@
 ---
-description: sidecar期待値JSON変更時のフロントエンドテスト影響調査と修正案提案
-TRIGGER when: `sidecar/src/test/resources/yo/dbunitcli/sidecar/controller/` 以下のJSONファイル変更時。
-DO NOT TRIGGER when: 読み取りのみ、または上記パス以外の変更のみ。
+description: >-
+  sidecar期待値JSON変更時のフロントエンドテスト影響調査と修正案提案
+  TRIGGER when: `sidecar/src/test/resources/yo/dbunitcli/sidecar/controller/` 以下のJSONファイル変更時。
+  DO NOT TRIGGER when: 読み取りのみ、または上記パス以外の変更のみ。
 ---
 
 以下を順に実施すること。
@@ -19,7 +20,7 @@ DO NOT TRIGGER when: 読み取りのみ、または上記パス以外の変更�
 
 ## 3. テスト影響調査
 
-`tauri/src/tests/app/form/*.test.tsx` で変更フィクスチャを参照するテストケースを特定。
+変更フィクスチャを参照するテストケースを `tauri/src/tests/` 配下から特定。
 
 ## 4. 修正案提示
 
