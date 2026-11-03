@@ -124,8 +124,7 @@ public class DatasetSettingsController extends AbstractResourceFileController<Da
     }
 
     /**
-     * 読み込まれるテーブルごとの列名を返す（テーブル名→列名）。table-namesと同じくlazyLoadで求めるため、
-     * データ行は分割（split）後の名前を求める場合だけ読む。tableNameを指定すればそのテーブルだけを返し、
+     * 読み込まれるテーブルごとの列名を返す（テーブル名→列名）。tableNameを指定すればそのテーブルだけを返し、
      * 対象外のソースはなるべく開かない（{@link Narrow#singlePass}）。読めなかったときはエラーを返す
      */
     @Interruptible

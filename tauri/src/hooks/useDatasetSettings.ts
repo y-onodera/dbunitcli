@@ -367,7 +367,7 @@ const INLINE_QUERY_TABLE_NAME = "inlineQuery";
 async function fetchTableColumns(
 	apiUrl: string,
 	info: DatasetSrcInfo,
-	request: { tableName: string },
+	tableName: string,
 	jdbcValues: Record<string, string>,
 	paramInputs: Record<string, string>,
 	signal?: AbortSignal,
@@ -379,7 +379,7 @@ async function fetchTableColumns(
 		info,
 		jdbcValues,
 		paramInputs,
-		request,
+		{ tableName },
 		signal,
 		onLog,
 	);
@@ -396,7 +396,7 @@ async function loadAllColumnNames(
 	const columns = await fetchTableColumns(
 		apiUrl,
 		withAllTables(srcInfo),
-		{ tableName: "" },
+		"",
 		jdbcValues,
 		paramInputs,
 		signal,
@@ -418,7 +418,7 @@ export const useColumnNamesFetcher = () => {
 		const columns = await fetchTableColumns(
 			apiUrl,
 			withAllTables(srcInfo),
-			{ tableName },
+			tableName,
 			jdbcValues,
 			paramInputs,
 			signal,
@@ -442,7 +442,7 @@ export const useCsvColumnNamesFetcher = () => {
 				values: { srcType: "csvq" },
 				inlineQuery: `SELECT * FROM ${csvReadExpression}`,
 			},
-			{ tableName: INLINE_QUERY_TABLE_NAME },
+			INLINE_QUERY_TABLE_NAME,
 			{},
 			paramInputs,
 			signal,

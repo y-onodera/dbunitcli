@@ -30,8 +30,8 @@ public class DatasetTableNamesRequestDto {
     private JsonXlsxSchemaDto inlineXlsxSchema;
 
     /**
-     * 未保存のsrcの内容（srcTypeがsql・table・csvqのときのみ）。指定時はsrcのファイルの代わりに読む。
-     * sql・csvqはSQLを{@link #INLINE_QUERY_TABLE_NAME}のテーブルとして、tableは1行1テーブル名として読む（SQL Editorのプレビュー・CSVREADの列の選択用）
+     * 未保存のsrcの内容（srcTypeがsql・table・csvqのときのみ）。指定時はsrcのファイルの代わりに読む（{@link yo.dbunitcli.dataset.InlineQuery}）。
+     * sql・csvqのテーブル名は{@link #INLINE_QUERY_TABLE_NAME}になる
      */
     private String inlineQuery;
 
