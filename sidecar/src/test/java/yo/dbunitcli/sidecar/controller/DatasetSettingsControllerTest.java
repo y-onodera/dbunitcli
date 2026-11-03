@@ -44,6 +44,9 @@ class DatasetSettingsControllerTest {
     private static final Path SETTING_DIR =
             Paths.get("target/test-temp/workspace/sample/resources/setting");
 
+    private static final Path UNIT_SETTING_DIR =
+            Paths.get("target/test-temp/workspace/sample").resolve(FileResources.OPTION_GENERATE_SETTING_PATH);
+
     private static final Path PREVIEW_SRC_DIR =
             Paths.get("target/test-temp/workspace/sample/resources/src/preview");
 
@@ -61,7 +64,7 @@ class DatasetSettingsControllerTest {
     HttpClient client;
 
     @AfterEach
-    void tearDown() {
+    void tearDown() throws IOException {
         this.tryDelete("savedSetting.json");
         this.tryDelete("deleteSetting.json");
         this.tryDelete("sqlFunctionSetting.json");
@@ -71,7 +74,7 @@ class DatasetSettingsControllerTest {
         this.tryDelete("previewJoinSetting.json");
         this.tryDelete("previewUnmatchedJoinSetting.json");
         this.tryDelete("previewKeysSetting.json");
-        this.tryDelete("previewUnitSetting.json");
+        Files.deleteIfExists(UNIT_SETTING_DIR.resolve("previewUnitSetting.json"));
         this.deletePreviewSrc();
     }
 
@@ -640,7 +643,8 @@ class DatasetSettingsControllerTest {
      * 全行にlabel列を足し、key=1の行だけのサブテーブルONEを作るunitSetting
      */
     private void writeUnitSetting() throws IOException {
-        this.writeSetting("previewUnitSetting.json",
+        Files.createDirectories(UNIT_SETTING_DIR);
+        Files.writeString(UNIT_SETTING_DIR.resolve("previewUnitSetting.json"),
                 "{\"settings\":[{\"pattern\":{\"regex\":\".*\",\"exclude\":[\"ONE\"]},\"separate\":["
                         + "{\"string\":{\"label\":\"'L' + key\"}},"
                         + "{\"tableName\":\"ONE\",\"filter\":[\"key == '1'\"]}]}]}");

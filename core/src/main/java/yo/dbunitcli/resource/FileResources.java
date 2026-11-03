@@ -122,7 +122,7 @@ public record FileResources() {
     }
 
     public static File searchGenerateSetting(final String settingPath) {
-        return FileResources.searchInOrder(settingPath, generateSettingDir().toPath().normalize().toString(), FileResources::searchSetting);
+        return FileResources.searchInOrder(settingPath, generateSettingDir().toPath().normalize().toString(), FileResources::searchWorkspace);
     }
 
     // 設定ファイルのimport先は、絶対パス→取り込み元の設定ファイルのディレクトリ→カレントディレクトリの順に探す
