@@ -48,3 +48,27 @@ describe("Textのクリアボタン", () => {
 		expect(clearButton()).not.toBeInTheDocument();
 	});
 });
+
+describe("Textのchildrenに渡すsetPath", () => {
+	it("ボタン等から値を変えたときも入力を更新して変更を通知する", async () => {
+		const handleValueChange = vi.fn();
+		render(
+			<Text
+				prefix="src"
+				element={textElement("UTF-8")}
+				handleValueChange={handleValueChange}
+			>
+				{({ setPath }) => (
+					<button type="button" onClick={() => setPath("MS932")}>
+						choose
+					</button>
+				)}
+			</Text>,
+		);
+
+		await userEvent.click(screen.getByRole("button", { name: "choose" }));
+
+		expect(screen.getByLabelText("-src.encoding")).toHaveValue("MS932");
+		expect(handleValueChange).toHaveBeenCalledWith("MS932");
+	});
+});
