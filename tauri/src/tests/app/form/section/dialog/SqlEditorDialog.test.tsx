@@ -5,11 +5,14 @@ import SqlEditorDialog from "../../../../../app/form/section/dialog/SqlEditorDia
 import type { DatasetSrcInfo } from "../../../../../model/CommandOption";
 
 // （mockReset:trueで実装が毎回リセットされるため、resolve値は各テスト内で設定する）
-const { mockSave, mockTableNames, jdbcState } = vi.hoisted(() => ({
-	mockSave: vi.fn(),
-	mockTableNames: vi.fn(),
-	jdbcState: { connectionOk: false },
-}));
+const { mockSave, mockTableNames, mockTablePreview, jdbcState } = vi.hoisted(
+	() => ({
+		mockSave: vi.fn(),
+		mockTableNames: vi.fn(),
+		mockTablePreview: vi.fn(),
+		jdbcState: { connectionOk: false },
+	}),
+);
 vi.mock("../../../../../hooks/useResourceFiles", () => ({
 	useResourceContent: () => ({ content: "select 1", loading: false }),
 	useSaveResourceContent: () => mockSave,
@@ -19,9 +22,13 @@ vi.mock("../../../../../hooks/useDatasetSettings", () => ({
 		mockTableNames(srcInfo);
 		return { tableNames: ["result"], loading: false, logs: [] };
 	},
-	useDatasetTablePreview: () => ({ preview: null, loading: false, logs: [] }),
+	useDatasetTablePreview: (srcInfo: DatasetSrcInfo, tableName: string) => {
+		mockTablePreview(srcInfo, tableName);
+		return { preview: null, loading: false, logs: [], error: "" };
+	},
 	useDatasetTableConvert: () => vi.fn(),
 	useCsvColumnNamesFetcher: () => vi.fn(),
+	INLINE_SOURCE_TABLE_NAME: "inlineSource",
 }));
 vi.mock("../../../../../context/DatasetSrcInfoProvider", () => ({
 	useDatasetSrcInfo: () => ({
@@ -40,11 +47,11 @@ vi.mock("../../../../../context/JdbcConnectionProvider", () => ({
 	}),
 }));
 
-function renderDialog() {
+function renderDialog(type: "sql" | "table" | "csvq" = "sql") {
 	const handleSave = vi.fn();
 	render(
 		<SqlEditorDialog
-			type="sql"
+			type={type}
 			fileName="query.sql"
 			handleDialogClose={vi.fn()}
 			handleSave={handleSave}
@@ -53,31 +60,55 @@ function renderDialog() {
 	return { user: userEvent.setup(), handleSave };
 }
 
+const PREVIEW_SRC_VALUES = {
+	srcType: "sql",
+	src: "old.sql",
+	setting: "",
+	settingTargetOnly: "true",
+};
+
 describe("SqlEditorDialogのテスト", () => {
-	it("Previewは保存せず、編集中の内容をsrcの代わりに、settingなしでテーブル一覧をプレビューする", async () => {
-		const { user, handleSave } = renderDialog();
+	it.each(["sql", "csvq"] as const)(
+		"srcType=%sのPreviewは保存せず、編集中の内容をsrcの代わりに、settingなしで一覧を挟まずにそのテーブルをプレビューする",
+		async (type) => {
+			const { user, handleSave } = renderDialog(type);
+			await user.type(
+				screen.getByPlaceholderText("Enter SQL query..."),
+				" from dual",
+			);
+			await user.click(screen.getByRole("button", { name: "Preview" }));
+
+			expect(screen.queryByText("Table List Preview")).not.toBeInTheDocument();
+			expect(mockTableNames).not.toHaveBeenCalled();
+			expect(
+				screen.getByText("inlineSource — Data Preview"),
+			).toBeInTheDocument();
+			expect(mockTablePreview).toHaveBeenLastCalledWith(
+				{ values: PREVIEW_SRC_VALUES, inlineSource: "select 1 from dual" },
+				"inlineSource",
+			);
+			expect(mockSave).not.toHaveBeenCalled();
+			expect(handleSave).not.toHaveBeenCalled();
+			expect(
+				screen.queryByRole("button", { name: "Save and Preview" }),
+			).not.toBeInTheDocument();
+		},
+	);
+
+	it("srcType=tableのPreviewは編集中の内容をsrcの代わりに、settingなしでテーブル一覧をプレビューする", async () => {
+		const { user } = renderDialog("table");
 		await user.type(
-			screen.getByPlaceholderText("Enter SQL query..."),
-			" from dual",
+			screen.getByPlaceholderText("Enter table definition..."),
+			"\nt2",
 		);
 		await user.click(screen.getByRole("button", { name: "Preview" }));
 
 		expect(screen.getByText("Table List Preview")).toBeInTheDocument();
 		expect(mockTableNames).toHaveBeenLastCalledWith({
-			values: {
-				srcType: "sql",
-				src: "old.sql",
-				setting: "",
-				settingTargetOnly: "true",
-			},
-			inlineSource: "select 1 from dual",
+			values: PREVIEW_SRC_VALUES,
+			inlineSource: "select 1\nt2",
 		});
 		expect(screen.getByText("result")).toBeInTheDocument();
-		expect(mockSave).not.toHaveBeenCalled();
-		expect(handleSave).not.toHaveBeenCalled();
-		expect(
-			screen.queryByRole("button", { name: "Save and Preview" }),
-		).not.toBeInTheDocument();
 	});
 
 	it.each([
