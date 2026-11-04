@@ -65,44 +65,42 @@ export default function DatasetSettingText({
 			handleValueChange={handleValueChange}
 			afterContent={({ path }) => preview?.(path)}
 		>
-			{({ path, setPath, isValueInDatalist }) => {
-				return (
-					<TextDropDownMenu
-						path={path}
-						setPath={setPath}
-						prefix={prefix}
-						element={element}
-						isValueInDatalist={isValueInDatalist}
-						editButtons={[
-							<EditResourceButton
-								dialog={editDialog}
-								dialogProps={{ kind }}
-								key="edit"
-								path={path}
-								setPath={setPath}
-							/>,
-							...(showGenerate
-								? [
-										<DatasetSettingGenerateButton
-											key="generate"
-											setPath={setPath}
-											editDialog={generateEditDialog}
-											kind={kind}
-										/>,
-									]
-								: []),
-						]}
-						removeButton={(closeMenu) => (
-							<RemoveResourceButton
-								kind={kind}
-								path={path}
-								setPath={setPath}
-								onRemoved={closeMenu}
-							/>
-						)}
-					/>
-				);
-			}}
+			{({ path, setPath, isValueInDatalist }) => (
+				<TextDropDownMenu
+					path={path}
+					setPath={setPath}
+					prefix={prefix}
+					element={element}
+					isValueInDatalist={isValueInDatalist}
+					editButtons={[
+						<EditResourceButton
+							dialog={editDialog}
+							dialogProps={{ kind }}
+							key="edit"
+							path={path}
+							setPath={setPath}
+						/>,
+						...(showGenerate
+							? [
+									<DatasetSettingGenerateButton
+										key="generate"
+										setPath={setPath}
+										editDialog={generateEditDialog}
+										kind={kind}
+									/>,
+								]
+							: []),
+					]}
+					removeButton={(closeMenu) => (
+						<RemoveResourceButton
+							kind={kind}
+							path={path}
+							setPath={setPath}
+							onRemoved={closeMenu}
+						/>
+					)}
+				/>
+			)}
 		</Text>
 	);
 }

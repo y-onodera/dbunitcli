@@ -40,11 +40,12 @@ export default function Text({
 	const fieldErrors = useFieldErrors(fieldName, !hidden);
 	const clearFieldErrors = useClearFieldErrors();
 
-	const handleChange = (ev: React.ChangeEvent<HTMLInputElement>) => {
-		const newValue = ev.target.value;
-		setPath(newValue);
-		onValueChange?.(newValue);
+	const updatePath = (newPath: string) => {
+		setPath(newPath);
+		onValueChange?.(newPath);
 	};
+	const handleChange = (ev: React.ChangeEvent<HTMLInputElement>) =>
+		updatePath(ev.target.value);
 
 	return (
 		<>
@@ -87,10 +88,9 @@ export default function Text({
 							path,
 							// ボタン等から値を変えたときはchangeが起きないため、ここで変更の通知と検証エラーの消去を行う
 							setPath: (action) => {
-								const newPath =
-									typeof action === "function" ? action(path) : action;
-								setPath(newPath);
-								onValueChange?.(newPath);
+								updatePath(
+									typeof action === "function" ? action(path) : action,
+								);
 								clearFieldErrors(fieldName);
 							},
 							isValueInDatalist,

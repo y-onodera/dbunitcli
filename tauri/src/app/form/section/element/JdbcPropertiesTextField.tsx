@@ -24,26 +24,24 @@ export default function JdbcPropertiesTextField({
 			showDefaulePath={true}
 			handleValueChange={(value) => onValueChange(element.name, value)}
 		>
-			{({ path, setPath, isValueInDatalist }) => {
-				return (
-					<TextDropDownMenu
-						prefix={prefix}
-						element={element}
-						path={path}
-						setPath={setPath}
-						isValueInDatalist={isValueInDatalist}
-						removeButton={(closeMenu) => (
-							<RemoveResourceButton
-								kind="jdbc"
-								path={path}
-								setPath={setPath}
-								onRemoved={closeMenu}
-							/>
-						)}
-						className="mr-24"
-					/>
-				);
-			}}
+			{({ path, setPath, isValueInDatalist }) => (
+				<TextDropDownMenu
+					prefix={prefix}
+					element={element}
+					path={path}
+					setPath={setPath}
+					isValueInDatalist={isValueInDatalist}
+					removeButton={(closeMenu) => (
+						<RemoveResourceButton
+							kind="jdbc"
+							path={path}
+							setPath={setPath}
+							onRemoved={closeMenu}
+						/>
+					)}
+					className="mr-24"
+				/>
+			)}
 		</Text>
 	);
 }
