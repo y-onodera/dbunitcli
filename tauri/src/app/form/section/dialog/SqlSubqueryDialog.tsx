@@ -301,13 +301,6 @@ export function SubqueryColumns({
 					}
 					disabled={missingSelect}
 				/>
-				{mode === "from" && (
-					<BlueButton
-						title="All Columns"
-						handleClick={() => onComplete(linesOf(columns), columns)}
-						disabled={columns.length === 0}
-					/>
-				)}
 				<WhiteButton title="Cancel" handleClick={onClose} />
 			</DialogActions>
 		</NestedDialogFrame>

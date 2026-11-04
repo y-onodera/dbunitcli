@@ -588,7 +588,9 @@ describe("SqlTableInsertDialogのサブクエリをテーブルにする挿入",
 		await user.click(screen.getByRole("button", { name: "Next" }));
 
 		const subquery = await findDialog("Subquery Columns");
-		await user.click(subquery.getByRole("button", { name: "All Columns" }));
+		const [selectList] = subquery.getAllByRole("table");
+		await user.click(within(selectList).getAllByRole("checkbox")[0]);
+		await user.click(subquery.getByRole("button", { name: "Next" }));
 		const outer = await findDialog("Select Columns");
 		await user.click(outer.getByText("ID"));
 		await user.click(outer.getByRole("button", { name: "Insert Columns" }));
