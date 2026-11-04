@@ -172,16 +172,17 @@ export default function SqlColumnInsertDialog({
 	// 先頭の条件として挿入するときだけキーワード行を付けられる
 	const firstCondition = statement !== undefined || connector === "none";
 
-	const linesOf = (targets: string[], subquery: string[] | null) => {
+	const selectedColumns = columns.filter((c) => selected.has(c));
+	const linesOf = (subquery: string[] | null) => {
 		if (plain) {
-			return targets;
+			return selectedColumns;
 		}
 		if (scalar) {
-			return scalarLines(targets[0] ?? "", subquery);
+			return scalarLines(selectedColumns[0] ?? "", subquery);
 		}
 		const formatted = isConditionUsage(usage)
 			? conditionLines(
-					targets.map((c) => qualifyColumn(c, qualifier)),
+					selectedColumns.map((c) => qualifyColumn(c, qualifier)),
 					usage,
 					{
 						operator: conditionOperator,
@@ -194,7 +195,7 @@ export default function SqlColumnInsertDialog({
 						subquery,
 					},
 				)
-			: columnLines(targets, usage, {
+			: columnLines(selectedColumns, usage, {
 					alias: qualifier,
 					columnAs,
 					continued: statement === undefined && continued,
@@ -214,7 +215,6 @@ export default function SqlColumnInsertDialog({
 		}
 		return placeScalar(value, scalarPlace, { continued, asName });
 	};
-	const selectedColumns = columns.filter((c) => selected.has(c));
 	const keywordOfUsage = columnKeyword(usage);
 	const previewSubquery = needsSubquery ? SUBQUERY_PLACEHOLDER : null;
 	const canInsert =
@@ -408,9 +408,7 @@ export default function SqlColumnInsertDialog({
 							/>
 						</DialogField>
 					)}
-					<InsertPreview
-						lines={canInsert ? linesOf(selectedColumns, previewSubquery) : []}
-					/>
+					<InsertPreview lines={canInsert ? linesOf(previewSubquery) : []} />
 				</>
 			)}
 			<DialogActions>
@@ -427,15 +425,8 @@ export default function SqlColumnInsertDialog({
 				) : (
 					<BlueButton
 						title={scalar ? "Insert Scalar" : "Insert Columns"}
-						handleClick={() => onInsert(linesOf(selectedColumns, null), inline)}
+						handleClick={() => onInsert(linesOf(null), inline)}
 						disabled={!canInsert}
-					/>
-				)}
-				{!singleColumn && !noColumns && (
-					<BlueButton
-						title="All Columns"
-						handleClick={() => onInsert(linesOf(columns, null))}
-						disabled={columns.length === 0}
 					/>
 				)}
 				<WhiteButton title="Cancel" handleClick={onClose} />
@@ -445,9 +436,7 @@ export default function SqlColumnInsertDialog({
 					mode={subqueryMode}
 					source={subquerySource}
 					usedAliases={alias === "" ? [] : [alias]}
-					onComplete={(subquery) =>
-						onInsert(linesOf(selectedColumns, subquery), inline)
-					}
+					onComplete={(subquery) => onInsert(linesOf(subquery), inline)}
 					onClose={() => setSubqueryMode(null)}
 				/>
 			)}

@@ -43,7 +43,7 @@ describe("SelectableTable", () => {
 		render(<Harness items={["USERS", "ORDERS", "USER_ROLES"]} />);
 		await user.type(screen.getByPlaceholderText("Filter..."), "user");
 		expect(screen.queryByText("ORDERS")).toBeNull();
-		await user.click(screen.getAllByRole("checkbox")[0]);
+		await user.click(screen.getByRole("checkbox", { name: "Select all" }));
 		expect(screen.getByTestId("selected").textContent).toBe("USERS,USER_ROLES");
 	});
 

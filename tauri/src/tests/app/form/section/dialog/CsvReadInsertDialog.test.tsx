@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import CsvReadInsertDialog from "../../../../../app/form/section/dialog/CsvReadInsertDialog";
@@ -155,8 +155,15 @@ describe("CsvReadInsertDialog", () => {
 		await screen.findByText("Subquery Columns");
 		await user.click(fromLast(screen.getAllByText("NAME"), 2));
 		await user.click(fromLast(screen.getAllByRole("button", { name: "Next" })));
-		await screen.findByText("Select Columns");
-		await user.click(screen.getByRole("button", { name: "All Columns" }));
+		const heading = await screen.findByRole("heading", {
+			name: "Select Columns",
+		});
+		await user.click(
+			within(heading.parentElement as HTMLElement).getByRole("checkbox", {
+				name: "Select all",
+			}),
+		);
+		await user.click(screen.getByRole("button", { name: "Insert Columns" }));
 		expect(onInsert).toHaveBeenCalledWith([
 			"SELECT",
 			"    S.NAME",
