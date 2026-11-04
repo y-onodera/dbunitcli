@@ -9,7 +9,6 @@ import { BlueButton } from "../../../../components/element/Button";
 import { TextArea } from "../../../../components/element/Input";
 import { useDatasetSrcInfo } from "../../../../context/DatasetSrcInfoProvider";
 import { useJdbcConnectionState } from "../../../../context/JdbcConnectionProvider";
-import { INLINE_SOURCE_TABLE_NAME } from "../../../../hooks/useDatasetSettings";
 import {
 	useResourceContent,
 	useSaveResourceContent,
@@ -96,6 +95,7 @@ function Dialog(props: SqlEditorDialogProps & { value: string }) {
 
 	// csvqはDBではなくCSVを読むため、DBのテーブル一覧の代わりにCSVファイルを選ぶ
 	const csvq = props.type === "csvq";
+	const table = props.type === "table";
 
 	function renderSelector() {
 		if (csvq) {
@@ -113,7 +113,7 @@ function Dialog(props: SqlEditorDialogProps & { value: string }) {
 				jdbcValues={jdbcValues}
 				onInsert={handleInsert}
 				onInsertColumn={handleInsertColumn}
-				plain={props.type === "table"}
+				plain={table}
 				queryOnly={props.queryOnly}
 				onClose={() => setShowSelector(false)}
 			/>
@@ -122,7 +122,7 @@ function Dialog(props: SqlEditorDialogProps & { value: string }) {
 
 	return (
 		<SettingDialog
-			title={props.type === "table" ? "Edit Table Definition" : "Edit SQL"}
+			title={table ? "Edit Table Definition" : "Edit SQL"}
 			helpCommand="dialogs/sql-editor"
 			helpLabel="SQL Editor"
 			handleDialogClose={props.handleDialogClose}
@@ -134,9 +134,7 @@ function Dialog(props: SqlEditorDialogProps & { value: string }) {
 				// sql・csvqはSQL1つで1テーブルなので、一覧を挟まずにそのテーブルを開く
 				<InlinePreviewButton
 					toInline={() => ({ inlineSource: content })}
-					singleTable={
-						props.type === "table" ? undefined : INLINE_SOURCE_TABLE_NAME
-					}
+					singleTable={!table}
 				/>
 			)}
 		>
@@ -155,9 +153,7 @@ function Dialog(props: SqlEditorDialogProps & { value: string }) {
 					value={content}
 					onChange={(e) => setContent(e.target.value)}
 					placeholder={
-						props.type === "table"
-							? "Enter table definition..."
-							: "Enter SQL query..."
+						table ? "Enter table definition..." : "Enter SQL query..."
 					}
 					spellCheck={false}
 				/>

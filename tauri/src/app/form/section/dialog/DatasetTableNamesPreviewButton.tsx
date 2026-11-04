@@ -17,6 +17,7 @@ import { PreviewButton } from "../../../../components/element/ButtonIcon";
 import { JobProgress } from "../../../../components/element/JobProgress";
 import { useDatasetSrcInfo } from "../../../../context/DatasetSrcInfoProvider";
 import {
+	INLINE_SOURCE_TABLE_NAME,
 	type TablePreview,
 	useDatasetTableConvert,
 	useDatasetTableNames,
@@ -92,13 +93,13 @@ export function SaveAndPreviewButton({
 }
 
 // SettingDialogのfooterActionsに置き、編集中の未保存の設定（inline）だけをsettingなしで適用して読み込まれるテーブル一覧をプレビューする（保存はしない）。
-// singleTable: 読み込まれるテーブルが1つと決まっていれば、一覧を出さずにそのテーブルのデータをプレビューする
+// singleTable: inlineSourceがSQL1つ（sql・csvq）で1テーブルと決まっているとき、一覧を出さずにそのテーブルのデータをプレビューする
 export function InlinePreviewButton({
 	toInline,
-	singleTable,
+	singleTable = false,
 }: {
 	toInline: () => Omit<DatasetSrcInfo, "values">;
-	singleTable?: string;
+	singleTable?: boolean;
 }) {
 	const datasetSrcInfo = useDatasetSrcInfo();
 	const [previewSrcInfo, setPreviewSrcInfo] = useState<DatasetSrcInfo | null>(
@@ -106,24 +107,6 @@ export function InlinePreviewButton({
 	);
 	if (!srcTypeOf(datasetSrcInfo)) {
 		return null;
-	}
-	function renderPreview(srcInfo: DatasetSrcInfo) {
-		const handleClose = () => setPreviewSrcInfo(null);
-		if (singleTable !== undefined) {
-			return (
-				<TableDataPreviewDialog
-					datasetSrcInfo={srcInfo}
-					tableName={singleTable}
-					handleClose={handleClose}
-				/>
-			);
-		}
-		return (
-			<DatasetTableNamesPreviewDialog
-				datasetSrcInfo={srcInfo}
-				handleDialogClose={handleClose}
-			/>
-		);
 	}
 	return (
 		<>
@@ -136,7 +119,19 @@ export function InlinePreviewButton({
 					})
 				}
 			/>
-			{previewSrcInfo !== null && renderPreview(previewSrcInfo)}
+			{previewSrcInfo !== null && singleTable && (
+				<TableDataPreviewDialog
+					datasetSrcInfo={previewSrcInfo}
+					tableName={INLINE_SOURCE_TABLE_NAME}
+					handleClose={() => setPreviewSrcInfo(null)}
+				/>
+			)}
+			{previewSrcInfo !== null && !singleTable && (
+				<DatasetTableNamesPreviewDialog
+					datasetSrcInfo={previewSrcInfo}
+					handleDialogClose={() => setPreviewSrcInfo(null)}
+				/>
+			)}
 		</>
 	);
 }
