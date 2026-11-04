@@ -144,7 +144,7 @@ export function InsertPreview({ lines }: { lines: string[] }) {
 		<DialogField last>
 			<pre
 				data-testid="insert-preview"
-				className="text-caption whitespace-pre-wrap break-all"
+				className="text-caption whitespace-pre-wrap break-all overflow-y-auto max-h-40"
 			>
 				{lines.join("\n")}
 			</pre>
