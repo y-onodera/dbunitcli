@@ -431,13 +431,6 @@ export default function SqlColumnInsertDialog({
 						disabled={!canInsert}
 					/>
 				)}
-				{!singleColumn && !noColumns && (
-					<BlueButton
-						title="All Columns"
-						handleClick={() => onInsert(linesOf(columns, null))}
-						disabled={columns.length === 0}
-					/>
-				)}
 				<WhiteButton title="Cancel" handleClick={onClose} />
 			</DialogActions>
 			{subqueryMode !== null && (

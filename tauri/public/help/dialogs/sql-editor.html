@@ -60,7 +60,7 @@
   <ol>
     <li>Select Tables を押し、Load Tables でデータベースのテーブル一覧を取得します。</li>
     <li>挿入したいテーブルにチェックを入れ、Insert を押すと、本文のカーソル位置に挿入され、Select Tables が閉じます。本文で範囲を選択していた場合は、その範囲を置き換えます。</li>
-    <li>テーブル名の横の Select columns アイコンを押すと、そのテーブルのカラム選択ダイアログ（Select Columns）が開きます。カラムにチェックを入れて Insert Columns を押すと、カーソル位置に 1 行 1 カラムで挿入されます。All Columns を押すと、チェックに関わらずすべてのカラムを 1 行ずつ書き出して挿入します（<code>*</code> は使いません）。Select Tables は開いたままなので、続けて別のテーブルを選べます。</li>
+    <li>テーブル名の横の Select columns アイコンを押すと、そのテーブルのカラム選択ダイアログ（Select Columns）が開きます。カラムにチェックを入れて Insert Columns を押すと、カーソル位置に 1 行 1 カラムで挿入されます。一覧の見出しのチェックで、表示中のカラムをすべて選べます（<code>*</code> は使いません）。Select Tables は開いたままなので、続けて別のテーブルを選べます。</li>
   </ol>
   <p><code>srcType</code> が <code>table</code> の場合は、テーブルを複数選べ、テーブル名・カラム名だけを 1 行ずつ挿入します。以降の項目は表示されません。</p>
   <p><code>srcType</code> が <code>sql</code> の場合は、使い道（Usage）を選ぶと、それに合った形で挿入します。挿入される内容は Insert の上に表示されます。データセットを読み込むフォーム（src など）から開いたときは、読み込みにしか使わないため、Select Tables の Usage に Insert / Update / Delete、Select Columns の Usage に Update set / Insert は表示されません。</p>
@@ -80,7 +80,7 @@ AND T.COLUMNB = </pre>
 
   <h3>テーブル（Select Tables）</h3>
   <p>選べるテーブルは 1 つです。別のテーブルを選ぶと置き換わります。</p>
-  <p>Usage が Select / Insert / Update / Left join / Inner join のときは、Insert ボタンが Next に変わります。Next を押すと Select Columns が開き、選んだカラム（All Columns なら全カラム）と合わせた文全体を挿入して、Select Tables が閉じます。このとき Select Columns の Usage はテーブル側に合わせて固定され、Keyword line と Separator on first line は表示されません。</p>
+  <p>Usage が Select / Insert / Update / Left join / Inner join のときは、Insert ボタンが Next に変わります。Next を押すと Select Columns が開き、選んだカラムと合わせた文全体を挿入して、Select Tables が閉じます。このとき Select Columns の Usage はテーブル側に合わせて固定され、Keyword line と Separator on first line は表示されません。</p>
   <p>Usage が Select columns のときも、Insert ボタンが Next に変わります。Next を押すと Select Columns が開き、テーブル名の横の Select columns アイコンから開いたときと同じく Usage を選べます。テーブルの句は付けず、選んだカラムだけを挿入して、Select Tables が閉じます。カラムを修飾する別名は Table alias の入力値です。</p>
   <table>
     <tr><th>項目</th><th>説明</th><th>デフォルト</th></tr>
@@ -177,7 +177,7 @@ FROM (
     <tr><th>値</th><th>説明</th></tr>
     <tr><td>=</td><td><code>UA.ID = </code>（NOT が ON なら <code>UA.ID != </code>）。複数のカラムを選べる</td></tr>
     <tr><td>IS NULL</td><td><code>UA.ID IS NULL</code>。複数のカラムを選べる</td></tr>
-    <tr><td>IN</td><td><code>UA.ID IN (...)</code>。カラムは 1 つだけ選べる。All Columns は表示されない</td></tr>
+    <tr><td>IN</td><td><code>UA.ID IN (...)</code>。カラムは 1 つだけ選べる。一覧の見出しの全選択チェックは表示されない</td></tr>
     <tr><td>EXISTS</td><td><code>EXISTS (...)</code>。カラムは選ばない。Next でサブクエリを選ぶ</td></tr>
   </table>
   <p>例: Operator が IS NULL、NOT が ON、Join columns with が OR、Group with ( ) が ON、Connect to main query が AND のとき</p>
@@ -208,7 +208,7 @@ FROM (
   <ol>
     <li>Select CSV を押し、Insert CSVREAD で CSV file と Charset を指定し、Usage・Table alias などを指定します。</li>
     <li>Next を押すと、挿入する <code>CSVREAD()</code> を csvq の実行時と同じように読んでカラムを取得し、Select Columns が開きます。カラム名は実行時と同じく大文字になります（例: <code>name</code> → <code>NAME</code>）。データ行は読みません。</li>
-    <li>カラムを選んで Insert Columns（All Columns なら全カラム）を押すと、文全体を挿入して Insert CSVREAD が閉じます。Select Columns の Usage は Insert CSVREAD の Usage に合わせて固定されます。Usage が Select columns のときは Select Columns で Usage を選べ、<code>CSVREAD()</code> の句は付けずにカラムだけを挿入します。</li>
+    <li>カラムを選んで Insert Columns を押すと、文全体を挿入して Insert CSVREAD が閉じます。Select Columns の Usage は Insert CSVREAD の Usage に合わせて固定されます。Usage が Select columns のときは Select Columns で Usage を選べ、<code>CSVREAD()</code> の句は付けずにカラムだけを挿入します。</li>
   </ol>
   <p>Usage が Cross join のときは、カラムを読み込まずに Insert ですぐ挿入します。Source を Subquery にすると、選んだ CSV ファイルからサブクエリを作って <code>FROM</code> / <code>JOIN</code> に置きます。</p>
   <p>Usage が Left join / Inner join のときに Select Columns の Operator で IN（IN source が Subquery）または EXISTS を選ぶと、Subquery Table ではテーブル一覧の代わりに CSV file と Charset を指定して CSV ファイルを 1 つ選びます。Charset のデフォルトは Insert CSVREAD の Charset、Table alias のデフォルトはファイル選択ボタンで選んだファイル名から作ります。</p>

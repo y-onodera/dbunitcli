@@ -76,7 +76,8 @@ describe("SqlTableInsertDialogのテーブル挿入", () => {
 		await user.click(screen.getByRole("button", { name: "Next" }));
 		await screen.findByText("Select Columns");
 		expect(screen.getByLabelText("Prefix table alias (O2)")).toBeChecked();
-		await user.click(screen.getByRole("button", { name: "All Columns" }));
+		await selectAllColumns(user);
+		await user.click(screen.getByRole("button", { name: "Insert Columns" }));
 		expect(onInsert).toHaveBeenCalledWith([
 			"    INNER JOIN",
 			"        ORDERS O2",
@@ -110,7 +111,7 @@ describe("SqlTableInsertDialogのテーブル挿入", () => {
 		expect(onInsertColumn).not.toHaveBeenCalled();
 	});
 
-	it("insertではエイリアスを入力できず、All Columnsで全カラムを書き出す", async () => {
+	it("insertではエイリアスを入力できず、全選択したカラムを書き出す", async () => {
 		const { user, onInsert } = await renderLoaded();
 		await user.click(screen.getByText("ORDERS"));
 		await user.selectOptions(screen.getByLabelText("Usage"), "insert");
@@ -118,7 +119,8 @@ describe("SqlTableInsertDialogのテーブル挿入", () => {
 		await user.click(screen.getByRole("button", { name: "Next" }));
 		await screen.findByText("Select Columns");
 
-		await user.click(screen.getByRole("button", { name: "All Columns" }));
+		await selectAllColumns(user);
+		await user.click(screen.getByRole("button", { name: "Insert Columns" }));
 		expect(onInsert).toHaveBeenCalledWith([
 			"INSERT INTO",
 			"    ORDERS",
@@ -139,7 +141,8 @@ describe("SqlTableInsertDialogのテーブル挿入", () => {
 		await user.click(screen.getByRole("button", { name: "Next" }));
 		await screen.findByText("Select Columns");
 
-		await user.click(screen.getByRole("button", { name: "All Columns" }));
+		await selectAllColumns(user);
+		await user.click(screen.getByRole("button", { name: "Insert Columns" }));
 		expect(onInsert).toHaveBeenCalledWith([
 			"UPDATE",
 			"    ORDERS O",
@@ -317,7 +320,8 @@ describe("SqlTableInsertDialogのカラム挿入", () => {
 		await screen.findByText("Select Columns");
 		expect(screen.queryByLabelText(/Prefix table alias/)).toBeNull();
 
-		await user.click(screen.getByRole("button", { name: "All Columns" }));
+		await selectAllColumns(user);
+		await user.click(screen.getByRole("button", { name: "Insert Columns" }));
 		expect(onInsert).toHaveBeenCalledWith([
 			"SELECT",
 			"    ID",
@@ -336,11 +340,11 @@ describe("SqlTableInsertDialogのカラム挿入", () => {
 		expect(mockJdbcColumns).toHaveBeenCalledTimes(1);
 	});
 
-	it("All Columnsは選択に関わらず全カラムを書き出す", async () => {
+	it("全選択チェックで全カラムを書き出す", async () => {
 		const { user, onInsertColumn } = await openColumnsOfOrders();
-		await user.click(screen.getByText("ID"));
 
-		await user.click(screen.getByRole("button", { name: "All Columns" }));
+		await selectAllColumns(user);
+		await user.click(screen.getByRole("button", { name: "Insert Columns" }));
 		expect(onInsertColumn).toHaveBeenCalledWith(["    ID", "  , NAME"]);
 	});
 
@@ -372,6 +376,14 @@ async function findDialog(title: string) {
 	return within(heading.parentElement as HTMLElement);
 }
 
+// Select Columns のカラム一覧の見出しにある全選択チェックを押す
+async function selectAllColumns(user: ReturnType<typeof userEvent.setup>) {
+	const [columnTable] = (await findDialog("Select Columns")).getAllByRole(
+		"table",
+	);
+	await user.click(within(columnTable).getAllByRole("checkbox")[0]);
+}
+
 describe("SqlTableInsertDialogの条件の挿入", () => {
 	async function openWhere() {
 		const loaded = await renderLoaded();
@@ -396,7 +408,8 @@ describe("SqlTableInsertDialogの条件の挿入", () => {
 		);
 		expect(screen.getByLabelText("Keyword line (WHERE)")).toBeDisabled();
 
-		await user.click(screen.getByRole("button", { name: "All Columns" }));
+		await selectAllColumns(user);
+		await user.click(screen.getByRole("button", { name: "Insert Columns" }));
 		expect(onInsertColumn).toHaveBeenCalledWith([
 			"AND (",
 			"        ID IS NOT NULL",
@@ -409,7 +422,8 @@ describe("SqlTableInsertDialogの条件の挿入", () => {
 		const { user, onInsertColumn } = await openWhere();
 		await user.click(screen.getByLabelText("NOT"));
 
-		await user.click(screen.getByRole("button", { name: "All Columns" }));
+		await selectAllColumns(user);
+		await user.click(screen.getByRole("button", { name: "Insert Columns" }));
 		expect(onInsertColumn).toHaveBeenCalledWith([
 			"WHERE",
 			"    ID != ",
@@ -420,7 +434,9 @@ describe("SqlTableInsertDialogの条件の挿入", () => {
 	it("IN は1カラムだけ選べ、値を1行で入れる", async () => {
 		const { user, onInsertColumn } = await openWhere();
 		await user.selectOptions(screen.getByLabelText("Operator"), "in");
-		expect(screen.queryByRole("button", { name: "All Columns" })).toBeNull();
+		const columnTable = (await findDialog("Select Columns")).getByRole("table");
+		// 全選択チェックを出さない
+		expect(within(columnTable).getAllByRole("checkbox")).toHaveLength(2);
 		await user.click(screen.getByText("ID"));
 		await user.click(screen.getByText("NAME"));
 		await user.type(screen.getByLabelText("Values"), "1, 2");
@@ -503,7 +519,8 @@ describe("SqlTableInsertDialogの条件の挿入", () => {
 		await user.selectOptions(screen.getByLabelText("Operator"), "isNull");
 		expect(screen.queryByLabelText("Connect to main query")).toBeNull();
 
-		await user.click(screen.getByRole("button", { name: "All Columns" }));
+		await selectAllColumns(user);
+		await user.click(screen.getByRole("button", { name: "Insert Columns" }));
 		expect(onInsert).toHaveBeenCalledWith([
 			"    LEFT JOIN",
 			"        ORDERS O",
@@ -546,7 +563,8 @@ describe("SqlTableInsertDialogのサブクエリをテーブルにする挿入",
 		const outer = await findDialog("Select Columns");
 		expect(outer.getByText("(subquery) S")).toBeInTheDocument();
 		expect(outer.queryByText("NAME")).toBeNull();
-		await user.click(outer.getByRole("button", { name: "All Columns" }));
+		await selectAllColumns(user);
+		await user.click(outer.getByRole("button", { name: "Insert Columns" }));
 
 		expect(onInsert).toHaveBeenCalledWith([
 			"SELECT",
