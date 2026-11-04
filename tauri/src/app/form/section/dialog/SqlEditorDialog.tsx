@@ -9,6 +9,7 @@ import { BlueButton } from "../../../../components/element/Button";
 import { TextArea } from "../../../../components/element/Input";
 import { useDatasetSrcInfo } from "../../../../context/DatasetSrcInfoProvider";
 import { useJdbcConnectionState } from "../../../../context/JdbcConnectionProvider";
+import { INLINE_SOURCE_TABLE_NAME } from "../../../../hooks/useDatasetSettings";
 import {
 	useResourceContent,
 	useSaveResourceContent,
@@ -129,8 +130,14 @@ function Dialog(props: SqlEditorDialogProps & { value: string }) {
 			save={(path) => saveDataSource(path, content)}
 			handleSave={props.handleSave}
 			footerActions={() => (
-				// 保存せず、編集中の内容をsrcのファイルの代わりにしてプレビューする（settingは適用しない）
-				<InlinePreviewButton toInline={() => ({ inlineSource: content })} />
+				// 保存せず、編集中の内容をsrcのファイルの代わりにしてプレビューする（settingは適用しない）。
+				// sql・csvqはSQL1つで1テーブルなので、一覧を挟まずにそのテーブルを開く
+				<InlinePreviewButton
+					toInline={() => ({ inlineSource: content })}
+					singleTable={
+						props.type === "table" ? undefined : INLINE_SOURCE_TABLE_NAME
+					}
+				/>
 			)}
 		>
 			<DialogBody size="md">

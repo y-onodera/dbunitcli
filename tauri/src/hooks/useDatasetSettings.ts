@@ -361,7 +361,7 @@ export const useSrcInfoColumnNames = (srcInfo: DatasetSrcInfo): string[] => {
 };
 
 // sidecarのDatasetTableNamesRequestDto.INLINE_SOURCE_TABLE_NAMEと揃える
-const INLINE_SOURCE_TABLE_NAME = "inlineSource";
+export const INLINE_SOURCE_TABLE_NAME = "inlineSource";
 
 // テーブル名→列名。tableNameを指定すればそのテーブルだけを読む。失敗は投げる
 async function fetchTableColumns(

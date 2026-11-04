@@ -29,7 +29,7 @@
   select * from USERS where STATUS = 'ACTIVE'
 
 指定:
-  → Preview（一覧の preview ボタンで読み込まれる行を確認し、Close で閉じる）
+  → Preview（読み込まれる行を確認し、Close で閉じる）
   name = active_users.sql
   → Save
 
@@ -227,11 +227,11 @@ FROM
   <p><code>CSVREAD()</code> の書き方は <a href="../sections/dataset-load-form/types/csvq.html">csvq</a> を参照してください。</p>
 
   <h2 id="section-preview">Preview</h2>
-  <p>ダイアログ下部の Preview を押すと、編集中の内容を <code>src</code> のファイルの代わりにして、読み込まれるテーブルの一覧を表示します（<a href="../sections/dataset-load-form.html">Dataset Load Form</a> の Preview Before Settings と同じ表示です）。一覧の preview ボタンを押すと、そのテーブルのデータを表示します。</p>
+  <p>ダイアログ下部の Preview を押すと、編集中の内容を <code>src</code> のファイルの代わりにして読み込みます。<code>srcType</code> が <code>sql</code> / <code>csvq</code> なら SQL 1 つで 1 テーブルなので、テーブルの一覧を挟まずにそのテーブルのデータを表示します。<code>table</code> なら読み込まれるテーブルの一覧を表示し（<a href="../sections/dataset-load-form.html">Dataset Load Form</a> の Preview Before Settings と同じ表示です）、一覧の preview ボタンでそのテーブルのデータを表示します。</p>
   <ul>
     <li>Save を押す前の内容でも確認でき、プレビューしてもファイルは保存されません。SQL Editor は閉じず、元のテキストボックスのファイル名も変わりません。</li>
     <li>フォームの <code>src</code> 以外の項目（JDBC の接続先、-P 値など）は実行時と同じものを使います。<code>setting</code> は指定していても適用しません。</li>
-    <li><code>srcType</code> が <code>sql</code> / <code>csvq</code> のとき、一覧のテーブル名は <code>inlineSource</code> と表示します。保存して実行したときのテーブル名は、保存したファイル名（拡張子を除く）です。</li>
+    <li><code>srcType</code> が <code>sql</code> / <code>csvq</code> のとき、データ表示のタイトルのテーブル名は <code>inlineSource</code> と表示します。保存して実行したときのテーブル名は、保存したファイル名（拡張子を除く）です。</li>
     <li><code>srcType</code> が <code>table</code> のとき、本文の 1 行を 1 テーブルとして表示します。空行は飛ばします。</li>
     <li><code>srcType</code> が <code>sql</code> / <code>table</code> のときは JDBC の接続先から読みます。<code>sql</code> は接続テストに成功するまで何も読み込みません。</li>
     <li>本文が空のときは何も読み込みません。Preview はフォームで <code>srcType</code> を指定しているときだけ表示されます。</li>
