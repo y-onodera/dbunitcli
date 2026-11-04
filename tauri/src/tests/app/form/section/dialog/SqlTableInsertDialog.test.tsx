@@ -178,7 +178,7 @@ describe("SqlTableInsertDialogのSelect columns", () => {
 		expect(screen.getByLabelText("Prefix table alias (U)")).toBeChecked();
 		await user.click(screen.getByText("ID"));
 		await user.click(screen.getByRole("button", { name: "Insert Columns" }));
-		expect(onInsert).toHaveBeenCalledWith(["WHERE", "    U.ID = "], false);
+		expect(onInsert).toHaveBeenCalledWith(["WHERE", "    U.ID = "]);
 		expect(onInsertColumn).not.toHaveBeenCalled();
 	});
 

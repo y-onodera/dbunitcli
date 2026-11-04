@@ -93,22 +93,19 @@ export function csvFileAlias(path: string): string {
 }
 
 // テーブルに続けて列を選び、文全体を組み立てる用途
-export type StatementUsage = Exclude<
-	TableUsage,
-	"delete" | "crossJoin" | "columns"
->;
-
-export function isStatementUsage(usage: TableUsage): usage is StatementUsage {
-	return usage !== "delete" && usage !== "crossJoin" && usage !== "columns";
-}
-
-const STATEMENT_COLUMN_USAGE: Record<StatementUsage, ColumnUsage> = {
+const STATEMENT_COLUMN_USAGE = {
 	select: "select",
 	insert: "insert",
 	update: "update",
 	leftJoin: "on",
 	innerJoin: "on",
-};
+} as const satisfies Partial<Record<TableUsage, ColumnUsage>>;
+
+export type StatementUsage = keyof typeof STATEMENT_COLUMN_USAGE;
+
+export function isStatementUsage(usage: TableUsage): usage is StatementUsage {
+	return usage in STATEMENT_COLUMN_USAGE;
+}
 
 export function statementColumnUsage(usage: StatementUsage): ColumnUsage {
 	return STATEMENT_COLUMN_USAGE[usage];
@@ -117,7 +114,7 @@ export function statementColumnUsage(usage: StatementUsage): ColumnUsage {
 // columnsはcolumnLinesで statementColumnUsage の用途に整え、キーワード行を付けていない行。StatementUsage以外では使わない
 export function tableLines(
 	table: string,
-	usage: TableUsage,
+	usage: Exclude<TableUsage, "columns">,
 	alias: string,
 	columns: string[],
 ): string[] {
@@ -140,8 +137,6 @@ export function tableLines(
 			return ["UPDATE", `${INDENT}${named}`, "SET", ...columns];
 		case "delete":
 			return ["DELETE FROM", `${INDENT}${named}`];
-		case "columns":
-			return columns;
 		default:
 			return [
 				`${INDENT}${JOIN_KEYWORDS[usage]}`,

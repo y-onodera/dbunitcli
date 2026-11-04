@@ -111,8 +111,8 @@ export default function TableInsertForm({
 		? subqueryAlias.trim() === ""
 		: isJoin(usage) && alias.trim() === "";
 	const statement = isStatementUsage(usage) ? usage : null;
-	// 列だけを選ぶ用途。列選択ダイアログで列の用途から選ぶ
-	const columnsOnly = usage === "columns";
+	const selectsColumns = statement !== null || usage === "columns";
+	const opensNext = selectsColumns || derived;
 	const columnTarget = columnLoad.target;
 
 	const handleUsageChange = (next: TableUsage) => {
@@ -128,7 +128,7 @@ export default function TableInsertForm({
 			derivedLoad.open(table);
 			return;
 		}
-		if (statement !== null || columnsOnly) {
+		if (selectsColumns) {
 			columnLoad.open(table);
 			return;
 		}
@@ -192,22 +192,18 @@ export default function TableInsertForm({
 			<InsertPreview
 				lines={
 					// 列まで選ぶ用途は、列選択ダイアログで文全体を見せる
-					table === null || statement !== null || derived || columnsOnly
-						? []
-						: tableLines(table, usage, alias, [])
+					table === null || opensNext ? [] : tableLines(table, usage, alias, [])
 				}
 			/>
 			<DialogActions>
 				<BlueButton
-					title={
-						statement !== null || derived || columnsOnly ? "Next" : "Insert"
-					}
+					title={opensNext ? "Next" : "Insert"}
 					handleClick={handleInsert}
 					disabled={table === null || aliasMissing}
 				/>
 				<WhiteButton title="Cancel" handleClick={onClose} />
 			</DialogActions>
-			{columnTarget !== null && statement !== null && (
+			{columnTarget !== null && selectsColumns && (
 				<SqlColumnInsertDialog
 					table={columnTarget.table}
 					columns={columnTarget.columns}
@@ -217,34 +213,23 @@ export default function TableInsertForm({
 					plain={false}
 					alias={alias.trim()}
 					qualify={alias.trim() !== ""}
-					statement={{
-						usage: statementColumnUsage(statement),
-						wrap: (lines) =>
-							tableLines(columnTarget.table, statement, alias, lines),
-					}}
-					subquerySource={subquerySource}
-					queryOnly={queryOnly}
-					onInsert={(lines) => {
-						onInsert(lines);
-						columnLoad.close();
-					}}
-					onClose={columnLoad.close}
-				/>
-			)}
-			{columnTarget !== null && columnsOnly && (
-				<SqlColumnInsertDialog
-					table={columnTarget.table}
-					columns={columnTarget.columns}
-					loading={columnLoad.job.running}
-					error={columnLoad.job.error}
-					logs={columnLoad.job.logs}
-					plain={false}
-					alias={alias.trim()}
-					qualify={alias.trim() !== ""}
+					statement={
+						statement === null
+							? undefined
+							: {
+									usage: statementColumnUsage(statement),
+									wrap: (lines) =>
+										tableLines(columnTarget.table, statement, alias, lines),
+								}
+					}
 					subquerySource={subquerySource}
 					queryOnly={queryOnly}
 					onInsert={(lines, inline) => {
-						onInsert(lines, inline);
+						if (inline) {
+							onInsert(lines, true);
+						} else {
+							onInsert(lines);
+						}
 						columnLoad.close();
 					}}
 					onClose={columnLoad.close}
