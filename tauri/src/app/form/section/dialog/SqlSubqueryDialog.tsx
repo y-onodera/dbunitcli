@@ -218,12 +218,12 @@ export function SubqueryColumns({
 		.map((c) => qualifyColumn(c, qualifier));
 
 	// EXISTS（と列を選ぶ前）は 1 を、IN は先頭の1列を SELECT する
-	const selectListOf = (targets: string[]) => {
-		if (mode === "exists" || targets.length === 0) {
+	const selectListOf = () => {
+		if (mode === "exists" || selectedColumns.length === 0) {
 			return columnLines(["1"], "select", { alias: "", columnAs: false });
 		}
 		return columnLines(
-			mode === "in" ? targets.slice(0, 1) : targets,
+			mode === "in" ? selectedColumns.slice(0, 1) : selectedColumns,
 			"select",
 			{
 				alias: qualifier,
@@ -238,8 +238,7 @@ export function SubqueryColumns({
 					...DEFAULT_CONDITION_OPTIONS,
 					conjunction,
 				});
-	const linesOf = (targets: string[]) =>
-		subqueryLines(table, alias, selectListOf(targets), where);
+	const lines = subqueryLines(table, alias, selectListOf(), where);
 	const missingSelect = mode !== "exists" && selectedColumns.length === 0;
 
 	return (
@@ -292,13 +291,11 @@ export function SubqueryColumns({
 					/>
 				</DialogField>
 			)}
-			<InsertPreview lines={linesOf(selectedColumns)} />
+			<InsertPreview lines={lines} />
 			<DialogActions>
 				<BlueButton
 					title={completeTitle}
-					handleClick={() =>
-						onComplete(linesOf(selectedColumns), selectedColumns)
-					}
+					handleClick={() => onComplete(lines, selectedColumns)}
 					disabled={missingSelect}
 				/>
 				<WhiteButton title="Cancel" handleClick={onClose} />

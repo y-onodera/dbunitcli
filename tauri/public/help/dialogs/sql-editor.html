@@ -60,7 +60,7 @@
   <ol>
     <li>Select Tables を押し、Load Tables でデータベースのテーブル一覧を取得します。</li>
     <li>挿入したいテーブルにチェックを入れ、Insert を押すと、本文のカーソル位置に挿入され、Select Tables が閉じます。本文で範囲を選択していた場合は、その範囲を置き換えます。</li>
-    <li>テーブル名の横の Select columns アイコンを押すと、そのテーブルのカラム選択ダイアログ（Select Columns）が開きます。カラムにチェックを入れて Insert Columns を押すと、カーソル位置に 1 行 1 カラムで挿入されます。一覧の見出しのチェックで、表示中のカラムをすべて選べます（<code>*</code> は使いません）。Select Tables は開いたままなので、続けて別のテーブルを選べます。</li>
+    <li>テーブル名の横の Select columns アイコンを押すと、そのテーブルのカラム選択ダイアログ（Select Columns）が開きます。カラムにチェックを入れて Insert Columns を押すと、カーソル位置に 1 行 1 カラムで挿入されます。一覧の見出しのチェックで、表示中のカラムをすべて選べます。すべて選んでも <code>*</code> にはせず、カラムを 1 行ずつ挿入します。Select Tables は開いたままなので、続けて別のテーブルを選べます。</li>
   </ol>
   <p><code>srcType</code> が <code>table</code> の場合は、テーブルを複数選べ、テーブル名・カラム名だけを 1 行ずつ挿入します。以降の項目は表示されません。</p>
   <p><code>srcType</code> が <code>sql</code> の場合は、使い道（Usage）を選ぶと、それに合った形で挿入します。挿入される内容は Insert の上に表示されます。データセットを読み込むフォーム（src など）から開いたときは、読み込みにしか使わないため、Select Tables の Usage に Insert / Update / Delete、Select Columns の Usage に Update set / Insert は表示されません。</p>

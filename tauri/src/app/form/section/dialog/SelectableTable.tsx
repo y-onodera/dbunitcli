@@ -59,6 +59,7 @@ export default function SelectableTable({
 								{onToggleAll && (
 									<input
 										type="checkbox"
+										aria-label="Select all"
 										checked={allSelected}
 										onChange={(e) =>
 											onToggleAll(filteredItems, e.target.checked)

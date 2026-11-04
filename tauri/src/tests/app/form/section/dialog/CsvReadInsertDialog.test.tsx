@@ -158,10 +158,11 @@ describe("CsvReadInsertDialog", () => {
 		const heading = await screen.findByRole("heading", {
 			name: "Select Columns",
 		});
-		const [columnTable] = within(
-			heading.parentElement as HTMLElement,
-		).getAllByRole("table");
-		await user.click(within(columnTable).getAllByRole("checkbox")[0]);
+		await user.click(
+			within(heading.parentElement as HTMLElement).getByRole("checkbox", {
+				name: "Select all",
+			}),
+		);
 		await user.click(screen.getByRole("button", { name: "Insert Columns" }));
 		expect(onInsert).toHaveBeenCalledWith([
 			"SELECT",
