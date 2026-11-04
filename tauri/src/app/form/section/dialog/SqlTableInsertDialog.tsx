@@ -28,7 +28,7 @@ import { useColumnLoad } from "./useColumnLoad";
 
 interface SqlTableInsertDialogProps {
 	jdbcValues: Record<string, string>;
-	onInsert: (tables: string[]) => void;
+	onInsert: (lines: string[], inline?: boolean) => void;
 	// inlineなら改行を足さずにカーソル位置へ入れる
 	onInsertColumn: (columns: string[], inline?: boolean) => void;
 	plain?: boolean;
@@ -127,7 +127,7 @@ function TablesContent({
 	onClose,
 }: {
 	tables: string[];
-	onInsert: (tables: string[]) => void;
+	onInsert: (lines: string[], inline?: boolean) => void;
 	onInsertColumn: (columns: string[], inline?: boolean) => void;
 	plain: boolean;
 	queryOnly: boolean;

@@ -160,6 +160,43 @@ describe("SqlTableInsertDialogのテーブル挿入", () => {
 	});
 });
 
+describe("SqlTableInsertDialogのSelect columns", () => {
+	const columnUsage = () =>
+		document.getElementById("sqlColumnInsert_usage") as HTMLSelectElement;
+
+	it("Nextで列の用途を選べる列選択に進み、テーブルの別名で修飾した列だけを挿入する", async () => {
+		const { user, onInsert, onInsertColumn } = await renderLoaded();
+		await user.click(screen.getByText("USER_ACCOUNT"));
+		await user.selectOptions(screen.getByLabelText("Usage"), "columns");
+		expect(screen.queryByTestId("insert-preview")).toBeNull();
+		await user.clear(screen.getByLabelText("Table alias"));
+		await user.type(screen.getByLabelText("Table alias"), "U");
+		await user.click(screen.getByRole("button", { name: "Next" }));
+		await screen.findByText("Select Columns");
+
+		await user.selectOptions(columnUsage(), "where");
+		expect(screen.getByLabelText("Prefix table alias (U)")).toBeChecked();
+		await user.click(screen.getByText("ID"));
+		await user.click(screen.getByRole("button", { name: "Insert Columns" }));
+		expect(onInsert).toHaveBeenCalledWith(["WHERE", "    U.ID = "], false);
+		expect(onInsertColumn).not.toHaveBeenCalled();
+	});
+
+	it("条件の右辺に置くスカラー値はinlineで挿入する", async () => {
+		const { user, onInsert } = await renderLoaded();
+		await user.click(screen.getByText("ORDERS"));
+		await user.selectOptions(screen.getByLabelText("Usage"), "columns");
+		await user.click(screen.getByRole("button", { name: "Next" }));
+		await screen.findByText("Select Columns");
+
+		await user.selectOptions(columnUsage(), "scalar");
+		await user.selectOptions(screen.getByLabelText("Place in"), "condition");
+		await user.click(screen.getByText("NAME"));
+		await user.click(screen.getByRole("button", { name: "Insert Scalar" }));
+		expect(onInsert).toHaveBeenCalledWith(["O.NAME"], true);
+	});
+});
+
 describe("SqlTableInsertDialogのqueryOnly", () => {
 	const optionValues = (select: HTMLElement) =>
 		within(select)
@@ -174,6 +211,7 @@ describe("SqlTableInsertDialogのqueryOnly", () => {
 			"leftJoin",
 			"innerJoin",
 			"crossJoin",
+			"columns",
 		]);
 	});
 

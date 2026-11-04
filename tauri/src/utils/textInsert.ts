@@ -49,7 +49,8 @@ export type TableUsage =
 	| "delete"
 	| "leftJoin"
 	| "innerJoin"
-	| "crossJoin";
+	| "crossJoin"
+	| "columns";
 
 // 句の中身の字下げ。JOINはFROMの中身と同じ位置に置き、結合先テーブルとONはさらに下げる
 const INDENT = "    ";
@@ -92,10 +93,13 @@ export function csvFileAlias(path: string): string {
 }
 
 // テーブルに続けて列を選び、文全体を組み立てる用途
-export type StatementUsage = Exclude<TableUsage, "delete" | "crossJoin">;
+export type StatementUsage = Exclude<
+	TableUsage,
+	"delete" | "crossJoin" | "columns"
+>;
 
 export function isStatementUsage(usage: TableUsage): usage is StatementUsage {
-	return usage !== "delete" && usage !== "crossJoin";
+	return usage !== "delete" && usage !== "crossJoin" && usage !== "columns";
 }
 
 const STATEMENT_COLUMN_USAGE: Record<StatementUsage, ColumnUsage> = {
@@ -136,6 +140,8 @@ export function tableLines(
 			return ["UPDATE", `${INDENT}${named}`, "SET", ...columns];
 		case "delete":
 			return ["DELETE FROM", `${INDENT}${named}`];
+		case "columns":
+			return columns;
 		default:
 			return [
 				`${INDENT}${JOIN_KEYWORDS[usage]}`,

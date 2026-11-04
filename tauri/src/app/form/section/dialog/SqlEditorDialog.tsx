@@ -84,8 +84,8 @@ function Dialog(props: SqlEditorDialogProps & { value: string }) {
 		textareaRef.current?.setSelectionRange(cursor, cursor);
 	});
 
-	const handleInsert = (lines: string[]) => {
-		insertToContent(lines);
+	const handleInsert = (lines: string[], inline?: boolean) => {
+		insertToContent(lines, inline);
 		setShowSelector(false);
 	};
 

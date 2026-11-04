@@ -11,11 +11,13 @@ import type { SelectGroup } from "./SqlInsertParts";
 import TableInsertForm, { TABLE_USAGE_GROUPS } from "./TableInsertForm";
 import { useCsvFile } from "./useCsvFile";
 
-// CSVは書き込めないため、Select Tablesの用途のうちFROM / JOINに置くものだけ
+// CSVは書き込めないため、Select Tablesの用途のうちFROM / JOINに置くものと列だけを選ぶもの
 const CSV_USAGE_GROUPS: SelectGroup<TableUsage>[] = TABLE_USAGE_GROUPS.map(
 	(group) => ({
 		label: group.label,
-		options: group.options.filter((o) => usesDerivedTable(o.value)),
+		options: group.options.filter(
+			(o) => usesDerivedTable(o.value) || o.value === "columns",
+		),
 	}),
 );
 
@@ -27,7 +29,7 @@ export default function CsvReadInsertDialog({
 }: {
 	// 文字コードの初期値
 	encoding: string;
-	onInsert: (lines: string[]) => void;
+	onInsert: (lines: string[], inline?: boolean) => void;
 	onClose: () => void;
 }) {
 	const csv = useCsvFile(encoding, csvFileAlias);
