@@ -41,6 +41,10 @@ export const TABLE_USAGE_GROUPS: SelectGroup<TableUsage>[] = [
 			{ value: "crossJoin", label: "Cross join" },
 		],
 	},
+	{
+		label: "Columns",
+		options: [{ value: "columns", label: "Select columns" }],
+	},
 ];
 
 // 読み込み専用のSQL（データセットの読込元）に置かない用途
@@ -58,7 +62,7 @@ const TABLE_SOURCE_OPTIONS: SelectOption<TableSource>[] = [
 	{ value: "subquery", label: "Subquery" },
 ];
 
-// 選んだテーブル1つの用途・別名を決め、句（列まで選ぶ用途は列も選んで文全体）を挿入する。
+// 選んだテーブル1つの用途・別名を決め、句（列まで選ぶ用途は列も選んで文全体、列だけの用途は列だけ）を挿入する。
 // テーブルを選ぶ画面は呼び出し側で、別名のデフォルトもそこで付ける。
 // 用途と別名は、呼び出し側の列選択（テーブル一覧の行の列選択アイコン）でも使うため呼び出し側が持つ
 export default function TableInsertForm({
@@ -86,7 +90,8 @@ export default function TableInsertForm({
 	subquerySource: SubquerySource;
 	// 列選択ダイアログの用途からDMLを除く
 	queryOnly?: boolean;
-	onInsert: (lines: string[]) => void;
+	// inlineは列選択ダイアログの条件の右辺の挿入
+	onInsert: (lines: string[], inline?: boolean) => void;
 	onClose: () => void;
 }) {
 	// 列まで選ぶ用途のときの、選んだテーブルの列の読込
@@ -106,6 +111,8 @@ export default function TableInsertForm({
 		? subqueryAlias.trim() === ""
 		: isJoin(usage) && alias.trim() === "";
 	const statement = isStatementUsage(usage) ? usage : null;
+	const selectsColumns = statement !== null || usage === "columns";
+	const opensNext = selectsColumns || derived;
 	const columnTarget = columnLoad.target;
 
 	const handleUsageChange = (next: TableUsage) => {
@@ -121,7 +128,7 @@ export default function TableInsertForm({
 			derivedLoad.open(table);
 			return;
 		}
-		if (statement !== null) {
+		if (selectsColumns) {
 			columnLoad.open(table);
 			return;
 		}
@@ -185,20 +192,18 @@ export default function TableInsertForm({
 			<InsertPreview
 				lines={
 					// 列まで選ぶ用途は、列選択ダイアログで文全体を見せる
-					table === null || statement !== null || derived
-						? []
-						: tableLines(table, usage, alias, [])
+					table === null || opensNext ? [] : tableLines(table, usage, alias, [])
 				}
 			/>
 			<DialogActions>
 				<BlueButton
-					title={statement !== null || derived ? "Next" : "Insert"}
+					title={opensNext ? "Next" : "Insert"}
 					handleClick={handleInsert}
 					disabled={table === null || aliasMissing}
 				/>
 				<WhiteButton title="Cancel" handleClick={onClose} />
 			</DialogActions>
-			{columnTarget !== null && statement !== null && (
+			{columnTarget !== null && selectsColumns && (
 				<SqlColumnInsertDialog
 					table={columnTarget.table}
 					columns={columnTarget.columns}
@@ -208,15 +213,23 @@ export default function TableInsertForm({
 					plain={false}
 					alias={alias.trim()}
 					qualify={alias.trim() !== ""}
-					statement={{
-						usage: statementColumnUsage(statement),
-						wrap: (lines) =>
-							tableLines(columnTarget.table, statement, alias, lines),
-					}}
+					statement={
+						statement === null
+							? undefined
+							: {
+									usage: statementColumnUsage(statement),
+									wrap: (lines) =>
+										tableLines(columnTarget.table, statement, alias, lines),
+								}
+					}
 					subquerySource={subquerySource}
 					queryOnly={queryOnly}
-					onInsert={(lines) => {
-						onInsert(lines);
+					onInsert={(lines, inline) => {
+						if (inline) {
+							onInsert(lines, true);
+						} else {
+							onInsert(lines);
+						}
 						columnLoad.close();
 					}}
 					onClose={columnLoad.close}

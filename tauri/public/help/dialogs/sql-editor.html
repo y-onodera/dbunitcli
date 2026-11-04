@@ -81,6 +81,7 @@ AND T.COLUMNB = </pre>
   <h3>テーブル（Select Tables）</h3>
   <p>選べるテーブルは 1 つです。別のテーブルを選ぶと置き換わります。</p>
   <p>Usage が Select / Insert / Update / Left join / Inner join のときは、Insert ボタンが Next に変わります。Next を押すと Select Columns が開き、選んだカラム（All Columns なら全カラム）と合わせた文全体を挿入して、Select Tables が閉じます。このとき Select Columns の Usage はテーブル側に合わせて固定され、Keyword line と Separator on first line は表示されません。</p>
+  <p>Usage が Select columns のときも、Insert ボタンが Next に変わります。Next を押すと Select Columns が開き、テーブル名の横の Select columns アイコンから開いたときと同じく Usage を選べます。テーブルの句は付けず、選んだカラムだけを挿入して、Select Tables が閉じます。カラムを修飾する別名は Table alias の入力値です。</p>
   <table>
     <tr><th>項目</th><th>説明</th><th>デフォルト</th></tr>
     <tr><td>Usage</td><td>テーブルの使い道。挿入する文の形が決まる</td><td>Select</td></tr>
@@ -96,6 +97,7 @@ AND T.COLUMNB = </pre>
     <tr><td>Delete</td><td><code>DELETE FROM</code>、テーブルの順に挿入する</td></tr>
     <tr><td>Left join / Inner join</td><td><code>LEFT JOIN</code> / <code>INNER JOIN</code>、テーブル、ON の条件（Select Columns の On と同じ形）の順に挿入する。右辺は空</td></tr>
     <tr><td>Cross join</td><td><code>CROSS JOIN</code>、テーブルの順に挿入する</td></tr>
+    <tr><td>Select columns</td><td>テーブルの句は挿入せず、Next で開く Select Columns で選んだ Usage の形でカラムだけを挿入する</td></tr>
   </table>
 
   <p>Source が Subquery のときは、Next を押すと次の順に選びます。</p>
@@ -137,7 +139,7 @@ FROM (
   </table>
 
   <h3>スカラー値（Scalar value）</h3>
-  <p>Usage が Scalar value のときは、条件の右辺・SELECT の列・ORDER BY に書く 1 つの値の式を挿入します。テーブル名の横の Select columns アイコンから開いた Select Columns で選べます（Next から開いたときは選べません）。</p>
+  <p>Usage が Scalar value のときは、条件の右辺・SELECT の列・ORDER BY に書く 1 つの値の式を挿入します。テーブル名の横の Select columns アイコン、または Usage が Select columns の Next から開いた Select Columns で選べます（ほかの Usage の Next から開いたときは選べません）。</p>
   <table>
     <tr><th>項目</th><th>説明</th><th>デフォルト</th></tr>
     <tr><td>Source</td><td>式の元。Column は選んだ 1 カラム、CASE は選んだ 1 カラムの CASE 式、Subquery は Next で選ぶサブクエリ（IN のサブクエリと同じ手順で、SELECT するカラムは 1 つ）</td><td>Column</td></tr>
@@ -206,7 +208,7 @@ FROM (
   <ol>
     <li>Select CSV を押し、Insert CSVREAD で CSV file と Charset を指定し、Usage・Table alias などを指定します。</li>
     <li>Next を押すと、挿入する <code>CSVREAD()</code> を csvq の実行時と同じように読んでカラムを取得し、Select Columns が開きます。カラム名は実行時と同じく大文字になります（例: <code>name</code> → <code>NAME</code>）。データ行は読みません。</li>
-    <li>カラムを選んで Insert Columns（All Columns なら全カラム）を押すと、文全体を挿入して Insert CSVREAD が閉じます。Select Columns の Usage は Insert CSVREAD の Usage に合わせて固定されます。</li>
+    <li>カラムを選んで Insert Columns（All Columns なら全カラム）を押すと、文全体を挿入して Insert CSVREAD が閉じます。Select Columns の Usage は Insert CSVREAD の Usage に合わせて固定されます。Usage が Select columns のときは Select Columns で Usage を選べ、<code>CSVREAD()</code> の句は付けずにカラムだけを挿入します。</li>
   </ol>
   <p>Usage が Cross join のときは、カラムを読み込まずに Insert ですぐ挿入します。Source を Subquery にすると、選んだ CSV ファイルからサブクエリを作って <code>FROM</code> / <code>JOIN</code> に置きます。</p>
   <p>Usage が Left join / Inner join のときに Select Columns の Operator で IN（IN source が Subquery）または EXISTS を選ぶと、Subquery Table ではテーブル一覧の代わりに CSV file と Charset を指定して CSV ファイルを 1 つ選びます。Charset のデフォルトは Insert CSVREAD の Charset、Table alias のデフォルトはファイル選択ボタンで選んだファイル名から作ります。</p>

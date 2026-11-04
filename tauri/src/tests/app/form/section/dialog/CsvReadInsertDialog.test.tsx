@@ -42,6 +42,20 @@ function renderDialog() {
 }
 
 describe("CsvReadInsertDialog", () => {
+	it("用途はFROM / JOINに置くものと、列だけを選ぶもの", () => {
+		renderDialog();
+		const usages = Array.from(
+			(screen.getByLabelText("Usage") as HTMLSelectElement).options,
+		).map((o) => o.value);
+		expect(usages).toEqual([
+			"select",
+			"leftJoin",
+			"innerJoin",
+			"crossJoin",
+			"columns",
+		]);
+	});
+
 	it("選んだファイルの列を読み、選んだ列でSELECT文を挿入する", async () => {
 		const { user, onInsert } = renderDialog();
 		expect(screen.getByLabelText("Charset*")).toHaveValue("MS932");
