@@ -1,4 +1,3 @@
-import type { Dispatch, SetStateAction } from "react";
 import { useResourcesSettings } from "../../../../context/WorkspaceResourcesProvider";
 import type { CommandOption } from "../../../../model/CommandOption";
 import { RemoveResourceButton } from "../dialog/ResourceEditButton";
@@ -26,23 +25,18 @@ export default function JdbcPropertiesTextField({
 			handleValueChange={(value) => onValueChange(element.name, value)}
 		>
 			{({ path, setPath, isValueInDatalist }) => {
-				const wrappedSetPath: Dispatch<SetStateAction<string>> = (action) => {
-					const newPath = typeof action === "function" ? action(path) : action;
-					setPath(newPath);
-					onValueChange(element.name, newPath);
-				};
 				return (
 					<TextDropDownMenu
 						prefix={prefix}
 						element={element}
 						path={path}
-						setPath={wrappedSetPath}
+						setPath={setPath}
 						isValueInDatalist={isValueInDatalist}
 						removeButton={(closeMenu) => (
 							<RemoveResourceButton
 								kind="jdbc"
 								path={path}
-								setPath={wrappedSetPath}
+								setPath={setPath}
 								onRemoved={closeMenu}
 							/>
 						)}

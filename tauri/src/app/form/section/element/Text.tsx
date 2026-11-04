@@ -85,9 +85,12 @@ export default function Text({
 						children &&
 						children({
 							path,
-							// ボタン等から値を変えたときはchangeが起きないため、ここで検証エラーを消す
-							setPath: (value) => {
-								setPath(value);
+							// ボタン等から値を変えたときはchangeが起きないため、ここで変更の通知と検証エラーの消去を行う
+							setPath: (action) => {
+								const newPath =
+									typeof action === "function" ? action(path) : action;
+								setPath(newPath);
+								onValueChange?.(newPath);
 								clearFieldErrors(fieldName);
 							},
 							isValueInDatalist,

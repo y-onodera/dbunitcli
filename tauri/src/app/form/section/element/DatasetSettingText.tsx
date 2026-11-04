@@ -1,4 +1,4 @@
-import type { ComponentType, Dispatch, ReactNode, SetStateAction } from "react";
+import type { ComponentType, ReactNode } from "react";
 import { InlineActions } from "../../../../components/dialog";
 import { useDatasetSrcInfo } from "../../../../context/DatasetSrcInfoProvider";
 import { useResourcesSettings } from "../../../../context/WorkspaceResourcesProvider";
@@ -66,15 +66,10 @@ export default function DatasetSettingText({
 			afterContent={({ path }) => preview?.(path)}
 		>
 			{({ path, setPath, isValueInDatalist }) => {
-				const handleSetPath: Dispatch<SetStateAction<string>> = (action) => {
-					const newPath = typeof action === "function" ? action(path) : action;
-					setPath(newPath);
-					handleValueChange?.(newPath);
-				};
 				return (
 					<TextDropDownMenu
 						path={path}
-						setPath={handleSetPath}
+						setPath={setPath}
 						prefix={prefix}
 						element={element}
 						isValueInDatalist={isValueInDatalist}
@@ -84,13 +79,13 @@ export default function DatasetSettingText({
 								dialogProps={{ kind }}
 								key="edit"
 								path={path}
-								setPath={handleSetPath}
+								setPath={setPath}
 							/>,
 							...(showGenerate
 								? [
 										<DatasetSettingGenerateButton
 											key="generate"
-											setPath={handleSetPath}
+											setPath={setPath}
 											editDialog={generateEditDialog}
 											kind={kind}
 										/>,
@@ -101,7 +96,7 @@ export default function DatasetSettingText({
 							<RemoveResourceButton
 								kind={kind}
 								path={path}
-								setPath={handleSetPath}
+								setPath={setPath}
 								onRemoved={closeMenu}
 							/>
 						)}

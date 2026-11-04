@@ -1,4 +1,3 @@
-import type { Dispatch, SetStateAction } from "react";
 import type { CommandOption } from "../../../../model/CommandOption";
 import { JdbcUrlBuilderButton } from "../dialog/JdbcUrlBuilderDialog";
 import PlainText from "./PlainText";
@@ -21,14 +20,9 @@ export default function JdbcUrlTextField({
 			handleValueChange={(value: string) => onValueChange(element.name, value)}
 			hidden={hidden}
 		>
-			{({ path, setPath }) => {
-				const wrappedSetPath: Dispatch<SetStateAction<string>> = (action) => {
-					const newPath = typeof action === "function" ? action(path) : action;
-					setPath(newPath);
-					onValueChange(element.name, newPath);
-				};
-				return <JdbcUrlBuilderButton value={path} setValue={wrappedSetPath} />;
-			}}
+			{({ path, setPath }) => (
+				<JdbcUrlBuilderButton value={path} setValue={setPath} />
+			)}
 		</PlainText>
 	);
 }
