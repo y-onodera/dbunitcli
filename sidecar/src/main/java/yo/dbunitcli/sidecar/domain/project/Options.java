@@ -104,15 +104,9 @@ public record Options(File baseDir, Map<yo.dbunitcli.application.CommandType, Re
             Arrays.stream(Type.values())
                   .filter(it -> it != Type.scaffold)
                   .forEach(this::addParameterFiles);
-            this.templates = new ResourceFile(
-                    new File(workspace, FileResources.OPTION_PARAMETERIZE_TEMPLATE_PATH)
-                    , FileResources::searchParameterizeTemplate);
-            this.compareSettings = new ResourceFile(
-                    new File(workspace, FileResources.OPTION_COMPARE_SETTING_PATH)
-                    , FileResources::searchCompareSetting);
-            this.generateSettings = new ResourceFile(
-                    new File(workspace, FileResources.OPTION_GENERATE_SETTING_PATH)
-                    , FileResources::searchGenerateSetting);
+            this.templates = ResourceFile.of(workspace, FileResources.OPTION_PARAMETERIZE_TEMPLATE_PATH, FileResources::searchParameterizeTemplate);
+            this.compareSettings = ResourceFile.of(workspace, FileResources.OPTION_COMPARE_SETTING_PATH, FileResources::searchCompareSetting);
+            this.generateSettings = ResourceFile.of(workspace, FileResources.OPTION_GENERATE_SETTING_PATH, FileResources::searchGenerateSetting);
         }
 
         private Builder addParameterFiles(final Type command) {

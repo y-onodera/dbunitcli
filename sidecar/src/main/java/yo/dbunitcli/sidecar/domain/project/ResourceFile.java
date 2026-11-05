@@ -31,6 +31,10 @@ public record ResourceFile(File baseDir, Set<String> files, Function<String, Opt
         this.reload();
     }
 
+    public static ResourceFile of(final File workspace, final String path, final Function<String, File> toFile) {
+        return new ResourceFile(new File(workspace, path), toFile);
+    }
+
     public Optional<String> read(final String name) {
         return this.select(name).map(it -> {
             try {
