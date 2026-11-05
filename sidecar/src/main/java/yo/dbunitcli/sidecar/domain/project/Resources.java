@@ -4,10 +4,10 @@ import yo.dbunitcli.resource.FileResources;
 import yo.dbunitcli.sidecar.dto.ResourcesDto;
 
 import java.io.File;
+import java.util.function.Function;
 
 public record Resources(
-        File baseDir
-        , ResourceFile jdbc
+        ResourceFile jdbc
         , ResourceFile datasetSetting
         , ResourceFile template
         , ResourceFile xlsxSchema
@@ -34,29 +34,28 @@ public record Resources(
     }
 
     public static class Builder {
-        private File baseDir;
+        private File workspace;
 
         public Resources build() {
             return new Resources(
-                    this.baseDir,
-                    new ResourceFile(new File(this.baseDir, "jdbc"), FileResources::searchJdbc),
-                    new ResourceFile(new File(this.baseDir, "setting"), FileResources::searchSetting),
-                    new ResourceFile(new File(this.baseDir, "template"), FileResources::searchTemplate),
-                    new ResourceFile(new File(this.baseDir, "xlsx-schema"), FileResources::searchXlsxSchema),
-                    new ResourceFile(new File(this.baseDir, "fixed-column-def"), FileResources::searchFixedColumnDef),
-                    new ResourceFile(new File(this.baseDir, "sql"), FileResources::searchSql),
-                    new ResourceFile(new File(this.baseDir, "table"), FileResources::searchTable),
-                    new ResourceFile(new File(this.baseDir, "csvq"), FileResources::searchCsvq)
+                    this.resourceFile(FileResources.RESOURCES_JDBC_PATH, FileResources::searchJdbc),
+                    this.resourceFile(FileResources.RESOURCES_SETTING_PATH, FileResources::searchSetting),
+                    this.resourceFile(FileResources.RESOURCES_TEMPLATE_PATH, FileResources::searchTemplate),
+                    this.resourceFile(FileResources.RESOURCES_XLSX_SCHEMA_PATH, FileResources::searchXlsxSchema),
+                    this.resourceFile(FileResources.RESOURCES_FIXED_COLUMN_DEF_PATH, FileResources::searchFixedColumnDef),
+                    this.resourceFile(FileResources.RESOURCES_SQL_PATH, FileResources::searchSql),
+                    this.resourceFile(FileResources.RESOURCES_TABLE_PATH, FileResources::searchTable),
+                    this.resourceFile(FileResources.RESOURCES_CSVQ_PATH, FileResources::searchCsvq)
             );
         }
 
         public Builder workspace(final File workspace) {
-            return this.setBaseDir(new File(workspace, "resources"));
+            this.workspace = workspace;
+            return this;
         }
 
-        public Builder setBaseDir(final File baseDir) {
-            this.baseDir = baseDir;
-            return this;
+        private ResourceFile resourceFile(final String path, final Function<String, File> search) {
+            return new ResourceFile(new File(this.workspace, path), search);
         }
     }
 }

@@ -16,7 +16,7 @@ describe("WorkspaceContextクラス", () => {
 		templateBase: "ws/resources/template",
 		parameterizeTemplateBase: "ws/option/parameterize/template",
 		jdbcBase: "ws/resources/jdbc",
-		xlsxSchemaBase: "ws/resources/xlsxSchema",
+		xlsxSchemaBase: "ws/resources/xlsx-schema",
 	});
 
 	it.each([
