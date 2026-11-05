@@ -20,7 +20,8 @@ public record FileResources() {
     public static final String RESOURCES_SETTING_PATH = "resources/setting";
     public static final String RESOURCES_TEMPLATE_PATH = "resources/template";
     public static final String RESOURCES_JDBC_PATH = "resources/jdbc";
-    public static final String RESOURCES_XLSX_SCHEMA_PATH = "resources/xlsxSchema";
+    public static final String RESOURCES_XLSX_SCHEMA_PATH = "resources/xlsx-schema";
+    public static final String RESOURCES_FIXED_COLUMN_DEF_PATH = "resources/fixed-column-def";
     public static final String RESOURCES_SQL_PATH = "resources/sql";
     public static final String RESOURCES_TABLE_PATH = "resources/table";
     public static final String RESOURCES_CSVQ_PATH = "resources/csvq";
@@ -169,7 +170,7 @@ public record FileResources() {
     }
 
     public static File fixedColumnDefDir() {
-        return new File(baseDir(), "resources/fixed-column-def");
+        return new File(baseDir(), RESOURCES_FIXED_COLUMN_DEF_PATH);
     }
 
     public static File searchFixedColumnDef(final String path) {

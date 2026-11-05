@@ -6,8 +6,7 @@ import yo.dbunitcli.sidecar.dto.ResourcesDto;
 import java.io.File;
 
 public record Resources(
-        File baseDir
-        , ResourceFile jdbc
+        ResourceFile jdbc
         , ResourceFile datasetSetting
         , ResourceFile template
         , ResourceFile xlsxSchema
@@ -34,28 +33,23 @@ public record Resources(
     }
 
     public static class Builder {
-        private File baseDir;
+        private File workspace;
 
         public Resources build() {
             return new Resources(
-                    this.baseDir,
-                    new ResourceFile(new File(this.baseDir, "jdbc"), FileResources::searchJdbc),
-                    new ResourceFile(new File(this.baseDir, "setting"), FileResources::searchSetting),
-                    new ResourceFile(new File(this.baseDir, "template"), FileResources::searchTemplate),
-                    new ResourceFile(new File(this.baseDir, "xlsx-schema"), FileResources::searchXlsxSchema),
-                    new ResourceFile(new File(this.baseDir, "fixed-column-def"), FileResources::searchFixedColumnDef),
-                    new ResourceFile(new File(this.baseDir, "sql"), FileResources::searchSql),
-                    new ResourceFile(new File(this.baseDir, "table"), FileResources::searchTable),
-                    new ResourceFile(new File(this.baseDir, "csvq"), FileResources::searchCsvq)
+                    ResourceFile.of(this.workspace, FileResources.RESOURCES_JDBC_PATH, FileResources::searchJdbc),
+                    ResourceFile.of(this.workspace, FileResources.RESOURCES_SETTING_PATH, FileResources::searchSetting),
+                    ResourceFile.of(this.workspace, FileResources.RESOURCES_TEMPLATE_PATH, FileResources::searchTemplate),
+                    ResourceFile.of(this.workspace, FileResources.RESOURCES_XLSX_SCHEMA_PATH, FileResources::searchXlsxSchema),
+                    ResourceFile.of(this.workspace, FileResources.RESOURCES_FIXED_COLUMN_DEF_PATH, FileResources::searchFixedColumnDef),
+                    ResourceFile.of(this.workspace, FileResources.RESOURCES_SQL_PATH, FileResources::searchSql),
+                    ResourceFile.of(this.workspace, FileResources.RESOURCES_TABLE_PATH, FileResources::searchTable),
+                    ResourceFile.of(this.workspace, FileResources.RESOURCES_CSVQ_PATH, FileResources::searchCsvq)
             );
         }
 
         public Builder workspace(final File workspace) {
-            return this.setBaseDir(new File(workspace, "resources"));
-        }
-
-        public Builder setBaseDir(final File baseDir) {
-            this.baseDir = baseDir;
+            this.workspace = workspace;
             return this;
         }
     }
