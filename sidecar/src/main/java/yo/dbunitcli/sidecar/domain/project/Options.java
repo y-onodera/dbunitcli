@@ -105,8 +105,8 @@ public record Options(File baseDir, Map<yo.dbunitcli.application.CommandType, Re
                   .filter(it -> it != Type.scaffold)
                   .forEach(this::addParameterFiles);
             this.templates = new ResourceFile(
-                    new File(this.parameters.get(Type.parameterize).baseDir(), "template")
-                    , FileResources::searchTemplate);
+                    new File(workspace, FileResources.OPTION_PARAMETERIZE_TEMPLATE_PATH)
+                    , FileResources::searchParameterizeTemplate);
             this.compareSettings = new ResourceFile(
                     new File(workspace, FileResources.OPTION_COMPARE_SETTING_PATH)
                     , FileResources::searchCompareSetting);
