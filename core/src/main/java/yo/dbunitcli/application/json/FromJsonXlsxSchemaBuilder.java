@@ -26,11 +26,11 @@ public class FromJsonXlsxSchemaBuilder implements XlsxSchema.Builder {
 
     private final Map<String, TargetFilter> sheetPatterns = new HashMap<>();
 
-    public XlsxSchema build(final File schema) throws FileNotFoundException, UnsupportedEncodingException {
+    public XlsxSchema build(final File schema, final String encoding) throws FileNotFoundException, UnsupportedEncodingException {
         if (schema == null) {
             return XlsxSchema.DEFAULT;
         }
-        return this.build(new InputStreamReader(new FileInputStream(schema), "MS932"));
+        return this.build(new InputStreamReader(new FileInputStream(schema), encoding));
     }
 
     public XlsxSchema build(final String json) {

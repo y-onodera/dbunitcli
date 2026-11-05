@@ -18,6 +18,8 @@ import yo.dbunitcli.sidecar.dto.ResourceSaveRequest;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 
 public abstract class AbstractResourceFileController<DTO extends ResourceSaveRequest<?>> implements ControllerExceptionHandler {
@@ -46,7 +48,7 @@ public abstract class AbstractResourceFileController<DTO extends ResourceSaveReq
     @Post(uri = "save", produces = MediaType.APPLICATION_JSON)
     public String save(@Body final DTO body) throws IOException {
         try {
-            this.saveJson(body.getName(), this.serializeJson(body));
+            this.saveJson(body.getName(), this.serializeJson(body), this.charsetOf(body));
         } catch (IOException e) {
             throw e;
         } catch (final Throwable th) {
@@ -75,7 +77,11 @@ public abstract class AbstractResourceFileController<DTO extends ResourceSaveReq
 
     protected abstract ResourceFile getResourceFile();
 
-    protected void saveJson(final String name, final String json) throws IOException {
+    protected Charset charsetOf(final DTO body) {
+        return StandardCharsets.UTF_8;
+    }
+
+    protected void saveJson(final String name, final String json, final Charset charset) throws IOException {
         final StringWriter stringWriter = new StringWriter();
         final JsonWriter jsonWriter = Json.createWriterFactory(
                         Collections.singletonMap(JsonGenerator.PRETTY_PRINTING, true))
@@ -83,7 +89,7 @@ public abstract class AbstractResourceFileController<DTO extends ResourceSaveReq
         jsonWriter.writeObject(Json.createReader(new StringReader(json)).readObject());
         jsonWriter.close();
         LOGGER.info(stringWriter.toString());
-        this.getResourceFile().update(name, stringWriter.toString());
+        this.getResourceFile().update(name, stringWriter.toString(), charset);
     }
 
     protected String currentFileList() {

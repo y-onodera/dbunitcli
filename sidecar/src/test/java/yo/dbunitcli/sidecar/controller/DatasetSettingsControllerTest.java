@@ -110,8 +110,7 @@ class DatasetSettingsControllerTest {
     @Test
     void testLoad() throws IOException {
         final String response = this.client.toBlocking()
-                .retrieve(HttpRequest.POST("dbunit-cli/dataset-setting/load", "test.json")
-                        .contentType(MediaType.TEXT_PLAIN_TYPE));
+                .retrieve(HttpRequest.POST("dbunit-cli/dataset-setting/load", "{\"name\":\"test.json\"}"));
         System.out.println(response);
         JsonTestHelper.assertJsonEquals(
                 Paths.get("src/test/resources/yo/dbunitcli/sidecar/controller/setting-load-response.json"),
@@ -133,8 +132,7 @@ class DatasetSettingsControllerTest {
                 "savedSetting.json がファイルシステムに作成されること");
 
         final String loadResponse = this.client.toBlocking()
-                .retrieve(HttpRequest.POST("dbunit-cli/dataset-setting/load", "savedSetting.json")
-                        .contentType(MediaType.TEXT_PLAIN_TYPE));
+                .retrieve(HttpRequest.POST("dbunit-cli/dataset-setting/load", "{\"name\":\"savedSetting.json\"}"));
         System.out.println(loadResponse);
         JsonTestHelper.assertJsonEquals(
                 Paths.get("src/test/resources/yo/dbunitcli/sidecar/controller/setting-save-load-response.json"),
@@ -165,8 +163,7 @@ class DatasetSettingsControllerTest {
                             "{\"name\":\"outputFilterSetting.json\",\"input\":{\"settings\":[],\"commonSettings\":[],\"outputFilter\":" + filter + "}}"));
 
             final String loaded = this.client.toBlocking()
-                    .retrieve(HttpRequest.POST("dbunit-cli/dataset-setting/load", "outputFilterSetting.json")
-                            .contentType(MediaType.TEXT_PLAIN_TYPE));
+                    .retrieve(HttpRequest.POST("dbunit-cli/dataset-setting/load", "{\"name\":\"outputFilterSetting.json\"}"));
             JsonTestHelper.assertJsonEquals("{\"outputFilter\":" + filter + "}", loaded);
         }
     }
@@ -179,8 +176,7 @@ class DatasetSettingsControllerTest {
                         "{\"name\":\"importSetting.json\",\"input\":{\"settings\":[],\"commonSettings\":[],\"import\":" + imports + "}}"));
 
         final String loaded = this.client.toBlocking()
-                .retrieve(HttpRequest.POST("dbunit-cli/dataset-setting/load", "importSetting.json")
-                        .contentType(MediaType.TEXT_PLAIN_TYPE));
+                .retrieve(HttpRequest.POST("dbunit-cli/dataset-setting/load", "{\"name\":\"importSetting.json\"}"));
         JsonTestHelper.assertJsonEquals("{\"import\":" + imports + "}", loaded);
     }
 

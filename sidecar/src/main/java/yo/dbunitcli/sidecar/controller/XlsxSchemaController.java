@@ -30,7 +30,7 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 @Controller("xlsx-schema")
-public class XlsxSchemaController extends AbstractResourceFileController<JsonXlsxSchemaRequestDto> {
+public class XlsxSchemaController extends AbstractEncodedResourceFileController<JsonXlsxSchemaRequestDto> {
     private static final Logger LOGGER = LoggerFactory.getLogger(XlsxSchemaController.class);
 
     public XlsxSchemaController(final Workspace workspace) {

@@ -2,6 +2,7 @@ package yo.dbunitcli.sidecar.domain.project;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -36,9 +37,13 @@ public record ResourceFile(File baseDir, Set<String> files, Function<String, Opt
     }
 
     public Optional<String> read(final String name) {
+        return this.read(name, StandardCharsets.UTF_8);
+    }
+
+    public Optional<String> read(final String name, final Charset charset) {
         return this.select(name).map(it -> {
             try {
-                return Files.readString(it, StandardCharsets.UTF_8);
+                return Files.readString(it, charset);
             } catch (final IOException e) {
                 throw new RuntimeException(e);
             }
@@ -70,8 +75,12 @@ public record ResourceFile(File baseDir, Set<String> files, Function<String, Opt
     }
 
     public void update(final String name, final String contents) throws IOException {
+        this.update(name, contents, StandardCharsets.UTF_8);
+    }
+
+    public void update(final String name, final String contents, final Charset charset) throws IOException {
         final Path saveTo = this.prepareUpdate(name);
-        Files.writeString(saveTo, contents, StandardCharsets.UTF_8);
+        Files.writeString(saveTo, contents, charset);
     }
 
     /** バイナリ等、既存ファイルの内容をそのまま取り込む（同名は上書き） */

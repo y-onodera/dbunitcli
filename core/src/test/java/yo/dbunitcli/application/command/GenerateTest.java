@@ -252,7 +252,7 @@ public class GenerateTest {
             this.assertGenerateFileEquals("Test3.json", "UTF-8");
             for (final String tableName : new String[]{"Test1", "Test2", "Test3"}) {
                 final XlsxSchema schema = new FromJsonXlsxSchemaBuilder()
-                        .build(new File(this.getResult(), tableName + ".json"));
+                        .build(new File(this.getResult(), tableName + ".json"), "UTF-8");
                 Assertions.assertTrue(schema.contains(tableName));
             }
         }
@@ -807,6 +807,7 @@ public class GenerateTest {
                         , "-src=src/test/resources/yo/dbunitcli/application/src/xlsxwithschema/ComplexLayout.xlsx"
                         , "-xlsxSchema=src/test/resources/yo/dbunitcli/application/settings/xlsxwithschema/ComplexSchemaAddFileInfo.json"
                         , "-setting=src/test/resources/yo/dbunitcli/application/settings/generate/with_metadata/separate_after_join.json"
+                        , "-settingEncoding=MS932"
                         , "-addFileInfo=true"
                         , "-generateType=xlsx"
                         , "-unit=dataset"
@@ -819,6 +820,7 @@ public class GenerateTest {
                         , "-src=src/test/resources/yo/dbunitcli/application/src/xlsxwithschema/ComplexLayout.xlsx"
                         , "-xlsxSchema=src/test/resources/yo/dbunitcli/application/settings/xlsxwithschema/ComplexSchemaAddFileInfo.json"
                         , "-setting=src/test/resources/yo/dbunitcli/application/settings/generate/with_metadata/separate_after_join.json"
+                        , "-settingEncoding=MS932"
                         , "-addFileInfo=true"
                         , "-formulaProcess=false"
                         , "-generateType=xlsx"

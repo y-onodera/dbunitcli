@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { SectionFieldset } from "../../components/dialog";
 import { SectionLegend } from "../../components/dialog/SectionFieldset";
-import { UnitSettingEncodingProvider } from "../../context/UnitSettingEncodingProvider";
+import { SettingEncodingProvider } from "../../context/SettingEncodingProvider";
 import type { GenerateOptions } from "../../model/SelectParameter";
 import {
 	DatasetLoadForm,
@@ -75,7 +75,7 @@ export function GenerateForm(prop: {
 						element={generate.unit}
 					/>
 				)}
-				<UnitSettingEncodingProvider encoding={unitSettingEncoding}>
+				<SettingEncodingProvider encoding={unitSettingEncoding}>
 					{generate.unitSetting && (
 						<DatasetSettingText
 							prefix=""
@@ -87,7 +87,7 @@ export function GenerateForm(prop: {
 							)}
 						/>
 					)}
-				</UnitSettingEncodingProvider>
+				</SettingEncodingProvider>
 				{generate.unitSettingEncoding && (
 					<EncodingText
 						prefix=""

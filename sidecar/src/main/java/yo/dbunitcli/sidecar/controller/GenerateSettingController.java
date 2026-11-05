@@ -10,7 +10,7 @@ import yo.dbunitcli.sidecar.dto.DatasetRequestDto;
  * generateの-unitSettingのJSONをoption/generate/settingに保存・読込・削除する（形式はdataset-settingと同じ）
  */
 @Controller("generate/setting")
-public class GenerateSettingController extends AbstractResourceFileController<DatasetRequestDto> {
+public class GenerateSettingController extends AbstractEncodedResourceFileController<DatasetRequestDto> {
 
     @Inject
     public GenerateSettingController(final Workspace workspace) {

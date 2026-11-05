@@ -24,6 +24,7 @@ import {
 	resourceBaseOf,
 	useUpdateResourceFiles,
 } from "./useResourceFiles";
+import { useSettingEncoding } from "./useSettingEncoding";
 
 // jdbcは接続テストに成功した値を優先する
 function buildDatasetRequestBody(
@@ -293,8 +294,9 @@ export const useSaveDatasetSettings = (
 	kind: DatasetSettingKind = "datasetSetting",
 ) => {
 	const updateResourceFiles = useUpdateResourceFiles(kind);
+	const encoding = useSettingEncoding();
 	return (name: string, input: DatasetSettings) =>
-		updateResourceFiles("save", JSON.stringify({ name, input }));
+		updateResourceFiles("save", JSON.stringify({ name, encoding, input }));
 };
 
 export const useDatasetSettingsData = (
@@ -302,6 +304,7 @@ export const useDatasetSettingsData = (
 	kind: DatasetSettingKind = "datasetSetting",
 ): { settings: DatasetSettings; loading: boolean } => {
 	const { apiUrl } = useEnvironment();
+	const encoding = useSettingEncoding();
 	const [settings, setSettings] = useState(DatasetSettings.create());
 	const [loading, setLoading] = useState(fileName !== "");
 
@@ -313,7 +316,7 @@ export const useDatasetSettingsData = (
 		}
 		const controller = new AbortController();
 		setLoading(true);
-		loadDatasetSettings(apiUrl, fileName, kind).then((result) => {
+		loadDatasetSettings(apiUrl, fileName, kind, encoding).then((result) => {
 			if (!controller.signal.aborted) {
 				setSettings(result);
 				setLoading(false);
@@ -322,7 +325,7 @@ export const useDatasetSettingsData = (
 		return () => {
 			controller.abort();
 		};
-	}, [fileName, apiUrl, kind]);
+	}, [fileName, apiUrl, kind, encoding]);
 
 	return { settings, loading };
 };
@@ -456,6 +459,7 @@ async function loadDatasetSettings(
 	apiUrl: string,
 	name: string,
 	kind: DatasetSettingKind,
+	encoding: string,
 ): Promise<DatasetSettings> {
 	if (name === "") {
 		return DatasetSettings.create();
@@ -464,8 +468,8 @@ async function loadDatasetSettings(
 		endpoint: `${apiUrl}${resourceBaseOf(kind)}/load`,
 		options: {
 			method: "POST",
-			headers: { "Content-Type": "text/plain" },
-			body: name,
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify({ name, encoding }),
 		},
 	};
 	return await fetchData(fetchParams)

@@ -40,8 +40,8 @@ const {
 vi.mock("../../../../../context/DatasetSrcInfoProvider", () => ({
 	useDatasetSrcInfo: () => srcInfoFixture.current,
 }));
-vi.mock("../../../../../context/UnitSettingEncodingProvider", () => ({
-	useUnitSettingEncoding: () => encodingFixture.current,
+vi.mock("../../../../../hooks/useSettingEncoding", () => ({
+	useSettingEncoding: () => encodingFixture.current,
 }));
 // 編集ダイアログ本体は使わず、footerのSave and Previewだけを出す（保存は"saved.json"へ成功したものとする）。
 // 保存先の種類はdata-kindに出して確認する

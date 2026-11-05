@@ -10,7 +10,7 @@ import yo.dbunitcli.sidecar.dto.DatasetRequestDto;
  * compareの-setting（比較キーの設定）のJSONをoption/compare/settingに保存・読込・削除する（形式はdataset-settingと同じ）
  */
 @Controller("compare/setting")
-public class CompareSettingController extends AbstractResourceFileController<DatasetRequestDto> {
+public class CompareSettingController extends AbstractEncodedResourceFileController<DatasetRequestDto> {
 
     @Inject
     public CompareSettingController(final Workspace workspace) {

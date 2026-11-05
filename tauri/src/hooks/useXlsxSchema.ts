@@ -8,17 +8,20 @@ import {
 	handleFetchError,
 } from "../utils/fetchUtils";
 import { useUpdateResourceFiles } from "./useResourceFiles";
+import { useSettingEncoding } from "./useSettingEncoding";
 
 export const useSaveXlsxSchema = () => {
 	const updateResourceFiles = useUpdateResourceFiles("xlsxSchema");
+	const encoding = useSettingEncoding();
 	return (name: string, input: XlsxSchema) =>
-		updateResourceFiles("save", JSON.stringify({ name, input }));
+		updateResourceFiles("save", JSON.stringify({ name, encoding, input }));
 };
 
 export const useXlsxSchemaData = (
 	fileName: string,
 ): { schema: XlsxSchema; loading: boolean } => {
 	const { apiUrl } = useEnvironment();
+	const encoding = useSettingEncoding();
 	const [schema, setSchema] = useState(XlsxSchema.create());
 	const [loading, setLoading] = useState(fileName !== "");
 
@@ -30,7 +33,7 @@ export const useXlsxSchemaData = (
 		}
 		const controller = new AbortController();
 		setLoading(true);
-		loadXlsxSchema(apiUrl, fileName).then((result) => {
+		loadXlsxSchema(apiUrl, fileName, encoding).then((result) => {
 			if (!controller.signal.aborted) {
 				setSchema(result);
 				setLoading(false);
@@ -39,7 +42,7 @@ export const useXlsxSchemaData = (
 		return () => {
 			controller.abort();
 		};
-	}, [fileName, apiUrl]);
+	}, [fileName, apiUrl, encoding]);
 
 	return { schema, loading };
 };
@@ -47,6 +50,7 @@ export const useXlsxSchemaData = (
 async function loadXlsxSchema(
 	apiUrl: string,
 	name: string,
+	encoding: string,
 ): Promise<XlsxSchema> {
 	if (name === "") {
 		return XlsxSchema.create();
@@ -55,8 +59,8 @@ async function loadXlsxSchema(
 		endpoint: `${apiUrl}xlsx-schema/load`,
 		options: {
 			method: "POST",
-			headers: { "Content-Type": "text/plain" },
-			body: name,
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify({ name, encoding }),
 		},
 	};
 	return await fetchData(fetchParams)

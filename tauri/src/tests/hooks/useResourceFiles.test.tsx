@@ -143,6 +143,8 @@ describe("保存フックのテスト", () => {
 		endpoint: string;
 		input: unknown;
 		key: keyof ResourcesSettingsBuilder;
+		// 設定ファイルの文字コード（送るものだけ。Providerが無いので空）
+		encoding?: string;
 	}>([
 		{
 			name: "useSaveXlsxSchema",
@@ -153,6 +155,7 @@ describe("保存フックのテスト", () => {
 			endpoint: "xlsx-schema/save",
 			input: xlsxSchema,
 			key: "xlsxSchemas",
+			encoding: "",
 		},
 		{
 			name: "useSaveFixedColumnDef",
@@ -173,6 +176,7 @@ describe("保存フックのテスト", () => {
 			endpoint: "dataset-setting/save",
 			input: datasetSettings,
 			key: "datasetSettings",
+			encoding: "",
 		},
 		...(
 			[
@@ -196,6 +200,7 @@ describe("保存フックのテスト", () => {
 			endpoint,
 			input: datasetSettings,
 			key,
+			encoding: "",
 		})),
 		...(
 			[
@@ -231,7 +236,7 @@ describe("保存フックのテスト", () => {
 		},
 	])(
 		"$nameは$endpointへ名前と内容を送り、応答で$keyを更新する",
-		async ({ useSave, endpoint, input, key }) => {
+		async ({ useSave, endpoint, input, key, encoding }) => {
 			const { operationResult, params, resources } =
 				await runWithResources(useSave);
 
@@ -239,6 +244,7 @@ describe("保存フックのテスト", () => {
 			expect(params?.endpoint).toBe(`${environmentFixture.apiUrl}${endpoint}`);
 			expect(JSON.parse(String(params?.options.body))).toStrictEqual({
 				name: "target",
+				...(encoding === undefined ? {} : { encoding }),
 				input: JSON.parse(JSON.stringify(input)),
 			});
 			expect(resources[key]).toStrictEqual(mockUpdatedFiles);

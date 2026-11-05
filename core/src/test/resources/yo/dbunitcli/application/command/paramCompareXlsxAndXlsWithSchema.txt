@@ -1,5 +1,6 @@
 -setting=src/test/resources/yo/dbunitcli/application/settings/xlsxwithschema/compareSetting.json
 -xlsxSchema=src/test/resources/yo/dbunitcli/application/settings/xlsxwithschema/ComplexLayoutSchema.json
+-settingEncoding=MS932
 -old.src=src/test/resources/yo/dbunitcli/application/src/xlsxwithschema/ComplexLayout.xlsx
 -old.srcType=xlsx
 -new.src=src/test/resources/yo/dbunitcli/application/src/xlsxwithschema/ComplexLayout.xls

@@ -1,5 +1,6 @@
 import { act, renderHook } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
+import { DatasetSrcInfoProvider } from "../../context/DatasetSrcInfoProvider";
 import {
 	type Environment,
 	environmentContext,
@@ -102,6 +103,31 @@ describe("XlsxSchemaProviderのテスト", () => {
 			expect(result.current.loading).toBe(false);
 			expect(result.current.schema.rows).toHaveLength(1);
 			expect(result.current.schema.cells).toHaveLength(1);
+		});
+
+		it("dataset読込フォームのsettingEncodingで読み込むことを確認", async () => {
+			mockFetchData.mockClear();
+			const { rerender } = renderHook(() => useXlsxSchemaData("test-setting"), {
+				wrapper: ({ children }: { children: React.ReactNode }) => (
+					<MockProvider>
+						<DatasetSrcInfoProvider
+							initialValue={{ values: { settingEncoding: "MS932" } }}
+						>
+							{children}
+						</DatasetSrcInfoProvider>
+					</MockProvider>
+				),
+			});
+			await act(async () => {
+				rerender();
+			});
+			const loads = mockFetchData.mock.calls.filter(([params]) =>
+				params.endpoint.endsWith("/xlsx-schema/load"),
+			);
+			expect(JSON.parse(String(loads[0][0].options.body))).toStrictEqual({
+				name: "test-setting",
+				encoding: "MS932",
+			});
 		});
 	});
 });

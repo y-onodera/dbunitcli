@@ -71,7 +71,7 @@ import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 
 @Controller("dataset-setting")
-public class DatasetSettingsController extends AbstractResourceFileController<DatasetRequestDto> {
+public class DatasetSettingsController extends AbstractEncodedResourceFileController<DatasetRequestDto> {
     private static final Logger LOGGER = LoggerFactory.getLogger(DatasetSettingsController.class);
     static final int PREVIEW_ROW_LIMIT = 100;
 
