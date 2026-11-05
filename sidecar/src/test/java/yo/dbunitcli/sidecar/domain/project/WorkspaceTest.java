@@ -86,7 +86,7 @@ class WorkspaceTest {
         assertEquals(new File(this.tempDir.toString(), "resources/setting").toPath().toAbsolutePath().normalize().toString(), context.getSettingBase());
         assertEquals(new File(this.tempDir.toString(), "resources/template").toPath().toAbsolutePath().normalize().toString(), context.getTemplateBase());
         assertEquals(new File(this.tempDir.toString(), "resources/jdbc").toPath().toAbsolutePath().normalize().toString(), context.getJdbcBase());
-        assertEquals(new File(this.tempDir.toString(), "resources/xlsxSchema").toPath().toAbsolutePath().normalize().toString(), context.getXlsxSchemaBase());
+        assertEquals(new File(this.tempDir.toString(), "resources/xlsx-schema").toPath().toAbsolutePath().normalize().toString(), context.getXlsxSchemaBase());
     }
 
     @Test

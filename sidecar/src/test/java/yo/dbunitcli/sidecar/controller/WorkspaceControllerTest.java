@@ -47,7 +47,7 @@ class WorkspaceControllerTest {
                 new File("target/test-temp/workspace/sample/resources/template").getAbsolutePath().replace("\\", "\\\\"),
                 new File("target/test-temp/workspace/sample/option/parameterize/template").getAbsolutePath().replace("\\", "\\\\"),
                 new File("target/test-temp/workspace/sample/resources/jdbc").getAbsolutePath().replace("\\", "\\\\"),
-                new File("target/test-temp/workspace/sample/resources/xlsxSchema").getAbsolutePath().replace("\\", "\\\\"),
+                new File("target/test-temp/workspace/sample/resources/xlsx-schema").getAbsolutePath().replace("\\", "\\\\"),
                 new File("target/test-temp/workspace/sample/resources/fixed-column-def").getAbsolutePath().replace("\\", "\\\\"),
                 new File("target/test-temp/workspace/sample/resources/sql").getAbsolutePath().replace("\\", "\\\\"),
                 new File("target/test-temp/workspace/sample/resources/table").getAbsolutePath().replace("\\", "\\\\"),
