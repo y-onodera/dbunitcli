@@ -31,8 +31,14 @@ type SqlEditorDialogProps = EditResourceDialogProps &
 		type: QueryDatasourceType;
 	};
 
+// コマンド実行時はsrcの-encodingで読むため、同じ文字コードで読み書きする
 export default function SqlEditorDialog(props: SqlEditorDialogProps) {
-	const { content, loading } = useResourceContent(props.type, props.fileName);
+	const encoding = useDatasetSrcInfo().values.encoding ?? "";
+	const { content, loading } = useResourceContent(
+		props.type,
+		props.fileName,
+		encoding,
+	);
 	if (loading) {
 		return <StatusMessage kind="loading">Loading...</StatusMessage>;
 	}
@@ -59,10 +65,13 @@ function Dialog(props: SqlEditorDialogProps & { value: string }) {
 	const [showSelector, setShowSelector] = useState(false);
 	const textareaRef = useRef<HTMLTextAreaElement>(null);
 	const pendingCursorRef = useRef<number | null>(null);
-	const saveDataSource = useSaveResourceContent(props.type);
 	const { jdbcValues, connectionOk } = useJdbcConnectionState();
 
 	const datasetSrcInfo = useDatasetSrcInfo();
+	const saveDataSource = useSaveResourceContent(
+		props.type,
+		datasetSrcInfo.values.encoding ?? "",
+	);
 
 	const insertToContent = (lines: string[], inline = false) => {
 		const textarea = textareaRef.current;

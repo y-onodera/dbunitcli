@@ -10,6 +10,7 @@ import { useSaveJdbcProperties } from "../../hooks/useJdbc";
 import {
 	type ResourceKind,
 	useDeleteResource,
+	useResourceContent,
 	useSaveResourceContent,
 } from "../../hooks/useResourceFiles";
 import { useSaveXlsxSchema } from "../../hooks/useXlsxSchema";
@@ -136,6 +137,26 @@ const jdbcValues = {
 	jdbcProperties: "",
 };
 
+describe("useResourceContentのテスト", () => {
+	it("名前と文字コードを送って読み込むことを確認", async () => {
+		mockFetchData.mockClear();
+		const { rerender } = renderHook(
+			() => useResourceContent("sql", "target.sql", "MS932"),
+			{ wrapper },
+		);
+		await act(async () => {
+			rerender();
+		});
+		const loads = mockFetchData.mock.calls.filter(([params]) =>
+			params.endpoint.endsWith("/sql/load"),
+		);
+		expect(JSON.parse(String(loads[0][0].options.body))).toStrictEqual({
+			name: "target.sql",
+			encoding: "MS932",
+		});
+	});
+});
+
 describe("保存フックのテスト", () => {
 	it.each<{
 		name: string;
@@ -217,12 +238,13 @@ describe("保存フックのテスト", () => {
 		).map(({ kind, endpoint, key }) => ({
 			name: `useSaveResourceContent(${kind})`,
 			useSave: () => {
-				const save = useSaveResourceContent(kind);
+				const save = useSaveResourceContent(kind, "MS932");
 				return (name: string) => save(name, "content");
 			},
 			endpoint,
 			input: { content: "content" },
 			key,
+			encoding: "MS932",
 		})),
 		{
 			name: "useSaveJdbcProperties",

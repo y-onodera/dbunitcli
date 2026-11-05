@@ -85,17 +85,25 @@ export const useDeleteResource = (kind: ResourceKind) => {
 	return (name: string) => updateResourceFiles("delete", name, "text/plain");
 };
 
-// テキスト系リソースの内容を{name, input: {content}}形式で保存する
-export const useSaveResourceContent = (kind: ResourceKind) => {
+// テキスト系リソースの内容を{name, encoding, input: {content}}形式で保存する。
+// encodingはコマンド実行時にそのファイルを読む文字コード（空ならsidecarがシステムの既定を使う）
+export const useSaveResourceContent = (
+	kind: ResourceKind,
+	encoding: string,
+) => {
 	const updateResourceFiles = useUpdateResourceFiles(kind);
 	return (name: string, content: string) =>
-		updateResourceFiles("save", JSON.stringify({ name, input: { content } }));
+		updateResourceFiles(
+			"save",
+			JSON.stringify({ name, encoding, input: { content } }),
+		);
 };
 
 // `${base}/load`へ名前を送り、{"content": ...}形式の応答から内容を読み込む（テキスト系リソースで共通）
 export const useResourceContent = (
 	kind: ResourceKind,
 	name: string,
+	encoding: string,
 ): { content: string; loading: boolean } => {
 	const { apiUrl } = useEnvironment();
 	const resource = resourceTargets[kind].base;
@@ -110,7 +118,7 @@ export const useResourceContent = (
 		}
 		const controller = new AbortController();
 		setLoading(true);
-		loadResourceContent(apiUrl, resource, name).then((result) => {
+		loadResourceContent(apiUrl, resource, name, encoding).then((result) => {
 			if (!controller.signal.aborted) {
 				setContent(result);
 				setLoading(false);
@@ -119,7 +127,7 @@ export const useResourceContent = (
 		return () => {
 			controller.abort();
 		};
-	}, [resource, name, apiUrl]);
+	}, [resource, name, apiUrl, encoding]);
 
 	return { content, loading };
 };
@@ -128,13 +136,14 @@ async function loadResourceContent(
 	apiUrl: string,
 	resource: string,
 	name: string,
+	encoding: string,
 ): Promise<string> {
 	const params = {
 		endpoint: `${apiUrl}${resource}/load`,
 		options: {
 			method: "POST",
-			headers: { "Content-Type": "text/plain" },
-			body: name,
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify({ name, encoding }),
 		},
 	};
 	try {

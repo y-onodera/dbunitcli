@@ -32,8 +32,7 @@ class ParameterizeTemplateResourceFileControllerTest {
     @Test
     void testLoad() throws IOException {
         final String response = this.client.toBlocking()
-                .retrieve(HttpRequest.POST("dbunit-cli/parameterize/template/load", "sample.json")
-                        .contentType(MediaType.TEXT_PLAIN_TYPE));
+                .retrieve(HttpRequest.POST("dbunit-cli/parameterize/template/load", "{\"name\":\"sample.json\"}"));
         JsonTestHelper.assertJsonEquals(
                 Paths.get("src/test/resources/yo/dbunitcli/sidecar/controller/parameterize-template-load-response.json"),
                 response);
@@ -49,8 +48,7 @@ class ParameterizeTemplateResourceFileControllerTest {
         Assertions.assertEquals("hello $name$\n", Files.readString(saved));
 
         final String loaded = this.client.toBlocking()
-                .retrieve(HttpRequest.POST("dbunit-cli/parameterize/template/load", "savedParamTemplate.txt")
-                        .contentType(MediaType.TEXT_PLAIN_TYPE));
+                .retrieve(HttpRequest.POST("dbunit-cli/parameterize/template/load", "{\"name\":\"savedParamTemplate.txt\"}"));
         Assertions.assertTrue(loaded.contains("\"content\""), loaded);
         Assertions.assertTrue(loaded.contains("hello $name$"), loaded);
     }

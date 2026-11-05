@@ -44,8 +44,7 @@ class TemplateResourceFileControllerTest {
     @Test
     void testLoad() throws IOException {
         final String response = this.client.toBlocking()
-                .retrieve(HttpRequest.POST("dbunit-cli/template/load", "sample.json")
-                        .contentType(MediaType.TEXT_PLAIN_TYPE));
+                .retrieve(HttpRequest.POST("dbunit-cli/template/load", "{\"name\":\"sample.json\"}"));
         System.out.println(response);
         JsonTestHelper.assertJsonEquals(
                 Paths.get("src/test/resources/yo/dbunitcli/sidecar/controller/template-load-response.json"),
@@ -108,8 +107,7 @@ class TemplateResourceFileControllerTest {
         Assertions.assertEquals(template, Files.readString(saved));
 
         final String loaded = this.client.toBlocking().retrieve(
-                HttpRequest.POST("dbunit-cli/template/load", "savedTemplate.stg")
-                        .contentType(MediaType.TEXT_PLAIN_TYPE));
+                HttpRequest.POST("dbunit-cli/template/load", "{\"name\":\"savedTemplate.stg\"}"));
         Assertions.assertTrue(loaded.contains("\"content\""), loaded);
         Assertions.assertTrue(loaded.contains("ddlType(row) ::= <<$row.TYPE_NAME$>>"), loaded);
     }

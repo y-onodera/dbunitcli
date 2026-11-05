@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { SectionFieldset } from "../../components/dialog";
 import { SectionLegend } from "../../components/dialog/SectionFieldset";
 import { useResourcesSettings } from "../../context/WorkspaceResourcesProvider";
@@ -22,6 +23,10 @@ export function ParameterizeForm(prop: {
 	const parameterize = prop.parameterize;
 	const paramData = parameterize.paramData;
 	const templateOption = parameterize.templateOption;
+	// templateの編集で読み書きする文字コード（-template.encodingの入力中の値）
+	const [templateEncoding, setTemplateEncoding] = useState(
+		templateOption?.encoding?.value ?? "",
+	);
 	const settings = useResourcesSettings();
 
 	return (
@@ -61,6 +66,7 @@ export function ParameterizeForm(prop: {
 								<EditResourceButton
 									key="edit"
 									dialog={ParameterizeTemplateDialog}
+									dialogProps={{ encoding: templateEncoding }}
 									path={path}
 									setPath={setPath}
 								/>,
@@ -80,7 +86,11 @@ export function ParameterizeForm(prop: {
 					<TemplateFormSection
 						templateOption={templateOption}
 						showEncoding={true}
-						handleValueChange={() => (_: string) => {}}
+						handleValueChange={(param) => (value: string) => {
+							if (param === templateOption.encoding) {
+								setTemplateEncoding(value);
+							}
+						}}
 					/>
 				)}
 			</SectionFieldset>

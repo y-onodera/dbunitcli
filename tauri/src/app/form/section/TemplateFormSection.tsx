@@ -44,6 +44,8 @@ export default function TemplateFormSection({
 				prefix={templateOption.prefix}
 				element={templateOption.templateGroup}
 				hidden={!showOptional}
+				// StringTemplateはtemplateGroup（.stg）を常にUTF-8で読む
+				encoding="UTF-8"
 				handleValueChange={handleValueChange(templateOption.templateGroup)}
 			/>
 			<PlainText

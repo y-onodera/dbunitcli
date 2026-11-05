@@ -8,19 +8,23 @@ import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
 import jakarta.inject.Inject;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import yo.dbunitcli.resource.FileResources;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Properties;
 
 /**
- * xlsxSchema・各settingの保存・読込が、リクエストのencodingで行われることを確認する
+ * xlsxSchema・各setting・テキスト系リソースの保存・読込がリクエストのencodingで行われ、
+ * jdbcのpropertiesはコマンド実行時の読み方（ISO-8859-1）で読める形で保存されることを確認する
  */
 @MicronautTest
 @Property(name = FileResources.PROPERTY_WORKSPACE, value = "target/test-temp/workspace/sample")
@@ -42,6 +46,12 @@ class EncodedResourceFileControllerTest {
     void tearDown() throws IOException {
         for (final String dir : List.of(FileResources.RESOURCES_SETTING_PATH
                 , FileResources.RESOURCES_XLSX_SCHEMA_PATH
+                , FileResources.RESOURCES_SQL_PATH
+                , FileResources.RESOURCES_TABLE_PATH
+                , FileResources.RESOURCES_CSVQ_PATH
+                , FileResources.RESOURCES_TEMPLATE_PATH
+                , FileResources.RESOURCES_JDBC_PATH
+                , FileResources.OPTION_PARAMETERIZE_TEMPLATE_PATH
                 , FileResources.OPTION_COMPARE_SETTING_PATH
                 , FileResources.OPTION_GENERATE_SETTING_PATH)) {
             Files.deleteIfExists(WORKSPACE.resolve(dir).resolve(SAVED));
@@ -56,9 +66,19 @@ class EncodedResourceFileControllerTest {
             "generate/setting, option/generate/setting, MS932",
             "xlsx-schema, resources/xlsx-schema, MS932",
             "xlsx-schema, resources/xlsx-schema, UTF-8",
+            "sql, resources/sql, MS932",
+            "table, resources/table, MS932",
+            "csvq, resources/csvq, MS932",
+            "template, resources/template, MS932",
+            "template, resources/template, UTF-8",
+            "parameterize/template, option/parameterize/template, MS932",
     })
     void testSaveAndLoad_指定した文字コードで保存し読み込む(final String base, final String dir, final String encoding) throws IOException {
-        final String input = base.equals("xlsx-schema") ? XLSX_SCHEMA_INPUT : SETTING_INPUT;
+        final String input = switch (base) {
+            case "xlsx-schema" -> XLSX_SCHEMA_INPUT;
+            case "dataset-setting", "compare/setting", "generate/setting" -> SETTING_INPUT;
+            default -> "{\"content\":\"SELECT * FROM 表B\"}";
+        };
         this.client.toBlocking().retrieve(HttpRequest.POST("dbunit-cli/" + base + "/save",
                 "{\"name\":\"" + SAVED + "\",\"encoding\":\"" + encoding + "\",\"input\":" + input + "}"));
 
@@ -68,5 +88,18 @@ class EncodedResourceFileControllerTest {
         final String loaded = this.client.toBlocking().retrieve(HttpRequest.POST("dbunit-cli/" + base + "/load",
                 "{\"name\":\"" + SAVED + "\",\"encoding\":\"" + encoding + "\"}"));
         Assertions.assertTrue(loaded.contains("表B"), encoding + "で読まれること: " + loaded);
+    }
+
+    @Test
+    void testSaveProperties_コマンド実行時と同じ読み方で読める形で保存する() throws IOException {
+        this.client.toBlocking().retrieve(HttpRequest.POST("dbunit-cli/jdbc/save-properties",
+                "{\"name\":\"" + SAVED + "\",\"input\":{\"url\":\"jdbc:h2:mem:表B\",\"user\":\"user\",\"pass\":\"パスワード\",\"properties\":\"\"}}"));
+
+        final Properties loaded = new Properties();
+        try (final InputStream input = Files.newInputStream(WORKSPACE.resolve(FileResources.RESOURCES_JDBC_PATH).resolve(SAVED))) {
+            loaded.load(input);
+        }
+        Assertions.assertEquals("jdbc:h2:mem:表B", loaded.getProperty("url"));
+        Assertions.assertEquals("パスワード", loaded.getProperty("pass"));
     }
 }

@@ -12,9 +12,10 @@ import yo.dbunitcli.sidecar.dto.EncodedResourceSaveRequest;
 import yo.dbunitcli.sidecar.dto.ResourceLoadRequestDto;
 
 import java.nio.charset.Charset;
+import java.util.Optional;
 
 /**
- * コマンド実行時に-settingEncoding等の文字コードで読まれるJSONのリソース。
+ * コマンド実行時に-settingEncoding等の文字コードで読まれるリソース。
  * GUIからも同じ文字コードで読み書きするため、load・saveでencodingを受け取る（空ならシステムの既定）
  */
 public abstract class AbstractEncodedResourceFileController<DTO extends EncodedResourceSaveRequest<?>> extends AbstractResourceFileController<DTO> {
@@ -33,11 +34,15 @@ public abstract class AbstractEncodedResourceFileController<DTO extends EncodedR
     public String load(@Body final String body) {
         try {
             final ResourceLoadRequestDto request = ObjectMapper.getDefault().readValue(body, ResourceLoadRequestDto.class);
-            return this.getResourceFile().read(request.getName(), toCharset(request.getEncoding())).orElse("{}");
+            return this.toLoadResponse(this.getResourceFile().read(request.getName(), toCharset(request.getEncoding())));
         } catch (final Throwable th) {
             LOGGER.error("cause:", th);
             throw new ApplicationException(th);
         }
+    }
+
+    protected String toLoadResponse(final Optional<String> content) {
+        return content.orElse("{}");
     }
 
     @Override

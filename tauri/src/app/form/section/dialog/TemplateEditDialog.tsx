@@ -11,12 +11,20 @@ import {
 } from "../../../../hooks/useResourceFiles";
 import type { EditResourceDialogProps } from "./ResourceEditButton";
 
+// encoding: コマンド実行時にこのファイルを読む文字コード。読み書きに使う
+type EncodingProp = { encoding: string };
+
 export default function TemplateEditDialog({
 	fileName,
 	handleDialogClose,
 	handleSave,
-}: EditResourceDialogProps) {
-	const { content, loading } = useResourceContent("template", fileName);
+	encoding,
+}: EditResourceDialogProps & EncodingProp) {
+	const { content, loading } = useResourceContent(
+		"template",
+		fileName,
+		encoding,
+	);
 	if (loading) {
 		return <StatusMessage kind="loading">Loading...</StatusMessage>;
 	}
@@ -26,6 +34,7 @@ export default function TemplateEditDialog({
 			fileName={fileName}
 			handleDialogClose={handleDialogClose}
 			handleSave={handleSave}
+			encoding={encoding}
 		/>
 	);
 }
@@ -35,9 +44,10 @@ function Dialog({
 	fileName,
 	handleDialogClose,
 	handleSave,
-}: EditResourceDialogProps & { content: string }) {
+	encoding,
+}: EditResourceDialogProps & EncodingProp & { content: string }) {
 	const [content, setContent] = useState<string>(initialContent);
-	const saveContent = useSaveResourceContent("template");
+	const saveContent = useSaveResourceContent("template", encoding);
 
 	return (
 		<SettingDialog
