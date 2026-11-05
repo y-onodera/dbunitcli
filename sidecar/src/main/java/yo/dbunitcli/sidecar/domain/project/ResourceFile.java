@@ -98,10 +98,11 @@ public record ResourceFile(File baseDir, Set<String> files, Function<String, Opt
         this.files.removeIf(path -> path.equals(name));
     }
 
+    /** 文字コードの分からないファイルもあるため、内容をデコードせずにそのまま複製する */
     public void copy(final String source) throws IOException {
-        Optional<String> content = this.read(source);
-        if (content.isPresent()) {
-            this.add(source, content.get());
+        final Optional<Path> path = this.select(source);
+        if (path.isPresent()) {
+            Files.copy(path.get(), this.prepareUpdate(this.getUniqueName(source)), StandardCopyOption.REPLACE_EXISTING);
         }
     }
 
