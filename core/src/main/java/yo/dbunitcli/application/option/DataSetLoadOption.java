@@ -10,7 +10,6 @@ import yo.dbunitcli.dataset.TableSeparators;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.util.List;
 
 public record DataSetLoadOption(
@@ -33,9 +32,7 @@ public record DataSetLoadOption(
      * -settingと-xlsxSchemaは同じ文字コードで読む
      */
     static String settingEncodingOf(final DataSetLoadDto dto) {
-        return Strings.isNotEmpty(dto.getSettingEncoding())
-                ? dto.getSettingEncoding()
-                : Charset.defaultCharset().displayName();
+        return EncodingOption.orDefault(dto.getSettingEncoding());
     }
 
     private static DataSourceType getSrcType(final DataSetLoadDto dto) {

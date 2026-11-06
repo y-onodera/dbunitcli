@@ -8,6 +8,7 @@ import yo.dbunitcli.application.DefaultArgumentFunction;
 import yo.dbunitcli.application.json.FromJsonTableSeparatorsBuilder;
 import yo.dbunitcli.application.option.DataSetConverterOption;
 import yo.dbunitcli.application.option.DataSetLoadOption;
+import yo.dbunitcli.application.option.EncodingOption;
 import yo.dbunitcli.application.option.ResultOption;
 import yo.dbunitcli.common.Parameter;
 import yo.dbunitcli.dataset.*;
@@ -17,7 +18,6 @@ import yo.dbunitcli.dataset.compare.DefaultCompareManager;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -98,8 +98,7 @@ public record CompareOption(
         this(param
                 , new ResultOption(resultFile, dto.getConvertResult())
                 , dto.getSetting()
-                , Strings.isNotEmpty(dto.getSettingEncoding())
-                        ? dto.getSettingEncoding() : Charset.defaultCharset().displayName()
+                , EncodingOption.orDefault(dto.getSettingEncoding())
                 , CompareOption.getTargetType(dto)
                 , dto.getCreatePatchSql()
                 , CompareOption.getTargetType(dto).isAny(Type.image, Type.pdf)

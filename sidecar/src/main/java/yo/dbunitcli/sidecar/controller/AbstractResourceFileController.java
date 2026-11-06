@@ -11,7 +11,7 @@ import jakarta.json.JsonWriter;
 import jakarta.json.stream.JsonGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import yo.dbunitcli.Strings;
+import yo.dbunitcli.application.option.EncodingOption;
 import yo.dbunitcli.sidecar.domain.project.ResourceFile;
 import yo.dbunitcli.sidecar.domain.project.Workspace;
 import yo.dbunitcli.sidecar.dto.ResourceLoadRequestDto;
@@ -92,7 +92,7 @@ public abstract class AbstractResourceFileController<DTO extends ResourceSaveReq
     protected abstract Charset defaultCharset();
 
     protected Charset charsetOf(final String encoding) {
-        return Strings.isNotEmpty(encoding) ? Charset.forName(encoding) : this.defaultCharset();
+        return Charset.forName(EncodingOption.orDefault(encoding, this.defaultCharset()));
     }
 
     protected void saveJson(final String name, final String json, final Charset charset) throws IOException {

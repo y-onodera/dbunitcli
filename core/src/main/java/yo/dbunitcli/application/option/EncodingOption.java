@@ -10,9 +10,18 @@ import java.util.List;
 public record EncodingOption(String prefix, String encoding) implements ComparableDataSetParamOption {
 
     public EncodingOption(final String prefix, final DataSetLoadDto dto) {
-        this(prefix, Strings.isNotEmpty(dto.getEncoding())
-                ? dto.getEncoding()
-                : Charset.defaultCharset().displayName());
+        this(prefix, EncodingOption.orDefault(dto.getEncoding()));
+    }
+
+    /**
+     * 文字コードのオプションが空ならシステムの既定の文字コードにする
+     */
+    public static String orDefault(final String encoding) {
+        return EncodingOption.orDefault(encoding, Charset.defaultCharset());
+    }
+
+    public static String orDefault(final String encoding, final Charset defaultCharset) {
+        return Strings.isNotEmpty(encoding) ? encoding : defaultCharset.displayName();
     }
 
     @Override

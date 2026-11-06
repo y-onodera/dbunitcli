@@ -12,6 +12,7 @@ import yo.dbunitcli.application.command.generate.GenerateWriter;
 import yo.dbunitcli.application.json.FromJsonTableSeparatorsBuilder;
 import yo.dbunitcli.application.option.DataSetConverterOption;
 import yo.dbunitcli.application.option.DataSetLoadOption;
+import yo.dbunitcli.application.option.EncodingOption;
 import yo.dbunitcli.application.option.TemplateRenderOption;
 import yo.dbunitcli.common.Parameter;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
@@ -27,7 +28,6 @@ import yo.dbunitcli.resource.st4.TemplateRender;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
@@ -52,9 +52,8 @@ public record GenerateOption(Parameter parameter, String resultDir, String resul
                      dto.getUnit() != null ? dto.getUnit() : ParameterUnit.record,
              !GenerateOption.getGenerateType(dto).strategy().isFixedTemplate() && Strings.isNotEmpty(dto.getUnitSetting())
                      ? dto.getUnitSetting() : "",
-             !GenerateOption.getGenerateType(dto).strategy().isFixedTemplate() && Strings.isNotEmpty(dto.getUnitSettingEncoding())
-                     ? dto.getUnitSettingEncoding()
-                     : Charset.defaultCharset().displayName(),
+             EncodingOption.orDefault(GenerateOption.getGenerateType(dto).strategy().isFixedTemplate()
+                     ? null : dto.getUnitSettingEncoding()),
              dto.getOperation(),
              Strings.isNotEmpty(dto.getSqlFilePrefix()) ? dto.getSqlFilePrefix() : "",
              Strings.isNotEmpty(dto.getSqlFileSuffix()) ? dto.getSqlFileSuffix() : "",
