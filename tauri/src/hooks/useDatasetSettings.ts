@@ -23,7 +23,7 @@ import { appendLogLines } from "./useJobLog";
 import {
 	type DatasetSettingKind,
 	resourceLoadParams,
-	useUpdateResourceFiles,
+	useSaveResource,
 } from "./useResourceFiles";
 
 // jdbcは接続テストに成功した値を優先する
@@ -293,10 +293,7 @@ export const useDatasetTableConvert = () => {
 export const useSaveDatasetSettings = (
 	kind: DatasetSettingKind = "datasetSetting",
 ) => {
-	const updateResourceFiles = useUpdateResourceFiles(kind);
-	const encoding = useResourceEncoding(kind);
-	return (name: string, input: DatasetSettings) =>
-		updateResourceFiles("save", JSON.stringify({ name, encoding, input }));
+	return useSaveResource<DatasetSettings>(kind);
 };
 
 export const useDatasetSettingsData = (

@@ -29,22 +29,27 @@ function encodingOf(kind: ResourceKind): string {
 	return `encoding-${kind}`;
 }
 
+const resourceEncodings = Object.fromEntries(
+	(
+		[
+			"datasetSetting",
+			"compareSetting",
+			"generateSetting",
+			"xlsxSchema",
+			"fixedColumnDef",
+			"template",
+			"parameterizeTemplate",
+			"sql",
+			"table",
+			"csvq",
+		] as const
+	).map((kind) => [kind, encodingOf(kind)]),
+);
+
 const wrapper = ({ children }: { children: React.ReactNode }) => (
 	<environmentContext.Provider value={environmentFixture}>
 		<WorkspaceResourcesProvider>
-			<ResourceEncodingProvider
-				encodings={{
-					datasetSetting: encodingOf("datasetSetting"),
-					compareSetting: encodingOf("compareSetting"),
-					generateSetting: encodingOf("generateSetting"),
-					xlsxSchema: encodingOf("xlsxSchema"),
-					template: encodingOf("template"),
-					parameterizeTemplate: encodingOf("parameterizeTemplate"),
-					sql: encodingOf("sql"),
-					table: encodingOf("table"),
-					csvq: encodingOf("csvq"),
-				}}
-			>
+			<ResourceEncodingProvider encodings={resourceEncodings}>
 				{children}
 			</ResourceEncodingProvider>
 		</WorkspaceResourcesProvider>
@@ -209,6 +214,7 @@ describe("保存フックのテスト", () => {
 			endpoint: "fixed-column-def/save",
 			input: fixedColumnDef,
 			key: "fixedColumnDefs",
+			encoding: encodingOf("fixedColumnDef"),
 		},
 		{
 			name: "useSaveDatasetSettings",

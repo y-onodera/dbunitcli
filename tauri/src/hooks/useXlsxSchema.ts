@@ -8,13 +8,10 @@ import {
 	getErrorMessage,
 	handleFetchError,
 } from "../utils/fetchUtils";
-import { resourceLoadParams, useUpdateResourceFiles } from "./useResourceFiles";
+import { resourceLoadParams, useSaveResource } from "./useResourceFiles";
 
 export const useSaveXlsxSchema = () => {
-	const updateResourceFiles = useUpdateResourceFiles("xlsxSchema");
-	const encoding = useResourceEncoding("xlsxSchema");
-	return (name: string, input: XlsxSchema) =>
-		updateResourceFiles("save", JSON.stringify({ name, encoding, input }));
+	return useSaveResource<XlsxSchema>("xlsxSchema");
 };
 
 export const useXlsxSchemaData = (

@@ -50,10 +50,10 @@ public class JdbcResourceFileController extends AbstractResourceFileController<J
     public String saveProperties(@Body final JdbcSavePropertiesRequestDto body) throws IOException {
         final JdbcDto jdbc = body.getInput();
         final JdbcOption option = new JdbcOption("jdbc", jdbc.getProperties(), jdbc.getUrl(), jdbc.getUser(), jdbc.getPass());
-        // コマンド実行時はProperties.load(InputStream)（ISO-8859-1）で読むため、それ以外の文字はエスケープしてASCIIだけで書く
+        // コマンド実行時はProperties.load(InputStream)（ISO-8859-1）で読むため、それ以外の文字をエスケープするstore(OutputStream)の出力をそのまま書く
         final ByteArrayOutputStream out = new ByteArrayOutputStream();
         option.loadJdbcTemplate().store(out, null);
-        this.getResourceFile().update(body.getName(), out.toString(StandardCharsets.ISO_8859_1), this.defaultCharset());
+        this.getResourceFile().update(body.getName(), out.toByteArray());
         return this.currentFileList();
     }
 

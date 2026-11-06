@@ -60,9 +60,9 @@ function Dialog(props: SqlEditorDialogProps & { value: string }) {
 	const textareaRef = useRef<HTMLTextAreaElement>(null);
 	const pendingCursorRef = useRef<number | null>(null);
 	const { jdbcValues, connectionOk } = useJdbcConnectionState();
+	const saveDataSource = useSaveResourceContent(props.type);
 
 	const datasetSrcInfo = useDatasetSrcInfo();
-	const saveDataSource = useSaveResourceContent(props.type);
 
 	const insertToContent = (lines: string[], inline = false) => {
 		const textarea = textareaRef.current;

@@ -9,32 +9,25 @@ import type { ResourceKind } from "../../hooks/useResourceFiles";
 
 function renderEncoding(
 	kind: ResourceKind,
-	outer?: ResourceEncodings,
-	inner?: ResourceEncodings,
+	outer: ResourceEncodings = {},
+	inner: ResourceEncodings = {},
 ) {
 	return renderHook(() => useResourceEncoding(kind), {
-		wrapper: ({ children }: { children: React.ReactNode }) => {
-			const content = inner ? (
+		wrapper: ({ children }: { children: React.ReactNode }) => (
+			<ResourceEncodingProvider encodings={outer}>
 				<ResourceEncodingProvider encodings={inner}>
 					{children}
 				</ResourceEncodingProvider>
-			) : (
-				children
-			);
-			return outer ? (
-				<ResourceEncodingProvider encodings={outer}>
-					{content}
-				</ResourceEncodingProvider>
-			) : (
-				content
-			);
-		},
+			</ResourceEncodingProvider>
+		),
 	}).result.current;
 }
 
 describe("ResourceEncodingProviderのテスト", () => {
 	it("範囲外・指定の無い種類は空文字を返すことを確認", () => {
-		expect(renderEncoding("sql")).toBe("");
+		expect(renderHook(() => useResourceEncoding("sql")).result.current).toBe(
+			"",
+		);
 		expect(renderEncoding("sql", { template: "MS932" })).toBe("");
 	});
 

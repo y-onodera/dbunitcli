@@ -2,7 +2,6 @@ package yo.dbunitcli.sidecar.controller;
 
 import io.micronaut.context.annotation.Property;
 import io.micronaut.http.HttpRequest;
-import io.micronaut.http.MediaType;
 import io.micronaut.http.client.HttpClient;
 import io.micronaut.http.client.annotation.Client;
 import io.micronaut.runtime.server.EmbeddedServer;

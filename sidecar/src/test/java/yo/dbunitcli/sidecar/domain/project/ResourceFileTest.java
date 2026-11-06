@@ -57,7 +57,7 @@ class ResourceFileTest {
         // 新しいResourceFileインスタンスを作成
         this.resourceFile = new ResourceFile(this.parentDir, FileResources::searchWorkspace);
 
-        final String content = this.resourceFile.read("test.json").orElseThrow();
+        final String content = this.resourceFile.read("test.json", StandardCharsets.UTF_8).orElseThrow();
         assertEquals(expectedContent, content);
     }
 
@@ -106,7 +106,7 @@ class ResourceFileTest {
 
     @Test
     public void read_ファイルが存在しない場合はemptyを返す() {
-        final var result = this.resourceFile.read("nonexistent.json");
+        final var result = this.resourceFile.read("nonexistent.json", StandardCharsets.UTF_8);
         assertTrue(result.isEmpty());
     }
 

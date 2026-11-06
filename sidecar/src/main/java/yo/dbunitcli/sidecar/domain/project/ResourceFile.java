@@ -36,10 +36,6 @@ public record ResourceFile(File baseDir, Set<String> files, Function<String, Opt
         return new ResourceFile(new File(workspace, path), toFile);
     }
 
-    public Optional<String> read(final String name) {
-        return this.read(name, StandardCharsets.UTF_8);
-    }
-
     public Optional<String> read(final String name, final Charset charset) {
         return this.select(name).map(it -> {
             try {
@@ -83,6 +79,10 @@ public record ResourceFile(File baseDir, Set<String> files, Function<String, Opt
         Files.writeString(saveTo, contents, charset);
     }
 
+    public void update(final String name, final byte[] contents) throws IOException {
+        Files.write(this.prepareUpdate(name), contents);
+    }
+
     /** バイナリ等、既存ファイルの内容をそのまま取り込む（同名は上書き） */
     public void updateFrom(final String name, final Path source) throws IOException {
         final Path saveTo = this.prepareUpdate(name);
@@ -102,7 +102,7 @@ public record ResourceFile(File baseDir, Set<String> files, Function<String, Opt
     public void copy(final String source) throws IOException {
         final Optional<Path> path = this.select(source);
         if (path.isPresent()) {
-            Files.copy(path.get(), this.prepareUpdate(this.getUniqueName(source)), StandardCopyOption.REPLACE_EXISTING);
+            this.updateFrom(this.getUniqueName(source), path.get());
         }
     }
 

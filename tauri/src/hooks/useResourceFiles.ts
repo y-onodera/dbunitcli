@@ -45,11 +45,6 @@ export type DatasetSettingKind =
 	| "compareSetting"
 	| "generateSetting";
 
-// 種類に対応するAPIの接頭辞（`${apiUrl}${base}/load`等）
-export function resourceBaseOf(kind: ResourceKind): string {
-	return resourceTargets[kind].base;
-}
-
 // `${base}/load`へ名前と、コマンド実行時にそのファイルを読む文字コードを送るリクエスト（読込で共通）
 export function resourceLoadParams(
 	apiUrl: string,
@@ -104,15 +99,18 @@ export const useDeleteResource = (kind: ResourceKind) => {
 	return (name: string) => updateResourceFiles("delete", name, "text/plain");
 };
 
-// テキスト系リソースの内容を{name, encoding, input: {content}}形式で保存する
-export const useSaveResourceContent = (kind: ResourceKind) => {
+// `${base}/save`へ名前・内容と、ResourceEncodingProviderのその種類の文字コードを送る（保存で共通）
+export const useSaveResource = <T>(kind: ResourceKind) => {
 	const updateResourceFiles = useUpdateResourceFiles(kind);
 	const encoding = useResourceEncoding(kind);
-	return (name: string, content: string) =>
-		updateResourceFiles(
-			"save",
-			JSON.stringify({ name, encoding, input: { content } }),
-		);
+	return (name: string, input: T) =>
+		updateResourceFiles("save", JSON.stringify({ name, encoding, input }));
+};
+
+// テキスト系リソースの内容を{content}形式で保存する
+export const useSaveResourceContent = (kind: ResourceKind) => {
+	const save = useSaveResource<{ content: string }>(kind);
+	return (name: string, content: string) => save(name, { content });
 };
 
 // `${base}/load`へ名前を送り、{"content": ...}形式の応答から内容を読み込む（テキスト系リソースで共通）
