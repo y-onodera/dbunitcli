@@ -6988,6 +6988,18 @@
       ]
     },
     {
+      "type": "yo.dbunitcli.dataset.JexlFunctions",
+      "methods": [
+        {
+          "name": "tryToNum",
+          "parameterTypes": [
+            "java.lang.Object",
+            "java.lang.Object"
+          ]
+        }
+      ]
+    },
+    {
       "type": "yo.dbunitcli.resource.poi.jxls.StreamingEachCommand",
       "methods": [
         {

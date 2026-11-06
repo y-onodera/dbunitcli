@@ -1,6 +1,5 @@
 package yo.dbunitcli.dataset;
 
-import org.apache.commons.jexl3.JexlBuilder;
 import org.apache.commons.jexl3.JexlExpression;
 import org.apache.commons.jexl3.MapContext;
 import org.dbunit.dataset.Column;
@@ -115,7 +114,7 @@ public class ComparableTableJoin {
     private record Eval(String expression) implements ConditionBuilder {
         @Override
         public BiFunction<Map<String, Object>, Map<String, Object>, Boolean> build(final ComparableTable left, final ComparableTable right) {
-            final JexlExpression jexl = new JexlBuilder().create().createExpression(this.expression());
+            final JexlExpression jexl = JexlFunctions.ENGINE.createExpression(this.expression());
             return (leftRow, rightRow) -> {
                 final Map<String, Object> param = new HashMap<>();
                 leftRow.forEach((key, value) -> param.put(left.getTableName() + "_" + key, value));

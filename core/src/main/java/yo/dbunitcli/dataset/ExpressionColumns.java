@@ -1,16 +1,11 @@
 package yo.dbunitcli.dataset;
 
-import org.apache.commons.jexl3.JexlBuilder;
 import org.apache.commons.jexl3.JexlContext;
 import org.apache.commons.jexl3.JexlEngine;
 import org.apache.commons.jexl3.MapContext;
 import org.dbunit.dataset.Column;
 import org.dbunit.dataset.datatype.DataType;
 
-import java.math.BigDecimal;
-import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
-import java.text.ParsePosition;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -73,7 +68,7 @@ public record ExpressionColumns(List<Expressions> values) {
     }
 
     public Object evaluate(final String columnName, final Map<String, Object> param) {
-        final JexlEngine jexl = new JexlBuilder().create();
+        final JexlEngine jexl = JexlFunctions.ENGINE;
         final JexlContext jc = new MapContext(param);
         return this.values()
                 .stream()
@@ -90,22 +85,10 @@ public record ExpressionColumns(List<Expressions> values) {
                                 if (val.isEmpty()) {
                                     yield val;
                                 }
-                                yield parseNumber(val);
+                                yield JexlFunctions.parseNumber(val);
                             }
                         })
                 .reduce(null, (a, b) -> b != null ? b : a);
-    }
-
-    private static BigDecimal parseNumber(final String val) {
-        // DecimalFormat はスレッドセーフでないため呼び出し毎に生成する
-        final DecimalFormat format = new DecimalFormat("#,##0.#", DecimalFormatSymbols.getInstance(Locale.ROOT));
-        format.setParseBigDecimal(true);
-        final ParsePosition pos = new ParsePosition(0);
-        final Number result = format.parse(val, pos);
-        if (result == null || pos.getIndex() != val.length()) {
-            throw new NumberFormatException("invalid number: " + val);
-        }
-        return (BigDecimal) result;
     }
 
     public enum ParameterType {
