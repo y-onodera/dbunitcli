@@ -6,6 +6,8 @@ public abstract class ResourceSaveRequest<DTO> {
 
     private DTO input;
 
+    private String encoding;
+
     public String getName() {
         return this.name;
     }
@@ -20,5 +22,13 @@ public abstract class ResourceSaveRequest<DTO> {
 
     public void setInput(final DTO input) {
         this.input = input;
+    }
+
+    public String getEncoding() {
+        return this.encoding;
+    }
+
+    public void setEncoding(final String encoding) {
+        this.encoding = encoding;
     }
 }

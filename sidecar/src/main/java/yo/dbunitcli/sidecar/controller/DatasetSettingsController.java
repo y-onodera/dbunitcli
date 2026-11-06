@@ -57,6 +57,7 @@ import yo.dbunitcli.sidecar.job.Interruptible;
 import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -65,13 +66,13 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 @Controller("dataset-setting")
-public class DatasetSettingsController extends AbstractEncodedResourceFileController<DatasetRequestDto> {
+public class DatasetSettingsController extends AbstractResourceFileController<DatasetRequestDto> {
     private static final Logger LOGGER = LoggerFactory.getLogger(DatasetSettingsController.class);
     static final int PREVIEW_ROW_LIMIT = 100;
 
@@ -331,6 +332,11 @@ public class DatasetSettingsController extends AbstractEncodedResourceFileContro
     @Override
     protected ResourceFile getResourceFile() {
         return this.workspace.resources().datasetSetting();
+    }
+
+    @Override
+    protected Charset defaultCharset() {
+        return Charset.defaultCharset();
     }
 
     private Parameter buildParameter(final DatasetTableNamesRequestDto request) {

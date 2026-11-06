@@ -21,6 +21,7 @@ import yo.dbunitcli.sidecar.job.Interruptible;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -30,7 +31,7 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 @Controller("xlsx-schema")
-public class XlsxSchemaController extends AbstractEncodedResourceFileController<JsonXlsxSchemaRequestDto> {
+public class XlsxSchemaController extends AbstractResourceFileController<JsonXlsxSchemaRequestDto> {
     private static final Logger LOGGER = LoggerFactory.getLogger(XlsxSchemaController.class);
 
     public XlsxSchemaController(final Workspace workspace) {
@@ -40,6 +41,11 @@ public class XlsxSchemaController extends AbstractEncodedResourceFileController<
     @Override
     protected ResourceFile getResourceFile() {
         return this.workspace.resources().xlsxSchema();
+    }
+
+    @Override
+    protected Charset defaultCharset() {
+        return Charset.defaultCharset();
     }
 
     /**

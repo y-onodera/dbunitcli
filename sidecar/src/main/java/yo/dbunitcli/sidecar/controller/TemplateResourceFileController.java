@@ -14,6 +14,7 @@ import yo.dbunitcli.sidecar.domain.project.Workspace;
 import yo.dbunitcli.sidecar.job.Interruptible;
 
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.util.Map;
 
@@ -32,6 +33,11 @@ public class TemplateResourceFileController extends AbstractTextResourceFileCont
     @Override
     protected ResourceFile getResourceFile() {
         return this.workspace.resources().template();
+    }
+
+    @Override
+    protected Charset defaultCharset() {
+        return Charset.defaultCharset();
     }
 
     /**

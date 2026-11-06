@@ -20,6 +20,7 @@ import yo.dbunitcli.sidecar.job.Interruptible;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
@@ -49,10 +50,10 @@ public class JdbcResourceFileController extends AbstractResourceFileController<J
     public String saveProperties(@Body final JdbcSavePropertiesRequestDto body) throws IOException {
         final JdbcDto jdbc = body.getInput();
         final JdbcOption option = new JdbcOption("jdbc", jdbc.getProperties(), jdbc.getUrl(), jdbc.getUser(), jdbc.getPass());
-        // コマンド実行時はProperties.load(InputStream)（ISO-8859-1）で読むため、それ以外の文字はエスケープして書く
+        // コマンド実行時はProperties.load(InputStream)（ISO-8859-1）で読むため、それ以外の文字はエスケープしてASCIIだけで書く
         final ByteArrayOutputStream out = new ByteArrayOutputStream();
         option.loadJdbcTemplate().store(out, null);
-        this.getResourceFile().update(body.getName(), out.toString(StandardCharsets.ISO_8859_1), StandardCharsets.ISO_8859_1);
+        this.getResourceFile().update(body.getName(), out.toString(StandardCharsets.ISO_8859_1), this.defaultCharset());
         return this.currentFileList();
     }
 
@@ -134,6 +135,11 @@ public class JdbcResourceFileController extends AbstractResourceFileController<J
     @Override
     protected ResourceFile getResourceFile() {
         return this.workspace.resources().jdbc();
+    }
+
+    @Override
+    protected Charset defaultCharset() {
+        return StandardCharsets.UTF_8;
     }
 
 }

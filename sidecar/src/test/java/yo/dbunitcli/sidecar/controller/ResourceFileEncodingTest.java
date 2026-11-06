@@ -28,7 +28,7 @@ import java.util.Properties;
  */
 @MicronautTest
 @Property(name = FileResources.PROPERTY_WORKSPACE, value = "target/test-temp/workspace/sample")
-class EncodedResourceFileControllerTest {
+class ResourceFileEncodingTest {
 
     private static final Path WORKSPACE = Paths.get("target/test-temp/workspace/sample");
 

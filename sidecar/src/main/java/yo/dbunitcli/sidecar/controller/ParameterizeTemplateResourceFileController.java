@@ -5,6 +5,8 @@ import jakarta.inject.Inject;
 import yo.dbunitcli.sidecar.domain.project.ResourceFile;
 import yo.dbunitcli.sidecar.domain.project.Workspace;
 
+import java.nio.charset.Charset;
+
 @Controller("parameterize/template")
 public class ParameterizeTemplateResourceFileController extends AbstractTextResourceFileController {
 
@@ -16,5 +18,10 @@ public class ParameterizeTemplateResourceFileController extends AbstractTextReso
     @Override
     protected ResourceFile getResourceFile() {
         return this.workspace.options().templates();
+    }
+
+    @Override
+    protected Charset defaultCharset() {
+        return Charset.defaultCharset();
     }
 }

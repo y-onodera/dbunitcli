@@ -18,6 +18,8 @@ import yo.dbunitcli.sidecar.dto.FixedColumnDefRequestDto;
 import yo.dbunitcli.sidecar.job.Interruptible;
 
 import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -37,6 +39,11 @@ public class FixedColumnDefController extends AbstractResourceFileController<Fix
     @Override
     protected ResourceFile getResourceFile() {
         return this.workspace.resources().fixedColumnDef();
+    }
+
+    @Override
+    protected Charset defaultCharset() {
+        return StandardCharsets.UTF_8;
     }
 
     @Override

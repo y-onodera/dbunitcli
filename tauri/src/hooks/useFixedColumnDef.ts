@@ -9,7 +9,7 @@ import {
 	getErrorMessage,
 	handleFetchError,
 } from "../utils/fetchUtils";
-import { useUpdateResourceFiles } from "./useResourceFiles";
+import { resourceLoadParams, useUpdateResourceFiles } from "./useResourceFiles";
 
 export const useSaveFixedColumnDef = () => {
 	const updateResourceFiles = useUpdateResourceFiles("fixedColumnDef");
@@ -53,14 +53,7 @@ async function loadFixedColumnDef(
 	if (name === "") {
 		return FixedColumnDef.create();
 	}
-	const fetchParams = {
-		endpoint: `${apiUrl}fixed-column-def/load`,
-		options: {
-			method: "POST",
-			headers: { "Content-Type": "text/plain" },
-			body: name,
-		},
-	};
+	const fetchParams = resourceLoadParams(apiUrl, "fixedColumnDef", name, "");
 	return fetchData(fetchParams)
 		.then((response) => response.json())
 		.then((schema: FixedColumnDefBuilder) => FixedColumnDef.build(schema))

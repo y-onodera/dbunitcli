@@ -5,6 +5,8 @@ import jakarta.inject.Inject;
 import yo.dbunitcli.sidecar.domain.project.ResourceFile;
 import yo.dbunitcli.sidecar.domain.project.Workspace;
 
+import java.nio.charset.Charset;
+
 @Controller("table")
 public class TableResourceFileController extends AbstractTextResourceFileController {
 
@@ -16,5 +18,10 @@ public class TableResourceFileController extends AbstractTextResourceFileControl
     @Override
     protected ResourceFile getResourceFile() {
         return this.workspace.resources().table();
+    }
+
+    @Override
+    protected Charset defaultCharset() {
+        return Charset.defaultCharset();
     }
 }

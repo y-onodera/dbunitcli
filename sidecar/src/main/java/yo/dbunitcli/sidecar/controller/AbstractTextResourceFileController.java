@@ -17,7 +17,7 @@ import java.util.Optional;
 /**
  * SQL等の生テキストのリソース。loadは{"content": ...}形式で返し、saveはcontentを生テキストとして保存する。応答は更新後のファイル一覧
  */
-public abstract class AbstractTextResourceFileController extends AbstractEncodedResourceFileController<TemplateRequestDto> {
+public abstract class AbstractTextResourceFileController extends AbstractResourceFileController<TemplateRequestDto> {
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractTextResourceFileController.class);
 
     protected AbstractTextResourceFileController(final Workspace workspace) {
@@ -37,7 +37,7 @@ public abstract class AbstractTextResourceFileController extends AbstractEncoded
     @Override
     public String save(@Body final TemplateRequestDto body) throws IOException {
         try {
-            this.getResourceFile().update(body.getName(), body.getInput().getContent(), this.charsetOf(body));
+            this.getResourceFile().update(body.getName(), body.getInput().getContent(), this.charsetOf(body.getEncoding()));
         } catch (final IOException e) {
             throw e;
         } catch (final Throwable th) {
