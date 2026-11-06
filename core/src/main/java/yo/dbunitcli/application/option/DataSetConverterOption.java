@@ -22,6 +22,7 @@ public record DataSetConverterOption(
         , String resultPath
         , String exportEmptyTable
         , String skipHeader
+        , String append
         , String outputEncoding
         , String excelTable
         , String format
@@ -41,6 +42,7 @@ public record DataSetConverterOption(
                 , dto.getResultPath()
                 , Strings.isNotEmpty(dto.getExportEmptyTable()) ? dto.getExportEmptyTable() : "true"
                 , Strings.isNotEmpty(dto.getExportHeader()) ? dto.getExportHeader() : "true"
+                , Strings.isNotEmpty(dto.getAppend()) ? dto.getAppend() : "false"
                 , Strings.isNotEmpty(dto.getOutputEncoding()) ? dto.getOutputEncoding() : "UTF-8"
                 , Strings.isNotEmpty(dto.getExcelTable()) ? dto.getExcelTable() : "SHEET"
                 , dto.getFormat()
@@ -81,7 +83,8 @@ public record DataSetConverterOption(
         return Option.concat(this.validateResultType()
                 , this.resultType == ResultType.table ? List.of() : Option.concat(
                         this.validateBoolean("-exportEmptyTable", this.exportEmptyTable)
-                        , this.validateBoolean("-exportHeader", this.skipHeader))
+                        , this.validateBoolean("-exportHeader", this.skipHeader)
+                        , this.validateBoolean("-append", this.append))
                 , this.validateParallel(this.parallel));
     }
 
@@ -123,6 +126,7 @@ public record DataSetConverterOption(
             if (type != ResultType.format && type != ResultType.fixed) {
                 result.putFlag("-exportHeader", this.skipHeader);
             }
+            result.putFlag("-append", this.append);
             if (type == ResultType.csv) {
                 result.put("-outputEncoding", this.outputEncoding);
                 result.put("-outputExtension", this.extension);
@@ -172,6 +176,7 @@ public record DataSetConverterOption(
                                     .setResultPath(this.resultPath)
                                     .setExportEmptyTable(Boolean.parseBoolean(this.exportEmptyTable))
                                     .setSkipHeader(Boolean.parseBoolean(this.skipHeader))
+                                    .setAppend(Boolean.parseBoolean(this.append))
                                     .setOutputEncoding(this.outputEncoding)
                                     .setExcelTable(this.excelTable)
                                     .setFormat(this.format)

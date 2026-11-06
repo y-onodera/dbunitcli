@@ -21,6 +21,8 @@ public class DataSetConverterDto implements CompositeDto {
     private DbOperation operation;
     @CommandLine.Option(names = "-exportHeader", description = "if true then export file has no header row ")
     private String exportHeader;
+    @CommandLine.Option(names = "-append", description = "if true and the result file already exists, append data rows to it without writing header")
+    private String append;
     @CommandLine.Option(names = "-outputEncoding", description = "output csv file encoding")
     private String outputEncoding;
     @CommandLine.Option(names = "-excelTable", description = "SHEET or BOOK")
@@ -89,6 +91,14 @@ public class DataSetConverterDto implements CompositeDto {
 
     public void setExportHeader(final String exportHeader) {
         this.exportHeader = exportHeader;
+    }
+
+    public String getAppend() {
+        return this.append;
+    }
+
+    public void setAppend(final String append) {
+        this.append = append;
     }
 
     public String getOutputEncoding() {

@@ -27,20 +27,20 @@ public class FixedFileConverter extends FlatFileConverter implements IDataSetCon
     public FixedFileConverter(final String theDirectory, final File resultDir, final String encoding,
                               final boolean exportEmptyTable, final List<FixedColumnDef> columnDefs,
                               final ComparableDataSetParam.LengthType lengthType) {
-        this(theDirectory, resultDir, encoding, exportEmptyTable, columnDefs, lengthType, null);
+        this(theDirectory, resultDir, encoding, exportEmptyTable, false, columnDefs, lengthType, null);
     }
 
     public FixedFileConverter(final String theDirectory, final File resultDir, final String encoding,
-                              final boolean exportEmptyTable, final List<FixedColumnDef> columnDefs,
+                              final boolean exportEmptyTable, final boolean append, final List<FixedColumnDef> columnDefs,
                               final ComparableDataSetParam.LengthType lengthType, final String extension) {
-        super(theDirectory, resultDir, encoding, exportEmptyTable, false, extension != null ? extension : "txt");
+        super(theDirectory, resultDir, encoding, exportEmptyTable, false, append, extension != null ? extension : "txt");
         this.columnDefs = columnDefs;
         this.lengthType = lengthType;
     }
 
     public FixedFileConverter(final DataSetConverterParam param) {
         this(param.resultDir().getAbsolutePath(), param.resultDir(), param.outputEncoding(), param.exportEmptyTable(),
-             new FromJsonFixedColumnDefBuilder().build(new File(param.fixedColumnDefFile())),
+             param.append(), new FromJsonFixedColumnDefBuilder().build(new File(param.fixedColumnDefFile())),
              ComparableDataSetParam.LengthType.of(param.fixedLengthType()), param.extension());
     }
 
@@ -59,7 +59,7 @@ public class FixedFileConverter extends FlatFileConverter implements IDataSetCon
     @Override
     public IDataSetConverter split() {
         return new FixedFileConverter(this.theDirectory, this.resultDir, this.encoding, this.exportEmptyTable,
-                                      this.columnDefs, this.lengthType, this.extension);
+                                      this.append, this.columnDefs, this.lengthType, this.extension);
     }
 
     @Override

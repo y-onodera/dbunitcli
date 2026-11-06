@@ -94,6 +94,29 @@ class DataSetConverterOptionTest {
         }
     }
 
+    @Test
+    void appendIsFalseByDefaultAndHiddenForTable() {
+        final DataSetConverterDto dto = new DataSetConverterDto();
+        for (final ResultType type : List.of(ResultType.csv, ResultType.xls, ResultType.xlsx, ResultType.format, ResultType.fixed)) {
+            dto.setResultType(type);
+            final DataSetConverterOption target = new DataSetConverterOption("result", dto);
+            Assertions.assertEquals("false", target.toParameters().get("-append"), type.name());
+            Assertions.assertFalse(target.getParam().build().append(), type.name());
+        }
+        dto.setResultType(ResultType.table);
+        Assertions.assertFalse(DataSetConverterOptionTest.options(dto).contains("-result.append"));
+    }
+
+    @Test
+    void appendMustBeBoolean() {
+        final DataSetConverterDto dto = new DataSetConverterDto();
+        dto.setAppend("yes");
+        Assertions.assertEquals(1, new DataSetConverterOption("result", dto).validate().stream()
+                .filter(it -> it.message().contains("-result.append")).count());
+        dto.setAppend("true");
+        Assertions.assertTrue(new DataSetConverterOption("result", dto).getParam().build().append());
+    }
+
     private static java.util.Set<String> options(final DataSetConverterDto dto) {
         return new DataSetConverterOption("result", dto).toParameters().options().keySet();
     }

@@ -19,6 +19,7 @@ public abstract class FlatFileConverter implements IDataSetConverter {
     protected final File resultDir;
     protected final String encoding;
     protected final boolean exportHeader;
+    protected final boolean append;
     protected final Charset charset;
     protected final String extension;
     protected ITableMetaData activeMetaData;
@@ -27,12 +28,14 @@ public abstract class FlatFileConverter implements IDataSetConverter {
     protected Writer writer;
 
     public FlatFileConverter(final String theDirectory, final File resultDir, final String encoding,
-                             final boolean exportEmptyTable, final boolean exportHeader, final String extension) {
+                             final boolean exportEmptyTable, final boolean exportHeader, final boolean append,
+                             final String extension) {
         this.exportEmptyTable = exportEmptyTable;
         this.theDirectory = theDirectory;
         this.resultDir = resultDir;
         this.encoding = encoding;
         this.exportHeader = exportHeader;
+        this.append = append;
         this.charset = Charset.forName(this.encoding);
         this.extension = extension;
     }
@@ -65,11 +68,13 @@ public abstract class FlatFileConverter implements IDataSetConverter {
             if (!directory.exists()) {
                 Files.createDirectories(directory.toPath());
             }
-            Files.deleteIfExists(this.file.toPath());
-            Files.createFile(this.file.toPath());
-            final FileOutputStream fos = new FileOutputStream(this.file);
-            this.writer = new OutputStreamWriter(fos, this.encoding);
-            if (this.exportHeader) {
+            // 追記時は既存ファイルにヘッダが書かれている前提で中身を検査しない
+            final boolean appending = this.append && this.file.exists();
+            if (appending) {
+                LOGGER.info("convert - append fileName={}", this.file);
+            }
+            this.openWriter(appending);
+            if (!appending && this.exportHeader) {
                 this.writeHeader();
             }
         } catch (final IOException var3) {
@@ -85,11 +90,14 @@ public abstract class FlatFileConverter implements IDataSetConverter {
             final File directory = new File(this.theDirectory);
             this.file = new File(directory, tableMetaData.getTableName() + "." + this.getExtension());
             LOGGER.info("convert - restart fileName={},rows={}", this.file, this.writeRows);
-            final FileOutputStream fos = new FileOutputStream(this.file, true);
-            this.writer = new OutputStreamWriter(fos, this.encoding);
+            this.openWriter(true);
         } catch (final IOException var3) {
             throw new AssertionError(var3);
         }
+    }
+
+    private void openWriter(final boolean append) throws IOException {
+        this.writer = new OutputStreamWriter(new FileOutputStream(this.file, append), this.encoding);
     }
 
     @Override

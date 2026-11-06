@@ -1,6 +1,7 @@
 package yo.dbunitcli.dataset.converter;
 
 import org.apache.poi.ss.usermodel.FontScheme;
+import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.apache.poi.xssf.usermodel.XSSFFont;
@@ -22,18 +23,28 @@ public class XlsxConverter extends XlsConverter {
             , final String filename
             , final TableExportType tableExport
             , final boolean exportEmptyTable
-            , final boolean exportHeader) {
-        super(resultDir, filename, tableExport, exportEmptyTable, exportHeader);
+            , final boolean exportHeader
+            , final boolean append) {
+        super(resultDir, filename, tableExport, exportEmptyTable, exportHeader, append);
     }
 
     @Override
     public IDataSetConverter split() {
-        return new XlsxConverter(this.resultDir, this.filename, this.tableExport, this.exportEmptyTable, this.exportHeader);
+        return new XlsxConverter(this.resultDir, this.filename, this.tableExport, this.exportEmptyTable, this.exportHeader
+                , this.append);
     }
 
     @Override
     protected String getFilename() {
         return super.getFilename() + "x";
+    }
+
+    /**
+     * 読み込んだファイルの行はSXSSFSheetから見えないため、元のXSSFSheetで数える
+     */
+    @Override
+    protected int nextRowIndex(final Sheet sheet) {
+        return super.nextRowIndex(((SXSSFWorkbook) sheet.getWorkbook()).getXSSFWorkbook().getSheet(sheet.getSheetName()));
     }
 
     @Override
