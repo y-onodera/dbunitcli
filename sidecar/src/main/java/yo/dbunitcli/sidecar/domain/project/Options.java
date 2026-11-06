@@ -8,6 +8,8 @@ import yo.dbunitcli.resource.FileResources;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -25,7 +27,7 @@ public record Options(File baseDir, Map<yo.dbunitcli.application.CommandType, Re
 
     public Stream<Path> paths(final Type type) {
         return this.parameters()
-                   .getOrDefault(type, new ResourceFile(this.getParent(type), FileResources::searchWorkspace))
+                   .getOrDefault(type, new ResourceFile(this.getParent(type), FileResources::searchWorkspace, StandardCharsets.UTF_8))
                    .pathStream();
     }
 
@@ -104,14 +106,16 @@ public record Options(File baseDir, Map<yo.dbunitcli.application.CommandType, Re
             Arrays.stream(Type.values())
                   .filter(it -> it != Type.scaffold)
                   .forEach(this::addParameterFiles);
-            this.templates = ResourceFile.of(workspace, FileResources.OPTION_PARAMETERIZE_TEMPLATE_PATH, FileResources::searchParameterizeTemplate);
-            this.compareSettings = ResourceFile.of(workspace, FileResources.OPTION_COMPARE_SETTING_PATH, FileResources::searchCompareSetting);
-            this.generateSettings = ResourceFile.of(workspace, FileResources.OPTION_GENERATE_SETTING_PATH, FileResources::searchGenerateSetting);
+            // コマンドが文字コードオプションで読むため、それが空のときと同じシステムの既定を使う
+            this.templates = ResourceFile.of(workspace, FileResources.OPTION_PARAMETERIZE_TEMPLATE_PATH, FileResources::searchParameterizeTemplate, Charset.defaultCharset());
+            this.compareSettings = ResourceFile.of(workspace, FileResources.OPTION_COMPARE_SETTING_PATH, FileResources::searchCompareSetting, Charset.defaultCharset());
+            this.generateSettings = ResourceFile.of(workspace, FileResources.OPTION_GENERATE_SETTING_PATH, FileResources::searchGenerateSetting, Charset.defaultCharset());
         }
 
         private Builder addParameterFiles(final Type command) {
             this.parameters.put(command, new ResourceFile(new File(this.baseDir, command.name())
                     , FileResources::searchWorkspace
+                    , StandardCharsets.UTF_8
             ));
             return this;
         }

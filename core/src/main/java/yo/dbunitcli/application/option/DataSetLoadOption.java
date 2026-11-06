@@ -10,7 +10,6 @@ import yo.dbunitcli.dataset.TableSeparators;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.util.List;
 
 public record DataSetLoadOption(
@@ -29,6 +28,13 @@ public record DataSetLoadOption(
 ) implements Option {
 
 
+    /**
+     * -settingと-xlsxSchemaは同じ文字コードで読む
+     */
+    static String settingEncodingOf(final DataSetLoadDto dto) {
+        return EncodingOption.orDefault(dto.getSettingEncoding());
+    }
+
     private static DataSourceType getSrcType(final DataSetLoadDto dto) {
         return dto.getSrcType() != null ? dto.getSrcType() : DataSourceType.csv;
     }
@@ -45,9 +51,7 @@ public record DataSetLoadOption(
                         ? dto.getSrc()
                         : null
                 , dto.getSetting()
-                , Strings.isNotEmpty(dto.getSettingEncoding())
-                        ? dto.getSettingEncoding()
-                        : Charset.defaultCharset().displayName()
+                , DataSetLoadOption.settingEncodingOf(dto)
                 , Strings.isNotEmpty(dto.getSettingTargetOnly()) ? dto.getSettingTargetOnly() : "false"
                 , dto.getRegTableInclude()
                 , dto.getRegTableExclude()

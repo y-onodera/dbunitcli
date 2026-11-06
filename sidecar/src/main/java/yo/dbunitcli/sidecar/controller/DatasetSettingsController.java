@@ -65,10 +65,10 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 @Controller("dataset-setting")
 public class DatasetSettingsController extends AbstractResourceFileController<DatasetRequestDto> {
@@ -232,7 +232,6 @@ public class DatasetSettingsController extends AbstractResourceFileController<Da
                                              .toList();
         return DatasetUnitTablePreviewResponseDto.of(table, rows);
     }
-
 
     /**
      * 選んだテーブルだけをresultフォームの指定でconvertし、出力先ディレクトリを返す（DB出力なら空文字）。

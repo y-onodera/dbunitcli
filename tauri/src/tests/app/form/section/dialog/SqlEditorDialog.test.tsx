@@ -5,17 +5,24 @@ import SqlEditorDialog from "../../../../../app/form/section/dialog/SqlEditorDia
 import type { DatasetSrcInfo } from "../../../../../model/CommandOption";
 
 // （mockReset:trueで実装が毎回リセットされるため、resolve値は各テスト内で設定する）
-const { mockSave, mockTableNames, mockTablePreview, jdbcState } = vi.hoisted(
-	() => ({
+const { mockSave, mockTableNames, mockTablePreview, jdbcState, resourceKinds } =
+	vi.hoisted(() => ({
 		mockSave: vi.fn(),
 		mockTableNames: vi.fn(),
 		mockTablePreview: vi.fn(),
 		jdbcState: { connectionOk: false },
-	}),
-);
+		// 読込・保存のフックに渡されたリソースの種類
+		resourceKinds: { load: [] as string[], save: [] as string[] },
+	}));
 vi.mock("../../../../../hooks/useResourceFiles", () => ({
-	useResourceContent: () => ({ content: "select 1", loading: false }),
-	useSaveResourceContent: () => mockSave,
+	useResourceContent: (kind: string) => {
+		resourceKinds.load.push(kind);
+		return { content: "select 1", loading: false };
+	},
+	useSaveResourceContent: (kind: string) => {
+		resourceKinds.save.push(kind);
+		return mockSave;
+	},
 }));
 vi.mock("../../../../../hooks/useDatasetSettings", () => ({
 	useDatasetTableNames: (srcInfo: DatasetSrcInfo) => {
@@ -68,6 +75,17 @@ const PREVIEW_SRC_VALUES = {
 };
 
 describe("SqlEditorDialogのテスト", () => {
+	it.each(["sql", "table", "csvq"] as const)(
+		"srcType=%sの種類のリソースとして読み込み・保存することを確認",
+		(type) => {
+			resourceKinds.load.length = 0;
+			resourceKinds.save.length = 0;
+			renderDialog(type);
+			expect(new Set(resourceKinds.load)).toStrictEqual(new Set([type]));
+			expect(new Set(resourceKinds.save)).toStrictEqual(new Set([type]));
+		},
+	);
+
 	it.each(["sql", "csvq"] as const)(
 		"srcType=%sのPreviewは保存せず、編集中の内容をsrcの代わりに、settingなしで一覧を挟まずにそのテーブルをプレビューする",
 		async (type) => {

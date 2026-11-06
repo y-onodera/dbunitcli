@@ -8,6 +8,7 @@ import yo.dbunitcli.application.command.Type;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
@@ -261,6 +262,16 @@ class OptionsTest {
         final File copied = new File(new File(this.optionDir, "run"), "source(1).txt");
         assertTrue(copied.exists());
         assertEquals("--arg=abc", Files.readString(copied.toPath()));
+    }
+
+    @Test
+    public void copy_UTF8以外のファイルもバイト列のまま複製する() throws IOException {
+        this.options.add("ms932", new CommandParameters(Type.run, new String[]{}));
+        final File runDir = new File(this.optionDir, "run");
+        final byte[] content = "-src=日本語.sql".getBytes(Charset.forName("MS932"));
+        Files.write(new File(runDir, "ms932.txt").toPath(), content);
+        this.options.copy(Type.run, "ms932");
+        assertArrayEquals(content, Files.readAllBytes(new File(runDir, "ms932(1).txt").toPath()));
     }
 
     @Test

@@ -23,7 +23,8 @@ const {
 	tableNamesCalls,
 } = vi.hoisted(() => ({
 	srcInfoFixture: { current: { values: {} } as DatasetSrcInfo },
-	encodingFixture: { current: "" },
+	// ResourceEncodingProviderの種類ごとの文字コード
+	encodingFixture: { current: {} as Record<string, string> },
 	unitFixture: {
 		previews: [] as UnitTablePreview[],
 		error: "",
@@ -40,8 +41,8 @@ const {
 vi.mock("../../../../../context/DatasetSrcInfoProvider", () => ({
 	useDatasetSrcInfo: () => srcInfoFixture.current,
 }));
-vi.mock("../../../../../context/UnitSettingEncodingProvider", () => ({
-	useUnitSettingEncoding: () => encodingFixture.current,
+vi.mock("../../../../../context/ResourceEncodingProvider", () => ({
+	useResourceEncoding: (kind: string) => encodingFixture.current[kind] ?? "",
 }));
 // 編集ダイアログ本体は使わず、footerのSave and Previewだけを出す（保存は"saved.json"へ成功したものとする）。
 // 保存先の種類はdata-kindに出して確認する
@@ -106,7 +107,10 @@ async function openUnitTables() {
 describe("UnitSettingPreviewButtonのテスト", () => {
 	beforeEach(() => {
 		srcInfoFixture.current = SRC_INFO;
-		encodingFixture.current = "MS932";
+		encodingFixture.current = {
+			generateSetting: "MS932",
+			datasetSetting: "UTF-8",
+		};
 		unitFixture.previews = [
 			{ tableName: "big", headers: ["key"], rows: [["1"]], totalRows: 1 },
 			{

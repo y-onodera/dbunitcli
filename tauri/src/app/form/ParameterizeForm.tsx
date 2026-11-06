@@ -1,5 +1,6 @@
 import { SectionFieldset } from "../../components/dialog";
 import { SectionLegend } from "../../components/dialog/SectionFieldset";
+import { ResourceEncodingProvider } from "../../context/ResourceEncodingProvider";
 import { useResourcesSettings } from "../../context/WorkspaceResourcesProvider";
 import type { ParameterizeOptions } from "../../model/SelectParameter";
 import { DatasetLoadForm } from "./section/DatasetLoadForm";
@@ -12,7 +13,9 @@ import Check from "./section/element/Check";
 import PlainText from "./section/element/PlainText";
 import Select from "./section/element/Select";
 import Text, { TextDropDownMenu } from "./section/element/Text";
-import TemplateFormSection from "./section/TemplateFormSection";
+import TemplateFormSection, {
+	useTemplateEncoding,
+} from "./section/TemplateFormSection";
 
 export function ParameterizeForm(prop: {
 	handleTypeSelect: () => Promise<void>;
@@ -22,68 +25,76 @@ export function ParameterizeForm(prop: {
 	const parameterize = prop.parameterize;
 	const paramData = parameterize.paramData;
 	const templateOption = parameterize.templateOption;
+	const templateEncoding = useTemplateEncoding(templateOption);
 	const settings = useResourcesSettings();
 
 	return (
 		<>
-			<SectionFieldset>
-				<SectionLegend
-					title="execute"
-					command="commands/parameterize"
-					label="Parameterize"
-				/>
-				<Select
-					handleTypeSelect={prop.handleTypeSelect}
-					prefix=""
-					element={parameterize.unit}
-				/>
-				<Check prefix="" element={parameterize.parameterize} />
-				<Check prefix="" element={parameterize.ignoreFail} />
-				{parameterize.parallel && (
-					<PlainText prefix="" element={parameterize.parallel} />
-				)}
-				<PlainText prefix="" element={parameterize.cmd} />
-				<PlainText prefix="" element={parameterize.cmdParam} />
-				<Text
-					prefix=""
-					element={parameterize.template}
-					showDefaulePath={true}
-					resourceFiles={settings.parameterizeTemplateFiles}
-				>
-					{({ path, setPath, isValueInDatalist }) => (
-						<TextDropDownMenu
-							path={path}
-							setPath={setPath}
-							prefix=""
-							element={parameterize.template}
-							isValueInDatalist={isValueInDatalist}
-							editButtons={[
-								<EditResourceButton
-									key="edit"
-									dialog={ParameterizeTemplateDialog}
-									path={path}
-									setPath={setPath}
-								/>,
-							]}
-							removeButton={(closeMenu) => (
-								<RemoveResourceButton
-									kind="parameterizeTemplate"
-									path={path}
-									setPath={setPath}
-									onRemoved={closeMenu}
-								/>
-							)}
+			<ResourceEncodingProvider
+				encodings={{
+					parameterizeTemplate: templateEncoding.encoding,
+					template: templateEncoding.encoding,
+				}}
+			>
+				<SectionFieldset>
+					<SectionLegend
+						title="execute"
+						command="commands/parameterize"
+						label="Parameterize"
+					/>
+					<Select
+						handleTypeSelect={prop.handleTypeSelect}
+						prefix=""
+						element={parameterize.unit}
+					/>
+					<Check prefix="" element={parameterize.parameterize} />
+					<Check prefix="" element={parameterize.ignoreFail} />
+					{parameterize.parallel && (
+						<PlainText prefix="" element={parameterize.parallel} />
+					)}
+					<PlainText prefix="" element={parameterize.cmd} />
+					<PlainText prefix="" element={parameterize.cmdParam} />
+					<Text
+						prefix=""
+						element={parameterize.template}
+						showDefaulePath={true}
+						resourceFiles={settings.parameterizeTemplateFiles}
+					>
+						{({ path, setPath, isValueInDatalist }) => (
+							<TextDropDownMenu
+								path={path}
+								setPath={setPath}
+								prefix=""
+								element={parameterize.template}
+								isValueInDatalist={isValueInDatalist}
+								editButtons={[
+									<EditResourceButton
+										key="edit"
+										dialog={ParameterizeTemplateDialog}
+										path={path}
+										setPath={setPath}
+									/>,
+								]}
+								removeButton={(closeMenu) => (
+									<RemoveResourceButton
+										kind="parameterizeTemplate"
+										path={path}
+										setPath={setPath}
+										onRemoved={closeMenu}
+									/>
+								)}
+							/>
+						)}
+					</Text>
+					{templateOption && (
+						<TemplateFormSection
+							templateOption={templateOption}
+							showEncoding={true}
+							handleValueChange={templateEncoding.handleValueChange}
 						/>
 					)}
-				</Text>
-				{templateOption && (
-					<TemplateFormSection
-						templateOption={templateOption}
-						showEncoding={true}
-						handleValueChange={() => (_: string) => {}}
-					/>
-				)}
-			</SectionFieldset>
+				</SectionFieldset>
+			</ResourceEncodingProvider>
 			<DatasetLoadForm
 				handleTypeSelect={prop.handleTypeSelect}
 				name={prop.name}

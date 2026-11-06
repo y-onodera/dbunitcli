@@ -2,6 +2,7 @@ import { type Dispatch, type SetStateAction, useEffect, useState } from "react";
 import { useEnvironment } from "../context/EnvironmentProvider";
 import { useJdbcConnectionState } from "../context/JdbcConnectionProvider";
 import { useParamInputs } from "../context/ParameterInputProvider";
+import { useResourceEncoding } from "../context/ResourceEncodingProvider";
 import {
 	type DatasetSrcInfo,
 	srcTypeOf,
@@ -21,8 +22,8 @@ import type { JobContext } from "./useJob";
 import { appendLogLines } from "./useJobLog";
 import {
 	type DatasetSettingKind,
-	resourceBaseOf,
-	useUpdateResourceFiles,
+	resourceLoadParams,
+	useSaveResource,
 } from "./useResourceFiles";
 
 // jdbcは接続テストに成功した値を優先する
@@ -292,9 +293,7 @@ export const useDatasetTableConvert = () => {
 export const useSaveDatasetSettings = (
 	kind: DatasetSettingKind = "datasetSetting",
 ) => {
-	const updateResourceFiles = useUpdateResourceFiles(kind);
-	return (name: string, input: DatasetSettings) =>
-		updateResourceFiles("save", JSON.stringify({ name, input }));
+	return useSaveResource<DatasetSettings>(kind);
 };
 
 export const useDatasetSettingsData = (
@@ -302,6 +301,7 @@ export const useDatasetSettingsData = (
 	kind: DatasetSettingKind = "datasetSetting",
 ): { settings: DatasetSettings; loading: boolean } => {
 	const { apiUrl } = useEnvironment();
+	const encoding = useResourceEncoding(kind);
 	const [settings, setSettings] = useState(DatasetSettings.create());
 	const [loading, setLoading] = useState(fileName !== "");
 
@@ -313,7 +313,7 @@ export const useDatasetSettingsData = (
 		}
 		const controller = new AbortController();
 		setLoading(true);
-		loadDatasetSettings(apiUrl, fileName, kind).then((result) => {
+		loadDatasetSettings(apiUrl, fileName, kind, encoding).then((result) => {
 			if (!controller.signal.aborted) {
 				setSettings(result);
 				setLoading(false);
@@ -322,7 +322,7 @@ export const useDatasetSettingsData = (
 		return () => {
 			controller.abort();
 		};
-	}, [fileName, apiUrl, kind]);
+	}, [fileName, apiUrl, kind, encoding]);
 
 	return { settings, loading };
 };
@@ -456,18 +456,12 @@ async function loadDatasetSettings(
 	apiUrl: string,
 	name: string,
 	kind: DatasetSettingKind,
+	encoding: string,
 ): Promise<DatasetSettings> {
 	if (name === "") {
 		return DatasetSettings.create();
 	}
-	const fetchParams = {
-		endpoint: `${apiUrl}${resourceBaseOf(kind)}/load`,
-		options: {
-			method: "POST",
-			headers: { "Content-Type": "text/plain" },
-			body: name,
-		},
-	};
+	const fetchParams = resourceLoadParams(apiUrl, kind, name, encoding);
 	return await fetchData(fetchParams)
 		.then((response) => response.json())
 		.then((setting: DatasetSettingsBuilder) => DatasetSettings.build(setting))

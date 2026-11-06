@@ -1,18 +1,8 @@
 package yo.dbunitcli.sidecar.dto;
 
-public abstract class ResourceSaveRequest<DTO> {
-
-    private String name;
+public abstract class ResourceSaveRequest<DTO> extends ResourceLoadRequestDto {
 
     private DTO input;
-
-    public String getName() {
-        return this.name;
-    }
-
-    public void setName(final String name) {
-        this.name = name;
-    }
 
     public DTO getInput() {
         return this.input;

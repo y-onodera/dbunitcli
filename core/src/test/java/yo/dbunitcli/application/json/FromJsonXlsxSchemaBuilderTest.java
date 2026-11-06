@@ -3,10 +3,16 @@ package yo.dbunitcli.application.json;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import yo.dbunitcli.application.TestResourceLoader;
 import yo.dbunitcli.resource.poi.XlsxSchema;
 
 import java.io.File;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -27,7 +33,7 @@ public class FromJsonXlsxSchemaBuilderTest implements TestResourceLoader {
     public void buildWhenNullSchemaShouldReturnDefault() throws Exception {
 
         // 実行
-        final XlsxSchema schema = this.builder.build((File) null);
+        final XlsxSchema schema = this.builder.build(null, "UTF-8");
 
         // 検証
         assertEquals(XlsxSchema.DEFAULT, schema);
@@ -53,7 +59,7 @@ public class FromJsonXlsxSchemaBuilderTest implements TestResourceLoader {
         final File schemaFile = this.getTestResourceFile("simple_rows.json");
 
         // 実行
-        final XlsxSchema schema = this.builder.build(schemaFile);
+        final XlsxSchema schema = this.builder.build(schemaFile, "UTF-8");
         final XlsxSchema.SimpleImpl simpleSchema = (XlsxSchema.SimpleImpl) schema;
 
         // 検証
@@ -70,7 +76,7 @@ public class FromJsonXlsxSchemaBuilderTest implements TestResourceLoader {
         final File schemaFile = this.getTestResourceFile("cells_only.json");
 
         // 実行
-        final XlsxSchema schema = this.builder.build(schemaFile);
+        final XlsxSchema schema = this.builder.build(schemaFile, "UTF-8");
         final XlsxSchema.SimpleImpl simpleSchema = (XlsxSchema.SimpleImpl) schema;
 
         // 検証
@@ -88,7 +94,7 @@ public class FromJsonXlsxSchemaBuilderTest implements TestResourceLoader {
         final File schemaFile = this.getTestResourceFile("rows_and_cells.json");
 
         // 実行
-        final XlsxSchema schema = this.builder.build(schemaFile);
+        final XlsxSchema schema = this.builder.build(schemaFile, "UTF-8");
         final XlsxSchema.SimpleImpl simpleSchema = (XlsxSchema.SimpleImpl) schema;
 
         // 検証
@@ -118,6 +124,23 @@ public class FromJsonXlsxSchemaBuilderTest implements TestResourceLoader {
         // 検証
         assertEquals(0, simpleSchema.rowsTableDefMap().get("Sheet1").getFirst().breakKey().length, "breakKeyが空であること");
         assertEquals("Table2", simpleSchema.cellsTableDefMap().get("Sheet2").getFirst().tableName(), "rowsの無いセル定義も読み込めること");
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"UTF-8", "MS932"})
+    @DisplayName("buildメソッドは指定した文字コードでJSONファイルを読むこと")
+    public void buildWhenEncodingSpecifiedShouldReadWithIt(final String encoding, @TempDir final Path tempDir) throws Exception {
+        // 準備
+        final File schemaFile = tempDir.resolve("schema.json").toFile();
+        Files.writeString(schemaFile.toPath()
+                , "{\"rows\":[{\"sheetName\":\"シート1\",\"tableName\":\"表1\",\"header\":[\"id\"],\"dataStart\":1,\"columnIndex\":[0]}]}"
+                , Charset.forName(encoding));
+
+        // 実行
+        final XlsxSchema.SimpleImpl simpleSchema = (XlsxSchema.SimpleImpl) this.builder.build(schemaFile, encoding);
+
+        // 検証
+        assertEquals("表1", simpleSchema.rowsTableDefMap().get("シート1").getFirst().tableName(), "日本語のシート名・テーブル名が読めること");
     }
 
 }

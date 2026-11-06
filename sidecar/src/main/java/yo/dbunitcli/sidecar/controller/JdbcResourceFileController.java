@@ -18,8 +18,8 @@ import yo.dbunitcli.sidecar.dto.JdbcDto;
 import yo.dbunitcli.sidecar.dto.JdbcSavePropertiesRequestDto;
 import yo.dbunitcli.sidecar.job.Interruptible;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.StringWriter;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Properties;
@@ -48,9 +48,10 @@ public class JdbcResourceFileController extends AbstractResourceFileController<J
     public String saveProperties(@Body final JdbcSavePropertiesRequestDto body) throws IOException {
         final JdbcDto jdbc = body.getInput();
         final JdbcOption option = new JdbcOption("jdbc", jdbc.getProperties(), jdbc.getUrl(), jdbc.getUser(), jdbc.getPass());
-        final StringWriter sw = new StringWriter();
-        option.loadJdbcTemplate().store(sw, null);
-        this.getResourceFile().update(body.getName(), sw.toString());
+        // コマンド実行時はProperties.load(InputStream)（ISO-8859-1）で読むため、それ以外の文字をエスケープするstore(OutputStream)の出力をそのまま書く
+        final ByteArrayOutputStream out = new ByteArrayOutputStream();
+        option.loadJdbcTemplate().store(out, null);
+        this.getResourceFile().update(body.getName(), out.toByteArray());
         return this.currentFileList();
     }
 
@@ -133,5 +134,4 @@ public class JdbcResourceFileController extends AbstractResourceFileController<J
     protected ResourceFile getResourceFile() {
         return this.workspace.resources().jdbc();
     }
-
 }

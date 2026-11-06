@@ -2,20 +2,20 @@
   "settings": [
     {
       "innerJoin": {
-        "left": "銉︺兗銈躲優銈广偪姒傝",
-        "right": "銉︺兗銈躲優銈广偪",
+        "left": "儐乕僓儅僗僞奣梫",
+        "right": "儐乕僓儅僗僞",
         "column": [
           "$FILE_PATH"
         ]
       },
       "tableName": "join",
       "exclude": [
-        "銉︺兗銈躲優銈广偪_$FILE_PATH",
-        "銉︺兗銈躲優銈广偪_$FILE_NAME",
-        "銉︺兗銈躲優銈广偪_$SHEET_NAME",
-        "銉︺兗銈躲優銈广偪姒傝_$FILE_PATH",
-        "銉︺兗銈躲優銈广偪姒傝_$FILE_NAME",
-        "銉︺兗銈躲優銈广偪姒傝_$SHEET_NAME"
+        "儐乕僓儅僗僞_$FILE_PATH",
+        "儐乕僓儅僗僞_$FILE_NAME",
+        "儐乕僓儅僗僞_$SHEET_NAME",
+        "儐乕僓儅僗僞奣梫_$FILE_PATH",
+        "儐乕僓儅僗僞奣梫_$FILE_NAME",
+        "儐乕僓儅僗僞奣梫_$SHEET_NAME"
       ]
     },
     {
@@ -24,13 +24,13 @@
         {
           "tableName": "char_column",
           "filter": [
-            "get('銉︺兗銈躲優銈广偪_銉囥兗銈垮瀷') == 'NVARCHAR'"
+            "get('儐乕僓儅僗僞_僨乕僞宆') == 'NVARCHAR'"
           ]
         },
         {
           "tableName": "number_column",
           "filter": [
-            "get('銉︺兗銈躲優銈广偪_銉囥兗銈垮瀷') == 'DECIMAL'"
+            "get('儐乕僓儅僗僞_僨乕僞宆') == 'DECIMAL'"
           ]
         }
       ]

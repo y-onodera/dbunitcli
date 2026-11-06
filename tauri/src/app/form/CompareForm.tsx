@@ -1,6 +1,8 @@
+import { useState } from "react";
 import { SectionFieldset } from "../../components/dialog";
 import { SectionLegend } from "../../components/dialog/SectionFieldset";
 import { DatasetSrcInfoProvider } from "../../context/DatasetSrcInfoProvider";
+import { ResourceEncodingProvider } from "../../context/ResourceEncodingProvider";
 import { buildDatasetSrcInfo } from "../../model/CommandOption";
 import type { CompareOptions } from "../../model/SelectParameter";
 import { DatasetLoadForm } from "./section/DatasetLoadForm";
@@ -29,6 +31,10 @@ export function CompareForm(prop: {
 	const targetType = prop.compare.targetType.value;
 	const settingElement = prop.compare.setting;
 	const settingEncodingElement = prop.compare.settingEncoding;
+	// 比較キーの設定の編集で読み書きする文字コード（入力中の値）
+	const [settingEncoding, setSettingEncoding] = useState(
+		settingEncodingElement.value,
+	);
 	const createPatchSqlElement = prop.compare.createPatchSql;
 
 	const oldDataInitialInfo = buildDatasetSrcInfo(oldData);
@@ -52,18 +58,26 @@ export function CompareForm(prop: {
 						key={`${prop.name}compare-setting:${oldData.srcType?.value ?? ""}`}
 						initialValue={oldDataInitialInfo}
 					>
-						<DatasetSettingText
-							prefix=""
-							element={settingElement}
-							editDialog={CompareKeySettingsDialog}
-							generateEditDialog={CompareKeySettingsEditDialog}
-							preview={null}
-						/>
+						<ResourceEncodingProvider
+							encodings={{ compareSetting: settingEncoding }}
+						>
+							<DatasetSettingText
+								prefix=""
+								element={settingElement}
+								editDialog={CompareKeySettingsDialog}
+								generateEditDialog={CompareKeySettingsEditDialog}
+								preview={null}
+							/>
+						</ResourceEncodingProvider>
 					</DatasetSrcInfoProvider>
 				) : (
 					<FileText prefix="" element={settingElement} />
 				)}
-				<EncodingText prefix="" element={settingEncodingElement} />
+				<EncodingText
+					prefix=""
+					element={settingEncodingElement}
+					handleValueChange={setSettingEncoding}
+				/>
 				{targetType === "data" && (
 					<Check prefix="" element={createPatchSqlElement} />
 				)}

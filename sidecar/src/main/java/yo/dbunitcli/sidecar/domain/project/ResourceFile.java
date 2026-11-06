@@ -1,8 +1,10 @@
 package yo.dbunitcli.sidecar.domain.project;
 
+import yo.dbunitcli.application.option.EncodingOption;
+
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
@@ -14,7 +16,10 @@ import java.util.function.Function;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-public record ResourceFile(File baseDir, Set<String> files, Function<String, Optional<Path>> pathResolver) {
+/**
+ * defaultCharsetはencodingを指定しない読み書きで使う文字コード
+ */
+public record ResourceFile(File baseDir, Set<String> files, Function<String, Optional<Path>> pathResolver, Charset defaultCharset) {
 
     private static Function<String, Optional<Path>> toPath(final Function<String, File> toFile) {
         return it -> {
@@ -26,19 +31,19 @@ public record ResourceFile(File baseDir, Set<String> files, Function<String, Opt
         };
     }
 
-    public ResourceFile(final File parentDir, Function<String, File> toFile) {
-        this(parentDir, new TreeSet<>(), toPath(toFile));
+    public ResourceFile(final File parentDir, final Function<String, File> toFile, final Charset defaultCharset) {
+        this(parentDir, new TreeSet<>(), toPath(toFile), defaultCharset);
         this.reload();
     }
 
-    public static ResourceFile of(final File workspace, final String path, final Function<String, File> toFile) {
-        return new ResourceFile(new File(workspace, path), toFile);
+    public static ResourceFile of(final File workspace, final String path, final Function<String, File> toFile, final Charset defaultCharset) {
+        return new ResourceFile(new File(workspace, path), toFile, defaultCharset);
     }
 
-    public Optional<String> read(final String name) {
+    public Optional<String> read(final String name, final String encoding) {
         return this.select(name).map(it -> {
             try {
-                return Files.readString(it, StandardCharsets.UTF_8);
+                return Files.readString(it, this.charsetOf(encoding));
             } catch (final IOException e) {
                 throw new RuntimeException(e);
             }
@@ -65,13 +70,21 @@ public record ResourceFile(File baseDir, Set<String> files, Function<String, Opt
 
     public Path add(final String name, final String contents) throws IOException {
         final Path saveTo = this.prepareUpdate(this.getUniqueName(name));
-        Files.writeString(saveTo, contents, StandardCharsets.UTF_8);
+        Files.writeString(saveTo, contents, this.defaultCharset);
         return saveTo;
     }
 
     public void update(final String name, final String contents) throws IOException {
+        this.update(name, contents, "");
+    }
+
+    public void update(final String name, final String contents, final String encoding) throws IOException {
         final Path saveTo = this.prepareUpdate(name);
-        Files.writeString(saveTo, contents, StandardCharsets.UTF_8);
+        Files.writeString(saveTo, contents, this.charsetOf(encoding));
+    }
+
+    public void update(final String name, final byte[] contents) throws IOException {
+        Files.write(this.prepareUpdate(name), contents);
     }
 
     /** バイナリ等、既存ファイルの内容をそのまま取り込む（同名は上書き） */
@@ -89,10 +102,11 @@ public record ResourceFile(File baseDir, Set<String> files, Function<String, Opt
         this.files.removeIf(path -> path.equals(name));
     }
 
+    /** 文字コードの分からないファイルもあるため、内容をデコードせずにそのまま複製する */
     public void copy(final String source) throws IOException {
-        Optional<String> content = this.read(source);
-        if (content.isPresent()) {
-            this.add(source, content.get());
+        final Optional<Path> path = this.select(source);
+        if (path.isPresent()) {
+            this.updateFrom(this.getUniqueName(source), path.get());
         }
     }
 
@@ -131,6 +145,10 @@ public record ResourceFile(File baseDir, Set<String> files, Function<String, Opt
                 throw new RuntimeException(e);
             }
         }
+    }
+
+    private Charset charsetOf(final String encoding) {
+        return Charset.forName(EncodingOption.orDefault(encoding, this.defaultCharset));
     }
 
     private Path create(final File file) throws IOException {

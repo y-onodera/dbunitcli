@@ -4,6 +4,8 @@ import yo.dbunitcli.resource.FileResources;
 import yo.dbunitcli.sidecar.dto.ResourcesDto;
 
 import java.io.File;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 public record Resources(
         ResourceFile jdbc
@@ -36,15 +38,17 @@ public record Resources(
         private File workspace;
 
         public Resources build() {
+            // コマンドが文字コードオプションで読むリソースは、それが空のときと同じシステムの既定。オプションの無いjdbc・fixedColumnDefはUTF-8
+            final Charset system = Charset.defaultCharset();
             return new Resources(
-                    ResourceFile.of(this.workspace, FileResources.RESOURCES_JDBC_PATH, FileResources::searchJdbc),
-                    ResourceFile.of(this.workspace, FileResources.RESOURCES_SETTING_PATH, FileResources::searchSetting),
-                    ResourceFile.of(this.workspace, FileResources.RESOURCES_TEMPLATE_PATH, FileResources::searchTemplate),
-                    ResourceFile.of(this.workspace, FileResources.RESOURCES_XLSX_SCHEMA_PATH, FileResources::searchXlsxSchema),
-                    ResourceFile.of(this.workspace, FileResources.RESOURCES_FIXED_COLUMN_DEF_PATH, FileResources::searchFixedColumnDef),
-                    ResourceFile.of(this.workspace, FileResources.RESOURCES_SQL_PATH, FileResources::searchSql),
-                    ResourceFile.of(this.workspace, FileResources.RESOURCES_TABLE_PATH, FileResources::searchTable),
-                    ResourceFile.of(this.workspace, FileResources.RESOURCES_CSVQ_PATH, FileResources::searchCsvq)
+                    ResourceFile.of(this.workspace, FileResources.RESOURCES_JDBC_PATH, FileResources::searchJdbc, StandardCharsets.UTF_8),
+                    ResourceFile.of(this.workspace, FileResources.RESOURCES_SETTING_PATH, FileResources::searchSetting, system),
+                    ResourceFile.of(this.workspace, FileResources.RESOURCES_TEMPLATE_PATH, FileResources::searchTemplate, system),
+                    ResourceFile.of(this.workspace, FileResources.RESOURCES_XLSX_SCHEMA_PATH, FileResources::searchXlsxSchema, system),
+                    ResourceFile.of(this.workspace, FileResources.RESOURCES_FIXED_COLUMN_DEF_PATH, FileResources::searchFixedColumnDef, StandardCharsets.UTF_8),
+                    ResourceFile.of(this.workspace, FileResources.RESOURCES_SQL_PATH, FileResources::searchSql, system),
+                    ResourceFile.of(this.workspace, FileResources.RESOURCES_TABLE_PATH, FileResources::searchTable, system),
+                    ResourceFile.of(this.workspace, FileResources.RESOURCES_CSVQ_PATH, FileResources::searchCsvq, system)
             );
         }
 

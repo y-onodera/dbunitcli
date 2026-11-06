@@ -1,6 +1,7 @@
 import { act, renderHook } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { environmentContext } from "../../context/EnvironmentProvider";
+import { ResourceEncodingProvider } from "../../context/ResourceEncodingProvider";
 import WorkspaceResourcesProvider, {
 	useResourcesSettings,
 } from "../../context/WorkspaceResourcesProvider";
@@ -10,6 +11,7 @@ import { useSaveJdbcProperties } from "../../hooks/useJdbc";
 import {
 	type ResourceKind,
 	useDeleteResource,
+	useResourceContent,
 	useSaveResourceContent,
 } from "../../hooks/useResourceFiles";
 import { useSaveXlsxSchema } from "../../hooks/useXlsxSchema";
@@ -22,9 +24,35 @@ import { environmentFixture, workspaceResourcesFixture } from "../setup";
 
 const mockUpdatedFiles = ["updated"];
 
+// 種類ごとに違う文字コードを与え、各フックが自分の種類の値を使うことを確かめる
+function encodingOf(kind: ResourceKind): string {
+	return `encoding-${kind}`;
+}
+
+const resourceEncodings = Object.fromEntries(
+	(
+		[
+			"datasetSetting",
+			"compareSetting",
+			"generateSetting",
+			"xlsxSchema",
+			"fixedColumnDef",
+			"template",
+			"parameterizeTemplate",
+			"sql",
+			"table",
+			"csvq",
+		] as const
+	).map((kind) => [kind, encodingOf(kind)]),
+);
+
 const wrapper = ({ children }: { children: React.ReactNode }) => (
 	<environmentContext.Provider value={environmentFixture}>
-		<WorkspaceResourcesProvider>{children}</WorkspaceResourcesProvider>
+		<WorkspaceResourcesProvider>
+			<ResourceEncodingProvider encodings={resourceEncodings}>
+				{children}
+			</ResourceEncodingProvider>
+		</WorkspaceResourcesProvider>
 	</environmentContext.Provider>
 );
 
@@ -136,6 +164,26 @@ const jdbcValues = {
 	jdbcProperties: "",
 };
 
+describe("useResourceContentのテスト", () => {
+	it("名前と、ResourceEncodingProviderのその種類の文字コードを送って読み込むことを確認", async () => {
+		mockFetchData.mockClear();
+		const { rerender } = renderHook(
+			() => useResourceContent("sql", "target.sql"),
+			{ wrapper },
+		);
+		await act(async () => {
+			rerender();
+		});
+		const loads = mockFetchData.mock.calls.filter(([params]) =>
+			params.endpoint.endsWith("/sql/load"),
+		);
+		expect(JSON.parse(String(loads[0][0].options.body))).toStrictEqual({
+			name: "target.sql",
+			encoding: encodingOf("sql"),
+		});
+	});
+});
+
 describe("保存フックのテスト", () => {
 	it.each<{
 		name: string;
@@ -143,6 +191,8 @@ describe("保存フックのテスト", () => {
 		endpoint: string;
 		input: unknown;
 		key: keyof ResourcesSettingsBuilder;
+		// 送る文字コード（ResourceEncodingProviderのその種類の値）
+		encoding?: string;
 	}>([
 		{
 			name: "useSaveXlsxSchema",
@@ -153,6 +203,7 @@ describe("保存フックのテスト", () => {
 			endpoint: "xlsx-schema/save",
 			input: xlsxSchema,
 			key: "xlsxSchemas",
+			encoding: encodingOf("xlsxSchema"),
 		},
 		{
 			name: "useSaveFixedColumnDef",
@@ -163,6 +214,7 @@ describe("保存フックのテスト", () => {
 			endpoint: "fixed-column-def/save",
 			input: fixedColumnDef,
 			key: "fixedColumnDefs",
+			encoding: encodingOf("fixedColumnDef"),
 		},
 		{
 			name: "useSaveDatasetSettings",
@@ -173,6 +225,7 @@ describe("保存フックのテスト", () => {
 			endpoint: "dataset-setting/save",
 			input: datasetSettings,
 			key: "datasetSettings",
+			encoding: encodingOf("datasetSetting"),
 		},
 		...(
 			[
@@ -196,6 +249,7 @@ describe("保存フックのテスト", () => {
 			endpoint,
 			input: datasetSettings,
 			key,
+			encoding: encodingOf(kind),
 		})),
 		...(
 			[
@@ -218,6 +272,7 @@ describe("保存フックのテスト", () => {
 			endpoint,
 			input: { content: "content" },
 			key,
+			encoding: encodingOf(kind),
 		})),
 		{
 			name: "useSaveJdbcProperties",
@@ -231,7 +286,7 @@ describe("保存フックのテスト", () => {
 		},
 	])(
 		"$nameは$endpointへ名前と内容を送り、応答で$keyを更新する",
-		async ({ useSave, endpoint, input, key }) => {
+		async ({ useSave, endpoint, input, key, encoding }) => {
 			const { operationResult, params, resources } =
 				await runWithResources(useSave);
 
@@ -239,6 +294,7 @@ describe("保存フックのテスト", () => {
 			expect(params?.endpoint).toBe(`${environmentFixture.apiUrl}${endpoint}`);
 			expect(JSON.parse(String(params?.options.body))).toStrictEqual({
 				name: "target",
+				...(encoding === undefined ? {} : { encoding }),
 				input: JSON.parse(JSON.stringify(input)),
 			});
 			expect(resources[key]).toStrictEqual(mockUpdatedFiles);

@@ -13,12 +13,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import yo.dbunitcli.sidecar.domain.project.ResourceFile;
 import yo.dbunitcli.sidecar.domain.project.Workspace;
+import yo.dbunitcli.sidecar.dto.ResourceLoadRequestDto;
 import yo.dbunitcli.sidecar.dto.ResourceSaveRequest;
 
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.Collections;
+import java.util.Optional;
 
 public abstract class AbstractResourceFileController<DTO extends ResourceSaveRequest<?>> implements ControllerExceptionHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractResourceFileController.class);
@@ -33,20 +35,27 @@ public abstract class AbstractResourceFileController<DTO extends ResourceSaveReq
         return this.currentFileList();
     }
 
-    @Post(uri = "load", consumes = MediaType.TEXT_PLAIN, produces = MediaType.APPLICATION_JSON)
-    public String load(@Body final String name) {
+    /**
+     * encodingはコマンド実行時にそのファイルを読む文字コード。GUIからも同じ文字コードで読み書きする
+     */
+    @Post(uri = "load", produces = MediaType.APPLICATION_JSON)
+    public String load(@Body final ResourceLoadRequestDto body) {
         try {
-            return this.getResourceFile().read(name).orElse("{}");
+            return this.toLoadResponse(this.getResourceFile().read(body.getName(), body.getEncoding()));
         } catch (final Throwable th) {
             LOGGER.error("cause:", th);
             throw new ApplicationException(th);
         }
     }
 
+    protected String toLoadResponse(final Optional<String> content) {
+        return content.orElse("{}");
+    }
+
     @Post(uri = "save", produces = MediaType.APPLICATION_JSON)
     public String save(@Body final DTO body) throws IOException {
         try {
-            this.saveJson(body.getName(), this.serializeJson(body));
+            this.saveJson(body.getName(), this.serializeJson(body), body.getEncoding());
         } catch (IOException e) {
             throw e;
         } catch (final Throwable th) {
@@ -75,7 +84,7 @@ public abstract class AbstractResourceFileController<DTO extends ResourceSaveReq
 
     protected abstract ResourceFile getResourceFile();
 
-    protected void saveJson(final String name, final String json) throws IOException {
+    protected void saveJson(final String name, final String json, final String encoding) throws IOException {
         final StringWriter stringWriter = new StringWriter();
         final JsonWriter jsonWriter = Json.createWriterFactory(
                         Collections.singletonMap(JsonGenerator.PRETTY_PRINTING, true))
@@ -83,7 +92,7 @@ public abstract class AbstractResourceFileController<DTO extends ResourceSaveReq
         jsonWriter.writeObject(Json.createReader(new StringReader(json)).readObject());
         jsonWriter.close();
         LOGGER.info(stringWriter.toString());
-        this.getResourceFile().update(name, stringWriter.toString());
+        this.getResourceFile().update(name, stringWriter.toString(), encoding);
     }
 
     protected String currentFileList() {

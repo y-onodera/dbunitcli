@@ -63,8 +63,7 @@ class XlsxSchemaControllerTest {
     @Test
     void testLoad() throws IOException {
         final String response = this.client.toBlocking()
-                .retrieve(HttpRequest.POST("dbunit-cli/xlsx-schema/load", "schema.json")
-                        .contentType(MediaType.TEXT_PLAIN_TYPE));
+                .retrieve(HttpRequest.POST("dbunit-cli/xlsx-schema/load", "{\"name\":\"schema.json\"}"));
         System.out.println(response);
         JsonTestHelper.assertJsonEquals(
                 Paths.get("src/test/resources/yo/dbunitcli/sidecar/controller/xlsx-schema-load-response.json"),
@@ -86,8 +85,7 @@ class XlsxSchemaControllerTest {
                 "savedSchema.json がファイルシステムに作成されること");
 
         final String loadResponse = this.client.toBlocking()
-                .retrieve(HttpRequest.POST("dbunit-cli/xlsx-schema/load", "savedSchema.json")
-                        .contentType(MediaType.TEXT_PLAIN_TYPE));
+                .retrieve(HttpRequest.POST("dbunit-cli/xlsx-schema/load", "{\"name\":\"savedSchema.json\"}"));
         System.out.println(loadResponse);
         JsonTestHelper.assertJsonEquals(
                 Paths.get("src/test/resources/yo/dbunitcli/sidecar/controller/xlsx-schema-save-load-response.json"),

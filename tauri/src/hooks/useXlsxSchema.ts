@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useEnvironment } from "../context/EnvironmentProvider";
+import { useResourceEncoding } from "../context/ResourceEncodingProvider";
 import type { DatasetSrcInfo } from "../model/CommandOption";
 import { XlsxSchema, type XlsxSchemaBuilder } from "../model/XlsxSchema";
 import {
@@ -7,18 +8,17 @@ import {
 	getErrorMessage,
 	handleFetchError,
 } from "../utils/fetchUtils";
-import { useUpdateResourceFiles } from "./useResourceFiles";
+import { resourceLoadParams, useSaveResource } from "./useResourceFiles";
 
 export const useSaveXlsxSchema = () => {
-	const updateResourceFiles = useUpdateResourceFiles("xlsxSchema");
-	return (name: string, input: XlsxSchema) =>
-		updateResourceFiles("save", JSON.stringify({ name, input }));
+	return useSaveResource<XlsxSchema>("xlsxSchema");
 };
 
 export const useXlsxSchemaData = (
 	fileName: string,
 ): { schema: XlsxSchema; loading: boolean } => {
 	const { apiUrl } = useEnvironment();
+	const encoding = useResourceEncoding("xlsxSchema");
 	const [schema, setSchema] = useState(XlsxSchema.create());
 	const [loading, setLoading] = useState(fileName !== "");
 
@@ -30,7 +30,7 @@ export const useXlsxSchemaData = (
 		}
 		const controller = new AbortController();
 		setLoading(true);
-		loadXlsxSchema(apiUrl, fileName).then((result) => {
+		loadXlsxSchema(apiUrl, fileName, encoding).then((result) => {
 			if (!controller.signal.aborted) {
 				setSchema(result);
 				setLoading(false);
@@ -39,7 +39,7 @@ export const useXlsxSchemaData = (
 		return () => {
 			controller.abort();
 		};
-	}, [fileName, apiUrl]);
+	}, [fileName, apiUrl, encoding]);
 
 	return { schema, loading };
 };
@@ -47,18 +47,12 @@ export const useXlsxSchemaData = (
 async function loadXlsxSchema(
 	apiUrl: string,
 	name: string,
+	encoding: string,
 ): Promise<XlsxSchema> {
 	if (name === "") {
 		return XlsxSchema.create();
 	}
-	const fetchParams = {
-		endpoint: `${apiUrl}xlsx-schema/load`,
-		options: {
-			method: "POST",
-			headers: { "Content-Type": "text/plain" },
-			body: name,
-		},
-	};
+	const fetchParams = resourceLoadParams(apiUrl, "xlsxSchema", name, encoding);
 	return await fetchData(fetchParams)
 		.then((response) => response.json())
 		.then((schema: XlsxSchemaBuilder) => XlsxSchema.build(schema))

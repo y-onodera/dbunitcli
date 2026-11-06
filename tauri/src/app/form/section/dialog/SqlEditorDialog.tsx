@@ -59,8 +59,8 @@ function Dialog(props: SqlEditorDialogProps & { value: string }) {
 	const [showSelector, setShowSelector] = useState(false);
 	const textareaRef = useRef<HTMLTextAreaElement>(null);
 	const pendingCursorRef = useRef<number | null>(null);
-	const saveDataSource = useSaveResourceContent(props.type);
 	const { jdbcValues, connectionOk } = useJdbcConnectionState();
+	const saveDataSource = useSaveResourceContent(props.type);
 
 	const datasetSrcInfo = useDatasetSrcInfo();
 

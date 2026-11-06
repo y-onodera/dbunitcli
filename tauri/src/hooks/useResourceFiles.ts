@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
 import { useEnvironment } from "../context/EnvironmentProvider";
+import { useResourceEncoding } from "../context/ResourceEncodingProvider";
 import { useSetResourcesSettings } from "../context/WorkspaceResourcesProvider";
 import type {
 	ResourcesSettings,
 	ResourcesSettingsBuilder,
 } from "../model/WorkspaceResources";
 import {
+	type FetchParams,
 	fetchAndUpdate,
 	fetchData,
 	getErrorMessage,
@@ -43,9 +45,21 @@ export type DatasetSettingKind =
 	| "compareSetting"
 	| "generateSetting";
 
-// 種類に対応するAPIの接頭辞（`${apiUrl}${base}/load`等）
-export function resourceBaseOf(kind: ResourceKind): string {
-	return resourceTargets[kind].base;
+// `${base}/load`へ名前と、コマンド実行時にそのファイルを読む文字コードを送るリクエスト（読込で共通）
+export function resourceLoadParams(
+	apiUrl: string,
+	kind: ResourceKind,
+	name: string,
+	encoding: string,
+): FetchParams {
+	return {
+		endpoint: `${apiUrl}${resourceTargets[kind].base}/load`,
+		options: {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify({ name, encoding }),
+		},
+	};
 }
 
 // 種類に対応するResourcesSettings上のファイル一覧（入力欄の候補）
@@ -85,11 +99,18 @@ export const useDeleteResource = (kind: ResourceKind) => {
 	return (name: string) => updateResourceFiles("delete", name, "text/plain");
 };
 
-// テキスト系リソースの内容を{name, input: {content}}形式で保存する
-export const useSaveResourceContent = (kind: ResourceKind) => {
+// `${base}/save`へ名前・内容と、ResourceEncodingProviderのその種類の文字コードを送る（保存で共通）
+export const useSaveResource = <T>(kind: ResourceKind) => {
 	const updateResourceFiles = useUpdateResourceFiles(kind);
-	return (name: string, content: string) =>
-		updateResourceFiles("save", JSON.stringify({ name, input: { content } }));
+	const encoding = useResourceEncoding(kind);
+	return (name: string, input: T) =>
+		updateResourceFiles("save", JSON.stringify({ name, encoding, input }));
+};
+
+// テキスト系リソースの内容を{content}形式で保存する
+export const useSaveResourceContent = (kind: ResourceKind) => {
+	const save = useSaveResource<{ content: string }>(kind);
+	return (name: string, content: string) => save(name, { content });
 };
 
 // `${base}/load`へ名前を送り、{"content": ...}形式の応答から内容を読み込む（テキスト系リソースで共通）
@@ -98,7 +119,7 @@ export const useResourceContent = (
 	name: string,
 ): { content: string; loading: boolean } => {
 	const { apiUrl } = useEnvironment();
-	const resource = resourceTargets[kind].base;
+	const encoding = useResourceEncoding(kind);
 	const [content, setContent] = useState("");
 	const [loading, setLoading] = useState(name !== "");
 
@@ -110,7 +131,7 @@ export const useResourceContent = (
 		}
 		const controller = new AbortController();
 		setLoading(true);
-		loadResourceContent(apiUrl, resource, name).then((result) => {
+		loadResourceContent(apiUrl, kind, name, encoding).then((result) => {
 			if (!controller.signal.aborted) {
 				setContent(result);
 				setLoading(false);
@@ -119,24 +140,18 @@ export const useResourceContent = (
 		return () => {
 			controller.abort();
 		};
-	}, [resource, name, apiUrl]);
+	}, [kind, name, apiUrl, encoding]);
 
 	return { content, loading };
 };
 
 async function loadResourceContent(
 	apiUrl: string,
-	resource: string,
+	kind: ResourceKind,
 	name: string,
+	encoding: string,
 ): Promise<string> {
-	const params = {
-		endpoint: `${apiUrl}${resource}/load`,
-		options: {
-			method: "POST",
-			headers: { "Content-Type": "text/plain" },
-			body: name,
-		},
-	};
+	const params = resourceLoadParams(apiUrl, kind, name, encoding);
 	try {
 		const response = await fetchData(params);
 		const data = (await response.json()) as { content?: string };

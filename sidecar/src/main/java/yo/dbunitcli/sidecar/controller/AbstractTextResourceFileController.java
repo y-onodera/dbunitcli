@@ -12,6 +12,7 @@ import yo.dbunitcli.sidecar.dto.TemplateRequestDto;
 
 import java.io.IOException;
 import java.io.StringWriter;
+import java.util.Optional;
 
 /**
  * SQL等の生テキストのリソース。loadは{"content": ...}形式で返し、saveはcontentを生テキストとして保存する。応答は更新後のファイル一覧
@@ -23,27 +24,20 @@ public abstract class AbstractTextResourceFileController extends AbstractResourc
         super(workspace);
     }
 
-    @Post(uri = "load", consumes = MediaType.TEXT_PLAIN, produces = MediaType.APPLICATION_JSON)
     @Override
-    public String load(@Body final String name) {
-        try {
-            final String content = this.getResourceFile().read(name).orElse("");
-            final StringWriter sw = new StringWriter();
-            try (final JsonWriter writer = Json.createWriter(sw)) {
-                writer.writeObject(Json.createObjectBuilder().add("content", content).build());
-            }
-            return sw.toString();
-        } catch (final Throwable th) {
-            LOGGER.error("cause:", th);
-            throw new ApplicationException(th);
+    protected String toLoadResponse(final Optional<String> content) {
+        final StringWriter sw = new StringWriter();
+        try (final JsonWriter writer = Json.createWriter(sw)) {
+            writer.writeObject(Json.createObjectBuilder().add("content", content.orElse("")).build());
         }
+        return sw.toString();
     }
 
     @Post(uri = "save", produces = MediaType.APPLICATION_JSON)
     @Override
     public String save(@Body final TemplateRequestDto body) throws IOException {
         try {
-            this.getResourceFile().update(body.getName(), body.getInput().getContent());
+            this.getResourceFile().update(body.getName(), body.getInput().getContent(), body.getEncoding());
         } catch (final IOException e) {
             throw e;
         } catch (final Throwable th) {

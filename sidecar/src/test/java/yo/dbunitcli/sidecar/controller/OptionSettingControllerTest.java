@@ -54,7 +54,7 @@ class OptionSettingControllerTest {
                 "resources/setting には作成されないこと");
 
         final String loaded = this.client.toBlocking()
-                .retrieve(HttpRequest.POST(base + "load", SAVED).contentType(MediaType.TEXT_PLAIN_TYPE));
+                .retrieve(HttpRequest.POST(base + "load", "{\"name\":\"" + SAVED + "\"}"));
         Assertions.assertTrue(loaded.contains("TABLE_B"), loaded);
 
         final String afterDelete = this.client.toBlocking()
@@ -67,8 +67,7 @@ class OptionSettingControllerTest {
     @CsvSource({"compare", "generate"})
     void testLoad_resourcesのsettingにあるファイルは読まない(final String command) {
         final String loaded = this.client.toBlocking()
-                .retrieve(HttpRequest.POST("dbunit-cli/" + command + "/setting/load", "test.json")
-                        .contentType(MediaType.TEXT_PLAIN_TYPE));
+                .retrieve(HttpRequest.POST("dbunit-cli/" + command + "/setting/load", "{\"name\":\"test.json\"}"));
         Assertions.assertEquals("{}", loaded);
     }
 }

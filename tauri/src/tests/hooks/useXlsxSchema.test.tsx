@@ -4,6 +4,7 @@ import {
 	type Environment,
 	environmentContext,
 } from "../../context/EnvironmentProvider";
+import { ResourceEncodingProvider } from "../../context/ResourceEncodingProvider";
 import WorkspaceResourcesProvider from "../../context/WorkspaceResourcesProvider";
 import { useXlsxSchemaData } from "../../hooks/useXlsxSchema";
 import type { WorkspaceResources } from "../../model/WorkspaceResources";
@@ -102,6 +103,31 @@ describe("XlsxSchemaProviderのテスト", () => {
 			expect(result.current.loading).toBe(false);
 			expect(result.current.schema.rows).toHaveLength(1);
 			expect(result.current.schema.cells).toHaveLength(1);
+		});
+
+		it("ResourceEncodingProviderのxlsxSchemaの文字コードで読み込むことを確認", async () => {
+			mockFetchData.mockClear();
+			const { rerender } = renderHook(() => useXlsxSchemaData("test-setting"), {
+				wrapper: ({ children }: { children: React.ReactNode }) => (
+					<MockProvider>
+						<ResourceEncodingProvider
+							encodings={{ xlsxSchema: "MS932", datasetSetting: "UTF-8" }}
+						>
+							{children}
+						</ResourceEncodingProvider>
+					</MockProvider>
+				),
+			});
+			await act(async () => {
+				rerender();
+			});
+			const loads = mockFetchData.mock.calls.filter(([params]) =>
+				params.endpoint.endsWith("/xlsx-schema/load"),
+			);
+			expect(JSON.parse(String(loads[0][0].options.body))).toStrictEqual({
+				name: "test-setting",
+				encoding: "MS932",
+			});
 		});
 	});
 });

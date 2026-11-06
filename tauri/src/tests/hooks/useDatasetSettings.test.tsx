@@ -184,7 +184,10 @@ describe("DatasetSettingsProviderのテスト", () => {
 				expect(loads.map(([params]) => params.endpoint)).toStrictEqual([
 					`${mockEnvironment.apiUrl}${endpoint}`,
 				]);
-				expect(loads[0][0].options.body).toBe("test-setting");
+				expect(JSON.parse(String(loads[0][0].options.body))).toStrictEqual({
+					name: "test-setting",
+					encoding: "",
+				});
 			},
 		);
 	});

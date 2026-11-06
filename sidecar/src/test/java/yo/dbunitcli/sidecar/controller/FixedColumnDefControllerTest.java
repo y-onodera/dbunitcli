@@ -61,8 +61,7 @@ class FixedColumnDefControllerTest {
     @Test
     void testLoad() throws IOException {
         final String response = this.client.toBlocking()
-                .retrieve(HttpRequest.POST("dbunit-cli/fixed-column-def/load", "sample.json")
-                        .contentType(MediaType.TEXT_PLAIN_TYPE));
+                .retrieve(HttpRequest.POST("dbunit-cli/fixed-column-def/load", "{\"name\":\"sample.json\"}"));
         System.out.println(response);
         JsonTestHelper.assertJsonEquals(
                 Paths.get("src/test/resources/yo/dbunitcli/sidecar/controller/fixed-column-def-load-response.json"),
@@ -84,8 +83,7 @@ class FixedColumnDefControllerTest {
                 "savedDef.json がファイルシステムに作成されること");
 
         final String loadResponse = this.client.toBlocking()
-                .retrieve(HttpRequest.POST("dbunit-cli/fixed-column-def/load", "savedDef.json")
-                        .contentType(MediaType.TEXT_PLAIN_TYPE));
+                .retrieve(HttpRequest.POST("dbunit-cli/fixed-column-def/load", "{\"name\":\"savedDef.json\"}"));
         System.out.println(loadResponse);
         JsonTestHelper.assertJsonEquals(
                 Paths.get("src/test/resources/yo/dbunitcli/sidecar/controller/fixed-column-def-save-load-response.json"),

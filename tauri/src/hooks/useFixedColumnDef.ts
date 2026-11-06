@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useEnvironment } from "../context/EnvironmentProvider";
+import { useResourceEncoding } from "../context/ResourceEncodingProvider";
 import {
 	FixedColumnDef,
 	type FixedColumnDefBuilder,
@@ -9,18 +10,17 @@ import {
 	getErrorMessage,
 	handleFetchError,
 } from "../utils/fetchUtils";
-import { useUpdateResourceFiles } from "./useResourceFiles";
+import { resourceLoadParams, useSaveResource } from "./useResourceFiles";
 
 export const useSaveFixedColumnDef = () => {
-	const updateResourceFiles = useUpdateResourceFiles("fixedColumnDef");
-	return (name: string, input: FixedColumnDef) =>
-		updateResourceFiles("save", JSON.stringify({ name, input }));
+	return useSaveResource<FixedColumnDef>("fixedColumnDef");
 };
 
 export const useFixedColumnDefData = (
 	fileName: string,
 ): { def: FixedColumnDef; loading: boolean } => {
 	const { apiUrl } = useEnvironment();
+	const encoding = useResourceEncoding("fixedColumnDef");
 	const [def, setDef] = useState(FixedColumnDef.create());
 	const [loading, setLoading] = useState(fileName !== "");
 
@@ -32,7 +32,7 @@ export const useFixedColumnDefData = (
 		}
 		const controller = new AbortController();
 		setLoading(true);
-		loadFixedColumnDef(apiUrl, fileName).then((result) => {
+		loadFixedColumnDef(apiUrl, fileName, encoding).then((result) => {
 			if (!controller.signal.aborted) {
 				setDef(result);
 				setLoading(false);
@@ -41,7 +41,7 @@ export const useFixedColumnDefData = (
 		return () => {
 			controller.abort();
 		};
-	}, [fileName, apiUrl]);
+	}, [fileName, apiUrl, encoding]);
 
 	return { def, loading };
 };
@@ -49,18 +49,17 @@ export const useFixedColumnDefData = (
 async function loadFixedColumnDef(
 	apiUrl: string,
 	name: string,
+	encoding: string,
 ): Promise<FixedColumnDef> {
 	if (name === "") {
 		return FixedColumnDef.create();
 	}
-	const fetchParams = {
-		endpoint: `${apiUrl}fixed-column-def/load`,
-		options: {
-			method: "POST",
-			headers: { "Content-Type": "text/plain" },
-			body: name,
-		},
-	};
+	const fetchParams = resourceLoadParams(
+		apiUrl,
+		"fixedColumnDef",
+		name,
+		encoding,
+	);
 	return fetchData(fetchParams)
 		.then((response) => response.json())
 		.then((schema: FixedColumnDefBuilder) => FixedColumnDef.build(schema))

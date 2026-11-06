@@ -1,13 +1,16 @@
 import { SectionFieldset } from "../../components/dialog";
 import { SectionLegend } from "../../components/dialog/SectionFieldset";
 import { JdbcConnectionProvider } from "../../context/JdbcConnectionProvider";
+import { ResourceEncodingProvider } from "../../context/ResourceEncodingProvider";
 import type { CommandOption } from "../../model/CommandOption";
 import type { RunOptions } from "../../model/SelectParameter";
 import FileText from "./section/element/FileText";
 import PlainText from "./section/element/PlainText";
 import Select from "./section/element/Select";
 import SrcFormSection from "./section/SrcFormSection";
-import TemplateFormSection from "./section/TemplateFormSection";
+import TemplateFormSection, {
+	useTemplateEncoding,
+} from "./section/TemplateFormSection";
 import TraversalFormSection from "./section/TraversalFormSection";
 
 export function RunForm(prop: {
@@ -16,6 +19,7 @@ export function RunForm(prop: {
 	run: RunOptions;
 }) {
 	const run = prop.run;
+	const templateEncoding = useTemplateEncoding(run.templateOption);
 	return (
 		<SectionFieldset>
 			<SectionLegend title="run" command="commands/run" label="Run" />
@@ -25,26 +29,33 @@ export function RunForm(prop: {
 				element={run.scriptType}
 			/>
 			{run.parallel && <PlainText prefix="" element={run.parallel} />}
-			<JdbcConnectionProvider>
-				<SrcFormSection
-					srcElements={run.srcData}
-					srcType={run.scriptType.value === "sql" ? "sql" : undefined}
-					jdbcOption={run.jdbcOption}
-					handleValueChange={() => (_: string) => {}}
-				/>
-				<TraversalFormSection
-					srcElements={run.srcData}
-					handleValueChange={() => (_: string) => {}}
-					handleToggleChecked={() => (_: boolean) => {}}
-				/>
-				{run.templateOption && (
-					<TemplateFormSection
-						templateOption={run.templateOption}
-						showEncoding={!run.srcData.encoding}
+			<ResourceEncodingProvider
+				encodings={{
+					sql: templateEncoding.encoding,
+					template: templateEncoding.encoding,
+				}}
+			>
+				<JdbcConnectionProvider>
+					<SrcFormSection
+						srcElements={run.srcData}
+						srcType={run.scriptType.value === "sql" ? "sql" : undefined}
+						jdbcOption={run.jdbcOption}
 						handleValueChange={() => (_: string) => {}}
 					/>
-				)}
-			</JdbcConnectionProvider>
+					<TraversalFormSection
+						srcElements={run.srcData}
+						handleValueChange={() => (_: string) => {}}
+						handleToggleChecked={() => (_: boolean) => {}}
+					/>
+					{run.templateOption && (
+						<TemplateFormSection
+							templateOption={run.templateOption}
+							showEncoding={!run.srcData.encoding}
+							handleValueChange={templateEncoding.handleValueChange}
+						/>
+					)}
+				</JdbcConnectionProvider>
+			</ResourceEncodingProvider>
 			{!run.jdbcOption && (
 				<>
 					<FileText

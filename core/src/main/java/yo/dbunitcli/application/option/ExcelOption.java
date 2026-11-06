@@ -7,10 +7,13 @@ import yo.dbunitcli.resource.FileResources;
 
 import java.util.List;
 
-public record ExcelOption(String prefix, String xlsxSchemaSource) implements ComparableDataSetParamOption {
+/**
+ * xlsxSchemaは-settingと同じく-settingEncodingで読む。-settingEncodingの出力・検証はDataSetLoadOptionが行う
+ */
+public record ExcelOption(String prefix, String xlsxSchemaSource, String settingEncoding) implements ComparableDataSetParamOption {
 
     public ExcelOption(final String prefix, final DataSetLoadDto dto) {
-        this(prefix, dto.getXlsxSchemaSource());
+        this(prefix, dto.getXlsxSchemaSource(), DataSetLoadOption.settingEncodingOf(dto));
     }
 
     @Override
@@ -33,7 +36,7 @@ public record ExcelOption(String prefix, String xlsxSchemaSource) implements Com
     public ComparableDataSetParam.Builder populate(final ComparableDataSetParam.Builder builder) {
         try {
             return builder.setXlsxSchema(new FromJsonXlsxSchemaBuilder()
-                    .build(FileResources.searchXlsxSchema(this.xlsxSchemaSource)));
+                    .build(FileResources.searchXlsxSchema(this.xlsxSchemaSource), this.settingEncoding));
         } catch (final Exception e) {
             throw new AssertionError(e.getMessage(), e);
         }
