@@ -1,11 +1,14 @@
 package yo.dbunitcli.dataset;
 
+import org.apache.commons.jexl3.JexlException;
 import org.apache.commons.jexl3.MapContext;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 class JexlFunctionsTest {
@@ -25,9 +28,12 @@ class JexlFunctionsTest {
     void tryToNumReturnsDefaultWhenNotConvertible() {
         Assertions.assertEquals("N/A", eval("tryToNum(a, 'N/A')", Map.of("a", "12a")));
         Assertions.assertEquals("N/A", eval("tryToNum(a, 'N/A')", Map.of("a", "")));
-        final Map<String, Object> nullParam = new HashMap<>();
-        nullParam.put("a", null);
-        Assertions.assertEquals(0, eval("tryToNum(a, 0)", nullParam));
+        Assertions.assertEquals(0, eval("tryToNum(a, 0)", Collections.singletonMap("a", null)));
+    }
+
+    @Test
+    void internalHelperIsNotCallableFromExpression() {
+        Assertions.assertThrows(JexlException.class, () -> eval("parse(a)", Map.of("a", "1")));
     }
 
     @Test
@@ -42,7 +48,7 @@ class JexlFunctionsTest {
 
     @Test
     void filterAcceptsTryToNum() {
-        final TableSeparator.RowFilter filter = TableSeparator.RowFilter.of(java.util.List.of("tryToNum(a, -1) > 1000"));
+        final TableSeparator.RowFilter filter = TableSeparator.RowFilter.of(List.of("tryToNum(a, -1) > 1000"));
         Assertions.assertTrue(filter.test(Map.of("a", "1,234")));
         Assertions.assertFalse(filter.test(Map.of("a", "abc")));
     }

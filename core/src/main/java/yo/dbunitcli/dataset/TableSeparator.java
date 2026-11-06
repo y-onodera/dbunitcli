@@ -1,6 +1,5 @@
 package yo.dbunitcli.dataset;
 
-import org.apache.commons.jexl3.JexlEngine;
 import org.apache.commons.jexl3.JexlExpression;
 import org.apache.commons.jexl3.MapContext;
 import org.dbunit.dataset.Column;
@@ -153,8 +152,6 @@ public record TableSeparator(TableMetaDataFilter sourceFilter
 
     public record RowFilter(List<JexlExpression> expressions) {
 
-        static JexlEngine JEXL = JexlFunctions.ENGINE;
-
         static RowFilter of(final List<String> expression) {
             if (expression.isEmpty()) {
                 return TableSeparator.NO_FILTER;
@@ -162,7 +159,7 @@ public record TableSeparator(TableMetaDataFilter sourceFilter
             return new RowFilter(expression
                     .stream()
                     .filter(it -> !it.trim().isEmpty())
-                    .map(RowFilter.JEXL::createExpression)
+                    .map(JexlFunctions.ENGINE::createExpression)
                     .toList());
         }
 
