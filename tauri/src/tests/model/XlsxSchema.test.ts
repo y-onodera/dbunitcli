@@ -224,3 +224,92 @@ describe("XlsxSchemaクラス", () => {
 		expect(json.cells[0].sheetName).toBe("Sheet2");
 	});
 });
+
+describe("XlsxSchemaのシートパターン", () => {
+	it("sheetNameがpatternsのキーならsheetPatternとして読み込む", () => {
+		const schema = XlsxSchema.build({
+			patterns: {
+				master: ".*マスタ.*",
+				other: { regex: "Sheet.*", exclude: ["Sheet9"] },
+			},
+			rows: [{ sheetName: "master", tableName: "T1" }],
+			cells: [{ sheetName: "other", tableName: "T2" }],
+		});
+		expect(schema.rows[0].sheetName).toBe("");
+		expect(schema.rows[0].sheetPattern).toEqual({ string: ".*マスタ.*" });
+		expect(schema.cells[0].sheetPattern).toEqual({
+			regex: "Sheet.*",
+			exclude: ["Sheet9"],
+		});
+	});
+
+	it("patternsのキーでないsheetNameはシート名のまま", () => {
+		const schema = XlsxSchema.build({
+			patterns: { master: "マスタ" },
+			rows: [{ sheetName: "Sheet1", tableName: "T1" }],
+		});
+		expect(schema.rows[0].sheetName).toBe("Sheet1");
+		expect(schema.rows[0].sheetPattern).toBeUndefined();
+	});
+
+	it("sheetPatternはpatternsに登録しsheetNameでキーを参照して保存する", () => {
+		const schema = new XlsxSchema(
+			[
+				new RowSetting({
+					sheetPattern: { regex: "Sheet.*", exclude: ["Sheet9", ""] },
+					tableName: "T1",
+				}),
+				new RowSetting({ sheetName: "Sheet1", tableName: "T2" }),
+			],
+			[
+				new CellSetting({
+					sheetPattern: { regex: "Sheet.*", exclude: ["Sheet9"] },
+					tableName: "T3",
+				}),
+			],
+		);
+		const json = schema.toJSON();
+		const key = "regex:Sheet.* exclude:Sheet9";
+		expect(json.patterns).toEqual({
+			[key]: { regex: "Sheet.*", exclude: ["Sheet9"] },
+		});
+		expect(json.rows.map((it) => it.sheetName)).toEqual([key, "Sheet1"]);
+		expect(json.rows[0]).not.toHaveProperty("sheetPattern");
+		expect(json.cells[0].sheetName).toBe(key);
+	});
+
+	it("regexとstringの両方があればregexだけを保存する", () => {
+		const json = new XlsxSchema(
+			[
+				new RowSetting({
+					sheetPattern: { string: "マスタ", regex: ".*マスタ" },
+					tableName: "T1",
+				}),
+			],
+			[],
+		).toJSON();
+		expect(json.patterns).toEqual({ "regex:.*マスタ": { regex: ".*マスタ" } });
+	});
+
+	it("パターンが空の設定は保存しない・パターンが無ければpatternsを出さない", () => {
+		const json = new XlsxSchema(
+			[new RowSetting({ sheetPattern: {}, tableName: "T1" })],
+			[],
+		).toJSON();
+		expect(json.rows).toEqual([]);
+		expect(json).not.toHaveProperty("patterns");
+	});
+
+	it("保存した内容を読み込むと同じパターンに戻る", () => {
+		const setting = new RowSetting({
+			sheetPattern: { string: "マスタ" },
+			tableName: "T1",
+		});
+		const saved = JSON.parse(
+			JSON.stringify(new XlsxSchema([setting], [])),
+		) as XlsxSchemaBuilder;
+		const loaded = XlsxSchema.build(saved);
+		expect(loaded.rows[0].sheetPattern).toEqual({ string: "マスタ" });
+		expect(loaded.rows[0].displayName()).toBe("string:マスタ→T1");
+	});
+});

@@ -1,0 +1,1 @@
+{"patterns":{"regex:Sheet.* exclude:Sheet9":{"regex":"Sheet.*","exclude":["Sheet9"]}},"rows":[{"sheetName":"regex:Sheet.* exclude:Sheet9","tableName":"TABLE_B","header":["id","value"],"dataStart":2,"columnIndex":[1,2],"addFileInfo":false}]}

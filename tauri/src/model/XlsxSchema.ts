@@ -1,5 +1,13 @@
+// シートを名前でなくパターンで指定する。一致の判定は core の TableMetaDataFilterParser.parsePattern を参照
+export type SheetPattern = {
+	string?: string;
+	regex?: string;
+	exclude?: string[];
+};
+
 export interface RowSettingBuilder {
 	sheetName?: string;
+	sheetPattern?: SheetPattern;
 	tableName?: string;
 	header?: string[];
 	dataStart?: string;
@@ -10,6 +18,7 @@ export interface RowSettingBuilder {
 
 export interface CellSettingBuilder {
 	sheetName?: string;
+	sheetPattern?: SheetPattern;
 	tableName?: string;
 	header?: string[];
 	rows?: { cellAddress: string[] }[];
@@ -18,6 +27,7 @@ export interface CellSettingBuilder {
 
 export class RowSetting {
 	sheetName: string;
+	sheetPattern?: SheetPattern;
 	tableName: string;
 	header: string[];
 	dataStart: string;
@@ -31,6 +41,7 @@ export class RowSetting {
 
 	constructor(builder: RowSettingBuilder) {
 		this.sheetName = builder.sheetName || "";
+		this.sheetPattern = builder.sheetPattern;
 		this.tableName = builder.tableName || "";
 		this.header = builder.header || [];
 		this.dataStart = builder.dataStart || "";
@@ -46,15 +57,13 @@ export class RowSetting {
 		});
 	}
 	displayName(): string {
-		if (!this.sheetName || !this.tableName) {
-			return "";
-		}
-		return `${this.sheetName}→${this.tableName}`;
+		return settingDisplayName(this);
 	}
 }
 
 export class CellSetting {
 	sheetName: string;
+	sheetPattern?: SheetPattern;
 	tableName: string;
 	header: string[];
 	rows: { cellAddress: string[] }[];
@@ -66,6 +75,7 @@ export class CellSetting {
 
 	constructor(builder: CellSettingBuilder) {
 		this.sheetName = builder?.sheetName || "";
+		this.sheetPattern = builder?.sheetPattern;
 		this.tableName = builder?.tableName || "";
 		this.header = builder?.header || [];
 		this.rows = builder?.rows || [];
@@ -91,10 +101,7 @@ export class CellSetting {
 	}
 
 	displayName(): string {
-		if (!this.sheetName || !this.tableName) {
-			return "";
-		}
-		return `${this.sheetName}→${this.tableName}`;
+		return settingDisplayName(this);
 	}
 }
 
@@ -112,11 +119,13 @@ export class XlsxSchema {
 	}
 
 	static build(schema: XlsxSchemaBuilder): XlsxSchema {
+		const withPattern = <T extends { sheetName?: string }>(builder: T) =>
+			resolveSheetPattern(builder, schema.patterns);
 		return new XlsxSchema(
-			schema.rows?.map((builder) => new RowSetting(builder)) || [
+			schema.rows?.map((builder) => new RowSetting(withPattern(builder))) || [
 				RowSetting.create(),
 			],
-			schema.cells?.map((builder) => new CellSetting(builder)) || [
+			schema.cells?.map((builder) => new CellSetting(withPattern(builder))) || [
 				CellSetting.create(),
 			],
 		);
@@ -153,14 +162,27 @@ export class XlsxSchema {
 			this.cells.map((it) => (it === before ? after : it)),
 		);
 	}
+	// sheetPatternはcoreの形式(トップレベルのpatternsに登録し、sheetNameでそのキーを参照する)にして保存する
 	toJSON() {
-		const filterSettings = <T extends { tableName: string; sheetName: string }>(
-			settings: T[],
-		) => settings.filter((setting) => setting.tableName && setting.sheetName);
-
+		const patterns: Record<string, SheetPattern> = {};
+		const toSaved = <T extends SheetTarget>(settings: T[]) =>
+			settings
+				.filter((setting) => setting.tableName && sheetKey(setting))
+				.map(({ sheetPattern, ...rest }) => {
+					const pattern = normalizeSheetPattern(sheetPattern);
+					if (!pattern) {
+						return rest;
+					}
+					const key = patternKey(pattern);
+					patterns[key] = pattern;
+					return { ...rest, sheetName: key };
+				});
+		const rows = toSaved(this.rows);
+		const cells = toSaved(this.cells);
 		return {
-			rows: filterSettings(this.rows),
-			cells: filterSettings(this.cells),
+			...(Object.keys(patterns).length > 0 ? { patterns } : {}),
+			rows,
+			cells,
 		};
 	}
 }
@@ -181,6 +203,7 @@ function removeArray<T>(array: T[], remove: number): T[] {
 	return [...array].filter((_, index) => index !== remove);
 }
 export interface XlsxSchemaBuilder {
+	patterns?: Record<string, string | string[] | SheetPattern>;
 	rows?: RowSettingBuilder[];
 	cells?: CellSettingBuilder[];
 }
@@ -191,4 +214,82 @@ export function createRowSetting(): RowSetting {
 
 export function createCellSetting(): CellSetting {
 	return CellSetting.create();
+}
+
+type SheetTarget = {
+	sheetName: string;
+	sheetPattern?: SheetPattern;
+	tableName: string;
+};
+
+// シートの指定(名前またはパターン)を表す文字列。未指定なら空文字
+function sheetKey(setting: SheetTarget): string {
+	if (setting.sheetPattern) {
+		const pattern = normalizeSheetPattern(setting.sheetPattern);
+		return pattern ? patternKey(pattern) : "";
+	}
+	return setting.sheetName;
+}
+
+function settingDisplayName(setting: SheetTarget): string {
+	const sheet = setting.sheetPattern ? sheetKey(setting) : setting.sheetName;
+	if (!sheet || !setting.tableName) {
+		return "";
+	}
+	return `${sheet}→${setting.tableName}`;
+}
+
+// coreはregexを優先するので保存時はどちらか一方にする。excludeの空要素は除く
+function normalizeSheetPattern(
+	pattern: SheetPattern | undefined,
+): SheetPattern | undefined {
+	if (!pattern) {
+		return undefined;
+	}
+	const exclude = pattern.exclude?.filter((it) => it);
+	if (!pattern.regex && !pattern.string) {
+		return undefined;
+	}
+	const base = pattern.regex
+		? { regex: pattern.regex }
+		: { string: pattern.string };
+	return exclude?.length ? { ...base, exclude } : base;
+}
+
+// patternsのキー。sheetNameの完全一致がpatternsより先に判定されるため、実在するシート名と重ならない書式にする
+function patternKey(pattern: SheetPattern): string {
+	const base = pattern.regex
+		? `regex:${pattern.regex}`
+		: `string:${pattern.string}`;
+	return pattern.exclude?.length
+		? `${base} exclude:${pattern.exclude.join(",")}`
+		: base;
+}
+
+function resolveSheetPattern<T extends { sheetName?: string }>(
+	builder: T,
+	patterns: XlsxSchemaBuilder["patterns"],
+): T & { sheetPattern?: SheetPattern } {
+	const sheetName = builder.sheetName ?? "";
+	if (!patterns || !Object.keys(patterns).includes(sheetName)) {
+		return builder;
+	}
+	return {
+		...builder,
+		sheetName: "",
+		sheetPattern: toSheetPattern(patterns[sheetName]),
+	};
+}
+
+// 配列の指定は画面で編集できないため先頭だけを使う
+function toSheetPattern(
+	pattern: string | string[] | SheetPattern,
+): SheetPattern {
+	if (typeof pattern === "string") {
+		return { string: pattern };
+	}
+	if (Array.isArray(pattern)) {
+		return { string: pattern[0] ?? "" };
+	}
+	return pattern;
 }

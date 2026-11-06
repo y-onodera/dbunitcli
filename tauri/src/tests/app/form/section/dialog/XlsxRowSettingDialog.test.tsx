@@ -32,6 +32,14 @@ vi.mock("../../../../../context/DatasetSrcInfoProvider", () => ({
 	useDatasetSrcInfo: () => srcInfoFixture.current,
 }));
 
+function getInput(name: string): HTMLElement {
+	const input = document.querySelector<HTMLElement>(`input[name="${name}"]`);
+	if (!input) {
+		throw new Error(`input ${name} not found`);
+	}
+	return input;
+}
+
 function renderDialog() {
 	const handleCommit = vi.fn();
 	render(
@@ -78,5 +86,40 @@ describe("XlsxRowSettingDialogのテスト", () => {
 		expect(
 			screen.queryByRole("button", { name: "Preview" }),
 		).not.toBeInTheDocument();
+	});
+});
+
+describe("XlsxRowSettingDialogのシート指定", () => {
+	it("sheetをpatternに切り替えるとsheetNameを引き継ぎ、regex・excludeを指定して確定できる", async () => {
+		srcInfoFixture.current = baseSrcInfo;
+		const { user, handleCommit } = renderDialog();
+		await user.selectOptions(screen.getByRole("combobox"), "pattern");
+
+		expect(screen.getByDisplayValue("Sheet1")).toHaveAttribute(
+			"name",
+			"string",
+		);
+		await user.type(getInput("regex"), "Sheet.*");
+		await user.click(screen.getByRole("button", { name: "Save" }));
+
+		expect(handleCommit).toHaveBeenCalledWith(
+			new RowSetting({
+				sheetPattern: { string: "Sheet1", regex: "Sheet.*" },
+				tableName: "before",
+			}),
+		);
+	});
+
+	it("nameに戻すとstringをsheetNameとして使う", async () => {
+		srcInfoFixture.current = baseSrcInfo;
+		const { user, handleCommit } = renderDialog();
+		const select = screen.getByRole("combobox");
+		await user.selectOptions(select, "pattern");
+		await user.selectOptions(select, "name");
+		await user.click(screen.getByRole("button", { name: "Save" }));
+
+		expect(handleCommit).toHaveBeenCalledWith(
+			new RowSetting({ sheetName: "Sheet1", tableName: "before" }),
+		);
 	});
 });

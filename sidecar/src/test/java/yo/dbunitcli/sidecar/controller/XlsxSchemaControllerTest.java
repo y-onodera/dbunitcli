@@ -93,6 +93,20 @@ class XlsxSchemaControllerTest {
     }
 
     @Test
+    void testSave_シートのパターンを保存して再ロードで確認する() throws IOException {
+        this.client.toBlocking()
+                .retrieve(HttpRequest.POST("dbunit-cli/xlsx-schema/save",
+                        "{\"name\":\"savedSchema.json\",\"input\":{\"patterns\":{\"regex:Sheet.* exclude:Sheet9\":{\"regex\":\"Sheet.*\",\"exclude\":[\"Sheet9\"]}},\"rows\":[{\"sheetName\":\"regex:Sheet.* exclude:Sheet9\",\"tableName\":\"TABLE_B\",\"header\":[\"id\",\"value\"],\"dataStart\":2,\"columnIndex\":[1,2],\"breakKey\":[],\"addFileInfo\":false}],\"cells\":[]}}"));
+
+        final String loadResponse = this.client.toBlocking()
+                .retrieve(HttpRequest.POST("dbunit-cli/xlsx-schema/load", "{\"name\":\"savedSchema.json\"}"));
+        System.out.println(loadResponse);
+        JsonTestHelper.assertJsonEquals(
+                Paths.get("src/test/resources/yo/dbunitcli/sidecar/controller/xlsx-schema-save-patterns-load-response.json"),
+                loadResponse);
+    }
+
+    @Test
     void testGenerate_データセットからxlsxSchemaテンプレートを生成する() throws IOException {
         final String response = this.client.toBlocking().retrieve(
                 HttpRequest.POST("dbunit-cli/xlsx-schema/generate",
