@@ -55,7 +55,7 @@
     <tr><td>dataset</td><td><code>param.dataSet.get('テーブル名').rows</code>（指定したテーブルの全行）</td></tr>
   </table>
   <p>各行はカラム名をキーとする Map なので、セルには <code>${row.get('カラム名')}</code> のように書きます（<code>row</code> は <code>jx:each</code> の <code>var</code> に指定した名前）。<code>unit=dataset</code> でテーブルごとのシートを持つテンプレートは、<a href="../dialogs/xlsx-template-generate.html">Xlsx Template Generate</a> で雛型を作れます。</p>
-  <p>セルの式では <code>tryToNum</code> などの関数も使えます（例: <code>${tryToNum(row.get('AMOUNT'), 0)}</code>）。関数の一覧は <a href="../dialogs/dataset-setting.html">Dataset Setting</a> の「JEXL 式の書き方」を参照してください。</p>
+  <p>セルの式では <code>tryToNum</code>・<code>formatDate</code> などの関数も使えます（例: <code>${tryToNum(row.get('AMOUNT'), 0)}</code>）。関数の一覧は <a href="../dialogs/dataset-setting.html">Dataset Setting</a> の「JEXL 式の書き方」を参照してください。</p>
 
   <h2 id="section-related">関連</h2>
   <ul>

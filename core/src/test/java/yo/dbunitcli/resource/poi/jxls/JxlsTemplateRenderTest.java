@@ -37,18 +37,19 @@ class JxlsTemplateRenderTest {
     }
 
     @Test
-    void templateExpressionCanUseTryToNum(@TempDir final File dir) throws IOException {
+    void templateExpressionCanUseFunctions(@TempDir final File dir) throws IOException {
         final File result = new File(dir, "result.xlsx");
         JxlsTemplateRender.builder()
                 .setTemplateParameterAttribute("")
                 .build()
-                .render(template("${tryToNum(a, 0) + 1}", "${tryToNum(b, 'N/A')}", "${a}")
-                        , result, new Parameter(Map.of("a", "1,234", "b", "abc")), false);
+                .render(template("${tryToNum(a, 0) + 1}", "${tryToNum(b, 'N/A')}", "${a}", "${formatDate(c, 'yyyyMMdd', 'yyyy/MM/dd')}")
+                        , result, new Parameter(Map.of("a", "1,234", "b", "abc", "c", "20261106")), false);
         try (final Workbook workbook = WorkbookFactory.create(result)) {
             final Row row = workbook.getSheetAt(0).getRow(0);
             Assertions.assertEquals(1235d, row.getCell(0).getNumericCellValue());
             Assertions.assertEquals("N/A", row.getCell(1).getStringCellValue());
             Assertions.assertEquals("1,234", row.getCell(2).getStringCellValue());
+            Assertions.assertEquals("2026/11/06", row.getCell(3).getStringCellValue());
         }
     }
 }

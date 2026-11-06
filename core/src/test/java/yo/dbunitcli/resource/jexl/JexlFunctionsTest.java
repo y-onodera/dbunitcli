@@ -40,6 +40,32 @@ class JexlFunctionsTest {
 
     @ParameterizedTest
     @MethodSource("engines")
+    void formatDateConvertsPattern(final JexlEngine engine) {
+        Assertions.assertEquals("2026/11/06", eval(engine, "formatDate(a, 'yyyyMMdd', 'yyyy/MM/dd')", Map.of("a", "20261106")));
+        Assertions.assertEquals("2026/01/06", eval(engine, "formatDate(a, 'yyyy/M/d', 'yyyy/MM/dd')", Map.of("a", "2026/1/6")));
+        Assertions.assertEquals("2026-11-06 23:05", eval(engine, "formatDate(a, 'yyyyMMddHHmmss', 'yyyy-MM-dd HH:mm')", Map.of("a", "20261106230512")));
+    }
+
+    @ParameterizedTest
+    @MethodSource("engines")
+    void formatDateReturnsValueWhenNotParsable(final JexlEngine engine) {
+        Assertions.assertEquals("abc", eval(engine, "formatDate(a, 'yyyyMMdd', 'yyyy/MM/dd')", Map.of("a", "abc")));
+        Assertions.assertEquals("", eval(engine, "formatDate(a, 'yyyyMMdd', 'yyyy/MM/dd')", Map.of("a", "")));
+        Assertions.assertNull(eval(engine, "formatDate(a, 'yyyyMMdd', 'yyyy/MM/dd')", Collections.singletonMap("a", null)));
+    }
+
+    @ParameterizedTest
+    @MethodSource("engines")
+    void formatDateReturnsDefaultWhenNotParsable(final JexlEngine engine) {
+        Assertions.assertEquals("2026/11/06", eval(engine, "formatDate(a, 'yyyyMMdd', 'yyyy/MM/dd', '-')", Map.of("a", "20261106")));
+        Assertions.assertEquals("-", eval(engine, "formatDate(a, 'yyyyMMdd', 'yyyy/MM/dd', '-')", Map.of("a", "2026-11-06")));
+        Assertions.assertEquals("-", eval(engine, "formatDate(a, 'yyyyMMdd', 'yyyy/MM/dd', '-')", Map.of("a", "20260230")));
+        Assertions.assertEquals("2024/02/29", eval(engine, "formatDate(a, 'yyyyMMdd', 'yyyy/MM/dd', '-')", Map.of("a", "20240229")));
+        Assertions.assertEquals("-", eval(engine, "formatDate(a, 'yyyyMMdd', 'yyyy/MM/dd', '-')", Collections.singletonMap("a", null)));
+    }
+
+    @ParameterizedTest
+    @MethodSource("engines")
     void internalHelperIsNotCallableFromExpression(final JexlEngine engine) {
         if (engine == JexlEngines.TEMPLATE) {
             // silent のため例外にならず null になる

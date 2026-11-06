@@ -6991,6 +6991,23 @@
       "type": "yo.dbunitcli.resource.jexl.JexlFunctions",
       "methods": [
         {
+          "name": "formatDate",
+          "parameterTypes": [
+            "java.lang.Object",
+            "java.lang.String",
+            "java.lang.String"
+          ]
+        },
+        {
+          "name": "formatDate",
+          "parameterTypes": [
+            "java.lang.Object",
+            "java.lang.String",
+            "java.lang.String",
+            "java.lang.Object"
+          ]
+        },
+        {
           "name": "tryToNum",
           "parameterTypes": [
             "java.lang.Object",
