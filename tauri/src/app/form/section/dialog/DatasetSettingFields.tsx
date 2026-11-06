@@ -19,6 +19,10 @@ import type {
 	DatasetSettingMode,
 } from "../../../../model/DatasetSettings";
 import { newDatasetSetting } from "../../../../model/DatasetSettings";
+import {
+	ColumnExpressionSelectDialog,
+	ExpressionEditDialog,
+} from "./AdditionalColumnDialogs";
 import ColumnSelectDialog from "./ColumnSelectDialog";
 
 export type DatasetSettingFieldsProps = {
@@ -119,11 +123,61 @@ const additionalColumnFields = [
 	},
 ] as const;
 
+type AdditionalColumnField = (typeof additionalColumnFields)[number];
+
 export function AdditionalColumnsFields({
 	target,
 	setTarget,
-}: DatasetSettingFieldsProps) {
+	columnDatalist,
+	onLoadColumns,
+}: DatasetSettingFieldsProps & {
+	columnDatalist: string[];
+	onLoadColumns: () => void;
+}) {
 	const [showOptional, setShowOptional] = useState(false);
+	const [selecting, setSelecting] = useState<AdditionalColumnField | null>(
+		null,
+	);
+	const [editing, setEditing] = useState<{
+		field: AdditionalColumnField;
+		index: number;
+	} | null>(null);
+	// 同じ名前が既にある組は上書きせずに除く
+	const appendEntries = (
+		field: AdditionalColumnField,
+		entries: [string, string][],
+	) =>
+		setTarget((cur) => {
+			let next = cur;
+			for (const [name, expression] of entries) {
+				const values = next[field.name];
+				if (!(name in values)) {
+					next = field.replace(next, Object.keys(values).length, {
+						[name]: expression,
+					});
+				}
+			}
+			return next;
+		});
+	function renderEditDialog() {
+		if (!editing) {
+			return null;
+		}
+		const { field, index } = editing;
+		const [name, value] = Object.entries(target[field.name])[index];
+		return (
+			<ExpressionEditDialog
+				name={name}
+				value={String(value)}
+				columns={columnDatalist}
+				defaultValue={defaultValueOf(field)}
+				onApply={(newValue) =>
+					setTarget((cur) => field.replace(cur, index, { [name]: newValue }))
+				}
+				onClose={() => setEditing(null)}
+			/>
+		);
+	}
 	return (
 		<Fieldset legend="Additional Columns">
 			<ExpandButton
@@ -131,22 +185,48 @@ export function AdditionalColumnsFields({
 				showOptional={showOptional}
 				caption="additional columns"
 			/>
-			{showOptional &&
-				additionalColumnFields.map((field) => (
-					<KeyValues
-						key={field.name}
-						name={field.name}
-						values={target[field.name]}
-						handleChange={(index, newValue) =>
-							setTarget((cur) => field.replace(cur, index, newValue))
-						}
-						handleRemove={(index) =>
-							setTarget((cur) => field.remove(cur, index))
-						}
-					/>
-				))}
+			{showOptional && (
+				<>
+					<DialogField>
+						<BlueButton title="Load Columns" handleClick={onLoadColumns} />
+					</DialogField>
+					{additionalColumnFields.map((field) => (
+						<KeyValues
+							key={field.name}
+							name={field.name}
+							values={target[field.name]}
+							handleChange={(index, newValue) =>
+								setTarget((cur) => field.replace(cur, index, newValue))
+							}
+							handleRemove={(index) =>
+								setTarget((cur) => field.remove(cur, index))
+							}
+							handleSelect={
+								columnDatalist.length > 0
+									? () => setSelecting(field)
+									: undefined
+							}
+							handleEdit={(index) => setEditing({ field, index })}
+						/>
+					))}
+				</>
+			)}
+			{selecting && (
+				<ColumnExpressionSelectDialog
+					columns={columnDatalist}
+					defaultValue={defaultValueOf(selecting)}
+					onApply={(entries) => appendEntries(selecting, entries)}
+					onClose={() => setSelecting(null)}
+				/>
+			)}
+			{renderEditDialog()}
 		</Fieldset>
 	);
+}
+
+// tryToNum等の既定値の初期値。numberは数値にしないと変換に失敗する
+function defaultValueOf(field: AdditionalColumnField): string {
+	return field.name === "number" ? "0" : "''";
 }
 
 // Filter/Orderの配列項目。モデルのreplace*/remove*をキー別に対応付ける

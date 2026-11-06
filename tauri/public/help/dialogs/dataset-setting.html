@@ -234,6 +234,21 @@ id | amount
   </table>
   <p>＋（Add）を押すと空の行が追加されます。name を入力して確定すると設定され、空のまま確定するとその行は消えます。追加した行を確定するまで ＋ は表示されません。</p>
 
+  <h3>読み込んだカラムの反映</h3>
+  <p>展開すると先頭に Load Columns ボタンが表示されます。使い方は Filter / Order の「Load Columns」と同じで、取得したカラムは Filter / Order と共通です。取得したカラムは <code>get('カラム名')</code> の形で式に反映します。日本語や記号を含むカラム名もそのまま参照できます。</p>
+  <p>反映するときに、カラムを関数で囲むかを <code>function</code> で選べます。</p>
+  <table>
+    <tr><th>function</th><th>反映される式</th></tr>
+    <tr><td>none</td><td><code>get('カラム名')</code></td></tr>
+    <tr><td>tryToNum</td><td><code>tryToNum(get('カラム名'), default)</code>。<code>default</code> が空なら <code>null</code> になる。</td></tr>
+    <tr><td>formatDate</td><td><code>formatDate(get('カラム名'), 'from', 'to', default)</code>。<code>default</code> が空なら 3 引数の形になる。</td></tr>
+  </table>
+  <p><code>default</code> には JEXL 式をそのまま書きます（文字列なら <code>''</code> のようにシングルクォートで囲みます）。初期値は <code>number</code> では <code>0</code>、それ以外では <code>''</code> です。<code>from</code> / <code>to</code> は書式だけを書きます。関数の詳しい動きは「JEXL 式の書き方」の「関数」を参照してください。</p>
+  <ul>
+    <li>select ボタン（チェックリスト付きのアイコン）: 各型の ＋ の右に表示されます。Select Columns ダイアログでカラムを複数選んで Apply を押すと、カラム名を name、カラムを参照する式を値とした行をまとめて末尾に追加します。その型に同じ name の行が既にあるカラムは追加しません。Load Columns でカラムを取得するまでは表示されません。</li>
+    <li>edit ボタン: 各行の右に表示され、値の式をテキストエリアで編集するダイアログを開きます。<code>column</code> でカラムを選び Append を押すと、編集中の式の末尾にカラムを参照する式を追記します（演算子などは自分で入力してください）。Apply で行の値に反映します。カラムを取得していない場合は、式の編集だけができます。</li>
+  </ul>
+
   <h3>変化の例</h3>
 
   <p><strong>string（文字列連結）</strong></p>
@@ -310,7 +325,7 @@ id | status   | mark
   </ul>
 
   <h3>Load Columns</h3>
-  <p>Filter / Order の先頭にある Load Columns ボタンで、各フィールドのカラム名入力の候補（入力補助）を読み込めます。</p>
+  <p>Filter / Order の先頭にある Load Columns ボタンで、各フィールドのカラム名入力の候補（入力補助）を読み込めます。Additional Columns の Load Columns ボタンも同じ動きで、取得したカラムは両方で使えます。</p>
   <ol>
     <li>Load Columns を押すと、Target の指定に該当するテーブルの一覧が表示されます。Target でテーブル名やパターンを指定していない場合は、データセット内のすべてのテーブルが表示されます。</li>
     <li>候補にしたいテーブルの行で Load Columns を押すと、そのテーブルのカラム名が取得されます。読み込むのは選んだテーブルだけです。</li>
@@ -410,6 +425,7 @@ id | name
     <li><code>substring(start, end)</code> — 部分文字列の取得</li>
   </ul>
   <p>文字列リテラルはシングルクォートで囲みます（例: <code>'APPROVED'</code>）。</p>
+  <p>日本語や記号を含むカラム名はそのままでは式に書けないため、<code>get('カラム名')</code> で参照します（例: <code>get('金額(円)') &gt; 1000</code>）。</p>
 
   <h3>関数</h3>
   <p>次の関数は、Excel テンプレート（<a href="../sections/jxls.html">Jxls</a>）の <code>${...}</code> の中でも使えます。</p>

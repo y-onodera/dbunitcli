@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { type ReactNode, useState } from "react";
 import {
 	DataTable,
 	DialogActions,
@@ -15,10 +15,13 @@ export default function ColumnSelectDialog({
 	columns,
 	onApply,
 	onClose,
+	children,
 }: {
 	columns: string[];
 	onApply: (selected: string[]) => void;
 	onClose: () => void;
+	// 一覧の上に出す、反映方法の指定欄
+	children?: ReactNode;
 }) {
 	const [selected, setSelected] = useState<string[]>([]);
 
@@ -58,6 +61,7 @@ export default function ColumnSelectDialog({
 	return (
 		<ModalOverlay width="w-lg" zClass="z-modal-nested">
 			<DialogTitle>Select Columns</DialogTitle>
+			{children}
 			{renderBody()}
 			<DialogActions>
 				<BlueButton
