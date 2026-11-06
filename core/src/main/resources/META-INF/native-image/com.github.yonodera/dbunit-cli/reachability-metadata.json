@@ -6988,7 +6988,7 @@
       ]
     },
     {
-      "type": "yo.dbunitcli.dataset.JexlFunctions",
+      "type": "yo.dbunitcli.resource.jexl.JexlFunctions",
       "methods": [
         {
           "name": "tryToNum",

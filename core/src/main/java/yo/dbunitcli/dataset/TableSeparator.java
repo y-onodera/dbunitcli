@@ -10,6 +10,7 @@ import org.dbunit.dataset.filter.DefaultColumnFilter;
 import org.dbunit.dataset.filter.IColumnFilter;
 import yo.dbunitcli.application.json.TableMetaDataFilterParser;
 import yo.dbunitcli.common.TableMetaDataFilter;
+import yo.dbunitcli.resource.jexl.JexlEngines;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -159,7 +160,7 @@ public record TableSeparator(TableMetaDataFilter sourceFilter
             return new RowFilter(expression
                     .stream()
                     .filter(it -> !it.trim().isEmpty())
-                    .map(JexlFunctions.ENGINE::createExpression)
+                    .map(JexlEngines.DATASET::createExpression)
                     .toList());
         }
 

@@ -47,6 +47,7 @@ public record JxlsTemplateRender(
         final JxlsPoiTemplateFillerBuilder builder = JxlsPoiTemplateFillerBuilder.newInstance()
                 .withAreaBuilder(areaBuilder)
                 .withTemplate(new ByteArrayInputStream(template))
+                .withExpressionEvaluatorFactory(new JexlFunctionsEvaluatorFactory())
                 .withTransformerFactory(new UserFormulasValueClearPoiTransformerFactory(this.deleteBlankCells));
         if (this.fastFormulaProcess) {
             builder.withFastFormulaProcessor();

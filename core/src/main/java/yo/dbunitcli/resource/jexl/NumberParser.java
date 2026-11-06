@@ -1,4 +1,4 @@
-package yo.dbunitcli.dataset;
+package yo.dbunitcli.resource.jexl;
 
 import java.math.BigDecimal;
 import java.text.DecimalFormat;

@@ -4,6 +4,8 @@ import org.apache.commons.jexl3.JexlContext;
 import org.apache.commons.jexl3.MapContext;
 import org.dbunit.dataset.Column;
 import org.dbunit.dataset.datatype.DataType;
+import yo.dbunitcli.resource.jexl.JexlEngines;
+import yo.dbunitcli.resource.jexl.NumberParser;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -72,7 +74,7 @@ public record ExpressionColumns(List<Expressions> values) {
                 .stream()
                 .filter(exp -> exp.contains(columnName))
                 .map(exp -> {
-                    final Object val = JexlFunctions.ENGINE.createExpression(exp.values().get(columnName)).evaluate(jc);
+                    final Object val = JexlEngines.DATASET.createExpression(exp.values().get(columnName)).evaluate(jc);
                     return switch (exp.type()) {
                         case STRING -> val;
                         case BOOLEAN -> Boolean.parseBoolean(val.toString());
