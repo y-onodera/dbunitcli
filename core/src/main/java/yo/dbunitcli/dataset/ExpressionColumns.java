@@ -8,6 +8,9 @@ import org.dbunit.dataset.Column;
 import org.dbunit.dataset.datatype.DataType;
 
 import java.math.BigDecimal;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.text.ParsePosition;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -87,10 +90,22 @@ public record ExpressionColumns(List<Expressions> values) {
                                 if (val.isEmpty()) {
                                     yield val;
                                 }
-                                yield new BigDecimal(val);
+                                yield parseNumber(val);
                             }
                         })
                 .reduce(null, (a, b) -> b != null ? b : a);
+    }
+
+    private static BigDecimal parseNumber(final String val) {
+        // DecimalFormat はスレッドセーフでないため呼び出し毎に生成する
+        final DecimalFormat format = new DecimalFormat("#,##0.#", DecimalFormatSymbols.getInstance(Locale.ROOT));
+        format.setParseBigDecimal(true);
+        final ParsePosition pos = new ParsePosition(0);
+        final Number result = format.parse(val, pos);
+        if (result == null || pos.getIndex() != val.length()) {
+            throw new NumberFormatException("invalid number: " + val);
+        }
+        return (BigDecimal) result;
     }
 
     public enum ParameterType {
