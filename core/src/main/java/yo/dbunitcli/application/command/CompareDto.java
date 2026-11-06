@@ -5,8 +5,6 @@ import yo.dbunitcli.application.CommandDto;
 import yo.dbunitcli.application.dto.DataSetConverterDto;
 import yo.dbunitcli.application.dto.DataSetLoadDto;
 import yo.dbunitcli.application.dto.ImageCompareDto;
-import yo.dbunitcli.application.option.EncodingOption;
-
 
 public class CompareDto extends CommandDto {
 
@@ -14,7 +12,7 @@ public class CompareDto extends CommandDto {
     private String setting;
 
     @CommandLine.Option(names = "-settingEncoding", description = "settings encoding")
-    private String settingEncoding = EncodingOption.orDefault(null);
+    private String settingEncoding;
 
     @CommandLine.Option(names = "-targetType")
     private CompareOption.Type targetType = CompareOption.Type.data;
