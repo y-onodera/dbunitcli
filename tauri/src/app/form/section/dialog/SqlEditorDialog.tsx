@@ -23,21 +23,20 @@ import { InlinePreviewButton } from "./DatasetTableNamesPreviewButton";
 import type { EditResourceDialogProps } from "./ResourceEditButton";
 import SqlTableInsertDialog from "./SqlTableInsertDialog";
 
-// queryOnlyはデータセットの読込元のSQL。テーブル・列の挿入の用途からDMLを除く
-type SqlEditorOptions = { queryOnly?: boolean };
+// queryOnlyはデータセットの読込元のSQL。テーブル・列の挿入の用途からDMLを除く。
+// encodingはコマンド実行時にこのSQLを読む文字コードで、読み書きに使う
+type SqlEditorOptions = { queryOnly?: boolean; encoding: string };
 
 type SqlEditorDialogProps = EditResourceDialogProps &
 	SqlEditorOptions & {
 		type: QueryDatasourceType;
 	};
 
-// コマンド実行時はsrcの-encodingで読むため、同じ文字コードで読み書きする
 export default function SqlEditorDialog(props: SqlEditorDialogProps) {
-	const encoding = useDatasetSrcInfo().values.encoding ?? "";
 	const { content, loading } = useResourceContent(
 		props.type,
 		props.fileName,
-		encoding,
+		props.encoding,
 	);
 	if (loading) {
 		return <StatusMessage kind="loading">Loading...</StatusMessage>;
@@ -68,10 +67,7 @@ function Dialog(props: SqlEditorDialogProps & { value: string }) {
 	const { jdbcValues, connectionOk } = useJdbcConnectionState();
 
 	const datasetSrcInfo = useDatasetSrcInfo();
-	const saveDataSource = useSaveResourceContent(
-		props.type,
-		datasetSrcInfo.values.encoding ?? "",
-	);
+	const saveDataSource = useSaveResourceContent(props.type, props.encoding);
 
 	const insertToContent = (lines: string[], inline = false) => {
 		const textarea = textareaRef.current;

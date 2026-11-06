@@ -86,6 +86,7 @@ export function ParameterizeForm(prop: {
 					<TemplateFormSection
 						templateOption={templateOption}
 						showEncoding={true}
+						encoding={templateEncoding}
 						handleValueChange={(param) => (value: string) => {
 							if (param === templateOption.encoding) {
 								setTemplateEncoding(value);

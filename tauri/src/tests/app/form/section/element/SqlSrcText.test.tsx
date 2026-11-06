@@ -38,7 +38,12 @@ function srcElement(value: string): CommandOption {
 
 function renderSrc(srcType: string, value: string) {
 	render(
-		<SqlSrcText prefix="src" element={srcElement(value)} srcType={srcType} />,
+		<SqlSrcText
+			prefix="src"
+			element={srcElement(value)}
+			srcType={srcType}
+			encoding=""
+		/>,
 	);
 }
 

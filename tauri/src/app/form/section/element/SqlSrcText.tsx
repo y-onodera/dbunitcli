@@ -9,6 +9,7 @@ import { sqlEditorDialogs } from "../dialog/SqlEditorDialog";
 import type { TextProp } from "./FormElementProp";
 import Text, { TextDropDownMenu } from "./Text";
 
+// encodingはコマンド実行時にこのSQLを読む文字コードで、編集ダイアログの読み書きに使う
 export default function SqlSrcText({
 	prefix,
 	element,
@@ -16,7 +17,8 @@ export default function SqlSrcText({
 	srcType,
 	handleValueChange,
 	queryOnly = false,
-}: TextProp & { queryOnly?: boolean }) {
+	encoding,
+}: TextProp & { queryOnly?: boolean; encoding: string }) {
 	const settings = useResourcesSettings();
 	const type = srcType as QueryDatasourceType;
 
@@ -41,7 +43,7 @@ export default function SqlSrcText({
 						<EditResourceButton
 							key="edit"
 							dialog={sqlEditorDialogs[type]}
-							dialogProps={{ queryOnly }}
+							dialogProps={{ queryOnly, encoding }}
 							path={path}
 							setPath={setPath}
 						/>,

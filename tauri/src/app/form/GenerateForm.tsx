@@ -111,6 +111,7 @@ export function GenerateForm(prop: {
 					<TemplateFormSection
 						templateOption={prop.generate.templateOption}
 						showEncoding={true}
+						encoding={templateEncoding}
 						handleValueChange={(param) => (value: string) => {
 							if (param === prop.generate.templateOption?.encoding) {
 								setTemplateEncoding(value);

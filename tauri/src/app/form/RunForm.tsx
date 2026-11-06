@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { SectionFieldset } from "../../components/dialog";
 import { SectionLegend } from "../../components/dialog/SectionFieldset";
 import { JdbcConnectionProvider } from "../../context/JdbcConnectionProvider";
@@ -16,6 +17,10 @@ export function RunForm(prop: {
 	run: RunOptions;
 }) {
 	const run = prop.run;
+	// SQLスクリプト・templateGroupの編集で読み書きする文字コード（-template.encodingの入力中の値）
+	const [templateEncoding, setTemplateEncoding] = useState(
+		run.templateOption?.encoding?.value ?? "",
+	);
 	return (
 		<SectionFieldset>
 			<SectionLegend title="run" command="commands/run" label="Run" />
@@ -31,6 +36,7 @@ export function RunForm(prop: {
 					srcType={run.scriptType.value === "sql" ? "sql" : undefined}
 					jdbcOption={run.jdbcOption}
 					handleValueChange={() => (_: string) => {}}
+					encoding={templateEncoding}
 				/>
 				<TraversalFormSection
 					srcElements={run.srcData}
@@ -41,7 +47,12 @@ export function RunForm(prop: {
 					<TemplateFormSection
 						templateOption={run.templateOption}
 						showEncoding={!run.srcData.encoding}
-						handleValueChange={() => (_: string) => {}}
+						handleValueChange={(param) => (value: string) => {
+							if (param === run.templateOption?.encoding) {
+								setTemplateEncoding(value);
+							}
+						}}
+						encoding={templateEncoding}
 					/>
 				)}
 			</JdbcConnectionProvider>

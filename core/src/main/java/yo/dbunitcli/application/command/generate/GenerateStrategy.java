@@ -9,6 +9,7 @@ import yo.dbunitcli.resource.FileResources;
 import yo.dbunitcli.resource.st4.TemplateRender;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 /**
@@ -30,10 +31,15 @@ public interface GenerateStrategy {
         return null;
     }
 
+    /** 組み込みのstgはclasspathのUTF-8のファイル */
     default STGroup stGroup() {
         final String stgPath = this.stgPath();
         return stgPath != null
-                ? new TemplateRender.Builder().setTemplateParameterAttribute(null).build().createSTGroup(stgPath)
+                ? new TemplateRender.Builder()
+                        .setTemplateParameterAttribute(null)
+                        .setEncoding(StandardCharsets.UTF_8.name())
+                        .build()
+                        .createSTGroup(stgPath)
                 : null;
     }
 

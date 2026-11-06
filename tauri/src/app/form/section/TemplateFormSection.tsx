@@ -15,9 +15,12 @@ export default function TemplateFormSection({
 	templateOption,
 	showEncoding,
 	handleValueChange,
+	encoding,
 }: {
 	templateOption: TemplateOption;
 	showEncoding: boolean;
+	// コマンド実行時にtemplateGroupを読む文字コード（入力中の値。編集ダイアログの読み書きに使う）
+	encoding: string;
 	handleValueChange: (param: CommandOption) => (newValue: string) => void;
 }) {
 	const [showOptional, setShowOptional] = useState(false);
@@ -44,8 +47,7 @@ export default function TemplateFormSection({
 				prefix={templateOption.prefix}
 				element={templateOption.templateGroup}
 				hidden={!showOptional}
-				// StringTemplateはtemplateGroup（.stg）を常にUTF-8で読む
-				encoding="UTF-8"
+				encoding={encoding}
 				handleValueChange={handleValueChange(templateOption.templateGroup)}
 			/>
 			<PlainText

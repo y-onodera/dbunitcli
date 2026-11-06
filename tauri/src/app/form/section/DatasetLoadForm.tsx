@@ -64,6 +64,7 @@ function DatasetLoadFormContent({
 				jdbcOption={jdbcOption}
 				handleValueChange={handleValueChange}
 				queryOnly
+				encoding={datasetSrcInfo.values.encoding ?? ""}
 			/>
 			<TraversalFormSection
 				srcElements={srcData}
@@ -75,6 +76,7 @@ function DatasetLoadFormContent({
 					templateOption={templateOption}
 					showEncoding={!srcData.encoding}
 					handleValueChange={handleValueChange}
+					encoding={datasetSrcInfo.values.encoding ?? ""}
 				/>
 			)}
 			<DataLoadFormSection

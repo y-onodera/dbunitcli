@@ -100,7 +100,7 @@ public record TemplateRender(File templateGroup, String templateParameterAttribu
         if (Optional.ofNullable(fileName).orElse("").isEmpty()) {
             stGroup = new STGroup(this.templateVarStart(), this.templateVarStop());
         } else {
-            stGroup = new STGroupFile(fileName, this.templateVarStart(), this.templateVarStop());
+            stGroup = new STGroupFile(fileName, this.encoding(), this.templateVarStart(), this.templateVarStop());
         }
         stGroup.registerRenderer(String.class, new SqlEscapeStringRenderer());
         return stGroup;
