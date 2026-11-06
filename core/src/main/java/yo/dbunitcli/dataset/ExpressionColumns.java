@@ -1,13 +1,12 @@
 package yo.dbunitcli.dataset;
 
-import org.apache.commons.jexl3.JexlBuilder;
 import org.apache.commons.jexl3.JexlContext;
-import org.apache.commons.jexl3.JexlEngine;
 import org.apache.commons.jexl3.MapContext;
 import org.dbunit.dataset.Column;
 import org.dbunit.dataset.datatype.DataType;
+import yo.dbunitcli.resource.jexl.JexlEngines;
+import yo.dbunitcli.resource.jexl.NumberParser;
 
-import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -70,26 +69,19 @@ public record ExpressionColumns(List<Expressions> values) {
     }
 
     public Object evaluate(final String columnName, final Map<String, Object> param) {
-        final JexlEngine jexl = new JexlBuilder().create();
         final JexlContext jc = new MapContext(param);
         return this.values()
                 .stream()
                 .filter(exp -> exp.contains(columnName))
-                .map(exp ->
-                        switch (exp.type()) {
-                            case STRING -> jexl.createExpression(exp.values().get(columnName)).evaluate(jc);
-                            case BOOLEAN ->
-                                    Boolean.parseBoolean(jexl.createExpression(exp.values().get(columnName)).evaluate(jc).toString());
-                            case SQL_FUNCTION ->
-                                    jexl.createExpression(exp.values().get(columnName)).evaluate(jc).toString();
-                            case NUMBER -> {
-                                final String val = jexl.createExpression(exp.values().get(columnName)).evaluate(jc).toString();
-                                if (val.isEmpty()) {
-                                    yield val;
-                                }
-                                yield new BigDecimal(val);
-                            }
-                        })
+                .map(exp -> {
+                    final Object val = JexlEngines.DATASET.createExpression(exp.values().get(columnName)).evaluate(jc);
+                    return switch (exp.type()) {
+                        case STRING -> val;
+                        case BOOLEAN -> Boolean.parseBoolean(val.toString());
+                        case SQL_FUNCTION -> val.toString();
+                        case NUMBER -> val.toString().isEmpty() ? "" : NumberParser.parse(val);
+                    };
+                })
                 .reduce(null, (a, b) -> b != null ? b : a);
     }
 
