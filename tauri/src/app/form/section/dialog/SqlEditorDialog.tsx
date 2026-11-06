@@ -20,12 +20,14 @@ import {
 } from "../../../../utils/textInsert";
 import CsvReadInsertDialog from "./CsvReadInsertDialog";
 import { InlinePreviewButton } from "./DatasetTableNamesPreviewButton";
-import type { EditResourceDialogProps } from "./ResourceEditButton";
+import type {
+	EditResourceDialogProps,
+	EncodingProp,
+} from "./ResourceEditButton";
 import SqlTableInsertDialog from "./SqlTableInsertDialog";
 
-// queryOnlyはデータセットの読込元のSQL。テーブル・列の挿入の用途からDMLを除く。
-// encodingはコマンド実行時にこのSQLを読む文字コードで、読み書きに使う
-type SqlEditorOptions = { queryOnly?: boolean; encoding: string };
+// queryOnlyはデータセットの読込元のSQL。テーブル・列の挿入の用途からDMLを除く
+type SqlEditorOptions = EncodingProp & { queryOnly?: boolean };
 
 type SqlEditorDialogProps = EditResourceDialogProps &
 	SqlEditorOptions & {

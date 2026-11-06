@@ -23,7 +23,9 @@ import PlainText from "./section/element/PlainText";
 import Select from "./section/element/Select";
 import TemplateText from "./section/element/TemplateText";
 import JxlsFormSection from "./section/JxlsFormSection";
-import TemplateFormSection from "./section/TemplateFormSection";
+import TemplateFormSection, {
+	useTemplateEncoding,
+} from "./section/TemplateFormSection";
 
 export function GenerateForm(prop: {
 	handleTypeSelect: () => Promise<void>;
@@ -47,10 +49,7 @@ export function GenerateForm(prop: {
 	const [unitSettingEncoding, setUnitSettingEncoding] = useState(
 		generate.unitSettingEncoding?.value ?? "",
 	);
-	// templateの編集で読み書きする文字コード（-template.encodingの入力中の値）
-	const [templateEncoding, setTemplateEncoding] = useState(
-		generate.templateOption?.encoding?.value ?? "",
-	);
+	const templateEncoding = useTemplateEncoding(generate.templateOption);
 	// srcの入力値はsrcフォームとunitSettingの編集・プレビューで共有する
 	// （テーブル名・カラム名の候補とプレビューの読込元にsrcのデータセットを使う）
 	return (
@@ -104,19 +103,15 @@ export function GenerateForm(prop: {
 						prefix=""
 						element={generate.template}
 						editButtons={templateEditButtons}
-						encoding={templateEncoding}
+						encoding={templateEncoding.encoding}
 					/>
 				)}
 				{prop.generate.templateOption && generateTypeValue === "txt" && (
 					<TemplateFormSection
 						templateOption={prop.generate.templateOption}
 						showEncoding={true}
-						encoding={templateEncoding}
-						handleValueChange={(param) => (value: string) => {
-							if (param === prop.generate.templateOption?.encoding) {
-								setTemplateEncoding(value);
-							}
-						}}
+						encoding={templateEncoding.encoding}
+						handleValueChange={templateEncoding.handleValueChange}
 					/>
 				)}
 				{prop.generate.templateOption && isExcelGenerate && (

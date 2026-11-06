@@ -7,7 +7,7 @@ import {
 	getErrorMessage,
 	handleFetchError,
 } from "../utils/fetchUtils";
-import { useUpdateResourceFiles } from "./useResourceFiles";
+import { resourceLoadParams, useUpdateResourceFiles } from "./useResourceFiles";
 import { useSettingEncoding } from "./useSettingEncoding";
 
 export const useSaveXlsxSchema = () => {
@@ -55,14 +55,7 @@ async function loadXlsxSchema(
 	if (name === "") {
 		return XlsxSchema.create();
 	}
-	const fetchParams = {
-		endpoint: `${apiUrl}xlsx-schema/load`,
-		options: {
-			method: "POST",
-			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify({ name, encoding }),
-		},
-	};
+	const fetchParams = resourceLoadParams(apiUrl, "xlsxSchema", name, encoding);
 	return await fetchData(fetchParams)
 		.then((response) => response.json())
 		.then((schema: XlsxSchemaBuilder) => XlsxSchema.build(schema))

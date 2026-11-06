@@ -9,10 +9,10 @@ import {
 	useResourceContent,
 	useSaveResourceContent,
 } from "../../../../hooks/useResourceFiles";
-import type { EditResourceDialogProps } from "./ResourceEditButton";
-
-// encoding: コマンド実行時にこのファイルを読む文字コード。読み書きに使う
-type EncodingProp = { encoding: string };
+import type {
+	EditResourceDialogProps,
+	EncodingProp,
+} from "./ResourceEditButton";
 
 function extractFileNameFromTemplatePath(templatePath: string): string {
 	return templatePath.replace(/\\/g, "/").split("/").pop() ?? templatePath;

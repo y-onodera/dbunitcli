@@ -29,6 +29,15 @@ public record DataSetLoadOption(
 ) implements Option {
 
 
+    /**
+     * -settingと-xlsxSchemaは同じ文字コードで読む
+     */
+    static String settingEncodingOf(final DataSetLoadDto dto) {
+        return Strings.isNotEmpty(dto.getSettingEncoding())
+                ? dto.getSettingEncoding()
+                : Charset.defaultCharset().displayName();
+    }
+
     private static DataSourceType getSrcType(final DataSetLoadDto dto) {
         return dto.getSrcType() != null ? dto.getSrcType() : DataSourceType.csv;
     }
@@ -45,9 +54,7 @@ public record DataSetLoadOption(
                         ? dto.getSrc()
                         : null
                 , dto.getSetting()
-                , Strings.isNotEmpty(dto.getSettingEncoding())
-                        ? dto.getSettingEncoding()
-                        : Charset.defaultCharset().displayName()
+                , DataSetLoadOption.settingEncodingOf(dto)
                 , Strings.isNotEmpty(dto.getSettingTargetOnly()) ? dto.getSettingTargetOnly() : "false"
                 , dto.getRegTableInclude()
                 , dto.getRegTableExclude()

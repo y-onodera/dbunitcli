@@ -1,12 +1,10 @@
 package yo.dbunitcli.application.option;
 
-import yo.dbunitcli.Strings;
 import yo.dbunitcli.application.dto.DataSetLoadDto;
 import yo.dbunitcli.application.json.FromJsonXlsxSchemaBuilder;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.resource.FileResources;
 
-import java.nio.charset.Charset;
 import java.util.List;
 
 /**
@@ -15,11 +13,7 @@ import java.util.List;
 public record ExcelOption(String prefix, String xlsxSchemaSource, String settingEncoding) implements ComparableDataSetParamOption {
 
     public ExcelOption(final String prefix, final DataSetLoadDto dto) {
-        this(prefix
-                , dto.getXlsxSchemaSource()
-                , Strings.isNotEmpty(dto.getSettingEncoding())
-                        ? dto.getSettingEncoding()
-                        : Charset.defaultCharset().displayName());
+        this(prefix, dto.getXlsxSchemaSource(), DataSetLoadOption.settingEncodingOf(dto));
     }
 
     @Override

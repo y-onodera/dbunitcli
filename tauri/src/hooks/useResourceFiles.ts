@@ -6,6 +6,7 @@ import type {
 	ResourcesSettingsBuilder,
 } from "../model/WorkspaceResources";
 import {
+	type FetchParams,
 	fetchAndUpdate,
 	fetchData,
 	getErrorMessage,
@@ -46,6 +47,23 @@ export type DatasetSettingKind =
 // 種類に対応するAPIの接頭辞（`${apiUrl}${base}/load`等）
 export function resourceBaseOf(kind: ResourceKind): string {
 	return resourceTargets[kind].base;
+}
+
+// `${base}/load`へ名前と、コマンド実行時にそのファイルを読む文字コードを送るリクエスト（読込で共通）
+export function resourceLoadParams(
+	apiUrl: string,
+	kind: ResourceKind,
+	name: string,
+	encoding: string,
+): FetchParams {
+	return {
+		endpoint: `${apiUrl}${resourceTargets[kind].base}/load`,
+		options: {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify({ name, encoding }),
+		},
+	};
 }
 
 // 種類に対応するResourcesSettings上のファイル一覧（入力欄の候補）
@@ -106,7 +124,6 @@ export const useResourceContent = (
 	encoding: string,
 ): { content: string; loading: boolean } => {
 	const { apiUrl } = useEnvironment();
-	const resource = resourceTargets[kind].base;
 	const [content, setContent] = useState("");
 	const [loading, setLoading] = useState(name !== "");
 
@@ -118,7 +135,7 @@ export const useResourceContent = (
 		}
 		const controller = new AbortController();
 		setLoading(true);
-		loadResourceContent(apiUrl, resource, name, encoding).then((result) => {
+		loadResourceContent(apiUrl, kind, name, encoding).then((result) => {
 			if (!controller.signal.aborted) {
 				setContent(result);
 				setLoading(false);
@@ -127,25 +144,18 @@ export const useResourceContent = (
 		return () => {
 			controller.abort();
 		};
-	}, [resource, name, apiUrl, encoding]);
+	}, [kind, name, apiUrl, encoding]);
 
 	return { content, loading };
 };
 
 async function loadResourceContent(
 	apiUrl: string,
-	resource: string,
+	kind: ResourceKind,
 	name: string,
 	encoding: string,
 ): Promise<string> {
-	const params = {
-		endpoint: `${apiUrl}${resource}/load`,
-		options: {
-			method: "POST",
-			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify({ name, encoding }),
-		},
-	};
+	const params = resourceLoadParams(apiUrl, kind, name, encoding);
 	try {
 		const response = await fetchData(params);
 		const data = (await response.json()) as { content?: string };

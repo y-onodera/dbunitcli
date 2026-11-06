@@ -11,6 +11,20 @@ import EncodingText from "./element/EncodingText";
 import PlainText from "./element/PlainText";
 import TemplateText from "./element/TemplateText";
 
+// template optionのencodingの入力中の値と、それを追うTemplateFormSectionのhandleValueChange。
+// templateGroup・template・SQLスクリプトの編集ダイアログが読み書きする文字コードに使う
+export function useTemplateEncoding(templateOption?: TemplateOption) {
+	const [encoding, setEncoding] = useState(
+		templateOption?.encoding?.value ?? "",
+	);
+	const handleValueChange = (param: CommandOption) => (value: string) => {
+		if (param === templateOption?.encoding) {
+			setEncoding(value);
+		}
+	};
+	return { encoding, handleValueChange };
+}
+
 export default function TemplateFormSection({
 	templateOption,
 	showEncoding,

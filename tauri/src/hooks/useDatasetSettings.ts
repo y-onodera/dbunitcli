@@ -21,7 +21,7 @@ import type { JobContext } from "./useJob";
 import { appendLogLines } from "./useJobLog";
 import {
 	type DatasetSettingKind,
-	resourceBaseOf,
+	resourceLoadParams,
 	useUpdateResourceFiles,
 } from "./useResourceFiles";
 import { useSettingEncoding } from "./useSettingEncoding";
@@ -464,14 +464,7 @@ async function loadDatasetSettings(
 	if (name === "") {
 		return DatasetSettings.create();
 	}
-	const fetchParams = {
-		endpoint: `${apiUrl}${resourceBaseOf(kind)}/load`,
-		options: {
-			method: "POST",
-			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify({ name, encoding }),
-		},
-	};
+	const fetchParams = resourceLoadParams(apiUrl, kind, name, encoding);
 	return await fetchData(fetchParams)
 		.then((response) => response.json())
 		.then((setting: DatasetSettingsBuilder) => DatasetSettings.build(setting))

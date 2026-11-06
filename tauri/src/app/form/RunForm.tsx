@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { SectionFieldset } from "../../components/dialog";
 import { SectionLegend } from "../../components/dialog/SectionFieldset";
 import { JdbcConnectionProvider } from "../../context/JdbcConnectionProvider";
@@ -8,7 +7,9 @@ import FileText from "./section/element/FileText";
 import PlainText from "./section/element/PlainText";
 import Select from "./section/element/Select";
 import SrcFormSection from "./section/SrcFormSection";
-import TemplateFormSection from "./section/TemplateFormSection";
+import TemplateFormSection, {
+	useTemplateEncoding,
+} from "./section/TemplateFormSection";
 import TraversalFormSection from "./section/TraversalFormSection";
 
 export function RunForm(prop: {
@@ -17,10 +18,7 @@ export function RunForm(prop: {
 	run: RunOptions;
 }) {
 	const run = prop.run;
-	// SQLスクリプト・templateGroupの編集で読み書きする文字コード（-template.encodingの入力中の値）
-	const [templateEncoding, setTemplateEncoding] = useState(
-		run.templateOption?.encoding?.value ?? "",
-	);
+	const templateEncoding = useTemplateEncoding(run.templateOption);
 	return (
 		<SectionFieldset>
 			<SectionLegend title="run" command="commands/run" label="Run" />
@@ -36,7 +34,7 @@ export function RunForm(prop: {
 					srcType={run.scriptType.value === "sql" ? "sql" : undefined}
 					jdbcOption={run.jdbcOption}
 					handleValueChange={() => (_: string) => {}}
-					encoding={templateEncoding}
+					encoding={templateEncoding.encoding}
 				/>
 				<TraversalFormSection
 					srcElements={run.srcData}
@@ -47,12 +45,8 @@ export function RunForm(prop: {
 					<TemplateFormSection
 						templateOption={run.templateOption}
 						showEncoding={!run.srcData.encoding}
-						handleValueChange={(param) => (value: string) => {
-							if (param === run.templateOption?.encoding) {
-								setTemplateEncoding(value);
-							}
-						}}
-						encoding={templateEncoding}
+						handleValueChange={templateEncoding.handleValueChange}
+						encoding={templateEncoding.encoding}
 					/>
 				)}
 			</JdbcConnectionProvider>
