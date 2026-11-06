@@ -62,8 +62,8 @@
   <h3>Target（対象指定）</h3>
   <table>
     <tr><th>項目</th><th>説明</th></tr>
-    <tr><td>name</td><td>対象テーブル名。単一文字列・配列、または <code>{ any, filePath }</code> 形式で外部ファイル参照も可。スキーマを含める場合は <code>schema.table</code> 形式</td></tr>
-    <tr><td>filePath</td><td><code>name</code> と併用し、テーブル名リストを読み込むファイルパス</td></tr>
+    <tr><td>name</td><td>対象テーブル名（完全一致）。単一文字列・配列、または <code>{ any, filePath }</code> 形式で指定する。スキーマを含める場合は <code>schema.table</code> 形式</td></tr>
+    <tr><td>filePath</td><td>読み込み元ファイルの絶対パス（区切り文字は <code>/</code>）全体に一致する正規表現。<code>name</code>（<code>{ any, filePath }</code>）・<code>pattern</code>・結合の中に書き、一致するファイル由来のテーブルだけを対象にする（例: <code>.*/master/.*</code>）</td></tr>
     <tr><td>pattern</td><td>テーブル名のマッチ。単一文字列・配列（いずれかを含めば一致）、または <code>{ string, regex, exclude }</code> 形式で指定する。<code>string</code> は部分一致、<code>regex</code> はテーブル名全体に一致する正規表現（両方あれば <code>regex</code> を使う）。<code>exclude</code> に除外するテーブル名（完全一致）を指定できる。</td></tr>
     <tr><td>innerJoin</td><td>2 テーブルを内部結合して 1 つの論理テーブルとして扱う（<code>left / right / column / on</code>）</td></tr>
     <tr><td>outerJoin</td><td>2 テーブルを外部結合して 1 つの論理テーブルとして扱う（<code>left / right / column / on</code>）</td></tr>
@@ -125,7 +125,7 @@
     <li><code>name</code> と <code>pattern</code> はどちらか一方だけ指定する（両方あれば <code>name</code> を使う）</li>
     <li><code>pattern</code> に <code>"*"</code> を指定すると、すべてのテーブルに一致する</li>
     <li><code>regex</code> は部分一致しない。<code>T_</code> で始まるテーブルなら <code>^T_.*</code> のように、名前全体に一致させる</li>
-    <li><code>settings</code> の <code>name</code> と違い、<code>filePath</code> によるテーブル名リストの読み込みは使えない</li>
+    <li><code>settings</code> の <code>name</code> と違い、<code>filePath</code> による読み込み元ファイルでの絞り込みは使えない</li>
     <li><code>"outputFilter": {}</code> のように <code>name</code> も <code>pattern</code> もない場合はエラーになる。絞り込まない場合は <code>outputFilter</code> 自体を書かない（ダイアログでは <code>none</code> を選ぶ）</li>
   </ul>
   <pre>{
