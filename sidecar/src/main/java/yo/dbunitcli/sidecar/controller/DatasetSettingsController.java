@@ -57,7 +57,6 @@ import yo.dbunitcli.sidecar.job.Interruptible;
 import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -234,7 +233,6 @@ public class DatasetSettingsController extends AbstractResourceFileController<Da
         return DatasetUnitTablePreviewResponseDto.of(table, rows);
     }
 
-
     /**
      * 選んだテーブルだけをresultフォームの指定でconvertし、出力先ディレクトリを返す（DB出力なら空文字）。
      * 読込条件はプレビューと同じ。出力を読み直せないため、絞り込みは対象を取りこぼさない範囲に留め（{@link Narrow#singlePass}）、
@@ -332,11 +330,6 @@ public class DatasetSettingsController extends AbstractResourceFileController<Da
     @Override
     protected ResourceFile getResourceFile() {
         return this.workspace.resources().datasetSetting();
-    }
-
-    @Override
-    protected Charset defaultCharset() {
-        return Charset.defaultCharset();
     }
 
     private Parameter buildParameter(final DatasetTableNamesRequestDto request) {

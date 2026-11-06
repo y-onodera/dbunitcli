@@ -6,8 +6,6 @@ import yo.dbunitcli.sidecar.domain.project.ResourceFile;
 import yo.dbunitcli.sidecar.domain.project.Workspace;
 import yo.dbunitcli.sidecar.dto.DatasetRequestDto;
 
-import java.nio.charset.Charset;
-
 /**
  * generateの-unitSettingのJSONをoption/generate/settingに保存・読込・削除する（形式はdataset-settingと同じ）
  */
@@ -22,10 +20,5 @@ public class GenerateSettingController extends AbstractResourceFileController<Da
     @Override
     protected ResourceFile getResourceFile() {
         return this.workspace.options().generateSettings();
-    }
-
-    @Override
-    protected Charset defaultCharset() {
-        return Charset.defaultCharset();
     }
 }

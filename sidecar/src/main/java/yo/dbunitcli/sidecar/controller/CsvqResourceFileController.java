@@ -5,8 +5,6 @@ import jakarta.inject.Inject;
 import yo.dbunitcli.sidecar.domain.project.ResourceFile;
 import yo.dbunitcli.sidecar.domain.project.Workspace;
 
-import java.nio.charset.Charset;
-
 @Controller("csvq")
 public class CsvqResourceFileController extends AbstractTextResourceFileController {
 
@@ -18,10 +16,5 @@ public class CsvqResourceFileController extends AbstractTextResourceFileControll
     @Override
     protected ResourceFile getResourceFile() {
         return this.workspace.resources().csvq();
-    }
-
-    @Override
-    protected Charset defaultCharset() {
-        return Charset.defaultCharset();
     }
 }

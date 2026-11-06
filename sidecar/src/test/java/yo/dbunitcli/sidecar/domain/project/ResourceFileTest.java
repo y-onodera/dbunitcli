@@ -25,7 +25,7 @@ class ResourceFileTest {
     @BeforeEach
     public void setUp() {
         this.parentDir = this.tempDir.toFile();
-        this.resourceFile = new ResourceFile(this.parentDir, FileResources::searchWorkspace);
+        this.resourceFile = new ResourceFile(this.parentDir, FileResources::searchWorkspace, StandardCharsets.UTF_8);
     }
 
     @Test
@@ -41,7 +41,7 @@ class ResourceFileTest {
         this.createTestFile("test2.json", "{}");
 
         // 新しいResourceFileインスタンスを作成（ファイルをスキャンするため）
-        this.resourceFile = new ResourceFile(this.parentDir, FileResources::searchWorkspace);
+        this.resourceFile = new ResourceFile(this.parentDir, FileResources::searchWorkspace, StandardCharsets.UTF_8);
 
         final List<String> files = this.resourceFile.list();
         assertEquals(2, files.size());
@@ -55,9 +55,9 @@ class ResourceFileTest {
         this.createTestFile("test.json", expectedContent);
 
         // 新しいResourceFileインスタンスを作成
-        this.resourceFile = new ResourceFile(this.parentDir, FileResources::searchWorkspace);
+        this.resourceFile = new ResourceFile(this.parentDir, FileResources::searchWorkspace, StandardCharsets.UTF_8);
 
-        final String content = this.resourceFile.read("test.json", StandardCharsets.UTF_8).orElseThrow();
+        final String content = this.resourceFile.read("test.json", "").orElseThrow();
         assertEquals(expectedContent, content);
     }
 
@@ -77,7 +77,7 @@ class ResourceFileTest {
         final String updatedContent = "{\"key\": \"updated\"}";
 
         this.createTestFile("test.json", initialContent);
-        this.resourceFile = new ResourceFile(this.parentDir, FileResources::searchWorkspace);
+        this.resourceFile = new ResourceFile(this.parentDir, FileResources::searchWorkspace, StandardCharsets.UTF_8);
 
         this.resourceFile.update("test.json", updatedContent);
 
@@ -95,7 +95,7 @@ class ResourceFileTest {
     @Test
     public void delete_ファイルが存在する場合は削除する() throws IOException {
         this.createTestFile("test.json", "{}");
-        this.resourceFile = new ResourceFile(this.parentDir, FileResources::searchWorkspace);
+        this.resourceFile = new ResourceFile(this.parentDir, FileResources::searchWorkspace, StandardCharsets.UTF_8);
 
         final Path filePath = this.tempDir.resolve("test.json");
         assertTrue(Files.exists(filePath));
@@ -106,14 +106,14 @@ class ResourceFileTest {
 
     @Test
     public void read_ファイルが存在しない場合はemptyを返す() {
-        final var result = this.resourceFile.read("nonexistent.json", StandardCharsets.UTF_8);
+        final var result = this.resourceFile.read("nonexistent.json", "");
         assertTrue(result.isEmpty());
     }
 
     @Test
     public void select_ファイルが存在する場合はPathを返す() throws IOException {
         this.createTestFile("test.json", "{}");
-        this.resourceFile = new ResourceFile(this.parentDir, FileResources::searchWorkspace);
+        this.resourceFile = new ResourceFile(this.parentDir, FileResources::searchWorkspace, StandardCharsets.UTF_8);
 
         final var result = this.resourceFile.select("test.json");
         assertTrue(result.isPresent());
@@ -140,7 +140,7 @@ class ResourceFileTest {
     @Test
     public void add_同名ファイルが存在する場合は連番付き名前で追加する() throws IOException {
         this.createTestFile("test.json", "{}");
-        this.resourceFile = new ResourceFile(this.parentDir, FileResources::searchWorkspace);
+        this.resourceFile = new ResourceFile(this.parentDir, FileResources::searchWorkspace, StandardCharsets.UTF_8);
 
         this.resourceFile.add("test.json", "{\"key\": \"1\"}");
 
@@ -154,7 +154,7 @@ class ResourceFileTest {
     public void add_連番1が存在する場合は連番2を使う() throws IOException {
         this.createTestFile("test.json", "{}");
         this.createTestFile("test(1).json", "{}");
-        this.resourceFile = new ResourceFile(this.parentDir, FileResources::searchWorkspace);
+        this.resourceFile = new ResourceFile(this.parentDir, FileResources::searchWorkspace, StandardCharsets.UTF_8);
 
         this.resourceFile.add("test.json", "{\"key\": \"2\"}");
 
@@ -166,7 +166,7 @@ class ResourceFileTest {
     @Test
     public void rename_ファイル名を変更する() throws IOException {
         this.createTestFile("old.json", "{\"key\": \"value\"}");
-        this.resourceFile = new ResourceFile(this.parentDir, FileResources::searchWorkspace);
+        this.resourceFile = new ResourceFile(this.parentDir, FileResources::searchWorkspace, StandardCharsets.UTF_8);
 
         this.resourceFile.rename("old.json", "new.json");
 
@@ -186,7 +186,7 @@ class ResourceFileTest {
     @Test
     public void copy_指定したソースの内容をデスティネーションにコピーする() throws IOException {
         this.createTestFile("source.txt", "hello");
-        this.resourceFile = new ResourceFile(this.parentDir, FileResources::searchWorkspace);
+        this.resourceFile = new ResourceFile(this.parentDir, FileResources::searchWorkspace, StandardCharsets.UTF_8);
 
         this.resourceFile.copy("source.txt");
 
@@ -204,7 +204,7 @@ class ResourceFileTest {
     @Test
     public void constructor_存在しないディレクトリでも例外をスローしない() {
         final File nonExistent = new File(this.tempDir.toFile(), "does_not_exist");
-        assertDoesNotThrow(() -> new ResourceFile(nonExistent, FileResources::searchWorkspace));
+        assertDoesNotThrow(() -> new ResourceFile(nonExistent, FileResources::searchWorkspace, StandardCharsets.UTF_8));
     }
 
     private void createTestFile(final String filename, final String content) throws IOException {

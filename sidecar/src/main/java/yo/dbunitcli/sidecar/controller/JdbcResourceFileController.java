@@ -20,8 +20,6 @@ import yo.dbunitcli.sidecar.job.Interruptible;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Properties;
@@ -136,10 +134,4 @@ public class JdbcResourceFileController extends AbstractResourceFileController<J
     protected ResourceFile getResourceFile() {
         return this.workspace.resources().jdbc();
     }
-
-    @Override
-    protected Charset defaultCharset() {
-        return StandardCharsets.UTF_8;
-    }
-
 }
