@@ -100,7 +100,7 @@ public class ParallelTableMappingTest {
 
     @Test
     public void lanes_empty_when_converter_write_one_book() {
-        final XlsxConverter converter = new XlsxConverter(this.tempDir.resolve("xlsx").toFile(), "result", XlsConverter.TableExportType.SHEET, true, true);
+        final XlsxConverter converter = new XlsxConverter(this.tempDir.resolve("xlsx").toFile(), "result", XlsConverter.TableExportType.SHEET, true, true, false);
         Assertions.assertTrue(ParallelTableMapping.lanes(this.producer(TableSeparators.NONE, converter, null), this.tasks(TableSeparators.NONE)).isEmpty());
     }
 

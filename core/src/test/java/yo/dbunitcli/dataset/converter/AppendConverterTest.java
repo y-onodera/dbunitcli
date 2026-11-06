@@ -31,8 +31,13 @@ public class AppendConverterTest {
             new Column("key", DataType.UNKNOWN), new Column("col1", DataType.UNKNOWN)});
 
     private static void write(final IDataSetConverter converter, final String... keys) throws DataSetException {
+        AppendConverterTest.write(converter, AppendConverterTest.TABLE, keys);
+    }
+
+    private static void write(final IDataSetConverter converter, final DefaultTableMetaData table, final String... keys)
+            throws DataSetException {
         converter.startDataSet();
-        converter.startTable(AppendConverterTest.TABLE);
+        converter.startTable(table);
         for (final String key : keys) {
             converter.row(new Object[]{key, "v" + key});
         }
@@ -128,12 +133,7 @@ public class AppendConverterTest {
         @Test
         public void addSheetWithHeaderWhenSheetNotExists() throws Exception {
             final DefaultTableMetaData other = new DefaultTableMetaData("t2", AppendConverterTest.TABLE.getColumns());
-            final IDataSetConverter first = this.converter(true, XlsConverter.TableExportType.SHEET, false);
-            first.startDataSet();
-            first.startTable(other);
-            first.row(new Object[]{"9", "v9"});
-            first.endTable();
-            first.endDataSet();
+            AppendConverterTest.write(this.converter(true, XlsConverter.TableExportType.SHEET, false), other, "9");
             AppendConverterTest.write(this.converter(true, XlsConverter.TableExportType.SHEET, true), "1");
             final File book = this.dir.resolve("book.xlsx").toFile();
             Assertions.assertEquals(List.of("key,col1", "9,v9"), AppendConverterTest.cells(book, "t2"));

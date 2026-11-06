@@ -5,7 +5,6 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.apache.poi.xssf.usermodel.XSSFFont;
-import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import yo.dbunitcli.dataset.DataSetConverterParam;
 import yo.dbunitcli.dataset.IDataSetConverter;
@@ -18,14 +17,6 @@ public class XlsxConverter extends XlsConverter {
 
     public XlsxConverter(final DataSetConverterParam param) {
         super(param);
-    }
-
-    public XlsxConverter(final File resultDir
-            , final String filename
-            , final TableExportType tableExport
-            , final boolean exportEmptyTable
-            , final boolean exportHeader) {
-        this(resultDir, filename, tableExport, exportEmptyTable, exportHeader, false);
     }
 
     public XlsxConverter(final File resultDir
@@ -53,8 +44,7 @@ public class XlsxConverter extends XlsConverter {
      */
     @Override
     protected int nextRowIndex(final Sheet sheet) {
-        final XSSFSheet xssfSheet = ((SXSSFWorkbook) sheet.getWorkbook()).getXSSFWorkbook().getSheet(sheet.getSheetName());
-        return xssfSheet.getPhysicalNumberOfRows() == 0 ? 0 : xssfSheet.getLastRowNum() + 1;
+        return super.nextRowIndex(((SXSSFWorkbook) sheet.getWorkbook()).getXSSFWorkbook().getSheet(sheet.getSheetName()));
     }
 
     @Override

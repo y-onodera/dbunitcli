@@ -38,8 +38,8 @@ public class XlsConverter implements IDataSetConverter {
     protected final boolean exportHeader;
     protected final boolean append;
     private final Map<Workbook, Map<Short, CellStyle>> cellStyleMap = new HashMap<>();
-    // SHEETで1ブックを使い回すため、reStartTableで書込位置を戻せるようシートごとの開始行を保持する
-    private final Map<String, Integer> firstDataRowIndex = new HashMap<>();
+    // SHEETのブックはflushまで書出さず、SXSSFは書出し済みの行をシートから数えられないため、次に書く行をシートごとに保持する
+    private final Map<String, Integer> nextRowIndexBySheet = new HashMap<>();
     // SimpleDateFormatはスレッドセーフでないため、インスタンスごとに持つ
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     protected String filename;
@@ -70,14 +70,6 @@ public class XlsConverter implements IDataSetConverter {
             , final String filename
             , final TableExportType tableExport
             , final boolean exportEmptyTable
-            , final boolean exportHeader) {
-        this(resultDir, filename, tableExport, exportEmptyTable, exportHeader, false);
-    }
-
-    public XlsConverter(final File resultDir
-            , final String filename
-            , final TableExportType tableExport
-            , final boolean exportEmptyTable
             , final boolean exportHeader
             , final boolean append) {
         this.resultDir = resultDir;
@@ -100,13 +92,11 @@ public class XlsConverter implements IDataSetConverter {
         if (this.tableExport == TableExportType.BOOK) {
             this.filename = this.metaData.getTableName();
             this.workbook = this.createWorkbook(this.writeTo());
-            this.sheet = this.workbook.getSheet(this.metaData.getTableName());
-            // 追記時は分割先のインスタンスが追記前の行数を持たないため、書き出し済みファイルの末尾から続ける
-            this.rowIndex = this.append ? this.nextRowIndex(this.sheet) : writeRows + 1;
-        } else {
-            this.sheet = this.workbook.getSheet(this.metaData.getTableName());
-            this.rowIndex = this.firstDataRowIndex.getOrDefault(this.metaData.getTableName(), 1) + writeRows;
         }
+        this.sheet = this.workbook.getSheet(this.metaData.getTableName());
+        this.rowIndex = this.tableExport == TableExportType.BOOK
+                ? this.nextRowIndex(this.sheet)
+                : this.nextRowIndexBySheet.get(this.metaData.getTableName());
         this.firstRowIndex = this.rowIndex - writeRows;
     }
 
@@ -162,7 +152,6 @@ public class XlsConverter implements IDataSetConverter {
         } else {
             this.sheet = this.workbook.createSheet(this.metaData.getTableName());
             this.sheet.setDisplayZeros(true);
-            this.workbook.setSheetName(this.workbook.getSheetIndex(this.sheet), this.metaData.getTableName());
             if (this.exportHeader) {
                 this.rowIndex = 1;
                 this.writeColumnNames();
@@ -171,7 +160,6 @@ public class XlsConverter implements IDataSetConverter {
             }
         }
         this.firstRowIndex = this.rowIndex;
-        this.firstDataRowIndex.put(this.metaData.getTableName(), this.rowIndex);
     }
 
     @Override
@@ -180,6 +168,8 @@ public class XlsConverter implements IDataSetConverter {
         XlsConverter.LOGGER.info("convert - end   sheetName={}", this.metaData.getTableName());
         if (this.tableExport == TableExportType.BOOK) {
             this.flush();
+        } else {
+            this.nextRowIndexBySheet.put(this.metaData.getTableName(), this.rowIndex);
         }
     }
 
@@ -229,6 +219,7 @@ public class XlsConverter implements IDataSetConverter {
         } catch (final IOException e) {
             throw new AssertionError(e);
         }
+        this.cellStyleMap.remove(this.workbook);
         XlsConverter.LOGGER.info("flush - end   fileName={}", writeTo);
     }
 

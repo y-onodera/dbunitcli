@@ -34,11 +34,6 @@ public class CsvConverter extends FlatFileConverter {
     }
 
     public CsvConverter(final String theDirectory, final File resultDir, final String encoding,
-                        final boolean exportEmptyTable, final boolean exportHeader) {
-        this(theDirectory, resultDir, encoding, exportEmptyTable, exportHeader, false, null);
-    }
-
-    public CsvConverter(final String theDirectory, final File resultDir, final String encoding,
                         final boolean exportEmptyTable, final boolean exportHeader, final boolean append,
                         final String extension) {
         super(theDirectory, resultDir, encoding, exportEmptyTable, exportHeader, append,
