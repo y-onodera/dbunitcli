@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useEnvironment } from "../context/EnvironmentProvider";
+import { useResourceEncoding } from "../context/ResourceEncodingProvider";
 import type { DatasetSrcInfo } from "../model/CommandOption";
 import { XlsxSchema, type XlsxSchemaBuilder } from "../model/XlsxSchema";
 import {
@@ -8,11 +9,10 @@ import {
 	handleFetchError,
 } from "../utils/fetchUtils";
 import { resourceLoadParams, useUpdateResourceFiles } from "./useResourceFiles";
-import { useSettingEncoding } from "./useSettingEncoding";
 
 export const useSaveXlsxSchema = () => {
 	const updateResourceFiles = useUpdateResourceFiles("xlsxSchema");
-	const encoding = useSettingEncoding();
+	const encoding = useResourceEncoding("xlsxSchema");
 	return (name: string, input: XlsxSchema) =>
 		updateResourceFiles("save", JSON.stringify({ name, encoding, input }));
 };
@@ -21,7 +21,7 @@ export const useXlsxSchemaData = (
 	fileName: string,
 ): { schema: XlsxSchema; loading: boolean } => {
 	const { apiUrl } = useEnvironment();
-	const encoding = useSettingEncoding();
+	const encoding = useResourceEncoding("xlsxSchema");
 	const [schema, setSchema] = useState(XlsxSchema.create());
 	const [loading, setLoading] = useState(fileName !== "");
 

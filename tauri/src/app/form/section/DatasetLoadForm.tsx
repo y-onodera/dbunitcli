@@ -6,6 +6,7 @@ import {
 	useDatasetSrcInfo,
 	useSetDatasetSrcInfo,
 } from "../../../context/DatasetSrcInfoProvider";
+import { ResourceEncodingProvider } from "../../../context/ResourceEncodingProvider";
 import type {
 	CommandOption,
 	DatasetSource,
@@ -43,58 +44,69 @@ function DatasetLoadFormContent({
 		handleValueChange(element)(String(checked));
 	const jdbcOption = srcData.jdbcProperties ? srcData : undefined;
 	const templateOption = srcData.templateGroup ? srcData : undefined;
+	const encoding = datasetSrcInfo.values.encoding ?? "";
+	const settingEncoding = datasetSrcInfo.values.settingEncoding ?? "";
 	return (
-		<SectionFieldset>
-			<SectionLegend
-				title={srcData.prefix}
-				command={helpCommand}
-				label={helpLabel}
-			/>
-			{srcData.srcType && (
-				<Select
-					handleTypeSelect={handleTypeSelect}
-					prefix={srcData.prefix}
-					element={srcData.srcType}
-					hidden={false}
+		<ResourceEncodingProvider
+			encodings={{
+				datasetSetting: settingEncoding,
+				xlsxSchema: settingEncoding,
+				sql: encoding,
+				table: encoding,
+				csvq: encoding,
+				template: encoding,
+			}}
+		>
+			<SectionFieldset>
+				<SectionLegend
+					title={srcData.prefix}
+					command={helpCommand}
+					label={helpLabel}
 				/>
-			)}
-			<SrcFormSection
-				srcElements={srcData}
-				srcType={defaultType ?? srcData.srcType?.value}
-				jdbcOption={jdbcOption}
-				handleValueChange={handleValueChange}
-				queryOnly
-				encoding={datasetSrcInfo.values.encoding ?? ""}
-			/>
-			<TraversalFormSection
-				srcElements={srcData}
-				handleValueChange={handleValueChange}
-				handleToggleChecked={handleToggleChecked}
-			/>
-			{templateOption && (
-				<TemplateFormSection
-					templateOption={templateOption}
-					showEncoding={!srcData.encoding}
+				{srcData.srcType && (
+					<Select
+						handleTypeSelect={handleTypeSelect}
+						prefix={srcData.prefix}
+						element={srcData.srcType}
+						hidden={false}
+					/>
+				)}
+				<SrcFormSection
+					srcElements={srcData}
+					srcType={defaultType ?? srcData.srcType?.value}
+					jdbcOption={jdbcOption}
 					handleValueChange={handleValueChange}
-					encoding={datasetSrcInfo.values.encoding ?? ""}
+					queryOnly
 				/>
-			)}
-			<DataLoadFormSection
-				options={srcData}
-				handleValueChange={handleValueChange}
-				handleToggleChecked={handleToggleChecked}
-			/>
-			<SrcTypeFormSection
-				options={srcData}
-				handleValueChange={handleValueChange}
-				handleToggleChecked={handleToggleChecked}
-			/>
-			<SettingFormSection
-				settingElements={srcData}
-				handleValueChange={handleValueChange}
-				handleToggleChecked={handleToggleChecked}
-			/>
-		</SectionFieldset>
+				<TraversalFormSection
+					srcElements={srcData}
+					handleValueChange={handleValueChange}
+					handleToggleChecked={handleToggleChecked}
+				/>
+				{templateOption && (
+					<TemplateFormSection
+						templateOption={templateOption}
+						showEncoding={!srcData.encoding}
+						handleValueChange={handleValueChange}
+					/>
+				)}
+				<DataLoadFormSection
+					options={srcData}
+					handleValueChange={handleValueChange}
+					handleToggleChecked={handleToggleChecked}
+				/>
+				<SrcTypeFormSection
+					options={srcData}
+					handleValueChange={handleValueChange}
+					handleToggleChecked={handleToggleChecked}
+				/>
+				<SettingFormSection
+					settingElements={srcData}
+					handleValueChange={handleValueChange}
+					handleToggleChecked={handleToggleChecked}
+				/>
+			</SectionFieldset>
+		</ResourceEncodingProvider>
 	);
 }
 

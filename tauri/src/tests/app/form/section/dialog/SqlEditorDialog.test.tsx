@@ -5,27 +5,22 @@ import SqlEditorDialog from "../../../../../app/form/section/dialog/SqlEditorDia
 import type { DatasetSrcInfo } from "../../../../../model/CommandOption";
 
 // （mockReset:trueで実装が毎回リセットされるため、resolve値は各テスト内で設定する）
-const {
-	mockSave,
-	mockTableNames,
-	mockTablePreview,
-	jdbcState,
-	resourceEncodings,
-} = vi.hoisted(() => ({
-	mockSave: vi.fn(),
-	mockTableNames: vi.fn(),
-	mockTablePreview: vi.fn(),
-	jdbcState: { connectionOk: false },
-	// 読込・保存のフックに渡された文字コード
-	resourceEncodings: { load: [] as string[], save: [] as string[] },
-}));
+const { mockSave, mockTableNames, mockTablePreview, jdbcState, resourceKinds } =
+	vi.hoisted(() => ({
+		mockSave: vi.fn(),
+		mockTableNames: vi.fn(),
+		mockTablePreview: vi.fn(),
+		jdbcState: { connectionOk: false },
+		// 読込・保存のフックに渡されたリソースの種類
+		resourceKinds: { load: [] as string[], save: [] as string[] },
+	}));
 vi.mock("../../../../../hooks/useResourceFiles", () => ({
-	useResourceContent: (_kind: string, _name: string, encoding: string) => {
-		resourceEncodings.load.push(encoding);
+	useResourceContent: (kind: string) => {
+		resourceKinds.load.push(kind);
 		return { content: "select 1", loading: false };
 	},
-	useSaveResourceContent: (_kind: string, encoding: string) => {
-		resourceEncodings.save.push(encoding);
+	useSaveResourceContent: (kind: string) => {
+		resourceKinds.save.push(kind);
 		return mockSave;
 	},
 }));
@@ -63,7 +58,6 @@ function renderDialog(type: "sql" | "table" | "csvq" = "sql") {
 	const handleSave = vi.fn();
 	render(
 		<SqlEditorDialog
-			encoding="UTF-8"
 			type={type}
 			fileName="query.sql"
 			handleDialogClose={vi.fn()}
@@ -81,13 +75,16 @@ const PREVIEW_SRC_VALUES = {
 };
 
 describe("SqlEditorDialogのテスト", () => {
-	it("渡された文字コードで読み込み・保存することを確認", () => {
-		resourceEncodings.load.length = 0;
-		resourceEncodings.save.length = 0;
-		renderDialog();
-		expect(new Set(resourceEncodings.load)).toStrictEqual(new Set(["UTF-8"]));
-		expect(new Set(resourceEncodings.save)).toStrictEqual(new Set(["UTF-8"]));
-	});
+	it.each(["sql", "table", "csvq"] as const)(
+		"srcType=%sの種類のリソースとして読み込み・保存することを確認",
+		(type) => {
+			resourceKinds.load.length = 0;
+			resourceKinds.save.length = 0;
+			renderDialog(type);
+			expect(new Set(resourceKinds.load)).toStrictEqual(new Set([type]));
+			expect(new Set(resourceKinds.save)).toStrictEqual(new Set([type]));
+		},
+	);
 
 	it.each(["sql", "csvq"] as const)(
 		"srcType=%sのPreviewは保存せず、編集中の内容をsrcの代わりに、settingなしで一覧を挟まずにそのテーブルをプレビューする",
@@ -143,7 +140,6 @@ describe("SqlEditorDialogのテスト", () => {
 			jdbcState.connectionOk = connectionOk;
 			render(
 				<SqlEditorDialog
-					encoding="UTF-8"
 					type={type}
 					fileName="query.sql"
 					handleDialogClose={vi.fn()}
@@ -162,7 +158,6 @@ describe("SqlEditorDialogのテスト", () => {
 		const user = userEvent.setup();
 		render(
 			<SqlEditorDialog
-				encoding="UTF-8"
 				type="csvq"
 				fileName="query.txt"
 				handleDialogClose={vi.fn()}

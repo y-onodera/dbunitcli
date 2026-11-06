@@ -9,12 +9,12 @@ import {
 import { WhiteButton } from "../../../../components/element/Button";
 import { IconButton } from "../../../../components/element/ButtonIcon";
 import { useDatasetSrcInfo } from "../../../../context/DatasetSrcInfoProvider";
+import { useResourceEncoding } from "../../../../context/ResourceEncodingProvider";
 import {
 	type UnitTablePreview,
 	useDatasetUnitTablePreview,
 } from "../../../../hooks/useDatasetSettings";
 import type { DatasetSettingKind } from "../../../../hooks/useResourceFiles";
-import { useSettingEncoding } from "../../../../hooks/useSettingEncoding";
 import {
 	type DatasetSrcInfo,
 	srcTypeOf,
@@ -34,7 +34,7 @@ function canPreview(srcInfo: DatasetSrcInfo): boolean {
 
 // generateの-unitSettingのプレビュー。srcのsettingを適用したテーブル一覧を出し、各テーブルの横のボタンで
 // そのテーブルにunitSettingを適用した後のテーブル（rowsになるテーブル自身とsubTable）を確認する。
-// srcはDatasetSrcInfoProvider、文字コードはSettingEncodingProviderの入力中の値を使う
+// srcはDatasetSrcInfoProvider、文字コードはResourceEncodingProviderのgenerateSettingの値を使う
 export default function UnitSettingPreviewButton({
 	unitSetting,
 }: {
@@ -129,7 +129,7 @@ function UnitTablesDialog({
 	handleClose: () => void;
 }) {
 	const datasetSrcInfo = useDatasetSrcInfo();
-	const encoding = useSettingEncoding();
+	const encoding = useResourceEncoding("generateSetting");
 	const { previews, loading, logs, error } = useDatasetUnitTablePreview(
 		datasetSrcInfo,
 		tableName,

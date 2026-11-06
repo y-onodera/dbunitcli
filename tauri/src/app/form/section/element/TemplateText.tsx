@@ -8,18 +8,15 @@ import TemplateEditDialog from "../dialog/TemplateEditDialog";
 import type { TextProp } from "./FormElementProp";
 import Text, { TextDropDownMenu } from "./Text";
 
-// editButtonsを渡すと、既定の編集ボタンの代わりにそれをメニューに出す（xlsxテンプレートの雛型生成など）。
-// encodingはコマンド実行時にこのテンプレートを読む文字コードで、編集ダイアログの読み書きに使う
+// editButtonsを渡すと、既定の編集ボタンの代わりにそれをメニューに出す（xlsxテンプレートの雛型生成など）
 export default function TemplateText({
 	prefix,
 	element,
 	hidden,
 	handleValueChange,
 	editButtons,
-	encoding,
 }: TextProp & {
 	editButtons?: (path: string, setPath: (value: string) => void) => ReactNode[];
-	encoding: string;
 }) {
 	const settings = useResourcesSettings();
 
@@ -44,7 +41,6 @@ export default function TemplateText({
 							<EditResourceButton
 								key="edit"
 								dialog={TemplateEditDialog}
-								dialogProps={{ encoding }}
 								path={path}
 								setPath={setPath}
 							/>,

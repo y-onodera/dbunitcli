@@ -1,6 +1,7 @@
 import { act, renderHook } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { environmentContext } from "../../context/EnvironmentProvider";
+import { ResourceEncodingProvider } from "../../context/ResourceEncodingProvider";
 import WorkspaceResourcesProvider, {
 	useResourcesSettings,
 } from "../../context/WorkspaceResourcesProvider";
@@ -23,9 +24,30 @@ import { environmentFixture, workspaceResourcesFixture } from "../setup";
 
 const mockUpdatedFiles = ["updated"];
 
+// 種類ごとに違う文字コードを与え、各フックが自分の種類の値を使うことを確かめる
+function encodingOf(kind: ResourceKind): string {
+	return `encoding-${kind}`;
+}
+
 const wrapper = ({ children }: { children: React.ReactNode }) => (
 	<environmentContext.Provider value={environmentFixture}>
-		<WorkspaceResourcesProvider>{children}</WorkspaceResourcesProvider>
+		<WorkspaceResourcesProvider>
+			<ResourceEncodingProvider
+				encodings={{
+					datasetSetting: encodingOf("datasetSetting"),
+					compareSetting: encodingOf("compareSetting"),
+					generateSetting: encodingOf("generateSetting"),
+					xlsxSchema: encodingOf("xlsxSchema"),
+					template: encodingOf("template"),
+					parameterizeTemplate: encodingOf("parameterizeTemplate"),
+					sql: encodingOf("sql"),
+					table: encodingOf("table"),
+					csvq: encodingOf("csvq"),
+				}}
+			>
+				{children}
+			</ResourceEncodingProvider>
+		</WorkspaceResourcesProvider>
 	</environmentContext.Provider>
 );
 
@@ -138,10 +160,10 @@ const jdbcValues = {
 };
 
 describe("useResourceContentのテスト", () => {
-	it("名前と文字コードを送って読み込むことを確認", async () => {
+	it("名前と、ResourceEncodingProviderのその種類の文字コードを送って読み込むことを確認", async () => {
 		mockFetchData.mockClear();
 		const { rerender } = renderHook(
-			() => useResourceContent("sql", "target.sql", "MS932"),
+			() => useResourceContent("sql", "target.sql"),
 			{ wrapper },
 		);
 		await act(async () => {
@@ -152,7 +174,7 @@ describe("useResourceContentのテスト", () => {
 		);
 		expect(JSON.parse(String(loads[0][0].options.body))).toStrictEqual({
 			name: "target.sql",
-			encoding: "MS932",
+			encoding: encodingOf("sql"),
 		});
 	});
 });
@@ -164,7 +186,7 @@ describe("保存フックのテスト", () => {
 		endpoint: string;
 		input: unknown;
 		key: keyof ResourcesSettingsBuilder;
-		// 設定ファイルの文字コード（送るものだけ。Providerが無いので空）
+		// 送る文字コード（ResourceEncodingProviderのその種類の値）
 		encoding?: string;
 	}>([
 		{
@@ -176,7 +198,7 @@ describe("保存フックのテスト", () => {
 			endpoint: "xlsx-schema/save",
 			input: xlsxSchema,
 			key: "xlsxSchemas",
-			encoding: "",
+			encoding: encodingOf("xlsxSchema"),
 		},
 		{
 			name: "useSaveFixedColumnDef",
@@ -197,7 +219,7 @@ describe("保存フックのテスト", () => {
 			endpoint: "dataset-setting/save",
 			input: datasetSettings,
 			key: "datasetSettings",
-			encoding: "",
+			encoding: encodingOf("datasetSetting"),
 		},
 		...(
 			[
@@ -221,7 +243,7 @@ describe("保存フックのテスト", () => {
 			endpoint,
 			input: datasetSettings,
 			key,
-			encoding: "",
+			encoding: encodingOf(kind),
 		})),
 		...(
 			[
@@ -238,13 +260,13 @@ describe("保存フックのテスト", () => {
 		).map(({ kind, endpoint, key }) => ({
 			name: `useSaveResourceContent(${kind})`,
 			useSave: () => {
-				const save = useSaveResourceContent(kind, "MS932");
+				const save = useSaveResourceContent(kind);
 				return (name: string) => save(name, "content");
 			},
 			endpoint,
 			input: { content: "content" },
 			key,
-			encoding: "MS932",
+			encoding: encodingOf(kind),
 		})),
 		{
 			name: "useSaveJdbcProperties",

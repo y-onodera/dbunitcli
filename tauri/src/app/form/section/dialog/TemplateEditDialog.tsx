@@ -9,22 +9,14 @@ import {
 	useResourceContent,
 	useSaveResourceContent,
 } from "../../../../hooks/useResourceFiles";
-import type {
-	EditResourceDialogProps,
-	EncodingProp,
-} from "./ResourceEditButton";
+import type { EditResourceDialogProps } from "./ResourceEditButton";
 
 export default function TemplateEditDialog({
 	fileName,
 	handleDialogClose,
 	handleSave,
-	encoding,
-}: EditResourceDialogProps & EncodingProp) {
-	const { content, loading } = useResourceContent(
-		"template",
-		fileName,
-		encoding,
-	);
+}: EditResourceDialogProps) {
+	const { content, loading } = useResourceContent("template", fileName);
 	if (loading) {
 		return <StatusMessage kind="loading">Loading...</StatusMessage>;
 	}
@@ -34,7 +26,6 @@ export default function TemplateEditDialog({
 			fileName={fileName}
 			handleDialogClose={handleDialogClose}
 			handleSave={handleSave}
-			encoding={encoding}
 		/>
 	);
 }
@@ -44,10 +35,9 @@ function Dialog({
 	fileName,
 	handleDialogClose,
 	handleSave,
-	encoding,
-}: EditResourceDialogProps & EncodingProp & { content: string }) {
+}: EditResourceDialogProps & { content: string }) {
 	const [content, setContent] = useState<string>(initialContent);
-	const saveContent = useSaveResourceContent("template", encoding);
+	const saveContent = useSaveResourceContent("template");
 
 	return (
 		<SettingDialog

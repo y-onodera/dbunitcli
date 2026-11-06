@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { SectionFieldset } from "../../components/dialog";
 import { SectionLegend } from "../../components/dialog/SectionFieldset";
-import { SettingEncodingProvider } from "../../context/SettingEncodingProvider";
+import { ResourceEncodingProvider } from "../../context/ResourceEncodingProvider";
 import type { GenerateOptions } from "../../model/SelectParameter";
 import {
 	DatasetLoadForm,
@@ -54,31 +54,36 @@ export function GenerateForm(prop: {
 	// （テーブル名・カラム名の候補とプレビューの読込元にsrcのデータセットを使う）
 	return (
 		<DatasetSrcInfoScope name={prop.name} srcData={srcData}>
-			<SectionFieldset>
-				<SectionLegend
-					title="generate"
-					command="commands/generate"
-					label="Generate"
-				/>
-				<Select
-					handleTypeSelect={prop.handleTypeSelect}
-					prefix=""
-					element={generate.generateType}
-				/>
-				{generateTypeValue === "txt" && (
-					<TxtTemplateGenerateButton
-						scaffoldPrefill={prop.scaffoldPrefill}
-						handleReflect={prop.handleScaffoldReflect}
+			<ResourceEncodingProvider
+				encodings={{
+					generateSetting: unitSettingEncoding,
+					template: templateEncoding.encoding,
+				}}
+			>
+				<SectionFieldset>
+					<SectionLegend
+						title="generate"
+						command="commands/generate"
+						label="Generate"
 					/>
-				)}
-				{generate.unit && (
 					<Select
 						handleTypeSelect={prop.handleTypeSelect}
 						prefix=""
-						element={generate.unit}
+						element={generate.generateType}
 					/>
-				)}
-				<SettingEncodingProvider encoding={unitSettingEncoding}>
+					{generateTypeValue === "txt" && (
+						<TxtTemplateGenerateButton
+							scaffoldPrefill={prop.scaffoldPrefill}
+							handleReflect={prop.handleScaffoldReflect}
+						/>
+					)}
+					{generate.unit && (
+						<Select
+							handleTypeSelect={prop.handleTypeSelect}
+							prefix=""
+							element={generate.unit}
+						/>
+					)}
 					{generate.unitSetting && (
 						<DatasetSettingText
 							prefix=""
@@ -90,75 +95,75 @@ export function GenerateForm(prop: {
 							)}
 						/>
 					)}
-				</SettingEncodingProvider>
-				{generate.unitSettingEncoding && (
-					<EncodingText
-						prefix=""
-						element={generate.unitSettingEncoding}
-						handleValueChange={setUnitSettingEncoding}
-					/>
-				)}
-				{generate.template && (
-					<TemplateText
-						prefix=""
-						element={generate.template}
-						editButtons={templateEditButtons}
-						encoding={templateEncoding.encoding}
-					/>
-				)}
-				{prop.generate.templateOption && generateTypeValue === "txt" && (
-					<TemplateFormSection
-						templateOption={prop.generate.templateOption}
-						showEncoding={true}
-						encoding={templateEncoding.encoding}
-						handleValueChange={templateEncoding.handleValueChange}
-					/>
-				)}
-				{prop.generate.templateOption && isExcelGenerate && (
-					<JxlsFormSection templateOption={prop.generate.templateOption} />
-				)}
-				{[generate.fixedLength, generate.defaultLength, generate.align]
-					.filter((field): field is NonNullable<typeof field> => field != null)
-					.map((field) => (
-						<PlainText key={field.name} prefix="" element={field} />
-					))}
-				{generate.parallel && (
-					<PlainText prefix="" element={generate.parallel} />
-				)}
-				<FileText prefix="" element={generate.result} />
-				<PlainText prefix="" element={generate.resultPath} />
-				{generate.outputEncoding && (
-					<EncodingText prefix="" element={generate.outputEncoding} />
-				)}
-				{generate.commit && <Check prefix="" element={generate.commit} />}
-				{generate.op && (
-					<Select
-						prefix=""
-						element={generate.op}
-						handleTypeSelect={(_: string) => {
-							return new Promise((_) => {});
-						}}
-					/>
-				)}
-				{generate.sqlFilePrefix && (
-					<PlainText prefix="" element={generate.sqlFilePrefix} />
-				)}
-				{generate.sqlFileSuffix && (
-					<PlainText prefix="" element={generate.sqlFileSuffix} />
-				)}
-				{generate.includeAllColumns && (
-					<Check prefix="" element={generate.includeAllColumns} />
-				)}
-				{generate.lazyLoad && <Check prefix="" element={generate.lazyLoad} />}
-			</SectionFieldset>
-			<DatasetLoadForm
-				handleTypeSelect={prop.handleTypeSelect}
-				name={prop.name}
-				srcData={srcData}
-				helpCommand="sections/dataset-load-form"
-				helpLabel="src"
-				parentSrcInfo={true}
-			/>
+					{generate.unitSettingEncoding && (
+						<EncodingText
+							prefix=""
+							element={generate.unitSettingEncoding}
+							handleValueChange={setUnitSettingEncoding}
+						/>
+					)}
+					{generate.template && (
+						<TemplateText
+							prefix=""
+							element={generate.template}
+							editButtons={templateEditButtons}
+						/>
+					)}
+					{prop.generate.templateOption && generateTypeValue === "txt" && (
+						<TemplateFormSection
+							templateOption={prop.generate.templateOption}
+							showEncoding={true}
+							handleValueChange={templateEncoding.handleValueChange}
+						/>
+					)}
+					{prop.generate.templateOption && isExcelGenerate && (
+						<JxlsFormSection templateOption={prop.generate.templateOption} />
+					)}
+					{[generate.fixedLength, generate.defaultLength, generate.align]
+						.filter(
+							(field): field is NonNullable<typeof field> => field != null,
+						)
+						.map((field) => (
+							<PlainText key={field.name} prefix="" element={field} />
+						))}
+					{generate.parallel && (
+						<PlainText prefix="" element={generate.parallel} />
+					)}
+					<FileText prefix="" element={generate.result} />
+					<PlainText prefix="" element={generate.resultPath} />
+					{generate.outputEncoding && (
+						<EncodingText prefix="" element={generate.outputEncoding} />
+					)}
+					{generate.commit && <Check prefix="" element={generate.commit} />}
+					{generate.op && (
+						<Select
+							prefix=""
+							element={generate.op}
+							handleTypeSelect={(_: string) => {
+								return new Promise((_) => {});
+							}}
+						/>
+					)}
+					{generate.sqlFilePrefix && (
+						<PlainText prefix="" element={generate.sqlFilePrefix} />
+					)}
+					{generate.sqlFileSuffix && (
+						<PlainText prefix="" element={generate.sqlFileSuffix} />
+					)}
+					{generate.includeAllColumns && (
+						<Check prefix="" element={generate.includeAllColumns} />
+					)}
+					{generate.lazyLoad && <Check prefix="" element={generate.lazyLoad} />}
+				</SectionFieldset>
+				<DatasetLoadForm
+					handleTypeSelect={prop.handleTypeSelect}
+					name={prop.name}
+					srcData={srcData}
+					helpCommand="sections/dataset-load-form"
+					helpLabel="src"
+					parentSrcInfo={true}
+				/>
+			</ResourceEncodingProvider>
 		</DatasetSrcInfoScope>
 	);
 }

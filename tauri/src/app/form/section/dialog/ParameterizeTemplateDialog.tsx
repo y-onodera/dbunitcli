@@ -9,10 +9,7 @@ import {
 	useResourceContent,
 	useSaveResourceContent,
 } from "../../../../hooks/useResourceFiles";
-import type {
-	EditResourceDialogProps,
-	EncodingProp,
-} from "./ResourceEditButton";
+import type { EditResourceDialogProps } from "./ResourceEditButton";
 
 function extractFileNameFromTemplatePath(templatePath: string): string {
 	return templatePath.replace(/\\/g, "/").split("/").pop() ?? templatePath;
@@ -22,14 +19,9 @@ export default function ParameterizeTemplateDialog({
 	fileName,
 	handleDialogClose,
 	handleSave,
-	encoding,
-}: EditResourceDialogProps & EncodingProp) {
+}: EditResourceDialogProps) {
 	const name = extractFileNameFromTemplatePath(fileName);
-	const { content, loading } = useResourceContent(
-		"parameterizeTemplate",
-		name,
-		encoding,
-	);
+	const { content, loading } = useResourceContent("parameterizeTemplate", name);
 	if (loading) {
 		return <StatusMessage kind="loading">Loading...</StatusMessage>;
 	}
@@ -39,7 +31,6 @@ export default function ParameterizeTemplateDialog({
 			fileName={name}
 			handleDialogClose={handleDialogClose}
 			handleSave={handleSave}
-			encoding={encoding}
 		/>
 	);
 }
@@ -49,10 +40,9 @@ function Dialog({
 	fileName,
 	handleDialogClose,
 	handleSave,
-	encoding,
-}: EditResourceDialogProps & EncodingProp & { content: string }) {
+}: EditResourceDialogProps & { content: string }) {
 	const [content, setContent] = useState<string>(initialContent);
-	const saveContent = useSaveResourceContent("parameterizeTemplate", encoding);
+	const saveContent = useSaveResourceContent("parameterizeTemplate");
 
 	return (
 		<SettingDialog

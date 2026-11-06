@@ -1,10 +1,10 @@
 import { act, renderHook } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
-import { DatasetSrcInfoProvider } from "../../context/DatasetSrcInfoProvider";
 import {
 	type Environment,
 	environmentContext,
 } from "../../context/EnvironmentProvider";
+import { ResourceEncodingProvider } from "../../context/ResourceEncodingProvider";
 import WorkspaceResourcesProvider from "../../context/WorkspaceResourcesProvider";
 import { useXlsxSchemaData } from "../../hooks/useXlsxSchema";
 import type { WorkspaceResources } from "../../model/WorkspaceResources";
@@ -105,16 +105,16 @@ describe("XlsxSchemaProviderのテスト", () => {
 			expect(result.current.schema.cells).toHaveLength(1);
 		});
 
-		it("dataset読込フォームのsettingEncodingで読み込むことを確認", async () => {
+		it("ResourceEncodingProviderのxlsxSchemaの文字コードで読み込むことを確認", async () => {
 			mockFetchData.mockClear();
 			const { rerender } = renderHook(() => useXlsxSchemaData("test-setting"), {
 				wrapper: ({ children }: { children: React.ReactNode }) => (
 					<MockProvider>
-						<DatasetSrcInfoProvider
-							initialValue={{ values: { settingEncoding: "MS932" } }}
+						<ResourceEncodingProvider
+							encodings={{ xlsxSchema: "MS932", datasetSetting: "UTF-8" }}
 						>
 							{children}
-						</DatasetSrcInfoProvider>
+						</ResourceEncodingProvider>
 					</MockProvider>
 				),
 			});

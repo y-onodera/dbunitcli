@@ -2,6 +2,7 @@ import { type Dispatch, type SetStateAction, useEffect, useState } from "react";
 import { useEnvironment } from "../context/EnvironmentProvider";
 import { useJdbcConnectionState } from "../context/JdbcConnectionProvider";
 import { useParamInputs } from "../context/ParameterInputProvider";
+import { useResourceEncoding } from "../context/ResourceEncodingProvider";
 import {
 	type DatasetSrcInfo,
 	srcTypeOf,
@@ -24,7 +25,6 @@ import {
 	resourceLoadParams,
 	useUpdateResourceFiles,
 } from "./useResourceFiles";
-import { useSettingEncoding } from "./useSettingEncoding";
 
 // jdbcは接続テストに成功した値を優先する
 function buildDatasetRequestBody(
@@ -294,7 +294,7 @@ export const useSaveDatasetSettings = (
 	kind: DatasetSettingKind = "datasetSetting",
 ) => {
 	const updateResourceFiles = useUpdateResourceFiles(kind);
-	const encoding = useSettingEncoding();
+	const encoding = useResourceEncoding(kind);
 	return (name: string, input: DatasetSettings) =>
 		updateResourceFiles("save", JSON.stringify({ name, encoding, input }));
 };
@@ -304,7 +304,7 @@ export const useDatasetSettingsData = (
 	kind: DatasetSettingKind = "datasetSetting",
 ): { settings: DatasetSettings; loading: boolean } => {
 	const { apiUrl } = useEnvironment();
-	const encoding = useSettingEncoding();
+	const encoding = useResourceEncoding(kind);
 	const [settings, setSettings] = useState(DatasetSettings.create());
 	const [loading, setLoading] = useState(fileName !== "");
 

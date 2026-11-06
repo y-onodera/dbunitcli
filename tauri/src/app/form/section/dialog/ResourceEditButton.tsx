@@ -99,9 +99,6 @@ export type EditResourceDialogProps = {
 	handleSave: (path: string) => void;
 };
 
-// encoding: コマンド実行時にこのファイルを読む文字コード。編集ダイアログの読み書きに使う
-export type EncodingProp = { encoding: string };
-
 // ファイル名で開く編集ダイアログ（保存したらパスを反映して閉じる）を持つ編集ボタン。
 // dialogPropsはダイアログへそのまま渡す追加のprops（保存先の種類など）
 export function EditResourceButton<P extends object = object>({

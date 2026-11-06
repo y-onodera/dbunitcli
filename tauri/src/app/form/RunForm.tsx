@@ -1,6 +1,7 @@
 import { SectionFieldset } from "../../components/dialog";
 import { SectionLegend } from "../../components/dialog/SectionFieldset";
 import { JdbcConnectionProvider } from "../../context/JdbcConnectionProvider";
+import { ResourceEncodingProvider } from "../../context/ResourceEncodingProvider";
 import type { CommandOption } from "../../model/CommandOption";
 import type { RunOptions } from "../../model/SelectParameter";
 import FileText from "./section/element/FileText";
@@ -28,28 +29,33 @@ export function RunForm(prop: {
 				element={run.scriptType}
 			/>
 			{run.parallel && <PlainText prefix="" element={run.parallel} />}
-			<JdbcConnectionProvider>
-				<SrcFormSection
-					srcElements={run.srcData}
-					srcType={run.scriptType.value === "sql" ? "sql" : undefined}
-					jdbcOption={run.jdbcOption}
-					handleValueChange={() => (_: string) => {}}
-					encoding={templateEncoding.encoding}
-				/>
-				<TraversalFormSection
-					srcElements={run.srcData}
-					handleValueChange={() => (_: string) => {}}
-					handleToggleChecked={() => (_: boolean) => {}}
-				/>
-				{run.templateOption && (
-					<TemplateFormSection
-						templateOption={run.templateOption}
-						showEncoding={!run.srcData.encoding}
-						handleValueChange={templateEncoding.handleValueChange}
-						encoding={templateEncoding.encoding}
+			<ResourceEncodingProvider
+				encodings={{
+					sql: templateEncoding.encoding,
+					template: templateEncoding.encoding,
+				}}
+			>
+				<JdbcConnectionProvider>
+					<SrcFormSection
+						srcElements={run.srcData}
+						srcType={run.scriptType.value === "sql" ? "sql" : undefined}
+						jdbcOption={run.jdbcOption}
+						handleValueChange={() => (_: string) => {}}
 					/>
-				)}
-			</JdbcConnectionProvider>
+					<TraversalFormSection
+						srcElements={run.srcData}
+						handleValueChange={() => (_: string) => {}}
+						handleToggleChecked={() => (_: boolean) => {}}
+					/>
+					{run.templateOption && (
+						<TemplateFormSection
+							templateOption={run.templateOption}
+							showEncoding={!run.srcData.encoding}
+							handleValueChange={templateEncoding.handleValueChange}
+						/>
+					)}
+				</JdbcConnectionProvider>
+			</ResourceEncodingProvider>
 			{!run.jdbcOption && (
 				<>
 					<FileText

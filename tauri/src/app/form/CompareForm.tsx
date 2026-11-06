@@ -2,7 +2,7 @@ import { useState } from "react";
 import { SectionFieldset } from "../../components/dialog";
 import { SectionLegend } from "../../components/dialog/SectionFieldset";
 import { DatasetSrcInfoProvider } from "../../context/DatasetSrcInfoProvider";
-import { SettingEncodingProvider } from "../../context/SettingEncodingProvider";
+import { ResourceEncodingProvider } from "../../context/ResourceEncodingProvider";
 import { buildDatasetSrcInfo } from "../../model/CommandOption";
 import type { CompareOptions } from "../../model/SelectParameter";
 import { DatasetLoadForm } from "./section/DatasetLoadForm";
@@ -58,7 +58,9 @@ export function CompareForm(prop: {
 						key={`${prop.name}compare-setting:${oldData.srcType?.value ?? ""}`}
 						initialValue={oldDataInitialInfo}
 					>
-						<SettingEncodingProvider encoding={settingEncoding}>
+						<ResourceEncodingProvider
+							encodings={{ compareSetting: settingEncoding }}
+						>
 							<DatasetSettingText
 								prefix=""
 								element={settingElement}
@@ -66,7 +68,7 @@ export function CompareForm(prop: {
 								generateEditDialog={CompareKeySettingsEditDialog}
 								preview={null}
 							/>
-						</SettingEncodingProvider>
+						</ResourceEncodingProvider>
 					</DatasetSrcInfoProvider>
 				) : (
 					<FileText prefix="" element={settingElement} />

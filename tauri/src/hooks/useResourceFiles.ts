@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useEnvironment } from "../context/EnvironmentProvider";
+import { useResourceEncoding } from "../context/ResourceEncodingProvider";
 import { useSetResourcesSettings } from "../context/WorkspaceResourcesProvider";
 import type {
 	ResourcesSettings,
@@ -103,13 +104,10 @@ export const useDeleteResource = (kind: ResourceKind) => {
 	return (name: string) => updateResourceFiles("delete", name, "text/plain");
 };
 
-// テキスト系リソースの内容を{name, encoding, input: {content}}形式で保存する。
-// encodingはコマンド実行時にそのファイルを読む文字コード（空ならsidecarがシステムの既定を使う）
-export const useSaveResourceContent = (
-	kind: ResourceKind,
-	encoding: string,
-) => {
+// テキスト系リソースの内容を{name, encoding, input: {content}}形式で保存する
+export const useSaveResourceContent = (kind: ResourceKind) => {
 	const updateResourceFiles = useUpdateResourceFiles(kind);
+	const encoding = useResourceEncoding(kind);
 	return (name: string, content: string) =>
 		updateResourceFiles(
 			"save",
@@ -121,9 +119,9 @@ export const useSaveResourceContent = (
 export const useResourceContent = (
 	kind: ResourceKind,
 	name: string,
-	encoding: string,
 ): { content: string; loading: boolean } => {
 	const { apiUrl } = useEnvironment();
+	const encoding = useResourceEncoding(kind);
 	const [content, setContent] = useState("");
 	const [loading, setLoading] = useState(name !== "");
 

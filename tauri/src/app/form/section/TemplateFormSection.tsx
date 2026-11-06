@@ -12,7 +12,7 @@ import PlainText from "./element/PlainText";
 import TemplateText from "./element/TemplateText";
 
 // template optionのencodingの入力中の値と、それを追うTemplateFormSectionのhandleValueChange。
-// templateGroup・template・SQLスクリプトの編集ダイアログが読み書きする文字コードに使う
+// ResourceEncodingProviderで、template optionを適用するリソースの文字コードにする
 export function useTemplateEncoding(templateOption?: TemplateOption) {
 	const [encoding, setEncoding] = useState(
 		templateOption?.encoding?.value ?? "",
@@ -29,12 +29,9 @@ export default function TemplateFormSection({
 	templateOption,
 	showEncoding,
 	handleValueChange,
-	encoding,
 }: {
 	templateOption: TemplateOption;
 	showEncoding: boolean;
-	// コマンド実行時にtemplateGroupを読む文字コード（入力中の値。編集ダイアログの読み書きに使う）
-	encoding: string;
 	handleValueChange: (param: CommandOption) => (newValue: string) => void;
 }) {
 	const [showOptional, setShowOptional] = useState(false);
@@ -61,7 +58,6 @@ export default function TemplateFormSection({
 				prefix={templateOption.prefix}
 				element={templateOption.templateGroup}
 				hidden={!showOptional}
-				encoding={encoding}
 				handleValueChange={handleValueChange(templateOption.templateGroup)}
 			/>
 			<PlainText
