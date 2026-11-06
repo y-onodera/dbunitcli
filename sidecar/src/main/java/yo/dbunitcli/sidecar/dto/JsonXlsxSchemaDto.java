@@ -3,12 +3,25 @@ package yo.dbunitcli.sidecar.dto;
 import io.micronaut.serde.annotation.Serdeable;
 
 import java.util.List;
+import java.util.Map;
 
 @Serdeable
 public class JsonXlsxSchemaDto {
 
+    /**
+     * rows/cellsのsheetNameから参照するシート名のパターン
+     */
+    private Map<String, PatternDto> patterns;
     private List<RowSetting> rows;
     private List<CellSetting> cells;
+
+    public Map<String, PatternDto> getPatterns() {
+        return this.patterns;
+    }
+
+    public void setPatterns(final Map<String, PatternDto> patterns) {
+        this.patterns = patterns;
+    }
 
     public List<RowSetting> getRows() {
         return this.rows;

@@ -49,8 +49,8 @@
   <p>処理対象のテーブルをどのように特定するかを選択します。</p>
   <table>
     <tr><th>項目</th><th>説明</th></tr>
-    <tr><td>name</td><td>テーブル名を1件以上列挙して指定する。<code>filePath</code> で設定ファイルからの相対パスを指定することも可能。</td></tr>
-    <tr><td>pattern</td><td>テーブル名のマッチで対象を特定する。<code>pattern</code> オブジェクトには部分一致用の <code>string</code> または正規表現用の <code>regex</code> を指定し、<code>exclude</code> 配列で除外パターンを追加できる。<code>filePath</code>（正規表現）を指定すると、そのパスに一致するファイル由来のテーブルのみが対象になる。</td></tr>
+    <tr><td>name</td><td>テーブル名を1件以上列挙して指定する（完全一致）。<code>filePath</code>（正規表現）を指定すると、読み込み元ファイルの絶対パス（区切り文字は <code>/</code>）全体がこれに一致するファイル由来のテーブルだけが対象になる（例: <code>.*/master/.*</code>）。</td></tr>
+    <tr><td>pattern</td><td>テーブル名のマッチで対象を特定する。<code>string</code> はテーブル名の部分一致（<code>*</code> はすべてのテーブルに一致）、<code>regex</code> はテーブル名全体に一致する正規表現（両方あれば <code>regex</code> を使う）。<code>exclude</code> に除外するテーブル名（完全一致）を指定できる。<code>filePath</code>（正規表現）を指定すると、そのパスに一致するファイル由来のテーブルのみが対象になる。</td></tr>
     <tr><td>outerJoin / innerJoin / fullJoin</td><td>2テーブルを結合して1つの論理テーブルとして扱う。<code>left</code> と <code>right</code> に結合対象のテーブル名、条件は <code>on</code>（JEXL 式）か <code>column</code>（共通カラム名）で指定する。<code>filePath</code>（正規表現）を指定すると、left / right ともそのパスに一致するファイル由来のテーブルのみを結合対象にする。right だけ別のパスにしたい場合は <code>rightFilePath</code> を指定する（指定した場合 right は <code>filePath</code> より優先される）。</td></tr>
   </table>
 
@@ -59,8 +59,9 @@
   <p><strong>name（対象テーブルの絞り込み）</strong></p>
   <p>入力に <code>users</code>、<code>orders</code>、<code>logs</code> がある状態で <code>name: ["users", "orders"]</code> を指定すると、<code>logs</code> は処理対象から外れます。</p>
 
-  <p><strong>pattern（正規表現マッチ）</strong></p>
-  <p><code>pattern: { string: "t_.*", exclude: ["t_tmp_.*"] }</code> を指定すると、<code>t_users</code> や <code>t_orders</code> は対象になり、<code>t_tmp_work</code> は除外されます。</p>
+  <p><strong>pattern（部分一致・正規表現）</strong></p>
+  <p><code>pattern: { string: "t_", exclude: ["t_tmp"] }</code> を指定すると、<code>t_users</code> や <code>t_orders</code> は対象になり、<code>t_tmp</code> は除外されます。<code>exclude</code> は完全一致のため、<code>t_tmp_work</code> は除外されません。</p>
+  <p><code>pattern: { regex: "t_(users|orders)" }</code> を指定すると、テーブル名全体が一致する <code>t_users</code> と <code>t_orders</code> だけが対象になります。</p>
 
   <p><strong>innerJoin（内部結合）</strong></p>
 <pre><code>Before (orders):

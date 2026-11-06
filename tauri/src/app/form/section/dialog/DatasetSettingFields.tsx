@@ -467,7 +467,7 @@ function TargetContent({
 					}
 				/>
 				<Arrays
-					name="patternExclue"
+					name="patternExclude"
 					values={target.pattern?.exclude ?? []}
 					list={tableList}
 					handleChange={(text, index) =>

@@ -46,7 +46,7 @@
   <h2 id="section-fields">共通の項目</h2>
   <table>
     <tr><th>項目</th><th>説明</th></tr>
-    <tr><td>sheetName</td><td>抽出対象となる Excel のシート名</td></tr>
+    <tr><td>sheet</td><td>抽出対象となる Excel のシート。シート名（<code>name</code>）か、シート名のパターン（<code>pattern</code>）で指定する。</td></tr>
     <tr><td>tableName</td><td>抽出結果に付与する論理テーブル名。<code>DatasetSetting</code> 等から参照する名前になる。</td></tr>
     <tr><td>header</td><td>カラム名の並び。1 行 1 カラム定義で、Excel 上のカラム並びと対応させる。</td></tr>
     <tr><td>addFileInfo</td><td>抽出結果に元ファイル情報のカラムを追加するかどうか</td></tr>
@@ -61,7 +61,7 @@
   </ol>
 
   <h2 id="section-save">保存とプレビュー</h2>
-  <p>ダイアログ下部のファイル名を指定して保存すると、設定内容が JSON ファイルとして書き出されます。<code>sheetName</code> と <code>tableName</code> が共に入力されている行のみが保存対象です。ファイルの読み込み・保存には、フォームに入力中の <code>settingEncoding</code> の文字コードを使います（未入力ならシステムデフォルト）。</p>
+  <p>ダイアログ下部のファイル名を指定して保存すると、設定内容が JSON ファイルとして書き出されます。<code>sheetName</code>（パターン指定の行は <code>string</code> か <code>regex</code>）と <code>tableName</code> が共に入力されている行のみが保存対象です。パターン指定の行は、JSON ではトップレベルの <code>patterns</code> にパターンを登録し、<code>sheetName</code> にそのキー（例: <code>regex:Sheet.*</code>）を書いた形で保存されます。ファイルの読み込み・保存には、フォームに入力中の <code>settingEncoding</code> の文字コードを使います（未入力ならシステムデフォルト）。</p>
   <p>Save and Preview を押すと、同じように保存したうえで、保存したファイルを <code>xlsxSchema</code> に適用して読み込まれるテーブルの一覧を表示します（<a href="../sections/dataset-load-form.html">Dataset Load Form</a> の Preview Apply Settings と同じ表示です）。一覧の preview ボタンを押すと、そのテーブルのデータを表示します。</p>
   <ul>
     <li><code>xlsxSchema</code> 以外の項目（<code>src</code>・<code>setting</code> など）はフォームに入力した値を使う</li>
