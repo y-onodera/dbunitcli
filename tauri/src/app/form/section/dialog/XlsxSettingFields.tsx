@@ -3,7 +3,13 @@ import { Arrays, Check, Select, Text } from "../../../../components/dialog";
 import { ResourceDatalist } from "../../../../components/element/Input";
 import { useDatasetSrcInfo } from "../../../../context/DatasetSrcInfoProvider";
 import { useSrcInfoSheets } from "../../../../hooks/useXlsxSchema";
-import type { SheetPattern } from "../../../../model/XlsxSchema";
+import {
+	removeArray,
+	replaceArray,
+	replaceSheetPattern,
+	type SheetPattern,
+	switchSheetTarget,
+} from "../../../../model/XlsxSchema";
 import { CommaSeparatedText, TextWithDatalist } from "./DialogFields";
 
 // RowSetting・CellSettingが共通で持つ項目
@@ -15,12 +21,10 @@ type XlsxCommonBuilder = {
 	addFileInfo?: boolean;
 };
 
-type XlsxCommonSetting<T> = Required<
-	Omit<XlsxCommonBuilder, "sheetPattern">
-> & {
-	sheetPattern?: SheetPattern;
-	with(builder: XlsxCommonBuilder): T;
-};
+type XlsxCommonSetting<T> = Required<Omit<XlsxCommonBuilder, "sheetPattern">> &
+	Pick<XlsxCommonBuilder, "sheetPattern"> & {
+		with(builder: XlsxCommonBuilder): T;
+	};
 
 type XlsxFieldsProps<T> = {
 	target: T;
@@ -39,14 +43,7 @@ export function XlsxTableFields<T extends XlsxCommonSetting<T>>({
 				name="sheet"
 				defaultValue={target.sheetPattern ? "pattern" : "name"}
 				handleOnChange={async (selected) =>
-					setTarget((cur) =>
-						cur.with({
-							sheetPattern:
-								selected === "pattern" ? { string: cur.sheetName } : undefined,
-							sheetName:
-								selected === "pattern" ? "" : (cur.sheetPattern?.string ?? ""),
-						}),
-					)
+					setTarget((cur) => switchSheetTarget(cur, selected))
 				}
 			>
 				<option value="name">name</option>
@@ -57,9 +54,7 @@ export function XlsxTableFields<T extends XlsxCommonSetting<T>>({
 					pattern={target.sheetPattern}
 					sheetNames={sheetNames}
 					handleChange={(change) =>
-						setTarget((cur) =>
-							cur.with({ sheetPattern: { ...cur.sheetPattern, ...change } }),
-						)
+						setTarget((cur) => replaceSheetPattern(cur, change))
 					}
 				/>
 			) : (
@@ -113,7 +108,8 @@ function SheetPatternFields({
 	handleChange: (change: SheetPattern) => void;
 }) {
 	const exclude = pattern.exclude ?? [];
-	const list = sheetNames.length > 0 ? "sheetPatternExclude_list" : undefined;
+	const datalistId = "sheetPatternExclude";
+	const list = sheetNames.length > 0 ? `${datalistId}_list` : undefined;
 	return (
 		<>
 			<Text
@@ -135,20 +131,13 @@ function SheetPatternFields({
 				values={exclude}
 				list={list}
 				handleChange={(text, index) =>
-					handleChange({
-						exclude:
-							index < exclude.length
-								? exclude.map((it, i) => (i === index ? text : it))
-								: exclude.concat(text),
-					})
+					handleChange({ exclude: replaceArray(exclude, text, index) })
 				}
 				handleRemove={(index) =>
-					handleChange({ exclude: exclude.filter((_, i) => i !== index) })
+					handleChange({ exclude: removeArray(exclude, index) })
 				}
 			/>
-			{list && (
-				<ResourceDatalist id="sheetPatternExclude" resources={sheetNames} />
-			)}
+			{list && <ResourceDatalist id={datalistId} resources={sheetNames} />}
 		</>
 	);
 }

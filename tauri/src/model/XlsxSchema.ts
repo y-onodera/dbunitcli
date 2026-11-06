@@ -1,9 +1,8 @@
-// シートを名前でなくパターンで指定する。一致の判定は core の TableMetaDataFilterParser.parsePattern を参照
-export type SheetPattern = {
-	string?: string;
-	regex?: string;
-	exclude?: string[];
-};
+import { type Pattern, toPattern } from "./DatasetSettings";
+
+// シートを名前でなくパターンで指定する。一致の判定は core の TableMetaDataFilterParser.parsePattern を参照。
+// filePathはシート名の判定に使われないため持たない
+export type SheetPattern = Omit<Pattern, "filePath">;
 
 export interface RowSettingBuilder {
 	sheetName?: string;
@@ -119,8 +118,16 @@ export class XlsxSchema {
 	}
 
 	static build(schema: XlsxSchemaBuilder): XlsxSchema {
+		const patterns = schema.patterns ?? {};
+		const patternKeys = new Set(Object.keys(patterns));
 		const withPattern = <T extends { sheetName?: string }>(builder: T) =>
-			resolveSheetPattern(builder, schema.patterns);
+			patternKeys.has(builder.sheetName ?? "")
+				? {
+						...builder,
+						sheetName: "",
+						sheetPattern: toSheetPattern(patterns[builder.sheetName ?? ""]),
+					}
+				: builder;
 		return new XlsxSchema(
 			schema.rows?.map((builder) => new RowSetting(withPattern(builder))) || [
 				RowSetting.create(),
@@ -166,17 +173,16 @@ export class XlsxSchema {
 	toJSON() {
 		const patterns: Record<string, SheetPattern> = {};
 		const toSaved = <T extends SheetTarget>(settings: T[]) =>
-			settings
-				.filter((setting) => setting.tableName && sheetKey(setting))
-				.map(({ sheetPattern, ...rest }) => {
-					const pattern = normalizeSheetPattern(sheetPattern);
-					if (!pattern) {
-						return rest;
-					}
-					const key = patternKey(pattern);
-					patterns[key] = pattern;
-					return { ...rest, sheetName: key };
-				});
+			settings.flatMap(({ sheetPattern, ...rest }) => {
+				const sheet = savedSheet({ ...rest, sheetPattern });
+				if (!rest.tableName || !sheet.sheetName) {
+					return [];
+				}
+				if (sheet.pattern) {
+					patterns[sheet.sheetName] = sheet.pattern;
+				}
+				return [{ ...rest, sheetName: sheet.sheetName }];
+			});
 		const rows = toSaved(this.rows);
 		const cells = toSaved(this.cells);
 		return {
@@ -186,7 +192,7 @@ export class XlsxSchema {
 		};
 	}
 }
-function replaceArray<T>(array: T[], newOne: T, index: number): T[] {
+export function replaceArray<T>(array: T[], newOne: T, index: number): T[] {
 	let result = [...array];
 	if (result.length > index) {
 		if (newOne) {
@@ -199,7 +205,7 @@ function replaceArray<T>(array: T[], newOne: T, index: number): T[] {
 	}
 	return result;
 }
-function removeArray<T>(array: T[], remove: number): T[] {
+export function removeArray<T>(array: T[], remove: number): T[] {
 	return [...array].filter((_, index) => index !== remove);
 }
 export interface XlsxSchemaBuilder {
@@ -222,17 +228,22 @@ type SheetTarget = {
 	tableName: string;
 };
 
-// シートの指定(名前またはパターン)を表す文字列。未指定なら空文字
-function sheetKey(setting: SheetTarget): string {
-	if (setting.sheetPattern) {
-		const pattern = normalizeSheetPattern(setting.sheetPattern);
-		return pattern ? patternKey(pattern) : "";
+// 保存するsheetName(パターン指定ならpatternsのキー)と、patternsに登録するパターン。未指定ならsheetNameは空文字
+function savedSheet(setting: SheetTarget): {
+	sheetName: string;
+	pattern?: SheetPattern;
+} {
+	if (!setting.sheetPattern) {
+		return { sheetName: setting.sheetName };
 	}
-	return setting.sheetName;
+	const pattern = normalizeSheetPattern(setting.sheetPattern);
+	return pattern
+		? { sheetName: patternKey(pattern), pattern }
+		: { sheetName: "" };
 }
 
 function settingDisplayName(setting: SheetTarget): string {
-	const sheet = setting.sheetPattern ? sheetKey(setting) : setting.sheetName;
+	const sheet = savedSheet(setting).sheetName;
 	if (!sheet || !setting.tableName) {
 		return "";
 	}
@@ -266,30 +277,42 @@ function patternKey(pattern: SheetPattern): string {
 		: base;
 }
 
-function resolveSheetPattern<T extends { sheetName?: string }>(
-	builder: T,
-	patterns: XlsxSchemaBuilder["patterns"],
-): T & { sheetPattern?: SheetPattern } {
-	const sheetName = builder.sheetName ?? "";
-	if (!patterns || !Object.keys(patterns).includes(sheetName)) {
-		return builder;
-	}
-	return {
-		...builder,
-		sheetName: "",
-		sheetPattern: toSheetPattern(patterns[sheetName]),
-	};
-}
-
 // 配列の指定は画面で編集できないため先頭だけを使う
 function toSheetPattern(
 	pattern: string | string[] | SheetPattern,
 ): SheetPattern {
-	if (typeof pattern === "string") {
-		return { string: pattern };
-	}
 	if (Array.isArray(pattern)) {
 		return { string: pattern[0] ?? "" };
 	}
-	return pattern;
+	return toPattern(pattern) ?? {};
+}
+
+type SheetTargetSetting<T> = {
+	sheetName: string;
+	sheetPattern?: SheetPattern;
+	with(builder: { sheetName?: string; sheetPattern?: SheetPattern }): T;
+};
+
+// name/patternの切替。入力中のシート名とstringを相互に引き継ぐ
+export function switchSheetTarget<T extends SheetTargetSetting<T>>(
+	setting: T,
+	kind: string,
+): T {
+	if (kind === "pattern") {
+		return setting.with({
+			sheetPattern: { string: setting.sheetName },
+			sheetName: "",
+		});
+	}
+	return setting.with({
+		sheetPattern: undefined,
+		sheetName: setting.sheetPattern?.string ?? "",
+	});
+}
+
+export function replaceSheetPattern<T extends SheetTargetSetting<T>>(
+	setting: T,
+	change: SheetPattern,
+): T {
+	return setting.with({ sheetPattern: { ...setting.sheetPattern, ...change } });
 }

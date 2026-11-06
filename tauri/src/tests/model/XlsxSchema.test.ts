@@ -9,6 +9,8 @@ import {
 	createCellSetting,
 	createRowSetting,
 	RowSetting,
+	replaceSheetPattern,
+	switchSheetTarget,
 	XlsxSchema,
 } from "../../model/XlsxSchema";
 
@@ -311,5 +313,29 @@ describe("XlsxSchemaのシートパターン", () => {
 		const loaded = XlsxSchema.build(saved);
 		expect(loaded.rows[0].sheetPattern).toEqual({ string: "マスタ" });
 		expect(loaded.rows[0].displayName()).toBe("string:マスタ→T1");
+	});
+});
+
+describe("シート指定の切替・更新", () => {
+	it("patternへ切り替えるとsheetNameをstringに引き継ぎ、nameへ戻すとstringをsheetNameにする", () => {
+		const toPattern = switchSheetTarget(
+			new RowSetting({ sheetName: "Sheet1" }),
+			"pattern",
+		);
+		expect(toPattern.sheetName).toBe("");
+		expect(toPattern.sheetPattern).toEqual({ string: "Sheet1" });
+
+		const toName = switchSheetTarget(toPattern, "name");
+		expect(toName.sheetName).toBe("Sheet1");
+		expect(toName.sheetPattern).toBeUndefined();
+	});
+
+	it("replaceSheetPatternは指定した項目だけを更新する", () => {
+		const setting = new CellSetting({
+			sheetPattern: { string: "マスタ", exclude: ["マスタ9"] },
+		});
+		expect(
+			replaceSheetPattern(setting, { regex: ".*マスタ" }).sheetPattern,
+		).toEqual({ string: "マスタ", regex: ".*マスタ", exclude: ["マスタ9"] });
 	});
 });

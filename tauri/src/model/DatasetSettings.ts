@@ -716,7 +716,9 @@ function toNameArray(
 	}
 	return typeof name === "string" ? [name] : name;
 }
-function toPattern(pattern: string | Pattern | undefined): Pattern | undefined {
+export function toPattern(
+	pattern: string | Pattern | undefined,
+): Pattern | undefined {
 	if (!pattern) {
 		return undefined;
 	}
