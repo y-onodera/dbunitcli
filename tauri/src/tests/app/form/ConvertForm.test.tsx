@@ -444,6 +444,18 @@ describe("ConvertFormの描画テスト", () => {
 				document.querySelector('[name="-result.exportHeader"]'),
 			).toBeInTheDocument();
 		});
+
+		it("appendを表示する", () => {
+			render(
+				<ConvertForm
+					{...makeConvertProps(convertRefreshSrcTypeTableResponseFixture)}
+				/>,
+			);
+
+			expect(
+				document.querySelector('[name="-result.append"]'),
+			).toBeInTheDocument();
+		});
 	});
 
 	describe("parallel（並列化できるときだけ表示）", () => {

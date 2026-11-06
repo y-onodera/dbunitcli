@@ -429,6 +429,7 @@ function makeCsvConvertResult(required = false, parallel = true) {
 			"WORKSPACE",
 			false,
 		),
+		append: makeElement("append", "FLG", "false", "WORKSPACE", false),
 		outputEncoding: makeElement(
 			"outputEncoding",
 			"TEXT",
@@ -470,6 +471,7 @@ function makeXlsxConvertResult(resultValue: string, excelTable = "SHEET") {
 			"WORKSPACE",
 			false,
 		),
+		append: makeElement("append", "FLG", "false", "WORKSPACE", false),
 		excelTable: makeElement(
 			"excelTable",
 			"TEXT",
@@ -546,6 +548,7 @@ export const compareLoadResponseFixture = {
 			"WORKSPACE",
 			false,
 		),
+		append: makeElement("append", "FLG", "false", "WORKSPACE", false),
 		outputEncoding: makeElement(
 			"outputEncoding",
 			"TEXT",

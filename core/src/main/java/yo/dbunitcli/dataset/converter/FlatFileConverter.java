@@ -19,6 +19,7 @@ public abstract class FlatFileConverter implements IDataSetConverter {
     protected final File resultDir;
     protected final String encoding;
     protected final boolean exportHeader;
+    protected final boolean append;
     protected final Charset charset;
     protected final String extension;
     protected ITableMetaData activeMetaData;
@@ -27,12 +28,14 @@ public abstract class FlatFileConverter implements IDataSetConverter {
     protected Writer writer;
 
     public FlatFileConverter(final String theDirectory, final File resultDir, final String encoding,
-                             final boolean exportEmptyTable, final boolean exportHeader, final String extension) {
+                             final boolean exportEmptyTable, final boolean exportHeader, final boolean append,
+                             final String extension) {
         this.exportEmptyTable = exportEmptyTable;
         this.theDirectory = theDirectory;
         this.resultDir = resultDir;
         this.encoding = encoding;
         this.exportHeader = exportHeader;
+        this.append = append;
         this.charset = Charset.forName(this.encoding);
         this.extension = extension;
     }
@@ -64,6 +67,12 @@ public abstract class FlatFileConverter implements IDataSetConverter {
             LOGGER.info("convert - start fileName={}", this.file);
             if (!directory.exists()) {
                 Files.createDirectories(directory.toPath());
+            }
+            // 追記時は既存ファイルにヘッダが書かれている前提で中身を検査しない
+            if (this.append && this.file.exists()) {
+                LOGGER.info("convert - append fileName={}", this.file);
+                this.writer = new OutputStreamWriter(new FileOutputStream(this.file, true), this.encoding);
+                return;
             }
             Files.deleteIfExists(this.file.toPath());
             Files.createFile(this.file.toPath());

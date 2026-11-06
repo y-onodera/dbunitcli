@@ -36,7 +36,10 @@ public class XlsConverter implements IDataSetConverter {
     protected final TableExportType tableExport;
     protected final boolean exportEmptyTable;
     protected final boolean exportHeader;
+    protected final boolean append;
     private final Map<Workbook, Map<Short, CellStyle>> cellStyleMap = new HashMap<>();
+    // SHEETで1ブックを使い回すため、reStartTableで書込位置を戻せるようシートごとの開始行を保持する
+    private final Map<String, Integer> firstDataRowIndex = new HashMap<>();
     // SimpleDateFormatはスレッドセーフでないため、インスタンスごとに持つ
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     protected String filename;
@@ -46,9 +49,9 @@ public class XlsConverter implements IDataSetConverter {
 
     private Sheet sheet;
 
-    private int sheetIndex = 0;
-
     private int rowIndex = 1;
+
+    private int firstRowIndex = 1;
 
     protected static String createZeros(final int count) {
         return XlsConverter.ZEROS.substring(0, count);
@@ -59,7 +62,8 @@ public class XlsConverter implements IDataSetConverter {
                 , param.fileName()
                 , TableExportType.valueOf(param.excelTable())
                 , param.exportEmptyTable()
-                , param.exportHeader());
+                , param.exportHeader()
+                , param.append());
     }
 
     public XlsConverter(final File resultDir
@@ -67,11 +71,21 @@ public class XlsConverter implements IDataSetConverter {
             , final TableExportType tableExport
             , final boolean exportEmptyTable
             , final boolean exportHeader) {
+        this(resultDir, filename, tableExport, exportEmptyTable, exportHeader, false);
+    }
+
+    public XlsConverter(final File resultDir
+            , final String filename
+            , final TableExportType tableExport
+            , final boolean exportEmptyTable
+            , final boolean exportHeader
+            , final boolean append) {
         this.resultDir = resultDir;
         this.filename = Optional.ofNullable(filename).orElse(this.resultDir.getName());
         this.tableExport = tableExport;
         this.exportEmptyTable = exportEmptyTable;
         this.exportHeader = exportHeader;
+        this.append = append;
     }
 
     @Override
@@ -86,10 +100,14 @@ public class XlsConverter implements IDataSetConverter {
         if (this.tableExport == TableExportType.BOOK) {
             this.filename = this.metaData.getTableName();
             this.workbook = this.createWorkbook(this.writeTo());
-            this.sheetIndex = 0;
+            this.sheet = this.workbook.getSheet(this.metaData.getTableName());
+            // 追記時は分割先のインスタンスが追記前の行数を持たないため、書き出し済みファイルの末尾から続ける
+            this.rowIndex = this.append ? this.nextRowIndex(this.sheet) : writeRows + 1;
+        } else {
+            this.sheet = this.workbook.getSheet(this.metaData.getTableName());
+            this.rowIndex = this.firstDataRowIndex.getOrDefault(this.metaData.getTableName(), 1) + writeRows;
         }
-        this.sheet = this.workbook.getSheet(this.metaData.getTableName());
-        this.rowIndex = writeRows + 1;
+        this.firstRowIndex = this.rowIndex - writeRows;
     }
 
     @Override
@@ -109,14 +127,14 @@ public class XlsConverter implements IDataSetConverter {
 
     @Override
     public IDataSetConverter split() {
-        return new XlsConverter(this.resultDir, this.filename, this.tableExport, this.exportEmptyTable, this.exportHeader);
+        return new XlsConverter(this.resultDir, this.filename, this.tableExport, this.exportEmptyTable, this.exportHeader
+                , this.append);
     }
 
     @Override
     public void startDataSet() {
         if (this.tableExport == TableExportType.SHEET) {
-            this.workbook = this.createWorkbook();
-            this.sheetIndex = 0;
+            this.workbook = this.openWorkbook();
         }
     }
 
@@ -133,23 +151,32 @@ public class XlsConverter implements IDataSetConverter {
         this.metaData = metaData;
         if (this.tableExport == TableExportType.BOOK) {
             this.filename = this.metaData.getTableName();
-            this.workbook = this.createWorkbook();
-            this.sheetIndex = 0;
+            this.workbook = this.openWorkbook();
         }
-        this.sheet = this.workbook.createSheet(this.metaData.getTableName());
-        this.sheet.setDisplayZeros(true);
-        this.workbook.setSheetName(this.sheetIndex++, this.metaData.getTableName());
-        if (this.exportHeader) {
-            this.rowIndex = 1;
-            this.writeColumnNames();
+        final Sheet existing = this.append ? this.workbook.getSheet(this.metaData.getTableName()) : null;
+        if (existing != null) {
+            // 追記時は既存シートにヘッダが書かれている前提で中身を検査しない
+            XlsConverter.LOGGER.info("convert - append sheetName={}", this.metaData.getTableName());
+            this.sheet = existing;
+            this.rowIndex = this.nextRowIndex(existing);
         } else {
-            this.rowIndex = 0;
+            this.sheet = this.workbook.createSheet(this.metaData.getTableName());
+            this.sheet.setDisplayZeros(true);
+            this.workbook.setSheetName(this.workbook.getSheetIndex(this.sheet), this.metaData.getTableName());
+            if (this.exportHeader) {
+                this.rowIndex = 1;
+                this.writeColumnNames();
+            } else {
+                this.rowIndex = 0;
+            }
         }
+        this.firstRowIndex = this.rowIndex;
+        this.firstDataRowIndex.put(this.metaData.getTableName(), this.rowIndex);
     }
 
     @Override
     public void endTable() throws DataSetException {
-        XlsConverter.LOGGER.info("convert - rows={} ", this.rowIndex - (this.exportHeader ? 1 : 0));
+        XlsConverter.LOGGER.info("convert - rows={} ", this.rowIndex - this.firstRowIndex);
         XlsConverter.LOGGER.info("convert - end   sheetName={}", this.metaData.getTableName());
         if (this.tableExport == TableExportType.BOOK) {
             this.flush();
@@ -236,6 +263,25 @@ public class XlsConverter implements IDataSetConverter {
 
     protected Workbook createWorkbook() {
         return this.createWorkbook(null);
+    }
+
+    /**
+     * 追記指定で出力先が既にあれば読み込み、なければ新規に作る
+     */
+    protected Workbook openWorkbook() {
+        final File writeTo = this.writeTo();
+        if (this.append && writeTo.exists()) {
+            XlsConverter.LOGGER.info("convert - append fileName={}", writeTo);
+            return this.createWorkbook(writeTo);
+        }
+        return this.createWorkbook();
+    }
+
+    /**
+     * @return 既存行の次の行番号
+     */
+    protected int nextRowIndex(final Sheet sheet) {
+        return sheet.getPhysicalNumberOfRows() == 0 ? 0 : sheet.getLastRowNum() + 1;
     }
 
     protected Workbook createWorkbook(final File writeTo) {

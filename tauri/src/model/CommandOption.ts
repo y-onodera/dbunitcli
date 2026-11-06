@@ -131,6 +131,7 @@ export type ResultOption = CommandOptions & {
 	resultPath?: CommandOption;
 	exportEmptyTable: CommandOption;
 	exportHeader?: CommandOption;
+	append?: CommandOption;
 	outputEncoding?: CommandOption;
 	excelTable?: CommandOption;
 	format?: CommandOption;

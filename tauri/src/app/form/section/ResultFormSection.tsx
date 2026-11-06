@@ -64,6 +64,9 @@ export default function ResultFormSection({
 			{resultOption.exportHeader && (
 				<Check prefix={prefix} element={resultOption.exportHeader} />
 			)}
+			{resultOption.append && (
+				<Check prefix={prefix} element={resultOption.append} />
+			)}
 			{excelTable && (
 				<Select
 					prefix={prefix}

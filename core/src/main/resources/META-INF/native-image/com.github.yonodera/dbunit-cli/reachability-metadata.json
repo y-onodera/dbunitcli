@@ -6751,6 +6751,9 @@
       "type": "yo.dbunitcli.application.dto.DataSetConverterDto",
       "fields": [
         {
+          "name": "append"
+        },
+        {
           "name": "excelTable"
         },
         {

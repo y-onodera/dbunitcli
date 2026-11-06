@@ -7,13 +7,13 @@ import java.io.File;
 public record DataSetConverterParam(DatabaseConnectionLoader databaseConnectionLoader, ResultType resultType,
                                     DbOperation operation, File resultDir, String fileName, String outputEncoding,
                                     String excelTable, String format, boolean exportEmptyTable, boolean exportHeader,
-                                    String extension, String fixedColumnDefFile, String fixedLengthType) {
+                                    boolean append, String extension, String fixedColumnDefFile, String fixedLengthType) {
 
 
     public DataSetConverterParam(final Builder builder) {
         this(builder.getDatabaseConnectionLoader(), builder.getResultType(), builder.getOperation(),
              builder.getResultDir(), builder.getResultPath(), builder.getOutputEncoding(), builder.getExcelTable(),
-             builder.getFormat(), builder.isExportEmptyTable(), builder.isSkipHeader(), builder.getExtension(),
+             builder.getFormat(), builder.isExportEmptyTable(), builder.isSkipHeader(), builder.isAppend(), builder.getExtension(),
              builder.getFixedColumnDefFile(), builder.getFixedLengthType());
     }
 
@@ -34,6 +34,7 @@ public record DataSetConverterParam(DatabaseConnectionLoader databaseConnectionL
         private String excelTable = "SHEET";
         private boolean exportEmptyTable;
         private boolean skipHeader;
+        private boolean append;
         private String resultPath;
         private String format;
         private String extension;
@@ -122,6 +123,15 @@ public record DataSetConverterParam(DatabaseConnectionLoader databaseConnectionL
 
         public Builder setSkipHeader(final boolean skipHeader) {
             this.skipHeader = skipHeader;
+            return this;
+        }
+
+        public boolean isAppend() {
+            return this.append;
+        }
+
+        public Builder setAppend(final boolean append) {
+            this.append = append;
             return this;
         }
 

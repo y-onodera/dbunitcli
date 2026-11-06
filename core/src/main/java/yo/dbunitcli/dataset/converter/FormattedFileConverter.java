@@ -16,20 +16,21 @@ public class FormattedFileConverter extends FlatFileConverter implements IDataSe
     private final String format;
 
     public FormattedFileConverter(final String theDirectory, final File resultDir, final String encoding,
-                                  final boolean exportEmptyTable, final String format, final String extension) {
-        super(theDirectory, resultDir, encoding, exportEmptyTable, false, extension != null ? extension : "txt");
+                                  final boolean exportEmptyTable, final boolean append, final String format,
+                                  final String extension) {
+        super(theDirectory, resultDir, encoding, exportEmptyTable, false, append, extension != null ? extension : "txt");
         this.format = format;
     }
 
     public FormattedFileConverter(final DataSetConverterParam param) {
         this(param.resultDir().getAbsolutePath(), param.resultDir(), param.outputEncoding(), param.exportEmptyTable(),
-             param.format(), param.extension());
+             param.append(), param.format(), param.extension());
     }
 
     @Override
     public IDataSetConverter split() {
         return new FormattedFileConverter(this.theDirectory, this.resultDir, this.encoding, this.exportEmptyTable,
-                                          this.format, this.extension);
+                                          this.append, this.format, this.extension);
     }
 
     @Override
