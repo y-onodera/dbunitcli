@@ -5,33 +5,25 @@ import {
 	DialogField,
 	DialogTitle,
 	ModalOverlay,
-	Select,
 	StatusMessage,
-	Text,
 } from "../../../../components/dialog";
 import { BlueButton, WhiteButton } from "../../../../components/element/Button";
 import { TextArea } from "../../../../components/element/Input";
 import {
 	type ColumnExpressionFunction,
 	type ColumnExpressionOption,
-	columnExpressionFunctions,
+	columnExpressionArgs,
 	expressionOperators,
 	newColumnExpressionOption,
 	toColumnExpression,
 } from "../../../../model/ColumnExpression";
 import ColumnSelectDialog from "./ColumnSelectDialog";
+import { OptionSelect, OptionText, type SelectOption } from "./SqlInsertParts";
 
-const defaultValueFunctions: readonly ColumnExpressionFunction[] = [
-	"tryToNum",
-	"formatDate",
-];
-
-const stringArgumentFunctions: readonly ColumnExpressionFunction[] = [
-	"contains",
-	"startsWith",
-	"endsWith",
-	"matches",
-];
+const functionOptions = Object.keys(columnExpressionArgs).map((fn) => ({
+	value: fn,
+	label: fn,
+})) as SelectOption<ColumnExpressionFunction>[];
 
 function ColumnExpressionFields({
 	option,
@@ -41,79 +33,29 @@ function ColumnExpressionFields({
 	setOption: Dispatch<SetStateAction<ColumnExpressionOption>>;
 }) {
 	return (
-		<DialogField>
-			<Select
-				name="function"
-				defaultValue={option.fn}
-				handleOnChange={async (fn) =>
-					setOption((cur) => ({ ...cur, fn: fn as ColumnExpressionFunction }))
-				}
-			>
-				{columnExpressionFunctions.map((fn) => (
-					<option key={fn} value={fn}>
-						{fn}
-					</option>
-				))}
-			</Select>
-			{option.fn === "formatDate" && (
-				<>
-					<Text
-						name="from"
-						value={option.from}
-						handleChange={(ev) =>
-							setOption((cur) => ({ ...cur, from: ev.target.value }))
-						}
-					/>
-					<Text
-						name="to"
-						value={option.to}
-						handleChange={(ev) =>
-							setOption((cur) => ({ ...cur, to: ev.target.value }))
-						}
-					/>
-				</>
-			)}
-			{stringArgumentFunctions.includes(option.fn) && (
-				<Text
-					name="argument"
-					value={option.argument}
-					handleChange={(ev) =>
-						setOption((cur) => ({ ...cur, argument: ev.target.value }))
-					}
+		<>
+			<DialogField>
+				<OptionSelect
+					id="function"
+					label="function"
+					options={functionOptions}
+					onChange={(fn) => setOption((cur) => ({ ...cur, fn }))}
 				/>
-			)}
-			{option.fn === "substring" && (
-				<>
-					<Text
-						name="start"
-						value={option.start}
-						handleChange={(ev) =>
-							setOption((cur) => ({ ...cur, start: ev.target.value }))
-						}
+			</DialogField>
+			{columnExpressionArgs[option.fn].map((arg) => (
+				<DialogField key={arg}>
+					<OptionText
+						id={arg}
+						label={arg}
+						value={option[arg]}
+						onChange={(value) => setOption((cur) => ({ ...cur, [arg]: value }))}
 					/>
-					<Text
-						name="end"
-						value={option.end}
-						handleChange={(ev) =>
-							setOption((cur) => ({ ...cur, end: ev.target.value }))
-						}
-					/>
-				</>
-			)}
-			{defaultValueFunctions.includes(option.fn) && (
-				<Text
-					name="default"
-					value={option.defaultValue}
-					handleChange={(ev) =>
-						setOption((cur) => ({ ...cur, defaultValue: ev.target.value }))
-					}
-				/>
-			)}
-		</DialogField>
+				</DialogField>
+			))}
+		</>
 	);
 }
 
-// 選んだカラムごとに、カラム名を名前・カラムを参照する式を値とした組を返す
 export function ColumnExpressionSelectDialog({
 	columns,
 	defaultValue,
@@ -162,13 +104,13 @@ export function ExpressionEditDialog({
 	onClose: () => void;
 }) {
 	const [text, setText] = useState(value);
-	const [operator, setOperator] = useState(0);
+	const [operator, setOperator] = useState(expressionOperators[0].value);
 	const [column, setColumn] = useState(columns[0] ?? "");
 	const [option, setOption] = useState(() =>
 		newColumnExpressionOption(defaultValue),
 	);
 
-	function renderAppend() {
+	function renderAppendColumn() {
 		if (columns.length === 0) {
 			return (
 				<StatusMessage kind="empty">
@@ -178,17 +120,14 @@ export function ExpressionEditDialog({
 		}
 		return (
 			<>
-				<Select
-					name="column"
-					defaultValue={column}
-					handleOnChange={async (selected) => setColumn(selected)}
-				>
-					{columns.map((c) => (
-						<option key={c} value={c}>
-							{c}
-						</option>
-					))}
-				</Select>
+				<DialogField>
+					<OptionSelect
+						id="column"
+						label="column"
+						options={columns.map((c) => ({ value: c, label: c }))}
+						onChange={setColumn}
+					/>
+				</DialogField>
 				<ColumnExpressionFields option={option} setOption={setOption} />
 				<DialogField>
 					<BlueButton
@@ -213,26 +152,21 @@ export function ExpressionEditDialog({
 					onChange={(ev) => setText(ev.target.value)}
 				/>
 			</DialogField>
-			<Select
-				name="operator"
-				defaultValue="0"
-				handleOnChange={async (selected) => setOperator(Number(selected))}
-			>
-				{expressionOperators.map((op, i) => (
-					<option key={op.label} value={i}>
-						{op.label}
-					</option>
-				))}
-			</Select>
+			<DialogField>
+				<OptionSelect
+					id="operator"
+					label="operator"
+					options={expressionOperators}
+					onChange={setOperator}
+				/>
+			</DialogField>
 			<DialogField>
 				<BlueButton
 					title="Append Operator"
-					handleClick={() =>
-						setText((cur) => cur + expressionOperators[operator].text)
-					}
+					handleClick={() => setText((cur) => cur + operator)}
 				/>
 			</DialogField>
-			{renderAppend()}
+			{renderAppendColumn()}
 			<DialogActions>
 				<BlueButton
 					title="Apply"

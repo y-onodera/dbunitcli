@@ -20,7 +20,6 @@ export default function ColumnSelectDialog({
 	columns: string[];
 	onApply: (selected: string[]) => void;
 	onClose: () => void;
-	// 一覧の上に出す、反映方法の指定欄
 	children?: ReactNode;
 }) {
 	const [selected, setSelected] = useState<string[]>([]);

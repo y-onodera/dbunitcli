@@ -23,7 +23,7 @@ describe("toColumnExpressionのテスト", () => {
 			fn: "tryToNum",
 		} as const;
 		expect(toColumnExpression("金額", option)).toBe("tryToNum(get('金額'), 0)");
-		expect(toColumnExpression("金額", { ...option, defaultValue: " " })).toBe(
+		expect(toColumnExpression("金額", { ...option, default: " " })).toBe(
 			"tryToNum(get('金額'), null)",
 		);
 	});
@@ -36,7 +36,7 @@ describe("toColumnExpressionのテスト", () => {
 		expect(toColumnExpression("日付", option)).toBe(
 			"formatDate(get('日付'), 'yyyyMMdd', 'yyyy/MM/dd')",
 		);
-		expect(toColumnExpression("日付", { ...option, defaultValue: "''" })).toBe(
+		expect(toColumnExpression("日付", { ...option, default: "''" })).toBe(
 			"formatDate(get('日付'), 'yyyyMMdd', 'yyyy/MM/dd', '')",
 		);
 	});

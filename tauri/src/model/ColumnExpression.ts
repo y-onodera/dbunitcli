@@ -1,38 +1,37 @@
-export const columnExpressionFunctions = [
-	"none",
-	"tryToNum",
-	"formatDate",
-	"contains",
-	"startsWith",
-	"endsWith",
-	"matches",
-	"substring",
-] as const;
+// from・to・argumentは文字列リテラルとして、default・start・endはJEXL式のまま埋め込む
+export type ColumnExpressionArg =
+	| "default"
+	| "from"
+	| "to"
+	| "argument"
+	| "start"
+	| "end";
 
-export type ColumnExpressionFunction =
-	(typeof columnExpressionFunctions)[number];
+// 関数ごとに入力させる引数（並びは入力欄の並び）
+export const columnExpressionArgs = {
+	none: [],
+	tryToNum: ["default"],
+	formatDate: ["from", "to", "default"],
+	contains: ["argument"],
+	startsWith: ["argument"],
+	endsWith: ["argument"],
+	matches: ["argument"],
+	substring: ["start", "end"],
+} as const satisfies Record<string, readonly ColumnExpressionArg[]>;
 
-// 読み込んだカラムをJEXL式として挿入するときの書式
-export type ColumnExpressionOption = {
-	fn: ColumnExpressionFunction;
-	// tryToNum・formatDateの既定値（JEXL式のまま埋め込む）
-	defaultValue: string;
-	// formatDateの書式（文字列リテラルとして埋め込む）
-	from: string;
-	to: string;
-	// contains・startsWith・endsWith・matchesの引数（文字列リテラルとして埋め込む）
-	argument: string;
-	// substringの引数（JEXL式のまま埋め込む）
-	start: string;
-	end: string;
-};
+export type ColumnExpressionFunction = keyof typeof columnExpressionArgs;
+
+export type ColumnExpressionOption = { fn: ColumnExpressionFunction } & Record<
+	ColumnExpressionArg,
+	string
+>;
 
 export function newColumnExpressionOption(
 	defaultValue: string,
 ): ColumnExpressionOption {
 	return {
 		fn: "none",
-		defaultValue,
+		default: defaultValue,
 		from: "yyyyMMdd",
 		to: "yyyy/MM/dd",
 		argument: "",
@@ -41,7 +40,7 @@ export function newColumnExpressionOption(
 	};
 }
 
-export function quoteJexlString(text: string): string {
+function quoteJexlString(text: string): string {
 	return `'${text.replace(/[\\']/g, "\\$&")}'`;
 }
 
@@ -51,7 +50,7 @@ export function toColumnExpression(
 	option: ColumnExpressionOption,
 ): string {
 	const ref = `get(${quoteJexlString(column)})`;
-	const defaultValue = option.defaultValue.trim();
+	const defaultValue = option.default.trim();
 	switch (option.fn) {
 		case "tryToNum":
 			return `tryToNum(${ref}, ${defaultValue || "null"})`;
@@ -83,26 +82,26 @@ export function toColumnExpression(
 	}
 }
 
-// 式に追記する演算子。textは追記する文字列そのもの
-export const expressionOperators = [
-	{ label: "== (equal)", text: " == " },
-	{ label: "!= (not equal)", text: " != " },
-	{ label: "> (greater)", text: " > " },
-	{ label: "< (less)", text: " < " },
-	{ label: ">= (greater or equal)", text: " >= " },
-	{ label: "<= (less or equal)", text: " <= " },
-	{ label: "=~ (regex match)", text: " =~ " },
-	{ label: "!~ (regex not match)", text: " !~ " },
-	{ label: "&& (AND)", text: " && " },
-	{ label: "|| (OR)", text: " || " },
-	{ label: "! (NOT)", text: "!" },
-	{ label: "+ (add / concat)", text: " + " },
-	{ label: "- (subtract)", text: " - " },
-	{ label: "* (multiply)", text: " * " },
-	{ label: "/ (divide)", text: " / " },
-	{ label: "% (modulo)", text: " % " },
-	{ label: "? (ternary)", text: " ? " },
-	{ label: ": (ternary)", text: " : " },
-	{ label: "== null", text: " == null" },
-	{ label: "!= null", text: " != null" },
-] as const;
+// valueは追記する文字列。二項演算子は前後に空白を付ける
+export const expressionOperators: { value: string; label: string }[] = [
+	{ value: " == ", label: "== (equal)" },
+	{ value: " != ", label: "!= (not equal)" },
+	{ value: " > ", label: "> (greater)" },
+	{ value: " < ", label: "< (less)" },
+	{ value: " >= ", label: ">= (greater or equal)" },
+	{ value: " <= ", label: "<= (less or equal)" },
+	{ value: " =~ ", label: "=~ (regex match)" },
+	{ value: " !~ ", label: "!~ (regex not match)" },
+	{ value: " && ", label: "&& (AND)" },
+	{ value: " || ", label: "|| (OR)" },
+	{ value: "!", label: "! (NOT)" },
+	{ value: " + ", label: "+ (add / concat)" },
+	{ value: " - ", label: "- (subtract)" },
+	{ value: " * ", label: "* (multiply)" },
+	{ value: " / ", label: "/ (divide)" },
+	{ value: " % ", label: "% (modulo)" },
+	{ value: " ? ", label: "? (ternary)" },
+	{ value: " : ", label: ": (ternary)" },
+	{ value: " == null", label: "== null" },
+	{ value: " != null", label: "!= null" },
+];
