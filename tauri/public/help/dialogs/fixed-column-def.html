@@ -34,7 +34,7 @@
   </ul>
 
   <h2 id="section-open">開き方</h2>
-  <p><code>fixedColumnDef</code> テキストボックス横のメニューにある編集ボタンから開きます。テキストボックスの値のファイル名が <code>&lt;workspace&gt;/resources/fixed-column-def</code> にあればその内容が読み込まれ、空の場合は空の定義が 1 行ある状態で開きます。同じメニューの削除ボタンでは、候補にある定義ファイルを削除できます。</p>
+  <p><code>fixedColumnDef</code> テキストボックス横のメニューにある編集ボタンから開きます。テキストボックスの値のファイル名が <code>&lt;workspace&gt;/resources/fixed-column-def</code> にあればその内容が読み込まれ、空の場合は空の定義が 1 行ある状態で開きます。</p>
   <p>同じメニューの generate ボタンからは、既存データセットのカラム構成をもとに雛型を作れます（<a href="fixed-column-def-generate.html">Fixed Column Def Generate</a>）。生成結果はこのダイアログに反映された状態で開きます。</p>
 
   <h2 id="section-content">設定項目</h2>
@@ -49,22 +49,14 @@
   <p>表の各行の Target には <code>name (length)</code> の形で表示されます。</p>
 
   <h2 id="section-operation">操作</h2>
-  <table>
-    <tr><th>ボタン</th><th>動作</th></tr>
-    <tr><td>追加</td><td>表の最後の行の下にあるボタン。空の Column Def Setting を開き、Save で表の末尾に追加する</td></tr>
-    <tr><td>編集</td><td>その行の Column Def Setting を開き、Save で内容を置き換える</td></tr>
-    <tr><td>削除</td><td>その行を表から取り除く</td></tr>
-    <tr><td>コピー</td><td>その行の内容を初期値にして Column Def Setting を開き、Save で表の末尾に追加する</td></tr>
-  </table>
-  <p>行の並び替えはできません。途中にカラムを入れたい場合は、後ろの行を削除してから追加し直してください。</p>
+  <p>Column Definitions の表の add / edit / delete / copy で行を編集します。各ボタンの動きと、行を並び替えられないことは <a href="../reference/common.html">画面共通の操作</a> の「ダイアログの設定一覧表」を参照してください。表の順がそのまま出力のカラム順になるため、途中にカラムを入れたい場合は、後ろの行を削除してから追加し直してください。</p>
 
   <h2 id="section-save">保存</h2>
-  <p>ダイアログ下部の name に保存先のファイル名を指定して Save を押すと、内容が <code>&lt;workspace&gt;/resources/fixed-column-def</code> にファイルとして書き出され、<code>fixedColumnDef</code> テキストボックスにそのファイル名が設定されます。存在しない名前を指定すると新規ファイルとして作成され、既存のファイル名を指定すると上書きされます。</p>
+  <p>保存先は <code>&lt;workspace&gt;/resources/fixed-column-def</code> です。name 欄と Save の動きは <a href="../reference/common.html">画面共通の操作</a> を参照してください。</p>
 
   <h2 id="section-notes">注意</h2>
   <ul>
     <li><code>name</code> が空の行は保存されません。</li>
-    <li>Close を押すと、保存せずにダイアログを閉じます（<code>fixedColumnDef</code> テキストボックスは変更されません）。</li>
   </ul>
 
   <h2 id="section-related">関連</h2>
