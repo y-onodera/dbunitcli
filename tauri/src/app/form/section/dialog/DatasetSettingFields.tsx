@@ -262,14 +262,14 @@ const filterOrderFields = [
 
 type FilterOrderFieldName = (typeof filterOrderFields)[number]["name"];
 
-// fieldNamesで表示する項目を絞れる（省略時はすべて）
+// fieldNamesで表示する項目を絞れる（省略時はすべて）。filterはJEXL式のため別の組に分け、legendは残りの組の見出し
 export function FilterOrderFields({
 	target,
 	setTarget,
 	columnDatalist,
 	columnList,
 	onLoadColumns,
-	legend = "Filter / Order",
+	legend = "Columns / Order",
 	fieldNames,
 }: DatasetSettingFieldsProps & {
 	columnDatalist: string[];
@@ -308,34 +308,56 @@ export function FilterOrderFields({
 			return next;
 		});
 	};
+	function renderGroup(
+		groupLegend: string,
+		fields: (typeof filterOrderFields)[number][],
+	) {
+		if (fields.length === 0) {
+			return null;
+		}
+		return (
+			<Fieldset legend={groupLegend}>
+				<DialogField>
+					<BlueButton title="Load Columns" handleClick={onLoadColumns} />
+				</DialogField>
+				{fields.map((field) => (
+					<Arrays
+						key={field.name}
+						name={field.name}
+						showCaption={true}
+						values={target[field.name]}
+						list={columnList}
+						handleChange={(text, index) =>
+							setTarget((cur) => field.replace(cur, text, index))
+						}
+						handleRemove={(index) =>
+							setTarget((cur) => field.remove(cur, index))
+						}
+						handleSelect={
+							columnDatalist.length > 0
+								? (index) => setSelecting({ field, index })
+								: undefined
+						}
+						handleEdit={
+							field.name === "filter"
+								? (index) => setEditingFilter(index)
+								: undefined
+						}
+					/>
+				))}
+			</Fieldset>
+		);
+	}
 	return (
-		<Fieldset legend={legend}>
-			<DialogField>
-				<BlueButton title="Load Columns" handleClick={onLoadColumns} />
-			</DialogField>
-			{visibleFields.map((field) => (
-				<Arrays
-					key={field.name}
-					name={field.name}
-					showCaption={true}
-					values={target[field.name]}
-					list={columnList}
-					handleChange={(text, index) =>
-						setTarget((cur) => field.replace(cur, text, index))
-					}
-					handleRemove={(index) => setTarget((cur) => field.remove(cur, index))}
-					handleSelect={
-						columnDatalist.length > 0
-							? (index) => setSelecting({ field, index })
-							: undefined
-					}
-					handleEdit={
-						field.name === "filter"
-							? (index) => setEditingFilter(index)
-							: undefined
-					}
-				/>
-			))}
+		<>
+			{renderGroup(
+				legend,
+				visibleFields.filter((field) => field.name !== "filter"),
+			)}
+			{renderGroup(
+				"Filter",
+				visibleFields.filter((field) => field.name === "filter"),
+			)}
 			{columnDatalist.length > 0 && (
 				<ResourceDatalist id="column_datalist" resources={columnDatalist} />
 			)}
@@ -362,7 +384,7 @@ export function FilterOrderFields({
 					onClose={() => setEditingFilter(null)}
 				/>
 			)}
-		</Fieldset>
+		</>
 	);
 }
 

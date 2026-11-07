@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { useState } from "react";
 import { describe, expect, it } from "vitest";
@@ -124,5 +124,22 @@ describe("FilterOrderFieldsのfilterの式編集のテスト", () => {
 		await user.click(screen.getByRole("button", { name: "Apply" }));
 
 		expect(filterValues()).toEqual(["a == 1", "b == 2"]);
+	});
+});
+
+describe("FilterOrderFieldsの組分けのテスト", () => {
+	it("filterはFilterの組に、残りはColumns / Orderの組に表示する", () => {
+		render(<FilterOrderHarness include={[]} />);
+
+		const columns = screen.getByRole("group", { name: "Columns / Order" });
+		const filter = screen.getByRole("group", { name: "Filter" });
+		for (const name of ["exclude", "include", "keys", "order"]) {
+			expect(within(columns).getByText(name)).toBeInTheDocument();
+		}
+		expect(within(columns).queryByText("filter")).not.toBeInTheDocument();
+		expect(within(filter).getByText("filter")).toBeInTheDocument();
+		expect(
+			within(filter).getByRole("button", { name: "Load Columns" }),
+		).toBeInTheDocument();
 	});
 });

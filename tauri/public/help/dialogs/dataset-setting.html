@@ -17,14 +17,14 @@
     <li><a href="#section-split">Split / Rename</a></li>
     <li><a href="#section-separate">Separate</a></li>
     <li><a href="#section-additional">Additional Columns</a></li>
-    <li><a href="#section-filter">Filter / Order</a></li>
+    <li><a href="#section-filter">Columns / Order・Filter</a></li>
     <li><a href="#section-jexl">JEXL 式の書き方</a></li>
     <li><a href="#section-preview">Preview</a></li>
     <li><a href="#section-related">関連</a></li>
   </ol>
 
   <h2 id="section-simple">シンプルな使い方</h2>
-  <p>Target で対象のテーブルを選び、Filter / Order などで適用する内容を指定します。<a href="dataset-settings.html">Dataset Settings</a> の表の行の編集ボタン（新しく作るときは追加ボタン）で開きます。</p>
+  <p>Target で対象のテーブルを選び、Columns / Order や Filter などで適用する内容を指定します。<a href="dataset-settings.html">Dataset Settings</a> の表の行の編集ボタン（新しく作るときは追加ボタン）で開きます。</p>
   <p>例: <code>users</code> から更新日時のカラムを外し、<code>id</code> を主キーにします。</p>
   <pre>入力 (users):
   id | name  | updated_at
@@ -32,8 +32,8 @@
 
 指定:
   Target の name       = users
-  Filter / Order の keys    = id
-  Filter / Order の exclude = updated_at
+  Columns / Order の keys    = id
+  Columns / Order の exclude = updated_at
   → Save
 
 結果 (users):
@@ -235,7 +235,7 @@ id | amount
   <p>＋（Add）を押すと空の行が追加されます。name を入力して確定すると設定され、空のまま確定するとその行は消えます。追加した行を確定するまで ＋ は表示されません。</p>
 
   <h3>読み込んだカラムの反映</h3>
-  <p>展開すると先頭に Load Columns ボタンが表示されます。使い方は Filter / Order の「Load Columns」と同じで、取得したカラムは Filter / Order と共通です。取得したカラムは <code>get('カラム名')</code> の形で式に反映します。日本語や記号を含むカラム名もそのまま参照できます。</p>
+  <p>展開すると先頭に Load Columns ボタンが表示されます。使い方は Columns / Order・Filter の「Load Columns」と同じで、取得したカラムはどの組でも共通です。取得したカラムは <code>get('カラム名')</code> の形で式に反映します。日本語や記号を含むカラム名もそのまま参照できます。</p>
   <p>反映するときに、カラムを関数で囲むかを <code>function</code> で選べます。</p>
   <table>
     <tr><th>function</th><th>反映される式</th></tr>
@@ -316,7 +316,8 @@ id | status   | mark
 3  | PENDING  | HOLD
 </code></pre>
 
-  <h2 id="section-filter">Filter / Order</h2>
+  <h2 id="section-filter">Columns / Order・Filter</h2>
+  <p><code>exclude</code> / <code>include</code> / <code>keys</code> / <code>order</code> は Columns / Order の組に、JEXL 式で書く <code>filter</code> は Filter の組に表示されます。</p>
   <table>
     <tr><th>項目</th><th>説明</th></tr>
     <tr><td>exclude</td><td>処理から除外するカラム</td></tr>
@@ -332,7 +333,7 @@ id | status   | mark
   </ul>
 
   <h3>Load Columns</h3>
-  <p>Filter / Order の先頭にある Load Columns ボタンで、各フィールドのカラム名入力の候補（入力補助）を読み込めます。Additional Columns の Load Columns ボタンも同じ動きで、取得したカラムは両方で使えます。</p>
+  <p>Columns / Order と Filter の先頭にある Load Columns ボタンで、各フィールドのカラム名入力の候補（入力補助）を読み込めます。どの組の Load Columns ボタンも同じ動きで（Additional Columns を含む）、取得したカラムはすべての組で使えます。</p>
   <ol>
     <li>Load Columns を押すと、Target の指定に該当するテーブルの一覧が表示されます。Target でテーブル名やパターンを指定していない場合は、データセット内のすべてのテーブルが表示されます。</li>
     <li>候補にしたいテーブルの行で Load Columns を押すと、そのテーブルのカラム名が取得されます。読み込むのは選んだテーブルだけです。</li>
