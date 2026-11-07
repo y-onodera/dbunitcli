@@ -247,8 +247,8 @@ id | amount
   </table>
   <p><code>default</code> には JEXL 式をそのまま書きます（文字列なら <code>''</code> のようにシングルクォートで囲みます）。初期値は <code>number</code> では <code>0</code>、それ以外では <code>''</code> です。<code>from</code> / <code>to</code> / <code>argument</code> はシングルクォートを付けずに値だけを書きます。<code>start</code> / <code>end</code> は数値（JEXL 式）を書きます。関数・メソッドの詳しい動きは「JEXL 式の書き方」を参照してください。</p>
   <ul>
-    <li>select ボタン（チェックリスト付きのアイコン）: 各型の ＋ の右に表示されます。Select Columns ダイアログでカラムを複数選んで Apply を押すと、カラム名を name、カラムを参照する式を値とした行をまとめて末尾に追加します。その型に同じ name の行が既にあるカラムは追加しません。Load Columns でカラムを取得するまでは表示されません。</li>
-    <li>edit ボタン: 各行の右に表示され、値の式をテキストエリアで編集するダイアログを開きます。Apply で行の値に反映します。
+    <li>select: 各型の add の右に表示されます。Select Columns ダイアログでカラムを複数選んで Apply を押すと、カラム名を name、カラムを参照する式を値とした行をまとめて末尾に追加します。その型に同じ name の行が既にあるカラムは追加しません。Load Columns でカラムを取得するまでは表示されません。</li>
+    <li>edit: 各行の右に表示され、値の式をテキストエリアで編集するダイアログを開きます。Apply で行の値に反映します。
       <ul>
         <li><code>operator</code> で演算子を選び Insert Operator を押すと、テキストエリアのカーソル位置に演算子を挿入します。選べる演算子は「JEXL 式の書き方」の「演算子」の表と同じ。二項演算子は前後に空白を付けて挿入する</li>
         <li><code>column</code> でカラムを選び Insert Column を押すと、カーソル位置にカラムを参照する式を挿入します。<code>function</code> の指定は上の表と同じ。カラムを取得していない場合は表示されない</li>
@@ -340,17 +340,17 @@ id | status   | mark
   <p>入力欄の候補表示だけでは、フィールドの値自体は変更されません。値を設定したい場合は、次の「カラムの一括選択」を使います。</p>
 
   <h3>カラムの一括選択</h3>
-  <p>Load Columns でカラム名を取得すると、<code>exclude</code> / <code>include</code> / <code>keys</code> / <code>filter</code> / <code>order</code> の各入力欄の右に選択ボタン（チェックリスト付きのアイコン、select）が表示されます。取得したカラムの中から複数を一度に選んで設定できます。</p>
+  <p>Load Columns でカラム名を取得すると、<code>exclude</code> / <code>include</code> / <code>keys</code> / <code>filter</code> / <code>order</code> の各入力欄の右に select が表示されます。取得したカラムの中から複数を一度に選んで設定できます。</p>
   <ol>
-    <li>設定したい項目の行で select ボタンを押すと、取得済みカラムをチェックボックスで選べる Select Columns ダイアログが開きます。</li>
+    <li>設定したい項目の行で select を押すと、取得済みカラムをチェックボックスで選べる Select Columns ダイアログが開きます。</li>
     <li>設定するカラムにチェックを入れて Apply を押します。1件も選択していない間は Apply は押せません。</li>
     <li>選択したカラムのうち、その項目の他の行に既にあるものは除かれます。残りの先頭の1件は select を押した行に設定され（元の値は上書きされます）、それ以外は末尾に追加されます。すべて他の行にある場合は何も変わりません。</li>
   </ol>
-  <p>Load Columns でカラムを取得するまでは、select ボタンは表示されません。</p>
+  <p>Load Columns でカラムを取得するまでは、select は表示されません。</p>
   <p><code>filter</code> では、カラム名ではなくカラムを参照する式（<code>get('カラム名')</code>）を設定します。Select Columns ダイアログで <code>function</code> も選べます（指定の仕方は Additional Columns の「読み込んだカラムの反映」と同じ。例: startsWith を選ぶと <code>get('区分').startsWith('SALE')</code>）。複数選んだ場合の行への入り方は上と同じで、filter の行は AND で組み合わさります。</p>
 
   <h3>filter の式の編集</h3>
-  <p><code>filter</code> の各行の右にある edit ボタンで、式をテキストエリアで編集するダイアログを開きます。値が空の行でも使えます。演算子・カラムの挿入の仕方は Additional Columns の edit ボタンと同じです。Apply で行に反映します。他の行と同じ式になる場合は反映されません。</p>
+  <p><code>filter</code> の各行の右にある edit で、式をテキストエリアで編集するダイアログを開きます。値が空の行でも使えます。演算子・カラムの挿入の仕方は Additional Columns の edit ボタンと同じです。Apply で行に反映します。他の行と同じ式になる場合は反映されません。</p>
 
   <h3>変化の例</h3>
 
