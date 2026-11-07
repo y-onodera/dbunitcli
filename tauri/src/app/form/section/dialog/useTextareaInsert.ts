@@ -1,7 +1,6 @@
 import { useLayoutEffect, useRef, useState } from "react";
 import type { InsertResult } from "../../../../utils/textInsert";
 
-// テキストエリアの選択範囲へ挿入する。挿入の仕方はinsertに渡す関数（utils/textInsert）で決める
 export function useTextareaInsert(initialValue: string) {
 	const [value, setValue] = useState(initialValue);
 	const textareaRef = useRef<HTMLTextAreaElement>(null);

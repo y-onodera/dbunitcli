@@ -1,5 +1,19 @@
 export type InsertResult = { value: string; cursor: number };
 
+// 選択範囲を置き換え、カーソルを挿入した文字列の直後に置く
+export function replaceSelection(
+	value: string,
+	text: string,
+	start: number,
+	end: number,
+): InsertResult {
+	const before = value.slice(0, start);
+	return {
+		value: before + text + value.slice(end),
+		cursor: before.length + text.length,
+	};
+}
+
 export function insertAtCursor(
 	value: string,
 	text: string,
@@ -29,17 +43,13 @@ export function insertInlineAtCursor(
 	end: number,
 ): InsertResult {
 	const before = value.slice(0, start);
-	const after = value.slice(end);
 	const currentLine = before.slice(before.lastIndexOf("\n") + 1);
 	const position = " ".repeat(
 		(ITEM_POSITION.exec(currentLine)?.[0] ?? "").length,
 	);
 	const [first = "", ...rest] = lines;
 	const inserted = [first, ...indentLines(rest, position)].join("\n");
-	return {
-		value: before + inserted + after,
-		cursor: before.length + inserted.length,
-	};
+	return replaceSelection(value, inserted, start, end);
 }
 
 export type TableUsage =

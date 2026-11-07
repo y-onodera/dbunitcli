@@ -230,7 +230,8 @@ export function AdditionalColumnsFields({
 }
 
 // Filter/Orderの配列項目。モデルのreplace*/remove*をキー別に対応付ける。
-// expressionはJEXL式で書く項目で、別の組に分けて式の編集ダイアログを使えるようにする
+// expressionはJEXL式で書く項目で、別の組に分けて選んだカラムを参照する式にする。
+// defaultValueはtryToNum等の既定値の初期値
 const filterOrderFields = [
 	{
 		name: "exclude",
@@ -251,7 +252,7 @@ const filterOrderFields = [
 	},
 	{
 		name: "filter",
-		expression: true,
+		expression: { defaultValue: "''" },
 		replace: (s: DatasetSetting, t: string, i: number) => s.replaceFilter(t, i),
 		remove: (s: DatasetSetting, i: number) => s.removeFilter(i),
 	},
@@ -265,8 +266,14 @@ const filterOrderFields = [
 type FilterOrderField = (typeof filterOrderFields)[number];
 type FilterOrderFieldName = FilterOrderField["name"];
 
+function expressionOf(
+	field: FilterOrderField,
+): { defaultValue: string } | undefined {
+	return "expression" in field ? field.expression : undefined;
+}
+
 function isExpressionField(field: FilterOrderField): boolean {
-	return "expression" in field;
+	return expressionOf(field) !== undefined;
 }
 
 // fieldNamesで表示する項目を絞れる（省略時はすべて）。legendは式でない項目の組の見出し
@@ -318,16 +325,16 @@ export function FilterOrderFields({
 			return next;
 		});
 	};
-	// 式の項目では、選んだカラムをカラム名ではなく参照する式にして設定する
 	function renderSelectDialog() {
 		if (!selecting) {
 			return null;
 		}
-		if (isExpressionField(selecting.field)) {
+		const expression = expressionOf(selecting.field);
+		if (expression) {
 			return (
 				<ColumnExpressionSelectDialog
 					columns={columnDatalist}
-					defaultValue="''"
+					defaultValue={expression.defaultValue}
 					onApply={(entries) =>
 						applySelected(entries.map(([, expression]) => expression))
 					}
@@ -396,7 +403,7 @@ export function FilterOrderFields({
 					name={editing.field.name}
 					value={target[editing.field.name][editing.index] ?? ""}
 					columns={columnDatalist}
-					defaultValue="''"
+					defaultValue={expressionOf(editing.field)?.defaultValue ?? ""}
 					onApply={(text) =>
 						setTarget((cur) =>
 							isDuplicated(cur[editing.field.name], text, editing.index)

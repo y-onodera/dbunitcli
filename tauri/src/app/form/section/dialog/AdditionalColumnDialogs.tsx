@@ -17,7 +17,7 @@ import {
 	newColumnExpressionOption,
 	toColumnExpression,
 } from "../../../../model/ColumnExpression";
-import { insertInlineAtCursor } from "../../../../utils/textInsert";
+import { replaceSelection } from "../../../../utils/textInsert";
 import ColumnSelectDialog from "./ColumnSelectDialog";
 import { OptionSelect, OptionText, type SelectOption } from "./SqlInsertParts";
 import { useTextareaInsert } from "./useTextareaInsert";
@@ -117,9 +117,9 @@ export function ExpressionEditDialog({
 		newColumnExpressionOption(defaultValue),
 	);
 
-	const insertAtCursor = (inserted: string) =>
+	const insertText = (inserted: string) =>
 		insert((current, start, end) =>
-			insertInlineAtCursor(current, [inserted], start, end),
+			replaceSelection(current, inserted, start, end),
 		);
 
 	function renderInsertColumn() {
@@ -144,9 +144,7 @@ export function ExpressionEditDialog({
 				<DialogField>
 					<BlueButton
 						title="Insert Column"
-						handleClick={() =>
-							insertAtCursor(toColumnExpression(column, option))
-						}
+						handleClick={() => insertText(toColumnExpression(column, option))}
 					/>
 				</DialogField>
 			</>
@@ -176,7 +174,7 @@ export function ExpressionEditDialog({
 			<DialogField>
 				<BlueButton
 					title="Insert Operator"
-					handleClick={() => insertAtCursor(operator)}
+					handleClick={() => insertText(operator)}
 				/>
 			</DialogField>
 			{renderInsertColumn()}
