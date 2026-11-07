@@ -74,3 +74,55 @@ describe("FilterOrderFieldsのカラム選択のテスト", () => {
 		expect(includeValues()).toEqual(["COL_A", "COL_B"]);
 	});
 });
+
+function FilterHarness({ filter }: { filter: string[] }) {
+	const [target, setTarget] = useState(new DatasetSetting({ filter }));
+	return (
+		<FilterOrderFields
+			target={target}
+			setTarget={setTarget}
+			columnDatalist={["区分"]}
+			columnList={undefined}
+			onLoadColumns={() => {}}
+			fieldNames={["filter"]}
+		/>
+	);
+}
+
+function filterValues() {
+	return Array.from(
+		document.querySelectorAll<HTMLInputElement>('input[name="filter"]'),
+	).map((input) => input.value);
+}
+
+describe("FilterOrderFieldsのfilterの式編集のテスト", () => {
+	it("editで空のfilterに演算子とカラムを追記して設定する", async () => {
+		const user = userEvent.setup();
+		render(<FilterHarness filter={[]} />);
+
+		await user.click(screen.getByRole("button", { name: "edit" }));
+		await user.click(screen.getByRole("button", { name: "Append Column" }));
+		await user.selectOptions(
+			screen.getByLabelText("operator"),
+			"=~ (regex match)",
+		);
+		await user.click(screen.getByRole("button", { name: "Append Operator" }));
+		await user.type(screen.getByRole("textbox", { name: "" }), "'SALE.*'");
+		await user.click(screen.getByRole("button", { name: "Apply" }));
+
+		expect(filterValues()).toEqual(["get('区分') =~ 'SALE.*'"]);
+	});
+
+	it("他の行と同じ式は設定しない", async () => {
+		const user = userEvent.setup();
+		render(<FilterHarness filter={["a == 1", "b == 2"]} />);
+
+		await user.click(screen.getAllByRole("button", { name: "edit" })[1]);
+		const textarea = screen.getByRole("textbox", { name: "" });
+		await user.clear(textarea);
+		await user.type(textarea, "a == 1");
+		await user.click(screen.getByRole("button", { name: "Apply" }));
+
+		expect(filterValues()).toEqual(["a == 1", "b == 2"]);
+	});
+});

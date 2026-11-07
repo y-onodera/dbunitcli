@@ -236,6 +236,7 @@ export function Arrays(props: {
 	showCaption?: boolean;
 	list?: string;
 	handleSelect?: (index: number) => void;
+	handleEdit?: (index: number) => void;
 }) {
 	// 値が空のときとAdd中は、末尾に画面だけの空行を出す（モデルは空の値を保持しないため）
 	// selectなど外から値が確定して行数が変われば、Add中は自然に終わる
@@ -271,6 +272,7 @@ export function Arrays(props: {
 						showCaption={props.showCaption}
 						list={props.list}
 						handleSelect={props.handleSelect}
+						handleEdit={props.handleEdit}
 					/>
 				);
 			})}
@@ -296,6 +298,7 @@ export function ArraysText(props: {
 	showCaption?: boolean;
 	list?: string;
 	handleSelect?: (index: number) => void;
+	handleEdit?: (index: number) => void;
 }) {
 	const [text, setText] = useState(props.val);
 	// 他の行と同じ値は確定させず、入力前の値に戻す
@@ -334,13 +337,16 @@ export function ArraysText(props: {
 					handleBlur={handleBlur}
 					list={props.list}
 				/>
-				{(props.handleSelect || props.index > 0) && (
+				{(props.handleSelect || props.handleEdit || props.index > 0) && (
 					<div className="col-start-3 flex items-center">
 						{props.handleSelect && (
 							<FactCheckButton
 								title="select"
 								handleClick={() => props.handleSelect?.(props.index)}
 							/>
+						)}
+						{props.handleEdit && (
+							<EditButton handleClick={() => props.handleEdit?.(props.index)} />
 						)}
 						{props.index > 0 && <RemoveButton handleClick={handleRemove} />}
 					</div>

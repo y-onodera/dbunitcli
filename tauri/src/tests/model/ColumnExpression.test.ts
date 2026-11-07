@@ -40,4 +40,30 @@ describe("toColumnExpressionのテスト", () => {
 			"formatDate(get('日付'), 'yyyyMMdd', 'yyyy/MM/dd', '')",
 		);
 	});
+
+	it("文字列メソッドは引数を文字列にしてget式に続ける", () => {
+		const option = {
+			...newColumnExpressionOption(""),
+			fn: "startsWith",
+			argument: "SALE'",
+		} as const;
+		expect(toColumnExpression("区分", option)).toBe(
+			"get('区分').startsWith('SALE\\'')",
+		);
+	});
+
+	it("substringはendが空なら1引数にする", () => {
+		const option = {
+			...newColumnExpressionOption(""),
+			fn: "substring",
+			start: "0",
+			end: "4",
+		} as const;
+		expect(toColumnExpression("日付", option)).toBe(
+			"get('日付').substring(0, 4)",
+		);
+		expect(toColumnExpression("日付", { ...option, end: "" })).toBe(
+			"get('日付').substring(0)",
+		);
+	});
 });

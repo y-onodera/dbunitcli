@@ -242,11 +242,18 @@ id | amount
     <tr><td>none</td><td><code>get('カラム名')</code></td></tr>
     <tr><td>tryToNum</td><td><code>tryToNum(get('カラム名'), default)</code>。<code>default</code> が空なら <code>null</code> になる。</td></tr>
     <tr><td>formatDate</td><td><code>formatDate(get('カラム名'), 'from', 'to', default)</code>。<code>default</code> が空なら 3 引数の形になる。</td></tr>
+    <tr><td>contains / startsWith / endsWith / matches</td><td><code>get('カラム名').contains('argument')</code> など。<code>argument</code> は文字列として埋め込む（<code>matches</code> では正規表現）。</td></tr>
+    <tr><td>substring</td><td><code>get('カラム名').substring(start, end)</code>。<code>end</code> が空なら <code>substring(start)</code> になる。</td></tr>
   </table>
-  <p><code>default</code> には JEXL 式をそのまま書きます（文字列なら <code>''</code> のようにシングルクォートで囲みます）。初期値は <code>number</code> では <code>0</code>、それ以外では <code>''</code> です。<code>from</code> / <code>to</code> は書式だけを書きます。関数の詳しい動きは「JEXL 式の書き方」の「関数」を参照してください。</p>
+  <p><code>default</code> には JEXL 式をそのまま書きます（文字列なら <code>''</code> のようにシングルクォートで囲みます）。初期値は <code>number</code> では <code>0</code>、それ以外では <code>''</code> です。<code>from</code> / <code>to</code> / <code>argument</code> はシングルクォートを付けずに値だけを書きます。<code>start</code> / <code>end</code> は数値（JEXL 式）を書きます。関数・メソッドの詳しい動きは「JEXL 式の書き方」を参照してください。</p>
   <ul>
     <li>select ボタン（チェックリスト付きのアイコン）: 各型の ＋ の右に表示されます。Select Columns ダイアログでカラムを複数選んで Apply を押すと、カラム名を name、カラムを参照する式を値とした行をまとめて末尾に追加します。その型に同じ name の行が既にあるカラムは追加しません。Load Columns でカラムを取得するまでは表示されません。</li>
-    <li>edit ボタン: 各行の右に表示され、値の式をテキストエリアで編集するダイアログを開きます。<code>column</code> でカラムを選び Append を押すと、編集中の式の末尾にカラムを参照する式を追記します（演算子などは自分で入力してください）。Apply で行の値に反映します。カラムを取得していない場合は、式の編集だけができます。</li>
+    <li>edit ボタン: 各行の右に表示され、値の式をテキストエリアで編集するダイアログを開きます。Apply で行の値に反映します。
+      <ul>
+        <li><code>operator</code> で演算子を選び Append Operator を押すと、編集中の式の末尾に演算子を追記します。選べる演算子は「JEXL 式の書き方」の「演算子」の表と同じ。二項演算子は前後に空白を付けて追記する</li>
+        <li><code>column</code> でカラムを選び Append Column を押すと、編集中の式の末尾にカラムを参照する式を追記します。<code>function</code> の指定は上の表と同じ。カラムを取得していない場合は表示されない</li>
+      </ul>
+    </li>
   </ul>
 
   <h3>変化の例</h3>
@@ -343,6 +350,9 @@ id | status   | mark
   </ol>
   <p>Load Columns でカラムを取得するまでは、select ボタンは表示されません。</p>
 
+  <h3>filter の式の編集</h3>
+  <p><code>filter</code> の各行の右にある edit ボタンで、式をテキストエリアで編集するダイアログを開きます。値が空の行でも使えます。演算子・カラムの追記の仕方は Additional Columns の edit ボタンと同じです。Apply で行に反映します。他の行と同じ式になる場合は反映されません。</p>
+
   <h3>変化の例</h3>
 
   <p><strong>exclude（カラム除外）</strong></p>
@@ -409,6 +419,7 @@ id | name
   <table>
     <tr><th>カテゴリ</th><th>演算子</th></tr>
     <tr><td>比較</td><td><code>==</code>, <code>!=</code>, <code>&gt;</code>, <code>&lt;</code>, <code>&gt;=</code>, <code>&lt;=</code></td></tr>
+    <tr><td>正規表現</td><td><code>=~</code>（値全体が正規表現に一致する）, <code>!~</code>（一致しない）。例: <code>type =~ 'SALE.*'</code></td></tr>
     <tr><td>論理</td><td><code>&amp;&amp;</code> (AND), <code>||</code> (OR), <code>!</code> (NOT)</td></tr>
     <tr><td>算術</td><td><code>+</code>, <code>-</code>, <code>*</code>, <code>/</code>, <code>%</code></td></tr>
     <tr><td>文字列連結</td><td><code>+</code></td></tr>

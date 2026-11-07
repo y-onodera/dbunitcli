@@ -70,7 +70,7 @@ describe("AdditionalColumnsFieldsのカラム反映のテスト", () => {
 		await user.clear(textarea);
 		await user.type(textarea, "'日付:' + ");
 		await user.selectOptions(screen.getByLabelText("function"), "formatDate");
-		await user.click(screen.getByRole("button", { name: "Append" }));
+		await user.click(screen.getByRole("button", { name: "Append Column" }));
 		await user.click(screen.getByRole("button", { name: "Apply" }));
 
 		expect(current.string).toEqual({
@@ -81,5 +81,28 @@ describe("AdditionalColumnsFieldsのカラム反映のテスト", () => {
 			document.querySelectorAll<HTMLInputElement>('input[name="string"]')[1]
 				.value,
 		).toBe("'日付:' + formatDate(get('顧客名'), 'yyyyMMdd', 'yyyy/MM/dd', '')");
+	});
+
+	it("editで演算子と文字列メソッドを追記する", async () => {
+		const user = userEvent.setup();
+		render(<AdditionalColumnsHarness initial={{ boolean: { 判定: "" } }} />);
+		await expand(user);
+
+		await user.click(screen.getByRole("button", { name: "edit" }));
+		await user.click(screen.getByRole("button", { name: "Append Column" }));
+		await user.selectOptions(
+			screen.getByLabelText("operator"),
+			screen.getByRole("option", { name: "&& (AND)" }),
+		);
+		await user.click(screen.getByRole("button", { name: "Append Operator" }));
+		await user.selectOptions(screen.getByLabelText("column"), "金額(円)");
+		await user.selectOptions(screen.getByLabelText("function"), "matches");
+		await user.type(screen.getByLabelText("argument"), "[[0-9]+");
+		await user.click(screen.getByRole("button", { name: "Append Column" }));
+		await user.click(screen.getByRole("button", { name: "Apply" }));
+
+		expect(current.boolean).toEqual({
+			判定: "get('顧客名') && get('金額(円)').matches('[0-9]+')",
+		});
 	});
 });

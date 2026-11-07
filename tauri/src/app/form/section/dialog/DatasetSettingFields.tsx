@@ -285,6 +285,8 @@ export function FilterOrderFields({
 		field: (typeof filterOrderFields)[number];
 		index: number;
 	} | null>(null);
+	// filterの式を編集している行。Addで出した空行も対象にするため値ではなく位置で持つ
+	const [editingFilter, setEditingFilter] = useState<number | null>(null);
 	// 他の行に既にある項目を除き、先頭をクリックした行に設定して残りを末尾に追加する
 	const applySelected = (selected: string[]) => {
 		if (!selecting) {
@@ -327,6 +329,11 @@ export function FilterOrderFields({
 							? (index) => setSelecting({ field, index })
 							: undefined
 					}
+					handleEdit={
+						field.name === "filter"
+							? (index) => setEditingFilter(index)
+							: undefined
+					}
 				/>
 			))}
 			{columnDatalist.length > 0 && (
@@ -337,6 +344,22 @@ export function FilterOrderFields({
 					columns={columnDatalist}
 					onApply={applySelected}
 					onClose={() => setSelecting(null)}
+				/>
+			)}
+			{editingFilter !== null && (
+				<ExpressionEditDialog
+					name="filter"
+					value={target.filter[editingFilter] ?? ""}
+					columns={columnDatalist}
+					defaultValue="''"
+					onApply={(text) =>
+						setTarget((cur) =>
+							isDuplicated(cur.filter, text, editingFilter)
+								? cur
+								: cur.replaceFilter(text, editingFilter),
+						)
+					}
+					onClose={() => setEditingFilter(null)}
 				/>
 			)}
 		</Fieldset>

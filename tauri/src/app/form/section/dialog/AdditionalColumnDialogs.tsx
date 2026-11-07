@@ -14,10 +14,24 @@ import { TextArea } from "../../../../components/element/Input";
 import {
 	type ColumnExpressionFunction,
 	type ColumnExpressionOption,
+	columnExpressionFunctions,
+	expressionOperators,
 	newColumnExpressionOption,
 	toColumnExpression,
 } from "../../../../model/ColumnExpression";
 import ColumnSelectDialog from "./ColumnSelectDialog";
+
+const defaultValueFunctions: readonly ColumnExpressionFunction[] = [
+	"tryToNum",
+	"formatDate",
+];
+
+const stringArgumentFunctions: readonly ColumnExpressionFunction[] = [
+	"contains",
+	"startsWith",
+	"endsWith",
+	"matches",
+];
 
 function ColumnExpressionFields({
 	option,
@@ -35,9 +49,11 @@ function ColumnExpressionFields({
 					setOption((cur) => ({ ...cur, fn: fn as ColumnExpressionFunction }))
 				}
 			>
-				<option value="none">none</option>
-				<option value="tryToNum">tryToNum</option>
-				<option value="formatDate">formatDate</option>
+				{columnExpressionFunctions.map((fn) => (
+					<option key={fn} value={fn}>
+						{fn}
+					</option>
+				))}
 			</Select>
 			{option.fn === "formatDate" && (
 				<>
@@ -57,7 +73,34 @@ function ColumnExpressionFields({
 					/>
 				</>
 			)}
-			{option.fn !== "none" && (
+			{stringArgumentFunctions.includes(option.fn) && (
+				<Text
+					name="argument"
+					value={option.argument}
+					handleChange={(ev) =>
+						setOption((cur) => ({ ...cur, argument: ev.target.value }))
+					}
+				/>
+			)}
+			{option.fn === "substring" && (
+				<>
+					<Text
+						name="start"
+						value={option.start}
+						handleChange={(ev) =>
+							setOption((cur) => ({ ...cur, start: ev.target.value }))
+						}
+					/>
+					<Text
+						name="end"
+						value={option.end}
+						handleChange={(ev) =>
+							setOption((cur) => ({ ...cur, end: ev.target.value }))
+						}
+					/>
+				</>
+			)}
+			{defaultValueFunctions.includes(option.fn) && (
 				<Text
 					name="default"
 					value={option.defaultValue}
@@ -119,6 +162,7 @@ export function ExpressionEditDialog({
 	onClose: () => void;
 }) {
 	const [text, setText] = useState(value);
+	const [operator, setOperator] = useState(0);
 	const [column, setColumn] = useState(columns[0] ?? "");
 	const [option, setOption] = useState(() =>
 		newColumnExpressionOption(defaultValue),
@@ -148,7 +192,7 @@ export function ExpressionEditDialog({
 				<ColumnExpressionFields option={option} setOption={setOption} />
 				<DialogField>
 					<BlueButton
-						title="Append"
+						title="Append Column"
 						handleClick={() =>
 							setText((cur) => cur + toColumnExpression(column, option))
 						}
@@ -167,6 +211,25 @@ export function ExpressionEditDialog({
 					value={text}
 					spellCheck={false}
 					onChange={(ev) => setText(ev.target.value)}
+				/>
+			</DialogField>
+			<Select
+				name="operator"
+				defaultValue="0"
+				handleOnChange={async (selected) => setOperator(Number(selected))}
+			>
+				{expressionOperators.map((op, i) => (
+					<option key={op.label} value={i}>
+						{op.label}
+					</option>
+				))}
+			</Select>
+			<DialogField>
+				<BlueButton
+					title="Append Operator"
+					handleClick={() =>
+						setText((cur) => cur + expressionOperators[operator].text)
+					}
 				/>
 			</DialogField>
 			{renderAppend()}
