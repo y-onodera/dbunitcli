@@ -24,7 +24,7 @@
   </ol>
 
   <h2 id="section-simple">シンプルな使い方</h2>
-  <p>Target で対象のテーブルを選び、Columns / Order や Filter などで適用する内容を指定します。<a href="dataset-settings.html">Dataset Settings</a> の表の行の編集ボタン（新しく作るときは追加ボタン）で開きます。</p>
+  <p>Target で対象のテーブルを選び、Columns / Order や Filter などで適用する内容を指定します。<a href="dataset-settings.html">Dataset Settings</a> の表の行の edit（新しく作るときは表の add）で開きます。</p>
   <p>例: <code>users</code> から更新日時のカラムを外し、<code>id</code> を主キーにします。</p>
   <pre>入力 (users):
   id | name  | updated_at
@@ -232,7 +232,7 @@ id | amount
     <tr><td>boolean</td><td>真偽値型カラム。条件式で判定結果を持たせる。</td></tr>
     <tr><td>sqlFunction</td><td>関数表現によるカラム。複雑なロジックを JEXL 関数として定義する。</td></tr>
   </table>
-  <p>＋（Add）を押すと空の行が追加されます。name を入力して確定すると設定され、空のまま確定するとその行は消えます。追加した行を確定するまで ＋ は表示されません。</p>
+  <p>行の追加・削除・確定の動きは <a href="../reference/common.html">画面共通の操作</a> の「ダイアログの複数値の入力欄」を参照してください。</p>
 
   <h3>読み込んだカラムの反映</h3>
   <p>展開すると先頭に Load Columns ボタンが表示されます。使い方は Columns / Order・Filter の「Load Columns」と同じで、取得したカラムはどの組でも共通です。取得したカラムは <code>get('カラム名')</code> の形で式に反映します。日本語や記号を含むカラム名もそのまま参照できます。</p>
@@ -247,8 +247,8 @@ id | amount
   </table>
   <p><code>default</code> には JEXL 式をそのまま書きます（文字列なら <code>''</code> のようにシングルクォートで囲みます）。初期値は <code>number</code> では <code>0</code>、それ以外では <code>''</code> です。<code>from</code> / <code>to</code> / <code>argument</code> はシングルクォートを付けずに値だけを書きます。<code>start</code> / <code>end</code> は数値（JEXL 式）を書きます。関数・メソッドの詳しい動きは「JEXL 式の書き方」を参照してください。</p>
   <ul>
-    <li>select ボタン（チェックリスト付きのアイコン）: 各型の ＋ の右に表示されます。Select Columns ダイアログでカラムを複数選んで Apply を押すと、カラム名を name、カラムを参照する式を値とした行をまとめて末尾に追加します。その型に同じ name の行が既にあるカラムは追加しません。Load Columns でカラムを取得するまでは表示されません。</li>
-    <li>edit ボタン: 各行の右に表示され、値の式をテキストエリアで編集するダイアログを開きます。Apply で行の値に反映します。
+    <li>select: 各型の add の右に表示されます。Select Columns ダイアログでカラムを複数選んで Apply を押すと、カラム名を name、カラムを参照する式を値とした行をまとめて末尾に追加します。その型に同じ name の行が既にあるカラムは追加しません。Load Columns でカラムを取得するまでは表示されません。</li>
+    <li>edit: 各行の右に表示され、値の式をテキストエリアで編集するダイアログを開きます。Apply で行の値に反映します。
       <ul>
         <li><code>operator</code> で演算子を選び Insert Operator を押すと、テキストエリアのカーソル位置に演算子を挿入します。選べる演算子は「JEXL 式の書き方」の「演算子」の表と同じ。二項演算子は前後に空白を付けて挿入する</li>
         <li><code>column</code> でカラムを選び Insert Column を押すと、カーソル位置にカラムを参照する式を挿入します。<code>function</code> の指定は上の表と同じ。カラムを取得していない場合は表示されない</li>
@@ -327,11 +327,7 @@ id | status   | mark
     <tr><td>filter</td><td>データ選択条件（JEXL 式）。複数指定した場合は AND 扱い。</td></tr>
     <tr><td>order</td><td>並び順に使用するカラム</td></tr>
   </table>
-  <p>各項目には同じ値を重複して設定できません。</p>
-  <ul>
-    <li>他の行と同じ値を入力した場合、その入力は確定されず、入力前の値に戻ります。</li>
-    <li>＋（Add）を押すと空の行が追加されます。値を入力して確定すると設定され、空のまま確定するとその行は消えます。追加した行を確定するまで ＋ は表示されません。</li>
-  </ul>
+  <p>各項目には同じ値を重複して設定できません。行の追加・削除・確定と重複したときの動きは <a href="../reference/common.html">画面共通の操作</a> の「ダイアログの複数値の入力欄」を参照してください。</p>
 
   <h3>Load Columns</h3>
   <p>Columns / Order と Filter の先頭にある Load Columns ボタンで、各フィールドのカラム名入力の候補（入力補助）を読み込めます。どの組の Load Columns ボタンも同じ動きで（Additional Columns を含む）、取得したカラムはすべての組で使えます。</p>
@@ -344,17 +340,17 @@ id | status   | mark
   <p>入力欄の候補表示だけでは、フィールドの値自体は変更されません。値を設定したい場合は、次の「カラムの一括選択」を使います。</p>
 
   <h3>カラムの一括選択</h3>
-  <p>Load Columns でカラム名を取得すると、<code>exclude</code> / <code>include</code> / <code>keys</code> / <code>filter</code> / <code>order</code> の各入力欄の右に選択ボタン（チェックリスト付きのアイコン、select）が表示されます。取得したカラムの中から複数を一度に選んで設定できます。</p>
+  <p>Load Columns でカラム名を取得すると、<code>exclude</code> / <code>include</code> / <code>keys</code> / <code>filter</code> / <code>order</code> の各入力欄の右に select が表示されます。取得したカラムの中から複数を一度に選んで設定できます。</p>
   <ol>
-    <li>設定したい項目の行で select ボタンを押すと、取得済みカラムをチェックボックスで選べる Select Columns ダイアログが開きます。</li>
+    <li>設定したい項目の行で select を押すと、取得済みカラムをチェックボックスで選べる Select Columns ダイアログが開きます。</li>
     <li>設定するカラムにチェックを入れて Apply を押します。1件も選択していない間は Apply は押せません。</li>
     <li>選択したカラムのうち、その項目の他の行に既にあるものは除かれます。残りの先頭の1件は select を押した行に設定され（元の値は上書きされます）、それ以外は末尾に追加されます。すべて他の行にある場合は何も変わりません。</li>
   </ol>
-  <p>Load Columns でカラムを取得するまでは、select ボタンは表示されません。</p>
+  <p>Load Columns でカラムを取得するまでは、select は表示されません。</p>
   <p><code>filter</code> では、カラム名ではなくカラムを参照する式（<code>get('カラム名')</code>）を設定します。Select Columns ダイアログで <code>function</code> も選べます（指定の仕方は Additional Columns の「読み込んだカラムの反映」と同じ。例: startsWith を選ぶと <code>get('区分').startsWith('SALE')</code>）。複数選んだ場合の行への入り方は上と同じで、filter の行は AND で組み合わさります。</p>
 
   <h3>filter の式の編集</h3>
-  <p><code>filter</code> の各行の右にある edit ボタンで、式をテキストエリアで編集するダイアログを開きます。値が空の行でも使えます。演算子・カラムの挿入の仕方は Additional Columns の edit ボタンと同じです。Apply で行に反映します。他の行と同じ式になる場合は反映されません。</p>
+  <p><code>filter</code> の各行の右にある edit で、式をテキストエリアで編集するダイアログを開きます。値が空の行でも使えます。演算子・カラムの挿入の仕方は Additional Columns の edit ボタンと同じです。Apply で行に反映します。他の行と同じ式になる場合は反映されません。</p>
 
   <h3>変化の例</h3>
 
@@ -512,7 +508,7 @@ id | name
   <ul>
     <li><a href="dataset-settings.html">Dataset Settings</a> — 設定ファイル全体の構造と commonSettings / import</li>
     <li><a href="dataset-setting-generate.html">Dataset Setting Generate</a> — 雛型を作る</li>
-    <li><a href="common.html">ダイアログ共通の操作</a> — 式の編集ダイアログの最大化など、ダイアログ共通のボタン</li>
+    <li><a href="../reference/common.html">画面共通の操作</a> — 式の編集ダイアログの最大化など、ダイアログ共通のボタン</li>
   </ul>
 </body>
 </html>

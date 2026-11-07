@@ -28,7 +28,7 @@
   <h2 id="step-command">2. コマンドを選ぶ</h2>
   <p>サイドバーでコマンド名（Convert / Compare / Generate / Run / Parameterize）をクリックすると、保存済みオプションの一覧が開きます。</p>
   <ul>
-    <li>新しく作る場合は ＋ を押します。<code>new item</code> という名前の保存済みオプションが作られます</li>
+    <li>新しく作る場合は add を押します。<code>new item</code> という名前の保存済みオプションが作られます</li>
     <li>既存のものを使う場合は名前をクリックします。フォームに内容が表示され、ヘッダ右側に <code>コマンド: 名前</code> が表示されます</li>
     <li>既存のものを元に別のものを作る場合は、⚙ の Copy で複製してから開きます</li>
   </ul>
@@ -39,8 +39,7 @@
   <ul>
     <li>時間がかかる処理は、実行中に Abandoned を押すと中断できます</li>
     <li>SQL やテンプレートに渡す値は Edit Parameters (-P) で入力できます。入力した -P 値は Save で一緒に保存されます（<a href="../dialogs/parameters.html">Parameters (-P)</a> を参照）</li>
-    <li>入力欄に値があるときは右端に × が表示され、押すと入力を消せます</li>
-    <li>入力欄の横のファイル選択・ディレクトリ選択ボタンで選んだパスは、オプションごとの基準ディレクトリからの相対パスで入ります（<a href="../dialogs/workspace.html">Workspace</a> の「ファイル選択と Workspace」を参照）</li>
+    <li>入力欄の × ・候補・⚙ メニューの使い方は <a href="../reference/common.html">画面共通の操作</a> を参照してください。⚙ メニューの file / dir で選んだパスは、入力欄の下に表示される基準ディレクトリからの相対パスで入ります</li>
     <li>あとで別の環境やデータで使い回す予定があるなら、この段階でパスを相対パスにし、接続先などを <code>${env.変数名}</code> にしておきます（<a href="#step-reuse">7.</a> を参照）</li>
   </ul>
 

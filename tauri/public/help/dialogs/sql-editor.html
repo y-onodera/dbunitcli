@@ -23,7 +23,7 @@
   </ol>
 
   <h2 id="section-simple">シンプルな使い方</h2>
-  <p><code>src</code> 横のメニューの編集ボタンで開き、SQL を書いて Preview で読み込まれる内容を確認してから保存します。</p>
+  <p><code>src</code> の ⚙ メニューの edit で開き、SQL を書いて Preview で読み込まれる内容を確認してから保存します。</p>
   <p>例: <code>srcType</code> が <code>sql</code> のとき、有効なユーザだけを読み込む SQL を作ります。</p>
   <pre>本文:
   select * from USERS where STATUS = 'ACTIVE'
@@ -44,7 +44,7 @@
   </ul>
 
   <h2 id="section-open">開き方</h2>
-  <p><a href="../sections/dataset-load-form.html">Dataset Load Form</a> の <code>src</code> の横のメニューにある編集ボタンから開きます。<code>src</code> の候補には、保存先のディレクトリにあるファイルが表示されます。同じメニューの削除ボタンでは、候補にあるファイルを削除できます。</p>
+  <p><a href="../sections/dataset-load-form.html">Dataset Load Form</a> の <code>src</code> の ⚙ メニューの edit から開きます。<code>src</code> の候補と delete は、下記の保存先のファイルが対象です（<a href="../reference/common.html">画面共通の操作</a> を参照）。</p>
 
   <h2 id="section-content">記述内容</h2>
   <table>
@@ -238,13 +238,13 @@ FROM
   </ul>
 
   <h2 id="section-save">保存</h2>
-  <p>ダイアログ下部の name に保存先のファイル名を指定して Save を押すと、内容がファイルとして書き出され、元のテキストボックスにそのファイル名が設定されます。保存先は <code>srcType</code> ごとに Workspace の <code>resources/sql</code> / <code>resources/table</code> / <code>resources/csvq</code> です。ファイルの読み込み・保存には、フォームに入力中の <code>encoding</code>（Run から開いたときは template option の <code>encoding</code>）の文字コードを使います（未入力ならシステムデフォルト）。</p>
+  <p>name 欄と Save の動きは <a href="../reference/common.html">画面共通の操作</a> を参照してください。保存先は <code>srcType</code> ごとに Workspace の <code>resources/sql</code> / <code>resources/table</code> / <code>resources/csvq</code> です。ファイルの読み込み・保存には、フォームに入力中の <code>encoding</code>（Run から開いたときは template option の <code>encoding</code>）の文字コードを使います（未入力ならシステムデフォルト）。</p>
 
   <h2 id="section-related">関連</h2>
   <ul>
     <li><a href="../sections/jdbc.html">JDBC</a> — 接続先と Connection Test</li>
     <li><a href="parameters.html">Parameters (-P)</a> — SQL に実行時の値を渡す</li>
-    <li><a href="common.html">ダイアログ共通の操作</a> — 最大化ボタンなど、ダイアログ共通のボタン</li>
+    <li><a href="../reference/common.html">画面共通の操作</a> — 最大化ボタンなど、ダイアログ共通のボタン</li>
   </ul>
 </body>
 </html>
