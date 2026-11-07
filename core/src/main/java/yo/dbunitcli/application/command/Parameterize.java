@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import yo.dbunitcli.application.Command;
 import yo.dbunitcli.common.Parameter;
+import yo.dbunitcli.resource.FileResources;
 import yo.dbunitcli.resource.Workers;
 
 import java.util.concurrent.atomic.AtomicInteger;
@@ -43,6 +44,14 @@ public class Parameterize implements Command<ParameterizeDto, ParameterizeOption
             Parameterize.LOGGER.info("total fail count:{}", failCount.get());
             throw new Command.CommandFailException("execute has fail count");
         }
+    }
+
+    /**
+     * 出力先はパラメータごとのコマンドが決めるため、それらに共通する結果ベースディレクトリを返す
+     */
+    @Override
+    public String resultDir(final String name, final String[] args, final Parameter parameter) {
+        return FileResources.resultDir().getAbsoluteFile().getPath();
     }
 
     @Override
