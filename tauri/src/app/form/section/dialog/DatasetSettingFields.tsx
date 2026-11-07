@@ -318,6 +318,31 @@ export function FilterOrderFields({
 			return next;
 		});
 	};
+	// 式の項目では、選んだカラムをカラム名ではなく参照する式にして設定する
+	function renderSelectDialog() {
+		if (!selecting) {
+			return null;
+		}
+		if (isExpressionField(selecting.field)) {
+			return (
+				<ColumnExpressionSelectDialog
+					columns={columnDatalist}
+					defaultValue="''"
+					onApply={(entries) =>
+						applySelected(entries.map(([, expression]) => expression))
+					}
+					onClose={() => setSelecting(null)}
+				/>
+			);
+		}
+		return (
+			<ColumnSelectDialog
+				columns={columnDatalist}
+				onApply={applySelected}
+				onClose={() => setSelecting(null)}
+			/>
+		);
+	}
 	function renderGroup(groupLegend: string, fields: FilterOrderField[]) {
 		if (fields.length === 0) {
 			return null;
@@ -365,13 +390,7 @@ export function FilterOrderFields({
 			{columnDatalist.length > 0 && (
 				<ResourceDatalist id="column_datalist" resources={columnDatalist} />
 			)}
-			{selecting && (
-				<ColumnSelectDialog
-					columns={columnDatalist}
-					onApply={applySelected}
-					onClose={() => setSelecting(null)}
-				/>
-			)}
+			{renderSelectDialog()}
 			{editing && (
 				<ExpressionEditDialog
 					name={editing.field.name}

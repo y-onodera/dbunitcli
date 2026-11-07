@@ -101,16 +101,29 @@ describe("FilterOrderFieldsのfilterの式編集のテスト", () => {
 		render(<FilterHarness filter={[]} />);
 
 		await user.click(screen.getByRole("button", { name: "edit" }));
-		await user.click(screen.getByRole("button", { name: "Append Column" }));
+		await user.click(screen.getByRole("button", { name: "Insert Column" }));
 		await user.selectOptions(
 			screen.getByLabelText("operator"),
 			"=~ (regex match)",
 		);
-		await user.click(screen.getByRole("button", { name: "Append Operator" }));
+		await user.click(screen.getByRole("button", { name: "Insert Operator" }));
 		await user.type(screen.getByRole("textbox", { name: "" }), "'SALE.*'");
 		await user.click(screen.getByRole("button", { name: "Apply" }));
 
 		expect(filterValues()).toEqual(["get('区分') =~ 'SALE.*'"]);
+	});
+
+	it("filterのselectはカラムを参照する式にして設定する", async () => {
+		const user = userEvent.setup();
+		render(<FilterHarness filter={[]} />);
+
+		await user.click(screen.getByRole("button", { name: "select" }));
+		await user.selectOptions(screen.getByLabelText("function"), "startsWith");
+		await user.type(screen.getByLabelText("argument"), "SALE");
+		await user.click(screen.getByRole("checkbox", { name: "区分" }));
+		await user.click(screen.getByRole("button", { name: "Apply" }));
+
+		expect(filterValues()).toEqual(["get('区分').startsWith('SALE')"]);
 	});
 
 	it("他の行と同じ式は設定しない", async () => {

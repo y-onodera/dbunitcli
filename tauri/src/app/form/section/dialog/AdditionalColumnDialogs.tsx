@@ -1,5 +1,5 @@
 import type { Dispatch, SetStateAction } from "react";
-import { useState } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import {
 	DialogActions,
 	DialogField,
@@ -17,6 +17,7 @@ import {
 	newColumnExpressionOption,
 	toColumnExpression,
 } from "../../../../model/ColumnExpression";
+import { insertInlineAtCursor } from "../../../../utils/textInsert";
 import ColumnSelectDialog from "./ColumnSelectDialog";
 import { OptionSelect, OptionText, type SelectOption } from "./SqlInsertParts";
 
@@ -109,12 +110,33 @@ export function ExpressionEditDialog({
 	const [option, setOption] = useState(() =>
 		newColumnExpressionOption(defaultValue),
 	);
+	const textareaRef = useRef<HTMLTextAreaElement>(null);
+	const pendingCursorRef = useRef<number | null>(null);
 
-	function renderAppendColumn() {
+	const insertAtCursor = (inserted: string) => {
+		const textarea = textareaRef.current;
+		const start = textarea?.selectionStart ?? text.length;
+		const end = textarea?.selectionEnd ?? text.length;
+		const result = insertInlineAtCursor(text, [inserted], start, end);
+		pendingCursorRef.current = result.cursor;
+		setText(result.value);
+	};
+
+	// 続けて挿入したときに直前の挿入の後ろへ入るよう、描画後にカーソルを移す
+	useLayoutEffect(() => {
+		const cursor = pendingCursorRef.current;
+		if (cursor === null) {
+			return;
+		}
+		pendingCursorRef.current = null;
+		textareaRef.current?.setSelectionRange(cursor, cursor);
+	});
+
+	function renderInsertColumn() {
 		if (columns.length === 0) {
 			return (
 				<StatusMessage kind="empty">
-					Load columns to append a column.
+					Load columns to insert a column.
 				</StatusMessage>
 			);
 		}
@@ -131,9 +153,9 @@ export function ExpressionEditDialog({
 				<ColumnExpressionFields option={option} setOption={setOption} />
 				<DialogField>
 					<BlueButton
-						title="Append Column"
+						title="Insert Column"
 						handleClick={() =>
-							setText((cur) => cur + toColumnExpression(column, option))
+							insertAtCursor(toColumnExpression(column, option))
 						}
 					/>
 				</DialogField>
@@ -146,6 +168,7 @@ export function ExpressionEditDialog({
 			<DialogTitle>{`Edit ${name}`}</DialogTitle>
 			<DialogField>
 				<TextArea
+					ref={textareaRef}
 					id="expression"
 					value={text}
 					spellCheck={false}
@@ -162,11 +185,11 @@ export function ExpressionEditDialog({
 			</DialogField>
 			<DialogField>
 				<BlueButton
-					title="Append Operator"
-					handleClick={() => setText((cur) => cur + operator)}
+					title="Insert Operator"
+					handleClick={() => insertAtCursor(operator)}
 				/>
 			</DialogField>
-			{renderAppendColumn()}
+			{renderInsertColumn()}
 			<DialogActions>
 				<BlueButton
 					title="Apply"

@@ -70,7 +70,7 @@ describe("AdditionalColumnsFieldsのカラム反映のテスト", () => {
 		await user.clear(textarea);
 		await user.type(textarea, "'日付:' + ");
 		await user.selectOptions(screen.getByLabelText("function"), "formatDate");
-		await user.click(screen.getByRole("button", { name: "Append Column" }));
+		await user.click(screen.getByRole("button", { name: "Insert Column" }));
 		await user.click(screen.getByRole("button", { name: "Apply" }));
 
 		expect(current.string).toEqual({
@@ -89,20 +89,41 @@ describe("AdditionalColumnsFieldsのカラム反映のテスト", () => {
 		await expand(user);
 
 		await user.click(screen.getByRole("button", { name: "edit" }));
-		await user.click(screen.getByRole("button", { name: "Append Column" }));
+		await user.click(screen.getByRole("button", { name: "Insert Column" }));
 		await user.selectOptions(
 			screen.getByLabelText("operator"),
 			screen.getByRole("option", { name: "&& (AND)" }),
 		);
-		await user.click(screen.getByRole("button", { name: "Append Operator" }));
+		await user.click(screen.getByRole("button", { name: "Insert Operator" }));
 		await user.selectOptions(screen.getByLabelText("column"), "金額(円)");
 		await user.selectOptions(screen.getByLabelText("function"), "matches");
 		await user.type(screen.getByLabelText("argument"), "[[0-9]+");
-		await user.click(screen.getByRole("button", { name: "Append Column" }));
+		await user.click(screen.getByRole("button", { name: "Insert Column" }));
 		await user.click(screen.getByRole("button", { name: "Apply" }));
 
 		expect(current.boolean).toEqual({
 			判定: "get('顧客名') && get('金額(円)').matches('[0-9]+')",
+		});
+	});
+
+	it("editの挿入はカーソル位置に入り、続けて挿入すると直前の挿入の後ろに入る", async () => {
+		const user = userEvent.setup();
+		render(
+			<AdditionalColumnsHarness initial={{ boolean: { 判定: "(  ) && x" } }} />,
+		);
+		await expand(user);
+
+		await user.click(screen.getByRole("button", { name: "edit" }));
+		const textarea = screen.getByRole<HTMLTextAreaElement>("textbox", {
+			name: "",
+		});
+		textarea.setSelectionRange(1, 3);
+		await user.click(screen.getByRole("button", { name: "Insert Column" }));
+		await user.click(screen.getByRole("button", { name: "Insert Operator" }));
+		await user.click(screen.getByRole("button", { name: "Apply" }));
+
+		expect(current.boolean).toEqual({
+			判定: "(get('顧客名') == ) && x",
 		});
 	});
 });

@@ -82,7 +82,7 @@ export function toColumnExpression(
 	}
 }
 
-// valueは追記する文字列。二項演算子は前後に空白を付ける
+// valueは挿入する文字列。二項演算子は前後に空白を付ける
 export const expressionOperators: { value: string; label: string }[] = [
 	{ value: " == ", label: "== (equal)" },
 	{ value: " != ", label: "!= (not equal)" },
