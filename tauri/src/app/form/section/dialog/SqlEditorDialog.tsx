@@ -80,10 +80,6 @@ function Dialog(props: SqlEditorDialogProps & { value: string }) {
 		setShowSelector(false);
 	};
 
-	const handleInsertColumn = (columns: string[], inline?: boolean) => {
-		insertToContent(columns, inline);
-	};
-
 	// csvqはDBではなくCSVを読むため、DBのテーブル一覧の代わりにCSVファイルを選ぶ
 	const csvq = props.type === "csvq";
 	const table = props.type === "table";
@@ -103,7 +99,7 @@ function Dialog(props: SqlEditorDialogProps & { value: string }) {
 			<SqlTableInsertDialog
 				jdbcValues={jdbcValues}
 				onInsert={handleInsert}
-				onInsertColumn={handleInsertColumn}
+				onInsertColumn={insertToContent}
 				plain={table}
 				queryOnly={props.queryOnly}
 				onClose={() => setShowSelector(false)}
