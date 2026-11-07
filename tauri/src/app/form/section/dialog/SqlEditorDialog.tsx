@@ -2,11 +2,11 @@ import { type ComponentType, useState } from "react";
 import {
 	DialogBody,
 	DialogField,
-	DialogTextArea,
 	SettingDialog,
 	StatusMessage,
 } from "../../../../components/dialog";
 import { BlueButton } from "../../../../components/element/Button";
+import { TextArea } from "../../../../components/element/Input";
 import { useDatasetSrcInfo } from "../../../../context/DatasetSrcInfoProvider";
 import { useJdbcConnectionState } from "../../../../context/JdbcConnectionProvider";
 import {
@@ -135,7 +135,7 @@ function Dialog(props: SqlEditorDialogProps & { value: string }) {
 						/>
 					</DialogField>
 				)}
-				<DialogTextArea
+				<TextArea
 					id="contents"
 					ref={textareaRef}
 					value={content}

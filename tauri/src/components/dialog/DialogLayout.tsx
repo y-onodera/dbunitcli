@@ -28,7 +28,7 @@ export function DialogBody({
 }
 
 // ダイアログ内の入力項目1つ分の縦余白。最後の項目は last を指定して下余白を広げる。
-// grow を指定すると、最大化中は残りの高さを埋める（DialogTextArea を入れる項目に使う）
+// grow を指定すると、最大化中の枠（高さのある flex 縦並び）で残りの高さを埋める（TextArea を入れる項目に使う）
 export function DialogField({
 	last = false,
 	grow = false,
@@ -38,12 +38,12 @@ export function DialogField({
 	grow?: boolean;
 	children: ReactNode;
 }) {
-	const { maximized } = useDialogMaximize();
 	const margin = last ? "mb-4" : "mb-3";
-	if (grow && maximized) {
-		return <div className={`${margin} grow flex flex-col`}>{children}</div>;
-	}
-	return <div className={margin}>{children}</div>;
+	return (
+		<div className={grow ? `${margin} grow flex flex-col` : margin}>
+			{children}
+		</div>
+	);
 }
 
 // ボタンを横並びにする行

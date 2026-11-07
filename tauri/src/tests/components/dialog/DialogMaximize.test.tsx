@@ -4,11 +4,11 @@ import { describe, expect, it, vi } from "vitest";
 import {
 	DialogBody,
 	DialogField,
-	DialogTextArea,
 	DialogTitle,
 	ModalOverlay,
 	SettingDialog,
 } from "../../../components/dialog";
+import { TextArea } from "../../../components/element/Input";
 
 function renderSettingDialog(maximizable: boolean) {
 	render(
@@ -20,11 +20,11 @@ function renderSettingDialog(maximizable: boolean) {
 			handleDialogClose={vi.fn()}
 		>
 			<DialogBody size="md">
-				<DialogTextArea id="outer" value="" />
+				<TextArea id="outer" value="" />
 				<ModalOverlay>
 					<DialogTitle>Nested</DialogTitle>
 					<DialogField grow>
-						<DialogTextArea id="nested" value="" />
+						<TextArea id="nested" value="" />
 					</DialogField>
 				</ModalOverlay>
 			</DialogBody>
@@ -33,7 +33,12 @@ function renderSettingDialog(maximizable: boolean) {
 	return userEvent.setup();
 }
 
-const textarea = (id: string) => document.getElementById(id) as HTMLElement;
+// テキストエリアの高さは親（DialogBody）が flex 縦並びで伸びるかで決まる
+const bodyOf = (id: string) =>
+	document.getElementById(id)?.parentElement as HTMLElement;
+// ModalOverlay の枠（スクロールする箱）
+const frameOf = (id: string) =>
+	document.getElementById(id)?.closest(".overflow-y-auto") as HTMLElement;
 
 describe("ダイアログの最大化", () => {
 	it("maximizableでなければ最大化ボタンを出さない", () => {
@@ -43,22 +48,23 @@ describe("ダイアログの最大化", () => {
 		).not.toBeInTheDocument();
 	});
 
-	it("最大化するとテキストエリアが残りの高さを埋め、元に戻すと固定の高さに戻る", async () => {
+	it("最大化すると本文が枠の残りを埋め、元に戻すと指定の幅に戻る", async () => {
 		const user = renderSettingDialog(true);
-		expect(textarea("outer")).toHaveClass("h-96");
+		expect(bodyOf("outer")).toHaveClass("w-dialog-md");
 
 		await user.click(screen.getByRole("button", { name: "Maximize" }));
-		expect(textarea("outer")).toHaveClass("flex-1");
-		expect(textarea("outer")).not.toHaveClass("h-96");
+		expect(bodyOf("outer")).toHaveClass("grow", "flex", "w-full");
+		expect(bodyOf("outer")).not.toHaveClass("w-dialog-md");
 
 		await user.click(screen.getByRole("button", { name: "Restore" }));
-		expect(textarea("outer")).toHaveClass("h-96");
+		expect(bodyOf("outer")).toHaveClass("w-dialog-md");
 	});
 
 	it("入れ子の枠は親の最大化を引き継がない", async () => {
 		const user = renderSettingDialog(true);
 		await user.click(screen.getByRole("button", { name: "Maximize" }));
-		expect(textarea("nested")).toHaveClass("h-96");
+		expect(frameOf("nested")).toHaveClass("max-h-[80vh]");
+		expect(frameOf("nested")).not.toHaveClass("h-full");
 		// 入れ子の ModalOverlay は maximizable でないのでボタンは親の1つだけ
 		expect(
 			screen.getAllByRole("button", { name: /Maximize|Restore/ }),

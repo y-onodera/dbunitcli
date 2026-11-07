@@ -1,6 +1,6 @@
 import { type ReactNode, useEffect, useRef } from "react";
 import {
-	DialogMaximizeProvider,
+	DialogMaximizeContext,
 	useDialogMaximizeState,
 } from "./DialogMaximize";
 
@@ -25,9 +25,7 @@ export function FullDialog({
 			// 最大化中の大きさはブラウザ既定の max-width / max-height で止まる。子は DialogBody が残りの高さを埋める
 			className={`overflow-y-auto fixed top-0 right-0 left-0 z-modal bg-surface border border-border-subtle${maximize.maximized ? " open:flex flex-col w-full h-full" : ""}`}
 		>
-			<DialogMaximizeProvider value={maximize}>
-				{children}
-			</DialogMaximizeProvider>
+			<DialogMaximizeContext value={maximize}>{children}</DialogMaximizeContext>
 		</dialog>
 	);
 }

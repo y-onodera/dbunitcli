@@ -205,6 +205,7 @@ export function PreviewField({
 		</div>
 	);
 }
+// 高さのある flex 縦並び（最大化中のダイアログ）では残りを埋め、それ以外では min-h-96 の高さになる
 export function TextArea({
 	ref,
 	...props
@@ -216,15 +217,13 @@ export function TextArea({
 	placeholder?: string;
 	spellCheck?: boolean;
 	onChange?: (ev: React.ChangeEvent<HTMLTextAreaElement>) => void;
-	// 親（flex 縦並び）の残りの高さを埋める。通常時の高さは下回らない
-	fill?: boolean;
 }) {
 	return (
 		<textarea
 			id={props.id}
 			ref={ref}
 			className={`p-2.5
-                       w-full ${props.fill ? "flex-1 min-h-96" : "h-96"}
+                       w-full flex-1 min-h-96
                        text-sm text-content
                        rounded-lg
                        bg-input

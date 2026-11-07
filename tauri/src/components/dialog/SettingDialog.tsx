@@ -25,7 +25,7 @@ type CommonProps = {
 	title?: string;
 	helpCommand?: string;
 	helpLabel?: string;
-	// タイトル行に最大化ボタンを出す。DialogTextArea を置くダイアログで使う
+	// タイトル行に最大化ボタンを出す。編集用 TextArea を置くダイアログで使う
 	maximizable?: boolean;
 };
 
