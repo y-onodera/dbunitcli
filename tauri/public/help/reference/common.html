@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <title>ヘルプ - 画面共通の操作</title>
+  <link rel="stylesheet" href="../help.css" />
+</head>
+<body>
+  <p><a href="../index.html">&larr; ヘルプ一覧に戻る</a></p>
+  <h1>画面共通の操作</h1>
+  <p>フォームとダイアログのどこでも同じように動く部品（入力欄、入力欄横の ⚙ メニュー、ファイル選択、ダイアログの複数値の入力欄と一覧表、ダイアログのボタン）をまとめたリファレンスです。特定の項目・ダイアログだけにある操作は、それぞれのページを参照してください。</p>
+
+  <h2 id="toc">目次</h2>
+  <ol>
+    <li><a href="#section-simple">シンプルな使い方</a></li>
+    <li><a href="#section-input">入力欄</a></li>
+    <li><a href="#section-candidates">候補（データリスト）</a></li>
+    <li><a href="#section-menu">⚙ メニュー</a></li>
+    <li><a href="#section-chooser">ファイル選択と基準ディレクトリ</a></li>
+    <li><a href="#section-arrays">ダイアログの複数値の入力欄</a></li>
+    <li><a href="#section-table">ダイアログの設定一覧表</a></li>
+    <li><a href="#section-dialog">ダイアログのボタンと表示</a></li>
+    <li><a href="#section-related">関連</a></li>
+  </ol>
+
+  <h2 id="section-simple">シンプルな使い方</h2>
+  <p>ファイルを指定する入力欄では、候補から選ぶか、横の ⚙ メニューから選択・編集します。保存したファイルは、その場で入力欄に入ります。</p>
+  <pre>指定:
+  setting の ⚙ → edit
+  → Dataset Settings で設定を書き、name = orders.json
+  → Save
+
+結果:
+  &lt;workspace&gt;/resources/setting/orders.json に保存され、setting = orders.json になる
+  以後、setting の候補に orders.json が出る</pre>
+  <ul>
+    <li>入力欄の下の灰色の文字は、相対パスを探す起点のディレクトリ（<a href="#section-chooser">基準ディレクトリ</a>）</li>
+    <li>候補にあるファイルは、⚙ メニューの delete で削除できる</li>
+  </ul>
+
+  <h2 id="section-input">入力欄</h2>
+  <table>
+    <tr><th>表示・操作</th><th>説明</th></tr>
+    <tr><td>×（入力欄の右端）</td><td>値があるときに表示。押すと入力を消す。キーボードの Tab では移動しない</td></tr>
+    <tr><td>入力欄の下の灰色の文字</td><td>ファイル・ディレクトリを指定する欄の一部に表示。1 行目が基準ディレクトリ、2 行目が Workspace（基準ディレクトリと同じなら出ない）。相対パスはこの順に探す。表示する欄は <a href="#section-chooser">ファイル選択と基準ディレクトリ</a> の表を参照</td></tr>
+    <tr><td>入力欄の下の赤字</td><td>Exec などで見つかったオプションの誤り。入力し直すか、⚙ メニューで選び直すと消える（詳細は <a href="../dialogs/workspace.html">Workspace</a> の「フッターの操作」）</td></tr>
+    <tr><td>候補の一覧</td><td>候補がある欄では、入力中に一致する候補が一覧で出る（<a href="#section-candidates">候補（データリスト）</a>）</td></tr>
+  </table>
+
+  <h2 id="section-candidates">候補（データリスト）</h2>
+  <p>候補は入力の補助です。一覧から選ぶと値が入りますが、候補にない値もそのまま入力できます。候補が 1 つもないときは一覧は出ません。</p>
+
+  <h3 id="section-candidates-file">ファイル名の候補</h3>
+  <p>設定・テンプレート・JDBC などのファイルを指定する欄では、基準ディレクトリの直下にあるファイルの名前が候補になります（サブディレクトリの中のファイルは出ません）。候補になる欄は <a href="#section-chooser">ファイル選択と基準ディレクトリ</a> の表を参照してください。</p>
+  <table>
+    <tr><th>タイミング</th><th>候補の変化</th></tr>
+    <tr><td>Workspace を開いたとき（起動時・ChangeWorkspace の confirm）</td><td>基準ディレクトリのファイルを読み直す</td></tr>
+    <tr><td>アプリのダイアログで保存・generate したとき</td><td>保存したファイルが加わる</td></tr>
+    <tr><td>⚙ メニューの delete で削除したとき</td><td>削除したファイルが消える</td></tr>
+    <tr><td>アプリの外（エクスプローラーなど）でファイルを追加・削除したとき</td><td>変わらない。ChangeWorkspace で Workspace を開き直すと反映される</td></tr>
+  </table>
+
+  <h3 id="section-candidates-dataset">テーブル名・シート名・カラム名の候補</h3>
+  <p>ダイアログの中には、フォームで指定したデータセットからテーブル名・シート名・カラム名を読み込んで候補にする欄があります。読み込むまで候補は出ません。どのデータセットから、どの操作で読み込むかはダイアログごとに違うため、各ダイアログのページを参照してください（例: <a href="../dialogs/dataset-setting.html">Dataset Setting</a> の Load Columns）。</p>
+
+  <h2 id="section-menu">⚙ メニュー</h2>
+  <p>入力欄の右の ⚙ を押すと、その欄で使えるボタンのメニューが開きます。メニューに出るボタンは欄の種類と値によって変わり、次の順に並びます。</p>
+  <table>
+    <tr><th>ボタン</th><th>動作</th><th>表示される条件</th></tr>
+    <tr><td>edit</td><td>入力欄の値をファイル名として編集ダイアログを開く。値が空なら新しいファイルを作る。ダイアログで Save すると、保存したファイル名が入力欄に入る</td><td>編集ダイアログがある欄</td></tr>
+    <tr><td>generate</td><td>既存のデータセットから雛型を作るダイアログを開く。保存すると、そのファイル名が入力欄に入る</td><td>雛型を生成できる欄</td></tr>
+    <tr><td>open</td><td>入力欄の値の場所を開く。ディレクトリはエクスプローラーで、ファイルは関連付けられたアプリで開く。相対パスは基準ディレクトリ・Workspace・起動ディレクトリの順に探す</td><td>ファイル・ディレクトリを指定する欄で、値があるとき</td></tr>
+    <tr><td>delete</td><td>確認のうえ、入力欄の値のファイルを基準ディレクトリから削除し、入力欄を空にする</td><td>値が<a href="#section-candidates-file">ファイル名の候補</a>のどれかと一致するとき</td></tr>
+    <tr><td>file</td><td>ファイルの選択ダイアログを開く。選んだファイルのパスが入力欄に入る（<a href="#section-chooser-value">選択後に入る値</a>）</td><td>ファイルを指定できる欄</td></tr>
+    <tr><td>dir</td><td>ディレクトリの選択ダイアログを開く。選んだディレクトリのパスが入力欄に入る</td><td>ディレクトリを指定できる欄</td></tr>
+  </table>
+  <ul>
+    <li>メニューは、file / dir で選択したとき、delete で削除したとき、メニューの外を押したときに閉じる</li>
+    <li>edit / generate で開いたダイアログを閉じても、メニューは開いたまま</li>
+    <li>画面をスクロールしても閉じず、⚙ の位置に付いて動く</li>
+    <li>どの欄で edit / generate がどのダイアログを開くかは、<a href="../index.html">ヘルプ一覧</a>の「画面・設定の詳細」で各ダイアログの開き方を参照</li>
+  </ul>
+
+  <h2 id="section-chooser">ファイル選択と基準ディレクトリ</h2>
+  <p>ファイル・ディレクトリを指定する欄には、それぞれ決まった<strong>基準ディレクトリ</strong>があります。相対パスで指定したときに探す起点で、選択ダイアログの開く場所・選んだあとに入る値・候補のもとにもなります。基準ディレクトリは ChangeWorkspace の設定で決まるので、Workspace / Dataset Base / Result Base を切り替えると、これらも切り替わります。</p>
+
+  <h3 id="section-chooser-base">項目ごとの基準ディレクトリ</h3>
+  <p>「下の表示」は入力欄の下に基準ディレクトリを表示するか、「候補」は<a href="#section-candidates-file">ファイル名の候補</a>が出るかを表します。</p>
+  <table>
+    <tr><th>項目</th><th>基準ディレクトリ</th><th>下の表示</th><th>候補</th></tr>
+    <tr><td><code>src</code>（入力データ）</td><td>Dataset Base</td><td>あり</td><td>—</td></tr>
+    <tr><td><code>src</code>（<code>srcType</code> が <code>sql</code> / <code>table</code> / <code>csvq</code>）</td><td><code>&lt;workspace&gt;/resources/sql</code> / <code>table</code> / <code>csvq</code></td><td>—</td><td>あり</td></tr>
+    <tr><td><code>result</code>（出力先）</td><td>Result Base</td><td>あり</td><td>—</td></tr>
+    <tr><td><code>setting</code>（Convert / Generate / Parameterize の src など、データセットの読込）</td><td><code>&lt;workspace&gt;/resources/setting</code></td><td>あり</td><td>あり</td></tr>
+    <tr><td><code>setting</code>（Compare の比較キーの設定）</td><td><code>&lt;workspace&gt;/option/compare/setting</code></td><td>あり</td><td><code>targetType</code> が <code>data</code> のときあり</td></tr>
+    <tr><td><code>unitSetting</code>（Generate）</td><td><code>&lt;workspace&gt;/option/generate/setting</code></td><td>あり</td><td>あり</td></tr>
+    <tr><td><code>template</code>（Generate）/ <code>templateGroup</code></td><td><code>&lt;workspace&gt;/resources/template</code></td><td>—</td><td>あり</td></tr>
+    <tr><td><code>template</code>（Parameterize）</td><td><code>&lt;workspace&gt;/option/parameterize/template</code></td><td>あり</td><td>あり</td></tr>
+    <tr><td><code>jdbcProperties</code></td><td><code>&lt;workspace&gt;/resources/jdbc</code></td><td>—</td><td>あり</td></tr>
+    <tr><td><code>xlsxSchema</code></td><td><code>&lt;workspace&gt;/resources/xlsx-schema</code></td><td>あり</td><td>あり</td></tr>
+    <tr><td><code>fixedColumnDef</code></td><td><code>&lt;workspace&gt;/resources/fixed-column-def</code></td><td>あり</td><td>あり</td></tr>
+    <tr><td>上記以外のファイル・ディレクトリの欄</td><td>Workspace</td><td>あり</td><td>—</td></tr>
+  </table>
+
+  <h3 id="section-chooser-open">選択ダイアログが開く場所</h3>
+  <ul>
+    <li>入力欄が空なら、基準ディレクトリを開く</li>
+    <li>値が入っていれば、その場所を開く。相対パスなら、基準ディレクトリ、Workspace、アプリの起動ディレクトリの順に探し、見つかった場所を開く</li>
+  </ul>
+
+  <h3 id="section-chooser-value">選択後に入る値</h3>
+  <table>
+    <tr><th>選んだ場所</th><th>入力欄に入る値</th></tr>
+    <tr><td>基準ディレクトリの中</td><td>基準ディレクトリからの相対パス（例: <code>resources/setting/orders.json</code> を選ぶと <code>orders.json</code>）</td></tr>
+    <tr><td>基準ディレクトリの外で、Workspace の中</td><td>Workspace からの相対パス</td></tr>
+    <tr><td>Workspace の外</td><td>絶対パス</td></tr>
+  </table>
+  <p>Exec や Save Shell で作った .bat が相対パスをどう解決するか、環境を切り替えて使い回すためのパスの置き方は、<a href="../dialogs/workspace.html">Workspace</a> の「実行時のパスの解決」を参照してください。</p>
+
+  <h2 id="section-arrays">ダイアログの複数値の入力欄</h2>
+  <p>ダイアログには、同じ項目に値を複数並べる入力欄（1 行に 1 つの値）と、name と expression を組で並べる入力欄があります。どちらも次のように動きます。</p>
+  <table>
+    <tr><th>ボタン・操作</th><th>動作</th></tr>
+    <tr><td>add（最後の行の下）</td><td>末尾に空の行を追加する。最後の行に値があるときだけ表示。値が 1 つもないときは、はじめから空の行が 1 つある</td></tr>
+    <tr><td>remove（行の右）</td><td>その行を消す。1 行目には出ないので、1 行目は × で値を消す</td></tr>
+    <tr><td>値の確定</td><td>入力欄からフォーカスが外れたときに確定する。1 行に 1 つの値の欄では、ほかの行と同じ値は確定せず、入力前の値に戻す</td></tr>
+    <tr><td>expression の入力</td><td>name と組の欄では、name を入力するまで expression は入力できない</td></tr>
+  </table>
+  <p>項目によっては、行の右に select（カラムをまとめて選ぶ）や edit（式を編集する）も表示されます。これらは項目ごとの機能なので、<a href="../dialogs/dataset-setting.html">Dataset Setting</a> などの各ダイアログのページを参照してください。</p>
+
+  <h2 id="section-table">ダイアログの設定一覧表</h2>
+  <p>Dataset Settings・Xlsx Schema・Fixed Column Def などでは、設定を Target と Action の 2 列の表で一覧します。設定の中身は、行のボタンから開くダイアログで編集します。</p>
+  <table>
+    <tr><th>ボタン</th><th>動作</th></tr>
+    <tr><td>edit</td><td>その行の設定を編集するダイアログを開く。ダイアログの Save で行に反映する</td></tr>
+    <tr><td>delete</td><td>その行を一覧から消す（確認なし）</td></tr>
+    <tr><td>copy</td><td>その行の設定を元に編集ダイアログを開く。ダイアログの Save で新しい行として追加する</td></tr>
+    <tr><td>add（表の最後の行）</td><td>空の設定で編集ダイアログを開く。ダイアログの Save で新しい行として追加する</td></tr>
+  </table>
+  <p>一覧表での変更は、一覧表のあるダイアログで Save するまでファイルに書き込まれません（行の編集ダイアログの Save は一覧表への反映だけです）。</p>
+
+  <h2 id="section-dialog">ダイアログのボタンと表示</h2>
+
+  <h3 id="section-buttons">ボタン行</h3>
+  <p>ダイアログ下部のボタン（Save / Execute / Apply / Close など）は、内容が長くてダイアログがスクロールするときも、下端に表示されたままです。左端が確定（Save / Apply など）、右端が Close です。</p>
+
+  <h3 id="section-save">ファイルを編集するダイアログの name</h3>
+  <p>⚙ メニューの edit から開くダイアログでは、ボタン行の上に <code>name</code> 欄があり、開いたときは入力欄の値が入っています。Save すると基準ディレクトリの <code>name</code> のファイルに保存し、元の入力欄にその名前を入れてダイアログを閉じます。<code>name</code> を変えて Save すると、別の名前で保存します。保存に失敗したときは、ダイアログは開いたままです。</p>
+
+  <h3 id="section-help">Help ボタン</h3>
+  <p>タイトル横に Help ボタンがあるダイアログでは、押すとそのダイアログのヘルプを別ウィンドウで開きます。同じヘルプのウィンドウが開いている場合は、そのウィンドウを前面に出します。</p>
+
+  <h3 id="section-maximize">最大化</h3>
+  <p>テキストエリアのあるダイアログでは、タイトル右端の最大化ボタンを押すと、ダイアログがウィンドウいっぱいに広がり、テキストエリアが残りの高さを埋めます。もう一度押すと元の大きさに戻ります。ウィンドウが小さく収まらない場合は、ダイアログがスクロールします（テキストエリアは最大化前の高さより低くなりません）。</p>
+  <p>最大化ボタンがあるダイアログ:</p>
+  <table>
+    <tr><th>ダイアログ</th><th>開き方</th></tr>
+    <tr><td><a href="../dialogs/sql-editor.html">SQL Editor</a></td><td><code>srcType</code> が sql / table / csvq のとき、<code>src</code> の ⚙ メニューの edit</td></tr>
+    <tr><td><a href="../dialogs/template-edit.html">Template File Edit</a></td><td>テンプレートの欄の ⚙ メニューの edit</td></tr>
+    <tr><td><a href="../dialogs/parameterize-template-edit.html">Edit Parameterize Template</a></td><td>Parameterize の <code>template</code> の ⚙ メニューの edit</td></tr>
+    <tr><td>式の編集（<a href="../dialogs/dataset-setting.html">Dataset Setting</a>）</td><td>Additional Columns・<code>filter</code> の行の edit</td></tr>
+  </table>
+
+  <h2 id="section-related">関連</h2>
+  <ul>
+    <li><a href="../dialogs/workspace.html">Workspace</a> — 実行時のパスの解決、サイドバー・フッターの操作</li>
+    <li><a href="../guide/getting-started.html">基本的な使い方</a> — Workspace を選んでから再利用するまでの流れ</li>
+    <li><a href="../index.html">ヘルプ一覧</a> — 各ダイアログのページ</li>
+  </ul>
+</body>
+</html>

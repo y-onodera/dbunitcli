@@ -154,5 +154,6 @@ index は次の順に、すべてのページへのリンクを並べる。
 | 並列処理の条件 | `sections/result-form.html`（コマンドのページは差分だけ） |
 | Env と -P の使い分け | `dialogs/parameters.html` |
 | 作業の流れ（Workspace の選択から再利用まで） | `guide/` の使い方ページ |
-| ファイル選択と基準ディレクトリ | `dialogs/workspace.html` |
+| ファイル選択と基準ディレクトリ（項目ごとの基準ディレクトリ・選択後に入る値） | `reference/common.html`（実行時のパスの解決は `dialogs/workspace.html`） |
+| アプリ全体で同じに動く部品（入力欄の ×・候補・⚙ メニュー・複数値の入力欄・設定一覧表・ダイアログのボタン） | `reference/common.html`。特定の項目・ダイアログだけの操作（Load Columns・select ボタンなど）は書かず、そのページに書く |
 | 組み込みテンプレートのカスタマイズ方法 | `dialogs/txt-template-generate.html`（固定成果物の type ページは 1 文とリンク） |
