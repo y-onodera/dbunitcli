@@ -19,7 +19,7 @@ DO NOT TRIGGER when: ダイアログ内の文言・ロジックだけの変更�
 ## 高さ
 - 枠の上限（`FullDialog` はブラウザ既定、`ModalOverlay` は `max-h-[80vh]`）は変えない
 - 本文内のスクロール領域は1つあたり `max-h-96` 以下。`h-[…vh]` で枠を埋めない
-- 編集用 `TextArea` は `DialogBody` 直下か `DialogField grow` 内に置き、枠（`SettingDialog` / `ModalOverlay`）に `maximizable` を付ける。最大化中はこの経路で残りの高さを埋める
+- 編集用 `TextArea` は `DialogBody` 直下か `DialogField grow` 内に置き、枠（`SettingDialog` / `ModalOverlay`）に `maximizable` を付ける。最大化中はこの経路で残りの高さを埋める。付けたら `public/help/dialogs/common.html` の「最大化」の表に足す
 
 ## 確認
 800×600 で長めのダミー内容を入れて開き、各ボタンの中心で `document.elementFromPoint` がそのボタンを返すこと。sidecar なしなら scratchpad に Vite の入口（`tauri/node_modules` を symlink、`src/App.css` と対象を絶対パスで import）を作り Playwright で開く。
