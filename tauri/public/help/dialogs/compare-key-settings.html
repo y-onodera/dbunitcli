@@ -11,9 +11,9 @@
   <p>Compare の <code>setting</code>（比較の設定ファイル）のうち、テーブルごとの比較キー（主キー）だけを編集するダイアログです。<code>targetType</code> が <code>data</code> のとき、<code>setting</code> の ⚙ メニューの edit から開きます。</p>
 
   <h2 id="section-simple">シンプルな使い方</h2>
-  <p>Key Settings の表の追加ボタンで Compare Key Setting を開き、対象のテーブルと <code>keys</code> を指定します。</p>
+  <p>Key Settings の表の add で Compare Key Setting を開き、対象のテーブルと <code>keys</code> を指定します。</p>
   <pre>指定:
-  setting の ⚙ メニューの edit → Key Settings の追加ボタン
+  setting の ⚙ メニューの edit → Key Settings の add
   Target の name = users
   Keys の keys   = id
   → Save（Compare Key Setting）
@@ -38,7 +38,7 @@
     <tr><td>Key Settings</td><td>テーブルごとの比較キー。ファイルの <code>settings</code> に保存する</td></tr>
     <tr><td>Common Key Settings</td><td>複数テーブルに共通で適用する比較キー。ファイルの <code>commonSettings</code> に保存する。Key Settings と重なったときの扱いは <a href="dataset-settings.html">Dataset Settings</a> の <code>commonSettings</code> と同じ</td></tr>
   </table>
-  <p>行の編集ボタン（新しく作るときは追加ボタン）で開く Compare Key Setting では、次の項目だけを編集します。</p>
+  <p>行の edit（新しく作るときは表の add）で開く Compare Key Setting では、次の項目だけを編集します。</p>
   <table>
     <tr><th>項目</th><th>説明</th></tr>
     <tr><td>Target</td><td>対象のテーブルの指定方法（<code>name</code> / <code>pattern</code> / 結合）。書き方は <a href="dataset-setting.html">Dataset Setting</a> と同じ</td></tr>

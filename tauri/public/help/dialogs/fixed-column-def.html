@@ -38,7 +38,7 @@
   <p>同じメニューの generate からは、既存データセットのカラム構成をもとに雛型を作れます（<a href="fixed-column-def-generate.html">Fixed Column Def Generate</a>）。生成結果はこのダイアログに反映された状態で開きます。</p>
 
   <h2 id="section-content">設定項目</h2>
-  <p>Column Definitions の表の 1 行が、出力ファイルの 1 カラムです。表の上から順に、固定長ファイルの左からカラムが並びます。行の編集ボタンで開く Column Def Setting で、次の項目を設定します。</p>
+  <p>Column Definitions の表の 1 行が、出力ファイルの 1 カラムです。表の上から順に、固定長ファイルの左からカラムが並びます。行の edit で開く Column Def Setting で、次の項目を設定します。</p>
   <table>
     <tr><th>項目</th><th>説明</th><th>デフォルト</th></tr>
     <tr><td>name</td><td>出力するカラム名。データセットがロード済みの場合、候補からカラム名を選べる</td><td>（空）</td></tr>
@@ -49,7 +49,7 @@
   <p>表の各行の Target には <code>name (length)</code> の形で表示されます。</p>
 
   <h2 id="section-operation">操作</h2>
-  <p>Column Definitions の表の add / edit / delete / copy で行を編集します。各ボタンの動きと、行を並び替えられないことは <a href="../reference/common.html">画面共通の操作</a> の「ダイアログの設定一覧表」を参照してください。表の順がそのまま出力のカラム順になるため、途中にカラムを入れたい場合は、後ろの行を削除してから追加し直してください。</p>
+  <p>Column Definitions の表の add / edit / delete / copy で行を編集します。各ボタンの動きと、行を並び替えられないことは <a href="../reference/common.html">画面共通の操作</a> の「ダイアログの設定一覧表」を参照してください。表の順がそのまま出力のカラム順になるため、途中にカラムを入れたい場合は、後ろの行を delete してから add で追加し直してください。</p>
 
   <h2 id="section-save">保存</h2>
   <p>保存先は <code>&lt;workspace&gt;/resources/fixed-column-def</code> です。name 欄と Save の動きは <a href="../reference/common.html">画面共通の操作</a> を参照してください。</p>
