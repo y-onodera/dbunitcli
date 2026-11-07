@@ -8,14 +8,14 @@
 <body>
   <p><a href="../index.html">&larr; ヘルプ一覧に戻る</a></p>
   <h1>画面共通の操作</h1>
-  <p>フォームとダイアログのどこでも同じように動く部品（入力欄、入力欄横の ⚙ メニュー、ファイル選択、ダイアログの複数値の入力欄と一覧表、ダイアログのボタン）をまとめたリファレンスです。特定の項目・ダイアログだけにある操作は、それぞれのページを参照してください。</p>
+  <p>フォームとダイアログのどこでも同じように動く部品（入力欄、入力欄横の ⋮ メニュー、ファイル選択、ダイアログの複数値の入力欄と一覧表、ダイアログのボタン）をまとめたリファレンスです。特定の項目・ダイアログだけにある操作は、それぞれのページを参照してください。</p>
 
   <h2 id="toc">目次</h2>
   <ol>
     <li><a href="#section-simple">シンプルな使い方</a></li>
     <li><a href="#section-input">入力欄</a></li>
     <li><a href="#section-candidates">候補（データリスト）</a></li>
-    <li><a href="#section-menu">⚙ メニュー</a></li>
+    <li><a href="#section-menu">⋮ メニュー</a></li>
     <li><a href="#section-chooser">ファイル選択と基準ディレクトリ</a></li>
     <li><a href="#section-arrays">ダイアログの複数値の入力欄</a></li>
     <li><a href="#section-table">ダイアログの設定一覧表</a></li>
@@ -24,9 +24,9 @@
   </ol>
 
   <h2 id="section-simple">シンプルな使い方</h2>
-  <p>ファイルを指定する入力欄では、候補から選ぶか、横の ⚙ メニューから選択・編集します。保存したファイルは、その場で入力欄に入ります。</p>
+  <p>ファイルを指定する入力欄では、候補から選ぶか、横の ⋮ メニューから選択・編集します。保存したファイルは、その場で入力欄に入ります。</p>
   <pre>指定:
-  setting の ⚙ → edit
+  setting の ⋮ → edit
   → Dataset Settings で設定を書き、name = orders.json
   → Save
 
@@ -35,7 +35,7 @@
   以後、setting の候補に orders.json が出る</pre>
   <ul>
     <li>入力欄の下の灰色の文字は、相対パスを探す起点のディレクトリ（<a href="#section-chooser">基準ディレクトリ</a>）</li>
-    <li>候補にあるファイルは、⚙ メニューの delete で削除できる</li>
+    <li>候補にあるファイルは、⋮ メニューの delete で削除できる</li>
   </ul>
 
   <h2 id="section-input">入力欄</h2>
@@ -43,7 +43,7 @@
     <tr><th>表示・操作</th><th>説明</th></tr>
     <tr><td>×（入力欄の右端）</td><td>値があるときに表示。押すと入力を消す。キーボードの Tab では移動しない</td></tr>
     <tr><td>入力欄の下の灰色の文字</td><td>ファイル・ディレクトリを指定する欄の一部に表示。1 行目が基準ディレクトリ、2 行目が Workspace（基準ディレクトリと同じなら出ない）。相対パスはこの順に探す。表示する欄は <a href="#section-chooser">ファイル選択と基準ディレクトリ</a> の表を参照</td></tr>
-    <tr><td>入力欄の下の赤字</td><td>Exec などで見つかったオプションの誤り。入力し直すか、⚙ メニューで選び直すと消える（詳細は <a href="../dialogs/workspace.html">Workspace</a> の「フッターの操作」）</td></tr>
+    <tr><td>入力欄の下の赤字</td><td>Exec などで見つかったオプションの誤り。入力し直すか、⋮ メニューで選び直すと消える（詳細は <a href="../dialogs/workspace.html">Workspace</a> の「フッターの操作」）</td></tr>
     <tr><td>候補の一覧</td><td>候補がある欄では、入力中に一致する候補が一覧で出る（<a href="#section-candidates">候補（データリスト）</a>）</td></tr>
   </table>
 
@@ -56,15 +56,15 @@
     <tr><th>タイミング</th><th>候補の変化</th></tr>
     <tr><td>Workspace を開いたとき（起動時・ChangeWorkspace の confirm）</td><td>基準ディレクトリのファイルを読み直す</td></tr>
     <tr><td>アプリのダイアログで保存・generate したとき</td><td>保存したファイルが加わる</td></tr>
-    <tr><td>⚙ メニューの delete で削除したとき</td><td>削除したファイルが消える</td></tr>
+    <tr><td>⋮ メニューの delete で削除したとき</td><td>削除したファイルが消える</td></tr>
     <tr><td>アプリの外（エクスプローラーなど）でファイルを追加・削除したとき</td><td>変わらない。ChangeWorkspace で Workspace を開き直すと反映される</td></tr>
   </table>
 
   <h3 id="section-candidates-dataset">テーブル名・シート名・カラム名の候補</h3>
   <p>ダイアログの中には、フォームで指定したデータセットからテーブル名・シート名・カラム名を読み込んで候補にする欄があります。読み込むまで候補は出ません。どのデータセットから、どの操作で読み込むかはダイアログごとに違うため、各ダイアログのページを参照してください（例: <a href="../dialogs/dataset-setting.html">Dataset Setting</a> の Load Columns）。</p>
 
-  <h2 id="section-menu">⚙ メニュー</h2>
-  <p>入力欄の右の ⚙ を押すと、その欄で使えるボタンのメニューが開きます。メニューに出るボタンは欄の種類と値によって変わり、次の順に並びます。</p>
+  <h2 id="section-menu">⋮ メニュー</h2>
+  <p>入力欄の右の ⋮ を押すと、その欄で使えるボタンのメニューが開きます。メニューに出るボタンは欄の種類と値によって変わり、次の順に並びます。</p>
   <table>
     <tr><th>ボタン</th><th>動作</th><th>表示される条件</th></tr>
     <tr><td>edit</td><td>入力欄の値をファイル名として編集ダイアログを開く。値が空なら新しいファイルを作る。ダイアログで Save すると、保存したファイル名が入力欄に入る</td><td>編集ダイアログがある欄</td></tr>
@@ -77,7 +77,7 @@
   <ul>
     <li>メニューは、file / dir で選択したとき、delete で削除したとき、メニューの外を押したときに閉じる</li>
     <li>edit / generate で開いたダイアログを閉じても、メニューは開いたまま</li>
-    <li>画面をスクロールしても閉じず、⚙ の位置に付いて動く</li>
+    <li>画面をスクロールしても閉じず、⋮ の位置に付いて動く</li>
     <li>どの欄で edit / generate がどのダイアログを開くかは、<a href="../index.html">ヘルプ一覧</a>の「画面・設定の詳細」で各ダイアログの開き方を参照</li>
   </ul>
 
@@ -145,7 +145,7 @@
   <p>ダイアログ下部のボタン（Save / Execute / Apply / Close など）は、内容が長くてダイアログがスクロールするときも、下端に表示されたままです。左端が確定（Save / Apply など）、右端が Close です。Close は、まだ保存・反映していない編集を捨ててダイアログを閉じます。元の入力欄も変わりません。</p>
 
   <h3 id="section-save">ファイルを編集するダイアログの name</h3>
-  <p>⚙ メニューの edit から開くダイアログでは、ボタン行の上に <code>name</code> 欄があり、開いたときは入力欄の値が入っています。Save すると基準ディレクトリの <code>name</code> のファイルに保存し、元の入力欄にその名前を入れてダイアログを閉じます。<code>name</code> を変えて Save すると、別の名前で保存します。ない名前なら新しいファイルを作り、ある名前なら上書きします。保存に失敗したときは、ダイアログは開いたままです。</p>
+  <p>⋮ メニューの edit から開くダイアログでは、ボタン行の上に <code>name</code> 欄があり、開いたときは入力欄の値が入っています。Save すると基準ディレクトリの <code>name</code> のファイルに保存し、元の入力欄にその名前を入れてダイアログを閉じます。<code>name</code> を変えて Save すると、別の名前で保存します。ない名前なら新しいファイルを作り、ある名前なら上書きします。保存に失敗したときは、ダイアログは開いたままです。</p>
 
   <h3 id="section-help">Help ボタン</h3>
   <p>タイトル横に Help ボタンがあるダイアログでは、押すとそのダイアログのヘルプを別ウィンドウで開きます。同じヘルプのウィンドウが開いている場合は、そのウィンドウを前面に出します。</p>
@@ -155,9 +155,9 @@
   <p>最大化ボタンがあるダイアログ:</p>
   <table>
     <tr><th>ダイアログ</th><th>開き方</th></tr>
-    <tr><td><a href="../dialogs/sql-editor.html">SQL Editor</a></td><td><code>srcType</code> が sql / table / csvq のとき、<code>src</code> の ⚙ メニューの edit</td></tr>
-    <tr><td><a href="../dialogs/template-edit.html">Template File Edit</a></td><td>テンプレートの欄の ⚙ メニューの edit</td></tr>
-    <tr><td><a href="../dialogs/parameterize-template-edit.html">Edit Parameterize Template</a></td><td>Parameterize の <code>template</code> の ⚙ メニューの edit</td></tr>
+    <tr><td><a href="../dialogs/sql-editor.html">Edit SQL / Edit Table Definition</a></td><td><code>srcType</code> が sql / table / csvq のとき、<code>src</code> の ⋮ メニューの edit</td></tr>
+    <tr><td><a href="../dialogs/template-edit.html">Template File Edit</a></td><td>テンプレートの欄の ⋮ メニューの edit</td></tr>
+    <tr><td><a href="../dialogs/parameterize-template-edit.html">Edit Parameterize Template</a></td><td>Parameterize の <code>template</code> の ⋮ メニューの edit</td></tr>
     <tr><td>式の編集（<a href="../dialogs/dataset-setting.html">Dataset Setting</a>）</td><td>Additional Columns・<code>filter</code> の行の edit</td></tr>
   </table>
 

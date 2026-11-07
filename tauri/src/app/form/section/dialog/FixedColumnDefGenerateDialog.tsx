@@ -17,7 +17,7 @@ const fixedColumnDefGenerateConfig: ModelGenerateConfig<
 	formId: "fixedColumnDefGenerateForm",
 	name: "fixedColumnDefGenerate",
 	command: "dialogs/fixed-column-def-generate",
-	label: "Fixed Column Def Generate",
+	label: "Generate Fixed Column Def",
 	title: "Generate Fixed Column Def",
 	endpoint: "fixed-column-def/generate",
 	build: FixedColumnDef.build,

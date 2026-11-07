@@ -2,13 +2,13 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8" />
-  <title>ヘルプ - SQL Editor</title>
+  <title>ヘルプ - Edit SQL / Edit Table Definition</title>
   <link rel="stylesheet" href="../help.css" />
 </head>
 <body>
   <p><a href="../index.html">&larr; ヘルプ一覧に戻る</a></p>
-  <h1>SQL Editor</h1>
-  <p><code>srcType</code> が <code>sql</code> / <code>table</code> / <code>csvq</code> のときに、SQL ファイル・テーブル名の一覧ファイルを編集するダイアログです。</p>
+  <h1>Edit SQL / Edit Table Definition</h1>
+  <p><code>srcType</code> が <code>sql</code> / <code>table</code> / <code>csvq</code> のときに、SQL ファイル・テーブル名の一覧ファイルを編集するダイアログです。ダイアログのタイトルは、<code>table</code> のとき Edit Table Definition、<code>sql</code> / <code>csvq</code> のとき Edit SQL です。</p>
 
   <h2 id="toc">目次</h2>
   <ol>
@@ -23,7 +23,7 @@
   </ol>
 
   <h2 id="section-simple">シンプルな使い方</h2>
-  <p><code>src</code> の ⚙ メニューの edit で開き、SQL を書いて Preview で読み込まれる内容を確認してから保存します。</p>
+  <p><code>src</code> の ⋮ メニューの edit で開き、SQL を書いて Preview で読み込まれる内容を確認してから保存します。</p>
   <p>例: <code>srcType</code> が <code>sql</code> のとき、有効なユーザだけを読み込む SQL を作ります。</p>
   <pre>本文:
   select * from USERS where STATUS = 'ACTIVE'
@@ -44,7 +44,7 @@
   </ul>
 
   <h2 id="section-open">開き方</h2>
-  <p><a href="../sections/dataset-load-form.html">Dataset Load Form</a> の <code>src</code> の ⚙ メニューの edit から開きます。<code>src</code> の候補と delete は、下記の保存先のファイルが対象です（<a href="../reference/common.html">画面共通の操作</a> を参照）。</p>
+  <p><a href="../sections/dataset-load-form.html">Dataset Load Form</a> の <code>src</code> の ⋮ メニューの edit から開きます。<code>src</code> の候補と delete は、下記の保存先のファイルが対象です（<a href="../reference/common.html">画面共通の操作</a> を参照）。</p>
 
   <h2 id="section-content">記述内容</h2>
   <table>
@@ -229,7 +229,7 @@ FROM
   <h2 id="section-preview">Preview</h2>
   <p>ダイアログ下部の Preview を押すと、編集中の内容を <code>src</code> のファイルの代わりにして読み込みます。<code>srcType</code> が <code>sql</code> / <code>csvq</code> なら SQL 1 つで 1 テーブルなので、テーブルの一覧を挟まずにそのテーブルのデータを表示します。<code>table</code> なら読み込まれるテーブルの一覧を表示し（<a href="../sections/dataset-load-form.html">Dataset Load Form</a> の Preview Before Settings と同じ表示です）、一覧の preview ボタンでそのテーブルのデータを表示します。</p>
   <ul>
-    <li>Save を押す前の内容でも確認でき、プレビューしてもファイルは保存されません。SQL Editor は閉じず、元のテキストボックスのファイル名も変わりません。</li>
+    <li>Save を押す前の内容でも確認でき、プレビューしてもファイルは保存されません。ダイアログは閉じず、元のテキストボックスのファイル名も変わりません。</li>
     <li>フォームの <code>src</code> 以外の項目（JDBC の接続先、-P 値など）は実行時と同じものを使います。<code>setting</code> は指定していても適用しません。</li>
     <li><code>srcType</code> が <code>sql</code> / <code>csvq</code> のとき、データ表示のタイトルのテーブル名は <code>inlineSource</code> と表示します。保存して実行したときのテーブル名は、保存したファイル名（拡張子を除く）です。</li>
     <li><code>srcType</code> が <code>table</code> のとき、本文の 1 行を 1 テーブルとして表示します。空行は飛ばします。</li>

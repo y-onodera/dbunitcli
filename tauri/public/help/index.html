@@ -38,7 +38,7 @@
   <ul class="cards">
     <li><a class="card" href="dialogs/workspace.html"><div class="cmd-name">Workspace<span class="badge badge-dialog">ダイアログ</span></div><div class="cmd-desc">ヘッダの ChangeWorkspace ボタンから開く。入力項目、ディレクトリ構成、サイドバー・フッターの操作、環境変数（Env）</div></a></li>
     <li><a class="card" href="dialogs/parameters.html"><div class="cmd-name">Parameters (-P)<span class="badge badge-dialog">ダイアログ</span></div><div class="cmd-desc">フッターの Edit Parameters (-P) ボタンから開く。SQL やテンプレートに実行時の値を渡す</div></a></li>
-    <li><a class="card" href="reference/common.html"><div class="cmd-name">画面共通の操作<span class="badge badge-reference">リファレンス</span></div><div class="cmd-desc">フォーム・ダイアログに共通。入力欄の × と基準ディレクトリの表示、候補（データリスト）、⚙ メニューのボタン、ファイル選択、複数値の入力欄・設定一覧表、ダイアログのボタン行・Help・最大化</div></a></li>
+    <li><a class="card" href="reference/common.html"><div class="cmd-name">画面共通の操作<span class="badge badge-reference">リファレンス</span></div><div class="cmd-desc">フォーム・ダイアログに共通。入力欄の × と基準ディレクトリの表示、候補（データリスト）、⋮ メニューのボタン、ファイル選択、複数値の入力欄・設定一覧表、ダイアログのボタン行・Help・最大化</div></a></li>
   </ul>
 
   <h3>共通の入力フォームのセクション</h3>
@@ -47,31 +47,31 @@
     <li><a class="card" href="sections/dataset-load-form.html"><div class="cmd-name">Dataset Load Form<span class="badge badge-section">セクション</span></div><div class="cmd-desc">入力データセットの指定。Convert / Compare / Generate / Parameterize で使う（Run は src・Traversal・Template の部分だけ）</div></a>
       <div class="types">srcType: <a href="sections/dataset-load-form/types/none.html">none</a><a href="sections/dataset-load-form/types/csv.html">csv</a><a href="sections/dataset-load-form/types/fixed.html">fixed</a><a href="sections/dataset-load-form/types/reg.html">reg</a><a href="sections/dataset-load-form/types/xlsx.html">xls / xlsx</a><a href="sections/dataset-load-form/types/table.html">table</a><a href="sections/dataset-load-form/types/sql.html">sql</a><a href="sections/dataset-load-form/types/csvq.html">csvq</a><a href="sections/dataset-load-form/types/file.html">file</a><a href="sections/dataset-load-form/types/dir.html">dir</a></div>
       <ul class="cards nested">
-        <li><a class="card" href="dialogs/sql-editor.html"><div class="cmd-name">SQL Editor<span class="badge badge-dialog">ダイアログ</span></div><div class="cmd-desc"><code>srcType</code> が sql / table / csvq のとき、<code>src</code> の ⚙ メニューの edit から開く。SQL ファイル・テーブル名リストの編集</div></a></li>
-        <li><a class="card" href="dialogs/xlsx-schema.html"><div class="cmd-name">Xlsx Schema<span class="badge badge-dialog">ダイアログ</span></div><div class="cmd-desc"><code>srcType</code> が xls / xlsx のとき、<code>xlsxSchema</code> の ⚙ メニューの edit から開く。Excel のシート・セルからテーブルを読み込む定義</div></a>
+        <li><a class="card" href="dialogs/sql-editor.html"><div class="cmd-name">Edit SQL / Edit Table Definition<span class="badge badge-dialog">ダイアログ</span></div><div class="cmd-desc"><code>srcType</code> が sql / table / csvq のとき、<code>src</code> の ⋮ メニューの edit から開く。SQL ファイル・テーブル名リストの編集</div></a></li>
+        <li><a class="card" href="dialogs/xlsx-schema.html"><div class="cmd-name">Xlsx Schema<span class="badge badge-dialog">ダイアログ</span></div><div class="cmd-desc"><code>srcType</code> が xls / xlsx のとき、<code>xlsxSchema</code> の ⋮ メニューの edit から開く。Excel のシート・セルからテーブルを読み込む定義</div></a>
           <ul class="cards nested">
             <li><a class="card" href="dialogs/xlsx-row-setting.html"><div class="cmd-name">Xlsx Row Setting<span class="badge badge-dialog">ダイアログ</span></div><div class="cmd-desc">Xlsx Schema の Rows Mapping Tables の行の edit から開く。行方向に並んだデータの抽出設定</div></a></li>
             <li><a class="card" href="dialogs/xlsx-cell-setting.html"><div class="cmd-name">Xlsx Cell Setting<span class="badge badge-dialog">ダイアログ</span></div><div class="cmd-desc">Xlsx Schema の Random Cell Mapping Tables の行の edit から開く。任意のセル位置から値を拾う設定</div></a></li>
           </ul></li>
-        <li><a class="card" href="dialogs/xlsx-schema-generate.html"><div class="cmd-name">Xlsx Schema Generate<span class="badge badge-dialog">ダイアログ</span></div><div class="cmd-desc"><code>xlsxSchema</code> の ⚙ メニューの generate から開く。既存データセットから Xlsx Schema の雛型を生成</div></a></li>
+        <li><a class="card" href="dialogs/xlsx-schema-generate.html"><div class="cmd-name">Generate Xlsx Schema<span class="badge badge-dialog">ダイアログ</span></div><div class="cmd-desc"><code>xlsxSchema</code> の ⋮ メニューの generate から開く。既存データセットから Xlsx Schema の雛型を生成</div></a></li>
         <li><a class="card" href="sections/traversal.html"><div class="cmd-name">Traversal<span class="badge badge-section">セクション</span></div><div class="cmd-desc">traversal option。ディレクトリを読み込むときの走査条件</div></a></li>
         <li><a class="card" href="sections/data-load.html"><div class="cmd-name">Data Load<span class="badge badge-section">セクション</span></div><div class="cmd-desc">data load option。ヘッダ行・開始行・ファイル情報カラムなど、読み込み時の挙動</div></a></li>
-        <li><a class="card" href="dialogs/dataset-settings.html"><div class="cmd-name">Dataset Settings<span class="badge badge-dialog">ダイアログ</span></div><div class="cmd-desc"><code>setting</code> の ⚙ メニューの edit から開く。主キー・カラム選択・フィルタなど、テーブルごとの設定ファイルの書式</div></a>
+        <li><a class="card" href="dialogs/dataset-settings.html"><div class="cmd-name">Dataset Settings<span class="badge badge-dialog">ダイアログ</span></div><div class="cmd-desc"><code>setting</code> の ⋮ メニューの edit から開く。主キー・カラム選択・フィルタなど、テーブルごとの設定ファイルの書式</div></a>
           <ul class="cards nested">
             <li><a class="card" href="dialogs/dataset-setting.html"><div class="cmd-name">Dataset Setting<span class="badge badge-dialog">ダイアログ</span></div><div class="cmd-desc">Dataset Settings の行の edit から開く。テーブルごとの設定の編集と JEXL 式の書き方</div></a></li>
           </ul></li>
-        <li><a class="card" href="dialogs/dataset-setting-generate.html"><div class="cmd-name">Dataset Setting Generate<span class="badge badge-dialog">ダイアログ</span></div><div class="cmd-desc"><code>setting</code> の ⚙ メニューの generate から開く。既存データセットから Dataset Settings の雛型を生成</div></a></li>
+        <li><a class="card" href="dialogs/dataset-setting-generate.html"><div class="cmd-name">Generate Dataset Setting<span class="badge badge-dialog">ダイアログ</span></div><div class="cmd-desc"><code>setting</code> の ⋮ メニューの generate から開く。既存データセットから Dataset Settings の雛型を生成</div></a></li>
       </ul></li>
     <li><a class="card" href="sections/result-form.html"><div class="cmd-name">Result Form<span class="badge badge-section">セクション</span></div><div class="cmd-desc">出力先と出力形式の指定。Convert / Compare で使う</div></a>
       <div class="types">resultType: <a href="sections/result-form/types/csv.html">csv</a><a href="sections/result-form/types/xlsx.html">xls / xlsx</a><a href="sections/result-form/types/table.html">table</a><a href="sections/result-form/types/format.html">format</a><a href="sections/result-form/types/fixed.html">fixed</a></div>
       <ul class="cards nested">
-        <li><a class="card" href="dialogs/fixed-column-def.html"><div class="cmd-name">Fixed Column Def<span class="badge badge-dialog">ダイアログ</span></div><div class="cmd-desc"><code>resultType</code> が fixed のとき、<code>fixedColumnDef</code> の ⚙ メニューの edit から開く。固定長出力のカラムごとの幅・寄せ方向・埋める文字の編集</div></a></li>
-        <li><a class="card" href="dialogs/fixed-column-def-generate.html"><div class="cmd-name">Fixed Column Def Generate<span class="badge badge-dialog">ダイアログ</span></div><div class="cmd-desc"><code>resultType</code> が fixed のとき、<code>fixedColumnDef</code> の ⚙ メニューの generate から開く。固定長出力のカラム幅定義の雛型を生成</div></a></li>
+        <li><a class="card" href="dialogs/fixed-column-def.html"><div class="cmd-name">Fixed Column Def<span class="badge badge-dialog">ダイアログ</span></div><div class="cmd-desc"><code>resultType</code> が fixed のとき、<code>fixedColumnDef</code> の ⋮ メニューの edit から開く。固定長出力のカラムごとの幅・寄せ方向・埋める文字の編集</div></a></li>
+        <li><a class="card" href="dialogs/fixed-column-def-generate.html"><div class="cmd-name">Generate Fixed Column Def<span class="badge badge-dialog">ダイアログ</span></div><div class="cmd-desc"><code>resultType</code> が fixed のとき、<code>fixedColumnDef</code> の ⋮ メニューの generate から開く。固定長出力のカラム幅定義の雛型を生成</div></a></li>
       </ul></li>
     <li><a class="card" href="sections/jdbc.html"><div class="cmd-name">JDBC<span class="badge badge-section">セクション</span></div><div class="cmd-desc">データベースへの接続設定。Dataset Load Form・Result Form・Run で、DB を読み書きするときに表示される</div></a></li>
     <li><a class="card" href="sections/template.html"><div class="cmd-name">Template<span class="badge badge-section">セクション</span></div><div class="cmd-desc">template option。StringTemplate 4 によるテンプレート処理の設定</div></a>
       <ul class="cards nested">
-        <li><a class="card" href="dialogs/template-edit.html"><div class="cmd-name">Template File Edit<span class="badge badge-dialog">ダイアログ</span></div><div class="cmd-desc">テンプレートの欄の ⚙ メニューの edit から開く。Generate の <code>template</code> などに指定するテンプレートの編集</div></a></li>
+        <li><a class="card" href="dialogs/template-edit.html"><div class="cmd-name">Template File Edit<span class="badge badge-dialog">ダイアログ</span></div><div class="cmd-desc">テンプレートの欄の ⋮ メニューの edit から開く。Generate の <code>template</code> などに指定するテンプレートの編集</div></a></li>
         <li><a class="card" href="reference/st4.html"><div class="cmd-name">StringTemplate 4 書式リファレンス<span class="badge badge-reference">リファレンス</span></div><div class="cmd-desc">テンプレートの構文と書式指定子</div></a></li>
       </ul></li>
   </ul>
@@ -82,17 +82,17 @@
     <li><a class="card" href="dialogs/txt-template-generate.html"><div class="cmd-name">Scaffold<span class="badge badge-dialog">ダイアログ</span></div><div class="cmd-desc"><code>generateType</code> が txt のとき、unit の上の Scaffold ボタンから開く。組み込みテンプレートを書き出してカスタマイズの出発点にする</div></a></li>
     <li><a class="card" href="sections/jxls.html"><div class="cmd-name">Jxls<span class="badge badge-section">セクション</span></div><div class="cmd-desc"><code>generateType</code> が xlsx / xls のときに表示される。Excel テンプレートの設定</div></a>
       <ul class="cards nested">
-        <li><a class="card" href="dialogs/xlsx-template-generate.html"><div class="cmd-name">Xlsx Template Generate<span class="badge badge-dialog">ダイアログ</span></div><div class="cmd-desc"><code>template</code> の ⚙ メニューの generate から開く。既存データセットから jxls テンプレートの雛型を生成</div></a></li>
+        <li><a class="card" href="dialogs/xlsx-template-generate.html"><div class="cmd-name">Generate Xlsx Template<span class="badge badge-dialog">ダイアログ</span></div><div class="cmd-desc"><code>template</code> の ⋮ メニューの generate から開く。既存データセットから jxls テンプレートの雛型を生成</div></a></li>
       </ul></li>
   </ul>
   <h4>Compare</h4>
   <ul class="cards">
-    <li><a class="card" href="dialogs/compare-key-settings.html"><div class="cmd-name">Compare Key Settings<span class="badge badge-dialog">ダイアログ</span></div><div class="cmd-desc"><code>targetType</code> が data のとき、compare の <code>setting</code> の ⚙ メニューの edit（generate）から開く。テーブルごとの比較キーの編集</div></a></li>
-    <li><a class="card" href="reference/image.html"><div class="cmd-name">Image Option<span class="badge badge-section">セクション</span></div><div class="cmd-desc"><code>targetType</code> が image / pdf のときに表示される。画像・PDF 比較のしきい値・除外領域・描画の設定</div></a></li>
+    <li><a class="card" href="dialogs/compare-key-settings.html"><div class="cmd-name">Compare Key Settings<span class="badge badge-dialog">ダイアログ</span></div><div class="cmd-desc"><code>targetType</code> が data のとき、compare の <code>setting</code> の ⋮ メニューの edit（generate）から開く。テーブルごとの比較キーの編集</div></a></li>
+    <li><a class="card" href="sections/image.html"><div class="cmd-name">Image Option<span class="badge badge-section">セクション</span></div><div class="cmd-desc"><code>targetType</code> が image / pdf のときに表示される。画像・PDF 比較のしきい値・除外領域・描画の設定</div></a></li>
   </ul>
   <h4>Parameterize</h4>
   <ul class="cards">
-    <li><a class="card" href="dialogs/parameterize-template-edit.html"><div class="cmd-name">Edit Parameterize Template<span class="badge badge-dialog">ダイアログ</span></div><div class="cmd-desc"><code>template</code> の ⚙ メニューの edit から開く。繰り返し実行するコマンドのオプションを書くテンプレートの編集</div></a></li>
+    <li><a class="card" href="dialogs/parameterize-template-edit.html"><div class="cmd-name">Edit Parameterize Template<span class="badge badge-dialog">ダイアログ</span></div><div class="cmd-desc"><code>template</code> の ⋮ メニューの edit から開く。繰り返し実行するコマンドのオプションを書くテンプレートの編集</div></a></li>
   </ul>
 </body>
 </html>

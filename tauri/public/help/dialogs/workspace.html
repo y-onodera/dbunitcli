@@ -72,7 +72,7 @@
   <table>
     <tr><th>画面要素</th><th>読み書きする場所</th></tr>
     <tr><td>サイドバー</td><td><code>option/&lt;command&gt;/*.txt</code>（保存済みオプションの一覧）</td></tr>
-    <tr><td>フォームの各設定ダイアログ</td><td><code>resources/</code> 配下（Dataset Settings・テンプレート・JDBC・Xlsx Schema・固定長カラム定義・SQL Editor で編集する SQL / テーブル名一覧）</td></tr>
+    <tr><td>フォームの各設定ダイアログ</td><td><code>resources/</code> 配下（Dataset Settings・テンプレート・JDBC・Xlsx Schema・固定長カラム定義・Edit SQL / Edit Table Definition で編集する SQL / テーブル名一覧）</td></tr>
     <tr><td>フォームの相対パス</td><td>入力ファイルは Dataset Base、出力先は Result Base、それ以外は Workspace を基準に解決</td></tr>
     <tr><td>Exec / Save Shell</td><td>Env ファイル（<code>${env.変数名}</code> の置き換え）</td></tr>
   </table>
@@ -103,7 +103,7 @@
     <tr><th>操作</th><th>動作</th><th>Workspace への影響</th></tr>
     <tr><td>名前</td><td>保存済みオプションを読み込んでフォームに表示</td><td>読み込みのみ</td></tr>
     <tr><td>add</td><td>空の保存済みオプション <code>new item</code> を追加（同名があれば <code>new item(1)</code> のように連番）</td><td><code>option/&lt;command&gt;/new item.txt</code> を作成</td></tr>
-    <tr><td>⚙（設定）</td><td>名前の横のボタン。次の操作メニューを開く</td><td>—</td></tr>
+    <tr><td>⋮</td><td>名前の横のボタン。次の操作メニューを開く</td><td>—</td></tr>
     <tr><td>Delete</td><td>保存済みオプションを削除</td><td><code>option/&lt;command&gt;/&lt;name&gt;.txt</code> を削除</td></tr>
     <tr><td>rename</td><td>入力欄に新しい名前を入れて確定ボタンで変更（同名があれば連番）</td><td>ファイル名を変更</td></tr>
     <tr><td>Copy</td><td>保存済みオプションを複製（<code>&lt;name&gt;(1)</code> のように連番）</td><td>複製したファイルを作成</td></tr>

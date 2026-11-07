@@ -11,7 +11,7 @@
   <p>Generate などで使用するテンプレートファイル（<a href="../sections/template.html">StringTemplate 4</a>）を作成・編集するダイアログです。</p>
 
   <h2 id="section-simple">シンプルな使い方</h2>
-  <p>テンプレートの欄の ⚙ メニューの edit で開き、テンプレートを書いて保存します。</p>
+  <p>テンプレートの欄の ⋮ メニューの edit で開き、テンプレートを書いて保存します。</p>
   <p>例: Generate（<code>generateType=txt</code>、<code>unit=table</code>）で、テーブルごとにカラム名の一覧を出力するテンプレートを作ります。</p>
   <pre>本文:
   -- $param.tableName$ : $param.columns:{c | $c.columnName$}; separator=", "$
@@ -30,7 +30,7 @@
   </ul>
 
   <h2 id="section-open">開き方</h2>
-  <p>テンプレートの欄の ⚙ メニューの edit から開きます。テキストボックスに Workspace のテンプレートとして存在するファイル名が入力されている場合はその内容が読み込まれ、空または存在しない名前の場合は空のエディタが開きます。</p>
+  <p>テンプレートの欄の ⋮ メニューの edit から開きます。テキストボックスに Workspace のテンプレートとして存在するファイル名が入力されている場合はその内容が読み込まれ、空または存在しない名前の場合は空のエディタが開きます。</p>
 
   <h2 id="section-content">記述内容</h2>
   <p>StringTemplate 4 のテンプレートを書きます。参照できる変数は <a href="../commands/generate/types/txt.html">generateType: txt</a>、書き方は <a href="../reference/st4.html">StringTemplate 4 書式リファレンス</a> を参照してください。</p>
