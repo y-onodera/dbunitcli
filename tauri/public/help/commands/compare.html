@@ -111,13 +111,13 @@
   <table>
     <tr><th>項目</th><th>説明</th><th>デフォルト</th></tr>
     <tr><td>targetType</td><td>比較対象の種類（下記「targetType 一覧」を参照）</td><td><code>data</code></td></tr>
-    <tr><td>setting</td><td>比較の設定ファイル（<a href="../dialogs/dataset-settings.html">Dataset Settings</a> 形式）。主キー・比較から除くカラム・並び順などをテーブルごとに指定する。<code>data</code> のときだけ使う。⚙ メニューの edit で、比較キーを <a href="../dialogs/compare-key-settings.html">Compare Key Settings</a> で編集できる</td><td>（空）</td></tr>
+    <tr><td>setting</td><td>比較の設定ファイル（<a href="../dialogs/dataset-settings.html">Dataset Settings</a> 形式）。主キー・比較から除くカラム・並び順などをテーブルごとに指定する。<code>data</code> のときだけ使う。⋮ メニューの edit で、比較キーを <a href="../dialogs/compare-key-settings.html">Compare Key Settings</a> で編集できる</td><td>（空）</td></tr>
     <tr><td>settingEncoding</td><td><code>setting</code> の文字コード</td><td>システムデフォルト</td></tr>
     <tr><td>oldData</td><td>比較元（旧）のデータセット。入力の形式（Excel・DB テーブルなど）や文字コードを変えられる</td><td>—</td></tr>
     <tr><td>newData</td><td>比較先（新）のデータセット</td><td>—</td></tr>
     <tr><td>expectData</td><td>期待値のデータセット。省略すると期待値との検証をしない（下記「expectData による検証」を参照）</td><td>（空）</td></tr>
     <tr><td>createPatchSql</td><td>旧データを新データへ補正するパッチ SQL を出力する。<code>data</code> のときだけ使う</td><td>OFF</td></tr>
-    <tr><td>imageOption</td><td>画像比較のしきい値・除外領域など（<a href="../reference/image.html">Image Option</a>）。<code>image</code> / <code>pdf</code> のときだけ表示</td><td>—</td></tr>
+    <tr><td>imageOption</td><td>画像比較のしきい値・除外領域など（<a href="../sections/image.html">Image Option</a>）。<code>image</code> / <code>pdf</code> のときだけ表示</td><td>—</td></tr>
     <tr><td>convertResult</td><td>比較結果の出力形式と出力先。Excel や DB テーブルへの出力に変えられる（<a href="../sections/result-form.html">Result Form</a>）</td><td>—</td></tr>
   </table>
   <p><code>oldData</code> / <code>newData</code> / <code>expectData</code> の指定方法は <a href="../sections/dataset-load-form.html">Dataset Load Form</a> を参照してください。</p>

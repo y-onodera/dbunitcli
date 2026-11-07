@@ -86,7 +86,7 @@ export function CompareForm(prop: {
 				<SectionFieldset>
 					<SectionLegend
 						title="image"
-						command="reference/image"
+						command="sections/image"
 						label="Image Option"
 					/>
 					<ImageOptionFormSection imageOption={imageOption} />

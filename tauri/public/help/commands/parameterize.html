@@ -32,7 +32,7 @@
   1 行目: srcData の src = data/202609、result = out/202609 で Convert を実行
   2 行目: srcData の src = data/202610、result = out/202610 で Convert を実行</pre>
   <p>テンプレートの <code>$param.列名$</code> が行ごとの値に置き換わり、行数分だけコマンドが実行されます。</p>
-  <p>テンプレートとパラメータデータは手で書かなくても作れます。元にするコマンドを Save し、サイドバーの ⚙ から Parameterize を選ぶと、今の値を 1 行だけ入れたパラメータデータとテンプレートが作られます（<a href="../guide/getting-started.html">基本的な使い方</a> の「6. Parameterize で繰り返し実行する」を参照）。</p>
+  <p>テンプレートとパラメータデータは手で書かなくても作れます。元にするコマンドを Save し、サイドバーの ⋮ から Parameterize を選ぶと、今の値を 1 行だけ入れたパラメータデータとテンプレートが作られます（<a href="../guide/getting-started.html">基本的な使い方</a> の「6. Parameterize で繰り返し実行する」を参照）。</p>
 
   <h2 id="section-options">変更できる設定</h2>
   <table>
@@ -43,7 +43,7 @@
     <tr><td>parallel</td><td>同時に実行するコマンド数（下記「並列実行」を参照）</td><td>（空）＝ 逐次</td></tr>
     <tr><td>cmd（必須）</td><td>実行するコマンド（<a href="compare.html">Compare</a> / <a href="convert.html">Convert</a> / <a href="generate.html">Generate</a> / <a href="run.html">Run</a>）。<code>$param.列名$</code> で行ごとに切り替えることもできる</td><td>—</td></tr>
     <tr><td>cmdParam</td><td>コマンドのオプションを書いたファイルのパス。パスに <code>$param.列名$</code> を書くと行ごとに別のファイルを使える（下記「応用例」を参照）。<code>template</code> と同時には指定できない</td><td>（空）</td></tr>
-    <tr><td>template</td><td>コマンドのオプションを書いたテンプレートファイル（<a href="../dialogs/parameterize-template-edit.html">Edit Parameterize Template</a> で編集）。<code>option/parameterize/template</code> のファイルを候補から選べ、⚙ メニューの delete で削除もできる。<code>cmdParam</code> と同時には指定できない</td><td>（空）</td></tr>
+    <tr><td>template</td><td>コマンドのオプションを書いたテンプレートファイル（<a href="../dialogs/parameterize-template-edit.html">Edit Parameterize Template</a> で編集）。<code>option/parameterize/template</code> のファイルを候補から選べ、⋮ メニューの delete で削除もできる。<code>cmdParam</code> と同時には指定できない</td><td>（空）</td></tr>
     <tr><td>paramData</td><td>パラメータデータ。Excel や DB テーブルなど、CSV 以外の形式にも変えられる（<a href="../sections/dataset-load-form.html">Dataset Load Form</a>）</td><td>—</td></tr>
     <tr><td>templateOption</td><td>テンプレート処理の設定。変数の区切り文字などを変えられる（<a href="../sections/template.html">Template</a>）</td><td>—</td></tr>
   </table>

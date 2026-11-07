@@ -20,7 +20,7 @@ const dialogConfig = {
 	formId: "xlsxTemplateGenerateForm",
 	name: "xlsxTemplateGenerate",
 	command: "dialogs/xlsx-template-generate",
-	label: "Xlsx Template Generate",
+	label: "Generate Xlsx Template",
 	title: "Generate Xlsx Template",
 };
 

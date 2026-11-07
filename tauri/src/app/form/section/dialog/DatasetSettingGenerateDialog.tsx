@@ -29,7 +29,7 @@ function datasetSettingGenerateConfig(
 		formId: "datasetSettingGenerateForm",
 		name: "datasetSettingGenerate",
 		command: "dialogs/dataset-setting-generate",
-		label: "Dataset Setting Generate",
+		label: "Generate Dataset Setting",
 		title: "Generate Dataset Setting",
 		endpoint: "dataset-setting/generate",
 		build: DatasetSettings.build,

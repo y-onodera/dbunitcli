@@ -8,7 +8,7 @@
 <body>
   <p><a href="../index.html">&larr; ヘルプ一覧に戻る</a></p>
   <h1>Fixed Column Def</h1>
-  <p>固定長ファイルに出力するときの、カラムごとの幅・寄せ方向・埋める文字の定義（Fixed Column Def）を編集するダイアログです。<a href="../sections/result-form/types/fixed.html">resultType: fixed</a> のときに表示される <code>fixedColumnDef</code> の ⚙ メニューの edit から開きます。</p>
+  <p>固定長ファイルに出力するときの、カラムごとの幅・寄せ方向・埋める文字の定義（Fixed Column Def）を編集するダイアログです。<a href="../sections/result-form/types/fixed.html">resultType: fixed</a> のときに表示される <code>fixedColumnDef</code> の ⋮ メニューの edit から開きます。</p>
 
   <h2 id="section-simple">シンプルな使い方</h2>
   <p>出力するカラムを上から順に追加し、カラムごとの幅を指定して保存します。</p>
@@ -30,12 +30,12 @@
   <ul>
     <li>値が幅より長い場合は、幅の位置で切り捨てられる</li>
     <li>定義に無いカラムは出力されない</li>
-    <li>既存のデータセットからカラムの一覧を作りたいときは、⚙ メニューの generate で雛型を作れる（<a href="fixed-column-def-generate.html">Fixed Column Def Generate</a>）</li>
+    <li>既存のデータセットからカラムの一覧を作りたいときは、⋮ メニューの generate で雛型を作れる（<a href="fixed-column-def-generate.html">Generate Fixed Column Def</a>）</li>
   </ul>
 
   <h2 id="section-open">開き方</h2>
-  <p><code>fixedColumnDef</code> の ⚙ メニューの edit から開きます。テキストボックスの値のファイル名が <code>&lt;workspace&gt;/resources/fixed-column-def</code> にあればその内容が読み込まれ、空の場合は空の定義が 1 行ある状態で開きます。</p>
-  <p>同じメニューの generate からは、既存データセットのカラム構成をもとに雛型を作れます（<a href="fixed-column-def-generate.html">Fixed Column Def Generate</a>）。生成結果はこのダイアログに反映された状態で開きます。</p>
+  <p><code>fixedColumnDef</code> の ⋮ メニューの edit から開きます。テキストボックスの値のファイル名が <code>&lt;workspace&gt;/resources/fixed-column-def</code> にあればその内容が読み込まれ、空の場合は空の定義が 1 行ある状態で開きます。</p>
+  <p>同じメニューの generate からは、既存データセットのカラム構成をもとに雛型を作れます（<a href="fixed-column-def-generate.html">Generate Fixed Column Def</a>）。生成結果はこのダイアログに反映された状態で開きます。</p>
 
   <h2 id="section-content">設定項目</h2>
   <p>Column Definitions の表の 1 行が、出力ファイルの 1 カラムです。表の上から順に、固定長ファイルの左からカラムが並びます。行の edit で開く Column Def Setting で、次の項目を設定します。</p>
@@ -62,7 +62,7 @@
   <h2 id="section-related">関連</h2>
   <ul>
     <li><a href="../sections/result-form/types/fixed.html">resultType: fixed</a> — この定義を使って固定長で出力する</li>
-    <li><a href="fixed-column-def-generate.html">Fixed Column Def Generate</a> — 既存データセットから雛型を生成する</li>
+    <li><a href="fixed-column-def-generate.html">Generate Fixed Column Def</a> — 既存データセットから雛型を生成する</li>
     <li><a href="../commands/generate/types/fixedColumnDef.html">generateType: fixedColumnDef</a> — Generate で雛型を作る</li>
   </ul>
 </body>

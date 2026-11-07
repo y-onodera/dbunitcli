@@ -30,7 +30,7 @@
   <ul>
     <li>新しく作る場合は add を押します。<code>new item</code> という名前の保存済みオプションが作られます</li>
     <li>既存のものを使う場合は名前をクリックします。フォームに内容が表示され、ヘッダ右側に <code>コマンド: 名前</code> が表示されます</li>
-    <li>既存のものを元に別のものを作る場合は、⚙ の Copy で複製してから開きます</li>
+    <li>既存のものを元に別のものを作る場合は、⋮ の Copy で複製してから開きます</li>
   </ul>
   <p>各コマンドでできることは、<a href="../index.html">ヘルプ一覧</a>の「コマンド」から各ページを参照してください。</p>
 
@@ -39,12 +39,12 @@
   <ul>
     <li>時間がかかる処理は、実行中に Abandoned を押すと中断できます</li>
     <li>SQL やテンプレートに渡す値は Edit Parameters (-P) で入力できます。入力した -P 値は Save で一緒に保存されます（<a href="../dialogs/parameters.html">Parameters (-P)</a> を参照）</li>
-    <li>入力欄の × ・候補・⚙ メニューの使い方は <a href="../reference/common.html">画面共通の操作</a> を参照してください。⚙ メニューの file / dir で選んだパスは、入力欄の下に表示される基準ディレクトリからの相対パスで入ります</li>
+    <li>入力欄の × ・候補・⋮ メニューの使い方は <a href="../reference/common.html">画面共通の操作</a> を参照してください。⋮ メニューの file / dir で選んだパスは、入力欄の下に表示される基準ディレクトリからの相対パスで入ります</li>
     <li>あとで別の環境やデータで使い回す予定があるなら、この段階でパスを相対パスにし、接続先などを <code>${env.変数名}</code> にしておきます（<a href="#step-reuse">7.</a> を参照）</li>
   </ul>
 
   <h2 id="step-save">4. Save で保存する</h2>
-  <p>オプションが決まったら、フッターの Save を押します。フォームの内容と -P 値が <code>option/&lt;command&gt;/&lt;name&gt;.txt</code> に上書き保存されます。名前は、サイドバーの ⚙ から rename で分かりやすいものに変えてください。</p>
+  <p>オプションが決まったら、フッターの Save を押します。フォームの内容と -P 値が <code>option/&lt;command&gt;/&lt;name&gt;.txt</code> に上書き保存されます。名前は、サイドバーの ⋮ から rename で分かりやすいものに変えてください。</p>
 
   <h2 id="step-shell">5. Save Shell で .bat を保存する</h2>
   <p>GUI を使わずに別のシェルやタスクスケジューラから実行したい場合は、フッターの Save Shell を押します。</p>
@@ -58,7 +58,7 @@
   <p>同じコマンドを値だけ変えて何回も実行したい場合は、Parameterize を使います。</p>
   <ol>
     <li>元にするオプションを Save しておきます（Parameterize は保存済みの内容から作られます）</li>
-    <li>サイドバーでその名前の ⚙ を押し、Parameterize を選びます。次の 3 つが作られ、Parameterize のフォームが開きます
+    <li>サイドバーでその名前の ⋮ を押し、Parameterize を選びます。次の 3 つが作られ、Parameterize のフォームが開きます
       <ul>
         <li>テンプレート <code>option/parameterize/template/&lt;name&gt;.txt</code>：各オプションが <code>-オプション名=$param.オプション名$</code> の形になります</li>
         <li>パラメータデータの CSV <code>&lt;workspace&gt;/&lt;name&gt;.csv</code>：今の値が 1 行だけ入っています</li>

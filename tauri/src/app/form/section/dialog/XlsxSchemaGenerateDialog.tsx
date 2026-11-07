@@ -17,7 +17,7 @@ const xlsxSchemaGenerateConfig: ModelGenerateConfig<
 	formId: "xlsxSchemaGenerateForm",
 	name: "xlsxSchemaGenerate",
 	command: "dialogs/xlsx-schema-generate",
-	label: "Xlsx Schema Generate",
+	label: "Generate Xlsx Schema",
 	title: "Generate Xlsx Schema",
 	endpoint: "xlsx-schema/generate",
 	build: XlsxSchema.build,

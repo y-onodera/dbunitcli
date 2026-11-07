@@ -13,7 +13,7 @@
   <h2 id="section-target">読み込み対象</h2>
   <table>
     <tr><th>項目</th><th>内容</th></tr>
-    <tr><td>src</td><td>テーブル名を 1 行に 1 つずつ書いたテキストファイル、またはそのファイルを置いたディレクトリ（<code>src</code> はテーブル名ではなく、テーブル名の一覧ファイル）。相対パスは Workspace の <code>resources/table</code>、Dataset Base、Workspace の順に探す（<a href="../../../dialogs/sql-editor.html">SQL Editor</a> で作ると <code>resources/table</code> に保存される）</td></tr>
+    <tr><td>src</td><td>テーブル名を 1 行に 1 つずつ書いたテキストファイル、またはそのファイルを置いたディレクトリ（<code>src</code> はテーブル名ではなく、テーブル名の一覧ファイル）。相対パスは Workspace の <code>resources/table</code>、Dataset Base、Workspace の順に探す（<a href="../../../dialogs/sql-editor.html">Edit Table Definition</a> で作ると <code>resources/table</code> に保存される）</td></tr>
     <tr><td>テーブル名</td><td>一覧ファイルに書いたテーブル名</td></tr>
     <tr><td>接続先</td><td><a href="../../jdbc.html">JDBC</a> の設定が必須</td></tr>
   </table>
@@ -54,7 +54,7 @@ JDBC 接続先:
     <li><a href="../../data-load.html">Data Load</a> の <code>headerName</code> を指定すると、取得した列の先頭から順に列名を置き換えます。<code>headerName</code> が取得した列より少ない場合、超えた列は無視されます。多い場合、余った列名の列を追加し値は空文字になります</li>
     <li><a href="../../data-load.html">Data Load</a> の <code>addFileInfo</code> を ON にすると、テーブル名の一覧ファイルのパス・ファイル名を各行に追加します（<code>$SHEET_NAME</code> は空文字）</li>
     <li>テーブル名の一覧ファイルには、空行やコメントを書かないでください</li>
-    <li>テーブル名の一覧ファイルは <a href="../../../dialogs/sql-editor.html">SQL Editor</a> で編集できます</li>
+    <li>テーブル名の一覧ファイルは <a href="../../../dialogs/sql-editor.html">Edit Table Definition</a> で編集できます</li>
   </ul>
 </body>
 </html>

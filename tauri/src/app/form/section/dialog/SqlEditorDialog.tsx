@@ -111,7 +111,7 @@ function Dialog(props: SqlEditorDialogProps & { value: string }) {
 		<SettingDialog
 			title={table ? "Edit Table Definition" : "Edit SQL"}
 			helpCommand="dialogs/sql-editor"
-			helpLabel="SQL Editor"
+			helpLabel="Edit SQL / Edit Table Definition"
 			maximizable
 			handleDialogClose={props.handleDialogClose}
 			fileName={props.fileName}
