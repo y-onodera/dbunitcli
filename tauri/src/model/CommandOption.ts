@@ -7,6 +7,8 @@ export type Attribute = {
 	required: boolean;
 	selectOption: string[];
 	defaultPath: DefaultPath;
+	/** 未入力時に使われる値（他の入力や実行環境で決まる場合はその説明） */
+	defaultValue?: string;
 };
 export type CommandOption = {
 	name: string;

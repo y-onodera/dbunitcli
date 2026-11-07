@@ -49,6 +49,26 @@ describe("Textのクリアボタン", () => {
 	});
 });
 
+describe("Textのプレースホルダー", () => {
+	it("未入力時に使われる値をプレースホルダーに表示する", () => {
+		const element = textElement("");
+		render(
+			<Text
+				prefix="src"
+				element={{
+					...element,
+					attribute: { ...element.attribute, defaultValue: "MS932" },
+				}}
+			/>,
+		);
+
+		expect(screen.getByLabelText("-src.encoding")).toHaveAttribute(
+			"placeholder",
+			"MS932",
+		);
+	});
+});
+
 describe("Textのchildrenに渡すsetPath", () => {
 	it("ボタン等から値を変えたときも入力を更新して変更を通知する", async () => {
 		const handleValueChange = vi.fn();

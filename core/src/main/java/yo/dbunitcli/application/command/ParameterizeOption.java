@@ -100,7 +100,7 @@ public record ParameterizeOption(
                 .put("-unit", this.unit, ParameterUnit.class)
                 .putFlag("-parameterize", this.parameterize)
                 .putFlag("-ignoreFail", this.ignoreFail)
-                .put("-parallel", this.parallel)
+                .putWithDefault("-parallel", this.parallel, "1")
                 .put("-cmd", this.cmd)
                 .put("-cmdParam", this.cmdParam)
                 .putFile("-template", this.template, BaseDir.PARAMETERIZE_TEMPLATE)

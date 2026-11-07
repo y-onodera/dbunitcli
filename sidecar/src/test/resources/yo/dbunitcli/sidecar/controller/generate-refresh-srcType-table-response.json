@@ -49,7 +49,8 @@
     "attribute": {
       "type": "TEXT",
       "required": false,
-      "defaultPath": "WORKSPACE"
+      "defaultPath": "WORKSPACE",
+      "defaultValue": "(auto: CPU cores)"
     },
     "value": ""
   },
@@ -67,18 +68,20 @@
     "attribute": {
       "type": "TEXT",
       "required": false,
-      "defaultPath": "WORKSPACE"
+      "defaultPath": "WORKSPACE",
+      "defaultValue": "(parameter name)"
     },
-    "value": "result"
+    "value": ""
   },
   "outputEncoding": {
     "name": "outputEncoding",
     "attribute": {
       "type": "TEXT",
       "required": false,
-      "defaultPath": "WORKSPACE"
+      "defaultPath": "WORKSPACE",
+      "defaultValue": "UTF-8"
     },
-    "value": "UTF-8"
+    "value": ""
   },
   "srcData": {
     "prefix": "src",
@@ -117,9 +120,10 @@
       "attribute": {
         "type": "TEXT",
         "required": false,
-        "defaultPath": "WORKSPACE"
+        "defaultPath": "WORKSPACE",
+        "defaultValue": "UTF-8"
       },
-      "value": "UTF-8"
+      "value": ""
     },
     "recursive": {
       "name": "recursive",
@@ -234,27 +238,30 @@
       "attribute": {
         "type": "TEXT",
         "required": false,
-        "defaultPath": "WORKSPACE"
+        "defaultPath": "WORKSPACE",
+        "defaultValue": "param"
       },
-      "value": "param"
+      "value": ""
     },
     "templateVarStart": {
       "name": "templateVarStart",
       "attribute": {
         "type": "TEXT",
         "required": false,
-        "defaultPath": "WORKSPACE"
+        "defaultPath": "WORKSPACE",
+        "defaultValue": "$"
       },
-      "value": "$"
+      "value": ""
     },
     "templateVarStop": {
       "name": "templateVarStop",
       "attribute": {
         "type": "TEXT",
         "required": false,
-        "defaultPath": "WORKSPACE"
+        "defaultPath": "WORKSPACE",
+        "defaultValue": "$"
       },
-      "value": "$"
+      "value": ""
     },
     "setting": {
       "name": "setting",
@@ -270,9 +277,10 @@
       "attribute": {
         "type": "TEXT",
         "required": false,
-        "defaultPath": "WORKSPACE"
+        "defaultPath": "WORKSPACE",
+        "defaultValue": "UTF-8"
       },
-      "value": "UTF-8"
+      "value": ""
     },
     "settingTargetOnly": {
       "name": "settingTargetOnly",
@@ -327,9 +335,10 @@
       "attribute": {
         "type": "TEXT",
         "required": false,
-        "defaultPath": "WORKSPACE"
+        "defaultPath": "WORKSPACE",
+        "defaultValue": "UTF-8"
       },
-      "value": "UTF-8"
+      "value": ""
     },
     "templateGroup": {
       "name": "templateGroup",
@@ -345,27 +354,30 @@
       "attribute": {
         "type": "TEXT",
         "required": false,
-        "defaultPath": "WORKSPACE"
+        "defaultPath": "WORKSPACE",
+        "defaultValue": "param"
       },
-      "value": "param"
+      "value": ""
     },
     "templateVarStart": {
       "name": "templateVarStart",
       "attribute": {
         "type": "TEXT",
         "required": false,
-        "defaultPath": "WORKSPACE"
+        "defaultPath": "WORKSPACE",
+        "defaultValue": "$"
       },
-      "value": "$"
+      "value": ""
     },
     "templateVarStop": {
       "name": "templateVarStop",
       "attribute": {
         "type": "TEXT",
         "required": false,
-        "defaultPath": "WORKSPACE"
+        "defaultPath": "WORKSPACE",
+        "defaultValue": "$"
       },
-      "value": "$"
+      "value": ""
     }
   }
 }

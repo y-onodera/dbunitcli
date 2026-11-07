@@ -20,6 +20,7 @@ import yo.dbunitcli.dataset.IDataSetConverter;
 import yo.dbunitcli.dataset.ResultType;
 import yo.dbunitcli.dataset.converter.DataSetConverterLoader;
 import yo.dbunitcli.dataset.producer.ComparableDataSetLoader;
+import yo.dbunitcli.dataset.producer.ComparableFixedColumnDefMetaDataProducer;
 import yo.dbunitcli.resource.FileResources;
 
 import java.io.File;
@@ -80,11 +81,19 @@ public record ScaffoldOption(
                 , dto.getCommandInput()
                 , new DataSetLoadOption("dataset", dto.getDatasetDto(), true)
                 , dto.getDatasetType() != null ? dto.getDatasetType() : ResultType.csv
-                , Strings.isNotEmpty(dto.getDatasetEncoding()) ? dto.getDatasetEncoding() : "UTF-8"
+                , dto.getDatasetEncoding()
                 , Strings.isNotEmpty(dto.getFixedLength()) ? dto.getFixedLength() : ""
-                , Strings.isNotEmpty(dto.getDefaultLength()) ? dto.getDefaultLength() : "10"
+                , dto.getDefaultLength()
                 , Strings.isNotEmpty(dto.getAlign()) ? dto.getAlign() : "left"
         );
+    }
+
+    /**
+     * フィールドは入力値を持ち、既定値はここで適用する（GUIで未入力のまま表示するため）
+     */
+    @Override
+    public String datasetEncoding() {
+        return Strings.isNotEmpty(this.datasetEncoding) ? this.datasetEncoding : "UTF-8";
     }
 
     public static ScaffoldDto toDto(final String[] args) {
@@ -181,7 +190,8 @@ public record ScaffoldOption(
         result.put("-commandType", this.commandType);
         if (ScaffoldTarget.fixedColumnDef.name().equals(this.target)) {
             result.put("-fixedLength", this.fixedLength)
-                  .put("-defaultLength", this.defaultLength)
+                  .putWithDefault("-defaultLength", this.defaultLength
+                                  , ComparableFixedColumnDefMetaDataProducer.DEFAULT_LENGTH)
                   .put("-align", this.align);
         }
         Arrays.stream(this.commandInput)
@@ -192,7 +202,7 @@ public record ScaffoldOption(
                   result.put(key, eqIdx > 0 ? arg.substring(eqIdx + 1) : "true");
               });
         result.put("-datasetType", this.datasetType, ResultType.class, Filter.exclude(ResultType.format), false);
-        result.put("-datasetEncoding", this.datasetEncoding);
+        result.putWithDefault("-datasetEncoding", this.datasetEncoding, "UTF-8");
         if (this.dataset != null) {
             result.addComponent("dataset", this.dataset.toParametersBuilder().build());
         }
@@ -255,7 +265,7 @@ public record ScaffoldOption(
                 .setResultDir(srcDir)
                 .setExportEmptyTable(true)
                 .setSkipHeader(!this.isHeaderlessDataset())
-                .setOutputEncoding(this.datasetEncoding)
+                .setOutputEncoding(this.datasetEncoding())
                 .build();
         return new DataSetConverterLoader().get(converterParam);
     }
@@ -344,7 +354,7 @@ public record ScaffoldOption(
         builder.put("-src.src", DATASET_SRC_DIR);
         builder.put("-src.srcType", this.datasetType.toDataSourceType().name());
         if (this.usesDatasetEncoding()) {
-            builder.put("-encoding", this.datasetEncoding);
+            builder.put("-encoding", this.datasetEncoding());
         }
     }
 

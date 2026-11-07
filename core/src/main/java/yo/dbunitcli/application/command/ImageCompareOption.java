@@ -91,19 +91,19 @@ public record ImageCompareOption(
     @Override
     public ParametersBuilder toParametersBuilder() {
         return new ParametersBuilder(this.getPrefix())
-                .put("-threshold", this.threshold)
-                .put("-pixelToleranceLevel", this.pixelToleranceLevel)
-                .put("-allowingPercentOfDifferentPixels", this.allowingPercentOfDifferentPixels)
-                .put("-rectangleLineWidth", this.rectangleLineWidth)
-                .put("-minimalRectangleSize", this.minimalRectangleSize)
-                .put("-maximalRectangleCount", this.maximalRectangleCount)
+                .putWithDefault("-threshold", this.threshold, "5")
+                .putWithDefault("-pixelToleranceLevel", this.pixelToleranceLevel, "0.01")
+                .putWithDefault("-allowingPercentOfDifferentPixels", this.allowingPercentOfDifferentPixels, "0.01")
+                .putWithDefault("-rectangleLineWidth", this.rectangleLineWidth, "1")
+                .putWithDefault("-minimalRectangleSize", this.minimalRectangleSize, "1")
+                .putWithDefault("-maximalRectangleCount", this.maximalRectangleCount, "-1")
                 .put("-excludedAreas", this.excludedAreas)
                 .putFlag("-drawExcludedRectangles", this.drawExcludedRectangles)
                 .putFlag("-fillExcludedRectangles", this.fillExcludedRectangles)
-                .put("-percentOpacityExcludedRectangles", this.percentOpacityExcludedRectangles)
+                .putWithDefault("-percentOpacityExcludedRectangles", this.percentOpacityExcludedRectangles, "20.0")
                 .put("-excludedRectangleColor", this.excludedRectangleColor)
                 .putFlag("-fillDifferenceRectangles", this.fillDifferenceRectangles)
-                .put("-percentOpacityDifferenceRectangles", this.percentOpacityDifferenceRectangles)
+                .putWithDefault("-percentOpacityDifferenceRectangles", this.percentOpacityDifferenceRectangles, "20.0")
                 .put("-differenceRectangleColor", this.differenceRectangleColor);
     }
 

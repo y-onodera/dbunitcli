@@ -7,6 +7,9 @@ import yo.dbunitcli.dataset.ComparableDataSetParam;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * @param delimiter エスケープ（\t等）を戻した入力値。既定値はアクセサで適用する
+ */
 public record CsvOption(
         String prefix
         , String delimiter
@@ -23,8 +26,13 @@ public record CsvOption(
                                 .replace("\\n", "\n")
                                 .replace("\\r", "\r")
                                 .replace("\\f", "\f")
-                        ).orElse(",")
+                        ).orElse("")
                 , dto.getIgnoreQuoted());
+    }
+
+    @Override
+    public String delimiter() {
+        return Strings.isNotEmpty(this.delimiter) ? this.delimiter : ",";
     }
 
     @Override
@@ -35,13 +43,13 @@ public record CsvOption(
     @Override
     public ParametersBuilder toParametersBuilder() {
         return new ParametersBuilder(this.getPrefix())
-                .put("-delimiter", this.delimiter
+                .putWithDefault("-delimiter", this.delimiter
                         .replace("\b", "\\b")
                         .replace("\t", "\\t")
                         .replace("\n", "\\n")
                         .replace("\r", "\\r")
                         .replace("\f", "\\f")
-                )
+                        , ",")
                 .put("-ignoreQuoted", this.ignoreQuoted);
     }
 
@@ -56,7 +64,7 @@ public record CsvOption(
     @Override
     public ComparableDataSetParam.Builder populate(final ComparableDataSetParam.Builder builder) {
         return builder
-                .setDelimiter(this.delimiter.charAt(0))
+                .setDelimiter(this.delimiter().charAt(0))
                 .setIgnoreQuoted(this.ignoreQuoted);
     }
 

@@ -9,6 +9,9 @@ import yo.dbunitcli.resource.st4.TemplateRender;
 
 import java.util.List;
 
+/**
+ * encoding・templateParameterAttribute・templateVarStart・templateVarStopは入力値を持ち、既定値はアクセサで適用する
+ */
 public record TemplateRenderOption(
         String prefix
         , String encoding
@@ -25,10 +28,10 @@ public record TemplateRenderOption(
 
     public TemplateRenderOption(final String prefix, final TemplateRenderDto dto) {
         this(prefix
-                , EncodingOption.orDefault(dto.getEncoding())
-                , dto.getTemplateParameterAttribute() != null ? dto.getTemplateParameterAttribute() : "param"
-                , Strings.isNotEmpty(dto.getTemplateVarStart()) ? dto.getTemplateVarStart() : "$"
-                , Strings.isNotEmpty(dto.getTemplateVarStop()) ? dto.getTemplateVarStop() : "$"
+                , dto.getEncoding()
+                , dto.getTemplateParameterAttribute()
+                , dto.getTemplateVarStart()
+                , dto.getTemplateVarStop()
                 , Strings.isNotEmpty(dto.getFormulaProcess()) ? dto.getFormulaProcess() : "true"
                 , Strings.isNotEmpty(dto.getEvaluateFormulas()) ? dto.getEvaluateFormulas() : "true"
                 , Strings.isNotEmpty(dto.getForceFormulaRecalc()) ? dto.getForceFormulaRecalc() : "false"
@@ -39,6 +42,26 @@ public record TemplateRenderOption(
     }
 
     @Override
+    public String encoding() {
+        return EncodingOption.orDefault(this.encoding);
+    }
+
+    @Override
+    public String templateParameterAttribute() {
+        return this.templateParameterAttribute != null ? this.templateParameterAttribute : "param";
+    }
+
+    @Override
+    public String templateVarStart() {
+        return Strings.isNotEmpty(this.templateVarStart) ? this.templateVarStart : "$";
+    }
+
+    @Override
+    public String templateVarStop() {
+        return Strings.isNotEmpty(this.templateVarStop) ? this.templateVarStop : "$";
+    }
+
+    @Override
     public String getPrefix() {
         return this.prefix;
     }
@@ -46,11 +69,11 @@ public record TemplateRenderOption(
     @Override
     public ParametersBuilder toParametersBuilder() {
         return new ParametersBuilder(this.getPrefix())
-                .put("-encoding", this.encoding)
+                .putWithDefault("-encoding", this.encoding, EncodingOption.defaultEncoding())
                 .putFile("-templateGroup", this.templateGroup, BaseDir.TEMPLATE)
-                .put("-templateParameterAttribute", this.templateParameterAttribute)
-                .put("-templateVarStart", this.templateVarStart)
-                .put("-templateVarStop", this.templateVarStop);
+                .putWithDefault("-templateParameterAttribute", this.templateParameterAttribute, "param")
+                .putWithDefault("-templateVarStart", this.templateVarStart, "$")
+                .putWithDefault("-templateVarStop", this.templateVarStop, "$");
     }
 
     @Override
@@ -75,9 +98,9 @@ public record TemplateRenderOption(
         return TemplateRender.builder()
                 .setEncoding(this.encoding())
                 .setTemplateGroup(FileResources.searchTemplate(this.templateGroup))
-                .setTemplateParameterAttribute(this.templateParameterAttribute)
-                .setTemplateVarStart(this.templateVarStart.charAt(0))
-                .setTemplateVarStop(this.templateVarStop.charAt(0))
+                .setTemplateParameterAttribute(this.templateParameterAttribute())
+                .setTemplateVarStart(this.templateVarStart().charAt(0))
+                .setTemplateVarStop(this.templateVarStop().charAt(0))
                 .build();
     }
 

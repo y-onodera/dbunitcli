@@ -7,10 +7,13 @@ import yo.dbunitcli.dataset.ComparableDataSetParam;
 import java.nio.charset.Charset;
 import java.util.List;
 
+/**
+ * @param encoding 入力値。GUIで未入力のまま表示できるよう既定値はアクセサで適用する
+ */
 public record EncodingOption(String prefix, String encoding) implements ComparableDataSetParamOption {
 
     public EncodingOption(final String prefix, final DataSetLoadDto dto) {
-        this(prefix, EncodingOption.orDefault(dto.getEncoding()));
+        this(prefix, dto.getEncoding());
     }
 
     /**
@@ -24,6 +27,18 @@ public record EncodingOption(String prefix, String encoding) implements Comparab
         return Strings.isNotEmpty(encoding) ? encoding : defaultCharset.displayName();
     }
 
+    /**
+     * 未入力時に使われる文字コード（GUIのプレースホルダー）
+     */
+    public static String defaultEncoding() {
+        return Charset.defaultCharset().displayName();
+    }
+
+    @Override
+    public String encoding() {
+        return EncodingOption.orDefault(this.encoding);
+    }
+
     @Override
     public String getPrefix() {
         return this.prefix;
@@ -32,7 +47,7 @@ public record EncodingOption(String prefix, String encoding) implements Comparab
     @Override
     public ParametersBuilder toParametersBuilder() {
         return new ParametersBuilder(this.getPrefix())
-                .put("-encoding", this.encoding);
+                .putWithDefault("-encoding", this.encoding, EncodingOption.defaultEncoding());
     }
 
     @Override
@@ -42,7 +57,7 @@ public record EncodingOption(String prefix, String encoding) implements Comparab
 
     @Override
     public ComparableDataSetParam.Builder populate(final ComparableDataSetParam.Builder builder) {
-        return builder.setEncoding(this.encoding);
+        return builder.setEncoding(this.encoding());
     }
 
 }

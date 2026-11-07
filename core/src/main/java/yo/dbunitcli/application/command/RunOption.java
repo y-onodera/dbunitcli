@@ -110,7 +110,7 @@ public record RunOption(
                         .build()
                 )
                 .put("-scriptType", this.scriptType, ScriptType.class)
-                .put("-parallel", this.parallel);
+                .putWithDefault("-parallel", this.parallel, "1");
         if (this.scriptType == ScriptType.sql) {
             result.addComponent("templateOption", this.templateOption.toParameters())
                     .addComponent("jdbcOption", this.jdbcOption.toParameters());

@@ -35,6 +35,7 @@ public record DataSetLoadOption(
         return EncodingOption.orDefault(dto.getSettingEncoding());
     }
 
+
     private static DataSourceType getSrcType(final DataSetLoadDto dto) {
         return dto.getSrcType() != null ? dto.getSrcType() : DataSourceType.csv;
     }
@@ -51,7 +52,7 @@ public record DataSetLoadOption(
                         ? dto.getSrc()
                         : null
                 , dto.getSetting()
-                , DataSetLoadOption.settingEncodingOf(dto)
+                , dto.getSettingEncoding()
                 , Strings.isNotEmpty(dto.getSettingTargetOnly()) ? dto.getSettingTargetOnly() : "false"
                 , dto.getRegTableInclude()
                 , dto.getRegTableExclude()
@@ -59,6 +60,14 @@ public record DataSetLoadOption(
                 , Strings.isNotEmpty(dto.getIncludeMetaData()) ? dto.getIncludeMetaData() : "false"
                 , new DataSourceTypeOptionFactory().create(prefix, DataSetLoadOption.getSrcType(dto), dto)
         );
+    }
+
+    /**
+     * フィールドは入力値を持ち、既定値はここで適用する（GUIで未入力のまま表示するため）
+     */
+    @Override
+    public String settingEncoding() {
+        return EncodingOption.orDefault(this.settingEncoding);
     }
 
     @Override
@@ -77,7 +86,7 @@ public record DataSetLoadOption(
         return result.putFileOrDir("-src", this.src, true, this.srcBaseDir())
                 .putAll(this.dataSetParam.toParameters())
                 .putFile("-setting", this.setting, BaseDir.SETTING)
-                .put("-settingEncoding", this.settingEncoding)
+                .putWithDefault("-settingEncoding", this.settingEncoding, EncodingOption.defaultEncoding())
                 .putFlag("-settingTargetOnly", this.settingTargetOnly)
                 .put("-regTableInclude", this.regTableInclude)
                 .put("-regTableExclude", this.regTableExclude)
@@ -144,7 +153,7 @@ public record DataSetLoadOption(
      */
     public TableSeparators getTableSeparators() {
         try {
-            final TableSeparators result = new FromJsonTableSeparatorsBuilder(this.settingEncoding).build(this.setting, BaseDir.SETTING);
+            final TableSeparators result = new FromJsonTableSeparatorsBuilder(this.settingEncoding()).build(this.setting, BaseDir.SETTING);
             return this.isSettingTargetOnly() && Strings.isNotEmpty(this.setting) ? result.onlySettingTargets() : result;
         } catch (final IOException e) {
             throw new AssertionError(e);

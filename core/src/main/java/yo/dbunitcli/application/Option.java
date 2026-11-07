@@ -499,6 +499,14 @@ public interface Option {
             return this.put(key, value, new Attribute(ParamType.TEXT, required));
         }
 
+        /**
+         * @param defaultValue 未入力時に使われる値。他の入力や実行環境で決まる場合はその説明
+         */
+        public ParametersBuilder putWithDefault(final String key, final String value, final String defaultValue) {
+            return this.put(key, value, new Attribute(ParamType.TEXT, new ArrayList<>(), false, BaseDir.WORKSPACE
+                    , defaultValue));
+        }
+
         public ParametersBuilder putFile(final String key, final String value, final BaseDir defaultPath) {
             return this.putFile(key, value, false, defaultPath);
         }
@@ -565,7 +573,16 @@ public interface Option {
     record Violation(List<String> options, String message) {
     }
 
-    record Attribute(ParamType type, ArrayList<String> selectOption, boolean required, BaseDir defaultPath) {
+    /**
+     * @param defaultValue 未入力時に使われる値（GUIのプレースホルダー）。無ければnull
+     */
+    record Attribute(ParamType type, ArrayList<String> selectOption, boolean required, BaseDir defaultPath,
+                     String defaultValue) {
+
+        public Attribute(final ParamType type, final ArrayList<String> selectOption, final boolean required,
+                         final BaseDir defaultPath) {
+            this(type, selectOption, required, defaultPath, null);
+        }
 
         public Attribute(final ParamType type, final boolean required) {
             this(type, new ArrayList<>(), required, BaseDir.WORKSPACE);
