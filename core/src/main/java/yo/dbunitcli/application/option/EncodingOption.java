@@ -10,18 +10,30 @@ import java.util.List;
 public record EncodingOption(String prefix, String encoding) implements ComparableDataSetParamOption {
 
     public EncodingOption(final String prefix, final DataSetLoadDto dto) {
-        this(prefix, EncodingOption.orDefault(dto.getEncoding()));
+        this(prefix, dto.getEncoding());
     }
 
     /**
      * 文字コードのオプションが空ならシステムの既定の文字コードにする
      */
     public static String orDefault(final String encoding) {
-        return EncodingOption.orDefault(encoding, Charset.defaultCharset());
+        return Strings.orDefault(encoding, EncodingOption.defaultEncoding());
     }
 
     public static String orDefault(final String encoding, final Charset defaultCharset) {
-        return Strings.isNotEmpty(encoding) ? encoding : defaultCharset.displayName();
+        return Strings.orDefault(encoding, defaultCharset.displayName());
+    }
+
+    /**
+     * 未入力時に使われる文字コード（GUIのプレースホルダー）
+     */
+    public static String defaultEncoding() {
+        return Charset.defaultCharset().displayName();
+    }
+
+    @Override
+    public String encoding() {
+        return EncodingOption.orDefault(this.encoding);
     }
 
     @Override
@@ -32,7 +44,7 @@ public record EncodingOption(String prefix, String encoding) implements Comparab
     @Override
     public ParametersBuilder toParametersBuilder() {
         return new ParametersBuilder(this.getPrefix())
-                .put("-encoding", this.encoding);
+                .putWithDefault("-encoding", this.encoding, EncodingOption.defaultEncoding());
     }
 
     @Override
@@ -42,7 +54,7 @@ public record EncodingOption(String prefix, String encoding) implements Comparab
 
     @Override
     public ComparableDataSetParam.Builder populate(final ComparableDataSetParam.Builder builder) {
-        return builder.setEncoding(this.encoding);
+        return builder.setEncoding(this.encoding());
     }
 
 }

@@ -27,7 +27,7 @@ public record FixedOption(
     public ParametersBuilder toParametersBuilder() {
         return new ParametersBuilder(this.getPrefix())
                 .put("-fixedLength", this.fixedLength)
-                .put("-fixedLengthType", this.fixedLengthType);
+                .putWithDefault("-fixedLengthType", this.fixedLengthType, ComparableDataSetParam.LengthType.DEFAULT_NAME);
     }
 
     /**

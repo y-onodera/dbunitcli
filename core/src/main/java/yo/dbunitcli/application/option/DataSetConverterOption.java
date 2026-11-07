@@ -7,6 +7,8 @@ import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.dataset.DataSetConverterParam;
 import yo.dbunitcli.dataset.DbOperation;
 import yo.dbunitcli.dataset.ResultType;
+import yo.dbunitcli.dataset.converter.CsvConverter;
+import yo.dbunitcli.dataset.converter.FlatFileConverter;
 import yo.dbunitcli.dataset.converter.XlsConverter;
 import yo.dbunitcli.resource.FileResources;
 
@@ -43,15 +45,22 @@ public record DataSetConverterOption(
                 , Strings.isNotEmpty(dto.getExportEmptyTable()) ? dto.getExportEmptyTable() : "true"
                 , Strings.isNotEmpty(dto.getExportHeader()) ? dto.getExportHeader() : "true"
                 , Strings.isNotEmpty(dto.getAppend()) ? dto.getAppend() : "false"
-                , Strings.isNotEmpty(dto.getOutputEncoding()) ? dto.getOutputEncoding() : "UTF-8"
+                , dto.getOutputEncoding()
                 , Strings.isNotEmpty(dto.getExcelTable()) ? dto.getExcelTable() : "SHEET"
                 , dto.getFormat()
                 , dto.getExtension()
                 , dto.getFixedColumnDefFile()
-                , Strings.isNotEmpty(dto.getFixedLengthType()) ? dto.getFixedLengthType() : "char"
+                , dto.getFixedLengthType()
                 , DataSetConverterOption.parallel(dto.getParallel())
         );
     }
+
+    /**
+     * -parallel未指定時の説明（GUIのプレースホルダー）
+     */
+    public static final String AUTO_PARALLEL_DESCRIPTION = "(auto: CPU cores)";
+
+    public static final String DEFAULT_OUTPUT_ENCODING = "UTF-8";
 
     /**
      * -parallelの値を整える。未指定は空文字（未指定時の並列数はコマンドごとに決める）。
@@ -63,6 +72,11 @@ public record DataSetConverterOption(
 
     private static ResultType resultType(final DataSetConverterDto dto) {
         return dto.getResultType() != null ? dto.getResultType() : ResultType.csv;
+    }
+
+    @Override
+    public String outputEncoding() {
+        return Strings.orDefault(this.outputEncoding, DEFAULT_OUTPUT_ENCODING);
     }
 
     @Override
@@ -120,7 +134,7 @@ public record DataSetConverterOption(
         } else {
             result.putDir("-result", this.resultDir, BaseDir.RESULT);
             if (this.usesResultPath()) {
-                result.put("-resultPath", this.resultPath);
+                result.putWithDefault("-resultPath", this.resultPath, ResultOption.RESULT_PATH_DESCRIPTION);
             }
             result.putFlag("-exportEmptyTable", this.exportEmptyTable);
             if (type != ResultType.format && type != ResultType.fixed) {
@@ -128,23 +142,23 @@ public record DataSetConverterOption(
             }
             result.putFlag("-append", this.append);
             if (type == ResultType.csv) {
-                result.put("-outputEncoding", this.outputEncoding);
-                result.put("-outputExtension", this.extension);
+                result.putWithDefault("-outputEncoding", this.outputEncoding, DEFAULT_OUTPUT_ENCODING);
+                result.putWithDefault("-outputExtension", this.extension, CsvConverter.DEFAULT_EXTENSION);
             } else if (type == ResultType.format) {
-                result.put("-outputEncoding", this.outputEncoding);
+                result.putWithDefault("-outputEncoding", this.outputEncoding, DEFAULT_OUTPUT_ENCODING);
                 result.put("-format", this.format);
-                result.put("-outputExtension", this.extension);
+                result.putWithDefault("-outputExtension", this.extension, FlatFileConverter.TEXT_EXTENSION);
             } else if (type == ResultType.fixed) {
-                result.put("-outputEncoding", this.outputEncoding);
-                result.put("-outputExtension", this.extension);
+                result.putWithDefault("-outputEncoding", this.outputEncoding, DEFAULT_OUTPUT_ENCODING);
+                result.putWithDefault("-outputExtension", this.extension, FlatFileConverter.TEXT_EXTENSION);
                 result.putFile("-fixedColumnDef", this.fixedColumnDefFile, BaseDir.FIXED_COLUMN_DEF);
-                result.put("-fixedLengthType", this.fixedLengthType);
+                result.putWithDefault("-fixedLengthType", this.fixedLengthType, ComparableDataSetParam.LengthType.DEFAULT_NAME);
             } else {
                 result.put("-excelTable", this.excelTable);
             }
         }
         if (showParallel) {
-            result.put("-parallel", this.parallel);
+            result.putWithDefault("-parallel", this.parallel, DataSetConverterOption.AUTO_PARALLEL_DESCRIPTION);
         }
         return result;
     }
@@ -177,7 +191,7 @@ public record DataSetConverterOption(
                                     .setExportEmptyTable(Boolean.parseBoolean(this.exportEmptyTable))
                                     .setSkipHeader(Boolean.parseBoolean(this.skipHeader))
                                     .setAppend(Boolean.parseBoolean(this.append))
-                                    .setOutputEncoding(this.outputEncoding)
+                                    .setOutputEncoding(this.outputEncoding())
                                     .setExcelTable(this.excelTable)
                                     .setFormat(this.format)
                                     .setExtension(this.extension)

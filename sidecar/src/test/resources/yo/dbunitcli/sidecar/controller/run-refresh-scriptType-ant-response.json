@@ -20,7 +20,8 @@
     "attribute": {
       "type": "TEXT",
       "required": false,
-      "defaultPath": "WORKSPACE"
+      "defaultPath": "WORKSPACE",
+      "defaultValue": "1"
     },
     "value": ""
   },
@@ -29,7 +30,8 @@
     "attribute": {
       "type": "TEXT",
       "required": false,
-      "defaultPath": "WORKSPACE"
+      "defaultPath": "WORKSPACE",
+      "defaultValue": "(default target)"
     },
     "value": ""
   },
@@ -94,9 +96,10 @@
       "attribute": {
         "type": "TEXT",
         "required": false,
-        "defaultPath": "WORKSPACE"
+        "defaultPath": "WORKSPACE",
+        "defaultValue": "UTF-8"
       },
-      "value": "UTF-8"
+      "value": ""
     },
     "settingTargetOnly": {
       "name": "settingTargetOnly",

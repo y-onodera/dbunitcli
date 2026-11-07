@@ -11,6 +11,12 @@ import java.util.function.UnaryOperator;
 
 public record ResultOption(String resultFile
         , DataSetConverterOption convertResult) {
+
+    /**
+     * -resultPath未指定時の説明（GUIのプレースホルダー）。GUIから実行するとresultFileはパラメータ名になる
+     */
+    public static final String RESULT_PATH_DESCRIPTION = "(parameter name)";
+
     public ResultOption(final String resultFile, final DataSetConverterDto dto) {
         this(resultFile
                 , new DataSetConverterOption("result", dto));

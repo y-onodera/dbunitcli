@@ -2,20 +2,29 @@ package yo.dbunitcli.application.option;
 
 import yo.dbunitcli.application.dto.DataSetLoadDto;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
+import yo.dbunitcli.dataset.DataSourceType;
 
 import java.util.List;
 
+/**
+ * @param srcType -extension未指定時に絞り込む拡張子（{@link DataSourceType#getExtension()}）を決める
+ */
 public record FileTraverseOption(TraverseOption traverseOption
-        , String extension) implements ComparableDataSetParamOption {
+        , String extension
+        , DataSourceType srcType) implements ComparableDataSetParamOption {
 
-    public FileTraverseOption(final String prefix, final DataSetLoadDto dto) {
-        this(new TraverseOption(prefix, dto), dto.getExtension());
+    /** -extension未指定で拡張子を絞り込まない場合の説明（GUIのプレースホルダー） */
+    private static final String ALL_FILES_DESCRIPTION = "(all files)";
+
+    public FileTraverseOption(final String prefix, final DataSourceType srcType, final DataSetLoadDto dto) {
+        this(new TraverseOption(prefix, dto), dto.getExtension(), srcType);
     }
 
     @Override
     public ParametersBuilder toParametersBuilder() {
         return this.traverseOption().toParametersBuilder()
-                .put("-extension", this.extension());
+                .putWithDefault("-extension", this.extension(), this.srcType.getExtension() != null
+                        ? this.srcType.getExtension() : ALL_FILES_DESCRIPTION);
     }
 
     @Override

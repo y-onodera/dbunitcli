@@ -4,6 +4,7 @@ import org.dbunit.dataset.Column;
 import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.ITableMetaData;
 import org.dbunit.dataset.datatype.DataType;
+import yo.dbunitcli.Strings;
 import yo.dbunitcli.dataset.ComparableDataSetProducer;
 import yo.dbunitcli.dataset.ComparableDataSetProducerWrapper;
 
@@ -15,6 +16,12 @@ public class ComparableFixedColumnDefMetaDataProducer extends ComparableDataSetP
             new Column("align", DataType.VARCHAR),
             new Column("pad", DataType.VARCHAR)
     };
+
+    /** -defaultLength未指定時の長さ */
+    public static final String DEFAULT_LENGTH = "10";
+
+    /** -align未指定時の寄せ */
+    public static final String DEFAULT_ALIGN = "left";
 
     private final String[] lengths;
     private final int defaultLength;
@@ -29,12 +36,13 @@ public class ComparableFixedColumnDefMetaDataProducer extends ComparableDataSetP
     }
 
     /**
-     * オプションの値（カンマ区切りの長さ・既定の長さ・寄せ）から作る
+     * オプションの値（カンマ区切りの長さ・既定の長さ・寄せ）から作る。既定の長さ・寄せが空なら{@link #DEFAULT_LENGTH}・{@link #DEFAULT_ALIGN}
      */
     public static ComparableFixedColumnDefMetaDataProducer of(final ComparableDataSetProducer delegate
             , final String fixedLength, final String defaultLength, final String align) {
         final String[] lengths = fixedLength == null || fixedLength.isEmpty() ? new String[0] : fixedLength.split(",");
-        return new ComparableFixedColumnDefMetaDataProducer(delegate, lengths, Integer.parseInt(defaultLength.trim()), align);
+        final int length = Integer.parseInt(Strings.orDefault(defaultLength, DEFAULT_LENGTH).trim());
+        return new ComparableFixedColumnDefMetaDataProducer(delegate, lengths, length, Strings.orDefault(align, DEFAULT_ALIGN));
     }
 
     public static Column[] outputSchema() {

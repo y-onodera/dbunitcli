@@ -53,6 +53,7 @@ export function ControllTextBox(props: {
 	id: string;
 	required: boolean;
 	value: string;
+	placeholder?: string;
 	/** 枠の配置と幅（格子の位置など）。入力欄そのものの見た目は変えない */
 	wStyle?: string;
 	list?: string;
@@ -81,6 +82,7 @@ export function ControllTextBox(props: {
 				required={props.required}
 				disabled={!!props.disabled}
 				value={props.value}
+				placeholder={props.placeholder}
 				onChange={props.handleChange}
 				onBlur={(ev) => props.handleBlur?.(ev)}
 				autoComplete={props.list ? "off" : "on"}

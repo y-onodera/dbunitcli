@@ -455,6 +455,9 @@ public record ComparableDataSetParam(
     public enum LengthType {
         CHAR, BYTE;
 
+        /** 未指定時の数え方（{@link #of}がCHARとして扱う） */
+        public static final String DEFAULT_NAME = "char";
+
         public static LengthType of(final String value) {
             if ("byte".equalsIgnoreCase(value)) {
                 return BYTE;

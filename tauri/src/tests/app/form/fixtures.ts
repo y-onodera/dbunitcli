@@ -28,6 +28,16 @@ function makeElement(
 	};
 }
 
+// 未入力時に使われる値（attribute.defaultValue）を持つテキスト項目
+function makeTextWithDefault(
+	name: string,
+	value: string,
+	defaultValue: string,
+): CommandOption {
+	const element = makeElement(name, "TEXT", value, "WORKSPACE", false);
+	return { ...element, attribute: { ...element.attribute, defaultValue } };
+}
+
 const SRC_TYPE_OPTIONS = [
 	"table",
 	"sql",
@@ -50,29 +60,15 @@ const TARGET_TYPE_OPTIONS = ["data", "image", "pdf"];
 function makeTemplateOption() {
 	return {
 		prefix: "template",
-		encoding: makeElement("encoding", "TEXT", "UTF-8", "WORKSPACE", false),
+		encoding: makeTextWithDefault("encoding", "", "UTF-8"),
 		templateGroup: makeElement("templateGroup", "FILE", "", "TEMPLATE", false),
-		templateParameterAttribute: makeElement(
+		templateParameterAttribute: makeTextWithDefault(
 			"templateParameterAttribute",
-			"TEXT",
+			"",
 			"param",
-			"WORKSPACE",
-			false,
 		),
-		templateVarStart: makeElement(
-			"templateVarStart",
-			"TEXT",
-			"$",
-			"WORKSPACE",
-			false,
-		),
-		templateVarStop: makeElement(
-			"templateVarStop",
-			"TEXT",
-			"$",
-			"WORKSPACE",
-			false,
-		),
+		templateVarStart: makeTextWithDefault("templateVarStart", "", "$"),
+		templateVarStop: makeTextWithDefault("templateVarStop", "", "$"),
 	};
 }
 
@@ -137,15 +133,15 @@ function makeCsvSrcData(
 			srcTypeOptions,
 		),
 		src: makeElement("src", "FILE_OR_DIR", src, "DATASET", true),
-		encoding: makeElement("encoding", "TEXT", "UTF-8", "WORKSPACE", false),
+		encoding: makeTextWithDefault("encoding", "", "UTF-8"),
 		recursive: makeElement("recursive", "FLG", "false", "WORKSPACE", false),
 		regInclude: makeElement("regInclude", "TEXT", "", "WORKSPACE", false),
 		regExclude: makeElement("regExclude", "TEXT", "", "WORKSPACE", false),
-		extension: makeElement("extension", "TEXT", "", "WORKSPACE", false),
+		extension: makeTextWithDefault("extension", "", "csv"),
 		headerName: makeElement("headerName", "TEXT", "", "WORKSPACE", false),
-		startRow: makeElement("startRow", "TEXT", "1", "WORKSPACE", false),
+		startRow: makeTextWithDefault("startRow", "", "1"),
 		addFileInfo: makeElement("addFileInfo", "FLG", "false", "WORKSPACE", false),
-		delimiter: makeElement("delimiter", "TEXT", ",", "WORKSPACE", false),
+		delimiter: makeTextWithDefault("delimiter", "", ","),
 		ignoreQuoted: makeElement(
 			"ignoreQuoted",
 			"FLG",
@@ -154,13 +150,7 @@ function makeCsvSrcData(
 			false,
 		),
 		setting: makeElement("setting", "FILE", "", "SETTING", false),
-		settingEncoding: makeElement(
-			"settingEncoding",
-			"TEXT",
-			"UTF-8",
-			"WORKSPACE",
-			false,
-		),
+		settingEncoding: makeTextWithDefault("settingEncoding", "", "UTF-8"),
 		settingTargetOnly: makeElement(
 			"settingTargetOnly",
 			"FLG",
@@ -208,19 +198,13 @@ function makeXlsxSrcData() {
 		recursive: makeElement("recursive", "FLG", "false", "WORKSPACE", false),
 		regInclude: makeElement("regInclude", "TEXT", "", "WORKSPACE", false),
 		regExclude: makeElement("regExclude", "TEXT", "", "WORKSPACE", false),
-		extension: makeElement("extension", "TEXT", "", "WORKSPACE", false),
+		extension: makeTextWithDefault("extension", "", "xlsx"),
 		headerName: makeElement("headerName", "TEXT", "", "WORKSPACE", false),
-		startRow: makeElement("startRow", "TEXT", "1", "WORKSPACE", false),
+		startRow: makeTextWithDefault("startRow", "", "1"),
 		addFileInfo: makeElement("addFileInfo", "FLG", "false", "WORKSPACE", false),
 		xlsxSchema: makeElement("xlsxSchema", "FILE", "", "XLSX_SCHEMA", false),
 		setting: makeElement("setting", "FILE", "", "SETTING", false),
-		settingEncoding: makeElement(
-			"settingEncoding",
-			"TEXT",
-			"UTF-8",
-			"WORKSPACE",
-			false,
-		),
+		settingEncoding: makeTextWithDefault("settingEncoding", "", "UTF-8"),
 		settingTargetOnly: makeElement(
 			"settingTargetOnly",
 			"FLG",
@@ -265,11 +249,11 @@ function makeTableSrcData(prefix: string) {
 			SRC_TYPE_OPTIONS,
 		),
 		src: makeElement("src", "FILE_OR_DIR", "", "TABLE", true),
-		encoding: makeElement("encoding", "TEXT", "UTF-8", "WORKSPACE", false),
+		encoding: makeTextWithDefault("encoding", "", "UTF-8"),
 		recursive: makeElement("recursive", "FLG", "false", "WORKSPACE", false),
 		regInclude: makeElement("regInclude", "TEXT", "", "WORKSPACE", false),
 		regExclude: makeElement("regExclude", "TEXT", "", "WORKSPACE", false),
-		extension: makeElement("extension", "TEXT", "", "WORKSPACE", false),
+		extension: makeTextWithDefault("extension", "", "(all files)"),
 		headerName: makeElement("headerName", "TEXT", "", "WORKSPACE", false),
 		addFileInfo: makeElement("addFileInfo", "FLG", "false", "WORKSPACE", false),
 		jdbcProperties: makeElement("jdbcProperties", "FILE", "", "JDBC", false),
@@ -284,35 +268,15 @@ function makeTableSrcData(prefix: string) {
 			false,
 		),
 		templateGroup: makeElement("templateGroup", "FILE", "", "TEMPLATE", false),
-		templateParameterAttribute: makeElement(
+		templateParameterAttribute: makeTextWithDefault(
 			"templateParameterAttribute",
-			"TEXT",
+			"",
 			"param",
-			"WORKSPACE",
-			false,
 		),
-		templateVarStart: makeElement(
-			"templateVarStart",
-			"TEXT",
-			"$",
-			"WORKSPACE",
-			false,
-		),
-		templateVarStop: makeElement(
-			"templateVarStop",
-			"TEXT",
-			"$",
-			"WORKSPACE",
-			false,
-		),
+		templateVarStart: makeTextWithDefault("templateVarStart", "", "$"),
+		templateVarStop: makeTextWithDefault("templateVarStop", "", "$"),
 		setting: makeElement("setting", "FILE", "", "SETTING", false),
-		settingEncoding: makeElement(
-			"settingEncoding",
-			"TEXT",
-			"UTF-8",
-			"WORKSPACE",
-			false,
-		),
+		settingEncoding: makeTextWithDefault("settingEncoding", "", "UTF-8"),
 		settingTargetOnly: makeElement(
 			"settingTargetOnly",
 			"FLG",
@@ -355,15 +319,9 @@ function makeImageFileSrcData(prefix: string) {
 		recursive: makeElement("recursive", "FLG", "false", "WORKSPACE", false),
 		regInclude: makeElement("regInclude", "TEXT", "", "WORKSPACE", false),
 		regExclude: makeElement("regExclude", "TEXT", "", "WORKSPACE", false),
-		extension: makeElement("extension", "TEXT", "png", "WORKSPACE", false),
+		extension: makeTextWithDefault("extension", "png", "(all files)"),
 		setting: makeElement("setting", "FILE", "", "SETTING", false),
-		settingEncoding: makeElement(
-			"settingEncoding",
-			"TEXT",
-			"UTF-8",
-			"WORKSPACE",
-			false,
-		),
+		settingEncoding: makeTextWithDefault("settingEncoding", "", "UTF-8"),
 		settingTargetOnly: makeElement(
 			"settingTargetOnly",
 			"FLG",
@@ -399,7 +357,7 @@ function makeImageFileSrcData(prefix: string) {
 // parallelは並列化できるときだけレスポンスに含まれる（convertは入力・出力とも、generateはsrcが並列読込できるとき）
 function parallelElement(parallel: boolean) {
 	return parallel
-		? { parallel: makeElement("parallel", "TEXT", "", "WORKSPACE", false) }
+		? { parallel: makeTextWithDefault("parallel", "", "(auto: CPU cores)") }
 		: {};
 }
 
@@ -430,13 +388,7 @@ function makeCsvConvertResult(required = false, parallel = true) {
 			false,
 		),
 		append: makeElement("append", "FLG", "false", "WORKSPACE", false),
-		outputEncoding: makeElement(
-			"outputEncoding",
-			"TEXT",
-			"UTF-8",
-			"WORKSPACE",
-			false,
-		),
+		outputEncoding: makeTextWithDefault("outputEncoding", "", "UTF-8"),
 		...parallelElement(parallel),
 	};
 }
@@ -455,7 +407,7 @@ function makeXlsxConvertResult(resultValue: string, excelTable = "SHEET") {
 		...(excelTable === "BOOK"
 			? {}
 			: {
-					resultPath: makeElement("resultPath", "TEXT", "", "WORKSPACE", false),
+					resultPath: makeTextWithDefault("resultPath", "", "(parameter name)"),
 				}),
 		exportEmptyTable: makeElement(
 			"exportEmptyTable",
@@ -511,13 +463,7 @@ export const compareLoadResponseFixture = {
 		false,
 	),
 	setting: makeElement("setting", "FILE", "", "COMPARE_SETTING", false),
-	settingEncoding: makeElement(
-		"settingEncoding",
-		"TEXT",
-		"UTF-8",
-		"WORKSPACE",
-		false,
-	),
+	settingEncoding: makeTextWithDefault("settingEncoding", "", "UTF-8"),
 	newData: makeCsvSrcData("new", "resources/src/csv/multi1.csv"),
 	oldData: makeCsvSrcData("old", "resources/src/csv/multi2.csv"),
 	convertResult: {
@@ -549,13 +495,7 @@ export const compareLoadResponseFixture = {
 			false,
 		),
 		append: makeElement("append", "FLG", "false", "WORKSPACE", false),
-		outputEncoding: makeElement(
-			"outputEncoding",
-			"TEXT",
-			"UTF-8",
-			"WORKSPACE",
-			false,
-		),
+		outputEncoding: makeTextWithDefault("outputEncoding", "", "UTF-8"),
 		...parallelElement(true),
 	},
 	expectData: {
@@ -597,14 +537,8 @@ export const generateLoadResponseFixture = {
 		"RESULT",
 		false,
 	),
-	resultPath: makeElement("resultPath", "TEXT", "result", "WORKSPACE", false),
-	outputEncoding: makeElement(
-		"outputEncoding",
-		"TEXT",
-		"UTF-8",
-		"WORKSPACE",
-		false,
-	),
+	resultPath: makeTextWithDefault("resultPath", "", "(parameter name)"),
+	outputEncoding: makeTextWithDefault("outputEncoding", "", "UTF-8"),
 	srcData: makeCsvSrcData("src", "resources/src/csv"),
 	templateOption: makeTemplateOption(),
 } as GenerateOptions;
@@ -618,13 +552,7 @@ function makeRunSrcData(src: string) {
 		regInclude: makeElement("regInclude", "TEXT", "", "WORKSPACE", false),
 		regExclude: makeElement("regExclude", "TEXT", "", "WORKSPACE", false),
 		setting: makeElement("setting", "FILE", "", "SETTING", false),
-		settingEncoding: makeElement(
-			"settingEncoding",
-			"TEXT",
-			"UTF-8",
-			"WORKSPACE",
-			false,
-		),
+		settingEncoding: makeTextWithDefault("settingEncoding", "", "UTF-8"),
 		settingTargetOnly: makeElement(
 			"settingTargetOnly",
 			"FLG",
@@ -658,7 +586,7 @@ export const runLoadResponseFixture = {
 		"sql",
 		"ant",
 	]),
-	parallel: makeElement("parallel", "TEXT", "", "WORKSPACE", false),
+	parallel: makeTextWithDefault("parallel", "", "1"),
 	srcData: makeRunSrcData("resources/sql/sample.sql"),
 	templateOption: makeTemplateOption(),
 	jdbcOption: {
@@ -680,7 +608,7 @@ export const parameterizeLoadResponseFixture = {
 	]),
 	parameterize: makeElement("parameterize", "FLG", "true", "WORKSPACE", false),
 	ignoreFail: makeElement("ignoreFail", "FLG", "false", "WORKSPACE", false),
-	parallel: makeElement("parallel", "TEXT", "", "WORKSPACE", false),
+	parallel: makeTextWithDefault("parallel", "", "1"),
 	cmd: makeElement("cmd", "TEXT", "convert", "WORKSPACE", false),
 	cmdParam: makeElement("cmdParam", "TEXT", "", "WORKSPACE", false),
 	template: makeElement(
@@ -749,50 +677,22 @@ export const compareRefreshTargetTypeImageResponseFixture = {
 		false,
 	),
 	setting: makeElement("setting", "FILE", "", "COMPARE_SETTING", false),
-	settingEncoding: makeElement(
-		"settingEncoding",
-		"TEXT",
-		"UTF-8",
-		"WORKSPACE",
-		false,
-	),
+	settingEncoding: makeTextWithDefault("settingEncoding", "", "UTF-8"),
 	imageOption: {
 		prefix: "image",
-		threshold: makeElement("threshold", "TEXT", "", "WORKSPACE", false),
-		pixelToleranceLevel: makeElement(
-			"pixelToleranceLevel",
-			"TEXT",
-			"",
-			"WORKSPACE",
-			false,
-		),
-		allowingPercentOfDifferentPixels: makeElement(
+		threshold: makeTextWithDefault("threshold", "", "5"),
+		pixelToleranceLevel: makeTextWithDefault("pixelToleranceLevel", "", "0.01"),
+		allowingPercentOfDifferentPixels: makeTextWithDefault(
 			"allowingPercentOfDifferentPixels",
-			"TEXT",
 			"",
-			"WORKSPACE",
-			false,
+			"0.01",
 		),
-		rectangleLineWidth: makeElement(
-			"rectangleLineWidth",
-			"TEXT",
-			"",
-			"WORKSPACE",
-			false,
-		),
-		minimalRectangleSize: makeElement(
-			"minimalRectangleSize",
-			"TEXT",
-			"",
-			"WORKSPACE",
-			false,
-		),
-		maximalRectangleCount: makeElement(
+		rectangleLineWidth: makeTextWithDefault("rectangleLineWidth", "", "1"),
+		minimalRectangleSize: makeTextWithDefault("minimalRectangleSize", "", "1"),
+		maximalRectangleCount: makeTextWithDefault(
 			"maximalRectangleCount",
-			"TEXT",
 			"",
-			"WORKSPACE",
-			false,
+			"-1",
 		),
 		excludedAreas: makeElement("excludedAreas", "TEXT", "", "WORKSPACE", false),
 		drawExcludedRectangles: makeElement(
@@ -809,12 +709,10 @@ export const compareRefreshTargetTypeImageResponseFixture = {
 			"WORKSPACE",
 			false,
 		),
-		percentOpacityExcludedRectangles: makeElement(
+		percentOpacityExcludedRectangles: makeTextWithDefault(
 			"percentOpacityExcludedRectangles",
-			"TEXT",
 			"",
-			"WORKSPACE",
-			false,
+			"20.0",
 		),
 		excludedRectangleColor: makeElement(
 			"excludedRectangleColor",
@@ -830,12 +728,10 @@ export const compareRefreshTargetTypeImageResponseFixture = {
 			"WORKSPACE",
 			false,
 		),
-		percentOpacityDifferenceRectangles: makeElement(
+		percentOpacityDifferenceRectangles: makeTextWithDefault(
 			"percentOpacityDifferenceRectangles",
-			"TEXT",
 			"",
-			"WORKSPACE",
-			false,
+			"20.0",
 		),
 		differenceRectangleColor: makeElement(
 			"differenceRectangleColor",
@@ -880,13 +776,7 @@ export const compareRefreshNewSrcTypeTableResponseFixture = {
 		false,
 	),
 	setting: makeElement("setting", "FILE", "", "COMPARE_SETTING", false),
-	settingEncoding: makeElement(
-		"settingEncoding",
-		"TEXT",
-		"UTF-8",
-		"WORKSPACE",
-		false,
-	),
+	settingEncoding: makeTextWithDefault("settingEncoding", "", "UTF-8"),
 	newData: makeTableSrcData("new"),
 	oldData: makeCsvSrcData("old", ""),
 	convertResult: makeCsvConvertResult(true),
@@ -922,13 +812,7 @@ export const compareRefreshExpectSrcTypeCsvResponseFixture = {
 		false,
 	),
 	setting: makeElement("setting", "FILE", "", "COMPARE_SETTING", false),
-	settingEncoding: makeElement(
-		"settingEncoding",
-		"TEXT",
-		"UTF-8",
-		"WORKSPACE",
-		false,
-	),
+	settingEncoding: makeTextWithDefault("settingEncoding", "", "UTF-8"),
 	newData: makeCsvSrcData("new", ""),
 	oldData: makeCsvSrcData("old", ""),
 	convertResult: makeCsvConvertResult(true),
@@ -955,14 +839,8 @@ export const generateRefreshSrcTypeTableResponseFixture = {
 	template: makeElement("template", "FILE", "", "TEMPLATE", true),
 	...parallelElement(true),
 	result: makeElement("result", "DIR", "", "RESULT", false),
-	resultPath: makeElement("resultPath", "TEXT", "result", "WORKSPACE", false),
-	outputEncoding: makeElement(
-		"outputEncoding",
-		"TEXT",
-		"UTF-8",
-		"WORKSPACE",
-		false,
-	),
+	resultPath: makeTextWithDefault("resultPath", "", "(parameter name)"),
+	outputEncoding: makeTextWithDefault("outputEncoding", "", "UTF-8"),
 	srcData: makeTableSrcData("src"),
 	templateOption: makeTemplateOption(),
 } as GenerateOptions;
@@ -976,7 +854,7 @@ export const runRefreshScriptTypeCmdResponseFixture = {
 		"sql",
 		"ant",
 	]),
-	parallel: makeElement("parallel", "TEXT", "", "WORKSPACE", false),
+	parallel: makeTextWithDefault("parallel", "", "1"),
 	baseDir: makeElement("baseDir", "TEXT", "", "WORKSPACE", false),
 	srcData: makeRunSrcData(""),
 } as RunOptions;
@@ -990,7 +868,7 @@ export const runRefreshScriptTypeAntResponseFixture = {
 		"sql",
 		"ant",
 	]),
-	antTarget: makeElement("antTarget", "TEXT", "", "WORKSPACE", false),
+	antTarget: makeTextWithDefault("antTarget", "", "(default target)"),
 } as RunOptions;
 
 // run-refresh-scriptType-sql-response.json をもとにしたフィクスチャ
@@ -1002,7 +880,7 @@ export const runRefreshScriptTypeSqlResponseFixture = {
 		"sql",
 		"ant",
 	]),
-	parallel: makeElement("parallel", "TEXT", "", "WORKSPACE", false),
+	parallel: makeTextWithDefault("parallel", "", "1"),
 	srcData: makeRunSrcData(""),
 	templateOption: makeTemplateOption(),
 	jdbcOption: {
@@ -1049,7 +927,7 @@ function makeGenerateJxlsFixture(
 		template: makeElement("template", "FILE", "", "TEMPLATE", true),
 		...parallelElement(true),
 		result: makeElement("result", "DIR", "", "RESULT", false),
-		resultPath: makeElement("resultPath", "TEXT", "result", "WORKSPACE", false),
+		resultPath: makeTextWithDefault("resultPath", "", "(parameter name)"),
 		srcData: makeCsvSrcData("src", ""),
 		templateOption: makeJxlsTemplateOption(includeFormulaProcess),
 	} as GenerateOptions;
@@ -1074,14 +952,8 @@ export const generateRefreshGenerateTypeSqlResponseFixture = {
 	),
 	...parallelElement(true),
 	result: makeElement("result", "DIR", "", "RESULT", false),
-	resultPath: makeElement("resultPath", "TEXT", "result", "WORKSPACE", false),
-	outputEncoding: makeElement(
-		"outputEncoding",
-		"TEXT",
-		"UTF-8",
-		"WORKSPACE",
-		false,
-	),
+	resultPath: makeTextWithDefault("resultPath", "", "(parameter name)"),
+	outputEncoding: makeTextWithDefault("outputEncoding", "", "UTF-8"),
 	commit: makeElement("commit", "FLG", "false", "WORKSPACE", false),
 	op: makeElement("op", "ENUM", "INSERT", "WORKSPACE", false, [
 		"INSERT",
@@ -1108,14 +980,8 @@ export const generateRefreshXlsxSchemaResponseFixture = {
 	),
 	...parallelElement(true),
 	result: makeElement("result", "DIR", "", "RESULT", false),
-	resultPath: makeElement("resultPath", "TEXT", "result", "WORKSPACE", false),
-	outputEncoding: makeElement(
-		"outputEncoding",
-		"TEXT",
-		"UTF-8",
-		"WORKSPACE",
-		false,
-	),
+	resultPath: makeTextWithDefault("resultPath", "", "(parameter name)"),
+	outputEncoding: makeTextWithDefault("outputEncoding", "", "UTF-8"),
 	srcData: makeCsvSrcData("src", ""),
 } as GenerateOptions;
 
@@ -1132,14 +998,8 @@ export const generateRefreshSettingsResponseFixture = {
 	),
 	...parallelElement(true),
 	result: makeElement("result", "DIR", "", "RESULT", false),
-	resultPath: makeElement("resultPath", "TEXT", "result", "WORKSPACE", false),
-	outputEncoding: makeElement(
-		"outputEncoding",
-		"TEXT",
-		"UTF-8",
-		"WORKSPACE",
-		false,
-	),
+	resultPath: makeTextWithDefault("resultPath", "", "(parameter name)"),
+	outputEncoding: makeTextWithDefault("outputEncoding", "", "UTF-8"),
 	srcData: makeCsvSrcData("src", ""),
 } as GenerateOptions;
 
@@ -1156,14 +1016,8 @@ export const generateRefreshFixedColumnDefResponseFixture = {
 	),
 	...parallelElement(true),
 	result: makeElement("result", "DIR", "", "RESULT", false),
-	resultPath: makeElement("resultPath", "TEXT", "result", "WORKSPACE", false),
-	outputEncoding: makeElement(
-		"outputEncoding",
-		"TEXT",
-		"UTF-8",
-		"WORKSPACE",
-		false,
-	),
+	resultPath: makeTextWithDefault("resultPath", "", "(parameter name)"),
+	outputEncoding: makeTextWithDefault("outputEncoding", "", "UTF-8"),
 	srcData: makeCsvSrcData("src", ""),
 } as GenerateOptions;
 
@@ -1202,13 +1056,7 @@ function makeScaffoldOptionsBase(target: string) {
 			false,
 			SCAFFOLD_DATASET_TYPE_OPTIONS,
 		),
-		datasetEncoding: makeElement(
-			"datasetEncoding",
-			"TEXT",
-			"UTF-8",
-			"WORKSPACE",
-			false,
-		),
+		datasetEncoding: makeTextWithDefault("datasetEncoding", "", "UTF-8"),
 		dataset: makeCsvSrcData("dataset", "resources/src/csv", [
 			"none",
 			...SRC_TYPE_OPTIONS,
@@ -1223,8 +1071,8 @@ export const scaffoldRefreshTargetDdlResponseFixture = makeScaffoldOptionsBase(
 export const scaffoldRefreshTargetFixedColumnDefResponseFixture = {
 	...makeScaffoldOptionsBase("fixedColumnDef"),
 	fixedLength: makeElement("fixedLength", "TEXT", "", "WORKSPACE", false),
-	defaultLength: makeElement("defaultLength", "TEXT", "10", "WORKSPACE", false),
-	align: makeElement("align", "TEXT", "left", "WORKSPACE", false),
+	defaultLength: makeTextWithDefault("defaultLength", "", "10"),
+	align: makeTextWithDefault("align", "", "left"),
 } as ScaffoldOptions;
 
 export const scaffoldExecResponseFixture: Record<string, string> = {

@@ -18,7 +18,7 @@ public class FormattedFileConverter extends FlatFileConverter implements IDataSe
     public FormattedFileConverter(final String theDirectory, final File resultDir, final String encoding,
                                   final boolean exportEmptyTable, final boolean append, final String format,
                                   final String extension) {
-        super(theDirectory, resultDir, encoding, exportEmptyTable, false, append, extension != null ? extension : "txt");
+        super(theDirectory, resultDir, encoding, exportEmptyTable, false, append, extension != null ? extension : TEXT_EXTENSION);
         this.format = format;
     }
 

@@ -90,6 +90,11 @@ public record CompareOption(
         return dto;
     }
 
+    @Override
+    public String settingEncoding() {
+        return EncodingOption.orDefault(this.settingEncoding);
+    }
+
     private static Type getTargetType(final CompareDto dto) {
         return dto.getTargetType() != null ? dto.getTargetType() : Type.data;
     }
@@ -98,7 +103,7 @@ public record CompareOption(
         this(param
                 , new ResultOption(resultFile, dto.getConvertResult())
                 , dto.getSetting()
-                , EncodingOption.orDefault(dto.getSettingEncoding())
+                , dto.getSettingEncoding()
                 , CompareOption.getTargetType(dto)
                 , dto.getCreatePatchSql()
                 , CompareOption.getTargetType(dto).isAny(Type.image, Type.pdf)
@@ -138,7 +143,7 @@ public record CompareOption(
         }
         return result
                 .putFile("-setting", this.setting, BaseDir.COMPARE_SETTING)
-                .put("-settingEncoding", this.settingEncoding)
+                .putWithDefault("-settingEncoding", this.settingEncoding, EncodingOption.defaultEncoding())
                 .addComponent("newData", newDataCommandLineArgs.build())
                 .addComponent("oldData", oldDataCommandLineArgs.build())
                 // 比較では出力は並列化せず、new/oldの読込だけが対象
@@ -183,11 +188,11 @@ public record CompareOption(
     public TableSeparators getTableSeparators() {
         try {
             if (this.targetType != Type.data) {
-                return new FromJsonTableSeparatorsBuilder(this.settingEncoding)
+                return new FromJsonTableSeparatorsBuilder(this.settingEncoding())
                         .build().map(separator -> separator.addSetting(TableSeparator.builder()
                                 .setComparisonKeys(List.of("NAME")).build()));
             } else {
-                return new FromJsonTableSeparatorsBuilder(this.settingEncoding).build(this.setting, BaseDir.COMPARE_SETTING);
+                return new FromJsonTableSeparatorsBuilder(this.settingEncoding()).build(this.setting, BaseDir.COMPARE_SETTING);
             }
         } catch (final IOException e) {
             throw new AssertionError(e);

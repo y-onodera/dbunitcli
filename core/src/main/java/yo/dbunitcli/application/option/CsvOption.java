@@ -13,6 +13,8 @@ public record CsvOption(
         , boolean ignoreQuoted
 ) implements ComparableDataSetParamOption {
 
+    private static final String DEFAULT_DELIMITER = ",";
+
     public CsvOption(final String prefix, final DataSetLoadDto dto) {
         this(prefix
                 , Optional.ofNullable(dto.getDelimiter())
@@ -23,8 +25,13 @@ public record CsvOption(
                                 .replace("\\n", "\n")
                                 .replace("\\r", "\r")
                                 .replace("\\f", "\f")
-                        ).orElse(",")
+                        ).orElse("")
                 , dto.getIgnoreQuoted());
+    }
+
+    @Override
+    public String delimiter() {
+        return Strings.orDefault(this.delimiter, DEFAULT_DELIMITER);
     }
 
     @Override
@@ -35,13 +42,13 @@ public record CsvOption(
     @Override
     public ParametersBuilder toParametersBuilder() {
         return new ParametersBuilder(this.getPrefix())
-                .put("-delimiter", this.delimiter
+                .putWithDefault("-delimiter", this.delimiter
                         .replace("\b", "\\b")
                         .replace("\t", "\\t")
                         .replace("\n", "\\n")
                         .replace("\r", "\\r")
                         .replace("\f", "\\f")
-                )
+                        , DEFAULT_DELIMITER)
                 .put("-ignoreQuoted", this.ignoreQuoted);
     }
 
@@ -56,7 +63,7 @@ public record CsvOption(
     @Override
     public ComparableDataSetParam.Builder populate(final ComparableDataSetParam.Builder builder) {
         return builder
-                .setDelimiter(this.delimiter.charAt(0))
+                .setDelimiter(this.delimiter().charAt(0))
                 .setIgnoreQuoted(this.ignoreQuoted);
     }
 

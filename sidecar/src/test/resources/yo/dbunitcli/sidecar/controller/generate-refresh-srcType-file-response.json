@@ -49,7 +49,8 @@
     "attribute": {
       "type": "TEXT",
       "required": false,
-      "defaultPath": "WORKSPACE"
+      "defaultPath": "WORKSPACE",
+      "defaultValue": "(auto: CPU cores)"
     },
     "value": ""
   },
@@ -67,18 +68,20 @@
     "attribute": {
       "type": "TEXT",
       "required": false,
-      "defaultPath": "WORKSPACE"
+      "defaultPath": "WORKSPACE",
+      "defaultValue": "(parameter name)"
     },
-    "value": "result"
+    "value": ""
   },
   "outputEncoding": {
     "name": "outputEncoding",
     "attribute": {
       "type": "TEXT",
       "required": false,
-      "defaultPath": "WORKSPACE"
+      "defaultPath": "WORKSPACE",
+      "defaultValue": "UTF-8"
     },
-    "value": "UTF-8"
+    "value": ""
   },
   "srcData": {
     "prefix": "src",
@@ -144,7 +147,8 @@
       "attribute": {
         "type": "TEXT",
         "required": false,
-        "defaultPath": "WORKSPACE"
+        "defaultPath": "WORKSPACE",
+        "defaultValue": "(all files)"
       },
       "value": ""
     },
@@ -162,9 +166,10 @@
       "attribute": {
         "type": "TEXT",
         "required": false,
-        "defaultPath": "WORKSPACE"
+        "defaultPath": "WORKSPACE",
+        "defaultValue": "UTF-8"
       },
-      "value": "UTF-8"
+      "value": ""
     },
     "settingTargetOnly": {
       "name": "settingTargetOnly",
@@ -219,9 +224,10 @@
       "attribute": {
         "type": "TEXT",
         "required": false,
-        "defaultPath": "WORKSPACE"
+        "defaultPath": "WORKSPACE",
+        "defaultValue": "UTF-8"
       },
-      "value": "UTF-8"
+      "value": ""
     },
     "templateGroup": {
       "name": "templateGroup",
@@ -237,27 +243,30 @@
       "attribute": {
         "type": "TEXT",
         "required": false,
-        "defaultPath": "WORKSPACE"
+        "defaultPath": "WORKSPACE",
+        "defaultValue": "param"
       },
-      "value": "param"
+      "value": ""
     },
     "templateVarStart": {
       "name": "templateVarStart",
       "attribute": {
         "type": "TEXT",
         "required": false,
-        "defaultPath": "WORKSPACE"
+        "defaultPath": "WORKSPACE",
+        "defaultValue": "$"
       },
-      "value": "$"
+      "value": ""
     },
     "templateVarStop": {
       "name": "templateVarStop",
       "attribute": {
         "type": "TEXT",
         "required": false,
-        "defaultPath": "WORKSPACE"
+        "defaultPath": "WORKSPACE",
+        "defaultValue": "$"
       },
-      "value": "$"
+      "value": ""
     }
   }
 }

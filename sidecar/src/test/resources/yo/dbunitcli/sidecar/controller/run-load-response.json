@@ -20,7 +20,8 @@
     "attribute": {
       "type": "TEXT",
       "required": false,
-      "defaultPath": "WORKSPACE"
+      "defaultPath": "WORKSPACE",
+      "defaultValue": "1"
     },
     "value": ""
   },
@@ -76,9 +77,10 @@
       "attribute": {
         "type": "TEXT",
         "required": false,
-        "defaultPath": "WORKSPACE"
+        "defaultPath": "WORKSPACE",
+        "defaultValue": "UTF-8"
       },
-      "value": "UTF-8"
+      "value": ""
     },
     "settingTargetOnly": {
       "name": "settingTargetOnly",
@@ -115,9 +117,10 @@
       "attribute": {
         "type": "TEXT",
         "required": false,
-        "defaultPath": "WORKSPACE"
+        "defaultPath": "WORKSPACE",
+        "defaultValue": "UTF-8"
       },
-      "value": "UTF-8"
+      "value": ""
     },
     "templateGroup": {
       "name": "templateGroup",
@@ -133,27 +136,30 @@
       "attribute": {
         "type": "TEXT",
         "required": false,
-        "defaultPath": "WORKSPACE"
+        "defaultPath": "WORKSPACE",
+        "defaultValue": "param"
       },
-      "value": "param"
+      "value": ""
     },
     "templateVarStart": {
       "name": "templateVarStart",
       "attribute": {
         "type": "TEXT",
         "required": false,
-        "defaultPath": "WORKSPACE"
+        "defaultPath": "WORKSPACE",
+        "defaultValue": "$"
       },
-      "value": "$"
+      "value": ""
     },
     "templateVarStop": {
       "name": "templateVarStop",
       "attribute": {
         "type": "TEXT",
         "required": false,
-        "defaultPath": "WORKSPACE"
+        "defaultPath": "WORKSPACE",
+        "defaultValue": "$"
       },
-      "value": "$"
+      "value": ""
     }
   },
   "jdbcOption": {

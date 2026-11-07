@@ -65,6 +65,7 @@ export default function Text({
 							hidden={hidden}
 							required={element.attribute.required}
 							value={path}
+							placeholder={element.attribute.defaultValue}
 							handleChange={handleChange}
 						/>
 						{!hidden && hasResources && (

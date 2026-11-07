@@ -11,8 +11,15 @@ public record StartRowOption(
         String startRow
 ) implements ComparableDataSetParamOption {
 
+    private static final String DEFAULT_START_ROW = "1";
+
     public StartRowOption(final String prefix, final DataSetLoadDto dto) {
-        this(prefix, Strings.isNotEmpty(dto.getStartRow()) ? dto.getStartRow() : "1");
+        this(prefix, dto.getStartRow());
+    }
+
+    @Override
+    public String startRow() {
+        return Strings.orDefault(this.startRow, DEFAULT_START_ROW);
     }
 
     @Override
@@ -27,12 +34,12 @@ public record StartRowOption(
 
     @Override
     public ComparableDataSetParam.Builder populate(final ComparableDataSetParam.Builder builder) {
-        return builder.setStartRow(Integer.parseInt(this.startRow.trim()));
+        return builder.setStartRow(Integer.parseInt(this.startRow().trim()));
     }
 
     @Override
     public ParametersBuilder toParametersBuilder() {
         return new ParametersBuilder(this.prefix)
-                .put("-startRow", this.startRow);
+                .putWithDefault("-startRow", this.startRow, DEFAULT_START_ROW);
     }
 }

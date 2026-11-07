@@ -13,6 +13,7 @@ import yo.dbunitcli.application.json.FromJsonTableSeparatorsBuilder;
 import yo.dbunitcli.application.option.DataSetConverterOption;
 import yo.dbunitcli.application.option.DataSetLoadOption;
 import yo.dbunitcli.application.option.EncodingOption;
+import yo.dbunitcli.application.option.ResultOption;
 import yo.dbunitcli.application.option.TemplateRenderOption;
 import yo.dbunitcli.common.Parameter;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
@@ -30,13 +31,16 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
-import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-public record GenerateOption(Parameter parameter, String resultDir, String resultPath, GenerateType generateType,
+/**
+ * @param resultFile -resultPath未指定時のファイル名
+ */
+public record GenerateOption(Parameter parameter, String resultFile, String resultDir, String resultPath,
+                             GenerateType generateType,
                              ParameterUnit unit, String unitSetting, String unitSettingEncoding, DbOperation operation,
                              String sqlFilePrefix, String sqlFileSuffix,
                              String commit, String template, String outputEncoding, DataSetLoadOption srcData,
@@ -45,27 +49,25 @@ public record GenerateOption(Parameter parameter, String resultDir, String resul
         implements CommandLineOption<GenerateDto>, GenerateContext {
 
     public GenerateOption(final String resultFile, final GenerateDto dto, final Parameter param) {
-        this(param, dto.getResultDir(),
-             Optional.ofNullable(dto.getResultPath()).filter(it -> !it.isEmpty()).orElse(resultFile),
+        this(param, resultFile, dto.getResultDir(), dto.getResultPath(),
              GenerateOption.getGenerateType(dto), GenerateOption.getGenerateType(dto).strategy().isFixedTemplate() ?
                      GenerateOption.getGenerateType(dto).strategy().fixedUnit() :
                      dto.getUnit() != null ? dto.getUnit() : ParameterUnit.record,
              !GenerateOption.getGenerateType(dto).strategy().isFixedTemplate() && Strings.isNotEmpty(dto.getUnitSetting())
                      ? dto.getUnitSetting() : "",
-             EncodingOption.orDefault(GenerateOption.getGenerateType(dto).strategy().isFixedTemplate()
-                     ? null : dto.getUnitSettingEncoding()),
+             GenerateOption.getGenerateType(dto).strategy().isFixedTemplate() ? null : dto.getUnitSettingEncoding(),
              dto.getOperation(),
              Strings.isNotEmpty(dto.getSqlFilePrefix()) ? dto.getSqlFilePrefix() : "",
              Strings.isNotEmpty(dto.getSqlFileSuffix()) ? dto.getSqlFileSuffix() : "",
              Strings.isNotEmpty(dto.getCommit()) ? dto.getCommit() : "true", dto.getTemplate(),
-             Strings.isNotEmpty(dto.getOutputEncoding()) ? dto.getOutputEncoding() : "UTF-8",
+             dto.getOutputEncoding(),
              new DataSetLoadOption("src", dto.getSrcData()),
              new TemplateRenderOption("template", dto.getTemplateOption()),
              Strings.isNotEmpty(dto.getIncludeAllColumns()) ? dto.getIncludeAllColumns() : "false",
              Strings.isNotEmpty(dto.getLazyLoad()) ? dto.getLazyLoad() : "true",
              Strings.isNotEmpty(dto.getFixedLength()) ? dto.getFixedLength() : "",
-             Strings.isNotEmpty(dto.getDefaultLength()) ? dto.getDefaultLength() : "10",
-             Strings.isNotEmpty(dto.getAlign()) ? dto.getAlign() : "left",
+             dto.getDefaultLength(),
+             dto.getAlign(),
              DataSetConverterOption.parallel(dto.getParallel()));
     }
 
@@ -76,6 +78,21 @@ public record GenerateOption(Parameter parameter, String resultDir, String resul
         new ArgumentMapper("src").populate(args, dto.getSrcData());
         new ArgumentMapper("template").populate(args, dto.getTemplateOption());
         return dto;
+    }
+
+    @Override
+    public String resultPath() {
+        return Strings.orDefault(this.resultPath, this.resultFile);
+    }
+
+    @Override
+    public String unitSettingEncoding() {
+        return EncodingOption.orDefault(this.unitSettingEncoding);
+    }
+
+    @Override
+    public String outputEncoding() {
+        return Strings.orDefault(this.outputEncoding, DataSetConverterOption.DEFAULT_OUTPUT_ENCODING);
     }
 
     private static GenerateType getGenerateType(final GenerateDto dto) {
@@ -193,7 +210,7 @@ public record GenerateOption(Parameter parameter, String resultDir, String resul
             }
         }
         try {
-            return new FromJsonTableSeparatorsBuilder(this.unitSettingEncoding).build(this.unitSetting, BaseDir.GENERATE_SETTING);
+            return new FromJsonTableSeparatorsBuilder(this.unitSettingEncoding()).build(this.unitSetting, BaseDir.GENERATE_SETTING);
         } catch (final IOException e) {
             throw new AssertionError(e);
         }
@@ -266,7 +283,7 @@ public record GenerateOption(Parameter parameter, String resultDir, String resul
         }
         if (this.unit == ParameterUnit.table && !this.strategy().isExcel() && !this.strategy().isFixedTemplate()) {
             result.putFile("-unitSetting", this.unitSetting, BaseDir.GENERATE_SETTING);
-            result.put("-unitSettingEncoding", this.unitSettingEncoding);
+            result.putWithDefault("-unitSettingEncoding", this.unitSettingEncoding, EncodingOption.defaultEncoding());
         }
         if (!this.strategy().isFixedTemplate()) {
             result.putFile("-template", this.template, true, BaseDir.TEMPLATE);
@@ -280,15 +297,16 @@ public record GenerateOption(Parameter parameter, String resultDir, String resul
         }
         this.strategy().putOptionParameters(this, result);
         if (this.isParallelizable()) {
-            result.put("-parallel", this.parallel);
+            result.putWithDefault("-parallel", this.parallel, DataSetConverterOption.AUTO_PARALLEL_DESCRIPTION);
         }
         result.addComponent("srcData", srcComponent.build());
         if (!this.strategy().isFixedTemplate()) {
             result.addComponent("templateOption", this.templateOptionArgs());
         }
-        result.putDir("-result", this.resultDir, BaseDir.RESULT).put("-resultPath", this.resultPath);
+        result.putDir("-result", this.resultDir, BaseDir.RESULT);
+        result.putWithDefault("-resultPath", this.resultPath, ResultOption.RESULT_PATH_DESCRIPTION);
         if (this.strategy().isText()) {
-            result.put("-outputEncoding", this.outputEncoding);
+            result.putWithDefault("-outputEncoding", this.outputEncoding, DataSetConverterOption.DEFAULT_OUTPUT_ENCODING);
         }
         return result;
     }

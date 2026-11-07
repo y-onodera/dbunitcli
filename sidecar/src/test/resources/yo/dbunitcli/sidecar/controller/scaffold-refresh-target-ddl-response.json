@@ -82,9 +82,10 @@
     "attribute": {
       "type": "TEXT",
       "required": false,
-      "defaultPath": "WORKSPACE"
+      "defaultPath": "WORKSPACE",
+      "defaultValue": "UTF-8"
     },
-    "value": "UTF-8"
+    "value": ""
   },
   "dataset": {
     "prefix": "dataset",
@@ -124,9 +125,10 @@
       "attribute": {
         "type": "TEXT",
         "required": false,
-        "defaultPath": "WORKSPACE"
+        "defaultPath": "WORKSPACE",
+        "defaultValue": "UTF-8"
       },
-      "value": "UTF-8"
+      "value": ""
     },
     "recursive": {
       "name": "recursive",
@@ -160,7 +162,8 @@
       "attribute": {
         "type": "TEXT",
         "required": false,
-        "defaultPath": "WORKSPACE"
+        "defaultPath": "WORKSPACE",
+        "defaultValue": "csv"
       },
       "value": ""
     },
@@ -178,9 +181,10 @@
       "attribute": {
         "type": "TEXT",
         "required": false,
-        "defaultPath": "WORKSPACE"
+        "defaultPath": "WORKSPACE",
+        "defaultValue": "1"
       },
-      "value": "1"
+      "value": ""
     },
     "addFileInfo": {
       "name": "addFileInfo",
@@ -196,9 +200,10 @@
       "attribute": {
         "type": "TEXT",
         "required": false,
-        "defaultPath": "WORKSPACE"
+        "defaultPath": "WORKSPACE",
+        "defaultValue": ","
       },
-      "value": ","
+      "value": ""
     },
     "ignoreQuoted": {
       "name": "ignoreQuoted",
@@ -223,9 +228,10 @@
       "attribute": {
         "type": "TEXT",
         "required": false,
-        "defaultPath": "WORKSPACE"
+        "defaultPath": "WORKSPACE",
+        "defaultValue": "UTF-8"
       },
-      "value": "UTF-8"
+      "value": ""
     },
     "settingTargetOnly": {
       "name": "settingTargetOnly",

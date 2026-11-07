@@ -9,6 +9,7 @@ import yo.dbunitcli.application.CommandParameters;
 import yo.dbunitcli.application.Option;
 import yo.dbunitcli.application.command.generate.DescriptorOption;
 import yo.dbunitcli.application.ParameterUnit;
+import yo.dbunitcli.application.option.DataSetConverterOption;
 import yo.dbunitcli.application.option.DataSetLoadOption;
 import yo.dbunitcli.common.Parameter;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
@@ -20,6 +21,7 @@ import yo.dbunitcli.dataset.IDataSetConverter;
 import yo.dbunitcli.dataset.ResultType;
 import yo.dbunitcli.dataset.converter.DataSetConverterLoader;
 import yo.dbunitcli.dataset.producer.ComparableDataSetLoader;
+import yo.dbunitcli.dataset.producer.ComparableFixedColumnDefMetaDataProducer;
 import yo.dbunitcli.resource.FileResources;
 
 import java.io.File;
@@ -80,11 +82,16 @@ public record ScaffoldOption(
                 , dto.getCommandInput()
                 , new DataSetLoadOption("dataset", dto.getDatasetDto(), true)
                 , dto.getDatasetType() != null ? dto.getDatasetType() : ResultType.csv
-                , Strings.isNotEmpty(dto.getDatasetEncoding()) ? dto.getDatasetEncoding() : "UTF-8"
+                , dto.getDatasetEncoding()
                 , Strings.isNotEmpty(dto.getFixedLength()) ? dto.getFixedLength() : ""
-                , Strings.isNotEmpty(dto.getDefaultLength()) ? dto.getDefaultLength() : "10"
-                , Strings.isNotEmpty(dto.getAlign()) ? dto.getAlign() : "left"
+                , dto.getDefaultLength()
+                , dto.getAlign()
         );
+    }
+
+    @Override
+    public String datasetEncoding() {
+        return Strings.orDefault(this.datasetEncoding, DataSetConverterOption.DEFAULT_OUTPUT_ENCODING);
     }
 
     public static ScaffoldDto toDto(final String[] args) {
@@ -181,8 +188,9 @@ public record ScaffoldOption(
         result.put("-commandType", this.commandType);
         if (ScaffoldTarget.fixedColumnDef.name().equals(this.target)) {
             result.put("-fixedLength", this.fixedLength)
-                  .put("-defaultLength", this.defaultLength)
-                  .put("-align", this.align);
+                  .putWithDefault("-defaultLength", this.defaultLength
+                                  , ComparableFixedColumnDefMetaDataProducer.DEFAULT_LENGTH)
+                  .putWithDefault("-align", this.align, ComparableFixedColumnDefMetaDataProducer.DEFAULT_ALIGN);
         }
         Arrays.stream(this.commandInput)
               .filter(arg -> arg.startsWith("-"))
@@ -192,7 +200,7 @@ public record ScaffoldOption(
                   result.put(key, eqIdx > 0 ? arg.substring(eqIdx + 1) : "true");
               });
         result.put("-datasetType", this.datasetType, ResultType.class, Filter.exclude(ResultType.format), false);
-        result.put("-datasetEncoding", this.datasetEncoding);
+        result.putWithDefault("-datasetEncoding", this.datasetEncoding, DataSetConverterOption.DEFAULT_OUTPUT_ENCODING);
         if (this.dataset != null) {
             result.addComponent("dataset", this.dataset.toParametersBuilder().build());
         }
@@ -255,7 +263,7 @@ public record ScaffoldOption(
                 .setResultDir(srcDir)
                 .setExportEmptyTable(true)
                 .setSkipHeader(!this.isHeaderlessDataset())
-                .setOutputEncoding(this.datasetEncoding)
+                .setOutputEncoding(this.datasetEncoding())
                 .build();
         return new DataSetConverterLoader().get(converterParam);
     }
@@ -344,7 +352,7 @@ public record ScaffoldOption(
         builder.put("-src.src", DATASET_SRC_DIR);
         builder.put("-src.srcType", this.datasetType.toDataSourceType().name());
         if (this.usesDatasetEncoding()) {
-            builder.put("-encoding", this.datasetEncoding);
+            builder.put("-encoding", this.datasetEncoding());
         }
     }
 

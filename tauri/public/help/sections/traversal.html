@@ -34,7 +34,7 @@
   <h2 id="section-options">設定項目</h2>
   <table>
     <tr><th>項目</th><th>説明</th></tr>
-    <tr><td>extension</td><td>対象にするファイルの拡張子。<code>.</code> を付けずに書く（例: <code>txt</code>）</td></tr>
+    <tr><td>extension</td><td>対象にするファイルの拡張子。<code>.</code> を付けずに書く（例: <code>txt</code>）。空なら <code>srcType</code> が <code>csv</code> / <code>xls</code> / <code>xlsx</code> のときはその拡張子のファイル、それ以外はすべてのファイルを対象にする</td></tr>
     <tr><td>recursive</td><td>ON にすると、サブディレクトリの中も読み込む</td></tr>
     <tr><td>regInclude</td><td>対象にするファイルの条件（正規表現）。ファイルのパス全体と照合し、一部に一致すれば対象にする</td></tr>
     <tr><td>regExclude</td><td>対象から外すファイルの条件（正規表現）。ファイルのパス全体と照合し、一部に一致すれば外す</td></tr>

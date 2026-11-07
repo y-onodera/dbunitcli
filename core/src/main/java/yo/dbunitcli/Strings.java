@@ -14,6 +14,10 @@ public enum Strings {
         return !Strings.isEmpty(s);
     }
 
+    public static String orDefault(final String s, final String defaultValue) {
+        return Strings.isNotEmpty(s) ? s : defaultValue;
+    }
+
     public static String capitalize(final String s) {
         if (s == null || s.isEmpty()) {
             return s;

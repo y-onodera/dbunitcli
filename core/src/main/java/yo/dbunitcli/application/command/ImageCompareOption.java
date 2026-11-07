@@ -39,6 +39,14 @@ public record ImageCompareOption(
     // excludedAreas全体の書式（矩形を0個以上連結）
     private static final Pattern AREAS_FORMAT = Pattern.compile("(?:" + AREA + ")*");
 
+    private static final String DEFAULT_THRESHOLD = "5";
+    private static final String DEFAULT_PIXEL_TOLERANCE_LEVEL = "0.01";
+    private static final String DEFAULT_ALLOWING_PERCENT_OF_DIFFERENT_PIXELS = "0.01";
+    private static final String DEFAULT_RECTANGLE_LINE_WIDTH = "1";
+    private static final String DEFAULT_MINIMAL_RECTANGLE_SIZE = "1";
+    private static final String DEFAULT_MAXIMAL_RECTANGLE_COUNT = "-1";
+    private static final String DEFAULT_PERCENT_OPACITY = "20.0";
+
     public ImageCompareOption(final String prefix) {
         this(prefix, new ImageCompareDto());
     }
@@ -91,38 +99,38 @@ public record ImageCompareOption(
     @Override
     public ParametersBuilder toParametersBuilder() {
         return new ParametersBuilder(this.getPrefix())
-                .put("-threshold", this.threshold)
-                .put("-pixelToleranceLevel", this.pixelToleranceLevel)
-                .put("-allowingPercentOfDifferentPixels", this.allowingPercentOfDifferentPixels)
-                .put("-rectangleLineWidth", this.rectangleLineWidth)
-                .put("-minimalRectangleSize", this.minimalRectangleSize)
-                .put("-maximalRectangleCount", this.maximalRectangleCount)
+                .putWithDefault("-threshold", this.threshold, DEFAULT_THRESHOLD)
+                .putWithDefault("-pixelToleranceLevel", this.pixelToleranceLevel, DEFAULT_PIXEL_TOLERANCE_LEVEL)
+                .putWithDefault("-allowingPercentOfDifferentPixels", this.allowingPercentOfDifferentPixels, DEFAULT_ALLOWING_PERCENT_OF_DIFFERENT_PIXELS)
+                .putWithDefault("-rectangleLineWidth", this.rectangleLineWidth, DEFAULT_RECTANGLE_LINE_WIDTH)
+                .putWithDefault("-minimalRectangleSize", this.minimalRectangleSize, DEFAULT_MINIMAL_RECTANGLE_SIZE)
+                .putWithDefault("-maximalRectangleCount", this.maximalRectangleCount, DEFAULT_MAXIMAL_RECTANGLE_COUNT)
                 .put("-excludedAreas", this.excludedAreas)
                 .putFlag("-drawExcludedRectangles", this.drawExcludedRectangles)
                 .putFlag("-fillExcludedRectangles", this.fillExcludedRectangles)
-                .put("-percentOpacityExcludedRectangles", this.percentOpacityExcludedRectangles)
+                .putWithDefault("-percentOpacityExcludedRectangles", this.percentOpacityExcludedRectangles, DEFAULT_PERCENT_OPACITY)
                 .put("-excludedRectangleColor", this.excludedRectangleColor)
                 .putFlag("-fillDifferenceRectangles", this.fillDifferenceRectangles)
-                .put("-percentOpacityDifferenceRectangles", this.percentOpacityDifferenceRectangles)
+                .putWithDefault("-percentOpacityDifferenceRectangles", this.percentOpacityDifferenceRectangles, DEFAULT_PERCENT_OPACITY)
                 .put("-differenceRectangleColor", this.differenceRectangleColor);
     }
 
     public ImageCompareBuilder createFactoryOf(final CompareOption.Type targetType) {
         final ImageCompareBuilder result = targetType == CompareOption.Type.image ? new ImageCompareBuilder() : PdfCompareManager.builder();
         return result
-                .setThreshold(Integer.parseInt(Optional.ofNullable(this.threshold).orElse("5")))
-                .setPixelToleranceLevel(Double.parseDouble(Optional.ofNullable(this.pixelToleranceLevel).orElse("0.01D")))
-                .setAllowingPercentOfDifferentPixels(Double.parseDouble(Optional.ofNullable(this.allowingPercentOfDifferentPixels).orElse("0.01D")))
-                .setRectangleLineWidth(Integer.parseInt(Optional.ofNullable(this.rectangleLineWidth).orElse("1")))
-                .setMinimalRectangleSize(Integer.valueOf(Optional.ofNullable(this.minimalRectangleSize).orElse("1")))
-                .setMaximalRectangleCount(Integer.valueOf(Optional.ofNullable(this.maximalRectangleCount).orElse("-1")))
+                .setThreshold(Integer.parseInt(Optional.ofNullable(this.threshold).orElse(DEFAULT_THRESHOLD)))
+                .setPixelToleranceLevel(Double.parseDouble(Optional.ofNullable(this.pixelToleranceLevel).orElse(DEFAULT_PIXEL_TOLERANCE_LEVEL)))
+                .setAllowingPercentOfDifferentPixels(Double.parseDouble(Optional.ofNullable(this.allowingPercentOfDifferentPixels).orElse(DEFAULT_ALLOWING_PERCENT_OF_DIFFERENT_PIXELS)))
+                .setRectangleLineWidth(Integer.parseInt(Optional.ofNullable(this.rectangleLineWidth).orElse(DEFAULT_RECTANGLE_LINE_WIDTH)))
+                .setMinimalRectangleSize(Integer.valueOf(Optional.ofNullable(this.minimalRectangleSize).orElse(DEFAULT_MINIMAL_RECTANGLE_SIZE)))
+                .setMaximalRectangleCount(Integer.valueOf(Optional.ofNullable(this.maximalRectangleCount).orElse(DEFAULT_MAXIMAL_RECTANGLE_COUNT)))
                 .setFillDifferenceRectangles(Boolean.parseBoolean(this.fillDifferenceRectangles))
-                .setPercentOpacityDifferenceRectangles(Double.parseDouble(Optional.ofNullable(this.percentOpacityDifferenceRectangles).orElse("20.0")))
+                .setPercentOpacityDifferenceRectangles(Double.parseDouble(Optional.ofNullable(this.percentOpacityDifferenceRectangles).orElse(DEFAULT_PERCENT_OPACITY)))
                 .setDifferenceRectangleColor(Optional.ofNullable(Color.getColor(this.differenceRectangleColor)).orElse(Color.red))
                 .setExcludeAreaList(this.excludeAreaList())
                 .setDrawExcludedRectangles(Boolean.parseBoolean(this.drawExcludedRectangles))
                 .setFillExcludedRectangles(Boolean.parseBoolean(this.fillExcludedRectangles))
-                .setPercentOpacityExcludedRectangles(Double.parseDouble(Optional.ofNullable(this.percentOpacityExcludedRectangles).orElse("20.0")))
+                .setPercentOpacityExcludedRectangles(Double.parseDouble(Optional.ofNullable(this.percentOpacityExcludedRectangles).orElse(DEFAULT_PERCENT_OPACITY)))
                 .setExcludedRectangleColor(Optional.ofNullable(Color.getColor(this.excludedRectangleColor)).orElse(Color.green))
                 ;
     }
