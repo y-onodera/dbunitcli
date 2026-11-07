@@ -5,6 +5,7 @@ import org.apache.tools.ant.taskdefs.Copy;
 import org.apache.tools.ant.taskdefs.Delete;
 import org.apache.tools.ant.types.FileSet;
 import org.junit.jupiter.api.*;
+import yo.dbunitcli.common.Parameter;
 import yo.dbunitcli.resource.FileResources;
 
 import java.io.File;
@@ -176,6 +177,12 @@ public class ParameterizeTest {
             newProperty.put(FileResources.PROPERTY_RESULT_BASE, TEMP_DIR + "/result");
             System.setProperties(newProperty);
             ParameterizeTest.clean(TEMP_DIR + "/result");
+        }
+
+        @Test
+        public void testResultDirIsResultBase() {
+            Assertions.assertEquals(new File(TEMP_DIR + "/result").getAbsolutePath()
+                    , new Parameterize().resultDir("test", new String[]{"-cmd=convert"}, Parameter.none()));
         }
 
         @Override
