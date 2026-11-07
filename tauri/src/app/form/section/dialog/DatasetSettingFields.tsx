@@ -19,6 +19,10 @@ import type {
 	DatasetSettingMode,
 } from "../../../../model/DatasetSettings";
 import { newDatasetSetting } from "../../../../model/DatasetSettings";
+import {
+	ColumnExpressionSelectDialog,
+	ExpressionEditDialog,
+} from "./AdditionalColumnDialogs";
 import ColumnSelectDialog from "./ColumnSelectDialog";
 
 export type DatasetSettingFieldsProps = {
@@ -91,39 +95,94 @@ export function ModeFields({
 	);
 }
 
-// 追加カラム(string/number/boolean/function)。モデルのreplace*/remove*をキー別に対応付ける
+// 追加カラム(string/number/boolean/function)。モデルのreplace*/remove*をキー別に対応付ける。
+// defaultValueはtryToNum等の既定値の初期値（numberは数値にしないと変換に失敗する）
 const additionalColumnFields = [
 	{
 		name: "string",
+		defaultValue: "''",
 		replace: (s: DatasetSetting, i: number, v: { [prop: string]: string }) =>
 			s.replaceString(i, v),
 		remove: (s: DatasetSetting, i: number) => s.removeString(i),
 	},
 	{
 		name: "number",
+		defaultValue: "0",
 		replace: (s: DatasetSetting, i: number, v: { [prop: string]: string }) =>
 			s.replaceNumber(i, v),
 		remove: (s: DatasetSetting, i: number) => s.removeNumber(i),
 	},
 	{
 		name: "boolean",
+		defaultValue: "''",
 		replace: (s: DatasetSetting, i: number, v: { [prop: string]: string }) =>
 			s.replaceBoolean(i, v),
 		remove: (s: DatasetSetting, i: number) => s.removeBoolean(i),
 	},
 	{
 		name: "sqlFunction",
+		defaultValue: "''",
 		replace: (s: DatasetSetting, i: number, v: { [prop: string]: string }) =>
 			s.replaceFunction(i, v),
 		remove: (s: DatasetSetting, i: number) => s.removeFunction(i),
 	},
 ] as const;
 
+type AdditionalColumnField = (typeof additionalColumnFields)[number];
+
 export function AdditionalColumnsFields({
 	target,
 	setTarget,
-}: DatasetSettingFieldsProps) {
+	columnDatalist,
+	onLoadColumns,
+}: DatasetSettingFieldsProps & {
+	columnDatalist: string[];
+	onLoadColumns: () => void;
+}) {
 	const [showOptional, setShowOptional] = useState(false);
+	const [selecting, setSelecting] = useState<AdditionalColumnField | null>(
+		null,
+	);
+	const [editing, setEditing] = useState<{
+		field: AdditionalColumnField;
+		index: number;
+	} | null>(null);
+	// 同じ名前が既にある組は上書きせずに除く
+	const appendEntries = (
+		field: AdditionalColumnField,
+		entries: [string, string][],
+	) =>
+		setTarget((cur) => {
+			let next = cur;
+			for (const [name, expression] of entries) {
+				const values = next[field.name];
+				if (!(name in values)) {
+					next = field.replace(next, Object.keys(values).length, {
+						[name]: expression,
+					});
+				}
+			}
+			return next;
+		});
+	function renderEditDialog() {
+		if (!editing) {
+			return null;
+		}
+		const { field, index } = editing;
+		const [name, value] = Object.entries(target[field.name])[index];
+		return (
+			<ExpressionEditDialog
+				name={name}
+				value={String(value)}
+				columns={columnDatalist}
+				defaultValue={field.defaultValue}
+				onApply={(newValue) =>
+					setTarget((cur) => field.replace(cur, index, { [name]: newValue }))
+				}
+				onClose={() => setEditing(null)}
+			/>
+		);
+	}
 	return (
 		<Fieldset legend="Additional Columns">
 			<ExpandButton
@@ -131,25 +190,48 @@ export function AdditionalColumnsFields({
 				showOptional={showOptional}
 				caption="additional columns"
 			/>
-			{showOptional &&
-				additionalColumnFields.map((field) => (
-					<KeyValues
-						key={field.name}
-						name={field.name}
-						values={target[field.name]}
-						handleChange={(index, newValue) =>
-							setTarget((cur) => field.replace(cur, index, newValue))
-						}
-						handleRemove={(index) =>
-							setTarget((cur) => field.remove(cur, index))
-						}
-					/>
-				))}
+			{showOptional && (
+				<>
+					<DialogField>
+						<BlueButton title="Load Columns" handleClick={onLoadColumns} />
+					</DialogField>
+					{additionalColumnFields.map((field) => (
+						<KeyValues
+							key={field.name}
+							name={field.name}
+							values={target[field.name]}
+							handleChange={(index, newValue) =>
+								setTarget((cur) => field.replace(cur, index, newValue))
+							}
+							handleRemove={(index) =>
+								setTarget((cur) => field.remove(cur, index))
+							}
+							handleSelect={
+								columnDatalist.length > 0
+									? () => setSelecting(field)
+									: undefined
+							}
+							handleEdit={(index) => setEditing({ field, index })}
+						/>
+					))}
+				</>
+			)}
+			{selecting && (
+				<ColumnExpressionSelectDialog
+					columns={columnDatalist}
+					defaultValue={selecting.defaultValue}
+					onApply={(entries) => appendEntries(selecting, entries)}
+					onClose={() => setSelecting(null)}
+				/>
+			)}
+			{renderEditDialog()}
 		</Fieldset>
 	);
 }
 
-// Filter/Orderの配列項目。モデルのreplace*/remove*をキー別に対応付ける
+// Filter/Orderの配列項目。モデルのreplace*/remove*をキー別に対応付ける。
+// expressionはJEXL式で書く項目で、別の組に分けて選んだカラムを参照する式にする。
+// defaultValueはtryToNum等の既定値の初期値
 const filterOrderFields = [
 	{
 		name: "exclude",
@@ -170,6 +252,7 @@ const filterOrderFields = [
 	},
 	{
 		name: "filter",
+		expression: { defaultValue: "''" },
 		replace: (s: DatasetSetting, t: string, i: number) => s.replaceFilter(t, i),
 		remove: (s: DatasetSetting, i: number) => s.removeFilter(i),
 	},
@@ -180,16 +263,27 @@ const filterOrderFields = [
 	},
 ] as const;
 
-type FilterOrderFieldName = (typeof filterOrderFields)[number]["name"];
+type FilterOrderField = (typeof filterOrderFields)[number];
+type FilterOrderFieldName = FilterOrderField["name"];
 
-// fieldNamesで表示する項目を絞れる（省略時はすべて）
+function expressionOf(
+	field: FilterOrderField,
+): { defaultValue: string } | undefined {
+	return "expression" in field ? field.expression : undefined;
+}
+
+function isExpressionField(field: FilterOrderField): boolean {
+	return expressionOf(field) !== undefined;
+}
+
+// fieldNamesで表示する項目を絞れる（省略時はすべて）。legendは式でない項目の組の見出し
 export function FilterOrderFields({
 	target,
 	setTarget,
 	columnDatalist,
 	columnList,
 	onLoadColumns,
-	legend = "Filter / Order",
+	legend = "Columns / Order",
 	fieldNames,
 }: DatasetSettingFieldsProps & {
 	columnDatalist: string[];
@@ -202,7 +296,12 @@ export function FilterOrderFields({
 		(field) => !fieldNames || fieldNames.includes(field.name),
 	);
 	const [selecting, setSelecting] = useState<{
-		field: (typeof filterOrderFields)[number];
+		field: FilterOrderField;
+		index: number;
+	} | null>(null);
+	// Addで出した空行も対象にするため値ではなく位置で持つ
+	const [editing, setEditing] = useState<{
+		field: FilterOrderField;
 		index: number;
 	} | null>(null);
 	// 他の行に既にある項目を除き、先頭をクリックした行に設定して残りを末尾に追加する
@@ -226,40 +325,96 @@ export function FilterOrderFields({
 			return next;
 		});
 	};
-	return (
-		<Fieldset legend={legend}>
-			<DialogField>
-				<BlueButton title="Load Columns" handleClick={onLoadColumns} />
-			</DialogField>
-			{visibleFields.map((field) => (
-				<Arrays
-					key={field.name}
-					name={field.name}
-					showCaption={true}
-					values={target[field.name]}
-					list={columnList}
-					handleChange={(text, index) =>
-						setTarget((cur) => field.replace(cur, text, index))
+	function renderSelectDialog() {
+		if (!selecting) {
+			return null;
+		}
+		const expression = expressionOf(selecting.field);
+		if (expression) {
+			return (
+				<ColumnExpressionSelectDialog
+					columns={columnDatalist}
+					defaultValue={expression.defaultValue}
+					onApply={(entries) =>
+						applySelected(entries.map(([, expression]) => expression))
 					}
-					handleRemove={(index) => setTarget((cur) => field.remove(cur, index))}
-					handleSelect={
-						columnDatalist.length > 0
-							? (index) => setSelecting({ field, index })
-							: undefined
-					}
+					onClose={() => setSelecting(null)}
 				/>
-			))}
+			);
+		}
+		return (
+			<ColumnSelectDialog
+				columns={columnDatalist}
+				onApply={applySelected}
+				onClose={() => setSelecting(null)}
+			/>
+		);
+	}
+	function renderGroup(groupLegend: string, fields: FilterOrderField[]) {
+		if (fields.length === 0) {
+			return null;
+		}
+		return (
+			<Fieldset legend={groupLegend}>
+				<DialogField>
+					<BlueButton title="Load Columns" handleClick={onLoadColumns} />
+				</DialogField>
+				{fields.map((field) => (
+					<Arrays
+						key={field.name}
+						name={field.name}
+						showCaption={true}
+						values={target[field.name]}
+						list={columnList}
+						handleChange={(text, index) =>
+							setTarget((cur) => field.replace(cur, text, index))
+						}
+						handleRemove={(index) =>
+							setTarget((cur) => field.remove(cur, index))
+						}
+						handleSelect={
+							columnDatalist.length > 0
+								? (index) => setSelecting({ field, index })
+								: undefined
+						}
+						handleEdit={
+							isExpressionField(field)
+								? (index) => setEditing({ field, index })
+								: undefined
+						}
+					/>
+				))}
+			</Fieldset>
+		);
+	}
+	return (
+		<>
+			{renderGroup(
+				legend,
+				visibleFields.filter((field) => !isExpressionField(field)),
+			)}
+			{renderGroup("Filter", visibleFields.filter(isExpressionField))}
 			{columnDatalist.length > 0 && (
 				<ResourceDatalist id="column_datalist" resources={columnDatalist} />
 			)}
-			{selecting && (
-				<ColumnSelectDialog
+			{renderSelectDialog()}
+			{editing && (
+				<ExpressionEditDialog
+					name={editing.field.name}
+					value={target[editing.field.name][editing.index] ?? ""}
 					columns={columnDatalist}
-					onApply={applySelected}
-					onClose={() => setSelecting(null)}
+					defaultValue={expressionOf(editing.field)?.defaultValue ?? ""}
+					onApply={(text) =>
+						setTarget((cur) =>
+							isDuplicated(cur[editing.field.name], text, editing.index)
+								? cur
+								: editing.field.replace(cur, text, editing.index),
+						)
+					}
+					onClose={() => setEditing(null)}
 				/>
 			)}
-		</Fieldset>
+		</>
 	);
 }
 

@@ -10,6 +10,7 @@ import {
 	insertInlineAtCursor,
 	placeScalar,
 	qualifyColumn,
+	replaceSelection,
 	scalarExpression,
 	subqueryLines,
 	tableLines,
@@ -402,5 +403,14 @@ describe("qualifyColumn", () => {
 	it("エイリアスが空または空白のみならカラム名のまま", () => {
 		expect(qualifyColumn("ID", "")).toBe("ID");
 		expect(qualifyColumn("ID", "  ")).toBe("ID");
+	});
+});
+
+describe("replaceSelection", () => {
+	it("選択範囲を置き換え、カーソルを挿入した文字列の直後に置く", () => {
+		expect(replaceSelection("(  ) && x", "a == b", 1, 3)).toEqual({
+			value: "(a == b) && x",
+			cursor: 7,
+		});
 	});
 });

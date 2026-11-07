@@ -43,7 +43,12 @@ export default function DatasetSettingDialog(props: {
 				columnList={candidates.columnList}
 				SeparateDialog={DatasetSettingDialog}
 			/>
-			<AdditionalColumnsFields target={target} setTarget={setTarget} />
+			<AdditionalColumnsFields
+				target={target}
+				setTarget={setTarget}
+				columnDatalist={candidates.columnDatalist}
+				onLoadColumns={candidates.openColumnDialog}
+			/>
 			<FilterOrderFields
 				target={target}
 				setTarget={setTarget}

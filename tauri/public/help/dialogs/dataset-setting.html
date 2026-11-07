@@ -17,14 +17,14 @@
     <li><a href="#section-split">Split / Rename</a></li>
     <li><a href="#section-separate">Separate</a></li>
     <li><a href="#section-additional">Additional Columns</a></li>
-    <li><a href="#section-filter">Filter / Order</a></li>
+    <li><a href="#section-filter">Columns / Order・Filter</a></li>
     <li><a href="#section-jexl">JEXL 式の書き方</a></li>
     <li><a href="#section-preview">Preview</a></li>
     <li><a href="#section-related">関連</a></li>
   </ol>
 
   <h2 id="section-simple">シンプルな使い方</h2>
-  <p>Target で対象のテーブルを選び、Filter / Order などで適用する内容を指定します。<a href="dataset-settings.html">Dataset Settings</a> の表の行の編集ボタン（新しく作るときは追加ボタン）で開きます。</p>
+  <p>Target で対象のテーブルを選び、Columns / Order や Filter などで適用する内容を指定します。<a href="dataset-settings.html">Dataset Settings</a> の表の行の編集ボタン（新しく作るときは追加ボタン）で開きます。</p>
   <p>例: <code>users</code> から更新日時のカラムを外し、<code>id</code> を主キーにします。</p>
   <pre>入力 (users):
   id | name  | updated_at
@@ -32,8 +32,8 @@
 
 指定:
   Target の name       = users
-  Filter / Order の keys    = id
-  Filter / Order の exclude = updated_at
+  Columns / Order の keys    = id
+  Columns / Order の exclude = updated_at
   → Save
 
 結果 (users):
@@ -234,6 +234,29 @@ id | amount
   </table>
   <p>＋（Add）を押すと空の行が追加されます。name を入力して確定すると設定され、空のまま確定するとその行は消えます。追加した行を確定するまで ＋ は表示されません。</p>
 
+  <h3>読み込んだカラムの反映</h3>
+  <p>展開すると先頭に Load Columns ボタンが表示されます。使い方は Columns / Order・Filter の「Load Columns」と同じで、取得したカラムはどの組でも共通です。取得したカラムは <code>get('カラム名')</code> の形で式に反映します。日本語や記号を含むカラム名もそのまま参照できます。</p>
+  <p>反映するときに、カラムを関数で囲むかを <code>function</code> で選べます。</p>
+  <table>
+    <tr><th>function</th><th>反映される式</th></tr>
+    <tr><td>none</td><td><code>get('カラム名')</code></td></tr>
+    <tr><td>tryToNum</td><td><code>tryToNum(get('カラム名'), default)</code>。<code>default</code> が空なら <code>null</code> になる。</td></tr>
+    <tr><td>formatDate</td><td><code>formatDate(get('カラム名'), 'from', 'to', default)</code>。<code>default</code> が空なら 3 引数の形になる。</td></tr>
+    <tr><td>contains / startsWith / endsWith / matches</td><td><code>get('カラム名').contains('argument')</code> など。<code>argument</code> は文字列として埋め込む（<code>matches</code> では正規表現）。</td></tr>
+    <tr><td>substring</td><td><code>get('カラム名').substring(start, end)</code>。<code>end</code> が空なら <code>substring(start)</code> になる。</td></tr>
+  </table>
+  <p><code>default</code> には JEXL 式をそのまま書きます（文字列なら <code>''</code> のようにシングルクォートで囲みます）。初期値は <code>number</code> では <code>0</code>、それ以外では <code>''</code> です。<code>from</code> / <code>to</code> / <code>argument</code> はシングルクォートを付けずに値だけを書きます。<code>start</code> / <code>end</code> は数値（JEXL 式）を書きます。関数・メソッドの詳しい動きは「JEXL 式の書き方」を参照してください。</p>
+  <ul>
+    <li>select ボタン（チェックリスト付きのアイコン）: 各型の ＋ の右に表示されます。Select Columns ダイアログでカラムを複数選んで Apply を押すと、カラム名を name、カラムを参照する式を値とした行をまとめて末尾に追加します。その型に同じ name の行が既にあるカラムは追加しません。Load Columns でカラムを取得するまでは表示されません。</li>
+    <li>edit ボタン: 各行の右に表示され、値の式をテキストエリアで編集するダイアログを開きます。Apply で行の値に反映します。
+      <ul>
+        <li><code>operator</code> で演算子を選び Insert Operator を押すと、テキストエリアのカーソル位置に演算子を挿入します。選べる演算子は「JEXL 式の書き方」の「演算子」の表と同じ。二項演算子は前後に空白を付けて挿入する</li>
+        <li><code>column</code> でカラムを選び Insert Column を押すと、カーソル位置にカラムを参照する式を挿入します。<code>function</code> の指定は上の表と同じ。カラムを取得していない場合は表示されない</li>
+        <li>文字列を選択した状態で挿入すると、選択した部分を置き換えます。挿入後のカーソルは挿入した文字列の直後に移るため、続けて挿入すると後ろに並ぶ</li>
+      </ul>
+    </li>
+  </ul>
+
   <h3>変化の例</h3>
 
   <p><strong>string（文字列連結）</strong></p>
@@ -294,7 +317,8 @@ id | status   | mark
 3  | PENDING  | HOLD
 </code></pre>
 
-  <h2 id="section-filter">Filter / Order</h2>
+  <h2 id="section-filter">Columns / Order・Filter</h2>
+  <p><code>exclude</code> / <code>include</code> / <code>keys</code> / <code>order</code> は Columns / Order の組に、JEXL 式で書く <code>filter</code> は Filter の組に表示されます。</p>
   <table>
     <tr><th>項目</th><th>説明</th></tr>
     <tr><td>exclude</td><td>処理から除外するカラム</td></tr>
@@ -310,7 +334,7 @@ id | status   | mark
   </ul>
 
   <h3>Load Columns</h3>
-  <p>Filter / Order の先頭にある Load Columns ボタンで、各フィールドのカラム名入力の候補（入力補助）を読み込めます。</p>
+  <p>Columns / Order と Filter の先頭にある Load Columns ボタンで、各フィールドのカラム名入力の候補（入力補助）を読み込めます。どの組の Load Columns ボタンも同じ動きで（Additional Columns を含む）、取得したカラムはすべての組で使えます。</p>
   <ol>
     <li>Load Columns を押すと、Target の指定に該当するテーブルの一覧が表示されます。Target でテーブル名やパターンを指定していない場合は、データセット内のすべてのテーブルが表示されます。</li>
     <li>候補にしたいテーブルの行で Load Columns を押すと、そのテーブルのカラム名が取得されます。読み込むのは選んだテーブルだけです。</li>
@@ -327,6 +351,10 @@ id | status   | mark
     <li>選択したカラムのうち、その項目の他の行に既にあるものは除かれます。残りの先頭の1件は select を押した行に設定され（元の値は上書きされます）、それ以外は末尾に追加されます。すべて他の行にある場合は何も変わりません。</li>
   </ol>
   <p>Load Columns でカラムを取得するまでは、select ボタンは表示されません。</p>
+  <p><code>filter</code> では、カラム名ではなくカラムを参照する式（<code>get('カラム名')</code>）を設定します。Select Columns ダイアログで <code>function</code> も選べます（指定の仕方は Additional Columns の「読み込んだカラムの反映」と同じ。例: startsWith を選ぶと <code>get('区分').startsWith('SALE')</code>）。複数選んだ場合の行への入り方は上と同じで、filter の行は AND で組み合わさります。</p>
+
+  <h3>filter の式の編集</h3>
+  <p><code>filter</code> の各行の右にある edit ボタンで、式をテキストエリアで編集するダイアログを開きます。値が空の行でも使えます。演算子・カラムの挿入の仕方は Additional Columns の edit ボタンと同じです。Apply で行に反映します。他の行と同じ式になる場合は反映されません。</p>
 
   <h3>変化の例</h3>
 
@@ -394,6 +422,7 @@ id | name
   <table>
     <tr><th>カテゴリ</th><th>演算子</th></tr>
     <tr><td>比較</td><td><code>==</code>, <code>!=</code>, <code>&gt;</code>, <code>&lt;</code>, <code>&gt;=</code>, <code>&lt;=</code></td></tr>
+    <tr><td>正規表現</td><td><code>=~</code>（値全体が正規表現に一致する）, <code>!~</code>（一致しない）。例: <code>type =~ 'SALE.*'</code></td></tr>
     <tr><td>論理</td><td><code>&amp;&amp;</code> (AND), <code>||</code> (OR), <code>!</code> (NOT)</td></tr>
     <tr><td>算術</td><td><code>+</code>, <code>-</code>, <code>*</code>, <code>/</code>, <code>%</code></td></tr>
     <tr><td>文字列連結</td><td><code>+</code></td></tr>
@@ -410,6 +439,7 @@ id | name
     <li><code>substring(start, end)</code> — 部分文字列の取得</li>
   </ul>
   <p>文字列リテラルはシングルクォートで囲みます（例: <code>'APPROVED'</code>）。</p>
+  <p>日本語や記号を含むカラム名はそのままでは式に書けないため、<code>get('カラム名')</code> で参照します（例: <code>get('金額(円)') &gt; 1000</code>）。</p>
 
   <h3>関数</h3>
   <p>次の関数は、Excel テンプレート（<a href="../sections/jxls.html">Jxls</a>）の <code>${...}</code> の中でも使えます。</p>

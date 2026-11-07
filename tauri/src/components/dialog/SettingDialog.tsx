@@ -3,6 +3,7 @@ import { type OperationResult, saveOnSuccess } from "../../utils/fetchUtils";
 import { BlueButton, WhiteButton } from "../element/Button";
 import {
 	AddButton,
+	EditButton,
 	FactCheckButton,
 	RemoveButton,
 } from "../element/ButtonIcon";
@@ -235,6 +236,7 @@ export function Arrays(props: {
 	showCaption?: boolean;
 	list?: string;
 	handleSelect?: (index: number) => void;
+	handleEdit?: (index: number) => void;
 }) {
 	// 値が空のときとAdd中は、末尾に画面だけの空行を出す（モデルは空の値を保持しないため）
 	// selectなど外から値が確定して行数が変われば、Add中は自然に終わる
@@ -270,6 +272,7 @@ export function Arrays(props: {
 						showCaption={props.showCaption}
 						list={props.list}
 						handleSelect={props.handleSelect}
+						handleEdit={props.handleEdit}
 					/>
 				);
 			})}
@@ -295,6 +298,7 @@ export function ArraysText(props: {
 	showCaption?: boolean;
 	list?: string;
 	handleSelect?: (index: number) => void;
+	handleEdit?: (index: number) => void;
 }) {
 	const [text, setText] = useState(props.val);
 	// 他の行と同じ値は確定させず、入力前の値に戻す
@@ -333,13 +337,16 @@ export function ArraysText(props: {
 					handleBlur={handleBlur}
 					list={props.list}
 				/>
-				{(props.handleSelect || props.index > 0) && (
+				{(props.handleSelect || props.handleEdit || props.index > 0) && (
 					<div className="col-start-3 flex items-center">
 						{props.handleSelect && (
 							<FactCheckButton
 								title="select"
 								handleClick={() => props.handleSelect?.(props.index)}
 							/>
+						)}
+						{props.handleEdit && (
+							<EditButton handleClick={() => props.handleEdit?.(props.index)} />
 						)}
 						{props.index > 0 && <RemoveButton handleClick={handleRemove} />}
 					</div>
@@ -354,6 +361,9 @@ export function KeyValues(props: {
 	values: object;
 	handleChange: (index: number, value: { [prop: string]: string }) => void;
 	handleRemove: (index: number) => void;
+	// 複数の行をまとめて追加する
+	handleSelect?: () => void;
+	handleEdit?: (index: number) => void;
 }) {
 	// 値が空のときとAdd中は、末尾に画面だけの空行を出す（名前が確定するまでモデルに入れない）
 	const [adding, setAdding] = useState(false);
@@ -366,7 +376,8 @@ export function KeyValues(props: {
 				const blank = index === blankIndex;
 				return (
 					<KeyValueText
-						key={key}
+						// 編集ダイアログなど外から式が変われば入力中のstateを作り直す
+						key={`${key}:${value}`}
 						propKey={key}
 						name={props.name}
 						value={value.toString()}
@@ -378,15 +389,19 @@ export function KeyValues(props: {
 							props.handleChange(i, newValue);
 						}}
 						handleRemove={blank ? () => setAdding(false) : props.handleRemove}
+						handleEdit={blank ? undefined : props.handleEdit}
 					/>
 				);
 			})}
 			<div className="grid grid-cols-5 justify-center pb-2">
-				{entries.length > 0 && !adding && (
-					<div className="col-start-2">
+				<div className="col-start-2 flex items-center">
+					{entries.length > 0 && !adding && (
 						<AddButton handleClick={() => setAdding(true)} />
-					</div>
-				)}
+					)}
+					{props.handleSelect && (
+						<FactCheckButton title="select" handleClick={props.handleSelect} />
+					)}
+				</div>
 			</div>
 		</>
 	);
@@ -399,6 +414,7 @@ export function KeyValueText(props: {
 	index: number;
 	handleChange: (index: number, value: { [prop: string]: string }) => void;
 	handleRemove: (index: number) => void;
+	handleEdit?: (index: number) => void;
 }) {
 	const [key, setKey] = useState(props.propKey);
 	const [value, setValue] = useState(props.value);
@@ -448,9 +464,12 @@ export function KeyValueText(props: {
 					handleChange={(ev) => setValue(ev.target.value)}
 					handleBlur={handleValueBlur}
 				/>
-				{props.index > 0 && (
-					<div className="col-start-5">
-						<RemoveButton handleClick={handleRemove} />
+				{(props.handleEdit || props.index > 0) && (
+					<div className="col-start-5 flex items-center">
+						{props.handleEdit && (
+							<EditButton handleClick={() => props.handleEdit?.(props.index)} />
+						)}
+						{props.index > 0 && <RemoveButton handleClick={handleRemove} />}
 					</div>
 				)}
 			</div>
