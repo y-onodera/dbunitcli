@@ -18,6 +18,9 @@ td:first-child { font-family: monospace; white-space: nowrap; color: #4f46e5; }
 pre { background: #f9fafb; padding: 0.75rem; border-radius: 0.375rem; overflow-x: auto; font-size: 0.85rem; }
 code { font-family: monospace; color: #4f46e5; }
 
+/* 画面イメージ（images/ 配下。tauri/screenshot/run.sh で撮り直す）。2 倍の解像度で撮るので半分の大きさで表示する */
+img.screenshot { display: block; zoom: 0.5; max-width: 100%; margin-top: 1.5rem; border: 2px solid #e5e7eb; border-radius: 0.75rem; }
+
 /* index.html のページ一覧 */
 ul.cards { list-style: none; padding: 0; }
 ul.cards li { margin-bottom: 0.5rem; }
