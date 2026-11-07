@@ -42,6 +42,8 @@
   <h2 id="section-input">入力欄</h2>
 
   <h3 id="section-input-parts">表示と操作</h3>
+  <img class="screenshot" src="../images/common/input-field.png" alt="値が入った入力欄。右端に ×、横に ⋮、下に灰色の文字で基準ディレクトリと Workspace" />
+  <img class="screenshot" src="../images/common/input-error.png" alt="入力欄の下に赤字でオプションの誤りが出ている" />
   <table>
     <tr><th>表示・操作</th><th>説明</th></tr>
     <tr><td>×</td><td>入力した値を消す。値があるときだけ表示。キーボードの Tab では移動しない</td></tr>
@@ -69,6 +71,7 @@
 
   <h3 id="section-menu">⋮ メニュー</h3>
   <p>メニューに出るボタンは、欄の種類と値によって変わります。</p>
+  <img class="screenshot" src="../images/common/menu.png" alt="⋮ を押して開いたメニュー。edit・generate・open・delete・file が並ぶ" />
   <table>
     <tr><th>ボタン</th><th>動作</th><th>表示される条件</th></tr>
     <tr><td>edit</td><td>入力欄の値のファイルを編集するダイアログを開く。値が空なら新しいファイルを作る。保存すると、そのファイル名が入力欄に入る</td><td>編集ダイアログがある欄</td></tr>
@@ -125,11 +128,12 @@
 
   <h3 id="section-buttons">フッターのボタン</h3>
   <p>確定のボタンは、ダイアログの用途によって名前と反映先が変わります。</p>
+  <img class="screenshot" src="../images/common/dialog-footer.png" alt="ファイルを編集するダイアログの name 欄と、Save・Save and Preview・Close のボタン" />
   <table>
     <tr><th>ボタン</th><th>動作</th><th>あるダイアログ</th></tr>
     <tr><td>Save</td><td><code>name</code> 欄のファイルに保存し、元の入力欄にそのファイル名を入れて閉じる。保存に失敗したときは開いたまま（<a href="#section-save">name 欄</a>）</td><td>⋮ メニューの edit で開く、ファイルを編集するダイアログ</td></tr>
     <tr><td>Save</td><td>編集内容を呼び出し元の一覧表の行に反映して閉じる。ファイルには書き込まない（<a href="#section-table">設定一覧表</a>）</td><td>設定一覧表の行を編集するダイアログ（Dataset Setting、Xlsx Row Setting など）</td></tr>
-    <tr><td>Apply</td><td>入力した内容を呼び出し元に反映して閉じる。ファイルには書き込まない</td><td><a href="../dialogs/parameters.html">Parameters (-P)</a>（-P 値に反映）、<a href="../sections/jdbc.html">JDBC URL Builder</a>（<code>jdbcUrl</code> に反映）</td></tr>
+    <tr><td>Apply</td><td>入力した内容を呼び出し元に反映して閉じる。ファイルには書き込まない</td><td><a href="../dialogs/parameters.html">Parameters (-P)</a>（-P 値に反映）、<a href="../sections/jdbc.html">JDBC URL Builder</a>（<code>jdbcUrl</code> に反映）、式の編集（<a href="../dialogs/dataset-setting.html">Dataset Setting</a> の行の式に反映）</td></tr>
     <tr><td>Execute</td><td>入力したデータセットから雛型を生成する。生成後の流れは各ダイアログのページを参照</td><td>⋮ メニューの generate で開くダイアログ</td></tr>
     <tr><td>Close</td><td>保存・反映していない編集を捨てて閉じる。元の入力欄・一覧表は変わらない</td><td>すべてのダイアログ</td></tr>
   </table>
@@ -145,6 +149,7 @@
 
   <h3 id="section-arrays">複数値の入力欄</h3>
   <p>同じ項目に値を複数並べる入力欄（1 行に 1 つの値）と、name と expression を組で並べる入力欄に共通の動きです。</p>
+  <img class="screenshot" src="../images/common/arrays.png" alt="1 行に 1 つの値を並べる入力欄。2 行目の右に remove、最後の行の下に add" />
   <table>
     <tr><th>ボタン・操作</th><th>動作</th></tr>
     <tr><td>add</td><td>末尾に空の行を追加する。最後の行に値があるときだけ表示。値が 1 つもないときは、はじめから空の行が 1 つある</td></tr>
@@ -156,6 +161,7 @@
 
   <h3 id="section-table">設定一覧表</h3>
   <p>Dataset Settings・Xlsx Schema・Fixed Column Def などで、複数の設定を Target と Action の表で一覧します。設定の中身は、行のボタンから開くダイアログで編集します。</p>
+  <img class="screenshot" src="../images/common/setting-table.png" alt="Target と Action の 2 列の設定一覧表。行に edit・delete・copy、表の下に add" />
   <table>
     <tr><th>ボタン</th><th>動作</th></tr>
     <tr><td>edit</td><td>その行の設定を編集するダイアログを開く。ダイアログの Save で行に反映する</td></tr>
@@ -173,6 +179,7 @@
 
   <h3 id="section-maximize">最大化</h3>
   <p>SQL・テンプレート・式など長い文章を書くダイアログでは、最大化ボタンでダイアログをウィンドウいっぱいに広げ、テキストエリアを広く使えます。もう一度押すと元の大きさに戻ります。</p>
+  <img class="screenshot" src="../images/common/maximize.png" alt="式の編集ダイアログ。タイトルの右に最大化ボタン" />
   <table>
     <tr><th>最大化できるダイアログ</th><th>開き方</th></tr>
     <tr><td><a href="../dialogs/sql-editor.html">Edit SQL / Edit Table Definition</a></td><td><code>srcType</code> が sql / table / csvq のとき、<code>src</code> の ⋮ メニューの edit</td></tr>
