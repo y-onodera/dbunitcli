@@ -1,5 +1,5 @@
 ---
-description: tauriのダイアログの幅・高さ・ボタン配置の規定（ウィンドウからはみ出してボタンを押せなくなるのを防ぐ）。
+description: tauriのダイアログの幅・高さ・ボタン配置・テキストエリア最大化の規定（ウィンドウからはみ出してボタンを押せなくなるのを防ぐ）。
 TRIGGER when: tauri/src で ModalOverlay / FullDialog / SettingDialog を使うダイアログを追加、または幅・高さ・ボタン配置・入れ子構造を変えるとき。
 DO NOT TRIGGER when: ダイアログ内の文言・ロジックだけの変更。
 ---
@@ -20,6 +20,7 @@ DO NOT TRIGGER when: ダイアログ内の文言・ロジックだけの変更�
 ## 高さ
 - 枠の上限（`FullDialog` はブラウザ既定、`ModalOverlay` は `max-h-[80vh]`）は変えない
 - 本文内のスクロール領域は1つあたり `max-h-96` 以下。`h-[…vh]` で枠を埋めない
+- 編集用テキストエリアは `DialogTextArea` を `DialogBody` 直下か `DialogField grow` 内に置き、枠（`SettingDialog` / `ModalOverlay`）に `maximizable` を付ける。最大化中の大きさはこれで決まる
 
 ## 確認
 800×600 で長めのダミー内容を入れて開き、各ボタンの中心で `document.elementFromPoint` がそのボタンを返すこと。sidecar なしなら scratchpad に Vite の入口（`tauri/node_modules` を symlink、`src/App.css` と対象を絶対パスで import）を作り Playwright で開く。

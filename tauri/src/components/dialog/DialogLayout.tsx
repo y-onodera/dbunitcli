@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { useDialogMaximize } from "./DialogMaximize";
 
 const BODY_SIZE = {
 	sm: "w-dialog-sm max-w-full p-4",
@@ -10,7 +11,8 @@ const BODY_SIZE = {
 	fluid: "p-4 rounded-lg mt-2",
 } as const;
 
-// ダイアログ本体の幅・パディング。高さの上限とスクロールはダイアログの枠（FullDialog / ModalOverlay）が持つ
+// ダイアログ本体の幅・パディング。高さの上限とスクロールはダイアログの枠（FullDialog / ModalOverlay）が持つ。
+// 最大化中は枠の幅と残りの高さを埋める
 export function DialogBody({
 	size,
 	children,
@@ -18,18 +20,30 @@ export function DialogBody({
 	size: keyof typeof BODY_SIZE;
 	children: ReactNode;
 }) {
-	return <div className={BODY_SIZE[size]}>{children}</div>;
+	const { maximized } = useDialogMaximize();
+	const className = maximized
+		? "grow flex flex-col w-full p-4"
+		: BODY_SIZE[size];
+	return <div className={className}>{children}</div>;
 }
 
-// ダイアログ内の入力項目1つ分の縦余白。最後の項目は last を指定して下余白を広げる
+// ダイアログ内の入力項目1つ分の縦余白。最後の項目は last を指定して下余白を広げる。
+// grow を指定すると、最大化中は残りの高さを埋める（DialogTextArea を入れる項目に使う）
 export function DialogField({
 	last = false,
+	grow = false,
 	children,
 }: {
 	last?: boolean;
+	grow?: boolean;
 	children: ReactNode;
 }) {
-	return <div className={last ? "mb-4" : "mb-3"}>{children}</div>;
+	const { maximized } = useDialogMaximize();
+	const margin = last ? "mb-4" : "mb-3";
+	if (grow && maximized) {
+		return <div className={`${margin} grow flex flex-col`}>{children}</div>;
+	}
+	return <div className={margin}>{children}</div>;
 }
 
 // ボタンを横並びにする行

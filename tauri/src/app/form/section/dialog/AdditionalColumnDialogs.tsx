@@ -3,12 +3,12 @@ import { useState } from "react";
 import {
 	DialogActions,
 	DialogField,
+	DialogTextArea,
 	DialogTitle,
 	ModalOverlay,
 	StatusMessage,
 } from "../../../../components/dialog";
 import { BlueButton, WhiteButton } from "../../../../components/element/Button";
-import { TextArea } from "../../../../components/element/Input";
 import {
 	type ColumnExpressionFunction,
 	type ColumnExpressionOption,
@@ -152,10 +152,10 @@ export function ExpressionEditDialog({
 	}
 
 	return (
-		<ModalOverlay width="w-2xl" zClass="z-modal-nested">
+		<ModalOverlay width="w-2xl" zClass="z-modal-nested" maximizable>
 			<DialogTitle>{`Edit ${name}`}</DialogTitle>
-			<DialogField>
-				<TextArea
+			<DialogField grow>
+				<DialogTextArea
 					ref={textareaRef}
 					id="expression"
 					value={text}

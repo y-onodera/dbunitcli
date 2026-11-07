@@ -216,20 +216,22 @@ export function TextArea({
 	placeholder?: string;
 	spellCheck?: boolean;
 	onChange?: (ev: React.ChangeEvent<HTMLTextAreaElement>) => void;
+	// 親（flex 縦並び）の残りの高さを埋める。通常時の高さは下回らない
+	fill?: boolean;
 }) {
 	return (
 		<textarea
 			id={props.id}
 			ref={ref}
-			className="p-2.5
-                       w-full h-96
+			className={`p-2.5
+                       w-full ${props.fill ? "flex-1 min-h-96" : "h-96"}
                        text-sm text-content
                        rounded-lg
                        bg-input
                        disabled:bg-input-disabled
                        border border-border
                        ring-primary-ring
-                       focus-visible:ring-3 "
+                       focus-visible:ring-3`}
 			value={props.value}
 			readOnly={props.readOnly}
 			placeholder={props.placeholder}

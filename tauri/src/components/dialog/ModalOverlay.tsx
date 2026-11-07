@@ -1,23 +1,36 @@
 import type { ReactNode } from "react";
 import { SectionHelpButton } from "./DialogHelpButton";
+import {
+	DialogMaximizeProvider,
+	MaximizeToggleButton,
+	useDialogMaximizeState,
+} from "./DialogMaximize";
 
 export function ModalOverlay({
 	children,
 	width = "w-96",
 	zClass = "z-modal",
+	maximizable = false,
 }: {
 	children: ReactNode;
 	width?: string;
 	zClass?: string;
+	maximizable?: boolean;
 }) {
+	const maximize = useDialogMaximizeState(maximizable);
+	const size = maximize.maximized
+		? "flex flex-col w-full h-[calc(100vh-2rem)]"
+		: `max-h-[80vh] ${width}`;
 	return (
 		<div
 			className={`fixed inset-0 bg-overlay flex items-center justify-center ${zClass}`}
 		>
 			<div
-				className={`bg-surface rounded-lg shadow-modal p-6 max-w-[calc(100vw-2rem)] max-h-[80vh] overflow-y-auto ${width}`}
+				className={`bg-surface rounded-lg shadow-modal p-6 max-w-[calc(100vw-2rem)] overflow-y-auto ${size}`}
 			>
-				{children}
+				<DialogMaximizeProvider value={maximize}>
+					{children}
+				</DialogMaximizeProvider>
 			</div>
 		</div>
 	);
@@ -34,6 +47,7 @@ export function DialogTitle(props: {
 			{props.command && props.label && (
 				<SectionHelpButton command={props.command} label={props.label} />
 			)}
+			<MaximizeToggleButton />
 		</h2>
 	);
 }

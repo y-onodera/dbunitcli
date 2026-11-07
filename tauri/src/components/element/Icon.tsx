@@ -215,6 +215,34 @@ export function HelpIcon(props: { title?: string; fill?: string }) {
 		</svg>
 	);
 }
+export function OpenInFullIcon(props: { title?: string; fill?: string }) {
+	return (
+		<svg
+			xmlns="http://www.w3.org/2000/svg"
+			height="24px"
+			viewBox="0 -960 960 960"
+			width="24px"
+			fill={props.fill ?? "currentColor"}
+		>
+			<title>{props.title ?? "maximize"}</title>
+			<path d="M120-120v-320h80v184l504-504H520v-80h320v320h-80v-184L256-200h184v80H120Z" />
+		</svg>
+	);
+}
+export function CloseFullscreenIcon(props: { title?: string; fill?: string }) {
+	return (
+		<svg
+			xmlns="http://www.w3.org/2000/svg"
+			height="24px"
+			viewBox="0 -960 960 960"
+			width="24px"
+			fill={props.fill ?? "currentColor"}
+		>
+			<title>{props.title ?? "restore"}</title>
+			<path d="M120-64 64-120l224-224H120v-80h304v304h-80v-168L120-64Zm520-480v-304h80v168l224-224 56 56-224 224h168v80H640Z" />
+		</svg>
+	);
+}
 export function ExpandIcon(props: { title?: string; close: boolean }) {
 	return (
 		<svg

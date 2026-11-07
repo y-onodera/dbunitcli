@@ -6,6 +6,7 @@ export {
 	InlineActions,
 	StatusMessage,
 } from "./DialogLayout";
+export { DialogTextArea } from "./DialogMaximize";
 export { FullDialog } from "./FullDialog";
 export { JobFailure } from "./JobFailure";
 export {

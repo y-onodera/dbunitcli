@@ -1,10 +1,10 @@
 import { useState } from "react";
 import {
 	DialogBody,
+	DialogTextArea,
 	SettingDialog,
 	StatusMessage,
 } from "../../../../components/dialog";
-import { TextArea } from "../../../../components/element/Input";
 import {
 	useResourceContent,
 	useSaveResourceContent,
@@ -46,6 +46,7 @@ function Dialog({
 
 	return (
 		<SettingDialog
+			maximizable
 			title="Edit Parameterize Template"
 			helpCommand="dialogs/parameterize-template-edit"
 			helpLabel="Edit Parameterize Template"
@@ -55,7 +56,7 @@ function Dialog({
 			handleSave={handleSave}
 		>
 			<DialogBody size="md">
-				<TextArea
+				<DialogTextArea
 					id="contents"
 					value={content}
 					onChange={(e) => setContent(e.target.value)}

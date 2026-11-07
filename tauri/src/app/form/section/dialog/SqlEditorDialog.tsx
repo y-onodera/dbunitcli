@@ -2,11 +2,11 @@ import { type ComponentType, useState } from "react";
 import {
 	DialogBody,
 	DialogField,
+	DialogTextArea,
 	SettingDialog,
 	StatusMessage,
 } from "../../../../components/dialog";
 import { BlueButton } from "../../../../components/element/Button";
-import { TextArea } from "../../../../components/element/Input";
 import { useDatasetSrcInfo } from "../../../../context/DatasetSrcInfoProvider";
 import { useJdbcConnectionState } from "../../../../context/JdbcConnectionProvider";
 import {
@@ -112,6 +112,7 @@ function Dialog(props: SqlEditorDialogProps & { value: string }) {
 			title={table ? "Edit Table Definition" : "Edit SQL"}
 			helpCommand="dialogs/sql-editor"
 			helpLabel="SQL Editor"
+			maximizable
 			handleDialogClose={props.handleDialogClose}
 			fileName={props.fileName}
 			save={(path) => saveDataSource(path, content)}
@@ -134,7 +135,7 @@ function Dialog(props: SqlEditorDialogProps & { value: string }) {
 						/>
 					</DialogField>
 				)}
-				<TextArea
+				<DialogTextArea
 					id="contents"
 					ref={textareaRef}
 					value={content}
