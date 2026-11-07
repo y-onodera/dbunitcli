@@ -137,7 +137,7 @@ function makeCsvSrcData(
 		recursive: makeElement("recursive", "FLG", "false", "WORKSPACE", false),
 		regInclude: makeElement("regInclude", "TEXT", "", "WORKSPACE", false),
 		regExclude: makeElement("regExclude", "TEXT", "", "WORKSPACE", false),
-		extension: makeElement("extension", "TEXT", "", "WORKSPACE", false),
+		extension: makeTextWithDefault("extension", "", "csv"),
 		headerName: makeElement("headerName", "TEXT", "", "WORKSPACE", false),
 		startRow: makeTextWithDefault("startRow", "", "1"),
 		addFileInfo: makeElement("addFileInfo", "FLG", "false", "WORKSPACE", false),
@@ -198,7 +198,7 @@ function makeXlsxSrcData() {
 		recursive: makeElement("recursive", "FLG", "false", "WORKSPACE", false),
 		regInclude: makeElement("regInclude", "TEXT", "", "WORKSPACE", false),
 		regExclude: makeElement("regExclude", "TEXT", "", "WORKSPACE", false),
-		extension: makeElement("extension", "TEXT", "", "WORKSPACE", false),
+		extension: makeTextWithDefault("extension", "", "xlsx"),
 		headerName: makeElement("headerName", "TEXT", "", "WORKSPACE", false),
 		startRow: makeTextWithDefault("startRow", "", "1"),
 		addFileInfo: makeElement("addFileInfo", "FLG", "false", "WORKSPACE", false),
@@ -253,7 +253,7 @@ function makeTableSrcData(prefix: string) {
 		recursive: makeElement("recursive", "FLG", "false", "WORKSPACE", false),
 		regInclude: makeElement("regInclude", "TEXT", "", "WORKSPACE", false),
 		regExclude: makeElement("regExclude", "TEXT", "", "WORKSPACE", false),
-		extension: makeElement("extension", "TEXT", "", "WORKSPACE", false),
+		extension: makeTextWithDefault("extension", "", "(all files)"),
 		headerName: makeElement("headerName", "TEXT", "", "WORKSPACE", false),
 		addFileInfo: makeElement("addFileInfo", "FLG", "false", "WORKSPACE", false),
 		jdbcProperties: makeElement("jdbcProperties", "FILE", "", "JDBC", false),
@@ -319,7 +319,7 @@ function makeImageFileSrcData(prefix: string) {
 		recursive: makeElement("recursive", "FLG", "false", "WORKSPACE", false),
 		regInclude: makeElement("regInclude", "TEXT", "", "WORKSPACE", false),
 		regExclude: makeElement("regExclude", "TEXT", "", "WORKSPACE", false),
-		extension: makeElement("extension", "TEXT", "png", "WORKSPACE", false),
+		extension: makeTextWithDefault("extension", "png", "(all files)"),
 		setting: makeElement("setting", "FILE", "", "SETTING", false),
 		settingEncoding: makeTextWithDefault("settingEncoding", "", "UTF-8"),
 		settingTargetOnly: makeElement(
@@ -868,7 +868,7 @@ export const runRefreshScriptTypeAntResponseFixture = {
 		"sql",
 		"ant",
 	]),
-	antTarget: makeElement("antTarget", "TEXT", "", "WORKSPACE", false),
+	antTarget: makeTextWithDefault("antTarget", "", "(default target)"),
 } as RunOptions;
 
 // run-refresh-scriptType-sql-response.json をもとにしたフィクスチャ
@@ -1072,7 +1072,7 @@ export const scaffoldRefreshTargetFixedColumnDefResponseFixture = {
 	...makeScaffoldOptionsBase("fixedColumnDef"),
 	fixedLength: makeElement("fixedLength", "TEXT", "", "WORKSPACE", false),
 	defaultLength: makeTextWithDefault("defaultLength", "", "10"),
-	align: makeElement("align", "TEXT", "left", "WORKSPACE", false),
+	align: makeTextWithDefault("align", "", "left"),
 } as ScaffoldOptions;
 
 export const scaffoldExecResponseFixture: Record<string, string> = {

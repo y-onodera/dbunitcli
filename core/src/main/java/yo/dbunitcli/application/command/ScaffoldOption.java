@@ -84,7 +84,7 @@ public record ScaffoldOption(
                 , dto.getDatasetEncoding()
                 , Strings.isNotEmpty(dto.getFixedLength()) ? dto.getFixedLength() : ""
                 , dto.getDefaultLength()
-                , Strings.isNotEmpty(dto.getAlign()) ? dto.getAlign() : "left"
+                , dto.getAlign()
         );
     }
 
@@ -192,7 +192,7 @@ public record ScaffoldOption(
             result.put("-fixedLength", this.fixedLength)
                   .putWithDefault("-defaultLength", this.defaultLength
                                   , ComparableFixedColumnDefMetaDataProducer.DEFAULT_LENGTH)
-                  .put("-align", this.align);
+                  .putWithDefault("-align", this.align, ComparableFixedColumnDefMetaDataProducer.DEFAULT_ALIGN);
         }
         Arrays.stream(this.commandInput)
               .filter(arg -> arg.startsWith("-"))

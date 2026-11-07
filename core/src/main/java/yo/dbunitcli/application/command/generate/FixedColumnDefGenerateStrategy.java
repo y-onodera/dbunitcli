@@ -48,6 +48,6 @@ public final class FixedColumnDefGenerateStrategy implements DescriptorGenerateS
         builder.put("-fixedLength", option.fixedLength())
                .putWithDefault("-defaultLength", option.defaultLength()
                                , ComparableFixedColumnDefMetaDataProducer.DEFAULT_LENGTH)
-               .put("-align", option.align());
+               .putWithDefault("-align", option.align(), ComparableFixedColumnDefMetaDataProducer.DEFAULT_ALIGN);
     }
 }

@@ -69,7 +69,7 @@ public record GenerateOption(Parameter parameter, String resultFile, String resu
              Strings.isNotEmpty(dto.getLazyLoad()) ? dto.getLazyLoad() : "true",
              Strings.isNotEmpty(dto.getFixedLength()) ? dto.getFixedLength() : "",
              dto.getDefaultLength(),
-             Strings.isNotEmpty(dto.getAlign()) ? dto.getAlign() : "left",
+             dto.getAlign(),
              DataSetConverterOption.parallel(dto.getParallel()));
     }
 

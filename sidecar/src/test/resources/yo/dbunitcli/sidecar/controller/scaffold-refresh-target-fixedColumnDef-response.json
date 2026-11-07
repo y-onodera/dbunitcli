@@ -85,9 +85,10 @@
     "attribute": {
       "type": "TEXT",
       "required": false,
-      "defaultPath": "WORKSPACE"
+      "defaultPath": "WORKSPACE",
+      "defaultValue": "left"
     },
-    "value": "left"
+    "value": ""
   },
   "datasetType": {
     "name": "datasetType",
@@ -190,7 +191,8 @@
       "attribute": {
         "type": "TEXT",
         "required": false,
-        "defaultPath": "WORKSPACE"
+        "defaultPath": "WORKSPACE",
+        "defaultValue": "csv"
       },
       "value": ""
     },

@@ -19,6 +19,9 @@ public class ComparableFixedColumnDefMetaDataProducer extends ComparableDataSetP
     /** -defaultLength未指定時の長さ */
     public static final String DEFAULT_LENGTH = "10";
 
+    /** -align未指定時の寄せ */
+    public static final String DEFAULT_ALIGN = "left";
+
     private final String[] lengths;
     private final int defaultLength;
     private final String align;
@@ -32,13 +35,14 @@ public class ComparableFixedColumnDefMetaDataProducer extends ComparableDataSetP
     }
 
     /**
-     * オプションの値（カンマ区切りの長さ・既定の長さ・寄せ）から作る。既定の長さが空なら{@link #DEFAULT_LENGTH}
+     * オプションの値（カンマ区切りの長さ・既定の長さ・寄せ）から作る。既定の長さ・寄せが空なら{@link #DEFAULT_LENGTH}・{@link #DEFAULT_ALIGN}
      */
     public static ComparableFixedColumnDefMetaDataProducer of(final ComparableDataSetProducer delegate
             , final String fixedLength, final String defaultLength, final String align) {
         final String[] lengths = fixedLength == null || fixedLength.isEmpty() ? new String[0] : fixedLength.split(",");
         return new ComparableFixedColumnDefMetaDataProducer(delegate, lengths, Integer.parseInt(
-                (defaultLength == null || defaultLength.isEmpty() ? DEFAULT_LENGTH : defaultLength).trim()), align);
+                (defaultLength == null || defaultLength.isEmpty() ? DEFAULT_LENGTH : defaultLength).trim())
+                , align == null || align.isEmpty() ? DEFAULT_ALIGN : align);
     }
 
     public static Column[] outputSchema() {

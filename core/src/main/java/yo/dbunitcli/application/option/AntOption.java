@@ -19,6 +19,6 @@ public record AntOption(
     @Override
     public ParametersBuilder toParametersBuilder() {
         return new ParametersBuilder(this.getPrefix())
-                .put("-antTarget", this.target);
+                .putWithDefault("-antTarget", this.target, "(default target)");
     }
 }

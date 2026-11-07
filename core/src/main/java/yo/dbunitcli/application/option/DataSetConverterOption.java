@@ -147,14 +147,14 @@ public record DataSetConverterOption(
             result.putFlag("-append", this.append);
             if (type == ResultType.csv) {
                 result.putWithDefault("-outputEncoding", this.outputEncoding, "UTF-8");
-                result.put("-outputExtension", this.extension);
+                result.putWithDefault("-outputExtension", this.extension, "csv");
             } else if (type == ResultType.format) {
                 result.putWithDefault("-outputEncoding", this.outputEncoding, "UTF-8");
                 result.put("-format", this.format);
-                result.put("-outputExtension", this.extension);
+                result.putWithDefault("-outputExtension", this.extension, "txt");
             } else if (type == ResultType.fixed) {
                 result.putWithDefault("-outputEncoding", this.outputEncoding, "UTF-8");
-                result.put("-outputExtension", this.extension);
+                result.putWithDefault("-outputExtension", this.extension, "txt");
                 result.putFile("-fixedColumnDef", this.fixedColumnDefFile, BaseDir.FIXED_COLUMN_DEF);
                 result.putWithDefault("-fixedLengthType", this.fixedLengthType, "char");
             } else {
