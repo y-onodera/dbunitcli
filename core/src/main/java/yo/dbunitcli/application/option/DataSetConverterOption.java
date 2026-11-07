@@ -7,15 +7,14 @@ import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.dataset.DataSetConverterParam;
 import yo.dbunitcli.dataset.DbOperation;
 import yo.dbunitcli.dataset.ResultType;
+import yo.dbunitcli.dataset.converter.CsvConverter;
+import yo.dbunitcli.dataset.converter.FlatFileConverter;
 import yo.dbunitcli.dataset.converter.XlsConverter;
 import yo.dbunitcli.resource.FileResources;
 
 import java.io.File;
 import java.util.List;
 
-/**
- * outputEncoding・fixedLengthTypeは入力値を持ち、既定値はアクセサで適用する（GUIで未入力のまま表示するため）
- */
 public record DataSetConverterOption(
         String prefix
         , ResultType resultType
@@ -61,6 +60,8 @@ public record DataSetConverterOption(
      */
     public static final String AUTO_PARALLEL_DESCRIPTION = "(auto: CPU cores)";
 
+    public static final String DEFAULT_OUTPUT_ENCODING = "UTF-8";
+
     /**
      * -parallelの値を整える。未指定は空文字（未指定時の並列数はコマンドごとに決める）。
      * 値の検証は{@link Option#validateParallel(String)}で行う
@@ -75,12 +76,7 @@ public record DataSetConverterOption(
 
     @Override
     public String outputEncoding() {
-        return Strings.isNotEmpty(this.outputEncoding) ? this.outputEncoding : "UTF-8";
-    }
-
-    @Override
-    public String fixedLengthType() {
-        return Strings.isNotEmpty(this.fixedLengthType) ? this.fixedLengthType : "char";
+        return Strings.orDefault(this.outputEncoding, DEFAULT_OUTPUT_ENCODING);
     }
 
     @Override
@@ -146,17 +142,17 @@ public record DataSetConverterOption(
             }
             result.putFlag("-append", this.append);
             if (type == ResultType.csv) {
-                result.putWithDefault("-outputEncoding", this.outputEncoding, "UTF-8");
-                result.putWithDefault("-outputExtension", this.extension, "csv");
+                result.putWithDefault("-outputEncoding", this.outputEncoding, DEFAULT_OUTPUT_ENCODING);
+                result.putWithDefault("-outputExtension", this.extension, CsvConverter.DEFAULT_EXTENSION);
             } else if (type == ResultType.format) {
-                result.putWithDefault("-outputEncoding", this.outputEncoding, "UTF-8");
+                result.putWithDefault("-outputEncoding", this.outputEncoding, DEFAULT_OUTPUT_ENCODING);
                 result.put("-format", this.format);
-                result.putWithDefault("-outputExtension", this.extension, "txt");
+                result.putWithDefault("-outputExtension", this.extension, FlatFileConverter.TEXT_EXTENSION);
             } else if (type == ResultType.fixed) {
-                result.putWithDefault("-outputEncoding", this.outputEncoding, "UTF-8");
-                result.putWithDefault("-outputExtension", this.extension, "txt");
+                result.putWithDefault("-outputEncoding", this.outputEncoding, DEFAULT_OUTPUT_ENCODING);
+                result.putWithDefault("-outputExtension", this.extension, FlatFileConverter.TEXT_EXTENSION);
                 result.putFile("-fixedColumnDef", this.fixedColumnDefFile, BaseDir.FIXED_COLUMN_DEF);
-                result.putWithDefault("-fixedLengthType", this.fixedLengthType, "char");
+                result.putWithDefault("-fixedLengthType", this.fixedLengthType, ComparableDataSetParam.LengthType.DEFAULT_NAME);
             } else {
                 result.put("-excelTable", this.excelTable);
             }
@@ -200,7 +196,7 @@ public record DataSetConverterOption(
                                     .setFormat(this.format)
                                     .setExtension(this.extension)
                                     .setFixedColumnDefFile(this.fixedColumnDefFile)
-                                    .setFixedLengthType(this.fixedLengthType())
+                                    .setFixedLengthType(this.fixedLengthType)
                 ;
     }
 

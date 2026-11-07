@@ -4,6 +4,7 @@ import org.dbunit.dataset.Column;
 import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.ITableMetaData;
 import org.dbunit.dataset.datatype.DataType;
+import yo.dbunitcli.Strings;
 import yo.dbunitcli.dataset.ComparableDataSetProducer;
 import yo.dbunitcli.dataset.ComparableDataSetProducerWrapper;
 
@@ -40,9 +41,8 @@ public class ComparableFixedColumnDefMetaDataProducer extends ComparableDataSetP
     public static ComparableFixedColumnDefMetaDataProducer of(final ComparableDataSetProducer delegate
             , final String fixedLength, final String defaultLength, final String align) {
         final String[] lengths = fixedLength == null || fixedLength.isEmpty() ? new String[0] : fixedLength.split(",");
-        return new ComparableFixedColumnDefMetaDataProducer(delegate, lengths, Integer.parseInt(
-                (defaultLength == null || defaultLength.isEmpty() ? DEFAULT_LENGTH : defaultLength).trim())
-                , align == null || align.isEmpty() ? DEFAULT_ALIGN : align);
+        final int length = Integer.parseInt(Strings.orDefault(defaultLength, DEFAULT_LENGTH).trim());
+        return new ComparableFixedColumnDefMetaDataProducer(delegate, lengths, length, Strings.orDefault(align, DEFAULT_ALIGN));
     }
 
     public static Column[] outputSchema() {

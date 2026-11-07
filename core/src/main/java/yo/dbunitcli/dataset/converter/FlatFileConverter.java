@@ -15,6 +15,9 @@ import java.nio.file.Files;
 public abstract class FlatFileConverter implements IDataSetConverter {
     private static final Logger LOGGER = LoggerFactory.getLogger(FlatFileConverter.class);
     protected final boolean exportEmptyTable;
+    /** 拡張子未指定時のテキスト出力の拡張子 */
+    public static final String TEXT_EXTENSION = "txt";
+
     protected final String theDirectory;
     protected final File resultDir;
     protected final String encoding;

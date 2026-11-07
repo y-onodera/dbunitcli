@@ -15,6 +15,9 @@ import java.util.stream.IntStream;
 
 public class CsvConverter extends FlatFileConverter {
 
+    /** 拡張子未指定時の拡張子 */
+    public static final String DEFAULT_EXTENSION = "csv";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(CsvConverter.class);
     private static final String QUOTE = "\"";
     private static final String ESCAPE = "\\";
@@ -37,7 +40,7 @@ public class CsvConverter extends FlatFileConverter {
                         final boolean exportEmptyTable, final boolean exportHeader, final boolean append,
                         final String extension) {
         super(theDirectory, resultDir, encoding, exportEmptyTable, exportHeader, append,
-              extension != null ? extension : "csv");
+              extension != null ? extension : DEFAULT_EXTENSION);
     }
 
     @Override

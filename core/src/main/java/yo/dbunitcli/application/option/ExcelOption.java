@@ -13,7 +13,7 @@ import java.util.List;
 public record ExcelOption(String prefix, String xlsxSchemaSource, String settingEncoding) implements ComparableDataSetParamOption {
 
     public ExcelOption(final String prefix, final DataSetLoadDto dto) {
-        this(prefix, dto.getXlsxSchemaSource(), DataSetLoadOption.settingEncodingOf(dto));
+        this(prefix, dto.getXlsxSchemaSource(), EncodingOption.orDefault(dto.getSettingEncoding()));
     }
 
     @Override

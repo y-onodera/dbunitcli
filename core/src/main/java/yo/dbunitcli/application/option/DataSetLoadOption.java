@@ -27,15 +27,6 @@ public record DataSetLoadOption(
         , ComparableDataSetParamOption dataSetParam
 ) implements Option {
 
-
-    /**
-     * -settingと-xlsxSchemaは同じ文字コードで読む
-     */
-    static String settingEncodingOf(final DataSetLoadDto dto) {
-        return EncodingOption.orDefault(dto.getSettingEncoding());
-    }
-
-
     private static DataSourceType getSrcType(final DataSetLoadDto dto) {
         return dto.getSrcType() != null ? dto.getSrcType() : DataSourceType.csv;
     }
@@ -62,9 +53,6 @@ public record DataSetLoadOption(
         );
     }
 
-    /**
-     * フィールドは入力値を持ち、既定値はここで適用する（GUIで未入力のまま表示するため）
-     */
     @Override
     public String settingEncoding() {
         return EncodingOption.orDefault(this.settingEncoding);

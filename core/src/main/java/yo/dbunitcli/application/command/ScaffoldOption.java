@@ -9,6 +9,7 @@ import yo.dbunitcli.application.CommandParameters;
 import yo.dbunitcli.application.Option;
 import yo.dbunitcli.application.command.generate.DescriptorOption;
 import yo.dbunitcli.application.ParameterUnit;
+import yo.dbunitcli.application.option.DataSetConverterOption;
 import yo.dbunitcli.application.option.DataSetLoadOption;
 import yo.dbunitcli.common.Parameter;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
@@ -88,12 +89,9 @@ public record ScaffoldOption(
         );
     }
 
-    /**
-     * フィールドは入力値を持ち、既定値はここで適用する（GUIで未入力のまま表示するため）
-     */
     @Override
     public String datasetEncoding() {
-        return Strings.isNotEmpty(this.datasetEncoding) ? this.datasetEncoding : "UTF-8";
+        return Strings.orDefault(this.datasetEncoding, DataSetConverterOption.DEFAULT_OUTPUT_ENCODING);
     }
 
     public static ScaffoldDto toDto(final String[] args) {
@@ -202,7 +200,7 @@ public record ScaffoldOption(
                   result.put(key, eqIdx > 0 ? arg.substring(eqIdx + 1) : "true");
               });
         result.put("-datasetType", this.datasetType, ResultType.class, Filter.exclude(ResultType.format), false);
-        result.putWithDefault("-datasetEncoding", this.datasetEncoding, "UTF-8");
+        result.putWithDefault("-datasetEncoding", this.datasetEncoding, DataSetConverterOption.DEFAULT_OUTPUT_ENCODING);
         if (this.dataset != null) {
             result.addComponent("dataset", this.dataset.toParametersBuilder().build());
         }

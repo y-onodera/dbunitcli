@@ -75,10 +75,12 @@ public record RunOption(
     }
 
     /**
-     * @return 並列数。未指定なら1（スクリプトは実行順に依存しやすいため、convert/generateと違い既定は逐次）
+     * @return 並列数。未指定なら{@link #DEFAULT_PARALLEL}（スクリプトは実行順に依存しやすいため、convert/generateと違い既定は逐次）
      */
+    private static final int DEFAULT_PARALLEL = 1;
+
     public int parallelism() {
-        return DataSetConverterOption.parallelism(this.parallel, 1);
+        return DataSetConverterOption.parallelism(this.parallel, DEFAULT_PARALLEL);
     }
 
     public Runner runner() {
@@ -110,7 +112,7 @@ public record RunOption(
                         .build()
                 )
                 .put("-scriptType", this.scriptType, ScriptType.class)
-                .putWithDefault("-parallel", this.parallel, "1");
+                .putWithDefault("-parallel", this.parallel, String.valueOf(DEFAULT_PARALLEL));
         if (this.scriptType == ScriptType.sql) {
             result.addComponent("templateOption", this.templateOption.toParameters())
                     .addComponent("jdbcOption", this.jdbcOption.toParameters());

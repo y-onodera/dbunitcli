@@ -7,14 +7,13 @@ import yo.dbunitcli.dataset.ComparableDataSetParam;
 import java.util.List;
 import java.util.Optional;
 
-/**
- * @param delimiter エスケープ（\t等）を戻した入力値。既定値はアクセサで適用する
- */
 public record CsvOption(
         String prefix
         , String delimiter
         , boolean ignoreQuoted
 ) implements ComparableDataSetParamOption {
+
+    private static final String DEFAULT_DELIMITER = ",";
 
     public CsvOption(final String prefix, final DataSetLoadDto dto) {
         this(prefix
@@ -32,7 +31,7 @@ public record CsvOption(
 
     @Override
     public String delimiter() {
-        return Strings.isNotEmpty(this.delimiter) ? this.delimiter : ",";
+        return Strings.orDefault(this.delimiter, DEFAULT_DELIMITER);
     }
 
     @Override
@@ -49,7 +48,7 @@ public record CsvOption(
                         .replace("\n", "\\n")
                         .replace("\r", "\\r")
                         .replace("\f", "\\f")
-                        , ",")
+                        , DEFAULT_DELIMITER)
                 .put("-ignoreQuoted", this.ignoreQuoted);
     }
 

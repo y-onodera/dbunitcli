@@ -9,9 +9,6 @@ import yo.dbunitcli.resource.st4.TemplateRender;
 
 import java.util.List;
 
-/**
- * encoding・templateParameterAttribute・templateVarStart・templateVarStopは入力値を持ち、既定値はアクセサで適用する
- */
 public record TemplateRenderOption(
         String prefix
         , String encoding
@@ -25,6 +22,9 @@ public record TemplateRenderOption(
         , String deleteBlankCells
         , String templateGroup
 ) implements ComparableDataSetParamOption {
+
+    private static final String DEFAULT_PARAMETER_ATTRIBUTE = "param";
+    private static final String DEFAULT_VAR_DELIMITER = "$";
 
     public TemplateRenderOption(final String prefix, final TemplateRenderDto dto) {
         this(prefix
@@ -48,17 +48,17 @@ public record TemplateRenderOption(
 
     @Override
     public String templateParameterAttribute() {
-        return this.templateParameterAttribute != null ? this.templateParameterAttribute : "param";
+        return this.templateParameterAttribute != null ? this.templateParameterAttribute : DEFAULT_PARAMETER_ATTRIBUTE;
     }
 
     @Override
     public String templateVarStart() {
-        return Strings.isNotEmpty(this.templateVarStart) ? this.templateVarStart : "$";
+        return Strings.orDefault(this.templateVarStart, DEFAULT_VAR_DELIMITER);
     }
 
     @Override
     public String templateVarStop() {
-        return Strings.isNotEmpty(this.templateVarStop) ? this.templateVarStop : "$";
+        return Strings.orDefault(this.templateVarStop, DEFAULT_VAR_DELIMITER);
     }
 
     @Override
@@ -71,9 +71,9 @@ public record TemplateRenderOption(
         return new ParametersBuilder(this.getPrefix())
                 .putWithDefault("-encoding", this.encoding, EncodingOption.defaultEncoding())
                 .putFile("-templateGroup", this.templateGroup, BaseDir.TEMPLATE)
-                .putWithDefault("-templateParameterAttribute", this.templateParameterAttribute, "param")
-                .putWithDefault("-templateVarStart", this.templateVarStart, "$")
-                .putWithDefault("-templateVarStop", this.templateVarStop, "$");
+                .putWithDefault("-templateParameterAttribute", this.templateParameterAttribute, DEFAULT_PARAMETER_ATTRIBUTE)
+                .putWithDefault("-templateVarStart", this.templateVarStart, DEFAULT_VAR_DELIMITER)
+                .putWithDefault("-templateVarStop", this.templateVarStop, DEFAULT_VAR_DELIMITER);
     }
 
     @Override

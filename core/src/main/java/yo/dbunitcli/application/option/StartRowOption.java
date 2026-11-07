@@ -6,13 +6,12 @@ import yo.dbunitcli.dataset.ComparableDataSetParam;
 
 import java.util.List;
 
-/**
- * @param startRow 入力値。既定値はアクセサで適用する
- */
 public record StartRowOption(
         String prefix,
         String startRow
 ) implements ComparableDataSetParamOption {
+
+    private static final String DEFAULT_START_ROW = "1";
 
     public StartRowOption(final String prefix, final DataSetLoadDto dto) {
         this(prefix, dto.getStartRow());
@@ -20,7 +19,7 @@ public record StartRowOption(
 
     @Override
     public String startRow() {
-        return Strings.isNotEmpty(this.startRow) ? this.startRow : "1";
+        return Strings.orDefault(this.startRow, DEFAULT_START_ROW);
     }
 
     @Override
@@ -41,6 +40,6 @@ public record StartRowOption(
     @Override
     public ParametersBuilder toParametersBuilder() {
         return new ParametersBuilder(this.prefix)
-                .putWithDefault("-startRow", this.startRow, "1");
+                .putWithDefault("-startRow", this.startRow, DEFAULT_START_ROW);
     }
 }

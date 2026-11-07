@@ -33,7 +33,7 @@ public class FixedFileConverter extends FlatFileConverter implements IDataSetCon
     public FixedFileConverter(final String theDirectory, final File resultDir, final String encoding,
                               final boolean exportEmptyTable, final boolean append, final List<FixedColumnDef> columnDefs,
                               final ComparableDataSetParam.LengthType lengthType, final String extension) {
-        super(theDirectory, resultDir, encoding, exportEmptyTable, false, append, extension != null ? extension : "txt");
+        super(theDirectory, resultDir, encoding, exportEmptyTable, false, append, extension != null ? extension : TEXT_EXTENSION);
         this.columnDefs = columnDefs;
         this.lengthType = lengthType;
     }

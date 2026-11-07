@@ -100,7 +100,7 @@ public record ParameterizeOption(
                 .put("-unit", this.unit, ParameterUnit.class)
                 .putFlag("-parameterize", this.parameterize)
                 .putFlag("-ignoreFail", this.ignoreFail)
-                .putWithDefault("-parallel", this.parallel, "1")
+                .putWithDefault("-parallel", this.parallel, String.valueOf(DEFAULT_PARALLEL))
                 .put("-cmd", this.cmd)
                 .put("-cmdParam", this.cmdParam)
                 .putFile("-template", this.template, BaseDir.PARAMETERIZE_TEMPLATE)
@@ -129,10 +129,12 @@ public record ParameterizeOption(
     }
 
     /**
-     * @return 並列数。未指定なら1（行ごとのコマンドは実行順に依存しやすいため、runと同じく既定は逐次）
+     * @return 並列数。未指定なら{@link #DEFAULT_PARALLEL}（行ごとのコマンドは実行順に依存しやすいため、runと同じく既定は逐次）
      */
+    private static final int DEFAULT_PARALLEL = 1;
+
     public int parallelism() {
-        return DataSetConverterOption.parallelism(this.parallel, 1);
+        return DataSetConverterOption.parallelism(this.parallel, DEFAULT_PARALLEL);
     }
 
     public Stream<Parameter> loadParams() {

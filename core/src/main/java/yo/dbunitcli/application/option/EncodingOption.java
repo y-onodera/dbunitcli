@@ -7,9 +7,6 @@ import yo.dbunitcli.dataset.ComparableDataSetParam;
 import java.nio.charset.Charset;
 import java.util.List;
 
-/**
- * @param encoding 入力値。GUIで未入力のまま表示できるよう既定値はアクセサで適用する
- */
 public record EncodingOption(String prefix, String encoding) implements ComparableDataSetParamOption {
 
     public EncodingOption(final String prefix, final DataSetLoadDto dto) {
@@ -20,11 +17,11 @@ public record EncodingOption(String prefix, String encoding) implements Comparab
      * 文字コードのオプションが空ならシステムの既定の文字コードにする
      */
     public static String orDefault(final String encoding) {
-        return EncodingOption.orDefault(encoding, Charset.defaultCharset());
+        return Strings.orDefault(encoding, EncodingOption.defaultEncoding());
     }
 
     public static String orDefault(final String encoding, final Charset defaultCharset) {
-        return Strings.isNotEmpty(encoding) ? encoding : defaultCharset.displayName();
+        return Strings.orDefault(encoding, defaultCharset.displayName());
     }
 
     /**

@@ -500,6 +500,9 @@ public interface Option {
         }
 
         /**
+         * 未入力時に既定値を使う項目。GUIで未入力のまま表示できるよう、valueには既定値を入れず入力値を渡す
+         * （既定値を適用した値はOptionのアクセサで返す）
+         *
          * @param defaultValue 未入力時に使われる値。他の入力や実行環境で決まる場合はその説明
          */
         public ParametersBuilder putWithDefault(final String key, final String value, final String defaultValue) {

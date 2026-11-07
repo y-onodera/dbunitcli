@@ -37,8 +37,6 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 
 /**
- * resultPath・unitSettingEncoding・outputEncodingは入力値を持ち、既定値はアクセサで適用する（GUIで未入力のまま表示するため）
- *
  * @param resultFile -resultPath未指定時のファイル名
  */
 public record GenerateOption(Parameter parameter, String resultFile, String resultDir, String resultPath,
@@ -84,7 +82,7 @@ public record GenerateOption(Parameter parameter, String resultFile, String resu
 
     @Override
     public String resultPath() {
-        return Strings.isNotEmpty(this.resultPath) ? this.resultPath : this.resultFile;
+        return Strings.orDefault(this.resultPath, this.resultFile);
     }
 
     @Override
@@ -94,7 +92,7 @@ public record GenerateOption(Parameter parameter, String resultFile, String resu
 
     @Override
     public String outputEncoding() {
-        return Strings.isNotEmpty(this.outputEncoding) ? this.outputEncoding : "UTF-8";
+        return Strings.orDefault(this.outputEncoding, DataSetConverterOption.DEFAULT_OUTPUT_ENCODING);
     }
 
     private static GenerateType getGenerateType(final GenerateDto dto) {
@@ -305,10 +303,10 @@ public record GenerateOption(Parameter parameter, String resultFile, String resu
         if (!this.strategy().isFixedTemplate()) {
             result.addComponent("templateOption", this.templateOptionArgs());
         }
-        result.putDir("-result", this.resultDir, BaseDir.RESULT).putWithDefault("-resultPath", this.resultPath,
-                                                                            ResultOption.RESULT_PATH_DESCRIPTION);
+        result.putDir("-result", this.resultDir, BaseDir.RESULT);
+        result.putWithDefault("-resultPath", this.resultPath, ResultOption.RESULT_PATH_DESCRIPTION);
         if (this.strategy().isText()) {
-            result.putWithDefault("-outputEncoding", this.outputEncoding, "UTF-8");
+            result.putWithDefault("-outputEncoding", this.outputEncoding, DataSetConverterOption.DEFAULT_OUTPUT_ENCODING);
         }
         return result;
     }
