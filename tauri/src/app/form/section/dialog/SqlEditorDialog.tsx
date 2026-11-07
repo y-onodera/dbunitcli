@@ -1,4 +1,4 @@
-import { type ComponentType, useLayoutEffect, useRef, useState } from "react";
+import { type ComponentType, useState } from "react";
 import {
 	DialogBody,
 	DialogField,
@@ -22,6 +22,7 @@ import CsvReadInsertDialog from "./CsvReadInsertDialog";
 import { InlinePreviewButton } from "./DatasetTableNamesPreviewButton";
 import type { EditResourceDialogProps } from "./ResourceEditButton";
 import SqlTableInsertDialog from "./SqlTableInsertDialog";
+import { useTextareaInsert } from "./useTextareaInsert";
 
 // queryOnlyはデータセットの読込元のSQL。テーブル・列の挿入の用途からDMLを除く
 type SqlEditorOptions = { queryOnly?: boolean };
@@ -55,34 +56,24 @@ export const sqlEditorDialogs: Record<
 };
 
 function Dialog(props: SqlEditorDialogProps & { value: string }) {
-	const [content, setContent] = useState<string>(props.value);
+	const {
+		value: content,
+		setValue: setContent,
+		textareaRef,
+		insert,
+	} = useTextareaInsert(props.value);
 	const [showSelector, setShowSelector] = useState(false);
-	const textareaRef = useRef<HTMLTextAreaElement>(null);
-	const pendingCursorRef = useRef<number | null>(null);
 	const { jdbcValues, connectionOk } = useJdbcConnectionState();
 	const saveDataSource = useSaveResourceContent(props.type);
 
 	const datasetSrcInfo = useDatasetSrcInfo();
 
-	const insertToContent = (lines: string[], inline = false) => {
-		const textarea = textareaRef.current;
-		const start = textarea?.selectionStart ?? content.length;
-		const end = textarea?.selectionEnd ?? content.length;
-		const result = inline
-			? insertInlineAtCursor(content, lines, start, end)
-			: insertAtCursor(content, lines.join("\n"), start, end);
-		pendingCursorRef.current = result.cursor;
-		setContent(result.value);
-	};
-
-	useLayoutEffect(() => {
-		const cursor = pendingCursorRef.current;
-		if (cursor === null) {
-			return;
-		}
-		pendingCursorRef.current = null;
-		textareaRef.current?.setSelectionRange(cursor, cursor);
-	});
+	const insertToContent = (lines: string[], inline = false) =>
+		insert((current, start, end) =>
+			inline
+				? insertInlineAtCursor(current, lines, start, end)
+				: insertAtCursor(current, lines.join("\n"), start, end),
+		);
 
 	const handleInsert = (lines: string[], inline?: boolean) => {
 		insertToContent(lines, inline);

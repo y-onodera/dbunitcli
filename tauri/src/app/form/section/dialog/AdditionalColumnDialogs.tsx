@@ -1,5 +1,5 @@
 import type { Dispatch, SetStateAction } from "react";
-import { useLayoutEffect, useRef, useState } from "react";
+import { useState } from "react";
 import {
 	DialogActions,
 	DialogField,
@@ -20,6 +20,7 @@ import {
 import { insertInlineAtCursor } from "../../../../utils/textInsert";
 import ColumnSelectDialog from "./ColumnSelectDialog";
 import { OptionSelect, OptionText, type SelectOption } from "./SqlInsertParts";
+import { useTextareaInsert } from "./useTextareaInsert";
 
 const functionOptions = Object.keys(columnExpressionArgs).map((fn) => ({
 	value: fn,
@@ -104,33 +105,22 @@ export function ExpressionEditDialog({
 	onApply: (value: string) => void;
 	onClose: () => void;
 }) {
-	const [text, setText] = useState(value);
+	const {
+		value: text,
+		setValue: setText,
+		textareaRef,
+		insert,
+	} = useTextareaInsert(value);
 	const [operator, setOperator] = useState(expressionOperators[0].value);
 	const [column, setColumn] = useState(columns[0] ?? "");
 	const [option, setOption] = useState(() =>
 		newColumnExpressionOption(defaultValue),
 	);
-	const textareaRef = useRef<HTMLTextAreaElement>(null);
-	const pendingCursorRef = useRef<number | null>(null);
 
-	const insertAtCursor = (inserted: string) => {
-		const textarea = textareaRef.current;
-		const start = textarea?.selectionStart ?? text.length;
-		const end = textarea?.selectionEnd ?? text.length;
-		const result = insertInlineAtCursor(text, [inserted], start, end);
-		pendingCursorRef.current = result.cursor;
-		setText(result.value);
-	};
-
-	// 続けて挿入したときに直前の挿入の後ろへ入るよう、描画後にカーソルを移す
-	useLayoutEffect(() => {
-		const cursor = pendingCursorRef.current;
-		if (cursor === null) {
-			return;
-		}
-		pendingCursorRef.current = null;
-		textareaRef.current?.setSelectionRange(cursor, cursor);
-	});
+	const insertAtCursor = (inserted: string) =>
+		insert((current, start, end) =>
+			insertInlineAtCursor(current, [inserted], start, end),
+		);
 
 	function renderInsertColumn() {
 		if (columns.length === 0) {
