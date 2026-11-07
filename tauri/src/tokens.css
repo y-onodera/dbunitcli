@@ -13,10 +13,10 @@
 }
 
 @theme {
-	/* Dialog width (--container-* から w-* / min-w-* が生成される) */
+	/* Dialog width (--container-* から w-* / min-w-* が生成される)。上限は tauri/.claude/skills/create-dialog */
 	--container-dialog-sm: 480px;
 	--container-dialog-md: 640px;
-	--container-dialog-lg: 800px;
+	--container-dialog-lg: 720px;
 	--container-dialog-min: 600px;
 
 	/* Shadow layers */

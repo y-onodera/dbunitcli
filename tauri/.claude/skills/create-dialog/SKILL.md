@@ -1,0 +1,25 @@
+---
+description: tauriのダイアログの幅・高さ・ボタン配置の規定（ウィンドウからはみ出してボタンを押せなくなるのを防ぐ）。
+TRIGGER when: tauri/src で ModalOverlay / FullDialog / SettingDialog を使うダイアログを追加、または幅・高さ・ボタン配置・入れ子構造を変えるとき。
+DO NOT TRIGGER when: ダイアログ内の文言・ロジックだけの変更。
+---
+
+基準は既定ウィンドウ 800×600（`src-tauri/tauri.conf.json`）。スクロールせずにボタンを押せること。
+
+## ボタン行
+- `FullDialog` は `DialogFooter` を直下（`DialogBody` の外）、`ModalOverlay` は `DialogActions` を直下（Fragment 経由は可）に置く。sticky で下端に固定されるが、`<div>` で包むとその中でしか効かない
+- `SettingDialog` は組込み。ボタン追加は `footerActions`
+- スクロールは枠に任せ、本文を `overflow-y-auto` + `max-h-*` の箱で包まない
+- 子ダイアログは `ModalOverlay zClass="z-modal-nested"` を親ダイアログの JSX 内に置く（`FullDialog` はトップレイヤーなので外だと隠れる）
+
+## 幅
+- `FullDialog` 本文は `DialogBody size` で決める（`src/tokens.css` の `--container-dialog-*`）。720px 超のトークン・固定幅を足さない
+- `ModalOverlay` の `width` は `w-80`〜`w-2xl`。それより広い幅や `w-[…]` は使わない
+- 本文内に本文幅を超える固定幅・`min-w-*` を付けない
+
+## 高さ
+- 枠の上限（`FullDialog` はブラウザ既定、`ModalOverlay` は `max-h-[80vh]`）は変えない
+- 本文内のスクロール領域は1つあたり `max-h-96` 以下。`h-[…vh]` で枠を埋めない
+
+## 確認
+800×600 で長めのダミー内容を入れて開き、各ボタンの中心で `document.elementFromPoint` がそのボタンを返すこと。sidecar なしなら scratchpad に Vite の入口（`tauri/node_modules` を symlink、`src/App.css` と対象を絶対パスで import）を作り Playwright で開く。

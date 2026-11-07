@@ -15,7 +15,7 @@ export function ModalOverlay({
 			className={`fixed inset-0 bg-overlay flex items-center justify-center ${zClass}`}
 		>
 			<div
-				className={`bg-surface rounded-lg shadow-modal p-6 max-w-full max-h-[80vh] overflow-y-auto ${width}`}
+				className={`bg-surface rounded-lg shadow-modal p-6 max-w-[calc(100vw-2rem)] max-h-[80vh] overflow-y-auto ${width}`}
 			>
 				{children}
 			</div>
@@ -38,12 +38,20 @@ export function DialogTitle(props: {
 	);
 }
 
+// 枠のスクロール中も見えるよう下端に固定する。影は ModalOverlay の下パディング（p-6）を覆い、ボタンの下に本文が透けるのを防ぐ
 export function DialogActions({ children }: { children: ReactNode }) {
-	return <div className="flex items-center gap-2 justify-end">{children}</div>;
+	return (
+		<div className="sticky bottom-0 bg-surface shadow-[0_1.5rem_0_var(--color-surface)] pt-3 flex items-center gap-2 justify-end">
+			{children}
+		</div>
+	);
 }
 
+// FullDialog の直下に置き、枠のスクロール中も見えるよう下端に固定する
 export function DialogFooter({ children }: { children: ReactNode }) {
 	return (
-		<div className="flex items-center gap-2 justify-end p-4">{children}</div>
+		<div className="sticky bottom-0 bg-surface flex items-center gap-2 justify-end p-4">
+			{children}
+		</div>
 	);
 }

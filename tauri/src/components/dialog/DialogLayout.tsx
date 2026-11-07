@@ -10,18 +10,15 @@ const BODY_SIZE = {
 	fluid: "p-4 rounded-lg mt-2",
 } as const;
 
-// ダイアログ本体の幅・パディング。scrollable 指定時は高さ上限を設けてスクロールさせる
+// ダイアログ本体の幅・パディング。高さの上限とスクロールはダイアログの枠（FullDialog / ModalOverlay）が持つ
 export function DialogBody({
 	size,
-	scrollable = false,
 	children,
 }: {
 	size: keyof typeof BODY_SIZE;
-	scrollable?: boolean;
 	children: ReactNode;
 }) {
-	const scroll = scrollable ? " overflow-y-auto max-h-[80vh]" : "";
-	return <div className={`${BODY_SIZE[size]}${scroll}`}>{children}</div>;
+	return <div className={BODY_SIZE[size]}>{children}</div>;
 }
 
 // ダイアログ内の入力項目1つ分の縦余白。最後の項目は last を指定して下余白を広げる
