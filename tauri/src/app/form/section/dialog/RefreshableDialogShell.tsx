@@ -40,7 +40,7 @@ export function RefreshableDialogShell<OPTIONS>({
 }) {
 	return createPortal(
 		<FullDialog onClose={onClose}>
-			<DialogBody size="auto" scrollable>
+			<DialogBody size="auto">
 				<DialogTitle command={command} label={label}>
 					{title}
 				</DialogTitle>

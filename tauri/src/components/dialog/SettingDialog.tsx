@@ -25,6 +25,8 @@ type CommonProps = {
 	title?: string;
 	helpCommand?: string;
 	helpLabel?: string;
+	// タイトル行に最大化ボタンを出す。編集用 TextArea を置くダイアログで使う
+	maximizable?: boolean;
 };
 
 // 入力中のファイル名へ保存し、成功したらonSaved(保存先)を呼ぶ
@@ -66,7 +68,10 @@ export function SettingDialog<T>(props: SettingDialogProps<T>) {
 	};
 
 	return (
-		<FullDialog onClose={props.handleDialogClose}>
+		<FullDialog
+			onClose={props.handleDialogClose}
+			maximizable={props.maximizable}
+		>
 			{props.title && (
 				<div className="px-4 pt-4">
 					<DialogTitle command={props.helpCommand} label={props.helpLabel}>
@@ -75,7 +80,7 @@ export function SettingDialog<T>(props: SettingDialogProps<T>) {
 				</div>
 			)}
 			{isFileMode ? (
-				<div className="relative overflow-x-auto flex flex-col gap-4">
+				<div className="relative overflow-x-auto flex flex-col gap-4 grow shrink-0">
 					{props.children}
 				</div>
 			) : (

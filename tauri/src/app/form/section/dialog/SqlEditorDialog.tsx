@@ -112,6 +112,7 @@ function Dialog(props: SqlEditorDialogProps & { value: string }) {
 			title={table ? "Edit Table Definition" : "Edit SQL"}
 			helpCommand="dialogs/sql-editor"
 			helpLabel="SQL Editor"
+			maximizable
 			handleDialogClose={props.handleDialogClose}
 			fileName={props.fileName}
 			save={(path) => saveDataSource(path, content)}

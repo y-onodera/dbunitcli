@@ -41,6 +41,7 @@ function Dialog({
 
 	return (
 		<SettingDialog
+			maximizable
 			title="Template File Edit"
 			helpCommand="dialogs/template-edit"
 			helpLabel="Template File Edit"

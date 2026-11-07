@@ -33,8 +33,8 @@ export default function Header() {
 
 function WorkspaceDialog({ onClose }: { onClose: () => void }) {
 	return (
-		<FullDialog onClose={onClose} className="w-full max-w-4xl">
-			<DialogBody size="fluid">
+		<FullDialog onClose={onClose}>
+			<DialogBody size="lg">
 				<StartupForm onSelect={onClose} onClose={onClose} />
 			</DialogBody>
 		</FullDialog>

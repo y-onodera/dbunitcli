@@ -46,6 +46,7 @@ function Dialog({
 
 	return (
 		<SettingDialog
+			maximizable
 			title="Edit Parameterize Template"
 			helpCommand="dialogs/parameterize-template-edit"
 			helpLabel="Edit Parameterize Template"

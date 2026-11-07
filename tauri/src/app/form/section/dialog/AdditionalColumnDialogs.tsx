@@ -152,9 +152,9 @@ export function ExpressionEditDialog({
 	}
 
 	return (
-		<ModalOverlay width="w-2xl" zClass="z-modal-nested">
+		<ModalOverlay width="w-2xl" zClass="z-modal-nested" maximizable>
 			<DialogTitle>{`Edit ${name}`}</DialogTitle>
-			<DialogField>
+			<DialogField grow>
 				<TextArea
 					ref={textareaRef}
 					id="expression"

@@ -205,6 +205,7 @@ export function PreviewField({
 		</div>
 	);
 }
+// 高さのある flex 縦並び（最大化中のダイアログ）では残りを埋め、それ以外では min-h-96 の高さになる
 export function TextArea({
 	ref,
 	...props
@@ -221,15 +222,15 @@ export function TextArea({
 		<textarea
 			id={props.id}
 			ref={ref}
-			className="p-2.5
-                       w-full h-96
+			className={`p-2.5
+                       w-full flex-1 min-h-96
                        text-sm text-content
                        rounded-lg
                        bg-input
                        disabled:bg-input-disabled
                        border border-border
                        ring-primary-ring
-                       focus-visible:ring-3 "
+                       focus-visible:ring-3`}
 			value={props.value}
 			readOnly={props.readOnly}
 			placeholder={props.placeholder}
