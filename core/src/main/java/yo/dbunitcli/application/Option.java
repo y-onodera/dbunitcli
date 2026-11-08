@@ -361,11 +361,25 @@ public interface Option {
         }
 
         public List<String> parameterizeArgs(final boolean containDefaultValue) {
-            return this.toList(containDefaultValue, key -> key + "=$param." + this.templateEscape(key) + "$");
+            return this.parameterizeArgs(containDefaultValue, _ -> true);
+        }
+
+        /**
+         * parameterizeが真のキーは$param.xxx$に置き換え、それ以外は値をテンプレートにそのまま書く
+         */
+        public List<String> parameterizeArgs(final boolean containDefaultValue, final Predicate<String> parameterize) {
+            return this.toList(containDefaultValue, key -> parameterize.test(key)
+                    ? key + "=$param." + this.templateEscape(key) + "$"
+                    : key + "=" + this.get(key).replace("$", "\\$"));
         }
 
         public Map<String, ?> toMap(final boolean containDefaultValue) {
+            return this.toMap(containDefaultValue, _ -> true);
+        }
+
+        public Map<String, ?> toMap(final boolean containDefaultValue, final Predicate<String> filter) {
             return this.toList(containDefaultValue, key -> key).stream()
+                       .filter(filter)
                        .collect(Collectors.toMap(this::templateEscape, this::get));
         }
 

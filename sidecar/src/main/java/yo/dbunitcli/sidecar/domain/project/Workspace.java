@@ -22,9 +22,12 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
@@ -194,17 +197,43 @@ public class Workspace {
         return scriptFile.getAbsolutePath();
     }
 
-    public String parameterize(final Type type, final String name) throws IOException {
-        Optional<CommandParameters> source = this.options().select(type, name);
+    /**
+     * parameterizeの対象に選べるオプション（値が入っているもの）を保存順に返す
+     */
+    public List<Map<String, String>> parameterizeCandidates(final Type type, final String name) {
+        return this.options().select(type, name)
+                   .map(source -> {
+                       final Option.Parameters target = source.toOptionParameters();
+                       return target.toList(false, key -> key).stream()
+                                    .map(key -> {
+                                        final Map<String, String> candidate = new LinkedHashMap<>();
+                                        candidate.put("key", key);
+                                        candidate.put("value", target.get(key));
+                                        return candidate;
+                                    })
+                                    .toList();
+                   })
+                   .orElse(List.of());
+    }
+
+    /**
+     * @param parameterizeKeys $param.xxx$に置き換えるオプション。nullなら値が入っている全オプション
+     */
+    public String parameterize(final Type type, final String name, final List<String> parameterizeKeys) throws IOException {
+        final Optional<CommandParameters> source = this.options().select(type, name);
         if (source.isPresent()) {
             final Option.Parameters target = source.get().toOptionParameters();
+            final Predicate<String> parameterize = parameterizeKeys == null ? _ -> true : parameterizeKeys::contains;
+            if (target.toList(false, key -> key).stream().noneMatch(parameterize)) {
+                throw new IllegalArgumentException("no option selected to parameterize");
+            }
             final Path templatePath = this.options()
                     .templates()
                     .add(name + ".txt", new CommandParameters(type, target
-                            .parameterizeArgs(false)
+                            .parameterizeArgs(false, parameterize)
                             .toArray(String[]::new))
                             .content());
-            File parameterSource = this.saveParameterSources(name, target);
+            final File parameterSource = this.saveParameterSources(name, target.toMap(false, parameterize));
             return this.options().add(name
                     , new CommandParameters(Type.parameterize,
                             parameterizeOption(type, templatePath,
@@ -222,9 +251,8 @@ public class Workspace {
                 .orElseGet(() -> Path.of(System.getProperty("user.dir")));
     }
 
-    private File saveParameterSources(final String name, final Option.Parameters args) {
+    private File saveParameterSources(final String name, final Map<String, ?> parameters) {
         final File resourcesDir = this.path().toFile();
-        Map<String, ?> parameters = args.toMap(false);
         final CsvConverter converter = new CsvConverter(resourcesDir, "UTF-8");
         converter.convert(new ComparableTable.Builder(name, parameters.keySet().toArray(new String[0]))
                 .addRow(parameters.values().toArray(Object[]::new))

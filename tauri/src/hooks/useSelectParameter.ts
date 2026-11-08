@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { useEnvironment } from "../context/EnvironmentProvider";
 import {
 	type FieldErrors,
@@ -110,17 +111,65 @@ export const useParameterActions = (command: string, name: string) => {
 
 	return { handleDelete, handleCopy, handleRename };
 };
+export type ParameterizeCandidate = { key: string; value: string };
+
+export const useParameterizeCandidates = (
+	command: string,
+	name: string,
+): { candidates: ParameterizeCandidate[]; loading: boolean } => {
+	const { apiUrl } = useEnvironment();
+	const [candidates, setCandidates] = useState<ParameterizeCandidate[]>([]);
+	const [loading, setLoading] = useState(true);
+	useEffect(() => {
+		const controller = new AbortController();
+		setLoading(true);
+		loadParameterizeCandidates(apiUrl, command, name).then((result) => {
+			if (!controller.signal.aborted) {
+				setCandidates(result);
+				setLoading(false);
+			}
+		});
+		return () => controller.abort();
+	}, [apiUrl, command, name]);
+	return { candidates, loading };
+};
+
+async function loadParameterizeCandidates(
+	apiUrl: string,
+	command: string,
+	name: string,
+): Promise<ParameterizeCandidate[]> {
+	const fetchParams = {
+		endpoint: `${apiUrl + command.toLowerCase()}/parameterize/candidates`,
+		options: {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify({ name }),
+		},
+	};
+	return fetchData(fetchParams)
+		.then((response) => response.json())
+		.catch((ex) => {
+			handleFetchError(getErrorMessage(ex), fetchParams);
+			return [];
+		});
+}
+
 export const useParameterizeFrom = () => {
 	const setParameter = useSetSelectParameterState();
 	const setParameterList = useSetParameterList();
 	const environment = useEnvironment();
-	return async (sourceCommand: string, name: string) => {
+	return async (
+		sourceCommand: string,
+		name: string,
+		parameterizeKeys: string[],
+	) => {
 		const fetchParams = {
 			endpoint: `${environment.apiUrl + sourceCommand.toLowerCase()}/parameterize`,
 			options: {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ name }),
+				body: JSON.stringify({ name, parameterizeKeys }),
 			},
 		};
 		try {

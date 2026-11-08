@@ -12,6 +12,7 @@ import {
 	useParameterizeFrom,
 } from "../../hooks/useSelectParameter";
 import type { EditName } from "../main/Sidebar";
+import ParameterizeOptionDialog from "./ParameterizeOptionDialog";
 
 type MenuEditProp = {
 	name: string;
@@ -46,6 +47,11 @@ export default function NameEditMenu({
 		editName.name,
 	);
 	const parameterizeFrom = useParameterizeFrom();
+	// メニューを閉じた後も開いておくため、メニュー（editName）とは別に持つ
+	const [parameterizeTarget, setParameterizeTarget] = useState<{
+		command: string;
+		name: string;
+	} | null>(null);
 	const canParameterize =
 		editName.command && editName.command !== "parameterize";
 	return (
@@ -77,13 +83,30 @@ export default function NameEditMenu({
 						handleMenuParameterize={
 							canParameterize
 								? () => {
-										parameterizeFrom(editName.command, editName.name);
+										setParameterizeTarget({
+											command: editName.command,
+											name: editName.name,
+										});
 										setEditName({} as EditName);
 									}
 								: undefined
 						}
 					/>
 				</div>
+			)}
+			{parameterizeTarget && (
+				<ParameterizeOptionDialog
+					command={parameterizeTarget.command}
+					name={parameterizeTarget.name}
+					onApply={(parameterizeKeys) =>
+						parameterizeFrom(
+							parameterizeTarget.command,
+							parameterizeTarget.name,
+							parameterizeKeys,
+						)
+					}
+					onClose={() => setParameterizeTarget(null)}
+				/>
 			)}
 		</>
 	);

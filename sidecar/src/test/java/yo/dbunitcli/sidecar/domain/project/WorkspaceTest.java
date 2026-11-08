@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -139,7 +140,7 @@ class WorkspaceTest {
         this.workspace.options().add("myConvert", new CommandParameters(Type.convert, new String[]{}));
 
         // Act
-        final String parameterizeName = this.workspace.parameterize(Type.convert, "myConvert");
+        final String parameterizeName = this.workspace.parameterize(Type.convert, "myConvert", null);
 
         // Assert: 戻り値は parameterize コマンド名
         assertEquals("myConvert", parameterizeName);
@@ -176,7 +177,37 @@ class WorkspaceTest {
 
     @Test
     void parameterize_存在しないパラメータを指定した場合は空文字を返す() throws IOException {
-        final String result = this.workspace.parameterize(Type.convert, "nonexistent");
+        final String result = this.workspace.parameterize(Type.convert, "nonexistent", null);
         assertEquals("", result);
+    }
+
+    @Test
+    void parameterizeCandidates_値が入っているオプションをキーと値で返す() throws IOException {
+        this.workspace.options().add("myConvert", new CommandParameters(Type.convert, new String[]{"-src.src=in.csv"}));
+
+        final List<Map<String, String>> candidates = this.workspace.parameterizeCandidates(Type.convert, "myConvert");
+
+        assertTrue(candidates.contains(Map.of("key", "-src.src", "value", "in.csv")));
+        assertTrue(candidates.stream().noneMatch(it -> it.get("value").isEmpty()), "値が空のオプションは含まないこと");
+    }
+
+    @Test
+    void parameterize_選んだオプションだけパラメータ化し残りは値をテンプレートに書く() throws IOException {
+        this.workspace.options().add("myConvert", new CommandParameters(Type.convert, new String[]{"-src.src=in.csv"}));
+
+        this.workspace.parameterize(Type.convert, "myConvert", List.of("-src.srcType"));
+
+        final String template = Files.readString(this.tempDir.resolve("option/parameterize/template/myConvert.txt"));
+        assertTrue(template.contains("-src.srcType=$param.src_srcType$"), "選んだオプションは $param.xxx$ になること");
+        assertTrue(template.contains("-src.src=in.csv"), "選ばなかったオプションは保存値のままになること");
+        assertEquals("src_srcType", Files.readAllLines(this.tempDir.resolve("myConvert.csv")).getFirst().replace("\"", ""));
+    }
+
+    @Test
+    void parameterize_パラメータ化するオプションが無ければエラー() throws IOException {
+        this.workspace.options().add("myConvert", new CommandParameters(Type.convert, new String[]{}));
+
+        assertThrows(IllegalArgumentException.class,
+                () -> this.workspace.parameterize(Type.convert, "myConvert", List.of()));
     }
 }
