@@ -45,4 +45,24 @@ public class RowCompareTest {
         final AssertionError error = assertThrows(AssertionError.class, () -> compare(oldTable, newTable));
         assertTrue(error.getMessage().startsWith("comparison keys not found in new table:[ID]"), error.getMessage());
     }
+
+    @Test
+    public void パッチSQLの主キーは比較キーと大文字小文字を区別せずに照合する() {
+        final TableSeparator lowerKey = TableSeparator.builder().setComparisonKeys(List.of("id")).build();
+        final ComparableTable oldTable = new ComparableTable.Builder(lowerKey.addSetting(new DefaultTableMetaData("T"
+                , new Column[]{new Column("ID", DataType.UNKNOWN), new Column("V", DataType.UNKNOWN)})))
+                .addRow(new Object[]{"1", "a"})
+                .build();
+        final boolean[] written = new boolean[1];
+        final CreatePatchSqlRowCompareResultHandler handler = new CreatePatchSqlRowCompareResultHandler(
+                new TableCompare(oldTable, oldTable, null)) {
+            @Override
+            protected void write() {
+                written[0] = true;
+            }
+        };
+        handler.handleDelete(0, oldTable.getRow(0));
+        handler.result();
+        assertTrue(written[0]);
+    }
 }

@@ -34,6 +34,14 @@ public class ComparableTableMappingTaskTest {
         Assertions.assertEquals(List.of("11", "21"), this.runs);
     }
 
+    @Test
+    public void 複数のタスクをまとめたタスクは1つのparamのbuilderでは変えられない() {
+        final ComparableDataSetParam param = DataSetTestSupport.param("{}");
+        final ComparableTableMappingTask.WithTargetTable task = new ComparableTableMappingTask.WithTargetTable("a"
+                , List.of(this.task(param, "11"), this.task(param, "21")));
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> task.with(param.toBuilder()));
+    }
+
     /**
      * 2つのソース（11〜13・21〜23）がaに書く行を、jxlsと同じく行を流して受け取るconverterで読み、テーブルごとの行を返す
      */

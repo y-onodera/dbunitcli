@@ -120,7 +120,7 @@ public class ComparableTableJoin {
                 final Map<String, Object> param = new HashMap<>();
                 leftRow.forEach((key, value) -> param.put(left.getTableName() + "_" + key, value));
                 rightRow.forEach((key, value) -> param.put(right.getTableName() + "_" + key, value));
-                return Boolean.parseBoolean(jexl.evaluate(new MapContext(param)).toString());
+                return Boolean.parseBoolean(String.valueOf(jexl.evaluate(new MapContext(param))));
             };
         }
     }

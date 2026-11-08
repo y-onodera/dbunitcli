@@ -100,9 +100,12 @@ public interface ComparableTableMappingTask {
             return new WithTargetTable(this.targetTableName, this.tasks.stream().map(it -> it.with(consumer)).toList());
         }
 
+        /**
+         * builderは1つのタスクのparamから作るため、ソースの異なる他のタスクには当てられない。with(Consumer)を使う
+         */
         @Override
         public ComparableTableMappingTask with(final ComparableDataSetParam.Builder builder) {
-            return this.tasks.getFirst().with(builder);
+            throw new UnsupportedOperationException("use with(Consumer) for WithTargetTable. targetTableName:" + this.targetTableName);
         }
 
         @Override

@@ -172,7 +172,7 @@ public record TableSeparator(TableMetaDataFilter sourceFilter
             if (this.expressions.isEmpty()) {
                 return true;
             }
-            return this.expressions.stream().allMatch(it -> Boolean.parseBoolean(it.evaluate(new MapContext(row)).toString()));
+            return this.expressions.stream().allMatch(it -> Boolean.parseBoolean(String.valueOf(it.evaluate(new MapContext(row)))));
         }
 
         public RowFilter and(final RowFilter otherFilter) {

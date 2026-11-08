@@ -6,6 +6,7 @@ import org.dbunit.dataset.ITableMetaData;
 import org.dbunit.dataset.datatype.DataType;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import yo.dbunitcli.common.TableMetaDataFilter;
 import yo.dbunitcli.common.filter.AnyFilter;
 
 import java.util.List;
@@ -85,5 +86,30 @@ public class TableSeparatorsTest {
 
         Assertions.assertEquals(1, mapped.settings().size());
         Assertions.assertEquals(1, mapped.joinConditions().size());
+    }
+
+    private static TableSeparator rename(final TableMetaDataFilter target, final TableRenameStrategy rename) {
+        return TableSeparator.builder()
+                             .setTargetFilter(target)
+                             .setSplitter(new TableSplitter.Builder().setRenameFunction(rename).build())
+                             .build();
+    }
+
+    @Test
+    public void 名前を変えても同じ設定に合い続ける場合は1回だけ適用する() {
+        final TableSeparators.Builder builder = new TableSeparators.Builder();
+        builder.addSetting(rename(name -> name.startsWith("T")
+                , new TableRenameStrategy.ReplaceFunction.Builder().setPrefix("T_").build()));
+
+        Assertions.assertEquals(List.of("T_T"), outputNames(builder.build(), "T"));
+    }
+
+    @Test
+    public void 名前を互いに変える設定は1回ずつ適用して止まる() {
+        final TableSeparators.Builder builder = new TableSeparators.Builder();
+        builder.addSetting(rename(new AnyFilter(List.of("A")), new TableRenameStrategy.ReplaceFunction.Builder().setNewName("B").build()));
+        builder.addSetting(rename(new AnyFilter(List.of("B")), new TableRenameStrategy.ReplaceFunction.Builder().setNewName("A").build()));
+
+        Assertions.assertEquals(List.of("A"), outputNames(builder.build(), "A"));
     }
 }

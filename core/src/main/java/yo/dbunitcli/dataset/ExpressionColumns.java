@@ -77,9 +77,9 @@ public record ExpressionColumns(List<Expressions> values) {
                     final Object val = JexlEngines.DATASET.createExpression(exp.values().get(columnName)).evaluate(jc);
                     return switch (exp.type()) {
                         case STRING -> val;
-                        case BOOLEAN -> Boolean.parseBoolean(val.toString());
-                        case SQL_FUNCTION -> val.toString();
-                        case NUMBER -> val.toString().isEmpty() ? "" : NumberParser.parse(val);
+                        case BOOLEAN -> Boolean.parseBoolean(String.valueOf(val));
+                        case SQL_FUNCTION -> Objects.toString(val, null);
+                        case NUMBER -> val == null ? null : val.toString().isEmpty() ? "" : NumberParser.parse(val);
                     };
                 })
                 .reduce(null, (a, b) -> b != null ? b : a);
