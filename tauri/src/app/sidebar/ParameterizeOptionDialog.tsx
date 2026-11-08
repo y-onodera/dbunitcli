@@ -16,67 +16,46 @@ import {
 	type ParameterizeCandidate,
 	type ParamSource,
 	useParameterizeCandidates,
+	useParameterizeFrom,
 } from "../../hooks/useSelectParameter";
+import { useTableSelection } from "../../hooks/useTableSelection";
 import { ENCODING_CANDIDATES } from "../form/section/element/EncodingText";
 
 const CHECKBOX_CLASS =
 	"w-4 h-4 text-primary border border-border ring-primary-ring focus-visible:ring-3";
 
-export default function ParameterizeOptionDialog({
-	command,
-	name,
-	onApply,
-	onClose,
-}: {
+type DialogProps = {
 	command: string;
 	name: string;
-	onApply: (parameterizeKeys: string[], paramSource: ParamSource) => void;
 	onClose: () => void;
-}) {
-	const { candidates, loading } = useParameterizeCandidates(command, name);
-	if (loading) {
+};
+
+export default function ParameterizeOptionDialog(props: DialogProps) {
+	const candidates = useParameterizeCandidates(props.command, props.name);
+	if (candidates === null) {
 		return (
 			<ModalOverlay width="w-2xl">
 				<StatusMessage kind="loading">Loading...</StatusMessage>
 			</ModalOverlay>
 		);
 	}
-	return (
-		<Dialog
-			name={name}
-			candidates={candidates}
-			onApply={onApply}
-			onClose={onClose}
-		/>
-	);
+	return <Dialog {...props} candidates={candidates} />;
 }
 
 function Dialog({
+	command,
 	name,
 	candidates,
-	onApply,
 	onClose,
-}: {
-	name: string;
-	candidates: ParameterizeCandidate[];
-	onApply: (parameterizeKeys: string[], paramSource: ParamSource) => void;
-	onClose: () => void;
-}) {
-	const [selected, setSelected] = useState<string[]>(
-		candidates.map((it) => it.key),
-	);
+}: DialogProps & { candidates: ParameterizeCandidate[] }) {
+	const parameterizeFrom = useParameterizeFrom();
+	const keys = candidates.map((it) => it.key);
+	const { selected, toggle, toggleAll } = useTableSelection(keys);
 	const [paramSource, setParamSource] = useState<ParamSource>({
 		type: "csv",
 		encoding: ENCODING_CANDIDATES[0],
 	});
-	const allSelected =
-		candidates.length > 0 && selected.length === candidates.length;
-	const toggle = (key: string) =>
-		setSelected((cur) =>
-			cur.includes(key) ? cur.filter((k) => k !== key) : [...cur, key],
-		);
-	const toggleAll = () =>
-		setSelected(allSelected ? [] : candidates.map((it) => it.key));
+	const allSelected = keys.length > 0 && selected.size === keys.length;
 
 	function renderRow(candidate: ParameterizeCandidate) {
 		return (
@@ -86,7 +65,7 @@ function Dialog({
 						type="checkbox"
 						aria-label={candidate.key}
 						className={CHECKBOX_CLASS}
-						checked={selected.includes(candidate.key)}
+						checked={selected.has(candidate.key)}
 						onChange={() => toggle(candidate.key)}
 					/>
 				</Td>
@@ -113,7 +92,7 @@ function Dialog({
 									aria-label="select all"
 									className={CHECKBOX_CLASS}
 									checked={allSelected}
-									onChange={toggleAll}
+									onChange={() => toggleAll(keys, !allSelected)}
 								/>
 							</Th>
 							<Th>option</Th>
@@ -190,13 +169,12 @@ function Dialog({
 			<DialogActions>
 				<BlueButton
 					title="Parameterize"
-					disabled={selected.length === 0}
+					disabled={selected.size === 0}
 					handleClick={() => {
-						// 送信順をチェックした順ではなく保存順に揃える
-						onApply(
-							candidates
-								.map((it) => it.key)
-								.filter((key) => selected.includes(key)),
+						parameterizeFrom(
+							command,
+							name,
+							keys.filter((key) => selected.has(key)),
 							paramSource,
 						);
 						onClose();

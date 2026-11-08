@@ -7,10 +7,7 @@ import {
 	ParameterizeButton,
 } from "../../components/element/ButtonIcon";
 import { ControllTextBox } from "../../components/element/Input";
-import {
-	useParameterActions,
-	useParameterizeFrom,
-} from "../../hooks/useSelectParameter";
+import { useParameterActions } from "../../hooks/useSelectParameter";
 import type { EditName } from "../main/Sidebar";
 import ParameterizeOptionDialog from "./ParameterizeOptionDialog";
 
@@ -46,7 +43,6 @@ export default function NameEditMenu({
 		editName.command,
 		editName.name,
 	);
-	const parameterizeFrom = useParameterizeFrom();
 	// メニューを閉じた後も開いておくため、メニュー（editName）とは別に持つ
 	const [parameterizeTarget, setParameterizeTarget] = useState<{
 		command: string;
@@ -98,14 +94,6 @@ export default function NameEditMenu({
 				<ParameterizeOptionDialog
 					command={parameterizeTarget.command}
 					name={parameterizeTarget.name}
-					onApply={(parameterizeKeys, paramSource) =>
-						parameterizeFrom(
-							parameterizeTarget.command,
-							parameterizeTarget.name,
-							parameterizeKeys,
-							paramSource,
-						)
-					}
 					onClose={() => setParameterizeTarget(null)}
 				/>
 			)}

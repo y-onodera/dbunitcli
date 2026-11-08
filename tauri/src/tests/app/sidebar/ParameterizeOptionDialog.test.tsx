@@ -11,10 +11,7 @@ const { mockParameterizeFrom, candidatesFixture } = vi.hoisted(() => ({
 	},
 }));
 vi.mock("../../../hooks/useSelectParameter", () => ({
-	useParameterizeCandidates: () => ({
-		candidates: candidatesFixture.current,
-		loading: false,
-	}),
+	useParameterizeCandidates: () => candidatesFixture.current,
 	useParameterizeFrom: () => mockParameterizeFrom,
 	useParameterActions: () => ({
 		handleDelete: vi.fn(),
@@ -32,13 +29,11 @@ const candidates = [
 describe("ParameterizeOptionDialogのテスト", () => {
 	it("保存値を表示し、初期状態は全オプションをパラメータ化する", async () => {
 		candidatesFixture.current = candidates;
-		const onApply = vi.fn();
 		const onClose = vi.fn();
 		render(
 			<ParameterizeOptionDialog
 				command="compare"
 				name="csvCsv"
-				onApply={onApply}
 				onClose={onClose}
 			/>,
 		);
@@ -46,7 +41,10 @@ describe("ParameterizeOptionDialogのテスト", () => {
 		expect(screen.getByText("multi1.csv")).toBeInTheDocument();
 		await userEvent.click(screen.getByRole("button", { name: "Parameterize" }));
 
-		expect(onApply).toHaveBeenCalledWith(
+		expect(mockParameterizeFrom).toHaveBeenCalledWith(
+			"compare",
+			"csvCsv",
+
 			["-new.src", "-new.srcType", "-old.src"],
 			{ type: "csv", encoding: "UTF-8" },
 		);
@@ -55,12 +53,10 @@ describe("ParameterizeOptionDialogのテスト", () => {
 
 	it("チェックを外したオプションは送らず、送る順は保存順に揃える", async () => {
 		candidatesFixture.current = candidates;
-		const onApply = vi.fn();
 		render(
 			<ParameterizeOptionDialog
 				command="compare"
 				name="csvCsv"
-				onApply={onApply}
 				onClose={vi.fn()}
 			/>,
 		);
@@ -70,10 +66,15 @@ describe("ParameterizeOptionDialogのテスト", () => {
 		await userEvent.click(screen.getByRole("checkbox", { name: "-new.src" }));
 		await userEvent.click(screen.getByRole("button", { name: "Parameterize" }));
 
-		expect(onApply).toHaveBeenCalledWith(["-new.src", "-old.src"], {
-			type: "csv",
-			encoding: "UTF-8",
-		});
+		expect(mockParameterizeFrom).toHaveBeenCalledWith(
+			"compare",
+			"csvCsv",
+			["-new.src", "-old.src"],
+			{
+				type: "csv",
+				encoding: "UTF-8",
+			},
+		);
 	});
 
 	it("1つも選んでいなければParameterizeを押せない", async () => {
@@ -82,7 +83,6 @@ describe("ParameterizeOptionDialogのテスト", () => {
 			<ParameterizeOptionDialog
 				command="compare"
 				name="csvCsv"
-				onApply={vi.fn()}
 				onClose={vi.fn()}
 			/>,
 		);
@@ -96,12 +96,10 @@ describe("ParameterizeOptionDialogのテスト", () => {
 describe("ParameterizeOptionDialogのパラメータデータ形式のテスト", () => {
 	it("csvでは選んだ文字コードを渡す", async () => {
 		candidatesFixture.current = candidates;
-		const onApply = vi.fn();
 		render(
 			<ParameterizeOptionDialog
 				command="compare"
 				name="csvCsv"
-				onApply={onApply}
 				onClose={vi.fn()}
 			/>,
 		);
@@ -109,10 +107,15 @@ describe("ParameterizeOptionDialogのパラメータデータ形式のテスト"
 		await userEvent.selectOptions(screen.getByLabelText("encoding"), "MS932");
 		await userEvent.click(screen.getByRole("button", { name: "Parameterize" }));
 
-		expect(onApply).toHaveBeenCalledWith(expect.any(Array), {
-			type: "csv",
-			encoding: "MS932",
-		});
+		expect(mockParameterizeFrom).toHaveBeenCalledWith(
+			"compare",
+			"csvCsv",
+			expect.any(Array),
+			{
+				type: "csv",
+				encoding: "MS932",
+			},
+		);
 	});
 
 	it("xlsxを選ぶと文字コードの欄を出さない", async () => {
@@ -121,7 +124,6 @@ describe("ParameterizeOptionDialogのパラメータデータ形式のテスト"
 			<ParameterizeOptionDialog
 				command="compare"
 				name="csvCsv"
-				onApply={vi.fn()}
 				onClose={vi.fn()}
 			/>,
 		);

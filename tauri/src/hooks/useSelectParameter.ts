@@ -18,6 +18,7 @@ import type {
 } from "../model/SelectParameter";
 import { SelectParameter } from "../model/SelectParameter";
 import {
+	fetchAndUpdate,
 	fetchData,
 	getErrorMessage,
 	handleFetchError,
@@ -113,36 +114,43 @@ export const useParameterActions = (command: string, name: string) => {
 };
 export type ParameterizeCandidate = { key: string; value: string };
 
-// parameterizeで作るパラメータデータの形式。encodingはcsvのときだけ使う
+// parameterizeで作るパラメータデータの形式。encodingはcsvのときだけ使われる
 export type ParamSource = { type: "csv" | "xlsx"; encoding: string };
 
+// 取得前はnull（取得に失敗したときは空の一覧にする）
 export const useParameterizeCandidates = (
 	command: string,
 	name: string,
-): { candidates: ParameterizeCandidate[]; loading: boolean } => {
+): ParameterizeCandidate[] | null => {
 	const { apiUrl } = useEnvironment();
-	const [candidates, setCandidates] = useState<ParameterizeCandidate[]>([]);
-	const [loading, setLoading] = useState(true);
+	const [candidates, setCandidates] = useState<ParameterizeCandidate[] | null>(
+		null,
+	);
 	useEffect(() => {
 		const controller = new AbortController();
-		setLoading(true);
-		loadParameterizeCandidates(apiUrl, command, name).then((result) => {
-			if (!controller.signal.aborted) {
-				setCandidates(result);
-				setLoading(false);
+		fetchAndUpdate<ParameterizeCandidate[]>(
+			parameterizeCandidatesParams(apiUrl, command, name),
+			(data) => {
+				if (!controller.signal.aborted) {
+					setCandidates(data);
+				}
+			},
+		).then((result) => {
+			if (result === "failed" && !controller.signal.aborted) {
+				setCandidates([]);
 			}
 		});
 		return () => controller.abort();
 	}, [apiUrl, command, name]);
-	return { candidates, loading };
+	return candidates;
 };
 
-async function loadParameterizeCandidates(
+function parameterizeCandidatesParams(
 	apiUrl: string,
 	command: string,
 	name: string,
-): Promise<ParameterizeCandidate[]> {
-	const fetchParams = {
+) {
+	return {
 		endpoint: `${apiUrl + command.toLowerCase()}/parameterize/candidates`,
 		options: {
 			method: "POST",
@@ -150,12 +158,6 @@ async function loadParameterizeCandidates(
 			body: JSON.stringify({ name }),
 		},
 	};
-	return fetchData(fetchParams)
-		.then((response) => response.json())
-		.catch((ex) => {
-			handleFetchError(getErrorMessage(ex), fetchParams);
-			return [];
-		});
 }
 
 export const useParameterizeFrom = () => {
@@ -177,8 +179,7 @@ export const useParameterizeFrom = () => {
 					name,
 					parameterizeKeys,
 					paramType: paramSource.type,
-					paramEncoding:
-						paramSource.type === "csv" ? paramSource.encoding : undefined,
+					paramEncoding: paramSource.encoding,
 				}),
 			},
 		};

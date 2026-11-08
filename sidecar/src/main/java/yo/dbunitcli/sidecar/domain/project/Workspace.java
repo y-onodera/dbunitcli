@@ -16,6 +16,7 @@ import yo.dbunitcli.dataset.converter.XlsConverter;
 import yo.dbunitcli.dataset.converter.XlsxConverter;
 import yo.dbunitcli.resource.FileResources;
 import yo.dbunitcli.sidecar.dto.ContextDto;
+import yo.dbunitcli.sidecar.dto.ParameterizeCandidateDto;
 import yo.dbunitcli.sidecar.dto.ParametersDto;
 import yo.dbunitcli.sidecar.dto.ResourcesDto;
 import yo.dbunitcli.sidecar.dto.WorkspaceDto;
@@ -26,7 +27,6 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -48,7 +48,7 @@ public class Workspace {
                 , "-template=" + templatePath.getFileName()
                 , "-param.src=" + parameterSource.getName()
                 , "-param.srcType=" + paramSource.type()));
-        if (paramSource.isCsv()) {
+        if (paramSource.type() == ParamType.csv) {
             result.add("-param.encoding=" + paramSource.encoding());
         }
         result.add("-unit=record");
@@ -208,17 +208,12 @@ public class Workspace {
     /**
      * parameterizeの対象に選べるオプション（値が入っているもの）を保存順に返す
      */
-    public List<Map<String, String>> parameterizeCandidates(final Type type, final String name) {
+    public List<ParameterizeCandidateDto> parameterizeCandidates(final Type type, final String name) {
         return this.options().select(type, name)
                    .map(source -> {
                        final Option.Parameters target = source.toOptionParameters();
                        return target.toList(false, key -> key).stream()
-                                    .map(key -> {
-                                        final Map<String, String> candidate = new LinkedHashMap<>();
-                                        candidate.put("key", key);
-                                        candidate.put("value", target.get(key));
-                                        return candidate;
-                                    })
+                                    .map(key -> new ParameterizeCandidateDto(key, target.get(key)))
                                     .toList();
                    })
                    .orElse(List.of());
@@ -262,7 +257,7 @@ public class Workspace {
 
     private File saveParameterSources(final String name, final Map<String, ?> parameters, final ParamSource paramSource) {
         final File resourcesDir = this.path().toFile();
-        if (paramSource.isCsv()) {
+        if (paramSource.type() == ParamType.csv) {
             new CsvConverter(resourcesDir, paramSource.encoding())
                     .convert(parameterTable(name, parameters));
             return new File(resourcesDir, name + ".csv");
@@ -288,25 +283,25 @@ public class Workspace {
      * @param type     csv または xlsx
      * @param encoding csvの文字コード
      */
-    public record ParamSource(String type, String encoding) {
-        private static final String CSV = "csv";
-        private static final String XLSX = "xlsx";
+    public record ParamSource(ParamType type, String encoding) {
+        public static final ParamSource DEFAULT = new ParamSource(ParamType.csv, "UTF-8");
 
-        /** 未指定の項目はcsv・UTF-8にする */
+        /** 未指定の項目はDEFAULTの値にする */
+        public ParamSource(final String type, final String encoding) {
+            this(Strings.isEmpty(type) ? DEFAULT.type() : ParamType.valueOf(type)
+                    , Strings.isEmpty(encoding) ? DEFAULT.encoding() : encoding);
+        }
+
         public ParamSource {
-            type = Strings.isEmpty(type) ? CSV : type;
-            if (!type.equals(CSV) && !type.equals(XLSX)) {
-                throw new IllegalArgumentException("unsupported param type: " + type);
-            }
-            encoding = Strings.isEmpty(encoding) ? "UTF-8" : encoding;
-            if (type.equals(CSV) && !Charset.isSupported(encoding)) {
+            if (type == ParamType.csv && !Charset.isSupported(encoding)) {
                 throw new IllegalArgumentException("unsupported encoding: " + encoding);
             }
         }
+    }
 
-        boolean isCsv() {
-            return this.type.equals(CSV);
-        }
+    /** 名前は-param.srcTypeの値 */
+    public enum ParamType {
+        csv, xlsx
     }
 
     public static class Builder {

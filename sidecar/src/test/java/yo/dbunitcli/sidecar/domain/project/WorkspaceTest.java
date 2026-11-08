@@ -8,6 +8,7 @@ import yo.dbunitcli.application.command.Parameterize;
 import yo.dbunitcli.application.command.Type;
 import yo.dbunitcli.common.Parameter;
 import yo.dbunitcli.resource.FileResources;
+import yo.dbunitcli.sidecar.dto.ParameterizeCandidateDto;
 import yo.dbunitcli.sidecar.dto.WorkspaceDto;
 
 import java.io.File;
@@ -146,7 +147,7 @@ class WorkspaceTest {
         this.workspace.options().add("myConvert", new CommandParameters(Type.convert, new String[]{}));
 
         // Act
-        final String parameterizeName = this.workspace.parameterize(Type.convert, "myConvert", null, new Workspace.ParamSource(null, null));
+        final String parameterizeName = this.workspace.parameterize(Type.convert, "myConvert", null, Workspace.ParamSource.DEFAULT);
 
         // Assert: 戻り値は parameterize コマンド名
         assertEquals("myConvert", parameterizeName);
@@ -183,7 +184,7 @@ class WorkspaceTest {
 
     @Test
     void parameterize_存在しないパラメータを指定した場合は空文字を返す() throws IOException {
-        final String result = this.workspace.parameterize(Type.convert, "nonexistent", null, new Workspace.ParamSource(null, null));
+        final String result = this.workspace.parameterize(Type.convert, "nonexistent", null, Workspace.ParamSource.DEFAULT);
         assertEquals("", result);
     }
 
@@ -191,17 +192,17 @@ class WorkspaceTest {
     void parameterizeCandidates_値が入っているオプションをキーと値で返す() throws IOException {
         this.workspace.options().add("myConvert", new CommandParameters(Type.convert, new String[]{"-src.src=in.csv"}));
 
-        final List<Map<String, String>> candidates = this.workspace.parameterizeCandidates(Type.convert, "myConvert");
+        final List<ParameterizeCandidateDto> candidates = this.workspace.parameterizeCandidates(Type.convert, "myConvert");
 
-        assertTrue(candidates.contains(Map.of("key", "-src.src", "value", "in.csv")));
-        assertTrue(candidates.stream().noneMatch(it -> it.get("value").isEmpty()), "値が空のオプションは含まないこと");
+        assertTrue(candidates.contains(new ParameterizeCandidateDto("-src.src", "in.csv")));
+        assertTrue(candidates.stream().noneMatch(it -> it.value().isEmpty()), "値が空のオプションは含まないこと");
     }
 
     @Test
     void parameterize_選んだオプションだけパラメータ化し残りは値をテンプレートに書く() throws IOException {
         this.workspace.options().add("myConvert", new CommandParameters(Type.convert, new String[]{"-src.src=in.csv"}));
 
-        this.workspace.parameterize(Type.convert, "myConvert", List.of("-src.srcType"), new Workspace.ParamSource(null, null));
+        this.workspace.parameterize(Type.convert, "myConvert", List.of("-src.srcType"), Workspace.ParamSource.DEFAULT);
 
         final String template = Files.readString(this.tempDir.resolve("option/parameterize/template/myConvert.txt"));
         assertTrue(template.contains("-src.srcType=$param.src_srcType$"), "選んだオプションは $param.xxx$ になること");
@@ -214,7 +215,7 @@ class WorkspaceTest {
         this.workspace.options().add("myConvert", new CommandParameters(Type.convert, new String[]{}));
 
         assertThrows(IllegalArgumentException.class,
-                () -> this.workspace.parameterize(Type.convert, "myConvert", List.of(), new Workspace.ParamSource(null, null)));
+                () -> this.workspace.parameterize(Type.convert, "myConvert", List.of(), Workspace.ParamSource.DEFAULT));
     }
 
     @Test
