@@ -355,7 +355,7 @@ public record TableSeparators(List<TableSeparator> settings
                                                                     .builder()
                                                                     .setRenameFunction(newFunction)
                                                                     .build())))
-                                                     .toList();
+                                                     .collect(Collectors.toCollection(ArrayList::new));
             return this;
         }
 

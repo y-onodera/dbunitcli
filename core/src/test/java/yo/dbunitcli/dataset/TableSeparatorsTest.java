@@ -112,4 +112,13 @@ public class TableSeparatorsTest {
 
         Assertions.assertEquals(List.of("A"), outputNames(builder.build(), "A"));
     }
+
+    @Test
+    public void 共通の名前を変えたあとも共通設定を追加できる() {
+        final TableSeparators.Builder builder = TableSeparators.NONE.builder()
+                .setCommonRenameFunction(new TableRenameStrategy.ReplaceFunction.Builder().setNewName("TARGET").build());
+        builder.addCommon(TableSeparator.builder().setComparisonKeys(List.of("key")).build());
+
+        Assertions.assertEquals(List.of("TARGET"), outputNames(builder.build(), "T"));
+    }
 }
