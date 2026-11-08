@@ -214,6 +214,25 @@ public class FromJsonTableSeparatorsBuilderTest {
     }
 
     @Test
+    public void configureSettingWhenSplitHasNoLimitShouldThrowWithMessage() {
+        final String json = """
+                {
+                    "settings": [{
+                        "name": "LARGE_TABLE",
+                        "split": {
+                            "breakKey": ["type"]
+                        }
+                    }]
+                }
+                """;
+        final jakarta.json.JsonObject jsonObject = jakarta.json.Json.createReader(new StringReader(json))
+                .readObject();
+        final IllegalArgumentException ex = assertThrows(IllegalArgumentException.class
+                , () -> new FromJsonTableSeparatorsBuilder("UTF-8").configureSetting(jsonObject));
+        assertEquals("'split' requires 'limit'", ex.getMessage());
+    }
+
+    @Test
     public void configureSettingWhenColumnFilterConfiguredShouldSetupFilters() {
         final String json = """
                 {

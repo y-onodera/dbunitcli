@@ -352,7 +352,7 @@ public record ScaffoldOption(
         builder.put("-src.src", DATASET_SRC_DIR);
         builder.put("-src.srcType", this.datasetType.toDataSourceType().name());
         if (this.usesDatasetEncoding()) {
-            builder.put("-encoding", this.datasetEncoding());
+            builder.put("-src.encoding", this.datasetEncoding());
         }
     }
 

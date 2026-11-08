@@ -13,7 +13,12 @@ import java.util.List;
 public record ExcelOption(String prefix, String xlsxSchemaSource, String settingEncoding) implements ComparableDataSetParamOption {
 
     public ExcelOption(final String prefix, final DataSetLoadDto dto) {
-        this(prefix, dto.getXlsxSchemaSource(), EncodingOption.orDefault(dto.getSettingEncoding()));
+        this(prefix, dto.getXlsxSchemaSource(), dto.getSettingEncoding());
+    }
+
+    @Override
+    public String settingEncoding() {
+        return EncodingOption.orDefault(this.settingEncoding);
     }
 
     @Override
@@ -36,7 +41,7 @@ public record ExcelOption(String prefix, String xlsxSchemaSource, String setting
     public ComparableDataSetParam.Builder populate(final ComparableDataSetParam.Builder builder) {
         try {
             return builder.setXlsxSchema(new FromJsonXlsxSchemaBuilder()
-                    .build(FileResources.searchXlsxSchema(this.xlsxSchemaSource), this.settingEncoding));
+                    .build(FileResources.searchXlsxSchema(this.xlsxSchemaSource), this.settingEncoding()));
         } catch (final Exception e) {
             throw new AssertionError(e.getMessage(), e);
         }

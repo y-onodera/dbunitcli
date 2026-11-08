@@ -92,7 +92,7 @@ orders_order_id | orders_item_id | orders_qty | items_id | items_name
     <tr><td>prefix</td><td>出力テーブル名に付与する接頭辞</td></tr>
     <tr><td>tableName</td><td>出力テーブル名のベース名</td></tr>
     <tr><td>suffix</td><td>出力テーブル名に付与する接尾辞</td></tr>
-    <tr><td>limit</td><td>1 出力テーブルあたりに含める breakKey のグループ数（breakKey 未指定時は行数）の上限。上限に達すると次の行から新しい出力テーブルへ切り替わる。<code>0</code>（未指定）のとき split は行われない。</td></tr>
+    <tr><td>limit（必須）</td><td>1 出力テーブルあたりに含める breakKey のグループ数（breakKey 未指定時は行数）の上限。上限に達すると次の行から新しい出力テーブルへ切り替わる。<code>0</code> のとき split は行われない。</td></tr>
     <tr><td>breakKey</td><td>split 時にテーブルを切り替えるキーとなるカラム。値が変化した回数が <code>limit</code> に達すると出力テーブルが切り替わる。未指定の場合は <code>limit</code> 行ごとに切り替わる。</td></tr>
   </table>
 

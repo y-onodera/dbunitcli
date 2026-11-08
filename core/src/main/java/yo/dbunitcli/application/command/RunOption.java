@@ -74,11 +74,11 @@ public record RunOption(
         return this.parallelism() > 1 ? result : result.sorted();
     }
 
+    private static final int DEFAULT_PARALLEL = 1;
+
     /**
      * @return 並列数。未指定なら{@link #DEFAULT_PARALLEL}（スクリプトは実行順に依存しやすいため、convert/generateと違い既定は逐次）
      */
-    private static final int DEFAULT_PARALLEL = 1;
-
     public int parallelism() {
         return DataSetConverterOption.parallelism(this.parallel, DEFAULT_PARALLEL);
     }
