@@ -242,6 +242,8 @@ export function Arrays(props: {
 	list?: string;
 	handleSelect?: (index: number) => void;
 	handleEdit?: (index: number) => void;
+	// 式を書く項目はKeyValuesのexpressionと同じ幅にする
+	wide?: boolean;
 }) {
 	// 値が空のときとAdd中は、末尾に画面だけの空行を出す（モデルは空の値を保持しないため）
 	// selectなど外から値が確定して行数が変われば、Add中は自然に終わる
@@ -278,6 +280,7 @@ export function Arrays(props: {
 						list={props.list}
 						handleSelect={props.handleSelect}
 						handleEdit={props.handleEdit}
+						wide={props.wide}
 					/>
 				);
 			})}
@@ -304,6 +307,7 @@ export function ArraysText(props: {
 	list?: string;
 	handleSelect?: (index: number) => void;
 	handleEdit?: (index: number) => void;
+	wide?: boolean;
 }) {
 	const [text, setText] = useState(props.val);
 	// 他の行と同じ値は確定させず、入力前の値に戻す
@@ -336,14 +340,16 @@ export function ArraysText(props: {
 					name={props.name}
 					id={props.name}
 					required={true}
-					wStyle="col-start-2"
+					wStyle={props.wide ? "col-start-2 col-span-2" : "col-start-2"}
 					value={text}
 					handleChange={(ev) => setText(ev.target.value)}
 					handleBlur={handleBlur}
 					list={props.list}
 				/>
 				{(props.handleSelect || props.handleEdit || props.index > 0) && (
-					<div className="col-start-3 flex items-center">
+					<div
+						className={`${props.wide ? "col-start-4" : "col-start-3"} flex items-center`}
+					>
 						{props.handleSelect && (
 							<FactCheckButton
 								title="select"

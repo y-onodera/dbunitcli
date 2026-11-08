@@ -364,6 +364,7 @@ export function FilterOrderFields({
 						key={field.name}
 						name={field.name}
 						showCaption={true}
+						wide={isExpressionField(field)}
 						values={target[field.name]}
 						list={columnList}
 						handleChange={(text, index) =>
