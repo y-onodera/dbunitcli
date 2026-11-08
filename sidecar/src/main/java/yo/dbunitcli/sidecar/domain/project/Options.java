@@ -31,6 +31,10 @@ public record Options(File baseDir, Map<yo.dbunitcli.application.CommandType, Re
                    .pathStream();
     }
 
+    public Charset charset(final Type type) {
+        return this.parameters.get(type).defaultCharset();
+    }
+
     public Stream<String> names(final yo.dbunitcli.application.CommandType type) {
         return this.parameters.get(type).stream().map(it -> it.replaceAll(".txt", ""));
     }
