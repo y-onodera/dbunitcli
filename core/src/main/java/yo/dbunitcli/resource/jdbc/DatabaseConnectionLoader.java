@@ -35,16 +35,17 @@ public record DatabaseConnectionLoader(Properties jdbcProp) {
     }
 
     public IDatabaseConnection loadConnection() {
-        final String url = this.jdbcProp.get("url").toString();
-        final String user = this.jdbcProp.get("user").toString();
-        final String pass = this.jdbcProp.get("pass").toString();
+        final String url = this.required("url");
+        final String user = this.required("user");
+        final String pass = this.required("pass");
         final IDatabaseConnection result;
+        Connection conn = null;
         try {
             if (url.contains("jdbc:oracle:thin")) {
                 Class.forName("oracle.jdbc.driver.OracleDriver");
                 final Properties props = baseProperties(user, pass);
                 props.setProperty("oracle.net.CONNECT_TIMEOUT", String.valueOf(CONNECT_TIMEOUT_SECONDS * 1000));
-                final Connection conn = DriverManager.getConnection(url, props);
+                conn = DriverManager.getConnection(url, props);
                 result = new DatabaseConnection(conn, user);
                 final DatabaseConfig config = result.getConfig();
                 config.setProperty(DatabaseConfig.PROPERTY_DATATYPE_FACTORY, new Oracle10DataTypeFactory());
@@ -56,7 +57,7 @@ public record DatabaseConnectionLoader(Properties jdbcProp) {
                 Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
                 final Properties props = baseProperties(user, pass);
                 props.setProperty("loginTimeout", String.valueOf(CONNECT_TIMEOUT_SECONDS));
-                final Connection conn = DriverManager.getConnection(url, props);
+                conn = DriverManager.getConnection(url, props);
                 result = new DatabaseConnection(conn, conn.getCatalog());
                 final DatabaseConfig config = result.getConfig();
                 config.setProperty(DatabaseConfig.PROPERTY_DATATYPE_FACTORY, new MsSqlDataTypeFactory());
@@ -69,7 +70,7 @@ public record DatabaseConnectionLoader(Properties jdbcProp) {
                 props.setProperty("connectTimeout", String.valueOf(CONNECT_TIMEOUT_SECONDS));
                 // socketTimeout covers data transfer after connect, so allow more time than connectTimeout
                 props.setProperty("socketTimeout", String.valueOf(CONNECT_TIMEOUT_SECONDS * 2));
-                final Connection conn = DriverManager.getConnection(url, props);
+                conn = DriverManager.getConnection(url, props);
                 result = new DatabaseConnection(conn);
                 final DatabaseConfig config = result.getConfig();
                 config.setProperty(DatabaseConfig.PROPERTY_DATATYPE_FACTORY, new PostgresqlDataTypeFactory());
@@ -80,7 +81,7 @@ public record DatabaseConnectionLoader(Properties jdbcProp) {
             } else if (url.contains("jdbc:h2")) {
                 Class.forName("org.h2.Driver");
                 // H2 is embedded/local; no network timeout needed
-                final Connection conn = DriverManager.getConnection(url, user, pass);
+                conn = DriverManager.getConnection(url, user, pass);
                 result = new DatabaseConnection(conn);
                 final DatabaseConfig config = result.getConfig();
                 config.setProperty(DatabaseConfig.PROPERTY_DATATYPE_FACTORY, new H2DataTypeFactory());
@@ -92,9 +93,27 @@ public record DatabaseConnectionLoader(Properties jdbcProp) {
                 throw new UnsupportedOperationException("unknown url :" + url);
             }
             return result;
-        } catch (final ClassNotFoundException | SQLException | DatabaseUnitException ex) {
+        } catch (final ClassNotFoundException | SQLException | DatabaseUnitException | RuntimeException ex) {
+            if (conn != null) {
+                try {
+                    conn.close();
+                } catch (final SQLException closeEx) {
+                    ex.addSuppressed(closeEx);
+                }
+            }
+            if (ex instanceof final RuntimeException runtimeException) {
+                throw runtimeException;
+            }
             throw new AssertionError(ex);
         }
+    }
+
+    private String required(final String key) {
+        final Object value = this.jdbcProp.get(key);
+        if (value == null) {
+            throw new IllegalArgumentException("jdbc property '" + key + "' is required");
+        }
+        return value.toString();
     }
 
     private static Properties baseProperties(final String user, final String pass) {

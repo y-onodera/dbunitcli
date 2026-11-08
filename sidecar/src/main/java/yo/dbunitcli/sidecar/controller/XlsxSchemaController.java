@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import yo.dbunitcli.Strings;
 import yo.dbunitcli.application.command.GenerateType;
+import yo.dbunitcli.application.json.FromJsonXlsxSchemaBuilder;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.dataset.producer.ComparableXlsxDataSetProducer;
 import yo.dbunitcli.resource.FileResources;
@@ -40,6 +41,16 @@ public class XlsxSchemaController extends AbstractResourceFileController<JsonXls
     @Override
     protected ResourceFile getResourceFile() {
         return this.workspace.resources().xlsxSchema();
+    }
+
+    /**
+     * 定義ミスのあるスキーマを保存しないよう、コマンド実行時と同じくcoreのXlsxSchemaを組み立ててから保存する
+     */
+    @Override
+    protected String serializeJson(final JsonXlsxSchemaRequestDto body) throws IOException {
+        final String json = super.serializeJson(body);
+        new FromJsonXlsxSchemaBuilder().build(json);
+        return json;
     }
 
     /**

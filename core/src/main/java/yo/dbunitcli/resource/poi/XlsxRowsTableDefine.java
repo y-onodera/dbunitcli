@@ -1,6 +1,7 @@
 package yo.dbunitcli.resource.poi;
 
 import org.dbunit.dataset.Column;
+import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.DefaultTableMetaData;
 import org.dbunit.dataset.ITableMetaData;
 import org.dbunit.dataset.datatype.DataType;
@@ -16,6 +17,15 @@ public record XlsxRowsTableDefine(String tableName
         , String[] breakKey
         , boolean addFileInfo) {
 
+    public XlsxRowsTableDefine {
+        // 読み込みを始めてから行ごとに気付くのでは遅いため、設定を読んだ時点で定義ミスにする
+        final int headerCount = XlsxRowsTableDefine.columnCount(tableMetaData);
+        if (cellIndexes.length > headerCount) {
+            throw new IllegalArgumentException("xlsx-schema rows '" + tableName + "': columnIndex has "
+                    + cellIndexes.length + " items but header has " + headerCount);
+        }
+    }
+
     public static Builder builder() {
         return new Builder();
     }
@@ -27,6 +37,14 @@ public record XlsxRowsTableDefine(String tableName
                 , builder.getCellIndexes().toArray(new Integer[0])
                 , builder.getBreakKey().toArray(new String[0])
                 , builder.getAddFileInfo());
+    }
+
+    private static int columnCount(final ITableMetaData tableMetaData) {
+        try {
+            return tableMetaData.getColumns().length;
+        } catch (final DataSetException e) {
+            throw new AssertionError(e);
+        }
     }
 
     public static class Builder {

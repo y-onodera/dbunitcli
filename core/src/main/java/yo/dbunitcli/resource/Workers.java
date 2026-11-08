@@ -60,15 +60,19 @@ public final class Workers {
      */
     public static <R> List<R> run(final int threads, final String threadNamePrefix
             , final IntFunction<Callable<R>> worker) {
+        if (threads <= 0) {
+            return new ArrayList<>();
+        }
         final ExecutorService executor = Workers.newExecutor(threads, threadNamePrefix);
         // executeは投入元のスレッドで呼ばれるため、ここで投入元の文脈を包む
         final CompletionService<R> completion = new ExecutorCompletionService<>(
                 command -> executor.execute(Workers.task(command)));
-        final List<Future<R>> futures = IntStream.range(0, threads)
-                .mapToObj(i -> completion.submit(worker.apply(i)))
-                .toList();
+        final List<Future<R>> futures = new ArrayList<>();
         final List<R> result = new ArrayList<>();
         try {
+            for (int i = 0; i < threads; i++) {
+                futures.add(completion.submit(worker.apply(i)));
+            }
             for (int i = 0; i < threads; i++) {
                 result.add(Workers.await(completion.take()));
             }
@@ -341,7 +345,8 @@ public final class Workers {
 
         @Override
         public void close() {
-            this.closers.forEach(Runnable::run);
+            // 後から確保した資源は先に確保した資源（DB接続など）を使うことがあるため、逆順に閉じる
+            this.closers.reversed().forEach(Runnable::run);
         }
 
         @FunctionalInterface

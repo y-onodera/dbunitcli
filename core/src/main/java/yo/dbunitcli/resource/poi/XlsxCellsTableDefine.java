@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -17,9 +18,30 @@ public record XlsxCellsTableDefine(String tableName
         , int rowCount
         , int columnCount
         , ITableMetaData tableMetaData
-        , Map<String, int[]> tableIndexMap
+        , Map<String, List<int[]>> tableIndexMap
         , boolean addFileInfo
 ) {
+
+    /**
+     * 読み込み中のセルの番地（シート名・$なし）と同じ形。それ以外の書き方はどのセルとも一致しない
+     */
+    private static final Pattern CELL_ADDRESS = Pattern.compile("[A-Z]{1,3}[1-9][0-9]*");
+
+    public XlsxCellsTableDefine {
+        // 読み込みを始めてから気付くのでは遅いため、設定を読んだ時点で定義ミスにする
+        for (final Map.Entry<String, List<int[]>> entry : tableIndexMap.entrySet()) {
+            if (!CELL_ADDRESS.matcher(entry.getKey()).matches()) {
+                throw new IllegalArgumentException("xlsx-schema cells '" + tableName + "': cellAddress '"
+                        + entry.getKey() + "' is not A1 format");
+            }
+            for (final int[] position : entry.getValue()) {
+                if (position[1] >= columnCount) {
+                    throw new IllegalArgumentException("xlsx-schema cells '" + tableName + "': rows[" + position[0]
+                            + "].cellAddress has more items than header " + columnCount);
+                }
+            }
+        }
+    }
 
     public static XlsxCellsTableDefine.Builder builder() {
         return new Builder();
@@ -34,12 +56,15 @@ public record XlsxCellsTableDefine(String tableName
                 , builder.getAddFileInfo());
     }
 
-    public String getColumnName(final String ref) throws DataSetException {
-        return this.tableMetaData.getColumns()[this.tableIndexMap.get(ref)[1]].getColumnName();
+    /**
+     * @return refを割り当てた位置（{行, 列}）。1つのセルを複数のカラムに割り当てられる
+     */
+    public List<int[]> getPositions(final String ref) {
+        return this.tableIndexMap.getOrDefault(ref, List.of());
     }
 
-    public int getRowIndex(final String ref) {
-        return this.tableIndexMap.get(ref)[0];
+    public String getColumnName(final int column) throws DataSetException {
+        return this.tableMetaData.getColumns()[column].getColumnName();
     }
 
     public Iterable<String> getTargetAddresses() {
@@ -72,11 +97,12 @@ public record XlsxCellsTableDefine(String tableName
             return this.rows.size();
         }
 
-        public Map<String, int[]> getTableIndexMap() {
-            final var result = new HashMap<String, int[]>();
+        public Map<String, List<int[]>> getTableIndexMap() {
+            final var result = new HashMap<String, List<int[]>>();
             IntStream.range(0, this.rows.size()).forEach(rowNum -> {
                 final String[] row = this.rows.get(rowNum);
-                IntStream.range(0, row.length).forEach(col -> result.put(row[col], new int[]{rowNum, col}));
+                IntStream.range(0, row.length)
+                        .forEach(col -> result.computeIfAbsent(row[col], k -> new ArrayList<>()).add(new int[]{rowNum, col}));
             });
             return result;
         }

@@ -4,8 +4,11 @@ import org.stringtemplate.v4.StringRenderer;
 import yo.dbunitcli.Strings;
 
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Locale;
+import java.util.stream.Collectors;
 
 public class SqlEscapeStringRenderer extends StringRenderer {
 
@@ -30,7 +33,7 @@ public class SqlEscapeStringRenderer extends StringRenderer {
         } else if (formatString.equals("kebabToUpperCamel")) {
             return Strings.kebabToCamel(o.toString(), Character::toUpperCase);
         } else if (formatString.equals("escapeSql")) {
-            return this.toClob(o.toString().replace("'", "''"));
+            return this.toClob(o.toString());
         } else if (formatString.equals("jexlExp")) {
             return "${" + o.toString() + "}";
         } else if (formatString.equals("ST4Exp")) {
@@ -39,43 +42,58 @@ public class SqlEscapeStringRenderer extends StringRenderer {
         return super.toString(o, formatString, locale);
     }
 
-    private String toClob(final String toString) {
-        final int length = toString.getBytes(StandardCharsets.UTF_8).length;
-        if (toString.contains("\r\n")) {
-            return Arrays.stream(toString.split("\r\n")).map(it -> this.quoted(it, length)).reduce("",
-                                                                                                   (current, newOne) ->
-                                                                                                           current.isEmpty() ?
-                                                                                                                   newOne :
-                                                                                                                   current + " || CHR(13) || CHR(10) || " + newOne);
-        } else if (toString.contains("\n")) {
-            return Arrays.stream(toString.split("\n")).map(toString1 -> this.quoted(toString1, length)).reduce("",
-                                                                                                               (current, newOne) ->
-                                                                                                                       current.isEmpty() ?
-                                                                                                                               newOne :
-                                                                                                                               current + " || CHR(10) || " + newOne);
+    private static final int LITERAL_MAX_BYTES = 4000;
+
+    private String toClob(final String value) {
+        final int length = SqlEscapeStringRenderer.escape(value).getBytes(StandardCharsets.UTF_8).length;
+        if (value.contains("\r\n")) {
+            return this.joinLines(value.split("\r\n"), " || CHR(13) || CHR(10) || ", length);
+        } else if (value.contains("\n")) {
+            return this.joinLines(value.split("\n"), " || CHR(10) || ", length);
         }
-        return this.quoted(toString, length);
+        return this.quoted(value, length);
     }
 
-    private String quoted(final String toString, final int length) {
-        if (length < 4000) {
-            return "'" + toString + "'";
+    private String joinLines(final String[] lines, final String separator, final int length) {
+        return Arrays.stream(lines)
+                .map(it -> this.quoted(it, length))
+                .collect(Collectors.joining(separator));
+    }
+
+    /**
+     * Oracleの文字列リテラルは4000バイトまでのため、超える場合はTO_CLOBで分割して連結する。
+     * 分割はエスケープ前の文字列で行い、''の組やサロゲートペアを分けない
+     */
+    private String quoted(final String value, final int length) {
+        if (length < LITERAL_MAX_BYTES) {
+            return "'" + SqlEscapeStringRenderer.escape(value) + "'";
         }
-        final int limit = toString.getBytes(StandardCharsets.UTF_8).length;
-        int start = 0;
-        int end = Math.min(4000, limit);
-        final StringBuilder result = new StringBuilder();
-        while (start < end) {
-            result.append("TO_CLOB('");
-            result.append(toString, start, end);
-            result.append("')");
-            start = end;
-            end = Math.min(end + 4000, limit);
-            if (start < end) {
-                result.append(" || ");
+        final List<String> chunks = new ArrayList<>();
+        final StringBuilder chunk = new StringBuilder();
+        int chunkBytes = 0;
+        for (int i = 0; i < value.length(); ) {
+            final int codePoint = value.codePointAt(i);
+            final String escaped = codePoint == '\'' ? "''" : new String(Character.toChars(codePoint));
+            final int bytes = escaped.getBytes(StandardCharsets.UTF_8).length;
+            if (chunkBytes + bytes > LITERAL_MAX_BYTES) {
+                chunks.add(chunk.toString());
+                chunk.setLength(0);
+                chunkBytes = 0;
             }
+            chunk.append(escaped);
+            chunkBytes += bytes;
+            i += Character.charCount(codePoint);
         }
-        return result.toString();
+        if (!chunk.isEmpty() || chunks.isEmpty()) {
+            chunks.add(chunk.toString());
+        }
+        return chunks.stream()
+                .map(it -> "TO_CLOB('" + it + "')")
+                .collect(Collectors.joining(" || "));
+    }
+
+    private static String escape(final String value) {
+        return value.replace("'", "''");
     }
 
 }

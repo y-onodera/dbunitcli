@@ -24,11 +24,14 @@ public class ManualRowsMappingTableBuilder implements XlsxRowsToTableBuilder {
 
     private final Map<String, TableMetaDataWithSource> tableMetaDataMap = new HashMap<>();
 
-    private final Map<String, List<Integer>> targetIndex = new HashMap<>();
+    /**
+     * シートの列番号 → 行の値の位置（columnIndexの並び＝headerの並び）
+     */
+    private final Map<String, Map<Integer, List<Integer>>> targetPositions = new HashMap<>();
 
     private final Map<String, String[]> breakKey = new HashMap<>();
 
-    private final List<String> rowValues = new ArrayList<>();
+    private final Map<Integer, String> rowValues = new HashMap<>();
     private int currentTableIndex = -1;
     private TableMetaDataWithSource nowProcessing = null;
 
@@ -40,7 +43,10 @@ public class ManualRowsMappingTableBuilder implements XlsxRowsToTableBuilder {
             this.tableNames[i] = def.tableName();
             this.tableStartRow.put(def.tableName(), def.dataStartRow());
             this.tableMetaDataMap.put(def.tableName(), sourceWithTableDefine.wrap(def.tableMetaData()));
-            this.targetIndex.put(def.tableName(), Arrays.asList(def.cellIndexes()));
+            final Map<Integer, List<Integer>> positions = new HashMap<>();
+            IntStream.range(0, def.cellIndexes().length)
+                    .forEach(pos -> positions.computeIfAbsent(def.cellIndexes()[pos], k -> new ArrayList<>()).add(pos));
+            this.targetPositions.put(def.tableName(), positions);
             this.breakKey.put(def.tableName(), def.breakKey());
         });
     }
@@ -93,10 +99,12 @@ public class ManualRowsMappingTableBuilder implements XlsxRowsToTableBuilder {
 
     @Override
     public String[] currentRow() {
-        if (this.nowProcessing.getColumnLength() < this.rowValues.size()) {
-            throw new AssertionError(this.rowValues + " large items than header:" + Arrays.toString(this.nowProcessing.getColumns()));
-        }
-        return this.nowProcessing.withDefaultValuesToArray(this.rowValues);
+        // 読んだ最後の位置までは空文字で埋め、それより後ろはwithDefaultValuesToArrayの既定値にする
+        final int size = this.rowValues.keySet().stream().mapToInt(Integer::intValue).max().orElse(-1) + 1;
+        final List<String> values = IntStream.range(0, size)
+                .mapToObj(i -> this.rowValues.getOrDefault(i, ""))
+                .toList();
+        return this.nowProcessing.withDefaultValuesToArray(values);
     }
 
     @Override
@@ -110,9 +118,9 @@ public class ManualRowsMappingTableBuilder implements XlsxRowsToTableBuilder {
     }
 
     private void addValue(final int i, final String o) {
-        if (this.targetIndex.get(this.getTableName()).contains(i)) {
-            this.rowValues.add(o);
-        }
+        this.targetPositions.get(this.getTableName())
+                .getOrDefault(i, List.of())
+                .forEach(pos -> this.rowValues.put(pos, o));
     }
 
     private boolean existsToBeMapping() {

@@ -67,7 +67,7 @@
   <h2 id="section-notes">注意</h2>
   <ol>
     <li><code>sheetName</code>（sheet が <code>pattern</code> のときは <code>string</code> か <code>regex</code>）と <code>tableName</code> の両方が入力されていない行は保存対象から除外されます。</li>
-    <li><code>header</code> と <code>columnIndex</code> は要素数を一致させてください。</li>
+    <li><code>header</code> と <code>columnIndex</code> は要素数を一致させてください。<code>columnIndex</code> が <code>header</code> より多い場合は、読み込み時（Save 時を含む）にエラーになります。</li>
     <li><code>dataStart</code> と <code>columnIndex</code> は 0 から数えた番号で指定します（Excel の行番号・列名ではありません）。</li>
     <li><code>breakKey</code> が空のときはレコードを読みません（テーブルは作られますが、行は 0 件になります）。</li>
   </ol>
