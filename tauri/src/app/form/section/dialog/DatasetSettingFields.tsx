@@ -363,8 +363,7 @@ export function FilterOrderFields({
 					<Arrays
 						key={field.name}
 						name={field.name}
-						caption={isExpressionField(field) ? "expression" : "column"}
-						wide={isExpressionField(field)}
+						kind={isExpressionField(field) ? "expression" : "column"}
 						values={target[field.name]}
 						list={columnList}
 						handleChange={(text, index) =>
