@@ -112,6 +112,53 @@ export const useParameterActions = (command: string, name: string) => {
 
 	return { handleDelete, handleCopy, handleRename };
 };
+// parameterizeのオプションが参照するファイル。usedByが空でなければ削除できない
+export type ParameterizeFile = {
+	option: string;
+	path: string;
+	usedBy: string[];
+};
+
+const parameterizeEndpointParams = (endpoint: string, body: object) => ({
+	endpoint,
+	options: {
+		method: "POST",
+		headers: { "Content-Type": "application/json" },
+		body: JSON.stringify(body),
+	},
+});
+
+// 取得に失敗したときはnull
+export const useLoadParameterizeFiles = () => {
+	const { apiUrl } = useEnvironment();
+	return async (name: string): Promise<ParameterizeFile[] | null> => {
+		let files: ParameterizeFile[] | null = null;
+		await fetchAndUpdate<ParameterizeFile[]>(
+			parameterizeEndpointParams(`${apiUrl}parameterize/files`, { name }),
+			(data) => {
+				files = data;
+			},
+		);
+		return files;
+	};
+};
+
+export const useDeleteParameterize = () => {
+	const { apiUrl } = useEnvironment();
+	const setParameterList = useSetParameterList();
+	return (name: string, deleteFiles: string[]) =>
+		fetchAndUpdate<string[]>(
+			parameterizeEndpointParams(`${apiUrl}parameterize/delete-with-files`, {
+				name,
+				deleteFiles,
+			}),
+			(parameters) =>
+				setParameterList((current) =>
+					current.replace("parameterize", parameters),
+				),
+		);
+};
+
 export type ParameterizeCandidate = { key: string; value: string };
 
 // parameterizeで作るパラメータデータの形式。encodingはcsvのときだけ使われる

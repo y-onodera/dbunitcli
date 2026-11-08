@@ -13,6 +13,8 @@ const { mockParameterizeFrom, candidatesFixture } = vi.hoisted(() => ({
 vi.mock("../../../hooks/useSelectParameter", () => ({
 	useParameterizeCandidates: () => candidatesFixture.current,
 	useParameterizeFrom: () => mockParameterizeFrom,
+	useLoadParameterizeFiles: () => vi.fn(),
+	useDeleteParameterize: () => vi.fn(),
 	useParameterActions: () => ({
 		handleDelete: vi.fn(),
 		handleCopy: vi.fn(),

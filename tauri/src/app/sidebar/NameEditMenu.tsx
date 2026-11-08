@@ -7,8 +7,14 @@ import {
 	ParameterizeButton,
 } from "../../components/element/ButtonIcon";
 import { ControllTextBox } from "../../components/element/Input";
-import { useParameterActions } from "../../hooks/useSelectParameter";
+import {
+	type ParameterizeFile,
+	useDeleteParameterize,
+	useLoadParameterizeFiles,
+	useParameterActions,
+} from "../../hooks/useSelectParameter";
 import type { EditName } from "../main/Sidebar";
+import ParameterizeDeleteDialog from "./ParameterizeDeleteDialog";
 import ParameterizeOptionDialog from "./ParameterizeOptionDialog";
 
 type MenuEditProp = {
@@ -48,6 +54,30 @@ export default function NameEditMenu({
 		command: string;
 		name: string;
 	} | null>(null);
+	const [deleteTarget, setDeleteTarget] = useState<{
+		name: string;
+		files: ParameterizeFile[];
+	} | null>(null);
+	const loadParameterizeFiles = useLoadParameterizeFiles();
+	const deleteParameterize = useDeleteParameterize();
+	const abortControllerRef = useRef<AbortController | null>(null);
+	useEffect(() => {
+		const controller = new AbortController();
+		abortControllerRef.current = controller;
+		return () => controller.abort();
+	}, []);
+	// 参照するファイルがあるときだけ、一緒に消すかを確認する
+	const deleteParameterizeOrConfirm = async (name: string) => {
+		const files = await loadParameterizeFiles(name);
+		if (files === null || abortControllerRef.current?.signal.aborted) {
+			return;
+		}
+		if (files.length === 0) {
+			deleteParameterize(name, []);
+		} else {
+			setDeleteTarget({ name, files });
+		}
+	};
 	const canParameterize =
 		editName.command && editName.command !== "parameterize";
 	return (
@@ -65,7 +95,11 @@ export default function NameEditMenu({
 					<MenuEdit
 						name={editName.name}
 						handleMenuDelete={() => {
-							handleDelete();
+							if (editName.command === "parameterize") {
+								deleteParameterizeOrConfirm(editName.name);
+							} else {
+								handleDelete();
+							}
 							setEditName({} as EditName);
 						}}
 						handleMenuRename={(newName: string) => {
@@ -89,6 +123,13 @@ export default function NameEditMenu({
 						}
 					/>
 				</div>
+			)}
+			{deleteTarget && (
+				<ParameterizeDeleteDialog
+					name={deleteTarget.name}
+					files={deleteTarget.files}
+					onClose={() => setDeleteTarget(null)}
+				/>
 			)}
 			{parameterizeTarget && (
 				<ParameterizeOptionDialog

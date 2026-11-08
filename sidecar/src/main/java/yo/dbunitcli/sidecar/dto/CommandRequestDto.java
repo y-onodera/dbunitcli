@@ -22,6 +22,8 @@ public class CommandRequestDto {
 
     private String paramEncoding;
 
+    private List<String> deleteFiles = List.of();
+
     public String getName() {
         return this.name;
     }
@@ -76,5 +78,13 @@ public class CommandRequestDto {
 
     public void setParamEncoding(final String paramEncoding) {
         this.paramEncoding = paramEncoding;
+    }
+
+    public List<String> getDeleteFiles() {
+        return this.deleteFiles;
+    }
+
+    public void setDeleteFiles(final List<String> deleteFiles) {
+        this.deleteFiles = deleteFiles;
     }
 }

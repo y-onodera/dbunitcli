@@ -9,6 +9,7 @@ import yo.dbunitcli.application.command.Type;
 import yo.dbunitcli.common.Parameter;
 import yo.dbunitcli.resource.FileResources;
 import yo.dbunitcli.sidecar.dto.ParameterizeCandidateDto;
+import yo.dbunitcli.sidecar.dto.ParameterizeFileDto;
 import yo.dbunitcli.sidecar.dto.WorkspaceDto;
 
 import java.io.File;
@@ -247,6 +248,79 @@ class WorkspaceTest {
     void ParamSource_未対応の形式や文字コードはエラー() {
         assertThrows(IllegalArgumentException.class, () -> new Workspace.ParamSource("xls", null));
         assertThrows(IllegalArgumentException.class, () -> new Workspace.ParamSource("csv", "no-such-encoding"));
+    }
+
+    @Test
+    void parameterizeFiles_テンプレートとパラメータデータを返す() throws IOException {
+        this.createParameterize();
+
+        assertEquals(List.of(
+                        new ParameterizeFileDto("-template", this.templatePath(), List.of()),
+                        new ParameterizeFileDto("-param.src", this.paramPath(), List.of())),
+                this.workspace.parameterizeFiles("myConvert"));
+    }
+
+    @Test
+    void parameterizeFiles_他のparameterizeが参照するファイルはusedByに名前を返す() throws IOException {
+        this.createParameterize();
+        this.workspace.options().add("other", new CommandParameters(Type.parameterize,
+                new String[]{"-cmd=convert", "-template=myConvert.txt", "-param.src=other.csv"}));
+
+        assertEquals(List.of("other"), this.workspace.parameterizeFiles("myConvert").getFirst().usedBy());
+        assertEquals(List.of(), this.workspace.parameterizeFiles("myConvert").getLast().usedBy());
+    }
+
+    @Test
+    void deleteParameterize_指定したファイルも削除し候補一覧からも消す() throws IOException {
+        this.createParameterize();
+
+        this.workspace.deleteParameterize("myConvert", List.of(this.templatePath(), this.paramPath()));
+
+        assertTrue(this.workspace.options().select(Type.parameterize, "myConvert").isEmpty());
+        assertFalse(Files.exists(Path.of(this.templatePath())));
+        assertFalse(Files.exists(Path.of(this.paramPath())));
+        assertFalse(this.workspace.options().templates().list().contains("myConvert.txt"));
+    }
+
+    @Test
+    void deleteParameterize_ファイルを指定しなければオプションだけ削除する() throws IOException {
+        this.createParameterize();
+
+        this.workspace.deleteParameterize("myConvert", List.of());
+
+        assertTrue(this.workspace.options().select(Type.parameterize, "myConvert").isEmpty());
+        assertTrue(Files.exists(Path.of(this.templatePath())));
+        assertTrue(Files.exists(Path.of(this.paramPath())));
+    }
+
+    @Test
+    void deleteParameterize_他から参照されるファイルや関係ないファイルを指定するとエラーで何も消さない() throws IOException {
+        this.createParameterize();
+        this.workspace.options().add("other", new CommandParameters(Type.parameterize,
+                new String[]{"-cmd=convert", "-template=myConvert.txt", "-param.src=other.csv"}));
+        final Path unrelated = Files.writeString(this.tempDir.resolve("unrelated.txt"), "");
+
+        assertThrows(IllegalArgumentException.class,
+                () -> this.workspace.deleteParameterize("myConvert", List.of(this.templatePath())));
+        assertThrows(IllegalArgumentException.class,
+                () -> this.workspace.deleteParameterize("myConvert", List.of(unrelated.toString())));
+
+        assertTrue(this.workspace.options().select(Type.parameterize, "myConvert").isPresent());
+        assertTrue(Files.exists(Path.of(this.templatePath())));
+        assertTrue(Files.exists(unrelated));
+    }
+
+    private void createParameterize() throws IOException {
+        this.workspace.options().add("myConvert", new CommandParameters(Type.convert, new String[]{"-src.src=in.csv"}));
+        this.workspace.parameterize(Type.convert, "myConvert", List.of("-src.src"), Workspace.ParamSource.DEFAULT);
+    }
+
+    private String templatePath() {
+        return this.tempDir.resolve("option/parameterize/template/myConvert.txt").toAbsolutePath().normalize().toString();
+    }
+
+    private String paramPath() {
+        return this.tempDir.resolve("myConvert.csv").toAbsolutePath().normalize().toString();
     }
 
     private List<Map<String, Object>> loadParams(final CommandParameters parameterize) {

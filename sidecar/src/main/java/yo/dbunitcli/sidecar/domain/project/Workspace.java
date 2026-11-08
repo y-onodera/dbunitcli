@@ -17,6 +17,7 @@ import yo.dbunitcli.dataset.converter.XlsxConverter;
 import yo.dbunitcli.resource.FileResources;
 import yo.dbunitcli.sidecar.dto.ContextDto;
 import yo.dbunitcli.sidecar.dto.ParameterizeCandidateDto;
+import yo.dbunitcli.sidecar.dto.ParameterizeFileDto;
 import yo.dbunitcli.sidecar.dto.ParametersDto;
 import yo.dbunitcli.sidecar.dto.ResourcesDto;
 import yo.dbunitcli.sidecar.dto.WorkspaceDto;
@@ -27,16 +28,23 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class Workspace {
     private static final Logger LOGGER = LoggerFactory.getLogger(Workspace.class);
+
+    // cmdParamはパラメータの値でファイル名が決まり、削除時に特定できないため含めない
+    private static final List<String> PARAMETERIZE_FILE_OPTIONS = List.of("-template", "-param.src");
 
     public static Builder builder() {
         return new Builder();
@@ -244,6 +252,66 @@ public class Workspace {
                                     parameterSource, paramSource)));
         }
         return "";
+    }
+
+    /**
+     * parameterizeのオプションが参照するファイルのうち、存在するもの
+     */
+    public List<ParameterizeFileDto> parameterizeFiles(final String name) {
+        final Map<String, File> files = this.referencedFiles(name);
+        final Map<String, Collection<File>> others = this.options().names(Type.parameterize)
+                .filter(other -> !other.equals(name))
+                .collect(Collectors.toMap(other -> other, other -> this.referencedFiles(other).values()));
+        return files.entrySet().stream()
+                .map(entry -> new ParameterizeFileDto(entry.getKey(), entry.getValue().getPath()
+                        , others.entrySet().stream()
+                                .filter(other -> other.getValue().contains(entry.getValue()))
+                                .map(Map.Entry::getKey)
+                                .sorted()
+                                .toList()))
+                .toList();
+    }
+
+    /**
+     * parameterizeのオプションと、filesに指定した参照先のファイルを削除する
+     *
+     * @param files parameterizeFilesのpathのうち、他から参照されていないもの
+     */
+    public void deleteParameterize(final String name, final List<String> files) throws IOException {
+        final Set<String> deletable = this.parameterizeFiles(name).stream()
+                .filter(file -> file.usedBy().isEmpty())
+                .map(ParameterizeFileDto::path)
+                .collect(Collectors.toSet());
+        final List<String> notDeletable = files.stream().filter(file -> !deletable.contains(file)).toList();
+        if (!notDeletable.isEmpty()) {
+            throw new IllegalArgumentException("cannot delete: " + notDeletable);
+        }
+        this.options().delete(Type.parameterize, name);
+        for (final String path : files) {
+            final File file = new File(path);
+            if (file.getParentFile().toPath().equals(FileResources.parameterizeTemplateDir().toPath().toAbsolutePath().normalize())) {
+                // 候補一覧からも消す
+                this.options().templates().delete(file.getName());
+            } else {
+                Files.deleteIfExists(file.toPath());
+            }
+        }
+    }
+
+    private Map<String, File> referencedFiles(final String name) {
+        final Map<String, File> result = new LinkedHashMap<>();
+        this.options().select(Type.parameterize, name).ifPresent(parameterize -> {
+            final Option.Parameters parameters = parameterize.toOptionParameters();
+            for (final String key : PARAMETERIZE_FILE_OPTIONS) {
+                if (parameters.hasValue(key)) {
+                    final File file = parameters.getArg(key).attribute().defaultPath().search(parameters.get(key));
+                    if (file.isFile()) {
+                        result.put(key, file.toPath().toAbsolutePath().normalize().toFile());
+                    }
+                }
+            }
+        });
+        return result;
     }
 
     private Path installDir() {

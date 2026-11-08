@@ -39,6 +39,22 @@ public class ParameterizeControllerTest {
     }
 
     @Test
+    public void testFiles_存在しないファイルは返さない() {
+        // csvConvertが参照するテンプレートとパラメータデータはサンプルのworkspaceに無い
+        final String response = this.client.toBlocking().retrieve(
+                HttpRequest.POST("dbunit-cli/parameterize/files", "{\"name\":\"csvConvert\"}"));
+        Assertions.assertEquals("[]", response);
+    }
+
+    @Test
+    public void testDeleteWithFiles_ファイルを指定せずにオプションを削除する() {
+        this.client.toBlocking().retrieve(HttpRequest.GET("dbunit-cli/parameterize/add"));
+        final String response = this.client.toBlocking().retrieve(
+                HttpRequest.POST("dbunit-cli/parameterize/delete-with-files", "{\"name\":\"new item\",\"deleteFiles\":[]}"));
+        Assertions.assertEquals("[\"csvConvert\"]", response);
+    }
+
+    @Test
     public void testAdd_パラメータを追加する() {
         final String response = this.client.toBlocking().retrieve(HttpRequest.GET("dbunit-cli/parameterize/add"));
         Assertions.assertEquals("[\"csvConvert\",\"new item\"]", response);
