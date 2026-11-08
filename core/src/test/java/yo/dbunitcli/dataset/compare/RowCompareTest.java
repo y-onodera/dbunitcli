@@ -65,4 +65,20 @@ public class RowCompareTest {
         handler.result();
         assertTrue(written[0]);
     }
+
+    @Test
+    public void 追加行はnewの行の順に渡す() {
+        final ComparableTable oldTable = table(new String[]{"ID", "V"});
+        final ComparableTable newTable = table(new String[]{"ID", "V"}
+                , new Object[]{"30", "a"}, new Object[]{"10", "b"}, new Object[]{"20", "c"}, new Object[]{"40", "d"});
+        final TableCompare tableCompare = new TableCompare(oldTable, newTable, null);
+        final List<Integer> added = new java.util.ArrayList<>();
+        new DefaultCompareManager.RowCompare(tableCompare, new DataRowCompareResultHandler(tableCompare) {
+            @Override
+            public void handleAdd(final int rowNum, final Object[] row) {
+                added.add(rowNum);
+            }
+        }).exec();
+        org.junit.jupiter.api.Assertions.assertEquals(List.of(0, 1, 2, 3), added);
+    }
 }

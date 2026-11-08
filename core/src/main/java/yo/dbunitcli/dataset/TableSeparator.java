@@ -93,7 +93,7 @@ public record TableSeparator(TableMetaDataFilter sourceFilter
                 .map(String::toUpperCase)
                 .toList());
         final Map<String, Column> columnMap = Arrays.stream(result)
-                .collect(Collectors.toMap(col -> col.getColumnName().toUpperCase(), col -> col));
+                .collect(Collectors.toMap(col -> col.getColumnName().toUpperCase(), col -> col, (first, _) -> first));
         return include.stream()
                 .map(columnMap::get)
                 .filter(Objects::nonNull)
@@ -154,14 +154,12 @@ public record TableSeparator(TableMetaDataFilter sourceFilter
     public record RowFilter(List<JexlExpression> expressions) {
 
         static RowFilter of(final List<String> expression) {
-            if (expression.isEmpty()) {
-                return TableSeparator.NO_FILTER;
-            }
-            return new RowFilter(expression
+            final List<JexlExpression> expressions = expression
                     .stream()
                     .filter(it -> !it.trim().isEmpty())
                     .map(JexlEngines.DATASET::createExpression)
-                    .toList());
+                    .toList();
+            return expressions.isEmpty() ? TableSeparator.NO_FILTER : new RowFilter(expressions);
         }
 
         public boolean isEmpty() {

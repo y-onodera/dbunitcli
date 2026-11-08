@@ -121,4 +121,26 @@ public class TableSeparatorsTest {
 
         Assertions.assertEquals(List.of("TARGET"), outputNames(builder.build(), "T"));
     }
+
+    @Test
+    public void 同じテーブルに合う設定はsettingsの順に適用する() {
+        final TableSeparators.Builder builder = new TableSeparators.Builder();
+        List.of("X1", "X2", "X3", "X4", "X5").forEach(name -> builder.addSetting(rename(new AnyFilter(List.of("T"))
+                , new TableRenameStrategy.ReplaceFunction.Builder().setNewName(name).build())));
+
+        Assertions.assertEquals(List.of("X1", "X2", "X3", "X4", "X5"), outputNames(builder.build(), "T"));
+    }
+
+    @Test
+    public void 空の式だけのfilterは絞り込みの無い設定と同じに扱う() {
+        Assertions.assertSame(TableSeparator.NO_FILTER, TableSeparator.RowFilter.of(List.of(" ", "")));
+        Assertions.assertFalse(TableSeparator.builder().setFilter(List.of(" ")).build().hasSettings());
+    }
+
+    @Test
+    public void 大文字小文字だけ違う列があってもincludeColumnsで絞り込める() {
+        final TableSeparator separator = TableSeparator.builder().setIncludeColumns(List.of("ID")).build();
+        final Column[] columns = {new Column("id", DataType.UNKNOWN), new Column("ID", DataType.UNKNOWN), new Column("V", DataType.UNKNOWN)};
+        Assertions.assertEquals(1, separator.filteredColumns(columns, new DefaultTableMetaData("T", columns)).length);
+    }
 }

@@ -81,7 +81,7 @@ public record ComparableTable(AddSettingTableMetaData addSettingTableMetaData
     }
 
     public Map<CompareKeys, Map.Entry<Integer, Object[]>> getRows(final List<String> keys) {
-        final Map<CompareKeys, Map.Entry<Integer, Object[]>> result = new HashMap<>();
+        final Map<CompareKeys, Map.Entry<Integer, Object[]>> result = new LinkedHashMap<>();
         IntStream.range(0, this.getRowCount())
                 .forEach(rowNum -> result.put(this.getKey(rowNum, keys)
                         , new AbstractMap.SimpleEntry<>(this.getOriginalRowIndex(rowNum), this.getRow(rowNum))));

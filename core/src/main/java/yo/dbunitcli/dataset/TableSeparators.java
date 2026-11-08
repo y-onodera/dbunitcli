@@ -207,7 +207,7 @@ public record TableSeparators(List<TableSeparator> settings
                          final Set<TableSeparator> nextApplied = new HashSet<>(applied);
                          nextApplied.addAll(matched);
                          final TableSeparator common = this.getCommonSettings(it);
-                         return this.addNewNameSetting(new HashSet<>(matched.stream().map(common::add).toList())
+                         return this.addNewNameSetting(new LinkedHashSet<>(matched.stream().map(common::add).toList())
                                                                .stream().map(separator -> separator.addSetting(it))
                                  , it.getTableName(), nextApplied);
                      });
@@ -261,7 +261,7 @@ public record TableSeparators(List<TableSeparator> settings
     }
 
     private Set<TableSeparator> getSeparatorsFromSettings(final ITableMetaData originMetaData) {
-        return new HashSet<>(this.matchedSettings(originMetaData)
+        return new LinkedHashSet<>(this.matchedSettings(originMetaData)
                                  .map(this.getCommonSettings(originMetaData)::add)
                                  .toList());
     }
