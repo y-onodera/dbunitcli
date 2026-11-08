@@ -93,6 +93,20 @@ public record ResourceFile(File baseDir, Set<String> files, Function<String, Opt
         Files.copy(source, saveTo, StandardCopyOption.REPLACE_EXISTING);
     }
 
+    /**
+     * baseDir直下のファイルなら削除して一覧からも外す
+     *
+     * @return baseDir直下のファイルだったか
+     */
+    public boolean deleteIfContains(final File file) throws IOException {
+        final Path parent = file.toPath().toAbsolutePath().normalize().getParent();
+        if (!this.baseDir.toPath().toAbsolutePath().normalize().equals(parent)) {
+            return false;
+        }
+        this.delete(file.getName());
+        return true;
+    }
+
     public void delete(final String name) throws IOException {
         final Path filePath = new File(this.baseDir, name).toPath();
         if (!filePath.toFile().exists()) {

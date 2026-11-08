@@ -43,8 +43,13 @@ import java.util.stream.Stream;
 public class Workspace {
     private static final Logger LOGGER = LoggerFactory.getLogger(Workspace.class);
 
-    // cmdParamはパラメータの値でファイル名が決まり、削除時に特定できないため含めない
-    private static final List<String> PARAMETERIZE_FILE_OPTIONS = List.of("-template", "-param.src");
+    private static final String TEMPLATE_OPTION = "-template";
+    private static final String PARAM_SRC_OPTION = "-param.src";
+    /**
+     * parameterizeが作るファイルを指すオプション。共有の設定ファイル（-param.setting等）は削除の対象にしないため含めない。
+     * cmdParamはパラメータの値でファイル名が決まり、削除時に特定できないため含めない
+     */
+    private static final List<String> PARAMETERIZE_FILE_OPTIONS = List.of(TEMPLATE_OPTION, PARAM_SRC_OPTION);
 
     public static Builder builder() {
         return new Builder();
@@ -53,8 +58,8 @@ public class Workspace {
     private static String[] parameterizeOption(final Type type, final Path templatePath,
                                                final File parameterSource, final ParamSource paramSource) {
         final List<String> result = new ArrayList<>(List.of("-cmd=" + type.name()
-                , "-template=" + templatePath.getFileName()
-                , "-param.src=" + parameterSource.getName()
+                , TEMPLATE_OPTION + "=" + templatePath.getFileName()
+                , PARAM_SRC_OPTION + "=" + parameterSource.getName()
                 , "-param.srcType=" + paramSource.type()));
         if (paramSource.type() == ParamType.csv) {
             result.add("-param.encoding=" + paramSource.encoding());
@@ -259,15 +264,18 @@ public class Workspace {
      */
     public List<ParameterizeFileDto> parameterizeFiles(final String name) {
         final Map<String, File> files = this.referencedFiles(name);
+        if (files.isEmpty()) {
+            return List.of();
+        }
         final Map<String, Collection<File>> others = this.options().names(Type.parameterize)
                 .filter(other -> !other.equals(name))
-                .collect(Collectors.toMap(other -> other, other -> this.referencedFiles(other).values()));
+                .sorted()
+                .collect(Collectors.toMap(other -> other, other -> this.referencedFiles(other).values()
+                        , (a, _) -> a, LinkedHashMap::new));
         return files.entrySet().stream()
                 .map(entry -> new ParameterizeFileDto(entry.getKey(), entry.getValue().getPath()
-                        , others.entrySet().stream()
-                                .filter(other -> other.getValue().contains(entry.getValue()))
-                                .map(Map.Entry::getKey)
-                                .sorted()
+                        , others.keySet().stream()
+                                .filter(other -> others.get(other).contains(entry.getValue()))
                                 .toList()))
                 .toList();
     }
@@ -278,21 +286,20 @@ public class Workspace {
      * @param files parameterizeFilesのpathのうち、他から参照されていないもの
      */
     public void deleteParameterize(final String name, final List<String> files) throws IOException {
-        final Set<String> deletable = this.parameterizeFiles(name).stream()
-                .filter(file -> file.usedBy().isEmpty())
-                .map(ParameterizeFileDto::path)
-                .collect(Collectors.toSet());
-        final List<String> notDeletable = files.stream().filter(file -> !deletable.contains(file)).toList();
-        if (!notDeletable.isEmpty()) {
-            throw new IllegalArgumentException("cannot delete: " + notDeletable);
+        if (!files.isEmpty()) {
+            final Set<String> deletable = this.parameterizeFiles(name).stream()
+                    .filter(file -> file.usedBy().isEmpty())
+                    .map(ParameterizeFileDto::path)
+                    .collect(Collectors.toSet());
+            final List<String> notDeletable = files.stream().filter(file -> !deletable.contains(file)).toList();
+            if (!notDeletable.isEmpty()) {
+                throw new IllegalArgumentException("cannot delete: " + notDeletable);
+            }
         }
         this.options().delete(Type.parameterize, name);
         for (final String path : files) {
             final File file = new File(path);
-            if (file.getParentFile().toPath().equals(FileResources.parameterizeTemplateDir().toPath().toAbsolutePath().normalize())) {
-                // 候補一覧からも消す
-                this.options().templates().delete(file.getName());
-            } else {
+            if (!this.options().templates().deleteIfContains(file)) {
                 Files.deleteIfExists(file.toPath());
             }
         }

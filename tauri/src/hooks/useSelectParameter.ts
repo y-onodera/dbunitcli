@@ -112,14 +112,14 @@ export const useParameterActions = (command: string, name: string) => {
 
 	return { handleDelete, handleCopy, handleRename };
 };
-// parameterizeのオプションが参照するファイル。usedByが空でなければ削除できない
+// sidecarのParameterizeFileDto
 export type ParameterizeFile = {
 	option: string;
 	path: string;
 	usedBy: string[];
 };
 
-const parameterizeEndpointParams = (endpoint: string, body: object) => ({
+const postJsonParams = (endpoint: string, body: object) => ({
 	endpoint,
 	options: {
 		method: "POST",
@@ -128,19 +128,13 @@ const parameterizeEndpointParams = (endpoint: string, body: object) => ({
 	},
 });
 
-// 取得に失敗したときはnull
 export const useLoadParameterizeFiles = () => {
 	const { apiUrl } = useEnvironment();
-	return async (name: string): Promise<ParameterizeFile[] | null> => {
-		let files: ParameterizeFile[] | null = null;
-		await fetchAndUpdate<ParameterizeFile[]>(
-			parameterizeEndpointParams(`${apiUrl}parameterize/files`, { name }),
-			(data) => {
-				files = data;
-			},
+	return (name: string, onLoad: (files: ParameterizeFile[]) => void) =>
+		fetchAndUpdate<ParameterizeFile[]>(
+			postJsonParams(`${apiUrl}parameterize/files`, { name }),
+			onLoad,
 		);
-		return files;
-	};
 };
 
 export const useDeleteParameterize = () => {
@@ -148,10 +142,7 @@ export const useDeleteParameterize = () => {
 	const setParameterList = useSetParameterList();
 	return (name: string, deleteFiles: string[]) =>
 		fetchAndUpdate<string[]>(
-			parameterizeEndpointParams(`${apiUrl}parameterize/delete-with-files`, {
-				name,
-				deleteFiles,
-			}),
+			postJsonParams(`${apiUrl}parameterize/delete`, { name, deleteFiles }),
 			(parameters) =>
 				setParameterList((current) =>
 					current.replace("parameterize", parameters),
@@ -176,7 +167,10 @@ export const useParameterizeCandidates = (
 	useEffect(() => {
 		const controller = new AbortController();
 		fetchAndUpdate<ParameterizeCandidate[]>(
-			parameterizeCandidatesParams(apiUrl, command, name),
+			postJsonParams(
+				`${apiUrl + command.toLowerCase()}/parameterize/candidates`,
+				{ name },
+			),
 			(data) => {
 				if (!controller.signal.aborted) {
 					setCandidates(data);
@@ -191,21 +185,6 @@ export const useParameterizeCandidates = (
 	}, [apiUrl, command, name]);
 	return candidates;
 };
-
-function parameterizeCandidatesParams(
-	apiUrl: string,
-	command: string,
-	name: string,
-) {
-	return {
-		endpoint: `${apiUrl + command.toLowerCase()}/parameterize/candidates`,
-		options: {
-			method: "POST",
-			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify({ name }),
-		},
-	};
-}
 
 export const useParameterizeFrom = () => {
 	const setParameter = useSetSelectParameterState();

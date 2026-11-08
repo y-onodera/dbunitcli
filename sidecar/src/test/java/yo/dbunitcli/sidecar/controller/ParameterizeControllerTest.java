@@ -47,10 +47,10 @@ public class ParameterizeControllerTest {
     }
 
     @Test
-    public void testDeleteWithFiles_ファイルを指定せずにオプションを削除する() {
+    public void testDelete_削除するファイルを指定できる() {
         this.client.toBlocking().retrieve(HttpRequest.GET("dbunit-cli/parameterize/add"));
         final String response = this.client.toBlocking().retrieve(
-                HttpRequest.POST("dbunit-cli/parameterize/delete-with-files", "{\"name\":\"new item\",\"deleteFiles\":[]}"));
+                HttpRequest.POST("dbunit-cli/parameterize/delete", "{\"name\":\"new item\",\"deleteFiles\":[]}"));
         Assertions.assertEquals("[\"csvConvert\"]", response);
     }
 

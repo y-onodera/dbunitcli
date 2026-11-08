@@ -7,6 +7,7 @@ import {
 	ParameterizeButton,
 } from "../../components/element/ButtonIcon";
 import { ControllTextBox } from "../../components/element/Input";
+import { useAbortSignalRef } from "../../hooks/useAbortSignalRef";
 import {
 	type ParameterizeFile,
 	useDeleteParameterize,
@@ -60,24 +61,19 @@ export default function NameEditMenu({
 	} | null>(null);
 	const loadParameterizeFiles = useLoadParameterizeFiles();
 	const deleteParameterize = useDeleteParameterize();
-	const abortControllerRef = useRef<AbortController | null>(null);
-	useEffect(() => {
-		const controller = new AbortController();
-		abortControllerRef.current = controller;
-		return () => controller.abort();
-	}, []);
+	const abortControllerRef = useAbortSignalRef();
 	// 参照するファイルがあるときだけ、一緒に消すかを確認する
-	const deleteParameterizeOrConfirm = async (name: string) => {
-		const files = await loadParameterizeFiles(name);
-		if (files === null || abortControllerRef.current?.signal.aborted) {
-			return;
-		}
-		if (files.length === 0) {
-			deleteParameterize(name, []);
-		} else {
-			setDeleteTarget({ name, files });
-		}
-	};
+	const deleteParameterizeOrConfirm = (name: string) =>
+		loadParameterizeFiles(name, (files) => {
+			if (abortControllerRef.current?.signal.aborted) {
+				return;
+			}
+			if (files.length === 0) {
+				deleteParameterize(name, []);
+			} else {
+				setDeleteTarget({ name, files });
+			}
+		});
 	const canParameterize =
 		editName.command && editName.command !== "parameterize";
 	return (
@@ -128,6 +124,9 @@ export default function NameEditMenu({
 				<ParameterizeDeleteDialog
 					name={deleteTarget.name}
 					files={deleteTarget.files}
+					onDelete={(deleteFiles) =>
+						deleteParameterize(deleteTarget.name, deleteFiles)
+					}
 					onClose={() => setDeleteTarget(null)}
 				/>
 			)}

@@ -6,13 +6,25 @@ import ParameterizeDeleteDialog from "../../../app/sidebar/ParameterizeDeleteDia
 import type { ParameterizeFile } from "../../../hooks/useSelectParameter";
 
 // （mockReset:trueで実装が毎回リセットされるため、resolve値は各テスト内で設定する）
-const { mockDeleteParameterize, mockLoadFiles, mockHandleDelete } = vi.hoisted(
-	() => ({
-		mockDeleteParameterize: vi.fn(),
-		mockLoadFiles: vi.fn(),
-		mockHandleDelete: vi.fn(),
-	}),
-);
+const {
+	mockDeleteParameterize,
+	mockLoadFiles,
+	mockHandleDelete,
+	mockOnDelete,
+} = vi.hoisted(() => ({
+	mockDeleteParameterize: vi.fn(),
+	mockLoadFiles: vi.fn(),
+	mockHandleDelete: vi.fn(),
+	mockOnDelete: vi.fn(),
+}));
+// 取得したファイルでonLoadを呼ぶ
+const loadFilesWith = (loaded: ParameterizeFile[]) =>
+	mockLoadFiles.mockImplementation(
+		(_name: string, onLoad: (files: ParameterizeFile[]) => void) => {
+			onLoad(loaded);
+			return Promise.resolve("success");
+		},
+	);
 vi.mock("../../../hooks/useSelectParameter", () => ({
 	useDeleteParameterize: () => mockDeleteParameterize,
 	useLoadParameterizeFiles: () => mockLoadFiles,
@@ -41,7 +53,12 @@ const editName = (command: string) => ({
 describe("ParameterizeDeleteDialogのテスト", () => {
 	it("他から参照されないファイルだけ最初にチェックし、参照されるファイルはチェックできない", () => {
 		render(
-			<ParameterizeDeleteDialog name="a" files={files} onClose={vi.fn()} />,
+			<ParameterizeDeleteDialog
+				name="a"
+				files={files}
+				onDelete={mockOnDelete}
+				onClose={vi.fn()}
+			/>,
 		);
 
 		expect(
@@ -56,41 +73,54 @@ describe("ParameterizeDeleteDialogのテスト", () => {
 	it("チェックしたファイルを指定して削除し、外せばオプションだけ削除する", async () => {
 		const onClose = vi.fn();
 		const { unmount } = render(
-			<ParameterizeDeleteDialog name="a" files={files} onClose={onClose} />,
+			<ParameterizeDeleteDialog
+				name="a"
+				files={files}
+				onDelete={mockOnDelete}
+				onClose={onClose}
+			/>,
 		);
 		await userEvent.click(screen.getByRole("button", { name: "Delete" }));
-		expect(mockDeleteParameterize).toHaveBeenCalledWith("a", [
-			"/ws/template/a.txt",
-		]);
+		expect(mockOnDelete).toHaveBeenCalledWith(["/ws/template/a.txt"]);
 		expect(onClose).toHaveBeenCalled();
 		unmount();
 
 		render(
-			<ParameterizeDeleteDialog name="a" files={files} onClose={vi.fn()} />,
+			<ParameterizeDeleteDialog
+				name="a"
+				files={files}
+				onDelete={mockOnDelete}
+				onClose={vi.fn()}
+			/>,
 		);
 		await userEvent.click(
 			screen.getByRole("checkbox", { name: "/ws/template/a.txt" }),
 		);
 		await userEvent.click(screen.getByRole("button", { name: "Delete" }));
-		expect(mockDeleteParameterize).toHaveBeenLastCalledWith("a", []);
+		expect(mockOnDelete).toHaveBeenLastCalledWith([]);
 	});
 
 	it("Closeでは何も削除しない", async () => {
 		const onClose = vi.fn();
 		render(
-			<ParameterizeDeleteDialog name="a" files={files} onClose={onClose} />,
+			<ParameterizeDeleteDialog
+				name="a"
+				files={files}
+				onDelete={mockOnDelete}
+				onClose={onClose}
+			/>,
 		);
 
 		await userEvent.click(screen.getByRole("button", { name: "Close" }));
 
 		expect(onClose).toHaveBeenCalled();
-		expect(mockDeleteParameterize).not.toHaveBeenCalled();
+		expect(mockOnDelete).not.toHaveBeenCalled();
 	});
 });
 
 describe("NameEditMenuの削除のテスト", () => {
 	it("parameterizeは参照するファイルがあれば確認ダイアログを開く", async () => {
-		mockLoadFiles.mockResolvedValue(files);
+		loadFilesWith(files);
 		render(
 			<NameEditMenu
 				editName={editName("parameterize")}
@@ -100,13 +130,13 @@ describe("NameEditMenuの削除のテスト", () => {
 
 		await userEvent.click(screen.getAllByTitle("delete")[0]);
 
-		expect(mockLoadFiles).toHaveBeenCalledWith("a");
+		expect(mockLoadFiles).toHaveBeenCalledWith("a", expect.any(Function));
 		expect(await screen.findByText("Delete a")).toBeInTheDocument();
 		expect(mockDeleteParameterize).not.toHaveBeenCalled();
 	});
 
 	it("parameterizeは参照するファイルが無ければ確認せずに削除する", async () => {
-		mockLoadFiles.mockResolvedValue([]);
+		loadFilesWith([]);
 		render(
 			<NameEditMenu
 				editName={editName("parameterize")}

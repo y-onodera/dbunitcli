@@ -9,10 +9,7 @@ import {
 	Tr,
 } from "../../components/dialog";
 import { BlueButton, WhiteButton } from "../../components/element/Button";
-import {
-	type ParameterizeFile,
-	useDeleteParameterize,
-} from "../../hooks/useSelectParameter";
+import type { ParameterizeFile } from "../../hooks/useSelectParameter";
 import { useTableSelection } from "../../hooks/useTableSelection";
 
 const CHECKBOX_CLASS =
@@ -21,13 +18,14 @@ const CHECKBOX_CLASS =
 export default function ParameterizeDeleteDialog({
 	name,
 	files,
+	onDelete,
 	onClose,
 }: {
 	name: string;
 	files: ParameterizeFile[];
+	onDelete: (deleteFiles: string[]) => void;
 	onClose: () => void;
 }) {
-	const deleteParameterize = useDeleteParameterize();
 	const { selected, toggle } = useTableSelection(
 		files.filter((file) => file.usedBy.length === 0).map((file) => file.path),
 	);
@@ -80,8 +78,7 @@ export default function ParameterizeDeleteDialog({
 				<BlueButton
 					title="Delete"
 					handleClick={() => {
-						deleteParameterize(
-							name,
+						onDelete(
 							files
 								.map((file) => file.path)
 								.filter((path) => selected.has(path)),

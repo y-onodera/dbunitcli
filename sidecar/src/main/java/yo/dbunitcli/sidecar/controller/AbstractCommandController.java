@@ -121,7 +121,7 @@ public abstract class AbstractCommandController implements ControllerExceptionHa
     @Post(uri = "delete", produces = MediaType.APPLICATION_JSON)
     public String delete(@Body final CommandRequestDto input) throws IOException {
         try {
-            this.workspace.options().delete(this.getCommandType(), input.getName());
+            this.deleteItem(input);
         } catch (IOException e) {
             throw e;
         } catch (final Throwable th) {
@@ -185,8 +185,7 @@ public abstract class AbstractCommandController implements ControllerExceptionHa
     @Post(uri = "parameterize/candidates", produces = MediaType.APPLICATION_JSON)
     public String parameterizeCandidates(@Body final CommandRequestDto input) {
         try {
-            return ObjectMapper.getDefault().writeValueAsString(
-                    this.workspace.parameterizeCandidates(this.getCommandType(), input.getName()));
+            return this.toJson(this.workspace.parameterizeCandidates(this.getCommandType(), input.getName()));
         } catch (final Throwable th) {
             LOGGER.error("cause:", th);
             throw new ApplicationException(th);
@@ -237,12 +236,16 @@ public abstract class AbstractCommandController implements ControllerExceptionHa
         return this.toJson(this.workspace.parameterNames(this.getCommandType()).toList());
     }
 
-    protected String toJson(final Map<String, Object> object) throws IOException {
+    protected String toJson(final Object object) throws IOException {
         return ObjectMapper.getDefault().writeValueAsString(object);
     }
 
-    protected String toJson(final List<String> object) throws IOException {
-        return ObjectMapper.getDefault().writeValueAsString(object);
+    protected void deleteItem(final CommandRequestDto input) throws IOException {
+        this.workspace.options().delete(this.getCommandType(), input.getName());
+    }
+
+    protected Workspace workspace() {
+        return this.workspace;
     }
 
 }
