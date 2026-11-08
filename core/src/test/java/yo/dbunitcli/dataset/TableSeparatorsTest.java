@@ -143,4 +143,18 @@ public class TableSeparatorsTest {
         final Column[] columns = {new Column("id", DataType.UNKNOWN), new Column("ID", DataType.UNKNOWN), new Column("V", DataType.UNKNOWN)};
         Assertions.assertEquals(1, separator.filteredColumns(columns, new DefaultTableMetaData("T", columns)).length);
     }
+
+    @Test
+    public void 追加カラムと同じ綴りの列は式で上書きし_大文字小文字だけ違う列があれば失敗する() {
+        final ExpressionColumns expressions = ExpressionColumns.builder()
+                .addExpressions(new ExpressionColumns.Expressions(ExpressionColumns.ParameterType.STRING
+                        , new java.util.HashMap<>(java.util.Map.of("NAME", "'x'"))))
+                .build();
+        final Column[] merged = expressions.merge(new Column[]{new Column("ID", DataType.UNKNOWN), new Column("NAME", DataType.UNKNOWN)});
+        Assertions.assertEquals(List.of("ID", "NAME"), java.util.Arrays.stream(merged).map(Column::getColumnName).toList());
+
+        final IllegalArgumentException error = Assertions.assertThrows(IllegalArgumentException.class
+                , () -> expressions.merge(new Column[]{new Column("ID", DataType.UNKNOWN), new Column("name", DataType.UNKNOWN)}));
+        Assertions.assertTrue(error.getMessage().contains("'NAME' differs only in case from column 'name'"), error.getMessage());
+    }
 }

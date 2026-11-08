@@ -48,6 +48,14 @@ public record ExpressionColumns(List<Expressions> values) {
             final ArrayList<Column> columnList = Arrays.stream(columns).collect(Collectors.toCollection(ArrayList::new));
             final List<String> columnNames = columnList.stream().map(Column::getColumnName).toList();
             this.toColumns().forEach(column -> {
+                // 列の索引は大文字小文字を区別しないため、綴りだけ違う列が並ぶとどちらを指すか決まらない
+                columnNames.stream()
+                        .filter(it -> it.equalsIgnoreCase(column.getColumnName()) && !it.equals(column.getColumnName()))
+                        .findFirst()
+                        .ifPresent(it -> {
+                            throw new IllegalArgumentException("expression column '" + column.getColumnName()
+                                    + "' differs only in case from column '" + it + "'. use the same spelling.");
+                        });
                 if (!columnNames.contains(column.getColumnName())) {
                     columnList.add(column);
                 } else {

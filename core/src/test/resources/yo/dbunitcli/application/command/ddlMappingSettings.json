@@ -10,11 +10,11 @@
         "PK_NAME": "pk_constraint_name",
         "TABLE_REMARKS": "table_desc",
         "REMARKS": "col_desc",
-        "TABLE_NAME": "table_name"
+        "TABLE_NAME": "tbl_name"
       },
       "boolean": {
         "NULLABLE": "is_nullable",
-        "IS_PK": "is_pk"
+        "IS_PK": "pk_flag"
       }
     }
   ]
