@@ -151,7 +151,9 @@ public record ParameterizeOption(
             return result;
         }
         final Map<String, String> mergeResult = Arrays.stream(result)
-                .collect(Collectors.toMap(ParameterizeOption.ARGS_IGNORE_FILTER.extractKey(), it -> it));
+                .filter(Strings::isNotEmpty)
+                .collect(Collectors.toMap(ParameterizeOption.ARGS_IGNORE_FILTER.extractKey(), it -> it
+                        , (_, later) -> later, LinkedHashMap::new));
         mergeResult.putAll(this.args.entrySet()
                 .stream()
                 .collect(Collectors.toMap(entry -> entry.getKey() + "=", entry -> entry.getKey() + "=" + entry.getValue())));

@@ -118,19 +118,19 @@ public record ImageCompareOption(
     public ImageCompareBuilder createFactoryOf(final CompareOption.Type targetType) {
         final ImageCompareBuilder result = targetType == CompareOption.Type.image ? new ImageCompareBuilder() : PdfCompareManager.builder();
         return result
-                .setThreshold(Integer.parseInt(Optional.ofNullable(this.threshold).orElse(DEFAULT_THRESHOLD)))
-                .setPixelToleranceLevel(Double.parseDouble(Optional.ofNullable(this.pixelToleranceLevel).orElse(DEFAULT_PIXEL_TOLERANCE_LEVEL)))
-                .setAllowingPercentOfDifferentPixels(Double.parseDouble(Optional.ofNullable(this.allowingPercentOfDifferentPixels).orElse(DEFAULT_ALLOWING_PERCENT_OF_DIFFERENT_PIXELS)))
-                .setRectangleLineWidth(Integer.parseInt(Optional.ofNullable(this.rectangleLineWidth).orElse(DEFAULT_RECTANGLE_LINE_WIDTH)))
-                .setMinimalRectangleSize(Integer.valueOf(Optional.ofNullable(this.minimalRectangleSize).orElse(DEFAULT_MINIMAL_RECTANGLE_SIZE)))
-                .setMaximalRectangleCount(Integer.valueOf(Optional.ofNullable(this.maximalRectangleCount).orElse(DEFAULT_MAXIMAL_RECTANGLE_COUNT)))
+                .setThreshold(Integer.parseInt(Strings.orDefault(this.threshold, DEFAULT_THRESHOLD)))
+                .setPixelToleranceLevel(Double.parseDouble(Strings.orDefault(this.pixelToleranceLevel, DEFAULT_PIXEL_TOLERANCE_LEVEL)))
+                .setAllowingPercentOfDifferentPixels(Double.parseDouble(Strings.orDefault(this.allowingPercentOfDifferentPixels, DEFAULT_ALLOWING_PERCENT_OF_DIFFERENT_PIXELS)))
+                .setRectangleLineWidth(Integer.parseInt(Strings.orDefault(this.rectangleLineWidth, DEFAULT_RECTANGLE_LINE_WIDTH)))
+                .setMinimalRectangleSize(Integer.valueOf(Strings.orDefault(this.minimalRectangleSize, DEFAULT_MINIMAL_RECTANGLE_SIZE)))
+                .setMaximalRectangleCount(Integer.valueOf(Strings.orDefault(this.maximalRectangleCount, DEFAULT_MAXIMAL_RECTANGLE_COUNT)))
                 .setFillDifferenceRectangles(Boolean.parseBoolean(this.fillDifferenceRectangles))
-                .setPercentOpacityDifferenceRectangles(Double.parseDouble(Optional.ofNullable(this.percentOpacityDifferenceRectangles).orElse(DEFAULT_PERCENT_OPACITY)))
+                .setPercentOpacityDifferenceRectangles(Double.parseDouble(Strings.orDefault(this.percentOpacityDifferenceRectangles, DEFAULT_PERCENT_OPACITY)))
                 .setDifferenceRectangleColor(Optional.ofNullable(Color.getColor(this.differenceRectangleColor)).orElse(Color.red))
                 .setExcludeAreaList(this.excludeAreaList())
                 .setDrawExcludedRectangles(Boolean.parseBoolean(this.drawExcludedRectangles))
                 .setFillExcludedRectangles(Boolean.parseBoolean(this.fillExcludedRectangles))
-                .setPercentOpacityExcludedRectangles(Double.parseDouble(Optional.ofNullable(this.percentOpacityExcludedRectangles).orElse(DEFAULT_PERCENT_OPACITY)))
+                .setPercentOpacityExcludedRectangles(Double.parseDouble(Strings.orDefault(this.percentOpacityExcludedRectangles, DEFAULT_PERCENT_OPACITY)))
                 .setExcludedRectangleColor(Optional.ofNullable(Color.getColor(this.excludedRectangleColor)).orElse(Color.green))
                 ;
     }
