@@ -29,8 +29,6 @@ public class ManualRowsMappingTableBuilder implements XlsxRowsToTableBuilder {
      */
     private final Map<String, Map<Integer, List<Integer>>> targetPositions = new HashMap<>();
 
-    private final Map<String, Integer> targetCount = new HashMap<>();
-
     private final Map<String, String[]> breakKey = new HashMap<>();
 
     private final Map<Integer, String> rowValues = new HashMap<>();
@@ -49,7 +47,6 @@ public class ManualRowsMappingTableBuilder implements XlsxRowsToTableBuilder {
             IntStream.range(0, def.cellIndexes().length)
                     .forEach(pos -> positions.computeIfAbsent(def.cellIndexes()[pos], k -> new ArrayList<>()).add(pos));
             this.targetPositions.put(def.tableName(), positions);
-            this.targetCount.put(def.tableName(), def.cellIndexes().length);
             this.breakKey.put(def.tableName(), def.breakKey());
         });
     }
@@ -102,10 +99,6 @@ public class ManualRowsMappingTableBuilder implements XlsxRowsToTableBuilder {
 
     @Override
     public String[] currentRow() {
-        final int count = this.targetCount.get(this.getTableName());
-        if (this.nowProcessing.getColumnLength() < count) {
-            throw new AssertionError(count + " columnIndex large items than header:" + Arrays.toString(this.nowProcessing.getColumns()));
-        }
         // 読んだ最後の位置までは空文字で埋め、それより後ろはwithDefaultValuesToArrayの既定値にする
         final int size = this.rowValues.keySet().stream().mapToInt(Integer::intValue).max().orElse(-1) + 1;
         final List<String> values = IntStream.range(0, size)

@@ -28,4 +28,16 @@ class ManualRowsMappingTableBuilderTest {
         Assertions.assertArrayEquals(new String[]{"name1", "id1"}, target.currentRow());
         Assertions.assertTrue(target.hasRow(1));
     }
+
+    @Test
+    void columnIndexMoreThanHeaderIsDefinitionError() {
+        final XlsxRowsTableDefine.Builder builder = XlsxRowsTableDefine.builder()
+                .setTableName("TABLE")
+                .setHeader(Stream.of("NAME"))
+                .setDataStartRow(1)
+                .addCellIndexes(Stream.of(1, 3))
+                .addBreakKey(Stream.of("NAME"));
+        final IllegalArgumentException actual = Assertions.assertThrows(IllegalArgumentException.class, builder::build);
+        Assertions.assertEquals("xlsx-schema rows 'TABLE': columnIndex has 2 items but header has 1", actual.getMessage());
+    }
 }
