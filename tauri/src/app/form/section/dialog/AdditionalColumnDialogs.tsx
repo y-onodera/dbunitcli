@@ -154,15 +154,6 @@ export function ExpressionEditDialog({
 	return (
 		<ModalOverlay width="w-2xl" zClass="z-modal-nested" maximizable>
 			<DialogTitle>{`Edit ${name}`}</DialogTitle>
-			<DialogField grow>
-				<TextArea
-					ref={textareaRef}
-					id="expression"
-					value={text}
-					spellCheck={false}
-					onChange={(ev) => setText(ev.target.value)}
-				/>
-			</DialogField>
 			<DialogField>
 				<OptionSelect
 					id="operator"
@@ -178,6 +169,15 @@ export function ExpressionEditDialog({
 				/>
 			</DialogField>
 			{renderInsertColumn()}
+			<DialogField grow last>
+				<TextArea
+					ref={textareaRef}
+					id="expression"
+					value={text}
+					spellCheck={false}
+					onChange={(ev) => setText(ev.target.value)}
+				/>
+			</DialogField>
 			<DialogActions>
 				<BlueButton
 					title="Apply"
