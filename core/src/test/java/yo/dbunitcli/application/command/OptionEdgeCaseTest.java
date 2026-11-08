@@ -6,8 +6,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import yo.dbunitcli.application.dto.ImageCompareDto;
 import yo.dbunitcli.common.Parameter;
+import yo.dbunitcli.dataset.compare.ImageCompareBuilder;
 import yo.dbunitcli.resource.FileResources;
 
+import java.awt.Color;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -19,6 +21,7 @@ import java.util.Properties;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class OptionEdgeCaseTest {
@@ -73,6 +76,53 @@ class OptionEdgeCaseTest {
         final ImageCompareOption option = new ImageCompareOption("image", dto);
         assertTrue(option.validate().isEmpty());
         assertDoesNotThrow(() -> option.createFactoryOf(CompareOption.Type.image));
+    }
+
+    @Test
+    void rectangleColorAcceptsNameAndHex() {
+        final ImageCompareDto dto = new ImageCompareDto();
+        dto.setDifferenceRectangleColor("Blue");
+        dto.setExcludedRectangleColor("#FFC800");
+        final ImageCompareOption option = new ImageCompareOption("image", dto);
+        assertTrue(option.validate().isEmpty());
+        final ImageCompareBuilder builder = option.createFactoryOf(CompareOption.Type.image);
+        assertEquals(Color.blue, builder.getDifferenceRectangleColor());
+        assertEquals(Color.orange, builder.getExcludedRectangleColor());
+    }
+
+    @Test
+    void rectangleColorUsesDefaultWhenEmpty() {
+        final ImageCompareBuilder builder = new ImageCompareOption("image", new ImageCompareDto())
+                .createFactoryOf(CompareOption.Type.image);
+        assertEquals(Color.red, builder.getDifferenceRectangleColor());
+        assertEquals(Color.green, builder.getExcludedRectangleColor());
+    }
+
+    @Test
+    void invalidRectangleColorIsViolation() {
+        final ImageCompareDto dto = new ImageCompareDto();
+        dto.setDifferenceRectangleColor("bleu");
+        dto.setExcludedRectangleColor("123");
+        final List<String> options = new ImageCompareOption("image", dto).validate().stream()
+                .flatMap(it -> it.options().stream())
+                .toList();
+        assertEquals(List.of("-image.differenceRectangleColor", "-image.excludedRectangleColor"), options);
+    }
+
+    @Test
+    void emptyOutputExtensionUsesConverterDefault() {
+        final ConvertOption option = new Convert().parseOption(new String[]{"-result.outputExtension="});
+        assertNull(option.result().convertResult().getParam().getExtension());
+    }
+
+    @Test
+    void emptyExtensionUsesSrcTypeExtension() {
+        final ConvertOption option = new Convert().parseOption(new String[]{
+                "-src.srcType=csv"
+                , "-src.src=src/test/resources/yo/dbunitcli/application/src/compare/multidiff/new"
+                , "-src.extension="
+        });
+        assertEquals("csv", option.srcData().getParam().getExtension());
     }
 
     @Test

@@ -10,7 +10,10 @@ import yo.dbunitcli.dataset.compare.PdfCompareManager;
 import java.awt.*;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -46,6 +49,25 @@ public record ImageCompareOption(
     private static final String DEFAULT_MINIMAL_RECTANGLE_SIZE = "1";
     private static final String DEFAULT_MAXIMAL_RECTANGLE_COUNT = "-1";
     private static final String DEFAULT_PERCENT_OPACITY = "20.0";
+
+    // native-imageでリフレクションの設定を要さないよう、java.awt.Colorの定数を列挙する
+    private static final Map<String, Color> NAMED_COLORS = new LinkedHashMap<>();
+
+    static {
+        NAMED_COLORS.put("white", Color.white);
+        NAMED_COLORS.put("lightgray", Color.lightGray);
+        NAMED_COLORS.put("gray", Color.gray);
+        NAMED_COLORS.put("darkgray", Color.darkGray);
+        NAMED_COLORS.put("black", Color.black);
+        NAMED_COLORS.put("red", Color.red);
+        NAMED_COLORS.put("pink", Color.pink);
+        NAMED_COLORS.put("orange", Color.orange);
+        NAMED_COLORS.put("yellow", Color.yellow);
+        NAMED_COLORS.put("green", Color.green);
+        NAMED_COLORS.put("magenta", Color.magenta);
+        NAMED_COLORS.put("cyan", Color.cyan);
+        NAMED_COLORS.put("blue", Color.blue);
+    }
 
     public ImageCompareOption(final String prefix) {
         this(prefix, new ImageCompareDto());
@@ -93,7 +115,9 @@ public record ImageCompareOption(
                 , this.validateDecimal("-percentOpacityExcludedRectangles", this.percentOpacityExcludedRectangles)
                 , this.validateBoolean("-drawExcludedRectangles", this.drawExcludedRectangles)
                 , this.validateBoolean("-fillDifferenceRectangles", this.fillDifferenceRectangles)
-                , this.validateBoolean("-fillExcludedRectangles", this.fillExcludedRectangles));
+                , this.validateBoolean("-fillExcludedRectangles", this.fillExcludedRectangles)
+                , this.validateColor("-differenceRectangleColor", this.differenceRectangleColor)
+                , this.validateColor("-excludedRectangleColor", this.excludedRectangleColor));
     }
 
     @Override
@@ -126,13 +150,47 @@ public record ImageCompareOption(
                 .setMaximalRectangleCount(Integer.valueOf(Strings.orDefault(this.maximalRectangleCount, DEFAULT_MAXIMAL_RECTANGLE_COUNT)))
                 .setFillDifferenceRectangles(Boolean.parseBoolean(this.fillDifferenceRectangles))
                 .setPercentOpacityDifferenceRectangles(Double.parseDouble(Strings.orDefault(this.percentOpacityDifferenceRectangles, DEFAULT_PERCENT_OPACITY)))
-                .setDifferenceRectangleColor(Optional.ofNullable(Color.getColor(this.differenceRectangleColor)).orElse(Color.red))
+                .setDifferenceRectangleColor(ImageCompareOption.decodeColor(this.differenceRectangleColor, Color.red))
                 .setExcludeAreaList(this.excludeAreaList())
                 .setDrawExcludedRectangles(Boolean.parseBoolean(this.drawExcludedRectangles))
                 .setFillExcludedRectangles(Boolean.parseBoolean(this.fillExcludedRectangles))
                 .setPercentOpacityExcludedRectangles(Double.parseDouble(Strings.orDefault(this.percentOpacityExcludedRectangles, DEFAULT_PERCENT_OPACITY)))
-                .setExcludedRectangleColor(Optional.ofNullable(Color.getColor(this.excludedRectangleColor)).orElse(Color.green))
+                .setExcludedRectangleColor(ImageCompareOption.decodeColor(this.excludedRectangleColor, Color.green))
                 ;
+    }
+
+    /**
+     * 未指定ならdefaultColor。値はvalidate()で検証済みのため、解釈できない値はここに来ない
+     */
+    private static Color decodeColor(final String value, final Color defaultColor) {
+        return Strings.isEmpty(value) ? defaultColor : ImageCompareOption.parseColor(value).orElse(defaultColor);
+    }
+
+    /**
+     * 色名（大文字小文字を問わない）か、Color.decodeで読める16進（0xRRGGBB・#RRGGBB）
+     */
+    private static Optional<Color> parseColor(final String value) {
+        final String trimmed = value.trim();
+        final Color named = NAMED_COLORS.get(trimmed.toLowerCase(Locale.ROOT));
+        if (named != null) {
+            return Optional.of(named);
+        }
+        if (!trimmed.startsWith("#") && !trimmed.toLowerCase(Locale.ROOT).startsWith("0x")) {
+            return Optional.empty();
+        }
+        try {
+            return Optional.of(Color.decode(trimmed));
+        } catch (final NumberFormatException ex) {
+            return Optional.empty();
+        }
+    }
+
+    private List<Violation> validateColor(final String key, final String value) {
+        if (Strings.isEmpty(value) || ImageCompareOption.parseColor(value).isPresent()) {
+            return List.of();
+        }
+        return this.invalidValue(key, "expected a color name " + NAMED_COLORS.keySet()
+                + " or hex (0xRRGGBB, #RRGGBB) but was '" + value + "'");
     }
 
     private List<Rectangle> excludeAreaList() {

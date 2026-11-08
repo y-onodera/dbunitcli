@@ -194,7 +194,7 @@ public record DataSetConverterOption(
                                     .setOutputEncoding(this.outputEncoding())
                                     .setExcelTable(this.excelTable)
                                     .setFormat(this.format)
-                                    .setExtension(this.extension)
+                                    .setExtension(Strings.orDefault(this.extension, null))
                                     .setFixedColumnDefFile(this.fixedColumnDefFile)
                                     .setFixedLengthType(this.fixedLengthType)
                 ;

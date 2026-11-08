@@ -72,7 +72,12 @@
   (10,20)-(100,150)  の矩形と (200,50)-(300,200) の矩形を除外</pre>
 
   <h3 id="section-color-format">色の指定</h3>
-  <p>色は Java の <code>Color.getColor()</code> が解釈する形式で指定します。代表的な書き方は 16 進リテラル（例: <code>0xFF0000</code> で赤、<code>0x00FF00</code> で緑、<code>0x0000FF</code> で青）です。未指定または解釈に失敗した場合は、差分矩形は <code>red</code>、除外矩形は <code>green</code> にフォールバックします。</p>
+  <p>色は色名か 16 進で指定します。未指定の場合は、差分矩形は <code>red</code>、除外矩形は <code>green</code> で描画します。どちらにも当てはまらない値を指定すると、実行前の検証でエラーになります。</p>
+  <table>
+    <tr><th>値</th><th>説明</th></tr>
+    <tr><td>色名</td><td><code>white</code> / <code>lightGray</code> / <code>gray</code> / <code>darkGray</code> / <code>black</code> / <code>red</code> / <code>pink</code> / <code>orange</code> / <code>yellow</code> / <code>green</code> / <code>magenta</code> / <code>cyan</code> / <code>blue</code>。大文字・小文字は区別しない</td></tr>
+    <tr><td>16 進</td><td><code>0xRRGGBB</code> または <code>#RRGGBB</code>（例: <code>0x0000FF</code>、<code>#0000FF</code> で青）</td></tr>
+  </table>
 
   <h2 id="section-output">出力イメージ</h2>
   <p>Compare の差分レポートには、以下 3 種類の矩形が重ねて描画された差分画像が含まれます。</p>

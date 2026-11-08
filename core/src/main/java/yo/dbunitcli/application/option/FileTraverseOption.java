@@ -1,5 +1,6 @@
 package yo.dbunitcli.application.option;
 
+import yo.dbunitcli.Strings;
 import yo.dbunitcli.application.dto.DataSetLoadDto;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.dataset.DataSourceType;
@@ -34,7 +35,7 @@ public record FileTraverseOption(TraverseOption traverseOption
 
     @Override
     public ComparableDataSetParam.Builder populate(final ComparableDataSetParam.Builder builder) {
-        return this.traverseOption().populate(builder).setExtension(this.extension());
+        return this.traverseOption().populate(builder).setExtension(Strings.orDefault(this.extension(), null));
     }
 
 
