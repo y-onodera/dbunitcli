@@ -4,7 +4,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import yo.dbunitcli.application.CommandParameters;
+import yo.dbunitcli.application.command.Parameterize;
 import yo.dbunitcli.application.command.Type;
+import yo.dbunitcli.common.Parameter;
 import yo.dbunitcli.resource.FileResources;
 import yo.dbunitcli.sidecar.dto.WorkspaceDto;
 
@@ -12,7 +14,11 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.charset.Charset;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Stream;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -140,7 +146,7 @@ class WorkspaceTest {
         this.workspace.options().add("myConvert", new CommandParameters(Type.convert, new String[]{}));
 
         // Act
-        final String parameterizeName = this.workspace.parameterize(Type.convert, "myConvert", null);
+        final String parameterizeName = this.workspace.parameterize(Type.convert, "myConvert", null, new Workspace.ParamSource(null, null));
 
         // Assert: 戻り値は parameterize コマンド名
         assertEquals("myConvert", parameterizeName);
@@ -177,7 +183,7 @@ class WorkspaceTest {
 
     @Test
     void parameterize_存在しないパラメータを指定した場合は空文字を返す() throws IOException {
-        final String result = this.workspace.parameterize(Type.convert, "nonexistent", null);
+        final String result = this.workspace.parameterize(Type.convert, "nonexistent", null, new Workspace.ParamSource(null, null));
         assertEquals("", result);
     }
 
@@ -195,7 +201,7 @@ class WorkspaceTest {
     void parameterize_選んだオプションだけパラメータ化し残りは値をテンプレートに書く() throws IOException {
         this.workspace.options().add("myConvert", new CommandParameters(Type.convert, new String[]{"-src.src=in.csv"}));
 
-        this.workspace.parameterize(Type.convert, "myConvert", List.of("-src.srcType"));
+        this.workspace.parameterize(Type.convert, "myConvert", List.of("-src.srcType"), new Workspace.ParamSource(null, null));
 
         final String template = Files.readString(this.tempDir.resolve("option/parameterize/template/myConvert.txt"));
         assertTrue(template.contains("-src.srcType=$param.src_srcType$"), "選んだオプションは $param.xxx$ になること");
@@ -208,6 +214,47 @@ class WorkspaceTest {
         this.workspace.options().add("myConvert", new CommandParameters(Type.convert, new String[]{}));
 
         assertThrows(IllegalArgumentException.class,
-                () -> this.workspace.parameterize(Type.convert, "myConvert", List.of()));
+                () -> this.workspace.parameterize(Type.convert, "myConvert", List.of(), new Workspace.ParamSource(null, null)));
+    }
+
+    @Test
+    void parameterize_xlsxを選ぶとxlsxのパラメータデータを作りparameterizeで読める() throws IOException {
+        this.workspace.options().add("myConvert", new CommandParameters(Type.convert, new String[]{"-src.src=in.csv"}));
+
+        this.workspace.parameterize(Type.convert, "myConvert", List.of("-src.src"), new Workspace.ParamSource("xlsx", "MS932"));
+
+        assertTrue(Files.exists(this.tempDir.resolve("myConvert.xlsx")));
+        final CommandParameters loaded = this.workspace.options().select(Type.parameterize, "myConvert").orElseThrow();
+        assertTrue(loaded.content().contains("-param.srcType=xlsx"));
+        assertFalse(loaded.content().contains("-param.encoding"), "xlsxでは文字コードを書かないこと");
+        assertEquals(List.of(Map.of("src_src", "in.csv")), this.loadParams(loaded));
+    }
+
+    @Test
+    void parameterize_csvは選んだ文字コードで書きparameterizeで読める() throws IOException {
+        this.workspace.options().add("myConvert", new CommandParameters(Type.convert, new String[]{"-src.src=入力.csv"}));
+
+        this.workspace.parameterize(Type.convert, "myConvert", List.of("-src.src"), new Workspace.ParamSource("csv", "MS932"));
+
+        final CommandParameters loaded = this.workspace.options().select(Type.parameterize, "myConvert").orElseThrow();
+        assertTrue(loaded.content().contains("-param.encoding=MS932"));
+        assertTrue(Files.readString(this.tempDir.resolve("myConvert.csv"), Charset.forName("MS932")).contains("入力.csv"));
+        assertEquals(List.of(Map.of("src_src", "入力.csv")), this.loadParams(loaded));
+    }
+
+    @Test
+    void ParamSource_未対応の形式や文字コードはエラー() {
+        assertThrows(IllegalArgumentException.class, () -> new Workspace.ParamSource("xls", null));
+        assertThrows(IllegalArgumentException.class, () -> new Workspace.ParamSource("csv", "no-such-encoding"));
+    }
+
+    private List<Map<String, Object>> loadParams(final CommandParameters parameterize) {
+        try (final Stream<Parameter> params = new Parameterize().parseOption(parameterize.args()).loadParams()) {
+            return params.map(param -> {
+                final Map<String, Object> row = new HashMap<>(param.toMap());
+                row.keySet().retainAll(Set.of("src_src"));
+                return row;
+            }).toList();
+        }
     }
 }

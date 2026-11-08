@@ -18,6 +18,10 @@ public class CommandRequestDto {
 
     private List<String> parameterizeKeys;
 
+    private String paramType;
+
+    private String paramEncoding;
+
     public String getName() {
         return this.name;
     }
@@ -56,5 +60,21 @@ public class CommandRequestDto {
 
     public void setParameterizeKeys(final List<String> parameterizeKeys) {
         this.parameterizeKeys = parameterizeKeys;
+    }
+
+    public String getParamType() {
+        return this.paramType;
+    }
+
+    public void setParamType(final String paramType) {
+        this.paramType = paramType;
+    }
+
+    public String getParamEncoding() {
+        return this.paramEncoding;
+    }
+
+    public void setParamEncoding(final String paramEncoding) {
+        this.paramEncoding = paramEncoding;
     }
 }

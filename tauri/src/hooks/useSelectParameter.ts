@@ -113,6 +113,9 @@ export const useParameterActions = (command: string, name: string) => {
 };
 export type ParameterizeCandidate = { key: string; value: string };
 
+// parameterizeで作るパラメータデータの形式。encodingはcsvのときだけ使う
+export type ParamSource = { type: "csv" | "xlsx"; encoding: string };
+
 export const useParameterizeCandidates = (
 	command: string,
 	name: string,
@@ -163,13 +166,20 @@ export const useParameterizeFrom = () => {
 		sourceCommand: string,
 		name: string,
 		parameterizeKeys: string[],
+		paramSource: ParamSource,
 	) => {
 		const fetchParams = {
 			endpoint: `${environment.apiUrl + sourceCommand.toLowerCase()}/parameterize`,
 			options: {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ name, parameterizeKeys }),
+				body: JSON.stringify({
+					name,
+					parameterizeKeys,
+					paramType: paramSource.type,
+					paramEncoding:
+						paramSource.type === "csv" ? paramSource.encoding : undefined,
+				}),
 			},
 		};
 		try {

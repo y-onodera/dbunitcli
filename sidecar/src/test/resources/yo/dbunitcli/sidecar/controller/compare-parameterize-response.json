@@ -110,7 +110,7 @@
         "defaultPath": "WORKSPACE",
         "defaultValue": "UTF-8"
       },
-      "value": ""
+      "value": "UTF-8"
     },
     "recursive": {
       "name": "recursive",

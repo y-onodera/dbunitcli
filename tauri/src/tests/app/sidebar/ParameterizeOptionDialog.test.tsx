@@ -46,11 +46,10 @@ describe("ParameterizeOptionDialogのテスト", () => {
 		expect(screen.getByText("multi1.csv")).toBeInTheDocument();
 		await userEvent.click(screen.getByRole("button", { name: "Parameterize" }));
 
-		expect(onApply).toHaveBeenCalledWith([
-			"-new.src",
-			"-new.srcType",
-			"-old.src",
-		]);
+		expect(onApply).toHaveBeenCalledWith(
+			["-new.src", "-new.srcType", "-old.src"],
+			{ type: "csv", encoding: "UTF-8" },
+		);
 		expect(onClose).toHaveBeenCalled();
 	});
 
@@ -71,7 +70,10 @@ describe("ParameterizeOptionDialogのテスト", () => {
 		await userEvent.click(screen.getByRole("checkbox", { name: "-new.src" }));
 		await userEvent.click(screen.getByRole("button", { name: "Parameterize" }));
 
-		expect(onApply).toHaveBeenCalledWith(["-new.src", "-old.src"]);
+		expect(onApply).toHaveBeenCalledWith(["-new.src", "-old.src"], {
+			type: "csv",
+			encoding: "UTF-8",
+		});
 	});
 
 	it("1つも選んでいなければParameterizeを押せない", async () => {
@@ -88,6 +90,45 @@ describe("ParameterizeOptionDialogのテスト", () => {
 		await userEvent.click(screen.getByRole("checkbox", { name: "select all" }));
 
 		expect(screen.getByRole("button", { name: "Parameterize" })).toBeDisabled();
+	});
+});
+
+describe("ParameterizeOptionDialogのパラメータデータ形式のテスト", () => {
+	it("csvでは選んだ文字コードを渡す", async () => {
+		candidatesFixture.current = candidates;
+		const onApply = vi.fn();
+		render(
+			<ParameterizeOptionDialog
+				command="compare"
+				name="csvCsv"
+				onApply={onApply}
+				onClose={vi.fn()}
+			/>,
+		);
+
+		await userEvent.selectOptions(screen.getByLabelText("encoding"), "MS932");
+		await userEvent.click(screen.getByRole("button", { name: "Parameterize" }));
+
+		expect(onApply).toHaveBeenCalledWith(expect.any(Array), {
+			type: "csv",
+			encoding: "MS932",
+		});
+	});
+
+	it("xlsxを選ぶと文字コードの欄を出さない", async () => {
+		candidatesFixture.current = candidates;
+		render(
+			<ParameterizeOptionDialog
+				command="compare"
+				name="csvCsv"
+				onApply={vi.fn()}
+				onClose={vi.fn()}
+			/>,
+		);
+
+		await userEvent.selectOptions(screen.getByLabelText("param data"), "xlsx");
+
+		expect(screen.queryByLabelText("encoding")).not.toBeInTheDocument();
 	});
 });
 
@@ -116,12 +157,15 @@ describe("NameEditMenuのParameterizeのテスト", () => {
 		await userEvent.click(
 			screen.getByRole("checkbox", { name: "-new.srcType" }),
 		);
+		await userEvent.selectOptions(screen.getByLabelText("param data"), "xlsx");
 		await userEvent.click(screen.getByRole("button", { name: "Parameterize" }));
 
-		expect(mockParameterizeFrom).toHaveBeenCalledWith("compare", "csvCsv", [
-			"-new.src",
-			"-old.src",
-		]);
+		expect(mockParameterizeFrom).toHaveBeenCalledWith(
+			"compare",
+			"csvCsv",
+			["-new.src", "-old.src"],
+			{ type: "xlsx", encoding: "UTF-8" },
+		);
 		expect(
 			screen.queryByRole("button", { name: "Parameterize" }),
 		).not.toBeInTheDocument();

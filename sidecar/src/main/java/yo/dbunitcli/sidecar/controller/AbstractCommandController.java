@@ -172,7 +172,8 @@ public abstract class AbstractCommandController implements ControllerExceptionHa
     @Post(uri = "parameterize", produces = MediaType.APPLICATION_JSON)
     public String parameterize(@Body final CommandRequestDto input) throws IOException {
         try {
-            return this.load(Type.parameterize, this.workspace.parameterize(this.getCommandType(), input.getName(), input.getParameterizeKeys()));
+            return this.load(Type.parameterize, this.workspace.parameterize(this.getCommandType(), input.getName(), input.getParameterizeKeys()
+                    , new Workspace.ParamSource(input.getParamType(), input.getParamEncoding())));
         } catch (IOException e) {
             throw e;
         } catch (final Throwable th) {

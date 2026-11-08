@@ -58,16 +58,16 @@
   <p>同じコマンドを値だけ変えて何回も実行したい場合は、Parameterize を使います。</p>
   <ol>
     <li>元にするオプションを Save しておきます（Parameterize は保存済みの内容から作られます）</li>
-    <li>サイドバーでその名前の ⋮ を押し、Parameterize を選びます。値が入っているオプションと保存値の一覧が開くので、パラメータにするオプションにチェックを付けます（最初は全部に付いています。見出しのチェックで全部の ON / OFF を切り替えられます）</li>
+    <li>サイドバーでその名前の ⋮ を押し、Parameterize を選びます。値が入っているオプションと保存値の一覧が開くので、パラメータにするオプションにチェックを付けます（最初は全部に付いています。見出しのチェックで全部の ON / OFF を切り替えられます）。<code>param data</code> でパラメータデータの形式（csv / xlsx）を、csv のときは <code>encoding</code> で文字コード（UTF-8 / MS932）を選びます</li>
     <li>Parameterize を押すと、次の 3 つが作られ、Parameterize のフォームが開きます
       <ul>
         <li>テンプレート <code>option/parameterize/template/&lt;name&gt;.txt</code>：チェックを付けたオプションは <code>-オプション名=$param.オプション名$</code> の形に、外したオプションは保存値のままになります</li>
-        <li>パラメータデータの CSV <code>&lt;workspace&gt;/&lt;name&gt;.csv</code>：チェックを付けたオプションの今の値が 1 行だけ入っています</li>
+        <li>パラメータデータ <code>&lt;workspace&gt;/&lt;name&gt;.csv</code>（xlsx を選んだときは <code>&lt;name&gt;.xlsx</code>）：チェックを付けたオプションの今の値が 1 行だけ入っています</li>
         <li>Parameterize の保存済みオプション <code>option/parameterize/&lt;name&gt;.txt</code></li>
       </ul>
     </li>
-    <li>CSV に、実行したい回数ぶん行を足して値を変えます</li>
-    <li>Exec で実行すると、CSV の行ごとにコマンドが実行されます。確認できたら Save し、必要なら Save Shell で .bat にします</li>
+    <li>パラメータデータに、実行したい回数ぶん行を足して値を変えます</li>
+    <li>Exec で実行すると、パラメータデータの行ごとにコマンドが実行されます。確認できたら Save し、必要なら Save Shell で .bat にします</li>
   </ol>
   <p><code>unit</code> や <code>cmdParam</code> などの設定は <a href="../commands/parameterize.html">Parameterize</a> を参照してください。</p>
 

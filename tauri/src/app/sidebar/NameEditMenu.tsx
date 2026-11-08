@@ -98,11 +98,12 @@ export default function NameEditMenu({
 				<ParameterizeOptionDialog
 					command={parameterizeTarget.command}
 					name={parameterizeTarget.name}
-					onApply={(parameterizeKeys) =>
+					onApply={(parameterizeKeys, paramSource) =>
 						parameterizeFrom(
 							parameterizeTarget.command,
 							parameterizeTarget.name,
 							parameterizeKeys,
+							paramSource,
 						)
 					}
 					onClose={() => setParameterizeTarget(null)}

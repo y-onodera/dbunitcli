@@ -11,10 +11,13 @@ import {
 	Tr,
 } from "../../components/dialog";
 import { BlueButton, WhiteButton } from "../../components/element/Button";
+import { InputLabel, SelectBox } from "../../components/element/Input";
 import {
 	type ParameterizeCandidate,
+	type ParamSource,
 	useParameterizeCandidates,
 } from "../../hooks/useSelectParameter";
+import { ENCODING_CANDIDATES } from "../form/section/element/EncodingText";
 
 const CHECKBOX_CLASS =
 	"w-4 h-4 text-primary border border-border ring-primary-ring focus-visible:ring-3";
@@ -27,7 +30,7 @@ export default function ParameterizeOptionDialog({
 }: {
 	command: string;
 	name: string;
-	onApply: (parameterizeKeys: string[]) => void;
+	onApply: (parameterizeKeys: string[], paramSource: ParamSource) => void;
 	onClose: () => void;
 }) {
 	const { candidates, loading } = useParameterizeCandidates(command, name);
@@ -56,12 +59,16 @@ function Dialog({
 }: {
 	name: string;
 	candidates: ParameterizeCandidate[];
-	onApply: (parameterizeKeys: string[]) => void;
+	onApply: (parameterizeKeys: string[], paramSource: ParamSource) => void;
 	onClose: () => void;
 }) {
 	const [selected, setSelected] = useState<string[]>(
 		candidates.map((it) => it.key),
 	);
+	const [paramSource, setParamSource] = useState<ParamSource>({
+		type: "csv",
+		encoding: ENCODING_CANDIDATES[0],
+	});
 	const allSelected =
 		candidates.length > 0 && selected.length === candidates.length;
 	const toggle = (key: string) =>
@@ -127,6 +134,58 @@ function Dialog({
 				Checked options become parameters. Unchecked options keep the saved
 				value in the template.
 			</p>
+			<DialogField>
+				<div className="flex items-center gap-3">
+					<InputLabel
+						id="paramType"
+						text="param data"
+						required={false}
+						wStyle="w-auto"
+					/>
+					<SelectBox
+						name="paramType"
+						id="paramType"
+						required={false}
+						wStyle="w-28"
+						defaultValue={paramSource.type}
+						handleOnChange={(selected) =>
+							setParamSource((cur) => ({
+								...cur,
+								type: selected as ParamSource["type"],
+							}))
+						}
+					>
+						<option value="csv">csv</option>
+						<option value="xlsx">xlsx</option>
+					</SelectBox>
+					{paramSource.type === "csv" && (
+						<>
+							<InputLabel
+								id="paramEncoding"
+								text="encoding"
+								required={false}
+								wStyle="w-auto"
+							/>
+							<SelectBox
+								name="paramEncoding"
+								id="paramEncoding"
+								required={false}
+								wStyle="w-32"
+								defaultValue={paramSource.encoding}
+								handleOnChange={(selected) =>
+									setParamSource((cur) => ({ ...cur, encoding: selected }))
+								}
+							>
+								{ENCODING_CANDIDATES.map((encoding) => (
+									<option key={encoding} value={encoding}>
+										{encoding}
+									</option>
+								))}
+							</SelectBox>
+						</>
+					)}
+				</div>
+			</DialogField>
 			{renderBody()}
 			<DialogActions>
 				<BlueButton
@@ -138,6 +197,7 @@ function Dialog({
 							candidates
 								.map((it) => it.key)
 								.filter((key) => selected.includes(key)),
+							paramSource,
 						);
 						onClose();
 					}}

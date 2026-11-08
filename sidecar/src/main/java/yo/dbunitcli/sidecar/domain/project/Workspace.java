@@ -1,5 +1,6 @@
 package yo.dbunitcli.sidecar.domain.project;
 
+import org.apache.poi.ss.util.WorkbookUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.stringtemplate.v4.ST;
@@ -11,6 +12,8 @@ import yo.dbunitcli.application.Option;
 import yo.dbunitcli.application.command.Type;
 import yo.dbunitcli.dataset.ComparableTable;
 import yo.dbunitcli.dataset.converter.CsvConverter;
+import yo.dbunitcli.dataset.converter.XlsConverter;
+import yo.dbunitcli.dataset.converter.XlsxConverter;
 import yo.dbunitcli.resource.FileResources;
 import yo.dbunitcli.sidecar.dto.ContextDto;
 import yo.dbunitcli.sidecar.dto.ParametersDto;
@@ -22,6 +25,7 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -39,12 +43,16 @@ public class Workspace {
     }
 
     private static String[] parameterizeOption(final Type type, final Path templatePath,
-                                               final File parameterSource) {
-        return new String[]{"-cmd=" + type.name()
+                                               final File parameterSource, final ParamSource paramSource) {
+        final List<String> result = new ArrayList<>(List.of("-cmd=" + type.name()
                 , "-template=" + templatePath.getFileName()
                 , "-param.src=" + parameterSource.getName()
-                , "-param.srcType=csv"
-                , "-unit=record"};
+                , "-param.srcType=" + paramSource.type()));
+        if (paramSource.isCsv()) {
+            result.add("-param.encoding=" + paramSource.encoding());
+        }
+        result.add("-unit=record");
+        return result.toArray(String[]::new);
     }
 
     private static String toRelative(final Path base, final Path target) {
@@ -219,7 +227,8 @@ public class Workspace {
     /**
      * @param parameterizeKeys $param.xxx$に置き換えるオプション。nullなら値が入っている全オプション
      */
-    public String parameterize(final Type type, final String name, final List<String> parameterizeKeys) throws IOException {
+    public String parameterize(final Type type, final String name, final List<String> parameterizeKeys
+            , final ParamSource paramSource) throws IOException {
         final Optional<CommandParameters> source = this.options().select(type, name);
         if (source.isPresent()) {
             final Option.Parameters target = source.get().toOptionParameters();
@@ -233,11 +242,11 @@ public class Workspace {
                             .parameterizeArgs(false, parameterize)
                             .toArray(String[]::new))
                             .content());
-            final File parameterSource = this.saveParameterSources(name, target.toMap(false, parameterize));
+            final File parameterSource = this.saveParameterSources(name, target.toMap(false, parameterize), paramSource);
             return this.options().add(name
                     , new CommandParameters(Type.parameterize,
                             parameterizeOption(type, templatePath,
-                                    parameterSource)));
+                                    parameterSource, paramSource)));
         }
         return "";
     }
@@ -251,13 +260,53 @@ public class Workspace {
                 .orElseGet(() -> Path.of(System.getProperty("user.dir")));
     }
 
-    private File saveParameterSources(final String name, final Map<String, ?> parameters) {
+    private File saveParameterSources(final String name, final Map<String, ?> parameters, final ParamSource paramSource) {
         final File resourcesDir = this.path().toFile();
-        final CsvConverter converter = new CsvConverter(resourcesDir, "UTF-8");
-        converter.convert(new ComparableTable.Builder(name, parameters.keySet().toArray(new String[0]))
+        if (paramSource.isCsv()) {
+            new CsvConverter(resourcesDir, paramSource.encoding())
+                    .convert(parameterTable(name, parameters));
+            return new File(resourcesDir, name + ".csv");
+        }
+        // テーブル名がシート名になるため、Excelで使えない文字・長さを丸める
+        final XlsxConverter converter = new XlsxConverter(resourcesDir, name, XlsConverter.TableExportType.SHEET
+                , true, true, false);
+        converter.startDataSet();
+        converter.convert(parameterTable(WorkbookUtil.createSafeSheetName(name), parameters));
+        converter.endDataSet();
+        return new File(resourcesDir, name + ".xlsx");
+    }
+
+    private static ComparableTable parameterTable(final String tableName, final Map<String, ?> parameters) {
+        return new ComparableTable.Builder(tableName, parameters.keySet().toArray(new String[0]))
                 .addRow(parameters.values().toArray(Object[]::new))
-                .build());
-        return new File(resourcesDir, name + ".csv");
+                .build();
+    }
+
+    /**
+     * parameterizeのパラメータデータの形式
+     *
+     * @param type     csv または xlsx
+     * @param encoding csvの文字コード
+     */
+    public record ParamSource(String type, String encoding) {
+        private static final String CSV = "csv";
+        private static final String XLSX = "xlsx";
+
+        /** 未指定の項目はcsv・UTF-8にする */
+        public ParamSource {
+            type = Strings.isEmpty(type) ? CSV : type;
+            if (!type.equals(CSV) && !type.equals(XLSX)) {
+                throw new IllegalArgumentException("unsupported param type: " + type);
+            }
+            encoding = Strings.isEmpty(encoding) ? "UTF-8" : encoding;
+            if (type.equals(CSV) && !Charset.isSupported(encoding)) {
+                throw new IllegalArgumentException("unsupported encoding: " + encoding);
+            }
+        }
+
+        boolean isCsv() {
+            return this.type.equals(CSV);
+        }
     }
 
     public static class Builder {
