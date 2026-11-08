@@ -5,11 +5,12 @@ import org.dbunit.dataset.DataSetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Function;
 
 public record TableSplitter(TableRenameStrategy renameFunction, List<String> breakKeys, int limit) {
 
-    public static TableSplitter NONE = new TableSplitter(new Builder());
+    public static final TableSplitter NONE = new TableSplitter(new Builder());
 
     public TableSplitter(final Builder builder) {
         this(builder.getRenameFunction(), builder.getBreakKeys(), builder.getLimit());
@@ -43,7 +44,7 @@ public record TableSplitter(TableRenameStrategy renameFunction, List<String> bre
         return row -> {
             final String[] keys = new String[indexes.length];
             for (int i = 0; i < indexes.length; i++) {
-                keys[i] = row[indexes[i]].toString();
+                keys[i] = Objects.toString(row[indexes[i]], null);
             }
             return Arrays.asList(keys);
         };
@@ -97,6 +98,7 @@ public record TableSplitter(TableRenameStrategy renameFunction, List<String> bre
     public Builder builder() {
         return new Builder()
                 .setLimit(this.limit)
+                .setBreakKeys(new ArrayList<>(this.breakKeys))
                 .setRenameFunction(this.renameFunction);
     }
 

@@ -2,7 +2,7 @@
   "commonSettings": [
     {
       "string": {
-        "TABLE_NAME": "table_name",
+        "TABLE_NAME": "tbl_name",
         "TABLE_REMARKS": "table_desc",
         "COLUMN_NAME": "col_name",
         "TYPE_NAME": "sql_type",
@@ -14,7 +14,7 @@
       },
       "boolean": {
         "NULLABLE": "is_nullable",
-        "IS_PK": "is_pk"
+        "IS_PK": "pk_flag"
       }
     }
   ]

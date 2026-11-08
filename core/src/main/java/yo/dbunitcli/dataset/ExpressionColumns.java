@@ -48,6 +48,14 @@ public record ExpressionColumns(List<Expressions> values) {
             final ArrayList<Column> columnList = Arrays.stream(columns).collect(Collectors.toCollection(ArrayList::new));
             final List<String> columnNames = columnList.stream().map(Column::getColumnName).toList();
             this.toColumns().forEach(column -> {
+                // 列の索引は大文字小文字を区別しないため、綴りだけ違う列が並ぶとどちらを指すか決まらない
+                columnNames.stream()
+                        .filter(it -> it.equalsIgnoreCase(column.getColumnName()) && !it.equals(column.getColumnName()))
+                        .findFirst()
+                        .ifPresent(it -> {
+                            throw new IllegalArgumentException("expression column '" + column.getColumnName()
+                                    + "' differs only in case from column '" + it + "'. use the same spelling.");
+                        });
                 if (!columnNames.contains(column.getColumnName())) {
                     columnList.add(column);
                 } else {
@@ -77,9 +85,9 @@ public record ExpressionColumns(List<Expressions> values) {
                     final Object val = JexlEngines.DATASET.createExpression(exp.values().get(columnName)).evaluate(jc);
                     return switch (exp.type()) {
                         case STRING -> val;
-                        case BOOLEAN -> Boolean.parseBoolean(val.toString());
-                        case SQL_FUNCTION -> val.toString();
-                        case NUMBER -> val.toString().isEmpty() ? "" : NumberParser.parse(val);
+                        case BOOLEAN -> Boolean.parseBoolean(String.valueOf(val));
+                        case SQL_FUNCTION -> Objects.toString(val, null);
+                        case NUMBER -> val == null ? null : val.toString().isEmpty() ? "" : NumberParser.parse(val);
                     };
                 })
                 .reduce(null, (a, b) -> b != null ? b : a);

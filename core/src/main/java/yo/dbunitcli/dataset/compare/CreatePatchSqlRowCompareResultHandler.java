@@ -38,12 +38,13 @@ public class CreatePatchSqlRowCompareResultHandler implements RowCompareResultHa
         this.columns = IntStream.range(0, tableCompare.getColumnLength())
                 .mapToObj(tableCompare::getOldColumn)
                 .toArray(Column[]::new);
-        final List<String> keyColumns = tableCompare.getKeyColumns();
+        // 比較キーは設定に書いた綴りのため、列名とは大文字小文字を区別せずに照合する
+        final List<String> keyColumns = tableCompare.getKeyColumns().stream().map(String::toUpperCase).toList();
         this.primaryKeys = Arrays.stream(this.columns)
-                .filter(it -> keyColumns.contains(it.getColumnName()))
+                .filter(it -> keyColumns.contains(it.getColumnName().toUpperCase()))
                 .toArray(Column[]::new);
         this.columnsExcludeKey = Arrays.stream(this.columns)
-                .filter(it -> !keyColumns.contains(it.getColumnName()))
+                .filter(it -> !keyColumns.contains(it.getColumnName().toUpperCase()))
                 .toArray(Column[]::new);
     }
 
