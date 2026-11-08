@@ -238,7 +238,7 @@ export function Arrays(props: {
 	handleChange: (text: string, index: number) => void;
 	handleRemove: (index: number) => void;
 	ignoreLabel?: boolean;
-	showCaption?: boolean;
+	caption?: string;
 	list?: string;
 	handleSelect?: (index: number) => void;
 	handleEdit?: (index: number) => void;
@@ -276,7 +276,7 @@ export function Arrays(props: {
 						handleRemove={blank ? () => setAdding(false) : props.handleRemove}
 						isDuplicated={(text) => isDuplicated(props.values, text, index)}
 						ignoreLabel={props.ignoreLabel}
-						showCaption={props.showCaption}
+						caption={props.caption}
 						list={props.list}
 						handleSelect={props.handleSelect}
 						handleEdit={props.handleEdit}
@@ -303,7 +303,7 @@ export function ArraysText(props: {
 	handleRemove: (index: number) => void;
 	isDuplicated?: (text: string) => boolean;
 	ignoreLabel?: boolean;
-	showCaption?: boolean;
+	caption?: string;
 	list?: string;
 	handleSelect?: (index: number) => void;
 	handleEdit?: (index: number) => void;
@@ -322,9 +322,9 @@ export function ArraysText(props: {
 	const showLabel = !props.ignoreLabel && props.index === 0;
 	return (
 		<>
-			{showLabel && props.showCaption && (
+			{showLabel && props.caption && (
 				<div className="grid grid-cols-5 pb-1">
-					<span className="col-start-2 text-caption">column</span>
+					<span className="col-start-2 text-caption">{props.caption}</span>
 				</div>
 			)}
 			<div className="grid grid-cols-5 pb-2">
