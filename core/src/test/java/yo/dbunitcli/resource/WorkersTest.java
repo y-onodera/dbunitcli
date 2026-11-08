@@ -191,4 +191,22 @@ public class WorkersTest {
         Assertions.assertEquals(Map.of("a", "submitter", "b", "submitter", "c", "submitter", "d", "submitter"), actual);
         Assertions.assertEquals(2, threads.size());
     }
+
+    @Test
+    public void run_and_forEach_do_nothing_without_items() {
+        Assertions.assertEquals(List.of(), Workers.run(0, "test-", i -> () -> i));
+        final List<String> actual = new ArrayList<>();
+        Workers.forEach(2, "test-", List.<String>of(), (item, resources, first) -> actual.add(item));
+        Assertions.assertEquals(List.of(), actual);
+    }
+
+    @Test
+    public void workerResources_close_in_reverse_order() {
+        final List<String> closed = new ArrayList<>();
+        try (final Workers.WorkerResources resources = new Workers.WorkerResources()) {
+            resources.get("connection", () -> "connection", closed::add);
+            resources.get("writer", () -> "writer", closed::add);
+        }
+        Assertions.assertEquals(List.of("writer", "connection"), closed);
+    }
 }

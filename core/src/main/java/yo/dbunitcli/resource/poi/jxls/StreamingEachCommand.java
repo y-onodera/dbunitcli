@@ -74,8 +74,11 @@ public class StreamingEachCommand extends EachCommand {
             final JxlsDataSetConverter converter = new JxlsDataSetConverter(cellRef, context, task.targetTableName(), this.area, this.getCellRefGenerator());
             final ComparableTableMappingContext mappingContext = new ComparableTableMappingContext(task.targetTableSeparators(), converter);
             mappingContext.open();
-            task.run(mappingContext);
-            mappingContext.close();
+            try {
+                task.run(mappingContext);
+            } finally {
+                mappingContext.close();
+            }
 
             final Size size = converter.getSize();
             if (this.getDirection() == Direction.DOWN) {

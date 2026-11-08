@@ -50,9 +50,8 @@ public class XlsxCellsToTableBuilder {
     }
 
     public void handle(final CellReference reference, final String formattedValue) {
-        final String ref = reference.formatAsString()
-                .replaceAll(".+!", "")
-                .replaceAll("\\$", "");
+        // シート名・絶対参照の$を含まない形（設定のcellAddressと同じ形）にする
+        final String ref = CellReference.convertNumToColString(reference.getCol()) + (reference.getRow() + 1);
         if (this.columnDefine.containsKey(ref)) {
             this.columnDefine.get(ref).forEach(it -> {
                 final ITableMetaData metaData = this.tableMetaDataMap.get(it.tableName());

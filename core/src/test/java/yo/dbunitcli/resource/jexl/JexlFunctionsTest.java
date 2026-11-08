@@ -74,4 +74,10 @@ class JexlFunctionsTest {
             Assertions.assertThrows(JexlException.class, () -> eval(engine, "parseOrNull(a)", Map.of("a", "1")));
         }
     }
+
+    @ParameterizedTest
+    @MethodSource("engines")
+    void formatDateReturnsDefaultWhenNotFormattable(final JexlEngine engine) {
+        Assertions.assertEquals("-", eval(engine, "formatDate(a, 'yyyyMMdd', 'yyyy/MM/dd HH:mm', '-')", Map.of("a", "20261106")));
+    }
 }

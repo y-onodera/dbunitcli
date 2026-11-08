@@ -43,10 +43,12 @@ public record FileResources() {
                     .map(File::new)
                     .orElse(new File("."));
             final File datasetDir = Optional.ofNullable(System.getProperty(PROPERTY_DATASET_BASE))
+                    .filter(it -> !it.isEmpty())
                     .map(FileResources::expandEnvironmentVariables)
                     .map(File::new)
                     .orElse(baseDir);
             final File resultDir = Optional.ofNullable(System.getProperty(PROPERTY_RESULT_BASE))
+                    .filter(it -> !it.isEmpty())
                     .map(FileResources::expandEnvironmentVariables)
                     .map(File::new)
                     .orElse(baseDir);

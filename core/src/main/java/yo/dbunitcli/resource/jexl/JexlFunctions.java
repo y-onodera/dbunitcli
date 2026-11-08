@@ -1,8 +1,8 @@
 package yo.dbunitcli.resource.jexl;
 
+import java.time.DateTimeException;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
-import java.time.format.DateTimeParseException;
 import java.time.format.ResolverStyle;
 import java.time.temporal.ChronoField;
 import java.util.Map;
@@ -47,7 +47,8 @@ public final class JexlFunctions {
         final DateTimeFormatter to = JexlFunctions.FORMATTERS.computeIfAbsent(toPattern, DateTimeFormatter::ofPattern);
         try {
             return to.format(from.parse(value.toString()));
-        } catch (final DateTimeParseException ex) {
+        } catch (final DateTimeException ex) {
+            // 読めない値に加え、変換先の書式が値に無い項目（日付だけの値への時刻など）を要求した場合も既定値にする
             return defaultValue;
         }
     }

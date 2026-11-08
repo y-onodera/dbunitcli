@@ -609,4 +609,28 @@ class FileResourcesTest {
             });
         }
     }
+
+    @Nested
+    class EmptyBasePropertyTest {
+        @BeforeAll
+        static void setProperty() {
+            final Properties newProperty = new Properties();
+            newProperty.putAll(FileResourcesTest.backup);
+            newProperty.put(FileResources.PROPERTY_DATASET_BASE, "");
+            newProperty.put(FileResources.PROPERTY_RESULT_BASE, "");
+            System.setProperties(newProperty);
+        }
+
+        @AfterAll
+        static void restore() {
+            FileResourcesTest.restore();
+        }
+
+        @Test
+        void emptyBaseFallsBackToWorkspace() {
+            Assertions.assertEquals(new File("."), FileResources.datasetDir());
+            Assertions.assertEquals(new File("."), FileResources.resultDir());
+            Assertions.assertEquals(new File(".", "out"), FileResources.resultDir("out"));
+        }
+    }
 }

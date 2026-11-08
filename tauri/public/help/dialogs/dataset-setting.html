@@ -442,8 +442,8 @@ id | name
   <table>
     <tr><th>関数</th><th>説明</th></tr>
     <tr><td><code>tryToNum(value, default)</code></td><td><code>value</code> を数値に変換できればその数値、できなければ <code>default</code> を返す。<code>value</code> が NULL の場合も <code>default</code> を返す。桁区切りの <code>,</code> を含む値（例: <code>'1,234.5'</code>）も数値に変換する。<code>number</code> で使う場合は、<code>default</code> に数値を指定してください。</td></tr>
-    <tr><td><code>formatDate(value, from, to)</code></td><td><code>value</code> を書式 <code>from</code> の日付として読み、書式 <code>to</code> の文字列にして返す。読めない場合（書式違い・2/30 のような存在しない日付・空文字）は <code>value</code> をそのまま返す。<code>value</code> が NULL の場合は NULL を返す。</td></tr>
-    <tr><td><code>formatDate(value, from, to, default)</code></td><td>読めない場合と <code>value</code> が NULL の場合に <code>default</code> を返す。それ以外は 3 引数と同じ</td></tr>
+    <tr><td><code>formatDate(value, from, to)</code></td><td><code>value</code> を書式 <code>from</code> の日付として読み、書式 <code>to</code> の文字列にして返す。読めない場合（書式違い・2/30 のような存在しない日付・空文字）と、<code>to</code> が読んだ値に無い項目を求める場合（例: <code>from</code> が日付だけで <code>to</code> に時刻 <code>HH:mm</code> を含む）は <code>value</code> をそのまま返す。<code>value</code> が NULL の場合は NULL を返す。</td></tr>
+    <tr><td><code>formatDate(value, from, to, default)</code></td><td>3 引数で <code>value</code> をそのまま返す場合と <code>value</code> が NULL の場合に <code>default</code> を返す。それ以外は 3 引数と同じ</td></tr>
   </table>
   <p><code>from</code> / <code>to</code> の書式は <code>yyyy</code>（年）、<code>MM</code>（月）、<code>dd</code>（日）、<code>HH</code>（時）、<code>mm</code>（分）、<code>ss</code>（秒）、<code>E</code>（曜日）などの組み合わせで書きます。<code>M</code> / <code>d</code> のように 1 文字にすると、<code>2026/1/6</code> のような桁がそろっていない値も読めます。<code>to</code> に <code>from</code> にない項目（日付だけの値に <code>HH</code> など）を書くとエラーになります。</p>
 

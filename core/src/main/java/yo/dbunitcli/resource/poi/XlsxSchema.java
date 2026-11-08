@@ -9,6 +9,7 @@ import yo.dbunitcli.common.Source;
 import yo.dbunitcli.common.TargetFilter;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -63,7 +64,7 @@ public interface XlsxSchema {
         SimpleImpl(final Builder builder) {
             this(new HashMap<>(builder.getRowsTableDefMap()),
                     new HashMap<>(builder.getCellsTableDefMap()),
-                    new HashMap<>(builder.getSheetPatterns()),
+                    new LinkedHashMap<>(builder.getSheetPatterns()),
                     Source.NONE);
         }
 

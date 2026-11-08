@@ -13,6 +13,7 @@ import yo.dbunitcli.resource.poi.XlsxSchema;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -24,7 +25,7 @@ public class FromJsonXlsxSchemaBuilder implements XlsxSchema.Builder {
 
     private final Map<String, List<XlsxCellsTableDefine>> cellsTableDefMap = new HashMap<>();
 
-    private final Map<String, TargetFilter> sheetPatterns = new HashMap<>();
+    private final Map<String, TargetFilter> sheetPatterns = new LinkedHashMap<>();
 
     public XlsxSchema build(final File schema, final String encoding) throws IOException {
         if (schema == null) {

@@ -92,4 +92,18 @@ class SqlEscapeStringRendererTest {
         assertEquals("Camelcase", this.target.toString((Object) "CAMELCASE", "kebabToUpperCamel", Locale.JAPANESE));
     }
 
+    @Test
+    void testToStringEscapeSqlSplitsMultibyteClobByBytes() {
+        final String value = "あ".repeat(2000);
+        final String actual = this.target.toString((Object) value, "escapeSql", Locale.JAPANESE);
+        // 6000バイトを4000バイト以下（あ=3バイトなので1333文字）ずつに分ける
+        assertEquals("TO_CLOB('" + "あ".repeat(1333) + "') || TO_CLOB('" + "あ".repeat(667) + "')", actual);
+    }
+
+    @Test
+    void testToStringEscapeSqlDoesNotSplitEscapedQuote() {
+        final String value = "a".repeat(3999) + "'" + "b";
+        final String actual = this.target.toString((Object) value, "escapeSql", Locale.JAPANESE);
+        assertEquals("TO_CLOB('" + "a".repeat(3999) + "') || TO_CLOB('''b')", actual);
+    }
 }
