@@ -156,11 +156,16 @@ public class DefaultCompareManager implements DataSetCompare.Manager {
         }
 
         protected List<CompareDiff> exec() {
+            this.assertNewTableHasKeyColumns();
             final int oldRows = this.oldTable.getRowCount();
             final Map<CompareKeys, Map.Entry<Integer, Object[]>> newRowLists = this.newTable.getRows(this.keyColumns);
+            final Set<CompareKeys> oldKeys = HashSet.newHashSet(oldRows);
             IntStream.range(0, oldRows).forEach(rowNum -> {
                 final Object[] oldRow = this.oldTable.getRow(rowNum, this.columnLength);
                 final CompareKeys key = this.oldTable.getKey(rowNum, this.keyColumns);
+                if (!oldKeys.add(key)) {
+                    throw new AssertionError("comparison keys not unique:" + this.keyColumns + " metaData:" + this.oldTable.getTableMetaData());
+                }
                 if (newRowLists.containsKey(key)) {
                     final Map.Entry<Integer, Object[]> rowEntry = newRowLists.get(key);
                     this.handler.handleModify(oldRow, rowEntry.getValue(), key.newRowNum(rowEntry.getKey()));
@@ -174,6 +179,19 @@ public class DefaultCompareManager implements DataSetCompare.Manager {
                 this.handler.handleAdd(row.getKey(), row.getValue());
             });
             return this.handler.result();
+        }
+
+        /**
+         * 比較キーはoldの主キーのため、newにその列が無ければ行を突き合わせられない
+         */
+        private void assertNewTableHasKeyColumns() {
+            final List<String> missing = this.keyColumns.stream()
+                    .filter(it -> !this.newTable.getTableMetaData().columnIndexes().containsKey(it.toUpperCase()))
+                    .toList();
+            if (!missing.isEmpty()) {
+                throw new AssertionError("comparison keys not found in new table:" + missing
+                        + " table:" + this.newTable.getTableName());
+            }
         }
     }
 }
