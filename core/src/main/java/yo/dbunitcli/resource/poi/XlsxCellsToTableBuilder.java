@@ -55,11 +55,13 @@ public class XlsxCellsToTableBuilder {
         if (this.columnDefine.containsKey(ref)) {
             this.columnDefine.get(ref).forEach(it -> {
                 final ITableMetaData metaData = this.tableMetaDataMap.get(it.tableName());
-                try {
-                    this.row.get(it.tableName())
-                            .get(it.getRowIndex(ref))[metaData.getColumnIndex(it.getColumnName(ref))] = formattedValue;
-                } catch (final DataSetException e) {
-                    throw new AssertionError(e);
+                final List<String[]> rows = this.row.get(it.tableName());
+                for (final int[] position : it.getPositions(ref)) {
+                    try {
+                        rows.get(position[0])[metaData.getColumnIndex(it.getColumnName(position[1]))] = formattedValue;
+                    } catch (final DataSetException e) {
+                        throw new AssertionError(e);
+                    }
                 }
             });
         }

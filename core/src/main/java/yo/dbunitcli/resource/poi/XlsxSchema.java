@@ -9,9 +9,11 @@ import yo.dbunitcli.common.Source;
 import yo.dbunitcli.common.TargetFilter;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public interface XlsxSchema {
 
@@ -60,6 +62,21 @@ public interface XlsxSchema {
             , Map<String, List<XlsxCellsTableDefine>> cellsTableDefMap
             , Map<String, TargetFilter> sheetPatterns
             , Source source) implements XlsxSchema {
+
+        public SimpleImpl {
+            // 同じシートで同じtableNameのcells定義が2つあると、後の定義が先の定義の行を置き換えるため定義ミスにする
+            cellsTableDefMap.forEach((sheet, defs) -> {
+                final Set<String> tableNames = new HashSet<>();
+                defs.stream()
+                        .map(XlsxCellsTableDefine::tableName)
+                        .filter(tableName -> !tableNames.add(tableName))
+                        .findFirst()
+                        .ifPresent(tableName -> {
+                            throw new IllegalArgumentException("xlsx-schema cells '" + sheet + "': tableName '"
+                                    + tableName + "' is defined more than once");
+                        });
+            });
+        }
 
         SimpleImpl(final Builder builder) {
             this(new HashMap<>(builder.getRowsTableDefMap()),
