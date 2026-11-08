@@ -211,6 +211,8 @@ public class Workspace {
         template.add("env", System.getProperty(FileResources.PROPERTY_ENV));
         template.add("commandType", commandType.name());
         template.add("name", name);
+        // 未指定だとCLIはシステムの既定で読むため、保存時の文字コードを渡す
+        template.add("templateEncoding", this.options().charset(commandType).name());
         final String content = template.render();
         final File scriptFile = new File(launchDir.toFile(), commandType.name() + "_" + name + ".bat");
         // BATファイルはWindowsのOSデフォルト文字コードで保存する必要がある
