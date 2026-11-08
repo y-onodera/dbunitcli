@@ -118,6 +118,17 @@ class XlsxSchemaControllerTest {
     }
 
     @Test
+    void testSave_定義ミスのあるスキーマは保存せず400を返す() {
+        final HttpClientResponseException ex = Assertions.assertThrows(
+                HttpClientResponseException.class,
+                () -> this.client.toBlocking().retrieve(HttpRequest.POST("dbunit-cli/xlsx-schema/save",
+                        "{\"name\":\"savedSchema.json\",\"input\":{\"rows\":[],\"cells\":[{\"sheetName\":\"Sheet1\",\"tableName\":\"TABLE_C\",\"header\":[\"id\"],\"rows\":[{\"cellAddress\":[\"$A$1\"]}],\"addFileInfo\":false}]}}")));
+        Assertions.assertEquals(HttpStatus.BAD_REQUEST, ex.getStatus());
+        Assertions.assertTrue(ex.getResponse().getBody(String.class).orElse("").contains("cellAddress '$A$1' is not A1 format"));
+        Assertions.assertFalse(Files.exists(SCHEMA_DIR.resolve("savedSchema.json")), "savedSchema.json は作成されないこと");
+    }
+
+    @Test
     void testGenerate_src未指定は400を返す() {
         final HttpClientResponseException ex = Assertions.assertThrows(
                 HttpClientResponseException.class,

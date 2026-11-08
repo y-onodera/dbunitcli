@@ -43,7 +43,7 @@
     <tr><td>exclude</td><td>（sheet が <code>pattern</code> のとき）パターンに一致しても対象から除くシート名（完全一致）。データセットがロード済みの場合、候補がデータリストから選択できる。</td></tr>
     <tr><td>tableName</td><td>抽出結果に付与する論理テーブル名</td></tr>
     <tr><td>header</td><td>カラム名の並び。カンマ区切りで指定する。各レコードのセルアドレスと同じ順序で対応させる。</td></tr>
-    <tr><td>rows</td><td>1 レコード分のセルアドレスをカンマ区切りで指定する。行を追加することで複数レコードを定義できる。同じセルアドレスを複数回書くと、そのセルの値を複数のカラムに入れる。</td></tr>
+    <tr><td>rows</td><td>1 レコード分のセルアドレスをカンマ区切りで指定する（各セルアドレスの前後の空白は取り除く）。行を追加することで複数レコードを定義できる。同じセルアドレスを複数回書くと、そのセルの値を複数のカラムに入れる。</td></tr>
     <tr><td>addFileInfo</td><td>元ファイル名などのファイル情報カラムを結果に追加するかどうか</td></tr>
   </table>
 
@@ -58,9 +58,9 @@
   <h2 id="section-notes">注意</h2>
   <ol>
     <li><code>sheetName</code>（sheet が <code>pattern</code> のときは <code>string</code> か <code>regex</code>）と <code>tableName</code> の両方が入力されていない行は保存対象から除外されます。</li>
-    <li><code>header</code> と各 <code>rows</code> のセルアドレス数は一致させてください。<code>header</code> より多いセルアドレスがある場合は、読み込み時にエラーになります。</li>
-    <li>セルアドレスは Excel の <code>A1</code> 形式（列は大文字、<code>$</code>・シート名・空白を付けない）で指定します。それ以外の書き方は読み込み時にエラーになります。</li>
-    <li>同じシートに同じ <code>tableName</code> の定義を 2 つ以上置くと、読み込み時にエラーになります。</li>
+    <li><code>header</code> と各 <code>rows</code> のセルアドレス数は一致させてください。<code>header</code> より多いセルアドレスがある場合は、読み込み時（Save 時を含む）にエラーになります。</li>
+    <li>セルアドレスは Excel の <code>A1</code> 形式（列は大文字、<code>$</code>・シート名・空白を付けない）で指定します。それ以外の書き方は読み込み時（Save 時を含む）にエラーになります。</li>
+    <li>同じシートに同じ <code>tableName</code> の定義を 2 つ以上置くと、読み込み時（Save 時を含む）にエラーになります。</li>
   </ol>
 
   <h2 id="section-related">関連</h2>

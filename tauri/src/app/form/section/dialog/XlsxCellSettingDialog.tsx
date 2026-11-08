@@ -32,7 +32,12 @@ export default function XlsxCellSettingDialog(props: {
 					name="rows"
 					values={target.rows.map((row) => row.cellAddress.join(","))}
 					handleChange={(text, index) =>
-						setTarget((cur) => cur.replaceRows(text.split(","), index))
+						setTarget((cur) =>
+							cur.replaceRows(
+								text.split(",").map((address) => address.trim()),
+								index,
+							),
+						)
 					}
 					handleRemove={(index) =>
 						setTarget((cur) => cur.replaceRows([], index))

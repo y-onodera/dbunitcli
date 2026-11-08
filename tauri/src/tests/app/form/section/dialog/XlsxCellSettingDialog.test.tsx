@@ -71,6 +71,37 @@ describe("XlsxCellSettingDialogのテスト", () => {
 		expect(handleCommit).not.toHaveBeenCalled();
 	});
 
+	it("rowsのセルアドレスは前後の空白を除いて確定する", async () => {
+		srcInfoFixture.current = baseSrcInfo;
+		const handleCommit = vi.fn();
+		render(
+			<XlsxCellSettingDialog
+				setting={
+					new CellSetting({
+						sheetName: "Sheet1",
+						tableName: "before",
+						header: ["a", "b"],
+						rows: [{ cellAddress: ["A1"] }],
+					})
+				}
+				handleDialogClose={vi.fn()}
+				handleCommit={handleCommit}
+			/>,
+		);
+		const user = userEvent.setup();
+		await user.type(screen.getByDisplayValue("A1"), ", B1 ");
+		await user.click(screen.getByRole("button", { name: "Save" }));
+
+		expect(handleCommit).toHaveBeenCalledWith(
+			new CellSetting({
+				sheetName: "Sheet1",
+				tableName: "before",
+				header: ["a", "b"],
+				rows: [{ cellAddress: ["A1", "B1"] }],
+			}),
+		);
+	});
+
 	it("srcTypeが未指定ならPreviewボタンを出さない", () => {
 		srcInfoFixture.current = { values: { src: "src" } };
 		renderDialog();
