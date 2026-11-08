@@ -29,7 +29,7 @@
 結果:
   INSERT INTO USERS (id, name) VALUES (1, 'Alice');</pre>
   <ul>
-    <li><code>param</code> の部分は <code>templateParameterAttribute</code> で変えられる。空にすると <code>$tableName$</code> のように直接書ける</li>
+    <li><code>param</code> の部分は <code>templateParameterAttribute</code> で変えられる。<code>""</code> を指定すると <code>$tableName$</code> のように直接書ける</li>
     <li><code>$</code> 以外の区切り文字にしたいときは <code>templateVarStart</code> / <code>templateVarStop</code> を変える</li>
     <li>書式の指定（大文字化・命名規則の変換など）は <a href="../reference/st4.html">StringTemplate 4 書式リファレンス</a> を参照</li>
   </ul>
@@ -40,7 +40,7 @@
     <tr><th>項目</th><th>説明</th><th>デフォルト</th></tr>
     <tr><td>encoding</td><td>テンプレートファイルの文字コード。Generate の <code>template</code> ファイル・<code>templateGroup</code> 等に適用</td><td>システムデフォルトの文字コード</td></tr>
     <tr><td>templateGroup</td><td>StringTemplate グループファイル（<code>.stg</code>）のパス。共通マクロ（サブテンプレート）を別ファイルにまとめて読み込む。Workspace の <code>resources/template/</code> を基準に探す</td><td>空（グループなし）</td></tr>
-    <tr><td>templateParameterAttribute</td><td>テンプレート内で入力行にアクセスする属性名。例えば <code>param</code> を指定すると、渡された行は <code>$param.columnName$</code> で参照する。空にするとカラム名で直接参照する</td><td>param</td></tr>
+    <tr><td>templateParameterAttribute</td><td>テンプレート内で入力行にアクセスする属性名。例えば <code>param</code> を指定すると、渡された行は <code>$param.columnName$</code> で参照する。<code>""</code>（ダブルクォート 2 つ）を指定するとカラム名で直接参照する</td><td>param</td></tr>
     <tr><td>templateVarStart</td><td>テンプレート式の開始文字（1 文字）</td><td>$</td></tr>
     <tr><td>templateVarStop</td><td>テンプレート式の終了文字（1 文字）</td><td>$</td></tr>
   </table>
@@ -51,7 +51,7 @@
   <h2 id="section-parameter-binding">パラメータのバインド</h2>
   <p>入力データセットの各行は、テンプレートに対して <code>templateParameterAttribute</code> で指定した属性名のオブジェクトとして渡されます。</p>
   <p>デフォルトの <code>templateParameterAttribute = param</code> の例は「シンプルな使い方」を参照してください。</p>
-  <p><strong>例 1: <code>templateParameterAttribute</code> を空に指定（直接バインド）</strong></p>
+  <p><strong>例 1: <code>templateParameterAttribute</code> に <code>""</code> を指定（直接バインド）</strong></p>
   <pre>入力行と結果は「シンプルな使い方」と同じ
 
 テンプレート (insert.sql):

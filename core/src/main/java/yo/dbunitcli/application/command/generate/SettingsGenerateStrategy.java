@@ -42,6 +42,6 @@ public final class SettingsGenerateStrategy implements GenerateStrategy {
 
     @Override
     public void putOptionParameters(final GenerateContext option, final Option.ParametersBuilder builder) {
-        builder.put("-includeAllColumns", option.includeAllColumns());
+        builder.putFlag("-includeAllColumns", option.includeAllColumns());
     }
 }

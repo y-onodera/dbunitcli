@@ -76,6 +76,16 @@ class TableMetaDataFilterParserTest {
     }
 
     @Test
+    void パース_nameのオブジェクトにanyがない場合_不足を示す例外をスロー() {
+        final JsonObject json = Json.createObjectBuilder()
+                .add("name", Json.createObjectBuilder().add("filePath", "a.csv"))
+                .build();
+        final TableMetaDataFilterParser parser = new TableMetaDataFilterParser(json, "name");
+        final IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, parser::parseEquals);
+        assertEquals("Object must contain 'any' property", ex.getMessage());
+    }
+
+    @Test
     void コンストラクタ_nullの場合_例外をスロー() {
         assertThrows(IllegalArgumentException.class, () -> new TableMetaDataFilterParser(null, null));
     }

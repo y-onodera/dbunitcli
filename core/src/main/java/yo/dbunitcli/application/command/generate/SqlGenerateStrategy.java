@@ -52,7 +52,7 @@ public final class SqlGenerateStrategy implements GenerateStrategy {
 
     @Override
     public void putOptionParameters(final GenerateContext option, final Option.ParametersBuilder builder) {
-        builder.put("-commit", option.commit()).put("-op", option.operation(), DbOperation.class)
+        builder.putFlag("-commit", option.commit()).put("-op", option.operation(), DbOperation.class)
                .put("-sqlFilePrefix", option.sqlFilePrefix()).put("-sqlFileSuffix", option.sqlFileSuffix());
     }
 }

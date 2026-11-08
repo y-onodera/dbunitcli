@@ -4,6 +4,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import yo.dbunitcli.application.Option;
 import yo.dbunitcli.application.dto.ImageCompareDto;
 import yo.dbunitcli.common.Parameter;
 import yo.dbunitcli.dataset.compare.ImageCompareBuilder;
@@ -123,6 +124,26 @@ class OptionEdgeCaseTest {
                 , "-src.extension="
         });
         assertEquals("csv", option.srcData().getParam().getExtension());
+    }
+
+    @Test
+    void doubleQuotesInTemplateParameterAttributeMeanNoAttribute() {
+        assertEquals("", new Generate().parseOption(new String[]{"-template.templateParameterAttribute=\"\""})
+                .templateOption().templateParameterAttribute());
+        assertEquals("param", new Generate().parseOption(new String[]{})
+                .templateOption().templateParameterAttribute());
+        assertEquals("row", new Generate().parseOption(new String[]{"-template.templateParameterAttribute=row"})
+                .templateOption().templateParameterAttribute());
+    }
+
+    @Test
+    void booleanGenerateOptionsAreFlags() {
+        assertEquals(Option.ParamType.FLG, new Generate().parseOption(new String[]{"-generateType=sql"})
+                .toParameters().getArg("-commit").attribute().type());
+        assertEquals(Option.ParamType.FLG, new Generate().parseOption(new String[]{"-generateType=settings"})
+                .toParameters().getArg("-includeAllColumns").attribute().type());
+        assertEquals(Option.ParamType.FLG, new Generate().parseOption(new String[]{"-generateType=xlsx"})
+                .toParameters().getArg("-lazyLoad").attribute().type());
     }
 
     @Test
