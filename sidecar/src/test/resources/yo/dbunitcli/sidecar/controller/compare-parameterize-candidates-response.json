@@ -1,0 +1,98 @@
+[
+  {
+    "key": "-targetType",
+    "value": "data"
+  },
+  {
+    "key": "-createPatchSql",
+    "value": "false"
+  },
+  {
+    "key": "-new.srcType",
+    "value": "csv"
+  },
+  {
+    "key": "-new.src",
+    "value": "resources/src/csv/multi1.csv"
+  },
+  {
+    "key": "-new.recursive",
+    "value": "false"
+  },
+  {
+    "key": "-new.addFileInfo",
+    "value": "false"
+  },
+  {
+    "key": "-new.ignoreQuoted",
+    "value": "false"
+  },
+  {
+    "key": "-new.settingTargetOnly",
+    "value": "false"
+  },
+  {
+    "key": "-new.loadData",
+    "value": "true"
+  },
+  {
+    "key": "-new.includeMetaData",
+    "value": "false"
+  },
+  {
+    "key": "-old.srcType",
+    "value": "csv"
+  },
+  {
+    "key": "-old.src",
+    "value": "resources/src/csv/multi2.csv"
+  },
+  {
+    "key": "-old.recursive",
+    "value": "false"
+  },
+  {
+    "key": "-old.addFileInfo",
+    "value": "false"
+  },
+  {
+    "key": "-old.ignoreQuoted",
+    "value": "false"
+  },
+  {
+    "key": "-old.settingTargetOnly",
+    "value": "false"
+  },
+  {
+    "key": "-old.loadData",
+    "value": "true"
+  },
+  {
+    "key": "-old.includeMetaData",
+    "value": "false"
+  },
+  {
+    "key": "-result.resultType",
+    "value": "csv"
+  },
+  {
+    "key": "-result.result",
+    "value": "target/compare/result"
+  },
+  {
+    "key": "-result.exportEmptyTable",
+    "value": "true"
+  },
+  {
+    "key": "-result.exportHeader",
+    "value": "true"
+  },
+  {
+    "key": "-result.append",
+    "value": "false"
+  },
+  {
+    "key": "-expect.srcType",
+    "value": "none"
+  }
+]

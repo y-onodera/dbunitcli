@@ -7,11 +7,16 @@ import {
 	ParameterizeButton,
 } from "../../components/element/ButtonIcon";
 import { ControllTextBox } from "../../components/element/Input";
+import { useAbortSignalRef } from "../../hooks/useAbortSignalRef";
 import {
+	type ParameterizeFile,
+	useDeleteParameterize,
+	useLoadParameterizeFiles,
 	useParameterActions,
-	useParameterizeFrom,
 } from "../../hooks/useSelectParameter";
 import type { EditName } from "../main/Sidebar";
+import ParameterizeDeleteDialog from "./ParameterizeDeleteDialog";
+import ParameterizeOptionDialog from "./ParameterizeOptionDialog";
 
 type MenuEditProp = {
 	name: string;
@@ -45,7 +50,30 @@ export default function NameEditMenu({
 		editName.command,
 		editName.name,
 	);
-	const parameterizeFrom = useParameterizeFrom();
+	// メニューを閉じた後も開いておくため、メニュー（editName）とは別に持つ
+	const [parameterizeTarget, setParameterizeTarget] = useState<{
+		command: string;
+		name: string;
+	} | null>(null);
+	const [deleteTarget, setDeleteTarget] = useState<{
+		name: string;
+		files: ParameterizeFile[];
+	} | null>(null);
+	const loadParameterizeFiles = useLoadParameterizeFiles();
+	const deleteParameterize = useDeleteParameterize();
+	const abortControllerRef = useAbortSignalRef();
+	// 参照するファイルがあるときだけ、一緒に消すかを確認する
+	const deleteParameterizeOrConfirm = (name: string) =>
+		loadParameterizeFiles(name, (files) => {
+			if (abortControllerRef.current?.signal.aborted) {
+				return;
+			}
+			if (files.length === 0) {
+				deleteParameterize(name, []);
+			} else {
+				setDeleteTarget({ name, files });
+			}
+		});
 	const canParameterize =
 		editName.command && editName.command !== "parameterize";
 	return (
@@ -63,7 +91,11 @@ export default function NameEditMenu({
 					<MenuEdit
 						name={editName.name}
 						handleMenuDelete={() => {
-							handleDelete();
+							if (editName.command === "parameterize") {
+								deleteParameterizeOrConfirm(editName.name);
+							} else {
+								handleDelete();
+							}
 							setEditName({} as EditName);
 						}}
 						handleMenuRename={(newName: string) => {
@@ -77,13 +109,33 @@ export default function NameEditMenu({
 						handleMenuParameterize={
 							canParameterize
 								? () => {
-										parameterizeFrom(editName.command, editName.name);
+										setParameterizeTarget({
+											command: editName.command,
+											name: editName.name,
+										});
 										setEditName({} as EditName);
 									}
 								: undefined
 						}
 					/>
 				</div>
+			)}
+			{deleteTarget && (
+				<ParameterizeDeleteDialog
+					name={deleteTarget.name}
+					files={deleteTarget.files}
+					onDelete={(deleteFiles) =>
+						deleteParameterize(deleteTarget.name, deleteFiles)
+					}
+					onClose={() => setDeleteTarget(null)}
+				/>
+			)}
+			{parameterizeTarget && (
+				<ParameterizeOptionDialog
+					command={parameterizeTarget.command}
+					name={parameterizeTarget.name}
+					onClose={() => setParameterizeTarget(null)}
+				/>
 			)}
 		</>
 	);

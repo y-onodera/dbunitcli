@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { useEnvironment } from "../context/EnvironmentProvider";
 import {
 	type FieldErrors,
@@ -17,6 +18,7 @@ import type {
 } from "../model/SelectParameter";
 import { SelectParameter } from "../model/SelectParameter";
 import {
+	fetchAndUpdate,
 	fetchData,
 	getErrorMessage,
 	handleFetchError,
@@ -110,17 +112,101 @@ export const useParameterActions = (command: string, name: string) => {
 
 	return { handleDelete, handleCopy, handleRename };
 };
+// sidecarのParameterizeFileDto
+export type ParameterizeFile = {
+	option: string;
+	path: string;
+	usedBy: string[];
+};
+
+const postJsonParams = (endpoint: string, body: object) => ({
+	endpoint,
+	options: {
+		method: "POST",
+		headers: { "Content-Type": "application/json" },
+		body: JSON.stringify(body),
+	},
+});
+
+export const useLoadParameterizeFiles = () => {
+	const { apiUrl } = useEnvironment();
+	return (name: string, onLoad: (files: ParameterizeFile[]) => void) =>
+		fetchAndUpdate<ParameterizeFile[]>(
+			postJsonParams(`${apiUrl}parameterize/files`, { name }),
+			onLoad,
+		);
+};
+
+export const useDeleteParameterize = () => {
+	const { apiUrl } = useEnvironment();
+	const setParameterList = useSetParameterList();
+	return (name: string, deleteFiles: string[]) =>
+		fetchAndUpdate<string[]>(
+			postJsonParams(`${apiUrl}parameterize/delete`, { name, deleteFiles }),
+			(parameters) =>
+				setParameterList((current) =>
+					current.replace("parameterize", parameters),
+				),
+		);
+};
+
+export type ParameterizeCandidate = { key: string; value: string };
+
+// parameterizeで作るパラメータデータの形式。encodingはcsvのときだけ使われる
+export type ParamSource = { type: "csv" | "xlsx"; encoding: string };
+
+// 取得前はnull（取得に失敗したときは空の一覧にする）
+export const useParameterizeCandidates = (
+	command: string,
+	name: string,
+): ParameterizeCandidate[] | null => {
+	const { apiUrl } = useEnvironment();
+	const [candidates, setCandidates] = useState<ParameterizeCandidate[] | null>(
+		null,
+	);
+	useEffect(() => {
+		const controller = new AbortController();
+		fetchAndUpdate<ParameterizeCandidate[]>(
+			postJsonParams(
+				`${apiUrl + command.toLowerCase()}/parameterize/candidates`,
+				{ name },
+			),
+			(data) => {
+				if (!controller.signal.aborted) {
+					setCandidates(data);
+				}
+			},
+		).then((result) => {
+			if (result === "failed" && !controller.signal.aborted) {
+				setCandidates([]);
+			}
+		});
+		return () => controller.abort();
+	}, [apiUrl, command, name]);
+	return candidates;
+};
+
 export const useParameterizeFrom = () => {
 	const setParameter = useSetSelectParameterState();
 	const setParameterList = useSetParameterList();
 	const environment = useEnvironment();
-	return async (sourceCommand: string, name: string) => {
+	return async (
+		sourceCommand: string,
+		name: string,
+		parameterizeKeys: string[],
+		paramSource: ParamSource,
+	) => {
 		const fetchParams = {
 			endpoint: `${environment.apiUrl + sourceCommand.toLowerCase()}/parameterize`,
 			options: {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ name }),
+				body: JSON.stringify({
+					name,
+					parameterizeKeys,
+					paramType: paramSource.type,
+					paramEncoding: paramSource.encoding,
+				}),
 			},
 		};
 		try {

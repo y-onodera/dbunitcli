@@ -1,7 +1,7 @@
 import type { TextProp } from "./FormElementProp";
 import Text from "./Text";
 
-const ENCODING_CANDIDATES = ["UTF-8", "MS932"];
+export const ENCODING_CANDIDATES = ["UTF-8", "MS932"];
 
 export default function EncodingText({
 	prefix,

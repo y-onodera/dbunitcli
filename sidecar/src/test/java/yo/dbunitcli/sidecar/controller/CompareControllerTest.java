@@ -36,7 +36,10 @@ class CompareControllerTest {
     public void tearDown() throws IOException {
         // parameterize コマンドの in-memory state も含めてクリーンアップ
         this.tryDeleteCommand("parameterize", "csvCsv");
-        Files.deleteIfExists(Paths.get(WORKSPACE, "option/parameterize/template/csvCsv.txt"));
+        // 一覧から消さないと次のテストのテンプレート名が csvCsv(1).txt になる
+        if (Files.exists(Paths.get(WORKSPACE, "option/parameterize/template/csvCsv.txt"))) {
+            this.workspace.options().templates().delete("csvCsv.txt");
+        }
         Files.deleteIfExists(Paths.get(WORKSPACE, "csvCsv.csv"));
 
         // compare コマンドのファイルをクリーンアップ
@@ -91,6 +94,26 @@ class CompareControllerTest {
         Assertions.assertTrue(
                 Files.exists(Paths.get(WORKSPACE, "option/parameterize/csvCsv.txt")),
                 "parameterize パラメータファイルが option/parameterize/csvCsv.txt に作成されること");
+    }
+
+    @Test
+    public void testParameterizeCandidates_値が入っているオプションを返す() throws IOException {
+        final String jsonResponse = this.client.toBlocking().retrieve(
+                HttpRequest.POST("dbunit-cli/compare/parameterize/candidates", "{\"name\":\"csvCsv\"}"));
+
+        JsonTestHelper.assertJsonEquals(Paths.get("src/test/resources/yo/dbunitcli/sidecar/controller/compare-parameterize-candidates-response.json"), jsonResponse);
+    }
+
+    @Test
+    public void testParameterize_選んだオプションだけパラメータ化する() throws IOException {
+        this.client.toBlocking().retrieve(
+                HttpRequest.POST("dbunit-cli/compare/parameterize", "{\"name\":\"csvCsv\",\"parameterizeKeys\":[\"-new.src\",\"-old.src\"]}"));
+
+        final String template = Files.readString(Paths.get(WORKSPACE, "option/parameterize/template/csvCsv.txt"));
+        Assertions.assertTrue(template.contains("-new.src=$param.new_src$"), template);
+        Assertions.assertTrue(template.contains("-old.src=$param.old_src$"), template);
+        Assertions.assertTrue(template.contains("-new.srcType=csv"), template);
+        Assertions.assertTrue(template.contains("-result.result=target/compare/result"), template);
     }
 
     @Test

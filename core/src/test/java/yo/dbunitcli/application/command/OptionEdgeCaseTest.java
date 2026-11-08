@@ -18,7 +18,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
+import java.util.function.Predicate;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -157,6 +160,26 @@ class OptionEdgeCaseTest {
         });
         final List<String> args = Arrays.asList(option.createArgs(Parameter.none()));
         assertEquals(List.of("-src.srcType=csv", "-result=second", "-src.src=override"), args);
+    }
+
+    @Test
+    void parameterizeArgsKeepsUnselectedValuesInTemplate() throws IOException {
+        final Option.Parameters source = new Convert().parseOption(new String[]{
+                "-src.src=C:\\dir\\a$b$.csv"
+                , "-src.srcType=csv"
+                , "-result=out"
+        }).toParameters();
+        final Predicate<String> parameterize = "-src.srcType"::equals;
+        final Path template = this.temp.resolve("template.txt");
+        Files.writeString(template, String.join("\r\n", source.parameterizeArgs(false, parameterize)), StandardCharsets.UTF_8);
+        final ParameterizeOption option = new Parameterize().parseOption(new String[]{
+                "-cmd=convert"
+                , "-template=" + template
+        });
+        final Map<String, ?> params = source.toMap(false, parameterize);
+        assertEquals(Set.of("src_srcType"), params.keySet());
+        final List<String> args = Arrays.asList(option.createArgs(Parameter.none().addAll(params)));
+        assertEquals(source.toList(false), args);
     }
 
     @Test
