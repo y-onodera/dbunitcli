@@ -10,7 +10,7 @@ import java.util.function.Function;
 
 public record TableSplitter(TableRenameStrategy renameFunction, List<String> breakKeys, int limit) {
 
-    public static TableSplitter NONE = new TableSplitter(new Builder());
+    public static final TableSplitter NONE = new TableSplitter(new Builder());
 
     public TableSplitter(final Builder builder) {
         this(builder.getRenameFunction(), builder.getBreakKeys(), builder.getLimit());

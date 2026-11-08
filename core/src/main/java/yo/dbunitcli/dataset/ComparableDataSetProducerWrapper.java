@@ -43,6 +43,7 @@ public abstract class ComparableDataSetProducerWrapper implements ComparableData
 
     @Override
     public void close() {
+        this.converted.clear();
         this.delegate.close();
     }
 

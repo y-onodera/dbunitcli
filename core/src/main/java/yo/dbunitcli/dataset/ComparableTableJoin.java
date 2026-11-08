@@ -125,12 +125,20 @@ public class ComparableTableJoin {
         }
     }
 
+    /**
+     * 右のテーブルの行。左の行ごとに右の全行と突き合わせるため、行のMapは1回だけ作る
+     */
+    private static List<Map<String, Object>> rightRows(final ComparableTable right) {
+        return right.stream().toList();
+    }
+
     private record InnerJoin(ConditionBuilder condition) implements Strategy {
         @Override
         public Stream<Object[]> execute(final ComparableTable left, final ComparableTable right) {
             final var on = this.condition().build(left, right);
+            final List<Map<String, Object>> rightRows = ComparableTableJoin.rightRows(right);
             return left.stream()
-                    .flatMap(outerRow -> right.stream()
+                    .flatMap(outerRow -> rightRows.stream()
                             .filter(innerRow -> on.apply(outerRow, innerRow))
                             .map(joined -> Stream.concat(outerRow.values().stream(), joined.values().stream()).toArray()));
         }
@@ -140,13 +148,14 @@ public class ComparableTableJoin {
         @Override
         public Stream<Object[]> execute(final ComparableTable left, final ComparableTable right) {
             final var on = this.condition().build(left, right);
+            final List<Map<String, Object>> rightRows = ComparableTableJoin.rightRows(right);
             return left.stream()
                     .flatMap(outerRow -> {
                         final Object[] firstReturn = new Object[1];
                         final Object[] notJoined = Stream.concat(outerRow.values().stream()
                                 , Arrays.stream(new Object[right.getNumberOfColumns()])).toArray();
                         return Stream.concat(
-                                right.stream()
+                                rightRows.stream()
                                         .filter(innerRow -> on.apply(outerRow, innerRow))
                                         .map(innerRow -> {
                                             firstReturn[0] = "";
@@ -163,27 +172,28 @@ public class ComparableTableJoin {
         public Stream<Object[]> execute(final ComparableTable left, final ComparableTable right) {
             final Set<Integer> joinRows = new HashSet<>();
             final var on = this.condition().build(left, right);
+            final List<Map<String, Object>> rightRows = ComparableTableJoin.rightRows(right);
             return Stream.concat(left.stream()
                             .flatMap(outerRow -> {
                                 final Object[] firstReturn = new Object[1];
                                 final Object[] notJoined = Stream.concat(outerRow.values().stream()
                                         , Arrays.stream(new Object[right.getNumberOfColumns()])).toArray();
                                 return Stream.concat(
-                                        IntStream.range(0, right.getRowCount())
-                                                .filter(rowNum -> on.apply(outerRow, right.getRowToMap(rowNum)))
+                                        IntStream.range(0, rightRows.size())
+                                                .filter(rowNum -> on.apply(outerRow, rightRows.get(rowNum)))
                                                 .mapToObj(rowNum -> {
                                                     firstReturn[0] = "";
                                                     joinRows.add(rowNum);
                                                     return Stream.concat(outerRow.values().stream()
-                                                            , right.getRowToMap(rowNum).values().stream()).toArray();
+                                                            , rightRows.get(rowNum).values().stream()).toArray();
                                                 })
                                         , Optional.of(notJoined).stream()
                                 ).filter(it -> !(firstReturn[0] != null && it == notJoined));
                             })
-                    , IntStream.range(0, right.getRowCount())
+                    , IntStream.range(0, rightRows.size())
                             .filter(rowNum -> !joinRows.contains(rowNum))
                             .mapToObj(rest -> Stream.concat(Arrays.stream(new Object[left.getNumberOfColumns()])
-                                    , right.getRowToMap(rest).values().stream()).toArray())
+                                    , rightRows.get(rest).values().stream()).toArray())
             );
         }
     }
