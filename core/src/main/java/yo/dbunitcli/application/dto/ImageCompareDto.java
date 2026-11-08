@@ -7,7 +7,7 @@ public class ImageCompareDto {
     private String drawExcludedRectangles;
     @CommandLine.Option(names = "-threshold", description = "the max distance between non-equal pixels.")
     private String threshold;
-    @CommandLine.Option(names = "-pixelToleranceLevel", description = "Level of the pixel tolerance. By default it's 0.1 -> 10% difference.")
+    @CommandLine.Option(names = "-pixelToleranceLevel", description = "Level of the pixel tolerance. By default it's 0.01 -> 1% difference.")
     private String pixelToleranceLevel;
     @CommandLine.Option(names = "-allowingPercentOfDifferentPixels", description = "The percent of the allowing pixels to be different to stay MATCH for comparison.")
     private String allowingPercentOfDifferentPixels;

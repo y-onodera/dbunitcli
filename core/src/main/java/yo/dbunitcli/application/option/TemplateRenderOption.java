@@ -24,6 +24,10 @@ public record TemplateRenderOption(
 ) implements ComparableDataSetParamOption {
 
     private static final String DEFAULT_PARAMETER_ATTRIBUTE = "param";
+    /**
+     * 属性名なし（カラム名で直接参照）を表す値。GUIでは空の値を送れず未指定と区別できないため、空の代わりに使う
+     */
+    private static final String NO_PARAMETER_ATTRIBUTE = "\"\"";
     private static final String DEFAULT_VAR_DELIMITER = "$";
 
     public TemplateRenderOption(final String prefix, final TemplateRenderDto dto) {
@@ -48,7 +52,10 @@ public record TemplateRenderOption(
 
     @Override
     public String templateParameterAttribute() {
-        return this.templateParameterAttribute != null ? this.templateParameterAttribute : DEFAULT_PARAMETER_ATTRIBUTE;
+        if (this.templateParameterAttribute == null) {
+            return DEFAULT_PARAMETER_ATTRIBUTE;
+        }
+        return NO_PARAMETER_ATTRIBUTE.equals(this.templateParameterAttribute.trim()) ? "" : this.templateParameterAttribute;
     }
 
     @Override

@@ -39,7 +39,7 @@
   <p>フォームの <code>jxls option</code> から設定します。</p>
   <table>
     <tr><th>項目</th><th>説明</th><th>デフォルト</th></tr>
-    <tr><td>templateParameterAttribute</td><td>テンプレート内でデータ行にアクセスする属性名。例えば <code>param</code> を指定すると <code>param.rows</code> のように参照する。空にすると <code>rows</code> のように直接参照する</td><td>param</td></tr>
+    <tr><td>templateParameterAttribute</td><td>テンプレート内でデータ行にアクセスする属性名。例えば <code>param</code> を指定すると <code>param.rows</code> のように参照する。<code>""</code>（ダブルクォート 2 つ）を指定すると <code>rows</code> のように直接参照する</td><td>param</td></tr>
     <tr><td>formulaProcess</td><td>（<code>xlsx</code> のみ）数式セルを処理する。<code>false</code> にするとメモリ使用量は減るが、行を追加したときにセル参照が更新されない</td><td>true</td></tr>
     <tr><td>evaluateFormulas</td><td>Excel 数式を評価するか</td><td>true</td></tr>
     <tr><td>forceFormulaRecalc</td><td>出力ファイルを Excel で開いたときに自動再計算させるフラグを立てる</td><td>false</td></tr>

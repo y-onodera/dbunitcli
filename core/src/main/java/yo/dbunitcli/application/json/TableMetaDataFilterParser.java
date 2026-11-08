@@ -154,6 +154,9 @@ public record TableMetaDataFilterParser(JsonObject jsonObject, String key) {
 
     private TableMetaDataFilter any(final JsonObject obj) {
         final JsonValue value = obj.get("any");
+        if (value == null) {
+            throw new IllegalArgumentException("Object must contain 'any' property");
+        }
         return switch (value.getValueType()) {
             case STRING -> any(((JsonString) value).getString());
             case ARRAY -> any(this.parseArrayValue(value.asJsonArray()));

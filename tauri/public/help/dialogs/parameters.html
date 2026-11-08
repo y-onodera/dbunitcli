@@ -52,8 +52,8 @@
   <p>参照する場所によって書き方が変わります。テンプレートの区切り文字はデフォルトの <code>$</code>、変数をまとめる属性名（templateParameterAttribute）はデフォルトの <code>param</code> の場合の例です。</p>
   <table>
     <tr><th>使う場所</th><th>書き方</th></tr>
-    <tr><td>SQL ファイル（srcType=sql / csvq、Run の sql）</td><td><code>$param.キー$</code>（templateParameterAttribute を空にした場合は <code>$キー$</code>）</td></tr>
-    <tr><td>Generate のテンプレート</td><td><code>$param.inputParam.キー$</code>（templateParameterAttribute を空にした場合は <code>$inputParam.キー$</code>）</td></tr>
+    <tr><td>SQL ファイル（srcType=sql / csvq、Run の sql）</td><td><code>$param.キー$</code>（templateParameterAttribute に <code>""</code> を指定した場合は <code>$キー$</code>）</td></tr>
+    <tr><td>Generate のテンプレート</td><td><code>$param.inputParam.キー$</code>（templateParameterAttribute に <code>""</code> を指定した場合は <code>$inputParam.キー$</code>）</td></tr>
     <tr><td>Parameterize のテンプレート / cmdParam</td><td><code>$param.inputParam.キー$</code></td></tr>
     <tr><td>Run の cmd / bat</td><td>環境変数として渡される（例：<code>%キー%</code>）</td></tr>
     <tr><td>Run の ant</td><td>Ant のプロパティとして渡される（例：<code>${キー}</code>）</td></tr>

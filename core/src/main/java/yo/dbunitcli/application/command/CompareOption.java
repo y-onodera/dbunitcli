@@ -262,7 +262,7 @@ public record CompareOption(
 
     public IDataSetConverter expectedDiffConverter() {
         return this.result().converter(it ->
-                it.setResultDir(new File(this.result().convertResult().resultDir(), "expectedDiff")));
+                it.setResultDir(new File(this.result().convertResult().getResultDir(), "expectedDiff")));
     }
 
     private TableSeparators getExpectTableSeparators() {

@@ -47,7 +47,7 @@ public final class ExcelGenerateStrategy implements GenerateStrategy {
 
     @Override
     public void putOptionParameters(final GenerateContext option, final Option.ParametersBuilder builder) {
-        builder.put("-lazyLoad", option.lazyLoad());
+        builder.putFlag("-lazyLoad", option.lazyLoad());
     }
 
     @Override

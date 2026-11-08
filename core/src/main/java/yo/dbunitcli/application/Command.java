@@ -82,7 +82,10 @@ public interface Command<DTO extends CommandDto, T extends CommandLineOption<DTO
                             String resultFile = "result";
                             if (args.length > 0 && args[0].startsWith("@")) {
                                 resultFile = FileResources.resultDir(args[0].replace("@", "")).getName();
-                                resultFile = resultFile.substring(0, resultFile.lastIndexOf("."));
+                                final int extension = resultFile.lastIndexOf(".");
+                                if (extension > 0) {
+                                    resultFile = resultFile.substring(0, extension);
+                                }
                             }
                             return resultFile;
                         }

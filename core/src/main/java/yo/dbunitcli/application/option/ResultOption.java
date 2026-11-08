@@ -13,7 +13,7 @@ public record ResultOption(String resultFile
         , DataSetConverterOption convertResult) {
 
     /**
-     * -resultPath未指定時の説明（GUIのプレースホルダー）。GUIから実行するとresultFileはパラメータ名になる
+     * -resultPath未指定時の説明（GUIのプレースホルダー）
      */
     public static final String RESULT_PATH_DESCRIPTION = "(parameter name)";
 

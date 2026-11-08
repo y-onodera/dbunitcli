@@ -467,7 +467,7 @@ public class ScaffoldTest {
                 final List<String> lines = Files.readAllLines(
                         TestCase.this.resultFile("dataset/ddl-encoding", "option/ddl.param").toPath(),
                         StandardCharsets.UTF_8);
-                assertTrue(lines.stream().anyMatch(l -> l.contains("-encoding=Shift_JIS")));
+                assertTrue(lines.stream().anyMatch(l -> l.equals("-src.encoding=Shift_JIS")));
             }
 
             private void assertDatasetCreatesSrcCsv(final String dir, final String target,
@@ -743,7 +743,7 @@ public class ScaffoldTest {
                     , "-unitSetting=option/generate/setting/myUnit.json"
                     , "-src.src=src"
                     , "-src.srcType=csv"
-                    , "-encoding=UTF-8"), lines);
+                    , "-src.encoding=UTF-8"), lines);
         }
 
         @Test
@@ -752,7 +752,7 @@ public class ScaffoldTest {
                                                             "-dataset.src=" + SRC_DIR, "-dataset.srcType=csv",
                                                             "-datasetType=fixed", "-datasetEncoding=Shift_JIS");
             assertTrue(lines.contains("-src.srcType=fixed"));
-            assertTrue(lines.contains("-encoding=Shift_JIS"));
+            assertTrue(lines.contains("-src.encoding=Shift_JIS"));
             assertTrue(lines.contains("-headerName=name,length,align,pad"));
             assertTrue(lines.contains("-resultPath=$param.tableName$.json"));
         }

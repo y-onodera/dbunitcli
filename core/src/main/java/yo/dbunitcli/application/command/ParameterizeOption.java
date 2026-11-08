@@ -128,11 +128,11 @@ public record ParameterizeOption(
         return Strings.isNotEmpty(value) && value.contains(this.templateOption.templateVarStart());
     }
 
+    private static final int DEFAULT_PARALLEL = 1;
+
     /**
      * @return 並列数。未指定なら{@link #DEFAULT_PARALLEL}（行ごとのコマンドは実行順に依存しやすいため、runと同じく既定は逐次）
      */
-    private static final int DEFAULT_PARALLEL = 1;
-
     public int parallelism() {
         return DataSetConverterOption.parallelism(this.parallel, DEFAULT_PARALLEL);
     }
@@ -151,7 +151,9 @@ public record ParameterizeOption(
             return result;
         }
         final Map<String, String> mergeResult = Arrays.stream(result)
-                .collect(Collectors.toMap(ParameterizeOption.ARGS_IGNORE_FILTER.extractKey(), it -> it));
+                .filter(Strings::isNotEmpty)
+                .collect(Collectors.toMap(ParameterizeOption.ARGS_IGNORE_FILTER.extractKey(), it -> it
+                        , (_, later) -> later, LinkedHashMap::new));
         mergeResult.putAll(this.args.entrySet()
                 .stream()
                 .collect(Collectors.toMap(entry -> entry.getKey() + "=", entry -> entry.getKey() + "=" + entry.getValue())));

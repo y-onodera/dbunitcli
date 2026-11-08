@@ -27,7 +27,7 @@ public class DataSetLoadDto implements CompositeDto {
     private String regExclude;
     @CommandLine.Option(names = "-extension", description = "target extension")
     private String extension;
-    @CommandLine.Option(names = "-recursive", description = "default true. whether traversal recursively")
+    @CommandLine.Option(names = "-recursive", description = "default false. whether traversal recursively")
     private String recursive;
     @CommandLine.Option(names = "-regTableInclude", description = "regex to include table name")
     private String regTableInclude;
@@ -49,7 +49,7 @@ public class DataSetLoadDto implements CompositeDto {
     private boolean ignoreQuoted = false;
     @CommandLine.Option(names = "-fixedLength", description = "comma separate column Lengths")
     private String fixedLength;
-    @CommandLine.Option(names = "-fixedLengthType", description = "char or byte (default: byte)")
+    @CommandLine.Option(names = "-fixedLengthType", description = "char or byte (default: char)")
     private String fixedLengthType;
     @CommandLine.Option(names = "-regDataSplit", description = "regex to use split data row")
     private String regDataSplit;

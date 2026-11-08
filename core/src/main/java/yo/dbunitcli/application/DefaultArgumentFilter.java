@@ -4,6 +4,7 @@ import picocli.CommandLine;
 
 import java.util.*;
 import java.util.function.Predicate;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 public class DefaultArgumentFilter implements ArgumentFilter {
@@ -26,7 +27,7 @@ public class DefaultArgumentFilter implements ArgumentFilter {
         final Map<String, String> options = Arrays.stream(expandArgs)
                 .filter(it -> this.mapKeyNames.stream().noneMatch(it::startsWith))
                 .filter(this.filterOptionNameMatch(commandLine))
-                .collect(Collectors.toMap(this.extractKey(), it -> it));
+                .collect(this.laterWins());
         this.overrideByPrefixUsedOption(prefix, commandLine, expandArgs, options);
         mapArgs.addAll(options.values());
         return mapArgs.toArray(new String[0]);
@@ -46,8 +47,15 @@ public class DefaultArgumentFilter implements ArgumentFilter {
                     .filter(it -> it.startsWith(myArgs))
                     .map(it -> it.replace(myArgs, "-"))
                     .filter(this.filterOptionNameMatch(commandLine))
-                    .collect(Collectors.toMap(this.extractKey(), it -> it));
+                    .collect(this.laterWins());
             nonPrefixOption.putAll(prefixUsedOption);
         }
+    }
+
+    /**
+     * 同じオプションが複数回あれば後のものを使う（@fileを展開した後ろに書いた指定で上書きできるようにする）
+     */
+    private Collector<String, ?, Map<String, String>> laterWins() {
+        return Collectors.toMap(this.extractKey(), it -> it, (_, later) -> later, LinkedHashMap::new);
     }
 }

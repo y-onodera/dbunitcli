@@ -27,6 +27,7 @@ public class FromJsonTableSeparatorsBuilder extends TableSeparators.Builder {
             return this.build((File) null);
         } else {
             return this.build(Arrays.stream(settings.split(","))
+                    .map(String::trim)
                     .map(baseDir::search)
                     .toArray(File[]::new));
         }
@@ -223,6 +224,9 @@ public class FromJsonTableSeparatorsBuilder extends TableSeparators.Builder {
     protected TableSplitter getSplitter(final JsonObject json) {
         if (json.containsKey("split")) {
             final JsonObject split = json.getJsonObject("split");
+            if (!split.containsKey("limit")) {
+                throw new IllegalArgumentException("'split' requires 'limit'");
+            }
             final List<String> breakKeys = new ArrayList<>();
             if (split.containsKey("breakKey")) {
                 final JsonArray breakKey = split.getJsonArray("breakKey");

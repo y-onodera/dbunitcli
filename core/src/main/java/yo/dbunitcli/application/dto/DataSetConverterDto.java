@@ -12,14 +12,14 @@ public class DataSetConverterDto implements CompositeDto {
     private String resultDir;
     @CommandLine.Option(names = "-resultType")
     private ResultType resultType;
-    @CommandLine.Option(names = "-exportEmptyTable", description = "if true then empty table is not export")
+    @CommandLine.Option(names = "-exportEmptyTable", description = "if false then empty table is not exported (default: true)")
     private String exportEmptyTable;
     @CommandLine.Option(names = "-resultPath", description = "result file relative path from -result=dir.")
     private String resultPath;
     @CommandLine.Option(names = "-op", description = "import operation UPDATE | INSERT | DELETE | REFRESH | " +
             "CLEAN_INSERT")
     private DbOperation operation;
-    @CommandLine.Option(names = "-exportHeader", description = "if true then export file has no header row ")
+    @CommandLine.Option(names = "-exportHeader", description = "if false then export file has no header row (default: true)")
     private String exportHeader;
     @CommandLine.Option(names = "-append", description = "if true and the result file already exists, append data rows to it without writing header")
     private String append;
