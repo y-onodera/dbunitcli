@@ -56,7 +56,7 @@ export default function ParameterizeDeleteDialog({
 	}
 
 	return (
-		<ModalOverlay width="w-2xl">
+		<ModalOverlay size="lg">
 			<DialogTitle>Delete {name}</DialogTitle>
 			<p className="text-caption text-content-muted mb-2">
 				Checked files are deleted together with the option.

@@ -13,7 +13,7 @@ DO NOT TRIGGER when: ダイアログ内の文言・ロジックだけの変更�
 - 子ダイアログは `ModalOverlay zClass="z-modal-nested"` を親ダイアログの JSX 内に置く（`FullDialog` はトップレイヤーなので外だと隠れる）
 
 ## 幅
-- `FullDialog` 本文は `DialogBody size`、`ModalOverlay` は `width` で決める。どちらも枠の `max-w-full` でウィンドウ幅に縮むので、`FullDialog` に幅クラスを足したり `max-w-*` を上書きしたりしない
+- `FullDialog` 本文は `DialogBody size`、`ModalOverlay` は `size` で決める。どちらも枠の `max-w-full` でウィンドウ幅に縮むので、`FullDialog` に幅クラスを足したり `max-w-*` を上書きしたりしない
 - 縮まない指定（本文内の固定幅・`min-w-*`）は 600px 以下に抑える
 
 ## 高さ

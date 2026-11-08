@@ -163,7 +163,7 @@ export function NestedDialogFrame({
 	children: ReactNode;
 }) {
 	return (
-		<ModalOverlay width="w-80" zClass="z-modal-nested">
+		<ModalOverlay zClass="z-modal-nested">
 			<DialogTitle>{title}</DialogTitle>
 			{table !== undefined && (
 				<p className="text-caption mb-4 truncate" title={table}>
@@ -195,7 +195,7 @@ export function renderColumnLoadState({
 }): ReactNode {
 	if (loading) {
 		return (
-			<ModalOverlay width="w-80" zClass="z-modal-nested">
+			<ModalOverlay zClass="z-modal-nested">
 				<JobProgress title="Loading..." lines={logs} onAbandon={onClose} />
 			</ModalOverlay>
 		);

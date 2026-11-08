@@ -152,7 +152,7 @@ export function ExpressionEditDialog({
 	}
 
 	return (
-		<ModalOverlay width="w-2xl" zClass="z-modal-nested" maximizable>
+		<ModalOverlay size="md" zClass="z-modal-nested" maximizable>
 			<DialogTitle>{`Edit ${name}`}</DialogTitle>
 			<DialogField>
 				<OptionSelect
