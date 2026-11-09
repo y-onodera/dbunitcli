@@ -5,7 +5,10 @@ import { DatasetSrcInfoProvider } from "../../context/DatasetSrcInfoProvider";
 import { ResourceEncodingProvider } from "../../context/ResourceEncodingProvider";
 import { buildDatasetSrcInfo } from "../../model/CommandOption";
 import type { CompareOptions } from "../../model/SelectParameter";
-import { DatasetLoadForm } from "./section/DatasetLoadForm";
+import {
+	DatasetLoadForm,
+	datasetSrcInfoResetKey,
+} from "./section/DatasetLoadForm";
 import CompareKeySettingsDialog, {
 	CompareKeySettingsEditDialog,
 } from "./section/dialog/CompareKeySettingsDialog";
@@ -41,7 +44,7 @@ export function CompareForm(prop: {
 		// 比較キーの編集ではold側の入力中のデータセット・JDBC接続からテーブル名・カラム名の候補を取るため、
 		// old側のsrcの入力値をフォーム全体で共有する。new/expect側は各DatasetLoadFormが自前の範囲を持つ
 		<DatasetSrcInfoProvider
-			resetKey={`${prop.name}:${oldData.prefix}:${oldData.srcType?.value ?? ""}`}
+			resetKey={datasetSrcInfoResetKey(prop.name, oldData)}
 			initialValue={buildDatasetSrcInfo(oldData)}
 		>
 			<SectionFieldset>

@@ -71,13 +71,14 @@ vi.mock("../../utils/fetchUtils", async (importOriginal) => ({
 describe("WorkspaceResourcesProviderのテスト", () => {
 	describe("取得失敗のテスト", () => {
 		it("取得に失敗したらエラーと再試行ボタンを表示し、再試行で成功すれば子を表示する", async () => {
-			vi.spyOn(window, "alert").mockImplementation(() => {});
 			mockFetchData.mockRejectedValueOnce(new Error("connection refused"));
 			await act(async () => {
 				render(<div>loaded</div>, { wrapper });
 			});
 			expect(
-				screen.getByText("Failed to load workspace resources."),
+				screen.getByText(
+					"Failed to load workspace resources: connection refused",
+				),
 			).toBeInTheDocument();
 			expect(screen.queryByText("loaded")).not.toBeInTheDocument();
 

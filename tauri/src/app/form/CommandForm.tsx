@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useSelectParameter } from "../../context/SelectParameterProvider";
 import { useRefreshSelectParameter } from "../../hooks/useSelectParameter";
+import type { SelectParameter } from "../../model/SelectParameter";
 import { CompareForm } from "./CompareForm";
 import { ConvertForm } from "./ConvertForm";
 import { GenerateForm } from "./GenerateForm";
@@ -8,14 +9,25 @@ import { ParameterizeForm } from "./ParameterizeForm";
 import { RunForm } from "./RunForm";
 import type { TxtTemplateGenerateFormValues } from "./section/dialog/TxtTemplateGenerateDialog";
 
-export default function CommandForm(prop: {
-	formData: (validate: boolean) => {
-		values: { [k: string]: FormDataEntryValue };
-		validationError: boolean;
-	};
-}) {
+type FormData = (validate: boolean) => {
+	values: { [k: string]: FormDataEntryValue };
+	validationError: boolean;
+};
+
+export default function CommandForm(prop: { formData: FormData }) {
 	const select = useSelectParameter();
-	const refreshSelect = useRefreshSelectParameter(select?.command);
+	if (!select) {
+		return null;
+	}
+	return <SelectedCommandForm select={select} formData={prop.formData} />;
+}
+
+function SelectedCommandForm(prop: {
+	select: SelectParameter;
+	formData: FormData;
+}) {
+	const { select } = prop;
+	const refreshSelect = useRefreshSelectParameter(select.command);
 	const handleTypeSelect = () => refreshSelect(prop.formData(false).values);
 	// generateフォームの-src.*をscaffoldダイアログの-dataset.*初期値として引き継ぐ
 	const scaffoldPrefill = (): TxtTemplateGenerateFormValues => {
@@ -36,9 +48,6 @@ export default function CommandForm(prop: {
 	};
 
 	const renderCommandForm = () => {
-		if (!select) {
-			return null;
-		}
 		switch (select.options.command) {
 			case "convert":
 				return (
@@ -89,10 +98,5 @@ export default function CommandForm(prop: {
 		}
 	};
 
-	const commandForm = renderCommandForm();
-	if (!commandForm) {
-		return null;
-	}
-
-	return commandForm;
+	return renderCommandForm();
 }

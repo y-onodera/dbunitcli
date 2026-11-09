@@ -10,9 +10,10 @@ import {
 	type WorkspaceResources,
 } from "../model/WorkspaceResources";
 import {
+	type FetchParams,
 	fetchData,
 	getErrorMessage,
-	handleFetchError,
+	logFetchError,
 } from "../utils/fetchUtils";
 import { useEnvironment } from "./EnvironmentProvider";
 
@@ -33,22 +34,23 @@ const setResourcesSettingsContext = createContext<
 	Dispatch<SetStateAction<ResourcesSettings>>
 >(() => undefined);
 
-// 失敗したらエラーを通知してundefinedを返す
-async function fetchWorkspaceResources(
-	apiUrl: string,
-): Promise<WorkspaceResources | undefined> {
-	const fetchParams = {
-		endpoint: `${apiUrl}workspace/resources`,
-		options: {
-			method: "GET",
-		},
-	};
+export const workspaceResourcesParams = (apiUrl: string): FetchParams => ({
+	endpoint: `${apiUrl}workspace/resources`,
+	options: { method: "GET" },
+});
+
+type LoadResult = { resources: WorkspaceResources } | { error: string };
+
+// 失敗は画面に出すので、alertは出さずログだけ残す
+async function loadWorkspaceResources(apiUrl: string): Promise<LoadResult> {
+	const fetchParams = workspaceResourcesParams(apiUrl);
 	try {
 		const response = await fetchData(fetchParams);
-		return await response.json();
+		return { resources: await response.json() };
 	} catch (ex) {
-		handleFetchError(getErrorMessage(ex), fetchParams);
-		return undefined;
+		const error = getErrorMessage(ex);
+		logFetchError(error, fetchParams);
+		return { error };
 	}
 }
 
@@ -57,8 +59,8 @@ export default function WorkspaceResourcesProvider(props: {
 }) {
 	const { apiUrl } = useEnvironment();
 	// use()に渡すPromiseは再描画で作り直すと再サスペンドするため、初回と再試行時だけ作る
-	const [promise, setPromise] = useState(() => fetchWorkspaceResources(apiUrl));
-	const retry = () => setPromise(fetchWorkspaceResources(apiUrl));
+	const [promise, setPromise] = useState(() => loadWorkspaceResources(apiUrl));
+	const retry = () => setPromise(loadWorkspaceResources(apiUrl));
 	return (
 		<Suspense fallback={<SidecarLoading />}>
 			<LoadResources promise={promise} retry={retry}>
@@ -68,23 +70,25 @@ export default function WorkspaceResourcesProvider(props: {
 	);
 }
 function LoadResources(props: {
-	promise: Promise<WorkspaceResources | undefined>;
+	promise: Promise<LoadResult>;
 	retry: () => void;
 	children: ReactNode;
 }) {
-	const resources = use(props.promise);
-	if (!resources) {
+	const result = use(props.promise);
+	if ("error" in result) {
 		return (
 			<div className="mx-auto max-w-4xl p-4">
 				<StatusMessage kind="error">
-					Failed to load workspace resources.
+					Failed to load workspace resources: {result.error}
 				</StatusMessage>
 				<BlueButton title="Retry" handleClick={props.retry} />
 			</div>
 		);
 	}
 	// 状態は取得成功後に初めてマウントする子で持つ（初期値は一度しか読まれないため）
-	return <CreateContext resources={resources}>{props.children}</CreateContext>;
+	return (
+		<CreateContext resources={result.resources}>{props.children}</CreateContext>
+	);
 }
 function CreateContext(props: {
 	resources: WorkspaceResources;

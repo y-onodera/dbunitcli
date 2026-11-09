@@ -200,14 +200,10 @@ export const useLoadSelectParameter = () => {
 	};
 };
 
-// commandは選択中のパラメータのもの。未選択（undefined）なら何もしない
-export const useRefreshSelectParameter = (command: string | undefined) => {
+export const useRefreshSelectParameter = (command: string) => {
 	const setParameter = useSetSelectParameterState();
 	const environment = useEnvironment();
 	return async (values: { [k: string]: FormDataEntryValue }) => {
-		if (!command) {
-			return;
-		}
 		const fetchParams = postJsonParams(
 			`${environment.apiUrl + command.toLowerCase()}/refresh`,
 			values,

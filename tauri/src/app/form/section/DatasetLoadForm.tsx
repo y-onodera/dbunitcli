@@ -115,6 +115,10 @@ function DatasetLoadFormContent({
 	);
 }
 
+// srcDataの入力値を初期値から作り直す単位
+export const datasetSrcInfoResetKey = (name: string, srcData: DatasetSource) =>
+	`${name}:${srcData.prefix}:${srcData.srcType?.value ?? ""}`;
+
 // srcDataの入力値を共有する範囲。srcTypeが変わったら初期値から作り直す
 export function DatasetSrcInfoScope({
 	name,
@@ -127,7 +131,7 @@ export function DatasetSrcInfoScope({
 }) {
 	return (
 		<DatasetSrcInfoProvider
-			key={`${name}:${srcData.prefix}:${srcData.srcType?.value ?? ""}`}
+			key={datasetSrcInfoResetKey(name, srcData)}
 			initialValue={buildDatasetSrcInfo(srcData)}
 		>
 			{children}
