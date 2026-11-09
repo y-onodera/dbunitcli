@@ -1,5 +1,5 @@
 import { removeArray, replaceArray } from "../utils/arrayUtils";
-import { type Pattern, toPattern } from "./DatasetSettings";
+import { type Pattern, patternText, toPattern } from "./DatasetSettings";
 
 // シートを名前でなくパターンで指定する。一致の判定は core の TableMetaDataFilterParser.parsePattern を参照。
 // filePathはシート名の判定に使われないため持たない
@@ -243,7 +243,7 @@ function normalizeSheetPattern(
 		return undefined;
 	}
 	const exclude = pattern.exclude?.filter((it) => it);
-	if (!pattern.regex && !pattern.string) {
+	if (!patternText(pattern)) {
 		return undefined;
 	}
 	const base = pattern.regex
@@ -295,8 +295,7 @@ export function switchSheetTarget<T extends SheetTargetSetting<T>>(
 	}
 	return setting.with({
 		sheetPattern: undefined,
-		sheetName:
-			setting.sheetPattern?.string || setting.sheetPattern?.regex || "",
+		sheetName: patternText(setting.sheetPattern),
 	});
 }
 
