@@ -39,7 +39,20 @@ export function parseJdbcUrl(url: string): Partial<JdbcUrlBuilderState> {
 		return {};
 	}
 	if (url.startsWith("jdbc:oracle:thin:@")) {
-		const rest = url.slice("jdbc:oracle:thin:@".length);
+		const rest = url.slice("jdbc:oracle:thin:@".length).replace(/^\/\//, "");
+		const slashIdx = rest.indexOf("/");
+		if (slashIdx >= 0) {
+			const hostPort = rest.slice(0, slashIdx);
+			const colonIdx = hostPort.lastIndexOf(":");
+			return {
+				rdbType: "oracle",
+				host: colonIdx >= 0 ? hostPort.slice(0, colonIdx) : hostPort,
+				port:
+					colonIdx >= 0 ? hostPort.slice(colonIdx + 1) : DEFAULT_PORTS.oracle,
+				serviceName: rest.slice(slashIdx + 1),
+			};
+		}
+		// SID形式(host:port:sid)。組み立て直すとサービス名形式になる
 		const parts = rest.split(":");
 		if (parts.length >= 3) {
 			return {

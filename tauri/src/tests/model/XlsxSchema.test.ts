@@ -339,3 +339,17 @@ describe("シート指定の切替・更新", () => {
 		).toEqual({ string: "マスタ", regex: ".*マスタ", exclude: ["マスタ9"] });
 	});
 });
+
+describe("switchSheetTarget 同種への切替", () => {
+	it("patternからpatternへの切替では入力済みのパターンを残すこと", () => {
+		const setting = new RowSetting({
+			sheetPattern: { regex: "^S", exclude: ["x"] },
+		});
+		expect(switchSheetTarget(setting, "pattern")).toBe(setting);
+	});
+
+	it("regexだけのpatternからnameに切り替えるとregexを引き継ぐこと", () => {
+		const setting = new RowSetting({ sheetPattern: { regex: "^S" } });
+		expect(switchSheetTarget(setting, "name").sheetName).toBe("^S");
+	});
+});

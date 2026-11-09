@@ -588,3 +588,60 @@ describe("DatasetSettingクラス", () => {
 		});
 	});
 });
+
+describe("レビュー指摘の回帰", () => {
+	it("outerJoin/fullJoinの表示名がjoin種別になること", () => {
+		const outer = new DatasetSetting({
+			outerJoin: { left: "a", right: "b", column: ["id"] },
+		});
+		const full = new DatasetSetting({
+			fullJoin: { left: "a", right: "b", on: "x" },
+		});
+		expect(outer.displayName()).toBe("outerJoin :a b on id");
+		expect(full.displayName()).toBe("fullJoin :a b on x");
+	});
+
+	it("空のpatternからnameに切り替えてもnameが選択されること", () => {
+		const setting = new DatasetSetting({ pattern: { string: "" } });
+		const replaced = setting.replace("name");
+		expect(replaced.handler()).toBe("name");
+		expect(replaced.name).toEqual([""]);
+	});
+
+	it("regexだけのpatternからnameに切り替えるとregexを引き継ぐこと", () => {
+		const setting = new DatasetSetting({ pattern: { regex: "^T" } });
+		expect(setting.replace("name").name).toEqual(["^T"]);
+	});
+
+	it("leftの無いjoinからnameに切り替えてもnameが選択されること", () => {
+		const setting = new DatasetSetting({ innerJoin: { right: "b" } });
+		expect(setting.replace("name").handler()).toBe("name");
+	});
+
+	it("対象が未入力の設定は保存しないこと", () => {
+		const settings = new DatasetSettings(
+			[
+				new DatasetSetting({ name: [] }),
+				new DatasetSetting({ pattern: { string: "" } }),
+				new DatasetSetting({ innerJoin: { left: "a" } }),
+				new DatasetSetting({ name: ["t"] }),
+			],
+			[],
+		);
+		expect(settings.toJSON().settings).toHaveLength(1);
+	});
+
+	it("他の行と同じキーへの変更は適用しないこと", () => {
+		const setting = new DatasetSetting({ string: { a: "1", b: "2" } });
+		const replaced = setting.replaceString(1, { a: "3" });
+		expect(replaced.string).toEqual({ a: "1", b: "2" });
+	});
+
+	it("同じ行のキーはそのまま値を変更できること", () => {
+		const setting = new DatasetSetting({ string: { a: "1", b: "2" } });
+		expect(setting.replaceString(0, { a: "3" }).string).toEqual({
+			a: "3",
+			b: "2",
+		});
+	});
+});

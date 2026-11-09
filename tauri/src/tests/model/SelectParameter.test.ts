@@ -175,3 +175,15 @@ describe("SelectParameterクラス", () => {
 		expect(renamed.inputParam).toBe(inputParam);
 	});
 });
+
+describe("SelectParameter 引数の不変性", () => {
+	it("渡したレスポンスを書き換えないこと", () => {
+		const response = { ...rawConvert } as Options & {
+			inputParam?: { [key: string]: string };
+		};
+		const param = new SelectParameter(response, "compare", "x", { a: "1" });
+		expect(response.inputParam).toBeUndefined();
+		expect(param.options.command).toBe("compare");
+		expect(param.options.inputParam).toEqual({ a: "1" });
+	});
+});

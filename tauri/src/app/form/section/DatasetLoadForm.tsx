@@ -12,7 +12,12 @@ import type {
 	DatasetSource,
 	SrcType,
 } from "../../../model/CommandOption";
-import { buildDatasetSrcInfo, withValues } from "../../../model/CommandOption";
+import {
+	buildDatasetSrcInfo,
+	hasJdbcOption,
+	hasTemplateOption,
+	withValues,
+} from "../../../model/CommandOption";
 import DataLoadFormSection from "./DataLoadFormSection";
 import Select from "./element/Select";
 import SettingFormSection from "./SettingFormSection";
@@ -42,8 +47,8 @@ function DatasetLoadFormContent({
 		setDatasetSrcInfo(withValues(datasetSrcInfo, { [element.name]: newValue }));
 	const handleToggleChecked = (element: CommandOption) => (checked: boolean) =>
 		handleValueChange(element)(String(checked));
-	const jdbcOption = srcData.jdbcProperties ? srcData : undefined;
-	const templateOption = srcData.templateGroup ? srcData : undefined;
+	const jdbcOption = hasJdbcOption(srcData) ? srcData : undefined;
+	const templateOption = hasTemplateOption(srcData) ? srcData : undefined;
 	const encoding = datasetSrcInfo.values.encoding ?? "";
 	const settingEncoding = datasetSrcInfo.values.settingEncoding ?? "";
 	return (

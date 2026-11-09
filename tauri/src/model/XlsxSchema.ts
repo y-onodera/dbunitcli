@@ -1,3 +1,4 @@
+import { removeArray, replaceArray } from "../utils/arrayUtils";
 import { type Pattern, toPattern } from "./DatasetSettings";
 
 // シートを名前でなくパターンで指定する。一致の判定は core の TableMetaDataFilterParser.parsePattern を参照。
@@ -39,14 +40,14 @@ export class RowSetting {
 	}
 
 	constructor(builder: RowSettingBuilder) {
-		this.sheetName = builder.sheetName || "";
+		this.sheetName = builder.sheetName ?? "";
 		this.sheetPattern = builder.sheetPattern;
-		this.tableName = builder.tableName || "";
-		this.header = builder.header || [];
-		this.dataStart = builder.dataStart || "";
-		this.columnIndex = builder.columnIndex || [];
-		this.breakKey = builder.breakKey || [];
-		this.addFileInfo = builder.addFileInfo || false;
+		this.tableName = builder.tableName ?? "";
+		this.header = builder.header ?? [];
+		this.dataStart = builder.dataStart ?? "";
+		this.columnIndex = builder.columnIndex ?? [];
+		this.breakKey = builder.breakKey ?? [];
+		this.addFileInfo = builder.addFileInfo ?? false;
 	}
 
 	with(builder: RowSettingBuilder): RowSetting {
@@ -73,12 +74,12 @@ export class CellSetting {
 	}
 
 	constructor(builder: CellSettingBuilder) {
-		this.sheetName = builder?.sheetName || "";
-		this.sheetPattern = builder?.sheetPattern;
-		this.tableName = builder?.tableName || "";
-		this.header = builder?.header || [];
-		this.rows = builder?.rows || [];
-		this.addFileInfo = builder?.addFileInfo || false;
+		this.sheetName = builder.sheetName ?? "";
+		this.sheetPattern = builder.sheetPattern;
+		this.tableName = builder.tableName ?? "";
+		this.header = builder.header ?? [];
+		this.rows = builder.rows ?? [];
+		this.addFileInfo = builder.addFileInfo ?? false;
 	}
 
 	replaceRows(newRows: string[], index: number): CellSetting {
@@ -192,22 +193,6 @@ export class XlsxSchema {
 		};
 	}
 }
-export function replaceArray<T>(array: T[], newOne: T, index: number): T[] {
-	let result = [...array];
-	if (result.length > index) {
-		if (newOne) {
-			result[index] = newOne;
-		} else {
-			result = removeArray(result, index);
-		}
-	} else if (newOne) {
-		result = result.concat(newOne);
-	}
-	return result;
-}
-export function removeArray<T>(array: T[], remove: number): T[] {
-	return [...array].filter((_, index) => index !== remove);
-}
 export interface XlsxSchemaBuilder {
 	patterns?: Record<string, string | string[] | SheetPattern>;
 	rows?: RowSettingBuilder[];
@@ -298,7 +283,11 @@ export function switchSheetTarget<T extends SheetTargetSetting<T>>(
 	setting: T,
 	kind: string,
 ): T {
-	if (kind === "pattern") {
+	const isPattern = kind === "pattern";
+	if (isPattern === !!setting.sheetPattern) {
+		return setting;
+	}
+	if (isPattern) {
 		return setting.with({
 			sheetPattern: { string: setting.sheetName },
 			sheetName: "",
@@ -306,7 +295,8 @@ export function switchSheetTarget<T extends SheetTargetSetting<T>>(
 	}
 	return setting.with({
 		sheetPattern: undefined,
-		sheetName: setting.sheetPattern?.string ?? "",
+		sheetName:
+			setting.sheetPattern?.string || setting.sheetPattern?.regex || "",
 	});
 }
 
