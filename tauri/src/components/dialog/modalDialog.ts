@@ -8,7 +8,9 @@ export function useModalDialog(
 	onClose: () => void,
 ) {
 	useEffect(() => {
-		showAboveChildren(ref.current);
+		if (ref.current) {
+			showAboveChildren(ref.current);
+		}
 	}, [ref]);
 	return {
 		onCancel: (ev: SyntheticEvent<HTMLDialogElement>) => {
@@ -27,19 +29,18 @@ export function useModalDialog(
 }
 
 // effect は子から先に走り、同時にマウントした入れ子の dialog が親より下に積まれるため、開き直して親の上に載せる
-function showAboveChildren(dialog: HTMLDialogElement | null) {
-	if (!dialog) {
-		return;
-	}
+function showAboveChildren(dialog: HTMLDialogElement) {
 	dialog.showModal();
-	for (const child of dialog.querySelectorAll("dialog[open]")) {
-		(child as HTMLDialogElement).close();
-		(child as HTMLDialogElement).showModal();
+	for (const child of dialog.querySelectorAll<HTMLDialogElement>(
+		"dialog[open]",
+	)) {
+		child.close();
+		child.showModal();
 	}
 }
 
-function reopenIfClosed(dialog: HTMLDialogElement | null) {
-	if (dialog?.isConnected && !dialog.open) {
+function reopenIfClosed(dialog: HTMLDialogElement) {
+	if (dialog.isConnected && !dialog.open) {
 		dialog.showModal();
 	}
 }

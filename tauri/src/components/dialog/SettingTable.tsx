@@ -26,7 +26,6 @@ interface SettingTableProps<T extends Displayable> {
 	renderSetting?: (setting: T) => React.ReactNode;
 	SettingDialogComponent: React.ComponentType<SettingDialogComponentProps<T>>;
 	newSetting: () => T;
-	getKey?: (setting: T) => string | number;
 }
 
 // 引数の既定値にアロー関数を書くとReact Compilerが未対応のため、モジュールレベルで定義する
@@ -46,17 +45,6 @@ function removeSetting<T>(current: T[], item: T): T[] {
 function displayNameOf(setting: Displayable): string {
 	return setting.displayName();
 }
-// displayNameはコピー直後や名前未入力の行で重複するため、行のkeyはインスタンスごとに振る
-const instanceKeys = new WeakMap<object, number>();
-let nextInstanceKey = 0;
-function instanceKeyOf(setting: object): number {
-	let key = instanceKeys.get(setting);
-	if (key === undefined) {
-		key = nextInstanceKey++;
-		instanceKeys.set(setting, key);
-	}
-	return key;
-}
 
 export default function SettingTable<T extends Displayable>({
 	caption,
@@ -68,7 +56,6 @@ export default function SettingTable<T extends Displayable>({
 	renderSetting = displayNameOf,
 	SettingDialogComponent,
 	newSetting,
-	getKey = instanceKeyOf,
 }: SettingTableProps<T>) {
 	const [selectSettings, setSelectSettings] = useState<{
 		setting: T;
@@ -107,8 +94,9 @@ export default function SettingTable<T extends Displayable>({
 					</tr>
 				</thead>
 				<tbody>
-					{settings.map((setting) => (
-						<tr key={getKey(setting)}>
+					{settings.map((setting, index) => (
+						// biome-ignore lint/suspicious/noArrayIndexKey: displayNameはコピー直後や名前未入力の行で重複する。行は入力中のstateを持たない
+						<tr key={index}>
 							<th
 								scope="row"
 								className="px-6 min-w-80 max-w-80 text-left text-sm text-content border"

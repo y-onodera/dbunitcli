@@ -1,5 +1,6 @@
-import { type ReactNode, useRef, useState } from "react";
-import { getErrorMessage } from "../../utils/fetchUtils";
+import { type ReactNode, useRef } from "react";
+import { reportError } from "../../utils/fetchUtils";
+import { useResettableState } from "../../utils/useResettableState";
 import { ClearIcon } from "./Icon";
 
 export function InputLabel(props: {
@@ -107,13 +108,10 @@ export function SelectBox(props: {
 	handleOnChange?: (selected: string) => void | Promise<void>;
 	children: ReactNode;
 }) {
-	const [selected, setSelected] = useState(props.defaultValue ?? "");
-	// 設定の読込み等で親から初期値が変わったら選択を合わせる
-	const [prevDefault, setPrevDefault] = useState(props.defaultValue);
-	if (props.defaultValue !== prevDefault) {
-		setPrevDefault(props.defaultValue);
-		setSelected(props.defaultValue ?? "");
-	}
+	const [selected, setSelected] = useResettableState(
+		props.defaultValue ?? "",
+		props.defaultValue,
+	);
 	return (
 		<select
 			name={props.name}
@@ -125,10 +123,9 @@ export function SelectBox(props: {
 			onChange={(event) => {
 				const value = event.currentTarget.value;
 				setSelected(value);
-				Promise.resolve(props.handleOnChange?.(value)).catch((error) => {
-					console.error("Select Error:", error);
-					alert(`Failed to apply ${props.name}: ${getErrorMessage(error)}`);
-				});
+				Promise.resolve(props.handleOnChange?.(value)).catch((error) =>
+					reportError(`Failed to apply ${props.name}`, error),
+				);
 			}}
 		>
 			{props.children}
@@ -142,13 +139,10 @@ export function CheckBox(props: {
 	defaultValue?: string;
 	handleOnChange?: (checked: boolean) => void;
 }) {
-	const [checked, setChecked] = useState(props.defaultValue === "true");
-	// 設定の読込み等で親から初期値が変わったらチェックを合わせる
-	const [prevDefault, setPrevDefault] = useState(props.defaultValue);
-	if (props.defaultValue !== prevDefault) {
-		setPrevDefault(props.defaultValue);
-		setChecked(props.defaultValue === "true");
-	}
+	const [checked, setChecked] = useResettableState(
+		props.defaultValue === "true",
+		props.defaultValue,
+	);
 	return (
 		<>
 			<input

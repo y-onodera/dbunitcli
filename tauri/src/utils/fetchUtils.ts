@@ -73,6 +73,12 @@ export const postJsonParams = (
 export const getErrorMessage = (error: unknown): string =>
 	error instanceof Error ? error.message : String(error);
 
+// fetch以外の想定外の失敗を知らせる
+export const reportError = (label: string, error: unknown) => {
+	alert(`${label}: ${getErrorMessage(error)}`);
+	console.error(`${label}:`, error);
+};
+
 export type OperationResult = "success" | "failed";
 
 export async function saveOnSuccess(

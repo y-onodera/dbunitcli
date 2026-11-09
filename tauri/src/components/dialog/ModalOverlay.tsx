@@ -8,7 +8,6 @@ import {
 } from "./DialogMaximize";
 import { useModalDialog } from "./modalDialog";
 
-// showModal() で top layer に載せ、背後の画面を操作不可にする。入れ子にしても後から開いたものが上に重なる
 export function ModalOverlay({
 	children,
 	onClose,

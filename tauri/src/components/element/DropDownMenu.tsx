@@ -9,7 +9,10 @@ import { createPortal } from "react-dom";
 import { BlueSettingButton } from "./ButtonIcon";
 
 // スクロール領域に隠れないよう fixed で画面基準に置く。ボタンの右に収まらなければ左へ、下にはみ出すなら上へずらす
-function menuPosition(button: DOMRect, menu: DOMRect): CSSProperties {
+function menuPosition(
+	button: DOMRect,
+	menu: { width: number; height: number },
+): CSSProperties {
 	const top = Math.max(
 		0,
 		Math.min(button.top, window.innerHeight - menu.height),
@@ -20,6 +23,16 @@ function menuPosition(button: DOMRect, menu: DOMRect): CSSProperties {
 	return { left: button.right, top };
 }
 
+// スクロールのたびに呼ばれるため、位置が変わらなければ同じオブジェクトを返して再描画を避ける
+function keepIfSame(prev: CSSProperties, next: CSSProperties): CSSProperties {
+	return prev.top === next.top &&
+		prev.left === next.left &&
+		prev.right === next.right &&
+		prev.visibility === next.visibility
+		? prev
+		: next;
+}
+
 export default function DropDownMenu({
 	children,
 	className,
@@ -28,9 +41,7 @@ export default function DropDownMenu({
 	className?: string;
 }) {
 	const [showMenu, setShowMenu] = useState(false);
-	const [menuStyle, setMenuStyle] = useState<CSSProperties>({
-		visibility: "hidden",
-	});
+	const [menuStyle, setMenuStyle] = useState<CSSProperties>({});
 	const buttonRef = useRef<HTMLDivElement>(null);
 	const menuRef = useRef<HTMLDivElement>(null);
 	const [portalTarget, setPortalTarget] = useState<HTMLElement | null>(null);
@@ -40,14 +51,15 @@ export default function DropDownMenu({
 
 	// 位置はメニューの実寸で決めるため、描画後・表示前に計算する
 	useLayoutEffect(() => {
+		// 寸法はスクロールでは変わらないため開いたときに1回だけ測る
+		const menuSize = menuRef.current?.getBoundingClientRect();
 		function updatePosition() {
-			if (buttonRef.current && menuRef.current) {
-				setMenuStyle(
-					menuPosition(
-						buttonRef.current.getBoundingClientRect(),
-						menuRef.current.getBoundingClientRect(),
-					),
+			if (buttonRef.current && menuSize) {
+				const next = menuPosition(
+					buttonRef.current.getBoundingClientRect(),
+					menuSize,
 				);
+				setMenuStyle((prev) => keepIfSame(prev, next));
 			}
 		}
 		function handleClickOutside() {
