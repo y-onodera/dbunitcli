@@ -1,5 +1,10 @@
 import { type ReactNode, useState } from "react";
-import { type OperationResult, saveOnSuccess } from "../../utils/fetchUtils";
+import {
+	type OperationResult,
+	reportError,
+	saveOnSuccess,
+} from "../../utils/fetchUtils";
+import { useResettableState } from "../../utils/useResettableState";
 import { BlueButton, WhiteButton } from "../element/Button";
 import {
 	AddButton,
@@ -56,12 +61,20 @@ type FileMode = {
 export type SettingDialogProps<T> = CommonProps & (SettingMode<T> | FileMode);
 
 export function SettingDialog<T>(props: SettingDialogProps<T>) {
-	const [fileNameValue, setFileNameValue] = useState(props.fileName ?? "");
+	const [fileNameValue, setFileNameValue] = useResettableState(
+		props.fileName ?? "",
+		props.fileName,
+	);
 	const isFileMode = props.fileName !== undefined;
+	const fileNameMissing = isFileMode && fileNameValue.trim() === "";
 	const saveThen: SaveThen = (onSaved) => {
-		if (isFileMode) {
+		if (isFileMode && !fileNameMissing) {
 			saveOnSuccess(
-				() => props.save(fileNameValue),
+				() =>
+					props.save(fileNameValue).catch((error): OperationResult => {
+						reportError("Save failed", error);
+						return "failed";
+					}),
 				() => onSaved(fileNameValue),
 			);
 		}
@@ -109,7 +122,7 @@ export function SettingDialog<T>(props: SettingDialogProps<T>) {
 			<DialogFooter>
 				<BlueButton
 					title={props.commitLabel ?? "Save"}
-					disabled={props.commitDisabled}
+					disabled={props.commitDisabled || fileNameMissing}
 					handleClick={() => {
 						if (isFileMode) {
 							saveThen(props.handleSave);
@@ -223,6 +236,24 @@ export function Select(props: {
 	);
 }
 
+// 値が空のときとAdd中は、末尾に空行を出す（blankIndex。出さないときは-1）。
+// selectなど外から行数が変われば、Add中は自然に終わる
+function useBlankRow(count: number) {
+	const [addingAt, setAddingAt] = useState<number | null>(null);
+	const adding = addingAt === count;
+	return {
+		adding,
+		blankIndex: adding || count === 0 ? count : -1,
+		startAdding: () => setAddingAt(count),
+		endAdding: () => setAddingAt(null),
+	};
+}
+
+// 複数行の入力欄で行ごとに一意なid。見出しのlabelは先頭行を指す
+function rowInputId(name: string, index: number): string {
+	return `${name}_${index}`;
+}
+
 // index以外の行に同じ値があるか
 export function isDuplicated(
 	values: string[],
@@ -244,14 +275,10 @@ export function Arrays(props: {
 	handleSelect?: (index: number) => void;
 	handleEdit?: (index: number) => void;
 }) {
-	// 値が空のときとAdd中は、末尾に画面だけの空行を出す（モデルは空の値を保持しないため）
-	// selectなど外から値が確定して行数が変われば、Add中は自然に終わる
-	const [addingAt, setAddingAt] = useState<number | null>(null);
-	const adding = addingAt === props.values.length;
-	const setAdding = (value: boolean) =>
-		setAddingAt(value ? props.values.length : null);
-	const blankIndex =
-		adding || props.values.length === 0 ? props.values.length : -1;
+	// モデルは空の値を保持しないため、空行は画面だけに出す
+	const { adding, blankIndex, startAdding, endAdding } = useBlankRow(
+		props.values.length,
+	);
 	const rows = blankIndex < 0 ? props.values : [...props.values, ""];
 	const lastValue = props.values[props.values.length - 1];
 	const canAdd = !!lastValue && !adding;
@@ -268,11 +295,11 @@ export function Arrays(props: {
 						index={index}
 						handleChange={(text, i) => {
 							if (blank) {
-								setAdding(false);
+								endAdding();
 							}
 							props.handleChange(text, i);
 						}}
-						handleRemove={blank ? () => setAdding(false) : props.handleRemove}
+						handleRemove={blank ? () => endAdding() : props.handleRemove}
 						isDuplicated={(text) => isDuplicated(props.values, text, index)}
 						ignoreLabel={props.ignoreLabel}
 						kind={props.kind}
@@ -285,7 +312,7 @@ export function Arrays(props: {
 			<div className="grid grid-cols-5 justify-center pb-2">
 				{canAdd && (
 					<div className="col-start-2">
-						<AddButton handleClick={() => setAdding(true)} />
+						<AddButton handleClick={() => startAdding()} />
 					</div>
 				)}
 			</div>
@@ -316,6 +343,7 @@ export function ArraysText(props: {
 		props.handleChange(newVal.target.value, props.index);
 	};
 	const handleRemove = () => props.handleRemove(props.index);
+	const inputId = rowInputId(props.name, props.index);
 	const showLabel = !props.ignoreLabel && props.index === 0;
 	const wide = props.kind === "expression";
 	return (
@@ -328,7 +356,7 @@ export function ArraysText(props: {
 			<div className="grid grid-cols-5 pb-2">
 				{showLabel && (
 					<InputLabel
-						id={props.name}
+						id={inputId}
 						text={props.name}
 						required={false}
 						wStyle="p-2.5"
@@ -336,7 +364,7 @@ export function ArraysText(props: {
 				)}
 				<ControllTextBox
 					name={props.name}
-					id={props.name}
+					id={inputId}
 					required={true}
 					wStyle={wide ? "col-start-2 col-span-2" : "col-start-2"}
 					value={text}
@@ -374,10 +402,11 @@ export function KeyValues(props: {
 	handleSelect?: () => void;
 	handleEdit?: (index: number) => void;
 }) {
-	// 値が空のときとAdd中は、末尾に画面だけの空行を出す（名前が確定するまでモデルに入れない）
-	const [adding, setAdding] = useState(false);
+	// 名前が確定するまでモデルに入れないため、空行は画面だけに出す
 	const entries = Object.entries(props.values);
-	const blankIndex = adding || entries.length === 0 ? entries.length : -1;
+	const { adding, blankIndex, startAdding, endAdding } = useBlankRow(
+		entries.length,
+	);
 	const rows = blankIndex < 0 ? entries : [...entries, ["", ""]];
 	return (
 		<>
@@ -386,18 +415,18 @@ export function KeyValues(props: {
 				return (
 					<KeyValueText
 						// 編集ダイアログなど外から式が変われば入力中のstateを作り直す
-						key={`${key}:${value}`}
+						key={`${key}\u0000${value}`}
 						propKey={key}
 						name={props.name}
-						value={value.toString()}
+						value={String(value ?? "")}
 						index={index}
 						handleChange={(i, newValue) => {
 							if (blank) {
-								setAdding(false);
+								endAdding();
 							}
 							props.handleChange(i, newValue);
 						}}
-						handleRemove={blank ? () => setAdding(false) : props.handleRemove}
+						handleRemove={blank ? () => endAdding() : props.handleRemove}
 						handleEdit={blank ? undefined : props.handleEdit}
 						isDuplicated={(text) =>
 							isDuplicated(
@@ -412,7 +441,7 @@ export function KeyValues(props: {
 			<div className="grid grid-cols-5 justify-center pb-2">
 				<div className="col-start-2 flex items-center">
 					{entries.length > 0 && !adding && (
-						<AddButton handleClick={() => setAdding(true)} />
+						<AddButton handleClick={() => startAdding()} />
 					)}
 					{props.handleSelect && (
 						<FactCheckButton title="select" handleClick={props.handleSelect} />
@@ -446,6 +475,7 @@ export function KeyValueText(props: {
 			newVal.target.value ? { [newVal.target.value]: value } : {},
 		);
 	};
+	const inputId = rowInputId(props.name, props.index);
 	const handleValueBlur = (newVal: React.FocusEvent<HTMLInputElement>) =>
 		props.handleChange(props.index, { [key]: newVal.target.value });
 	const handleRemove = () => props.handleRemove(props.index);
@@ -462,7 +492,7 @@ export function KeyValueText(props: {
 			<div className="grid grid-cols-5 pb-2">
 				{props.index === 0 && (
 					<InputLabel
-						id={props.name}
+						id={inputId}
 						text={props.name}
 						required={false}
 						wStyle="p-2.5"
@@ -470,7 +500,7 @@ export function KeyValueText(props: {
 				)}
 				<ControllTextBox
 					name={props.name}
-					id={props.name}
+					id={inputId}
 					required={true}
 					wStyle="col-start-2"
 					value={key}
@@ -479,7 +509,7 @@ export function KeyValueText(props: {
 				/>
 				<ControllTextBox
 					name={props.name}
-					id={props.name}
+					id={`${inputId}_value`}
 					required={true}
 					wStyle="col-start-3 col-span-2 ml-1"
 					value={value}

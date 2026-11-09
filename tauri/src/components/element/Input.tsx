@@ -1,4 +1,6 @@
-import { type ReactNode, useRef, useState } from "react";
+import { type ReactNode, useRef } from "react";
+import { reportError } from "../../utils/fetchUtils";
+import { useResettableState } from "../../utils/useResettableState";
 import { ClearIcon } from "./Icon";
 
 export function InputLabel(props: {
@@ -106,8 +108,9 @@ export function SelectBox(props: {
 	handleOnChange?: (selected: string) => void | Promise<void>;
 	children: ReactNode;
 }) {
-	const [selected, setSelected] = useState(
-		props.defaultValue ? props.defaultValue : "",
+	const [selected, setSelected] = useResettableState(
+		props.defaultValue ?? "",
+		props.defaultValue,
 	);
 	return (
 		<select
@@ -118,8 +121,11 @@ export function SelectBox(props: {
 			style={props.hidden ? { display: "none" } : {}}
 			value={selected}
 			onChange={(event) => {
-				setSelected(event.currentTarget.value);
-				props.handleOnChange?.(event.currentTarget.value);
+				const value = event.currentTarget.value;
+				setSelected(value);
+				Promise.resolve(props.handleOnChange?.(value)).catch((error) =>
+					reportError(`Failed to apply ${props.name}`, error),
+				);
 			}}
 		>
 			{props.children}
@@ -133,7 +139,10 @@ export function CheckBox(props: {
 	defaultValue?: string;
 	handleOnChange?: (checked: boolean) => void;
 }) {
-	const [checked, setChecked] = useState(props.defaultValue === "true");
+	const [checked, setChecked] = useResettableState(
+		props.defaultValue === "true",
+		props.defaultValue,
+	);
 	return (
 		<>
 			<input

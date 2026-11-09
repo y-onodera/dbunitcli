@@ -107,7 +107,7 @@ export default function SqlTableInsertDialog({
 	}
 
 	return (
-		<ModalOverlay>
+		<ModalOverlay onClose={onClose}>
 			<DialogTitle>Select Tables</DialogTitle>
 			<DialogField last>
 				<BlueButton title="Load Tables" handleClick={handleLoad} />

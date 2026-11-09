@@ -34,7 +34,7 @@ export default function ParameterizeOptionDialog(props: DialogProps) {
 	const candidates = useParameterizeCandidates(props.command, props.name);
 	if (candidates === null) {
 		return (
-			<ModalOverlay size="lg">
+			<ModalOverlay size="lg" onClose={props.onClose}>
 				<StatusMessage kind="loading">Loading...</StatusMessage>
 			</ModalOverlay>
 		);
@@ -107,7 +107,7 @@ function Dialog({
 	}
 
 	return (
-		<ModalOverlay size="lg">
+		<ModalOverlay size="lg" onClose={onClose}>
 			<DialogTitle>Parameterize {name}</DialogTitle>
 			<p className="text-caption text-content-muted mb-2">
 				Checked options become parameters. Unchecked options keep the saved

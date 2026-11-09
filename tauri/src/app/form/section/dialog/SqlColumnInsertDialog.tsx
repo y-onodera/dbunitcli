@@ -237,7 +237,7 @@ export default function SqlColumnInsertDialog({
 	};
 
 	return (
-		<NestedDialogFrame title="Select Columns" table={table}>
+		<NestedDialogFrame title="Select Columns" table={table} onClose={onClose}>
 			{!plain && (
 				<>
 					{statement === undefined && (

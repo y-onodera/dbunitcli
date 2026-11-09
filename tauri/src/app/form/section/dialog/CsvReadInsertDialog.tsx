@@ -36,7 +36,7 @@ export default function CsvReadInsertDialog({
 	const fetchColumns = useCsvColumnNamesFetcher();
 	const [usage, setUsage] = useState<TableUsage>("select");
 	return (
-		<ModalOverlay>
+		<ModalOverlay onClose={onClose}>
 			<DialogTitle>Insert CSVREAD</DialogTitle>
 			<CsvFileFields idPrefix="csvReadInsert" {...csv.fields} />
 			<TableInsertForm

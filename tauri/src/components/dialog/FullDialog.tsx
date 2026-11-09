@@ -1,8 +1,9 @@
-import { type ReactNode, useEffect, useRef } from "react";
+import { type ReactNode, useRef } from "react";
 import {
 	DialogMaximizeContext,
 	useDialogMaximizeState,
 } from "./DialogMaximize";
+import { useModalDialog } from "./modalDialog";
 
 export function FullDialog({
 	onClose,
@@ -14,14 +15,13 @@ export function FullDialog({
 	children: ReactNode;
 }) {
 	const dialogRef = useRef<HTMLDialogElement>(null);
+	const dialog = useModalDialog(dialogRef, onClose);
 	const maximize = useDialogMaximizeState(maximizable);
-	useEffect(() => {
-		dialogRef.current?.showModal();
-	}, []);
 	return (
 		<dialog
 			ref={dialogRef}
-			onClose={onClose}
+			onCancel={dialog.onCancel}
+			onClose={dialog.onClose}
 			// 最大化中の大きさはブラウザ既定の max-width / max-height で止まる。子は DialogBody が残りの高さを埋める
 			className={`overflow-y-auto fixed top-0 right-0 left-0 z-modal bg-surface border border-border-subtle${maximize.maximized ? " open:flex flex-col w-full h-full" : ""}`}
 		>

@@ -26,14 +26,17 @@ interface SettingTableProps<T extends Displayable> {
 	renderSetting?: (setting: T) => React.ReactNode;
 	SettingDialogComponent: React.ComponentType<SettingDialogComponentProps<T>>;
 	newSetting: () => T;
-	getKey?: (setting: T) => string | number;
 }
 
 // 引数の既定値にアロー関数を書くとReact Compilerが未対応のため、モジュールレベルで定義する
 function appendSetting<T>(current: T[], item: T): T[] {
 	return [...current, item];
 }
+// ダイアログを開いている間にsettingsが差し替わり編集元が無くなっていたら、編集内容を失わないよう末尾に追加する
 function replaceSetting<T>(current: T[], before: T, after: T): T[] {
+	if (!current.includes(before)) {
+		return [...current, after];
+	}
 	return current.map((s) => (s === before ? after : s));
 }
 function removeSetting<T>(current: T[], item: T): T[] {
@@ -53,17 +56,18 @@ export default function SettingTable<T extends Displayable>({
 	renderSetting = displayNameOf,
 	SettingDialogComponent,
 	newSetting,
-	getKey = displayNameOf,
 }: SettingTableProps<T>) {
-	const defaultState = { setting: newSetting(), action: "" };
-	const [selectSettings, setSelectSettings] = useState(defaultState);
+	const [selectSettings, setSelectSettings] = useState<{
+		setting: T;
+		action: "add" | "update";
+	} | null>(null);
 
 	return (
 		<>
-			{selectSettings.action && (
+			{selectSettings && (
 				<SettingDialogComponent
 					setting={selectSettings.setting}
-					handleDialogClose={() => setSelectSettings(defaultState)}
+					handleDialogClose={() => setSelectSettings(null)}
 					handleCommit={(newSettings: T) => {
 						setSettings((cur) => {
 							if (selectSettings.action === "add") {
@@ -71,7 +75,7 @@ export default function SettingTable<T extends Displayable>({
 							}
 							return updateSettings(cur, selectSettings.setting, newSettings);
 						});
-						setSelectSettings(defaultState);
+						setSelectSettings(null);
 					}}
 				/>
 			)}
@@ -90,8 +94,9 @@ export default function SettingTable<T extends Displayable>({
 					</tr>
 				</thead>
 				<tbody>
-					{settings.map((setting) => (
-						<tr key={getKey(setting)}>
+					{settings.map((setting, index) => (
+						// biome-ignore lint/suspicious/noArrayIndexKey: displayNameはコピー直後や名前未入力の行で重複する。行は入力中のstateを持たない
+						<tr key={index}>
 							<th
 								scope="row"
 								className="px-6 min-w-80 max-w-80 text-left text-sm text-content border"

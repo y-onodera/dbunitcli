@@ -136,7 +136,7 @@
     <tr><td>Save</td><td>編集内容を呼び出し元の一覧表の行に反映して閉じる。ファイルには書き込まない（<a href="#section-table">設定一覧表</a>）</td><td>設定一覧表の行を編集するダイアログ（Dataset Setting、Xlsx Row Setting など）</td></tr>
     <tr><td>Apply</td><td>入力した内容を呼び出し元に反映して閉じる。ファイルには書き込まない</td><td><a href="../dialogs/parameters.html">Parameters (-P)</a>（-P 値に反映）、<a href="../sections/jdbc.html">JDBC URL Builder</a>（<code>jdbcUrl</code> に反映）、式の編集（<a href="../dialogs/dataset-setting.html">Dataset Setting</a> の行の式に反映）</td></tr>
     <tr><td>Execute</td><td>入力したデータセットから雛型を生成する。生成後の流れは各ダイアログのページを参照</td><td>⋮ メニューの generate で開くダイアログ</td></tr>
-    <tr><td>Close</td><td>保存・反映していない編集を捨てて閉じる。元の入力欄・一覧表は変わらない</td><td>すべてのダイアログ</td></tr>
+    <tr><td>Close</td><td>保存・反映していない編集を捨てて閉じる。元の入力欄・一覧表は変わらない。Esc キーでも同じように閉じる（ダイアログの上に開いたダイアログでは、上のものだけが閉じる）</td><td>すべてのダイアログ</td></tr>
   </table>
   <p>Preview・Export など、ほかのボタンはダイアログ固有の機能です。各ダイアログのページを参照してください。</p>
 
@@ -146,6 +146,7 @@
     <li>開いたときは、元の入力欄の値が入っている</li>
     <li>Save すると、基準ディレクトリの <code>name</code> のファイルに保存する</li>
     <li><code>name</code> を変えて Save すると、別の名前で保存する。ない名前なら新しいファイルを作り、ある名前なら上書きする</li>
+    <li><code>name</code> が空のあいだは Save を押せない。Save and Preview など保存を伴うほかのボタンも保存しない</li>
   </ul>
 
   <h3 id="section-arrays">複数値の入力欄</h3>

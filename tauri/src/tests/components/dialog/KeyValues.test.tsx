@@ -56,4 +56,41 @@ describe("KeyValuesのテスト", () => {
 		expect(inputValues()).toEqual(["COL_A", "1"]);
 		expect(screen.getByRole("button", { name: "add" })).toBeInTheDocument();
 	});
+
+	it("Add中に外から行が増えたら空行を出さない", async () => {
+		const user = userEvent.setup();
+		const { rerender } = render(
+			<KeyValues
+				name="string"
+				values={{ COL_A: "1" }}
+				handleChange={() => {}}
+				handleRemove={() => {}}
+			/>,
+		);
+		await user.click(screen.getByRole("button", { name: "add" }));
+		expect(inputValues()).toEqual(["COL_A", "1", "", ""]);
+
+		rerender(
+			<KeyValues
+				name="string"
+				values={{ COL_A: "1", COL_B: "2" }}
+				handleChange={() => {}}
+				handleRemove={() => {}}
+			/>,
+		);
+		expect(inputValues()).toEqual(["COL_A", "1", "COL_B", "2"]);
+		expect(screen.getByRole("button", { name: "add" })).toBeInTheDocument();
+	});
+
+	it("値がnullでも空欄として表示する", () => {
+		render(
+			<KeyValues
+				name="string"
+				values={{ COL_A: null }}
+				handleChange={() => {}}
+				handleRemove={() => {}}
+			/>,
+		);
+		expect(inputValues()).toEqual(["COL_A", ""]);
+	});
 });

@@ -156,14 +156,16 @@ export function InsertPreview({ lines }: { lines: string[] }) {
 export function NestedDialogFrame({
 	title,
 	table,
+	onClose,
 	children,
 }: {
 	title: string;
 	table?: string;
+	onClose: () => void;
 	children: ReactNode;
 }) {
 	return (
-		<ModalOverlay zClass="z-modal-nested">
+		<ModalOverlay onClose={onClose}>
 			<DialogTitle>{title}</DialogTitle>
 			{table !== undefined && (
 				<p className="text-caption mb-4 truncate" title={table}>
@@ -195,14 +197,14 @@ export function renderColumnLoadState({
 }): ReactNode {
 	if (loading) {
 		return (
-			<ModalOverlay zClass="z-modal-nested">
+			<ModalOverlay onClose={onClose}>
 				<JobProgress title="Loading..." lines={logs} onAbandon={onClose} />
 			</ModalOverlay>
 		);
 	}
 	if (error || columns === null) {
 		return (
-			<NestedDialogFrame title={title} table={table}>
+			<NestedDialogFrame title={title} table={table} onClose={onClose}>
 				{error && <JobFailure message={error} lines={logs} />}
 				<DialogActions>
 					<WhiteButton title="Close" handleClick={onClose} />

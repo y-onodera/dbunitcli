@@ -45,4 +45,38 @@ describe("SettingDialogのファイルモードのテスト", () => {
 		});
 		expect(handleSave).not.toHaveBeenCalled();
 	});
+
+	it("ファイル名が空ならSaveできない", async () => {
+		const { user, save } = renderFileMode("success");
+		const fileName = document.querySelector(
+			'input[name="fileName"]',
+		) as HTMLInputElement;
+		await user.clear(fileName);
+
+		const saveButton = screen.getByRole("button", { name: "Save" });
+		expect(saveButton).toBeDisabled();
+		await user.click(saveButton);
+		expect(save).not.toHaveBeenCalled();
+	});
+
+	it("保存処理が例外を投げたらalertで知らせる", async () => {
+		const alertSpy = vi.spyOn(window, "alert").mockImplementation(() => {});
+		vi.spyOn(console, "error").mockImplementation(() => {});
+		const save = vi.fn().mockRejectedValue(new Error("boom"));
+		render(
+			<SettingDialog
+				fileName="before.json"
+				handleDialogClose={vi.fn()}
+				save={save}
+				handleSave={vi.fn()}
+			>
+				<div />
+			</SettingDialog>,
+		);
+		await userEvent.setup().click(screen.getByRole("button", { name: "Save" }));
+
+		await waitFor(() => {
+			expect(alertSpy).toHaveBeenCalledWith("Save failed: boom");
+		});
+	});
 });

@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { type ReactNode, useRef } from "react";
 import { SectionHelpButton } from "./DialogHelpButton";
 import { DIALOG_WIDTH } from "./DialogLayout";
 import {
@@ -6,34 +6,35 @@ import {
 	MaximizeToggleButton,
 	useDialogMaximizeState,
 } from "./DialogMaximize";
+import { useModalDialog } from "./modalDialog";
 
 export function ModalOverlay({
 	children,
+	onClose,
 	size = "sm",
-	zClass = "z-modal",
 	maximizable = false,
 }: {
 	children: ReactNode;
+	// Esc で呼ぶ
+	onClose: () => void;
 	size?: keyof typeof DIALOG_WIDTH;
-	zClass?: string;
 	maximizable?: boolean;
 }) {
+	const dialogRef = useRef<HTMLDialogElement>(null);
+	const dialog = useModalDialog(dialogRef, onClose);
 	const maximize = useDialogMaximizeState(maximizable);
 	const frameSize = maximize.maximized
-		? "flex flex-col w-full h-full"
+		? "open:flex flex-col w-full h-full max-h-[calc(100%-2rem)]"
 		: `max-h-[80vh] ${DIALOG_WIDTH[size]}`;
 	return (
-		<div
-			className={`fixed inset-0 p-4 bg-overlay flex items-center justify-center ${zClass}`}
+		<dialog
+			ref={dialogRef}
+			onCancel={dialog.onCancel}
+			onClose={dialog.onClose}
+			className={`m-auto bg-surface text-content rounded-lg shadow-modal p-6 max-w-[calc(100%-2rem)] overflow-y-auto backdrop:bg-overlay ${frameSize}`}
 		>
-			<div
-				className={`bg-surface rounded-lg shadow-modal p-6 max-w-full overflow-y-auto ${frameSize}`}
-			>
-				<DialogMaximizeContext value={maximize}>
-					{children}
-				</DialogMaximizeContext>
-			</div>
-		</div>
+			<DialogMaximizeContext value={maximize}>{children}</DialogMaximizeContext>
+		</dialog>
 	);
 }
 

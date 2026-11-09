@@ -79,7 +79,7 @@ function ListSubqueryTable({
 
 	return (
 		renderSubqueryColumns(columnLoad, mode, alias, onComplete, onClose) ?? (
-			<NestedDialogFrame title="Subquery Table">
+			<NestedDialogFrame title="Subquery Table" onClose={onClose}>
 				<DialogField>
 					<SelectableTable
 						items={tables}
@@ -118,7 +118,7 @@ function CsvSubqueryTable({
 
 	return (
 		renderSubqueryColumns(columnLoad, mode, csv.alias, onComplete, onClose) ?? (
-			<NestedDialogFrame title="Subquery Table">
+			<NestedDialogFrame title="Subquery Table" onClose={onClose}>
 				<CsvFileFields idPrefix="sqlSubquery" {...csv.fields} />
 				<SubqueryTableActions
 					alias={csv.alias}
@@ -242,7 +242,7 @@ export function SubqueryColumns({
 	const missingSelect = mode !== "exists" && selectedColumns.length === 0;
 
 	return (
-		<NestedDialogFrame title="Subquery Columns" table={table}>
+		<NestedDialogFrame title="Subquery Columns" table={table} onClose={onClose}>
 			{mode !== "exists" && (
 				<DialogField>
 					<p className="text-sm font-medium mb-1">

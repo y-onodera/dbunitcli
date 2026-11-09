@@ -76,7 +76,7 @@ export default function ColumnDatalistDialog({
 	}
 
 	return (
-		<ModalOverlay zClass="z-modal-nested">
+		<ModalOverlay onClose={onClose}>
 			<DialogTitle>Load Column Datalist</DialogTitle>
 			{job.running ? (
 				<JobProgress
