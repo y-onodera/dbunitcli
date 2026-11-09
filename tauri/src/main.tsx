@@ -2,6 +2,7 @@ import "./App.css";
 import React, { useState } from "react";
 import ReactDOM from "react-dom/client";
 import Layout from "./app/main/Layout";
+import AppErrorBoundary from "./app/startup/AppErrorBoundary";
 import StartupForm from "./app/startup/StartupForm";
 import EnvironmentProvider from "./context/EnvironmentProvider";
 import WorkspaceResourcesProvider from "./context/WorkspaceResourcesProvider";
@@ -15,15 +16,17 @@ const App: React.FC = () => {
 
 	return (
 		<React.StrictMode>
-			<EnvironmentProvider>
-				<WorkspaceResourcesProvider>
-					{isStartupFormVisible ? (
-						<StartupForm onSelect={handleSelect} />
-					) : (
-						<Layout />
-					)}
-				</WorkspaceResourcesProvider>
-			</EnvironmentProvider>
+			<AppErrorBoundary>
+				<EnvironmentProvider>
+					<WorkspaceResourcesProvider>
+						{isStartupFormVisible ? (
+							<StartupForm onSelect={handleSelect} />
+						) : (
+							<Layout />
+						)}
+					</WorkspaceResourcesProvider>
+				</EnvironmentProvider>
+			</AppErrorBoundary>
 		</React.StrictMode>
 	);
 };
