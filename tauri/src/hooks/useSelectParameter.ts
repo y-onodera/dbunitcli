@@ -159,19 +159,15 @@ export const useParameterizeFrom = () => {
 		parameterizeKeys: string[],
 		paramSource: ParamSource,
 	) => {
-		const fetchParams = {
-			endpoint: `${environment.apiUrl + sourceCommand.toLowerCase()}/parameterize`,
-			options: {
-				method: "POST",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({
-					name,
-					parameterizeKeys,
-					paramType: paramSource.type,
-					paramEncoding: paramSource.encoding,
-				}),
+		const fetchParams = postJsonParams(
+			`${environment.apiUrl + sourceCommand.toLowerCase()}/parameterize`,
+			{
+				name,
+				parameterizeKeys,
+				paramType: paramSource.type,
+				paramEncoding: paramSource.encoding,
 			},
-		};
+		);
 		try {
 			const response = await fetchData(fetchParams);
 			const parameter: ParameterizeOptions = await response.json();
@@ -191,14 +187,10 @@ export const useLoadSelectParameter = () => {
 	const setParameter = useSetSelectParameterState();
 	const environment = useEnvironment();
 	return async (command: Command, name: string) => {
-		const fetchParams = {
-			endpoint: `${environment.apiUrl + command.toLowerCase()}/load`,
-			options: {
-				method: "POST",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ name }),
-			},
-		};
+		const fetchParams = postJsonParams(
+			`${environment.apiUrl + command.toLowerCase()}/load`,
+			{ name },
+		);
 		try {
 			const response = await fetchData(fetchParams);
 			setParameter(new SelectParameter(await response.json(), command, name));
@@ -212,14 +204,10 @@ export const useRefreshSelectParameter = (command: string) => {
 	const setParameter = useSetSelectParameterState();
 	const environment = useEnvironment();
 	return async (values: { [k: string]: FormDataEntryValue }) => {
-		const fetchParams = {
-			endpoint: `${environment.apiUrl + command.toLowerCase()}/refresh`,
-			options: {
-				method: "POST",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify(values),
-			},
-		};
+		const fetchParams = postJsonParams(
+			`${environment.apiUrl + command.toLowerCase()}/refresh`,
+			values,
+		);
 		try {
 			const response = await fetchData(fetchParams);
 			const parameter: Options = await response.json();
@@ -296,12 +284,10 @@ const useParameterAction = () => {
 		onLog?: (line: string) => void,
 	): Promise<Running | null> => {
 		const fetchParams = {
-			endpoint: `${environment.apiUrl + parameter.command}/${action}`,
-			options: {
-				method: "POST",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ name: parameter.name, ...extraBody }),
-			},
+			...postJsonParams(`${environment.apiUrl + parameter.command}/${action}`, {
+				name: parameter.name,
+				...extraBody,
+			}),
 			signal,
 			onLog,
 		};

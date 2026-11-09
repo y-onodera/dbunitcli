@@ -12,7 +12,11 @@ import {
 	DatasetSettings,
 	type DatasetSettingsBuilder,
 } from "../model/DatasetSettings";
-import { fetchData, getErrorMessage } from "../utils/fetchUtils";
+import {
+	fetchData,
+	getErrorMessage,
+	postJsonParams,
+} from "../utils/fetchUtils";
 import type { FormValues } from "../utils/formValues";
 import type { JobContext } from "./useJob";
 import { appendLogLines } from "./useJobLog";
@@ -28,14 +32,14 @@ function buildDatasetRequestBody(
 	info: DatasetSrcInfo,
 	jdbcValues: Record<string, string>,
 	extra?: Record<string, unknown>,
-): string {
-	return JSON.stringify({
+): Record<string, unknown> {
+	return {
 		srcOptions: { ...info.values, ...jdbcValues },
 		inlineSetting: info.inlineSetting,
 		inlineXlsxSchema: info.inlineXlsxSchema,
 		inlineSource: info.inlineSource,
 		...extra,
-	});
+	};
 }
 
 // ソース未指定（inlineSourceならその内容が空）・none・JDBC未接続のJDBC系srcではsidecarへ問い合わせない
@@ -104,15 +108,13 @@ async function fetchDatasetJson<T>(
 	onLog?: (line: string) => void,
 ): Promise<T> {
 	const fetchParams = {
-		endpoint: `${apiUrl}dataset-setting/${endpoint}`,
-		options: {
-			method: "POST",
-			headers: { "Content-Type": "application/json" },
-			body: buildDatasetRequestBody(info, jdbcValues, {
+		...postJsonParams(
+			`${apiUrl}dataset-setting/${endpoint}`,
+			buildDatasetRequestBody(info, jdbcValues, {
 				...extra,
 				parameters: paramInputs,
 			}),
-		},
+		),
 		signal,
 		onLog,
 	};
@@ -271,16 +273,14 @@ export const useDatasetTableConvert = () => {
 		context: JobContext,
 	): Promise<string> => {
 		const response = await fetchData({
-			endpoint: `${apiUrl}dataset-setting/table-convert`,
-			options: {
-				method: "POST",
-				headers: { "Content-Type": "application/json" },
-				body: buildDatasetRequestBody(srcInfo, jdbcValues, {
+			...postJsonParams(
+				`${apiUrl}dataset-setting/table-convert`,
+				buildDatasetRequestBody(srcInfo, jdbcValues, {
 					tableName,
 					parameters: paramInputs,
 					result,
 				}),
-			},
+			),
 			...context,
 		});
 		return response.text();

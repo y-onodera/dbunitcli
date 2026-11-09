@@ -1,5 +1,9 @@
 import type { JobContext } from "../../../../hooks/useJob";
-import { fetchData, getErrorMessage } from "../../../../utils/fetchUtils";
+import {
+	fetchData,
+	getErrorMessage,
+	postJsonParams,
+} from "../../../../utils/fetchUtils";
 import type { FormValues } from "../../../../utils/formValues";
 
 // refresh系エンドポイントで再構成するダイアログフォームの共通基盤
@@ -16,12 +20,7 @@ export async function postDialogForm<T>(
 	fetchOptions?: JobContext,
 ): Promise<T> {
 	const response = await fetchData({
-		endpoint: `${apiUrl}${endpoint}`,
-		options: {
-			method: "POST",
-			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify(values),
-		},
+		...postJsonParams(`${apiUrl}${endpoint}`, values),
 		...fetchOptions,
 	});
 	return (await response.json()) as T;

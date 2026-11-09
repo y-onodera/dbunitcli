@@ -17,6 +17,7 @@ import {
 	fetchData,
 	getErrorMessage,
 	handleFetchError,
+	postJsonParams,
 } from "../utils/fetchUtils";
 
 // parameterList・resourcesSettingsへのWorkspaceResources反映（update/reload共通）
@@ -39,14 +40,10 @@ export const useWorkspaceUpdate = () => {
 		resultBase: string,
 		env: string,
 	) => {
-		const fetchParams = {
-			endpoint: `${environment.apiUrl}workspace/update`,
-			options: {
-				method: "POST",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ workspace, datasetBase, resultBase, env }),
-			},
-		};
+		const fetchParams = postJsonParams(
+			`${environment.apiUrl}workspace/update`,
+			{ workspace, datasetBase, resultBase, env },
+		);
 		await fetchData(fetchParams)
 			.then((response) => response.json())
 			.then((resources: WorkspaceResources) => {
@@ -85,14 +82,10 @@ export const useResolveAbsolutePath = () => {
 	const { apiUrl } = useEnvironment();
 	const context = useWorkspaceContext();
 	return async (path: string, attribute: Attribute): Promise<string> => {
-		const fetchParams = {
-			endpoint: `${apiUrl}workspace/resolve-path`,
-			options: {
-				method: "POST",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ path, defaultPath: attribute.defaultPath }),
-			},
-		};
+		const fetchParams = postJsonParams(`${apiUrl}workspace/resolve-path`, {
+			path,
+			defaultPath: attribute.defaultPath,
+		});
 		try {
 			const response = await fetchData(fetchParams);
 			const sidecarResult = await response.text();
