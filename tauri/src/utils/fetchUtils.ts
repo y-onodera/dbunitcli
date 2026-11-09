@@ -82,7 +82,10 @@ export async function fetchAndUpdate<T>(
 			return "success" as OperationResult;
 		})
 		.catch((ex) => {
-			handleFetchError(getErrorMessage(ex), fetchParams);
+			// 呼び出し元が中断したときは知らせない
+			if (!fetchParams.signal?.aborted) {
+				handleFetchError(getErrorMessage(ex), fetchParams);
+			}
 			return "failed" as OperationResult;
 		});
 }

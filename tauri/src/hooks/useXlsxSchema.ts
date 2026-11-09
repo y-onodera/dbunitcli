@@ -1,66 +1,33 @@
 import { useEffect, useState } from "react";
 import { useEnvironment } from "../context/EnvironmentProvider";
-import { useResourceEncoding } from "../context/ResourceEncodingProvider";
 import type { DatasetSrcInfo } from "../model/CommandOption";
 import { XlsxSchema, type XlsxSchemaBuilder } from "../model/XlsxSchema";
+import { fetchData, getErrorMessage, logFetchError } from "../utils/fetchUtils";
 import {
-	fetchData,
-	getErrorMessage,
-	handleFetchError,
-} from "../utils/fetchUtils";
-import { resourceLoadParams, useSaveResource } from "./useResourceFiles";
+	type ResourceParser,
+	useResourceLoad,
+	useSaveResource,
+} from "./useResourceFiles";
 
 export const useSaveXlsxSchema = () => {
 	return useSaveResource<XlsxSchema>("xlsxSchema");
 };
 
+const XLSX_SCHEMA_PARSER: ResourceParser<XlsxSchema> = {
+	empty: () => XlsxSchema.create(),
+	parse: (json) => XlsxSchema.build(json as XlsxSchemaBuilder),
+};
+
 export const useXlsxSchemaData = (
 	fileName: string,
 ): { schema: XlsxSchema; loading: boolean } => {
-	const { apiUrl } = useEnvironment();
-	const encoding = useResourceEncoding("xlsxSchema");
-	const [schema, setSchema] = useState(XlsxSchema.create());
-	const [loading, setLoading] = useState(fileName !== "");
-
-	useEffect(() => {
-		if (!fileName) {
-			setSchema(XlsxSchema.create());
-			setLoading(false);
-			return;
-		}
-		const controller = new AbortController();
-		setLoading(true);
-		loadXlsxSchema(apiUrl, fileName, encoding).then((result) => {
-			if (!controller.signal.aborted) {
-				setSchema(result);
-				setLoading(false);
-			}
-		});
-		return () => {
-			controller.abort();
-		};
-	}, [fileName, apiUrl, encoding]);
-
-	return { schema, loading };
+	const { data, loading } = useResourceLoad(
+		"xlsxSchema",
+		fileName,
+		XLSX_SCHEMA_PARSER,
+	);
+	return { schema: data, loading };
 };
-
-async function loadXlsxSchema(
-	apiUrl: string,
-	name: string,
-	encoding: string,
-): Promise<XlsxSchema> {
-	if (name === "") {
-		return XlsxSchema.create();
-	}
-	const fetchParams = resourceLoadParams(apiUrl, "xlsxSchema", name, encoding);
-	return await fetchData(fetchParams)
-		.then((response) => response.json())
-		.then((schema: XlsxSchemaBuilder) => XlsxSchema.build(schema))
-		.catch((ex) => {
-			handleFetchError(getErrorMessage(ex), fetchParams);
-			return XlsxSchema.create();
-		});
-}
 
 type SheetSrc = {
 	src: string;
@@ -72,13 +39,12 @@ type SheetSrc = {
 	extension: string;
 };
 
+// 入力候補なので、取得できなければ候補なしとする（原因はコンソールに残す）
 async function fetchSheets(
 	apiUrl: string,
 	sheetSrc: SheetSrc,
+	signal: AbortSignal,
 ): Promise<string[]> {
-	if (!sheetSrc.src) {
-		return [];
-	}
 	const fetchParams = {
 		endpoint: `${apiUrl}xlsx-schema/sheets`,
 		options: {
@@ -89,10 +55,17 @@ async function fetchSheets(
 				recursive: sheetSrc.recursive === "true",
 			}),
 		},
+		signal,
 	};
-	return fetchData(fetchParams)
-		.then((r) => r.json())
-		.catch(() => []);
+	try {
+		const response = await fetchData(fetchParams);
+		return (await response.json()) as string[];
+	} catch (ex) {
+		if (!signal.aborted) {
+			logFetchError(getErrorMessage(ex), fetchParams);
+		}
+		return [];
+	}
 }
 
 export const useSrcInfoSheets = (srcInfo: DatasetSrcInfo): string[] => {
@@ -110,18 +83,23 @@ export const useSrcInfoSheets = (srcInfo: DatasetSrcInfo): string[] => {
 
 	useEffect(() => {
 		if (!src) {
+			setSheetNames([]);
 			return;
 		}
 		const controller = new AbortController();
-		fetchSheets(apiUrl, {
-			src,
-			regTableInclude,
-			regTableExclude,
-			recursive,
-			regInclude,
-			regExclude,
-			extension,
-		}).then((names) => {
+		fetchSheets(
+			apiUrl,
+			{
+				src,
+				regTableInclude,
+				regTableExclude,
+				recursive,
+				regInclude,
+				regExclude,
+				extension,
+			},
+			controller.signal,
+		).then((names) => {
 			if (!controller.signal.aborted) {
 				setSheetNames(names);
 			}

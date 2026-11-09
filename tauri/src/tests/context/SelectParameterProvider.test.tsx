@@ -156,6 +156,14 @@ const { mockFetchData } = vi.hoisted(() => {
 vi.mock("../../utils/fetchUtils", async (importOriginal) => ({
 	...(await importOriginal<typeof import("../../utils/fetchUtils")>()),
 	fetchData: mockFetchData,
+	// 実体のfetchAndUpdateはモジュール内のfetchDataを呼ぶため、モックのfetchDataへ回す
+	fetchAndUpdate: vi.fn(
+		async (params: FetchParams, onSuccess: (data: unknown) => void) => {
+			const response = await mockFetchData(params);
+			onSuccess(await response.json());
+			return "success" as const;
+		},
+	),
 	handleFetchError: vi.fn(),
 	logFetchError: vi.fn(),
 	getErrorMessage: vi.fn((error: unknown) =>

@@ -2,7 +2,6 @@ import { type Dispatch, type SetStateAction, useEffect, useState } from "react";
 import { useEnvironment } from "../context/EnvironmentProvider";
 import { useJdbcConnectionState } from "../context/JdbcConnectionProvider";
 import { useParamInputs } from "../context/ParameterInputProvider";
-import { useResourceEncoding } from "../context/ResourceEncodingProvider";
 import {
 	type DatasetSrcInfo,
 	srcTypeOf,
@@ -12,17 +11,14 @@ import {
 	DatasetSettings,
 	type DatasetSettingsBuilder,
 } from "../model/DatasetSettings";
-import {
-	fetchData,
-	getErrorMessage,
-	handleFetchError,
-} from "../utils/fetchUtils";
+import { fetchData, getErrorMessage } from "../utils/fetchUtils";
 import type { FormValues } from "../utils/formValues";
 import type { JobContext } from "./useJob";
 import { appendLogLines } from "./useJobLog";
 import {
 	type DatasetSettingKind,
-	resourceLoadParams,
+	type ResourceParser,
+	useResourceLoad,
 	useSaveResource,
 } from "./useResourceFiles";
 
@@ -41,7 +37,7 @@ function buildDatasetRequestBody(
 	});
 }
 
-// ソース未指定（inlineSourceならその内容が空）・none・JDBC未接続のsqlではsidecarへ問い合わせない
+// ソース未指定（inlineSourceならその内容が空）・none・JDBC未接続のsql/tableではsidecarへ問い合わせない
 function isSrcReady(info: DatasetSrcInfo, connectionOk: boolean): boolean {
 	const srcType = srcTypeOf(info);
 	const hasSrc =
@@ -51,7 +47,7 @@ function isSrcReady(info: DatasetSrcInfo, connectionOk: boolean): boolean {
 	if (!hasSrc || !srcType || srcType === "none") {
 		return false;
 	}
-	return srcType !== "sql" || connectionOk;
+	return (srcType !== "sql" && srcType !== "table") || connectionOk;
 }
 
 // Previewの読込状態。失敗したらdataは空にし、errorにメッセージを持つ。logsは読込中に届いたログ（失敗後も残す）
@@ -124,7 +120,7 @@ async function fetchDatasetJson<T>(
 
 // srcの読込準備ができていてenabledなら、endpointへextraを付けて読み込む。srcInfoやextraが変わるたびに読み直す。
 // extraは文字列だけの値にする（毎回作り直されるオブジェクトでも読み直さないよう、JSON文字列にして比較する）。
-// withLogs: 読込中のログも受け取る
+// withLogs: 読込中のログも受け取る。allTables: settingの対象外のテーブルも読む
 function useDatasetLoad<T>(
 	srcInfo: DatasetSrcInfo,
 	endpoint: string,
@@ -132,6 +128,7 @@ function useDatasetLoad<T>(
 	enabled: boolean,
 	idle: Load<T>,
 	withLogs: boolean,
+	allTables = false,
 ): Load<T> {
 	const [load, setLoad] = useState<Load<T>>(idle);
 	const { apiUrl } = useEnvironment();
@@ -152,7 +149,7 @@ function useDatasetLoad<T>(
 				fetchDatasetJson<T>(
 					apiUrl,
 					endpoint,
-					srcInfo,
+					allTables ? withAllTables(srcInfo) : srcInfo,
 					jdbcValues,
 					paramInputs,
 					JSON.parse(extraKey),
@@ -176,6 +173,7 @@ function useDatasetLoad<T>(
 		extraKey,
 		idle,
 		withLogs,
+		allTables,
 	]);
 
 	return load;
@@ -296,68 +294,37 @@ export const useSaveDatasetSettings = (
 	return useSaveResource<DatasetSettings>(kind);
 };
 
+const DATASET_SETTINGS_PARSER: ResourceParser<DatasetSettings> = {
+	empty: () => DatasetSettings.create(),
+	parse: (json) => DatasetSettings.build(json as DatasetSettingsBuilder),
+};
+
 export const useDatasetSettingsData = (
 	fileName: string,
 	kind: DatasetSettingKind = "datasetSetting",
 ): { settings: DatasetSettings; loading: boolean } => {
-	const { apiUrl } = useEnvironment();
-	const encoding = useResourceEncoding(kind);
-	const [settings, setSettings] = useState(DatasetSettings.create());
-	const [loading, setLoading] = useState(fileName !== "");
-
-	useEffect(() => {
-		if (!fileName) {
-			setSettings(DatasetSettings.create());
-			setLoading(false);
-			return;
-		}
-		const controller = new AbortController();
-		setLoading(true);
-		loadDatasetSettings(apiUrl, fileName, kind, encoding).then((result) => {
-			if (!controller.signal.aborted) {
-				setSettings(result);
-				setLoading(false);
-			}
-		});
-		return () => {
-			controller.abort();
-		};
-	}, [fileName, apiUrl, kind, encoding]);
-
-	return { settings, loading };
+	const { data, loading } = useResourceLoad(
+		kind,
+		fileName,
+		DATASET_SETTINGS_PARSER,
+	);
+	return { settings: data, loading };
 };
 
+const IDLE_ALL_COLUMNS = idleLoad<Record<string, string[]>>({});
+
+// 入力候補なので、settingの対象外のテーブルのカラムも含め、取得できなければ候補なしとする
 export const useSrcInfoColumnNames = (srcInfo: DatasetSrcInfo): string[] => {
-	const [columnNames, setColumnNames] = useState<string[]>([]);
-	const { apiUrl } = useEnvironment();
-	const { jdbcValues, connectionOk } = useJdbcConnectionState();
-	const paramInputs = useParamInputs();
-
-	const srcReady = isSrcReady(srcInfo, connectionOk);
-
-	useEffect(() => {
-		if (!srcReady) {
-			setColumnNames([]);
-			return;
-		}
-		const controller = new AbortController();
-		loadAllColumnNames(
-			apiUrl,
-			srcInfo,
-			jdbcValues,
-			paramInputs,
-			controller.signal,
-		).then((names) => {
-			if (!controller.signal.aborted) {
-				setColumnNames(names);
-			}
-		});
-		return () => {
-			controller.abort();
-		};
-	}, [apiUrl, srcInfo, srcReady, jdbcValues, paramInputs]);
-
-	return columnNames;
+	const { data } = useDatasetLoad(
+		srcInfo,
+		"table-columns",
+		{ tableName: "" },
+		true,
+		IDLE_ALL_COLUMNS,
+		false,
+		true,
+	);
+	return [...new Set(Object.values(data).flat())];
 };
 
 // sidecarのDatasetTableNamesRequestDto.INLINE_SOURCE_TABLE_NAMEと揃える
@@ -383,25 +350,6 @@ async function fetchTableColumns(
 		signal,
 		onLog,
 	);
-}
-
-// 入力候補なので、settingの対象外のテーブルのカラムも含め、取得できなければ候補なしとする
-async function loadAllColumnNames(
-	apiUrl: string,
-	srcInfo: DatasetSrcInfo,
-	jdbcValues: Record<string, string>,
-	paramInputs: Record<string, string>,
-	signal: AbortSignal,
-): Promise<string[]> {
-	const columns = await fetchTableColumns(
-		apiUrl,
-		withAllTables(srcInfo),
-		"",
-		jdbcValues,
-		paramInputs,
-		signal,
-	).catch(() => ({}));
-	return [...new Set(Object.values(columns).flat())];
 }
 
 export const useColumnNamesFetcher = () => {
@@ -451,22 +399,3 @@ export const useCsvColumnNamesFetcher = () => {
 		return columns[INLINE_SOURCE_TABLE_NAME] ?? [];
 	};
 };
-
-async function loadDatasetSettings(
-	apiUrl: string,
-	name: string,
-	kind: DatasetSettingKind,
-	encoding: string,
-): Promise<DatasetSettings> {
-	if (name === "") {
-		return DatasetSettings.create();
-	}
-	const fetchParams = resourceLoadParams(apiUrl, kind, name, encoding);
-	return await fetchData(fetchParams)
-		.then((response) => response.json())
-		.then((setting: DatasetSettingsBuilder) => DatasetSettings.build(setting))
-		.catch((ex) => {
-			handleFetchError(getErrorMessage(ex), fetchParams);
-			return DatasetSettings.create();
-		});
-}
