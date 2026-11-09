@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { SectionHelpButton } from "./DialogHelpButton";
+import { DIALOG_WIDTH } from "./DialogLayout";
 import {
 	DialogMaximizeContext,
 	MaximizeToggleButton,
@@ -8,25 +9,25 @@ import {
 
 export function ModalOverlay({
 	children,
-	width = "w-96",
+	size = "sm",
 	zClass = "z-modal",
 	maximizable = false,
 }: {
 	children: ReactNode;
-	width?: string;
+	size?: keyof typeof DIALOG_WIDTH;
 	zClass?: string;
 	maximizable?: boolean;
 }) {
 	const maximize = useDialogMaximizeState(maximizable);
-	const size = maximize.maximized
+	const frameSize = maximize.maximized
 		? "flex flex-col w-full h-full"
-		: `max-h-[80vh] ${width}`;
+		: `max-h-[80vh] ${DIALOG_WIDTH[size]}`;
 	return (
 		<div
 			className={`fixed inset-0 p-4 bg-overlay flex items-center justify-center ${zClass}`}
 		>
 			<div
-				className={`bg-surface rounded-lg shadow-modal p-6 max-w-full overflow-y-auto ${size}`}
+				className={`bg-surface rounded-lg shadow-modal p-6 max-w-full overflow-y-auto ${frameSize}`}
 			>
 				<DialogMaximizeContext value={maximize}>
 					{children}

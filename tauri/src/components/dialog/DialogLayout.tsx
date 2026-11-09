@@ -1,10 +1,16 @@
 import type { ReactNode } from "react";
 import { useDialogMaximize } from "./DialogMaximize";
 
+export const DIALOG_WIDTH = {
+	sm: "w-dialog-sm",
+	md: "w-dialog-md",
+	lg: "w-dialog-lg",
+} as const;
+
 const BODY_SIZE = {
-	sm: "w-dialog-sm max-w-full p-4",
-	md: "w-dialog-md max-w-full p-4",
-	lg: "w-dialog-lg max-w-full p-4",
+	sm: `${DIALOG_WIDTH.sm} max-w-full p-4`,
+	md: `${DIALOG_WIDTH.md} max-w-full p-4`,
+	lg: `${DIALOG_WIDTH.lg} max-w-full p-4`,
 	// 幅固定ではなく最小幅のみ指定し、内容に応じて広がる
 	auto: "min-w-dialog-min p-4",
 	// 幅は親に任せる

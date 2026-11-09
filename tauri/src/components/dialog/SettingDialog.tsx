@@ -238,7 +238,8 @@ export function Arrays(props: {
 	handleChange: (text: string, index: number) => void;
 	handleRemove: (index: number) => void;
 	ignoreLabel?: boolean;
-	showCaption?: boolean;
+	// 先頭行の上に見出しとして出す。expressionは入力欄を広げる
+	kind?: "column" | "expression";
 	list?: string;
 	handleSelect?: (index: number) => void;
 	handleEdit?: (index: number) => void;
@@ -274,7 +275,7 @@ export function Arrays(props: {
 						handleRemove={blank ? () => setAdding(false) : props.handleRemove}
 						isDuplicated={(text) => isDuplicated(props.values, text, index)}
 						ignoreLabel={props.ignoreLabel}
-						showCaption={props.showCaption}
+						kind={props.kind}
 						list={props.list}
 						handleSelect={props.handleSelect}
 						handleEdit={props.handleEdit}
@@ -300,7 +301,7 @@ export function ArraysText(props: {
 	handleRemove: (index: number) => void;
 	isDuplicated?: (text: string) => boolean;
 	ignoreLabel?: boolean;
-	showCaption?: boolean;
+	kind?: "column" | "expression";
 	list?: string;
 	handleSelect?: (index: number) => void;
 	handleEdit?: (index: number) => void;
@@ -316,11 +317,12 @@ export function ArraysText(props: {
 	};
 	const handleRemove = () => props.handleRemove(props.index);
 	const showLabel = !props.ignoreLabel && props.index === 0;
+	const wide = props.kind === "expression";
 	return (
 		<>
-			{showLabel && props.showCaption && (
+			{showLabel && props.kind && (
 				<div className="grid grid-cols-5 pb-1">
-					<span className="col-start-2 text-caption">column</span>
+					<span className="col-start-2 text-caption">{props.kind}</span>
 				</div>
 			)}
 			<div className="grid grid-cols-5 pb-2">
@@ -336,14 +338,16 @@ export function ArraysText(props: {
 					name={props.name}
 					id={props.name}
 					required={true}
-					wStyle="col-start-2"
+					wStyle={wide ? "col-start-2 col-span-2" : "col-start-2"}
 					value={text}
 					handleChange={(ev) => setText(ev.target.value)}
 					handleBlur={handleBlur}
 					list={props.list}
 				/>
 				{(props.handleSelect || props.handleEdit || props.index > 0) && (
-					<div className="col-start-3 flex items-center">
+					<div
+						className={`${wide ? "col-start-4" : "col-start-3"} flex items-center`}
+					>
 						{props.handleSelect && (
 							<FactCheckButton
 								title="select"
