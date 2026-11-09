@@ -74,7 +74,8 @@ const { mockFetchData, mockFetchAndUpdate } = vi.hoisted(() => {
 	return { mockFetchData, mockFetchAndUpdate };
 });
 
-vi.mock("../../utils/fetchUtils", () => ({
+vi.mock("../../utils/fetchUtils", async (importOriginal) => ({
+	...(await importOriginal<typeof import("../../utils/fetchUtils")>()),
 	fetchData: mockFetchData,
 	fetchAndUpdate: mockFetchAndUpdate,
 }));

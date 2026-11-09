@@ -2,9 +2,8 @@ import {
 	type CommandOption,
 	isCsvType,
 	isFixedType,
+	isJdbcType,
 	isRegType,
-	isSqlType,
-	isTableType,
 	isXlsType,
 	isXlsxType,
 	type SrcTypeOptions,
@@ -32,7 +31,7 @@ export default function SrcTypeFormSection({
 				handleToggleChecked={handleToggleChecked}
 			/>
 		);
-	} else if (isTableType(options) || isSqlType(options)) {
+	} else if (isJdbcType(options)) {
 		return (
 			<DBFormSection
 				options={options}

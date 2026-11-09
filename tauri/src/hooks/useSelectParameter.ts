@@ -7,7 +7,6 @@ import {
 } from "../context/FieldErrorProvider";
 import {
 	useSelectParameter,
-	useSetSelectParameter,
 	useSetSelectParameterState,
 } from "../context/SelectParameterProvider";
 import { useSetParameterList } from "../context/WorkspaceResourcesProvider";
@@ -18,6 +17,7 @@ import type {
 } from "../model/SelectParameter";
 import { SelectParameter } from "../model/SelectParameter";
 import {
+	type FetchParams,
 	fetchAndUpdate,
 	fetchData,
 	getErrorMessage,
@@ -26,6 +26,7 @@ import {
 	logFetchError,
 	OptionValidationError,
 	type OptionViolation,
+	postJsonParams,
 } from "../utils/fetchUtils";
 
 export type Running = {
@@ -37,78 +38,48 @@ export type Running = {
 	failed?: boolean;
 };
 
-export const useAddParameter = (command: string) => {
-	const setParameter = useSetParameterList();
-	const environment = useEnvironment();
-	return async () => {
-		const fetchParams = {
-			endpoint: `${environment.apiUrl + command.toLowerCase()}/add`,
-			options: {
-				method: "GET",
-				headers: { "Content-Type": "application/json" },
-			},
-		};
-		await fetchData(fetchParams)
-			.then((response) => response.json())
-			.then((parameters: string[]) => {
-				setParameter((current) =>
-					current.replace(command.toLowerCase(), parameters),
-				);
-			})
-			.catch((ex) => handleFetchError(getErrorMessage(ex), fetchParams));
-	};
-};
-export const useParameterActions = (command: string, name: string) => {
+// リクエストの応答（commandの更新後のパラメータ名一覧）をparameterListへ書き戻す関数を返す
+const useUpdateParameterList = (command: string) => {
 	const setParameterList = useSetParameterList();
+	return (fetchParams: FetchParams, onUpdated?: () => void) =>
+		fetchAndUpdate<string[]>(fetchParams, (parameters) => {
+			setParameterList((current) => current.replace(command, parameters));
+			onUpdated?.();
+		});
+};
+
+export const useAddParameter = (command: string) => {
 	const { apiUrl } = useEnvironment();
-	const parameter = useSelectParameter();
-	const setParameter = useSetSelectParameter();
+	const key = command.toLowerCase();
+	const updateList = useUpdateParameterList(key);
+	return () =>
+		updateList({ endpoint: `${apiUrl + key}/add`, options: { method: "GET" } });
+};
 
-	const postAndUpdateList = async (action: string) => {
-		const fetchParams = {
-			endpoint: `${apiUrl + command.toLowerCase()}/${action}`,
-			options: {
-				method: "POST",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ name }),
-			},
-		};
-		await fetchData(fetchParams)
-			.then((response) => response.json())
-			.then((parameters: string[]) => {
-				setParameterList((current) =>
-					current.replace(command.toLowerCase(), parameters),
-				);
-			})
-			.catch((ex) => handleFetchError(getErrorMessage(ex), fetchParams));
-	};
+export const useParameterActions = (command: string, name: string) => {
+	const { apiUrl } = useEnvironment();
+	const setParameter = useSetSelectParameterState();
+	const key = command.toLowerCase();
+	const updateList = useUpdateParameterList(key);
+	const post = (action: string, body: object, onUpdated?: () => void) =>
+		updateList(postJsonParams(`${apiUrl + key}/${action}`, body), onUpdated);
 
-	const handleDelete = () => postAndUpdateList("delete");
-	const handleCopy = () => postAndUpdateList("copy");
-	const handleRename = async (newName: string) => {
-		const fetchParams = {
-			endpoint: `${apiUrl + command.toLowerCase()}/rename`,
-			options: {
-				method: "POST",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ oldName: name, newName }),
-			},
-		};
-		await fetchData(fetchParams)
-			.then((response) => response.json())
-			.then((parameters: string[]) => {
-				setParameterList((current) =>
-					current.replace(command.toLowerCase(), parameters),
-				);
-				if (
-					parameter.command === command.toLowerCase() &&
-					parameter.name === name
-				) {
-					setParameter(parameter.options, parameter.command, newName);
-				}
-			})
-			.catch((ex) => handleFetchError(getErrorMessage(ex), fetchParams));
-	};
+	const handleDelete = () => post("delete", { name });
+	const handleCopy = () => post("copy", { name });
+	// 応答を待つ間に選択が変わりうるので、選択中のパラメータは更新時点の値で判定する
+	const handleRename = (newName: string) =>
+		post("rename", { oldName: name, newName }, () =>
+			setParameter((current) =>
+				current.command === key && current.name === name
+					? new SelectParameter(
+							current.options,
+							current.command,
+							newName,
+							current.inputParam,
+						)
+					: current,
+			),
+		);
 
 	return { handleDelete, handleCopy, handleRename };
 };
@@ -118,15 +89,6 @@ export type ParameterizeFile = {
 	path: string;
 	usedBy: string[];
 };
-
-const postJsonParams = (endpoint: string, body: object) => ({
-	endpoint,
-	options: {
-		method: "POST",
-		headers: { "Content-Type": "application/json" },
-		body: JSON.stringify(body),
-	},
-});
 
 export const useLoadParameterizeFiles = () => {
 	const { apiUrl } = useEnvironment();
@@ -139,14 +101,10 @@ export const useLoadParameterizeFiles = () => {
 
 export const useDeleteParameterize = () => {
 	const { apiUrl } = useEnvironment();
-	const setParameterList = useSetParameterList();
+	const updateList = useUpdateParameterList("parameterize");
 	return (name: string, deleteFiles: string[]) =>
-		fetchAndUpdate<string[]>(
+		updateList(
 			postJsonParams(`${apiUrl}parameterize/delete`, { name, deleteFiles }),
-			(parameters) =>
-				setParameterList((current) =>
-					current.replace("parameterize", parameters),
-				),
 		);
 };
 
@@ -166,11 +124,16 @@ export const useParameterizeCandidates = (
 	);
 	useEffect(() => {
 		const controller = new AbortController();
+		// 別のパラメータの候補を出したままにしない
+		setCandidates(null);
 		fetchAndUpdate<ParameterizeCandidate[]>(
-			postJsonParams(
-				`${apiUrl + command.toLowerCase()}/parameterize/candidates`,
-				{ name },
-			),
+			{
+				...postJsonParams(
+					`${apiUrl + command.toLowerCase()}/parameterize/candidates`,
+					{ name },
+				),
+				signal: controller.signal,
+			},
 			(data) => {
 				if (!controller.signal.aborted) {
 					setCandidates(data);
@@ -196,19 +159,15 @@ export const useParameterizeFrom = () => {
 		parameterizeKeys: string[],
 		paramSource: ParamSource,
 	) => {
-		const fetchParams = {
-			endpoint: `${environment.apiUrl + sourceCommand.toLowerCase()}/parameterize`,
-			options: {
-				method: "POST",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({
-					name,
-					parameterizeKeys,
-					paramType: paramSource.type,
-					paramEncoding: paramSource.encoding,
-				}),
+		const fetchParams = postJsonParams(
+			`${environment.apiUrl + sourceCommand.toLowerCase()}/parameterize`,
+			{
+				name,
+				parameterizeKeys,
+				paramType: paramSource.type,
+				paramEncoding: paramSource.encoding,
 			},
-		};
+		);
 		try {
 			const response = await fetchData(fetchParams);
 			const parameter: ParameterizeOptions = await response.json();
@@ -228,14 +187,10 @@ export const useLoadSelectParameter = () => {
 	const setParameter = useSetSelectParameterState();
 	const environment = useEnvironment();
 	return async (command: Command, name: string) => {
-		const fetchParams = {
-			endpoint: `${environment.apiUrl + command.toLowerCase()}/load`,
-			options: {
-				method: "POST",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ name }),
-			},
-		};
+		const fetchParams = postJsonParams(
+			`${environment.apiUrl + command.toLowerCase()}/load`,
+			{ name },
+		);
 		try {
 			const response = await fetchData(fetchParams);
 			setParameter(new SelectParameter(await response.json(), command, name));
@@ -249,14 +204,10 @@ export const useRefreshSelectParameter = (command: string) => {
 	const setParameter = useSetSelectParameterState();
 	const environment = useEnvironment();
 	return async (values: { [k: string]: FormDataEntryValue }) => {
-		const fetchParams = {
-			endpoint: `${environment.apiUrl + command.toLowerCase()}/refresh`,
-			options: {
-				method: "POST",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify(values),
-			},
-		};
+		const fetchParams = postJsonParams(
+			`${environment.apiUrl + command.toLowerCase()}/refresh`,
+			values,
+		);
 		try {
 			const response = await fetchData(fetchParams);
 			const parameter: Options = await response.json();
@@ -333,12 +284,10 @@ const useParameterAction = () => {
 		onLog?: (line: string) => void,
 	): Promise<Running | null> => {
 		const fetchParams = {
-			endpoint: `${environment.apiUrl + parameter.command}/${action}`,
-			options: {
-				method: "POST",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ name: parameter.name, ...extraBody }),
-			},
+			...postJsonParams(`${environment.apiUrl + parameter.command}/${action}`, {
+				name: parameter.name,
+				...extraBody,
+			}),
 			signal,
 			onLog,
 		};

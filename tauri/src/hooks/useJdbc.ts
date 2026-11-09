@@ -5,6 +5,7 @@ import {
 	getErrorMessage,
 	handleFetchError,
 	logFetchError,
+	postJsonParams,
 } from "../utils/fetchUtils";
 import type { JobContext } from "./useJob";
 import { useUpdateResourceFiles } from "./useResourceFiles";
@@ -21,15 +22,13 @@ function toJdbcRequestBody(jdbcValues: Record<string, string>) {
 	};
 }
 
-// 一覧を取得する。失敗は呼び出し元がログと一緒に表示するため投げる（自分で中断したときはコンソールにも出さない）
+// 一覧を取得する。失敗は呼び出し元がログと一緒に表示するため投げる
 async function fetchJdbcList(params: FetchParams): Promise<string[]> {
 	try {
 		const response = await fetchData(params);
 		return (await response.json()) as string[];
 	} catch (e) {
-		if (!params.signal?.aborted) {
-			logFetchError(getErrorMessage(e), params);
-		}
+		logFetchError(getErrorMessage(e), params);
 		throw e;
 	}
 }
@@ -41,12 +40,7 @@ export const useJdbcTables = () => {
 		context: JobContext,
 	): Promise<string[]> =>
 		fetchJdbcList({
-			endpoint: `${apiUrl}jdbc/tables`,
-			options: {
-				method: "POST",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify(toJdbcRequestBody(jdbcValues)),
-			},
+			...postJsonParams(`${apiUrl}jdbc/tables`, toJdbcRequestBody(jdbcValues)),
 			timeoutMs: JDBC_TIMEOUT_MS,
 			...context,
 		});
@@ -60,12 +54,10 @@ export const useJdbcColumns = () => {
 		context: JobContext,
 	): Promise<string[]> =>
 		fetchJdbcList({
-			endpoint: `${apiUrl}jdbc/columns`,
-			options: {
-				method: "POST",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ ...toJdbcRequestBody(jdbcValues), table }),
-			},
+			...postJsonParams(`${apiUrl}jdbc/columns`, {
+				...toJdbcRequestBody(jdbcValues),
+				table,
+			}),
 			timeoutMs: JDBC_TIMEOUT_MS,
 			...context,
 		});
@@ -77,12 +69,7 @@ export const useJdbcConnectionTest = () => {
 		jdbcValues: Record<string, string>,
 	): Promise<{ success: boolean; message: string } | null> => {
 		const params = {
-			endpoint: `${apiUrl}jdbc/test`,
-			options: {
-				method: "POST",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify(toJdbcRequestBody(jdbcValues)),
-			},
+			...postJsonParams(`${apiUrl}jdbc/test`, toJdbcRequestBody(jdbcValues)),
 			timeoutMs: JDBC_TIMEOUT_MS,
 		};
 		try {

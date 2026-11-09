@@ -2,9 +2,9 @@ import { type Dispatch, type SetStateAction, useEffect, useState } from "react";
 import { useEnvironment } from "../context/EnvironmentProvider";
 import { useJdbcConnectionState } from "../context/JdbcConnectionProvider";
 import { useParamInputs } from "../context/ParameterInputProvider";
-import { useResourceEncoding } from "../context/ResourceEncodingProvider";
 import {
 	type DatasetSrcInfo,
+	isJdbcSrcType,
 	srcTypeOf,
 	withAllTables,
 } from "../model/CommandOption";
@@ -15,14 +15,15 @@ import {
 import {
 	fetchData,
 	getErrorMessage,
-	handleFetchError,
+	postJsonParams,
 } from "../utils/fetchUtils";
 import type { FormValues } from "../utils/formValues";
 import type { JobContext } from "./useJob";
 import { appendLogLines } from "./useJobLog";
 import {
 	type DatasetSettingKind,
-	resourceLoadParams,
+	type ResourceParser,
+	useResourceLoad,
 	useSaveResource,
 } from "./useResourceFiles";
 
@@ -31,17 +32,17 @@ function buildDatasetRequestBody(
 	info: DatasetSrcInfo,
 	jdbcValues: Record<string, string>,
 	extra?: Record<string, unknown>,
-): string {
-	return JSON.stringify({
+): Record<string, unknown> {
+	return {
 		srcOptions: { ...info.values, ...jdbcValues },
 		inlineSetting: info.inlineSetting,
 		inlineXlsxSchema: info.inlineXlsxSchema,
 		inlineSource: info.inlineSource,
 		...extra,
-	});
+	};
 }
 
-// ソース未指定（inlineSourceならその内容が空）・none・JDBC未接続のsqlではsidecarへ問い合わせない
+// ソース未指定（inlineSourceならその内容が空）・none・JDBC未接続のJDBC系srcではsidecarへ問い合わせない
 function isSrcReady(info: DatasetSrcInfo, connectionOk: boolean): boolean {
 	const srcType = srcTypeOf(info);
 	const hasSrc =
@@ -51,7 +52,7 @@ function isSrcReady(info: DatasetSrcInfo, connectionOk: boolean): boolean {
 	if (!hasSrc || !srcType || srcType === "none") {
 		return false;
 	}
-	return srcType !== "sql" || connectionOk;
+	return !isJdbcSrcType(srcType) || connectionOk;
 }
 
 // Previewの読込状態。失敗したらdataは空にし、errorにメッセージを持つ。logsは読込中に届いたログ（失敗後も残す）
@@ -107,15 +108,13 @@ async function fetchDatasetJson<T>(
 	onLog?: (line: string) => void,
 ): Promise<T> {
 	const fetchParams = {
-		endpoint: `${apiUrl}dataset-setting/${endpoint}`,
-		options: {
-			method: "POST",
-			headers: { "Content-Type": "application/json" },
-			body: buildDatasetRequestBody(info, jdbcValues, {
+		...postJsonParams(
+			`${apiUrl}dataset-setting/${endpoint}`,
+			buildDatasetRequestBody(info, jdbcValues, {
 				...extra,
 				parameters: paramInputs,
 			}),
-		},
+		),
 		signal,
 		onLog,
 	};
@@ -274,16 +273,14 @@ export const useDatasetTableConvert = () => {
 		context: JobContext,
 	): Promise<string> => {
 		const response = await fetchData({
-			endpoint: `${apiUrl}dataset-setting/table-convert`,
-			options: {
-				method: "POST",
-				headers: { "Content-Type": "application/json" },
-				body: buildDatasetRequestBody(srcInfo, jdbcValues, {
+			...postJsonParams(
+				`${apiUrl}dataset-setting/table-convert`,
+				buildDatasetRequestBody(srcInfo, jdbcValues, {
 					tableName,
 					parameters: paramInputs,
 					result,
 				}),
-			},
+			),
 			...context,
 		});
 		return response.text();
@@ -296,68 +293,36 @@ export const useSaveDatasetSettings = (
 	return useSaveResource<DatasetSettings>(kind);
 };
 
+const DATASET_SETTINGS_PARSER: ResourceParser<DatasetSettings> = {
+	empty: () => DatasetSettings.create(),
+	parse: (json) => DatasetSettings.build(json as DatasetSettingsBuilder),
+};
+
 export const useDatasetSettingsData = (
 	fileName: string,
 	kind: DatasetSettingKind = "datasetSetting",
 ): { settings: DatasetSettings; loading: boolean } => {
-	const { apiUrl } = useEnvironment();
-	const encoding = useResourceEncoding(kind);
-	const [settings, setSettings] = useState(DatasetSettings.create());
-	const [loading, setLoading] = useState(fileName !== "");
-
-	useEffect(() => {
-		if (!fileName) {
-			setSettings(DatasetSettings.create());
-			setLoading(false);
-			return;
-		}
-		const controller = new AbortController();
-		setLoading(true);
-		loadDatasetSettings(apiUrl, fileName, kind, encoding).then((result) => {
-			if (!controller.signal.aborted) {
-				setSettings(result);
-				setLoading(false);
-			}
-		});
-		return () => {
-			controller.abort();
-		};
-	}, [fileName, apiUrl, kind, encoding]);
-
-	return { settings, loading };
+	const { data, loading } = useResourceLoad(
+		kind,
+		fileName,
+		DATASET_SETTINGS_PARSER,
+	);
+	return { settings: data, loading };
 };
 
+const IDLE_ALL_COLUMNS = idleLoad<Record<string, string[]>>({});
+
+// 入力候補なので、settingの対象外のテーブルのカラムも含め、取得できなければ候補なしとする
 export const useSrcInfoColumnNames = (srcInfo: DatasetSrcInfo): string[] => {
-	const [columnNames, setColumnNames] = useState<string[]>([]);
-	const { apiUrl } = useEnvironment();
-	const { jdbcValues, connectionOk } = useJdbcConnectionState();
-	const paramInputs = useParamInputs();
-
-	const srcReady = isSrcReady(srcInfo, connectionOk);
-
-	useEffect(() => {
-		if (!srcReady) {
-			setColumnNames([]);
-			return;
-		}
-		const controller = new AbortController();
-		loadAllColumnNames(
-			apiUrl,
-			srcInfo,
-			jdbcValues,
-			paramInputs,
-			controller.signal,
-		).then((names) => {
-			if (!controller.signal.aborted) {
-				setColumnNames(names);
-			}
-		});
-		return () => {
-			controller.abort();
-		};
-	}, [apiUrl, srcInfo, srcReady, jdbcValues, paramInputs]);
-
-	return columnNames;
+	const { data } = useDatasetLoad(
+		withAllTables(srcInfo),
+		"table-columns",
+		{ tableName: "" },
+		true,
+		IDLE_ALL_COLUMNS,
+		false,
+	);
+	return [...new Set(Object.values(data).flat())];
 };
 
 // sidecarのDatasetTableNamesRequestDto.INLINE_SOURCE_TABLE_NAMEと揃える
@@ -370,8 +335,7 @@ async function fetchTableColumns(
 	tableName: string,
 	jdbcValues: Record<string, string>,
 	paramInputs: Record<string, string>,
-	signal?: AbortSignal,
-	onLog?: (line: string) => void,
+	{ signal, onLog }: JobContext,
 ): Promise<Record<string, string[]>> {
 	return fetchDatasetJson(
 		apiUrl,
@@ -385,25 +349,6 @@ async function fetchTableColumns(
 	);
 }
 
-// 入力候補なので、settingの対象外のテーブルのカラムも含め、取得できなければ候補なしとする
-async function loadAllColumnNames(
-	apiUrl: string,
-	srcInfo: DatasetSrcInfo,
-	jdbcValues: Record<string, string>,
-	paramInputs: Record<string, string>,
-	signal: AbortSignal,
-): Promise<string[]> {
-	const columns = await fetchTableColumns(
-		apiUrl,
-		withAllTables(srcInfo),
-		"",
-		jdbcValues,
-		paramInputs,
-		signal,
-	).catch(() => ({}));
-	return [...new Set(Object.values(columns).flat())];
-}
-
 export const useColumnNamesFetcher = () => {
 	const { apiUrl } = useEnvironment();
 	const { jdbcValues } = useJdbcConnectionState();
@@ -411,7 +356,7 @@ export const useColumnNamesFetcher = () => {
 	return async (
 		srcInfo: DatasetSrcInfo,
 		tableName: string,
-		{ signal, onLog }: JobContext,
+		context: JobContext,
 	): Promise<string[]> => {
 		// 失敗は投げる（呼び出し元がエラーと実行中のログを表示する）。
 		// 入力候補なので、settingの対象外のテーブルでも取得する
@@ -421,8 +366,7 @@ export const useColumnNamesFetcher = () => {
 			tableName,
 			jdbcValues,
 			paramInputs,
-			signal,
-			onLog,
+			context,
 		);
 		return columns[tableName] ?? [];
 	};
@@ -434,7 +378,7 @@ export const useCsvColumnNamesFetcher = () => {
 	const paramInputs = useParamInputs();
 	return async (
 		csvReadExpression: string,
-		{ signal, onLog }: JobContext,
+		context: JobContext,
 	): Promise<string[]> => {
 		const columns = await fetchTableColumns(
 			apiUrl,
@@ -445,28 +389,8 @@ export const useCsvColumnNamesFetcher = () => {
 			INLINE_SOURCE_TABLE_NAME,
 			{},
 			paramInputs,
-			signal,
-			onLog,
+			context,
 		);
 		return columns[INLINE_SOURCE_TABLE_NAME] ?? [];
 	};
 };
-
-async function loadDatasetSettings(
-	apiUrl: string,
-	name: string,
-	kind: DatasetSettingKind,
-	encoding: string,
-): Promise<DatasetSettings> {
-	if (name === "") {
-		return DatasetSettings.create();
-	}
-	const fetchParams = resourceLoadParams(apiUrl, kind, name, encoding);
-	return await fetchData(fetchParams)
-		.then((response) => response.json())
-		.then((setting: DatasetSettingsBuilder) => DatasetSettings.build(setting))
-		.catch((ex) => {
-			handleFetchError(getErrorMessage(ex), fetchParams);
-			return DatasetSettings.create();
-		});
-}

@@ -7,12 +7,12 @@ import type {
 	ResourcesSettingsBuilder,
 } from "../model/WorkspaceResources";
 import {
-	type FetchParams,
 	fetchAndUpdate,
 	fetchData,
 	getErrorMessage,
 	handleFetchError,
 	type OperationResult,
+	postJsonParams,
 } from "../utils/fetchUtils";
 
 // リソース種類ごとのAPIの接頭辞と、応答（更新後のファイル一覧）を書き戻すResourcesSettingsのキー
@@ -44,23 +44,6 @@ export type DatasetSettingKind =
 	| "datasetSetting"
 	| "compareSetting"
 	| "generateSetting";
-
-// `${base}/load`へ名前と、コマンド実行時にそのファイルを読む文字コードを送るリクエスト（読込で共通）
-export function resourceLoadParams(
-	apiUrl: string,
-	kind: ResourceKind,
-	name: string,
-	encoding: string,
-): FetchParams {
-	return {
-		endpoint: `${apiUrl}${resourceTargets[kind].base}/load`,
-		options: {
-			method: "POST",
-			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify({ name, encoding }),
-		},
-	};
-}
 
 // 種類に対応するResourcesSettings上のファイル一覧（入力欄の候補）
 export function resourceFilesOf(
@@ -113,51 +96,84 @@ export const useSaveResourceContent = (kind: ResourceKind) => {
 	return (name: string, content: string) => save(name, { content });
 };
 
-// `${base}/load`へ名前を送り、{"content": ...}形式の応答から内容を読み込む（テキスト系リソースで共通）
-export const useResourceContent = (
+// 名前が空・読込失敗のときの値を作る関数と、応答のJSONから値を作る関数。
+// effectの依存に入るので、モジュールレベルの関数を渡す（hooks-design.md）
+export type ResourceParser<T> = {
+	empty: () => T;
+	parse: (json: unknown) => T;
+};
+
+// `${base}/load`へ名前を送り、応答をparserで変換して返す。名前を変えたり離れたりしたら読込を中断する
+export const useResourceLoad = <T>(
 	kind: ResourceKind,
 	name: string,
-): { content: string; loading: boolean } => {
+	parser: ResourceParser<T>,
+): { data: T; loading: boolean } => {
 	const { apiUrl } = useEnvironment();
 	const encoding = useResourceEncoding(kind);
-	const [content, setContent] = useState("");
+	const [data, setData] = useState(parser.empty);
 	const [loading, setLoading] = useState(name !== "");
 
 	useEffect(() => {
 		if (!name) {
-			setContent("");
+			setData(parser.empty());
 			setLoading(false);
 			return;
 		}
 		const controller = new AbortController();
 		setLoading(true);
-		loadResourceContent(apiUrl, kind, name, encoding).then((result) => {
-			if (!controller.signal.aborted) {
-				setContent(result);
-				setLoading(false);
-			}
-		});
+		loadResource(apiUrl, kind, name, encoding, parser, controller.signal).then(
+			(result) => {
+				if (!controller.signal.aborted) {
+					setData(result);
+					setLoading(false);
+				}
+			},
+		);
 		return () => {
 			controller.abort();
 		};
-	}, [kind, name, apiUrl, encoding]);
+	}, [kind, name, apiUrl, encoding, parser]);
 
-	return { content, loading };
+	return { data, loading };
 };
 
-async function loadResourceContent(
+// 失敗はalertで知らせて空の値を返す
+async function loadResource<T>(
 	apiUrl: string,
 	kind: ResourceKind,
 	name: string,
 	encoding: string,
-): Promise<string> {
-	const params = resourceLoadParams(apiUrl, kind, name, encoding);
+	parser: ResourceParser<T>,
+	signal: AbortSignal,
+): Promise<T> {
+	// encodingはコマンド実行時にそのファイルを読む文字コード
+	const params = {
+		...postJsonParams(`${apiUrl}${resourceTargets[kind].base}/load`, {
+			name,
+			encoding,
+		}),
+		signal,
+	};
 	try {
 		const response = await fetchData(params);
-		const data = (await response.json()) as { content?: string };
-		return data.content ?? "";
+		return parser.parse(await response.json());
 	} catch (e) {
 		handleFetchError(getErrorMessage(e), params);
-		return "";
+		return parser.empty();
 	}
 }
+
+const CONTENT_PARSER: ResourceParser<string> = {
+	empty: () => "",
+	parse: (json) => (json as { content?: string }).content ?? "",
+};
+
+// {"content": ...}形式の応答から内容を読み込む（テキスト系リソースで共通）
+export const useResourceContent = (
+	kind: ResourceKind,
+	name: string,
+): { content: string; loading: boolean } => {
+	const { data, loading } = useResourceLoad(kind, name, CONTENT_PARSER);
+	return { content: data, loading };
+};

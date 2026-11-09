@@ -49,7 +49,8 @@ const { mockFetchData } = vi.hoisted(() => {
 		}),
 	};
 });
-vi.mock("../../../utils/fetchUtils", () => ({
+vi.mock("../../../utils/fetchUtils", async (importOriginal) => ({
+	...(await importOriginal<typeof import("../../../utils/fetchUtils")>()),
 	fetchData: mockFetchData,
 }));
 
