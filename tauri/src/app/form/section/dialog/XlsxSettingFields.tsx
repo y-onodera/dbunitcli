@@ -4,12 +4,11 @@ import { ResourceDatalist } from "../../../../components/element/Input";
 import { useDatasetSrcInfo } from "../../../../context/DatasetSrcInfoProvider";
 import { useSrcInfoSheets } from "../../../../hooks/useXlsxSchema";
 import {
-	removeArray,
-	replaceArray,
 	replaceSheetPattern,
 	type SheetPattern,
 	switchSheetTarget,
 } from "../../../../model/XlsxSchema";
+import { removeArray, replaceArray } from "../../../../utils/arrayUtils";
 import { CommaSeparatedText, TextWithDatalist } from "./DialogFields";
 
 // RowSetting・CellSettingが共通で持つ項目

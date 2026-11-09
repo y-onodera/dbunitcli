@@ -1,3 +1,5 @@
+import { removeArray, replaceArray } from "../utils/arrayUtils";
+
 export type Pattern = {
 	string?: string;
 	regex?: string;
@@ -191,7 +193,7 @@ export class DatasetSettings {
 		let outputFilter: object | undefined;
 		if (names?.length) {
 			outputFilter = { name: { any: names } };
-		} else if (pattern?.regex || pattern?.string) {
+		} else if (pattern && patternText(pattern)) {
 			const exclude = pattern.exclude?.filter((it) => it);
 			outputFilter = {
 				pattern: {
@@ -204,7 +206,7 @@ export class DatasetSettings {
 		}
 		const imports = this.imports.filter((it) => it.path);
 		return {
-			settings: this.settings.filter((setting) => setting.displayName()),
+			settings: this.settings.filter((setting) => setting.hasTarget()),
 			// commonSettingsは全テーブルに効くため対象テーブルを持たないのが普通。中身の無い行だけ除く
 			commonSettings: this.commonSettings.filter((setting) =>
 				hasValue(setting.toJSON()),
@@ -275,39 +277,26 @@ export class DatasetSetting {
 			return this;
 		}
 		const filePath = this.targetFilePath();
-		if (this.join()) {
-			const join = this.join();
+		const join = this.join();
+		if (join) {
+			const left = join.left ?? "";
 			if (newTarget === "name") {
-				return this.replaceTarget({ name: join?.left, filePath });
+				return this.replaceTarget({ name: left, filePath });
 			}
 			if (newTarget === "pattern") {
-				return this.replaceTarget({
-					pattern: { string: join?.left ?? "", filePath },
-				});
+				return this.replaceTarget({ pattern: { string: left, filePath } });
 			}
 			return this.replaceTarget({ [newTarget]: join });
 		}
+		const text = this.name?.[0] ?? patternText(this.pattern);
 		if (newTarget === "name") {
-			return this.replaceTarget({
-				name: this.pattern?.string ?? [""],
-				filePath,
-			});
+			return this.replaceTarget({ name: text, filePath });
 		}
 		if (newTarget === "pattern") {
-			return this.replaceTarget({
-				pattern: { string: this.name ? this.name[0] : "", filePath },
-			});
-		}
-		let left: string;
-		if (this.name) {
-			left = this.name[0];
-		} else if (this.pattern) {
-			left = this.pattern.string ?? this.pattern.regex ?? "";
-		} else {
-			left = "";
+			return this.replaceTarget({ pattern: { string: text, filePath } });
 		}
 		return this.replaceTarget({
-			[newTarget]: { left, filePath },
+			[newTarget]: { left: text, filePath },
 		});
 	}
 
@@ -601,6 +590,18 @@ export class DatasetSetting {
 		return target(this);
 	}
 
+	// 対象テーブルが入力されているか
+	hasTarget(): boolean {
+		if (this.pattern) {
+			return !!patternText(this.pattern);
+		}
+		const join = this.join();
+		if (join) {
+			return !!(join.left && join.right);
+		}
+		return !!this.name?.some((it) => it);
+	}
+
 	handler(): string {
 		if (this.pattern) {
 			return "pattern";
@@ -631,24 +632,16 @@ function target(setting: DatasetSetting): string {
 			? `${nameStr} filePath:${setting.filePath}`
 			: nameStr;
 	}
-	if (setting.pattern) {
-		if (typeof setting.pattern === "string") {
-			return `pattern :${setting.pattern}`;
-		}
-		const pattern = setting.pattern as Pattern;
+	const { pattern } = setting;
+	if (pattern) {
 		const matcher = pattern.regex
 			? `regex :${pattern.regex}`
 			: `pattern :${pattern.string}`;
-		return `${matcher} exclude :[${pattern.exclude ? pattern.exclude.join(",") : ""}]`;
+		return `${matcher} exclude :[${pattern.exclude?.join(",") ?? ""}]`;
 	}
-	if (setting.innerJoin) {
-		return `innerJoin :${setting.innerJoin.left} ${setting.innerJoin.right} on ${setting.innerJoin.column ? setting.innerJoin.column.join(",") : setting.innerJoin.on}`;
-	}
-	if (setting.outerJoin) {
-		return `innerJoin :${setting.outerJoin.left} ${setting.outerJoin.right} on ${setting.outerJoin.column ? setting.outerJoin.column.join(",") : setting.outerJoin.on}`;
-	}
-	if (setting.fullJoin) {
-		return `innerJoin :${setting.fullJoin.left} ${setting.fullJoin.right} on ${setting.fullJoin.column ? setting.fullJoin.column.join(",") : setting.fullJoin.on}`;
+	const join = setting.join();
+	if (join) {
+		return `${setting.handler()} :${join.left} ${join.right} on ${join.column?.join(",") ?? join.on}`;
 	}
 	return "";
 }
@@ -662,31 +655,16 @@ function hasValue(value: unknown): boolean {
 	}
 	return value !== "" && value !== false && value != null;
 }
-function replaceArray(
-	array: string[],
-	newOne: string,
-	index: number,
-): string[] {
-	let result = [...array];
-	if (result.length > index) {
-		if (newOne) {
-			result[index] = newOne;
-		} else {
-			result = removeArray(result, index);
-		}
-	} else if (newOne) {
-		result = result.concat(newOne);
-	}
-	return result;
-}
-function removeArray(array: string[], remove: number): string[] {
-	return [...array].filter((_, index) => index !== remove);
-}
+// 他の行と同じキーにする変更は、その行を上書きして消してしまうため適用しない
 function replaceObject(
 	src: object,
 	index: number,
 	value: { [prop: string]: string },
 ): object {
+	const keys = Object.keys(src);
+	if (keys.some((key, i) => i !== index && key in value)) {
+		return src;
+	}
 	const result = {};
 	Object.entries(src).forEach(([k, v], i) => {
 		if (i === index) {
@@ -695,7 +673,7 @@ function replaceObject(
 			Object.assign(result, { [k]: v });
 		}
 	});
-	if (Object.keys(src).length === index) {
+	if (keys.length === index) {
 		Object.assign(result, value);
 	}
 	return result;
@@ -708,13 +686,17 @@ function removeObject(src: object, index: number): object {
 export function newDatasetSetting(): DatasetSetting {
 	return new DatasetSetting({} as DatasetSettingBuilder);
 }
+// 空文字も「nameを選択中で未入力」として残す
 function toNameArray(
 	name: string | string[] | undefined,
 ): string[] | undefined {
-	if (!name) {
-		return undefined;
-	}
 	return typeof name === "string" ? [name] : name;
+}
+// パターンの照合文字列。空のstringはregexに譲るため??ではなく||で判定する
+export function patternText(
+	pattern: Omit<Pattern, "filePath"> | undefined,
+): string {
+	return pattern?.string || pattern?.regex || "";
 }
 export function toPattern(
 	pattern: string | Pattern | undefined,

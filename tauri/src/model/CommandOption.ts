@@ -109,8 +109,8 @@ export type SrcElements = CommandOptions & {
 export type DatasetSource = CommandOptions &
 	SrcElements &
 	SrcTypeOptions &
-	(JdbcOption | undefined) &
-	(TemplateOption | undefined);
+	Partial<Omit<JdbcOption, "prefix">> &
+	Partial<Omit<TemplateOption, "prefix">>;
 // データセット読込フォームのsrc要素の値（オプション名→値）。sidecarへはそのまま-src.<オプション名>として渡す
 export type DatasetSrcInfo = {
 	values: Record<string, string>;
@@ -118,7 +118,7 @@ export type DatasetSrcInfo = {
 	inlineSetting?: DatasetSetting;
 	// 未保存のxlsxスキーマ。指定時はxlsxSchemaより優先してこのスキーマの対象だけを読む
 	inlineXlsxSchema?: XlsxSchema;
-	// 未保存のsrcの内容。指定時はsrcのファイルの代わりに読む（読めない形式はsidecarがエラーにする）
+	// 未保存のsrcの内容。指定時はsrcのファイルの代わりに読む
 	inlineSource?: string;
 };
 export type JdbcOption = CommandOptions & {
@@ -217,6 +217,16 @@ export function isSqlType(options: SrcTypeOptions): options is SqlOptions {
 export function isTableType(options: SrcTypeOptions): options is TableOptions {
 	return options.srcType?.value === "table";
 }
+export function hasJdbcOption(
+	datasrc: DatasetSource,
+): datasrc is DatasetSource & JdbcOption {
+	return !!datasrc.jdbcProperties;
+}
+export function hasTemplateOption(
+	datasrc: DatasetSource,
+): datasrc is DatasetSource & TemplateOption {
+	return !!datasrc.templateGroup;
+}
 export function buildDatasetSrcInfo(datasrc: DatasetSource): DatasetSrcInfo {
 	const values: Record<string, string> = {};
 	for (const element of Object.values(datasrc)) {
@@ -243,7 +253,7 @@ export function withValues(
 	return { ...info, values: { ...info.values, ...values } };
 }
 
-// settingを適用せずに読む（settingが無ければsettingTargetOnlyでは絞らない）
+// settingを適用せずに読む
 export function withoutSetting(info: DatasetSrcInfo): DatasetSrcInfo {
 	return withValues(info, { setting: "" });
 }

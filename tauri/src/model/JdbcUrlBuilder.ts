@@ -39,7 +39,11 @@ export function parseJdbcUrl(url: string): Partial<JdbcUrlBuilderState> {
 		return {};
 	}
 	if (url.startsWith("jdbc:oracle:thin:@")) {
-		const rest = url.slice("jdbc:oracle:thin:@".length);
+		const rest = url.slice("jdbc:oracle:thin:@".length).replace(/^\/\//, "");
+		if (rest.includes("/")) {
+			return parseHostPortDb("oracle", rest);
+		}
+		// SID形式(host:port:sid)。組み立て直すとサービス名形式になる
 		const parts = rest.split(":");
 		if (parts.length >= 3) {
 			return {
@@ -51,31 +55,23 @@ export function parseJdbcUrl(url: string): Partial<JdbcUrlBuilderState> {
 		}
 	}
 	if (url.startsWith("jdbc:postgresql://")) {
-		const rest = url.slice("jdbc:postgresql://".length);
-		const slashIdx = rest.indexOf("/");
-		const hostPort = slashIdx >= 0 ? rest.slice(0, slashIdx) : rest;
-		const db = slashIdx >= 0 ? rest.slice(slashIdx + 1) : "";
-		const colonIdx = hostPort.lastIndexOf(":");
-		return {
-			rdbType: "postgres",
-			host: colonIdx >= 0 ? hostPort.slice(0, colonIdx) : hostPort,
-			port:
-				colonIdx >= 0 ? hostPort.slice(colonIdx + 1) : DEFAULT_PORTS.postgres,
-			serviceName: db,
-		};
+		return parseHostPortDb("postgres", url.slice("jdbc:postgresql://".length));
 	}
 	if (url.startsWith("jdbc:h2:tcp://")) {
-		const rest = url.slice("jdbc:h2:tcp://".length);
-		const slashIdx = rest.indexOf("/");
-		const hostPort = slashIdx >= 0 ? rest.slice(0, slashIdx) : rest;
-		const db = slashIdx >= 0 ? rest.slice(slashIdx + 1) : "";
-		const colonIdx = hostPort.lastIndexOf(":");
-		return {
-			rdbType: "h2",
-			host: colonIdx >= 0 ? hostPort.slice(0, colonIdx) : hostPort,
-			port: colonIdx >= 0 ? hostPort.slice(colonIdx + 1) : DEFAULT_PORTS.h2,
-			serviceName: db,
-		};
+		return parseHostPortDb("h2", url.slice("jdbc:h2:tcp://".length));
 	}
 	return {};
+}
+
+// host[:port][/db]
+function parseHostPortDb(rdbType: RdbType, rest: string): JdbcUrlBuilderState {
+	const slashIdx = rest.indexOf("/");
+	const hostPort = slashIdx >= 0 ? rest.slice(0, slashIdx) : rest;
+	const colonIdx = hostPort.lastIndexOf(":");
+	return {
+		rdbType,
+		host: colonIdx >= 0 ? hostPort.slice(0, colonIdx) : hostPort,
+		port: colonIdx >= 0 ? hostPort.slice(colonIdx + 1) : DEFAULT_PORTS[rdbType],
+		serviceName: slashIdx >= 0 ? rest.slice(slashIdx + 1) : "",
+	};
 }

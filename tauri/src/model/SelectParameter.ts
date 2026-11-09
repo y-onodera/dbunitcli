@@ -28,10 +28,12 @@ export class SelectParameter {
 	) {
 		this.name = name;
 		this.command = command;
-		this.options = response;
-		this.options.command = this.command;
 		this.inputParam = inputParam ?? response.inputParam ?? {};
-		this.options.inputParam = this.inputParam;
+		this.options = {
+			...response,
+			command,
+			inputParam: this.inputParam,
+		} as Options & { inputParam?: InputParam };
 	}
 }
 export type Options =

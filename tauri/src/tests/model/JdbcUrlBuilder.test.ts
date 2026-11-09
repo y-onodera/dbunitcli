@@ -115,3 +115,24 @@ describe("parseJdbcUrl", () => {
 		expect(parsed.serviceName).toBe(state.serviceName);
 	});
 });
+
+describe("Oracle URL の往復", () => {
+	it("buildJdbcUrl でビルドした Oracle URL を parseJdbcUrl で元に戻せること", () => {
+		const state: JdbcUrlBuilderState = {
+			rdbType: "oracle",
+			host: "db.example.com",
+			port: "1521",
+			serviceName: "ORCLPDB",
+		};
+		expect(parseJdbcUrl(buildJdbcUrl(state))).toEqual(state);
+	});
+
+	it("// の無いサービス名形式も読めること", () => {
+		expect(parseJdbcUrl("jdbc:oracle:thin:@host:1522/svc")).toEqual({
+			rdbType: "oracle",
+			host: "host",
+			port: "1522",
+			serviceName: "svc",
+		});
+	});
+});

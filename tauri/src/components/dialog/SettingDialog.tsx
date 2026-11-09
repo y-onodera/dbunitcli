@@ -399,6 +399,13 @@ export function KeyValues(props: {
 						}}
 						handleRemove={blank ? () => setAdding(false) : props.handleRemove}
 						handleEdit={blank ? undefined : props.handleEdit}
+						isDuplicated={(text) =>
+							isDuplicated(
+								entries.map(([k]) => k),
+								text,
+								index,
+							)
+						}
 					/>
 				);
 			})}
@@ -424,14 +431,21 @@ export function KeyValueText(props: {
 	handleChange: (index: number, value: { [prop: string]: string }) => void;
 	handleRemove: (index: number) => void;
 	handleEdit?: (index: number) => void;
+	isDuplicated?: (text: string) => boolean;
 }) {
 	const [key, setKey] = useState(props.propKey);
 	const [value, setValue] = useState(props.value);
-	const handleKeyBlur = (newVal: React.FocusEvent<HTMLInputElement>) =>
+	// 他の行と同じ名前は確定させず、入力前の名前に戻す
+	const handleKeyBlur = (newVal: React.FocusEvent<HTMLInputElement>) => {
+		if (props.isDuplicated?.(newVal.target.value)) {
+			setKey(props.propKey);
+			return;
+		}
 		props.handleChange(
 			props.index,
 			newVal.target.value ? { [newVal.target.value]: value } : {},
 		);
+	};
 	const handleValueBlur = (newVal: React.FocusEvent<HTMLInputElement>) =>
 		props.handleChange(props.index, { [key]: newVal.target.value });
 	const handleRemove = () => props.handleRemove(props.index);
