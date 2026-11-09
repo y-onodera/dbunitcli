@@ -1,4 +1,4 @@
-import { createContext, useContext } from "react";
+import { createContext, use } from "react";
 import type { ResourceKind } from "../hooks/useResourceFiles";
 
 export type ResourceEncodings = Partial<Record<ResourceKind, string>>;
@@ -14,7 +14,7 @@ export function ResourceEncodingProvider({
 	children: React.ReactNode;
 	encodings: ResourceEncodings;
 }) {
-	const parent = useContext(ResourceEncodingContext);
+	const parent = use(ResourceEncodingContext);
 	return (
 		<ResourceEncodingContext.Provider value={{ ...parent, ...encodings }}>
 			{children}
@@ -24,5 +24,5 @@ export function ResourceEncodingProvider({
 
 // 種類のリソースを読み書きする文字コード。指定が無ければ空（sidecarが種類ごとの既定を使う）
 export function useResourceEncoding(kind: ResourceKind): string {
-	return useContext(ResourceEncodingContext)[kind] ?? "";
+	return use(ResourceEncodingContext)[kind] ?? "";
 }

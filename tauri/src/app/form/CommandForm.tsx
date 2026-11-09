@@ -15,7 +15,7 @@ export default function CommandForm(prop: {
 	};
 }) {
 	const select = useSelectParameter();
-	const refreshSelect = useRefreshSelectParameter(select.options?.command);
+	const refreshSelect = useRefreshSelectParameter(select?.command);
 	const handleTypeSelect = () => refreshSelect(prop.formData(false).values);
 	// generateフォームの-src.*をscaffoldダイアログの-dataset.*初期値として引き継ぐ
 	const scaffoldPrefill = (): TxtTemplateGenerateFormValues => {
@@ -36,7 +36,10 @@ export default function CommandForm(prop: {
 	};
 
 	const renderCommandForm = () => {
-		switch (select.options?.command) {
+		if (!select) {
+			return null;
+		}
+		switch (select.options.command) {
 			case "convert":
 				return (
 					<ConvertForm

@@ -1,6 +1,6 @@
 import { getMatches } from "@tauri-apps/plugin-cli";
 import type { ReactNode } from "react";
-import { createContext, Suspense, use } from "react";
+import { createContext, Suspense, use, useState } from "react";
 import SidecarLoading from "../app/startup/SidecarLoading";
 import { API_CONTEXT_PATH } from "../utils/apiPath";
 
@@ -11,29 +11,31 @@ export type Environment = {
 	result_base: string;
 };
 export const environmentContext = createContext<Environment>({} as Environment);
-export default function EnvironmentProvider(props: { children: ReactNode }) {
-	const getEnvironment = async () => {
-		const matches = await getMatches();
-		const port = matches.args.port.value ? matches.args.port.value : "8080";
-		const workspace = matches.args.workspace.value
-			? (matches.args.workspace.value as string)
-			: ".";
-		const dataset_base = matches.args["dataset.base"].value
-			? (matches.args["dataset.base"].value as string)
-			: ".";
-		const result_base = matches.args["result.base"].value
-			? (matches.args["result.base"].value as string)
-			: ".";
-		return {
-			apiUrl: `http://localhost:${port}${API_CONTEXT_PATH}`,
-			workspace,
-			dataset_base,
-			result_base,
-		};
+
+type CliArgs = Awaited<ReturnType<typeof getMatches>>["args"];
+
+// 未指定・空文字の引数は既定値にする
+function argOrDefault(args: CliArgs, name: string, defaultValue: string) {
+	const value = args[name]?.value;
+	return typeof value === "string" && value !== "" ? value : defaultValue;
+}
+
+async function loadEnvironment(): Promise<Environment> {
+	const { args } = await getMatches();
+	return {
+		apiUrl: `http://localhost:${argOrDefault(args, "port", "8080")}${API_CONTEXT_PATH}`,
+		workspace: argOrDefault(args, "workspace", "."),
+		dataset_base: argOrDefault(args, "dataset.base", "."),
+		result_base: argOrDefault(args, "result.base", "."),
 	};
+}
+
+export default function EnvironmentProvider(props: { children: ReactNode }) {
+	// use()に渡すPromiseは再描画で作り直すと再サスペンドするため、初回だけ作る
+	const [promise] = useState(loadEnvironment);
 	return (
 		<Suspense fallback={<SidecarLoading />}>
-			<CreateContext promise={getEnvironment()}>{props.children}</CreateContext>
+			<CreateContext promise={promise}>{props.children}</CreateContext>
 		</Suspense>
 	);
 }

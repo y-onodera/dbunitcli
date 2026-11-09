@@ -3,18 +3,17 @@ import { createContext, use, useState } from "react";
 import type { Command, Options } from "../model/SelectParameter";
 import { SelectParameter } from "../model/SelectParameter";
 
-const selectParameterContext = createContext<SelectParameter>(
-	{} as SelectParameter,
+// コマンド・パラメータを選ぶまではundefined
+const selectParameterContext = createContext<SelectParameter | undefined>(
+	undefined,
 );
 const setSelectParameterContext = createContext<
-	Dispatch<SetStateAction<SelectParameter>>
+	Dispatch<SetStateAction<SelectParameter | undefined>>
 >(() => undefined);
 export default function SelectParameterProvider(props: {
 	children: ReactNode;
 }) {
-	const [parameter, setParameter] = useState<SelectParameter>(
-		{} as SelectParameter,
-	);
+	const [parameter, setParameter] = useState<SelectParameter | undefined>();
 	return (
 		<selectParameterContext.Provider value={parameter}>
 			<setSelectParameterContext.Provider value={setParameter}>

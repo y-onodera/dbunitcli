@@ -143,7 +143,7 @@ export function DatasetLoadForm(prop: {
 	helpCommand?: string;
 	helpLabel?: string;
 	// trueなら自前のDatasetSrcInfoScopeを作らず、親のものへ入力値を反映する
-	// （generateフォームでは-unitSettingのプレビューも同じsrcの入力値を使うため）
+	// （同じsrcの入力値をフォーム内の別の欄でも使うとき。generateの-unitSettingプレビュー、compareの比較キー編集）
 	parentSrcInfo?: boolean;
 }) {
 	if (prop.srcData.srcType?.value === "none") {
