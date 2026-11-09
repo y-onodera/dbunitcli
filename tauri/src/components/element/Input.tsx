@@ -1,4 +1,5 @@
 import { type ReactNode, useRef, useState } from "react";
+import { getErrorMessage } from "../../utils/fetchUtils";
 import { ClearIcon } from "./Icon";
 
 export function InputLabel(props: {
@@ -106,9 +107,13 @@ export function SelectBox(props: {
 	handleOnChange?: (selected: string) => void | Promise<void>;
 	children: ReactNode;
 }) {
-	const [selected, setSelected] = useState(
-		props.defaultValue ? props.defaultValue : "",
-	);
+	const [selected, setSelected] = useState(props.defaultValue ?? "");
+	// 設定の読込み等で親から初期値が変わったら選択を合わせる
+	const [prevDefault, setPrevDefault] = useState(props.defaultValue);
+	if (props.defaultValue !== prevDefault) {
+		setPrevDefault(props.defaultValue);
+		setSelected(props.defaultValue ?? "");
+	}
 	return (
 		<select
 			name={props.name}
@@ -118,8 +123,12 @@ export function SelectBox(props: {
 			style={props.hidden ? { display: "none" } : {}}
 			value={selected}
 			onChange={(event) => {
-				setSelected(event.currentTarget.value);
-				props.handleOnChange?.(event.currentTarget.value);
+				const value = event.currentTarget.value;
+				setSelected(value);
+				Promise.resolve(props.handleOnChange?.(value)).catch((error) => {
+					console.error("Select Error:", error);
+					alert(`Failed to apply ${props.name}: ${getErrorMessage(error)}`);
+				});
 			}}
 		>
 			{props.children}
@@ -134,6 +143,12 @@ export function CheckBox(props: {
 	handleOnChange?: (checked: boolean) => void;
 }) {
 	const [checked, setChecked] = useState(props.defaultValue === "true");
+	// 設定の読込み等で親から初期値が変わったらチェックを合わせる
+	const [prevDefault, setPrevDefault] = useState(props.defaultValue);
+	if (props.defaultValue !== prevDefault) {
+		setPrevDefault(props.defaultValue);
+		setChecked(props.defaultValue === "true");
+	}
 	return (
 		<>
 			<input

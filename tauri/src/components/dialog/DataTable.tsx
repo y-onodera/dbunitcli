@@ -50,8 +50,19 @@ export function Tr({
 }) {
 	return (
 		<tr
-			className={`border-t border-border-faint hover:bg-surface-subtle${onClick ? " cursor-pointer" : ""}`}
+			className={`border-t border-border-faint hover:bg-surface-subtle${onClick ? " cursor-pointer focus-visible:outline-none focus-visible:ring-3 ring-primary-ring ring-inset" : ""}`}
 			onClick={onClick}
+			tabIndex={onClick ? 0 : undefined}
+			onKeyDown={
+				onClick
+					? (ev) => {
+							if (ev.key === "Enter" || ev.key === " ") {
+								ev.preventDefault();
+								onClick();
+							}
+						}
+					: undefined
+			}
 		>
 			{children}
 		</tr>

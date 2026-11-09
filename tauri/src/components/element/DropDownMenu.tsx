@@ -1,12 +1,24 @@
 import {
 	type CSSProperties,
 	type ReactNode,
-	useEffect,
+	useLayoutEffect,
 	useRef,
 	useState,
 } from "react";
 import { createPortal } from "react-dom";
 import { BlueSettingButton } from "./ButtonIcon";
+
+// スクロール領域に隠れないよう fixed で画面基準に置く。ボタンの右に収まらなければ左へ、下にはみ出すなら上へずらす
+function menuPosition(button: DOMRect, menu: DOMRect): CSSProperties {
+	const top = Math.max(
+		0,
+		Math.min(button.top, window.innerHeight - menu.height),
+	);
+	if (button.right + menu.width > window.innerWidth) {
+		return { right: window.innerWidth - button.left, top };
+	}
+	return { left: button.right, top };
+}
 
 export default function DropDownMenu({
 	children,
@@ -16,25 +28,26 @@ export default function DropDownMenu({
 	className?: string;
 }) {
 	const [showMenu, setShowMenu] = useState(false);
-	const [menuStyle, setMenuStyle] = useState<CSSProperties>({});
+	const [menuStyle, setMenuStyle] = useState<CSSProperties>({
+		visibility: "hidden",
+	});
 	const buttonRef = useRef<HTMLDivElement>(null);
+	const menuRef = useRef<HTMLDivElement>(null);
 	const [portalTarget, setPortalTarget] = useState<HTMLElement | null>(null);
 	// React のイベントはポータルを越えて伝播するため、メニュー配下から
 	// createPortal されたダイアログ内の操作も「内側」として判定できる
 	const insideMouseDownRef = useRef(false);
 
-	useEffect(() => {
-		// スクロール領域に隠れないよう fixed で画面基準に配置する
+	// 位置はメニューの実寸で決めるため、描画後・表示前に計算する
+	useLayoutEffect(() => {
 		function updatePosition() {
-			if (!buttonRef.current) {
-				return;
-			}
-			const rect = buttonRef.current.getBoundingClientRect();
-			const menuWidth = 96;
-			if (rect.right + menuWidth > window.innerWidth) {
-				setMenuStyle({ right: window.innerWidth - rect.left, top: rect.top });
-			} else {
-				setMenuStyle({ left: rect.right, top: rect.top });
+			if (buttonRef.current && menuRef.current) {
+				setMenuStyle(
+					menuPosition(
+						buttonRef.current.getBoundingClientRect(),
+						menuRef.current.getBoundingClientRect(),
+					),
+				);
 			}
 		}
 		function handleClickOutside() {
@@ -46,9 +59,6 @@ export default function DropDownMenu({
 		}
 		if (showMenu) {
 			insideMouseDownRef.current = false;
-			// showModal() 済みの dialog は top layer に載り z-index で越えられないため、
-			// dialog 内から開いた場合はその dialog 配下に描画する
-			setPortalTarget(buttonRef.current?.closest("dialog") ?? document.body);
 			updatePosition();
 			document.addEventListener("mousedown", handleClickOutside);
 			// スクロールしても閉じず追従させる (メニュー配下のダイアログごと消えるため)
@@ -63,7 +73,15 @@ export default function DropDownMenu({
 	}, [showMenu]);
 
 	const closeMenu = () => setShowMenu(false);
-	const toggleMenu = () => setShowMenu((prev) => !prev);
+	const toggleMenu = () => {
+		if (!showMenu) {
+			// showModal() 済みの dialog は top layer に載り z-index で越えられないため、
+			// dialog 内から開いた場合はその dialog 配下に描画する
+			setPortalTarget(buttonRef.current?.closest("dialog") ?? document.body);
+			setMenuStyle({ visibility: "hidden" });
+		}
+		setShowMenu(!showMenu);
+	};
 
 	return (
 		<div
@@ -78,6 +96,7 @@ export default function DropDownMenu({
 				portalTarget &&
 				createPortal(
 					<div
+						ref={menuRef}
 						className="fixed z-modal-nested p-4 text-content bg-surface border border-border-faint rounded-lg shadow-dropdown"
 						style={menuStyle}
 					>

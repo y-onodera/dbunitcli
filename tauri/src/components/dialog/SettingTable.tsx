@@ -33,7 +33,11 @@ interface SettingTableProps<T extends Displayable> {
 function appendSetting<T>(current: T[], item: T): T[] {
 	return [...current, item];
 }
+// ダイアログを開いている間にsettingsが差し替わり編集元が無くなっていたら、編集内容を失わないよう末尾に追加する
 function replaceSetting<T>(current: T[], before: T, after: T): T[] {
+	if (!current.includes(before)) {
+		return [...current, after];
+	}
 	return current.map((s) => (s === before ? after : s));
 }
 function removeSetting<T>(current: T[], item: T): T[] {
@@ -41,6 +45,17 @@ function removeSetting<T>(current: T[], item: T): T[] {
 }
 function displayNameOf(setting: Displayable): string {
 	return setting.displayName();
+}
+// displayNameはコピー直後や名前未入力の行で重複するため、行のkeyはインスタンスごとに振る
+const instanceKeys = new WeakMap<object, number>();
+let nextInstanceKey = 0;
+function instanceKeyOf(setting: object): number {
+	let key = instanceKeys.get(setting);
+	if (key === undefined) {
+		key = nextInstanceKey++;
+		instanceKeys.set(setting, key);
+	}
+	return key;
 }
 
 export default function SettingTable<T extends Displayable>({
@@ -53,17 +68,19 @@ export default function SettingTable<T extends Displayable>({
 	renderSetting = displayNameOf,
 	SettingDialogComponent,
 	newSetting,
-	getKey = displayNameOf,
+	getKey = instanceKeyOf,
 }: SettingTableProps<T>) {
-	const defaultState = { setting: newSetting(), action: "" };
-	const [selectSettings, setSelectSettings] = useState(defaultState);
+	const [selectSettings, setSelectSettings] = useState<{
+		setting: T;
+		action: "add" | "update";
+	} | null>(null);
 
 	return (
 		<>
-			{selectSettings.action && (
+			{selectSettings && (
 				<SettingDialogComponent
 					setting={selectSettings.setting}
-					handleDialogClose={() => setSelectSettings(defaultState)}
+					handleDialogClose={() => setSelectSettings(null)}
 					handleCommit={(newSettings: T) => {
 						setSettings((cur) => {
 							if (selectSettings.action === "add") {
@@ -71,7 +88,7 @@ export default function SettingTable<T extends Displayable>({
 							}
 							return updateSettings(cur, selectSettings.setting, newSettings);
 						});
-						setSelectSettings(defaultState);
+						setSelectSettings(null);
 					}}
 				/>
 			)}

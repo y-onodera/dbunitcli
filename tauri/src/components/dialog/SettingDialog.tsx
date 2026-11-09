@@ -1,5 +1,9 @@
 import { type ReactNode, useState } from "react";
-import { type OperationResult, saveOnSuccess } from "../../utils/fetchUtils";
+import {
+	getErrorMessage,
+	type OperationResult,
+	saveOnSuccess,
+} from "../../utils/fetchUtils";
 import { BlueButton, WhiteButton } from "../element/Button";
 import {
 	AddButton,
@@ -57,13 +61,22 @@ export type SettingDialogProps<T> = CommonProps & (SettingMode<T> | FileMode);
 
 export function SettingDialog<T>(props: SettingDialogProps<T>) {
 	const [fileNameValue, setFileNameValue] = useState(props.fileName ?? "");
+	const [prevFileName, setPrevFileName] = useState(props.fileName);
+	if (props.fileName !== prevFileName) {
+		setPrevFileName(props.fileName);
+		setFileNameValue(props.fileName ?? "");
+	}
 	const isFileMode = props.fileName !== undefined;
+	const fileNameMissing = isFileMode && fileNameValue.trim() === "";
 	const saveThen: SaveThen = (onSaved) => {
-		if (isFileMode) {
+		if (isFileMode && !fileNameMissing) {
 			saveOnSuccess(
 				() => props.save(fileNameValue),
 				() => onSaved(fileNameValue),
-			);
+			).catch((error) => {
+				console.error("Save Error:", error);
+				alert(`Save failed: ${getErrorMessage(error)}`);
+			});
 		}
 	};
 
@@ -109,7 +122,7 @@ export function SettingDialog<T>(props: SettingDialogProps<T>) {
 			<DialogFooter>
 				<BlueButton
 					title={props.commitLabel ?? "Save"}
-					disabled={props.commitDisabled}
+					disabled={props.commitDisabled || fileNameMissing}
 					handleClick={() => {
 						if (isFileMode) {
 							saveThen(props.handleSave);
@@ -223,6 +236,11 @@ export function Select(props: {
 	);
 }
 
+// 複数行の入力欄で行ごとに一意なid。見出しのlabelは先頭行を指す
+function rowInputId(name: string, index: number): string {
+	return `${name}_${index}`;
+}
+
 // index以外の行に同じ値があるか
 export function isDuplicated(
 	values: string[],
@@ -328,7 +346,7 @@ export function ArraysText(props: {
 			<div className="grid grid-cols-5 pb-2">
 				{showLabel && (
 					<InputLabel
-						id={props.name}
+						id={rowInputId(props.name, props.index)}
 						text={props.name}
 						required={false}
 						wStyle="p-2.5"
@@ -336,7 +354,7 @@ export function ArraysText(props: {
 				)}
 				<ControllTextBox
 					name={props.name}
-					id={props.name}
+					id={rowInputId(props.name, props.index)}
 					required={true}
 					wStyle={wide ? "col-start-2 col-span-2" : "col-start-2"}
 					value={text}
@@ -375,8 +393,12 @@ export function KeyValues(props: {
 	handleEdit?: (index: number) => void;
 }) {
 	// 値が空のときとAdd中は、末尾に画面だけの空行を出す（名前が確定するまでモデルに入れない）
-	const [adding, setAdding] = useState(false);
+	// selectなど外から行数が変われば、Add中は自然に終わる
+	const [addingAt, setAddingAt] = useState<number | null>(null);
 	const entries = Object.entries(props.values);
+	const adding = addingAt === entries.length;
+	const setAdding = (value: boolean) =>
+		setAddingAt(value ? entries.length : null);
 	const blankIndex = adding || entries.length === 0 ? entries.length : -1;
 	const rows = blankIndex < 0 ? entries : [...entries, ["", ""]];
 	return (
@@ -386,10 +408,10 @@ export function KeyValues(props: {
 				return (
 					<KeyValueText
 						// 編集ダイアログなど外から式が変われば入力中のstateを作り直す
-						key={`${key}:${value}`}
+						key={JSON.stringify([key, value])}
 						propKey={key}
 						name={props.name}
-						value={value.toString()}
+						value={String(value ?? "")}
 						index={index}
 						handleChange={(i, newValue) => {
 							if (blank) {
@@ -462,7 +484,7 @@ export function KeyValueText(props: {
 			<div className="grid grid-cols-5 pb-2">
 				{props.index === 0 && (
 					<InputLabel
-						id={props.name}
+						id={rowInputId(props.name, props.index)}
 						text={props.name}
 						required={false}
 						wStyle="p-2.5"
@@ -470,7 +492,7 @@ export function KeyValueText(props: {
 				)}
 				<ControllTextBox
 					name={props.name}
-					id={props.name}
+					id={rowInputId(props.name, props.index)}
 					required={true}
 					wStyle="col-start-2"
 					value={key}
@@ -479,7 +501,7 @@ export function KeyValueText(props: {
 				/>
 				<ControllTextBox
 					name={props.name}
-					id={props.name}
+					id={`${rowInputId(props.name, props.index)}_value`}
 					required={true}
 					wStyle="col-start-3 col-span-2 ml-1"
 					value={value}

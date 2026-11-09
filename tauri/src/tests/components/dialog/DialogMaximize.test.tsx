@@ -21,7 +21,7 @@ function renderSettingDialog(maximizable: boolean) {
 		>
 			<DialogBody size="md">
 				<TextArea id="outer" value="" />
-				<ModalOverlay>
+				<ModalOverlay onClose={vi.fn()}>
 					<DialogTitle>Nested</DialogTitle>
 					<DialogField grow>
 						<TextArea id="nested" value="" />
