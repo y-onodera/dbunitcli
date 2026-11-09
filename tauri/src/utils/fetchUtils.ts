@@ -36,19 +36,39 @@ Request Body: ${errorInfo.requestBody}
     `.trim();
 };
 
-// 呼び出し元が画面にエラーを表示する場合に、詳細をコンソールにだけ残す
+// 呼び出し元が画面にエラーを表示する場合に、詳細をコンソールにだけ残す。
+// 呼び出し元が中断したときは失敗として扱わない（logFetchError・handleFetchErrorで共通）
 export const logFetchError = (
 	message: string,
-	{ endpoint, options }: FetchParams,
+	{ endpoint, options, signal }: FetchParams,
 ) => {
+	if (signal?.aborted) {
+		return;
+	}
 	console.error("Fetch Error:", createErrorInfo(message, endpoint, options));
 };
 
 export const handleFetchError = (message: string, fetchParams: FetchParams) => {
-	const { endpoint, options } = fetchParams;
+	const { endpoint, options, signal } = fetchParams;
+	if (signal?.aborted) {
+		return;
+	}
 	alert(createErrorMessage(createErrorInfo(message, endpoint, options)));
 	logFetchError(message, fetchParams);
 };
+
+// JSONの本文をPOSTするリクエスト
+export const postJsonParams = (
+	endpoint: string,
+	body: object,
+): FetchParams => ({
+	endpoint,
+	options: {
+		method: "POST",
+		headers: { "Content-Type": "application/json" },
+		body: JSON.stringify(body),
+	},
+});
 
 export const getErrorMessage = (error: unknown): string =>
 	error instanceof Error ? error.message : String(error);
@@ -82,10 +102,7 @@ export async function fetchAndUpdate<T>(
 			return "success" as OperationResult;
 		})
 		.catch((ex) => {
-			// 呼び出し元が中断したときは知らせない
-			if (!fetchParams.signal?.aborted) {
-				handleFetchError(getErrorMessage(ex), fetchParams);
-			}
+			handleFetchError(getErrorMessage(ex), fetchParams);
 			return "failed" as OperationResult;
 		});
 }

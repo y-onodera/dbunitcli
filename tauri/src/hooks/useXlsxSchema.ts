@@ -2,7 +2,12 @@ import { useEffect, useState } from "react";
 import { useEnvironment } from "../context/EnvironmentProvider";
 import type { DatasetSrcInfo } from "../model/CommandOption";
 import { XlsxSchema, type XlsxSchemaBuilder } from "../model/XlsxSchema";
-import { fetchData, getErrorMessage, logFetchError } from "../utils/fetchUtils";
+import {
+	fetchData,
+	getErrorMessage,
+	logFetchError,
+	postJsonParams,
+} from "../utils/fetchUtils";
 import {
 	type ResourceParser,
 	useResourceLoad,
@@ -29,6 +34,9 @@ export const useXlsxSchemaData = (
 	return { schema: data, loading };
 };
 
+// 空にするたびに別の配列を作って再描画しないよう共有する
+const NO_SHEETS: string[] = [];
+
 type SheetSrc = {
 	src: string;
 	regTableInclude: string;
@@ -46,30 +54,23 @@ async function fetchSheets(
 	signal: AbortSignal,
 ): Promise<string[]> {
 	const fetchParams = {
-		endpoint: `${apiUrl}xlsx-schema/sheets`,
-		options: {
-			method: "POST",
-			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify({
-				...sheetSrc,
-				recursive: sheetSrc.recursive === "true",
-			}),
-		},
+		...postJsonParams(`${apiUrl}xlsx-schema/sheets`, {
+			...sheetSrc,
+			recursive: sheetSrc.recursive === "true",
+		}),
 		signal,
 	};
 	try {
 		const response = await fetchData(fetchParams);
 		return (await response.json()) as string[];
 	} catch (ex) {
-		if (!signal.aborted) {
-			logFetchError(getErrorMessage(ex), fetchParams);
-		}
+		logFetchError(getErrorMessage(ex), fetchParams);
 		return [];
 	}
 }
 
 export const useSrcInfoSheets = (srcInfo: DatasetSrcInfo): string[] => {
-	const [sheetNames, setSheetNames] = useState<string[]>([]);
+	const [sheetNames, setSheetNames] = useState<string[]>(NO_SHEETS);
 	const { apiUrl } = useEnvironment();
 	const {
 		src = "",
@@ -83,7 +84,7 @@ export const useSrcInfoSheets = (srcInfo: DatasetSrcInfo): string[] => {
 
 	useEffect(() => {
 		if (!src) {
-			setSheetNames([]);
+			setSheetNames(NO_SHEETS);
 			return;
 		}
 		const controller = new AbortController();

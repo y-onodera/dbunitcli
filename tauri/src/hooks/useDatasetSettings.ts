@@ -4,6 +4,7 @@ import { useJdbcConnectionState } from "../context/JdbcConnectionProvider";
 import { useParamInputs } from "../context/ParameterInputProvider";
 import {
 	type DatasetSrcInfo,
+	isJdbcSrcType,
 	srcTypeOf,
 	withAllTables,
 } from "../model/CommandOption";
@@ -37,7 +38,7 @@ function buildDatasetRequestBody(
 	});
 }
 
-// ソース未指定（inlineSourceならその内容が空）・none・JDBC未接続のsql/tableではsidecarへ問い合わせない
+// ソース未指定（inlineSourceならその内容が空）・none・JDBC未接続のJDBC系srcではsidecarへ問い合わせない
 function isSrcReady(info: DatasetSrcInfo, connectionOk: boolean): boolean {
 	const srcType = srcTypeOf(info);
 	const hasSrc =
@@ -47,7 +48,7 @@ function isSrcReady(info: DatasetSrcInfo, connectionOk: boolean): boolean {
 	if (!hasSrc || !srcType || srcType === "none") {
 		return false;
 	}
-	return (srcType !== "sql" && srcType !== "table") || connectionOk;
+	return !isJdbcSrcType(srcType) || connectionOk;
 }
 
 // Previewの読込状態。失敗したらdataは空にし、errorにメッセージを持つ。logsは読込中に届いたログ（失敗後も残す）
@@ -120,7 +121,7 @@ async function fetchDatasetJson<T>(
 
 // srcの読込準備ができていてenabledなら、endpointへextraを付けて読み込む。srcInfoやextraが変わるたびに読み直す。
 // extraは文字列だけの値にする（毎回作り直されるオブジェクトでも読み直さないよう、JSON文字列にして比較する）。
-// withLogs: 読込中のログも受け取る。allTables: settingの対象外のテーブルも読む
+// withLogs: 読込中のログも受け取る
 function useDatasetLoad<T>(
 	srcInfo: DatasetSrcInfo,
 	endpoint: string,
@@ -128,7 +129,6 @@ function useDatasetLoad<T>(
 	enabled: boolean,
 	idle: Load<T>,
 	withLogs: boolean,
-	allTables = false,
 ): Load<T> {
 	const [load, setLoad] = useState<Load<T>>(idle);
 	const { apiUrl } = useEnvironment();
@@ -149,7 +149,7 @@ function useDatasetLoad<T>(
 				fetchDatasetJson<T>(
 					apiUrl,
 					endpoint,
-					allTables ? withAllTables(srcInfo) : srcInfo,
+					srcInfo,
 					jdbcValues,
 					paramInputs,
 					JSON.parse(extraKey),
@@ -173,7 +173,6 @@ function useDatasetLoad<T>(
 		extraKey,
 		idle,
 		withLogs,
-		allTables,
 	]);
 
 	return load;
@@ -316,13 +315,12 @@ const IDLE_ALL_COLUMNS = idleLoad<Record<string, string[]>>({});
 // 入力候補なので、settingの対象外のテーブルのカラムも含め、取得できなければ候補なしとする
 export const useSrcInfoColumnNames = (srcInfo: DatasetSrcInfo): string[] => {
 	const { data } = useDatasetLoad(
-		srcInfo,
+		withAllTables(srcInfo),
 		"table-columns",
 		{ tableName: "" },
 		true,
 		IDLE_ALL_COLUMNS,
 		false,
-		true,
 	);
 	return [...new Set(Object.values(data).flat())];
 };
@@ -337,8 +335,7 @@ async function fetchTableColumns(
 	tableName: string,
 	jdbcValues: Record<string, string>,
 	paramInputs: Record<string, string>,
-	signal?: AbortSignal,
-	onLog?: (line: string) => void,
+	{ signal, onLog }: JobContext,
 ): Promise<Record<string, string[]>> {
 	return fetchDatasetJson(
 		apiUrl,
@@ -359,7 +356,7 @@ export const useColumnNamesFetcher = () => {
 	return async (
 		srcInfo: DatasetSrcInfo,
 		tableName: string,
-		{ signal, onLog }: JobContext,
+		context: JobContext,
 	): Promise<string[]> => {
 		// 失敗は投げる（呼び出し元がエラーと実行中のログを表示する）。
 		// 入力候補なので、settingの対象外のテーブルでも取得する
@@ -369,8 +366,7 @@ export const useColumnNamesFetcher = () => {
 			tableName,
 			jdbcValues,
 			paramInputs,
-			signal,
-			onLog,
+			context,
 		);
 		return columns[tableName] ?? [];
 	};
@@ -382,7 +378,7 @@ export const useCsvColumnNamesFetcher = () => {
 	const paramInputs = useParamInputs();
 	return async (
 		csvReadExpression: string,
-		{ signal, onLog }: JobContext,
+		context: JobContext,
 	): Promise<string[]> => {
 		const columns = await fetchTableColumns(
 			apiUrl,
@@ -393,8 +389,7 @@ export const useCsvColumnNamesFetcher = () => {
 			INLINE_SOURCE_TABLE_NAME,
 			{},
 			paramInputs,
-			signal,
-			onLog,
+			context,
 		);
 		return columns[INLINE_SOURCE_TABLE_NAME] ?? [];
 	};

@@ -7,12 +7,12 @@ import type {
 	ResourcesSettingsBuilder,
 } from "../model/WorkspaceResources";
 import {
-	type FetchParams,
 	fetchAndUpdate,
 	fetchData,
 	getErrorMessage,
 	handleFetchError,
 	type OperationResult,
+	postJsonParams,
 } from "../utils/fetchUtils";
 
 // リソース種類ごとのAPIの接頭辞と、応答（更新後のファイル一覧）を書き戻すResourcesSettingsのキー
@@ -44,23 +44,6 @@ export type DatasetSettingKind =
 	| "datasetSetting"
 	| "compareSetting"
 	| "generateSetting";
-
-// `${base}/load`へ名前と、コマンド実行時にそのファイルを読む文字コードを送るリクエスト（読込で共通）
-export function resourceLoadParams(
-	apiUrl: string,
-	kind: ResourceKind,
-	name: string,
-	encoding: string,
-): FetchParams {
-	return {
-		endpoint: `${apiUrl}${resourceTargets[kind].base}/load`,
-		options: {
-			method: "POST",
-			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify({ name, encoding }),
-		},
-	};
-}
 
 // 種類に対応するResourcesSettings上のファイル一覧（入力欄の候補）
 export function resourceFilesOf(
@@ -155,7 +138,7 @@ export const useResourceLoad = <T>(
 	return { data, loading };
 };
 
-// 失敗はalertで知らせて空の値を返す（中断したときは知らせない）
+// 失敗はalertで知らせて空の値を返す
 async function loadResource<T>(
 	apiUrl: string,
 	kind: ResourceKind,
@@ -164,17 +147,19 @@ async function loadResource<T>(
 	parser: ResourceParser<T>,
 	signal: AbortSignal,
 ): Promise<T> {
+	// encodingはコマンド実行時にそのファイルを読む文字コード
 	const params = {
-		...resourceLoadParams(apiUrl, kind, name, encoding),
+		...postJsonParams(`${apiUrl}${resourceTargets[kind].base}/load`, {
+			name,
+			encoding,
+		}),
 		signal,
 	};
 	try {
 		const response = await fetchData(params);
 		return parser.parse(await response.json());
 	} catch (e) {
-		if (!signal.aborted) {
-			handleFetchError(getErrorMessage(e), params);
-		}
+		handleFetchError(getErrorMessage(e), params);
 		return parser.empty();
 	}
 }

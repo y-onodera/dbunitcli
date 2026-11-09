@@ -21,15 +21,13 @@ function toJdbcRequestBody(jdbcValues: Record<string, string>) {
 	};
 }
 
-// 一覧を取得する。失敗は呼び出し元がログと一緒に表示するため投げる（自分で中断したときはコンソールにも出さない）
+// 一覧を取得する。失敗は呼び出し元がログと一緒に表示するため投げる
 async function fetchJdbcList(params: FetchParams): Promise<string[]> {
 	try {
 		const response = await fetchData(params);
 		return (await response.json()) as string[];
 	} catch (e) {
-		if (!params.signal?.aborted) {
-			logFetchError(getErrorMessage(e), params);
-		}
+		logFetchError(getErrorMessage(e), params);
 		throw e;
 	}
 }

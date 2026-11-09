@@ -17,6 +17,7 @@ import type {
 } from "../model/SelectParameter";
 import { SelectParameter } from "../model/SelectParameter";
 import {
+	type FetchParams,
 	fetchAndUpdate,
 	fetchData,
 	getErrorMessage,
@@ -25,6 +26,7 @@ import {
 	logFetchError,
 	OptionValidationError,
 	type OptionViolation,
+	postJsonParams,
 } from "../utils/fetchUtils";
 
 export type Running = {
@@ -36,51 +38,37 @@ export type Running = {
 	failed?: boolean;
 };
 
-const postJsonParams = (endpoint: string, body: object) => ({
-	endpoint,
-	options: {
-		method: "POST",
-		headers: { "Content-Type": "application/json" },
-		body: JSON.stringify(body),
-	},
-});
+// リクエストの応答（commandの更新後のパラメータ名一覧）をparameterListへ書き戻す関数を返す
+const useUpdateParameterList = (command: string) => {
+	const setParameterList = useSetParameterList();
+	return (fetchParams: FetchParams, onUpdated?: () => void) =>
+		fetchAndUpdate<string[]>(fetchParams, (parameters) => {
+			setParameterList((current) => current.replace(command, parameters));
+			onUpdated?.();
+		});
+};
 
 export const useAddParameter = (command: string) => {
-	const setParameterList = useSetParameterList();
 	const { apiUrl } = useEnvironment();
 	const key = command.toLowerCase();
+	const updateList = useUpdateParameterList(key);
 	return () =>
-		fetchAndUpdate<string[]>(
-			{ endpoint: `${apiUrl + key}/add`, options: { method: "GET" } },
-			(parameters) =>
-				setParameterList((current) => current.replace(key, parameters)),
-		);
+		updateList({ endpoint: `${apiUrl + key}/add`, options: { method: "GET" } });
 };
 
 export const useParameterActions = (command: string, name: string) => {
-	const setParameterList = useSetParameterList();
 	const { apiUrl } = useEnvironment();
 	const setParameter = useSetSelectParameterState();
 	const key = command.toLowerCase();
+	const updateList = useUpdateParameterList(key);
+	const post = (action: string, body: object, onUpdated?: () => void) =>
+		updateList(postJsonParams(`${apiUrl + key}/${action}`, body), onUpdated);
 
-	const postAndUpdateList = (
-		action: string,
-		body: object,
-		onUpdated?: () => void,
-	) =>
-		fetchAndUpdate<string[]>(
-			postJsonParams(`${apiUrl + key}/${action}`, body),
-			(parameters) => {
-				setParameterList((current) => current.replace(key, parameters));
-				onUpdated?.();
-			},
-		);
-
-	const handleDelete = () => postAndUpdateList("delete", { name });
-	const handleCopy = () => postAndUpdateList("copy", { name });
+	const handleDelete = () => post("delete", { name });
+	const handleCopy = () => post("copy", { name });
 	// 応答を待つ間に選択が変わりうるので、選択中のパラメータは更新時点の値で判定する
 	const handleRename = (newName: string) =>
-		postAndUpdateList("rename", { oldName: name, newName }, () =>
+		post("rename", { oldName: name, newName }, () =>
 			setParameter((current) =>
 				current.command === key && current.name === name
 					? new SelectParameter(
@@ -113,14 +101,10 @@ export const useLoadParameterizeFiles = () => {
 
 export const useDeleteParameterize = () => {
 	const { apiUrl } = useEnvironment();
-	const setParameterList = useSetParameterList();
+	const updateList = useUpdateParameterList("parameterize");
 	return (name: string, deleteFiles: string[]) =>
-		fetchAndUpdate<string[]>(
+		updateList(
 			postJsonParams(`${apiUrl}parameterize/delete`, { name, deleteFiles }),
-			(parameters) =>
-				setParameterList((current) =>
-					current.replace("parameterize", parameters),
-				),
 		);
 };
 

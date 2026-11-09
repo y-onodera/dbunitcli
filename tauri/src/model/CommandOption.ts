@@ -211,11 +211,14 @@ export function isXlsType(options: SrcTypeOptions): options is XlsOptions {
 export function isXlsxType(options: SrcTypeOptions): options is XlsxOptions {
 	return options.srcType?.value === "xlsx";
 }
-export function isSqlType(options: SrcTypeOptions): options is SqlOptions {
-	return options.srcType?.value === "sql";
+// JDBC接続で読むsrcType（入力欄の表示とsidecarへの問い合わせ可否で共通）
+export function isJdbcSrcType(srcType: string | undefined): boolean {
+	return srcType === "table" || srcType === "sql";
 }
-export function isTableType(options: SrcTypeOptions): options is TableOptions {
-	return options.srcType?.value === "table";
+export function isJdbcType(
+	options: SrcTypeOptions,
+): options is TableOptions | SqlOptions {
+	return isJdbcSrcType(options.srcType?.value);
 }
 export function hasJdbcOption(
 	datasrc: DatasetSource,
