@@ -1,39 +1,34 @@
-import { createContext, useContext, useState } from "react";
+import type { Dispatch, ReactNode, SetStateAction } from "react";
+import { createContext, use } from "react";
 import type { DatasetSrcInfo } from "../model/CommandOption";
+import { useResettableState } from "../utils/useResettableState";
 import { JdbcConnectionProvider } from "./JdbcConnectionProvider";
 
-type DatasetSrcInfoContextValue = {
-	state: DatasetSrcInfo;
-	setState: (state: DatasetSrcInfo) => void;
-};
-
-const DatasetSrcInfoContext = createContext<DatasetSrcInfoContextValue>({
-	state: { values: {} },
-	setState: () => {},
-});
+const datasetSrcInfoContext = createContext<DatasetSrcInfo>({ values: {} });
+const setDatasetSrcInfoContext = createContext<
+	Dispatch<SetStateAction<DatasetSrcInfo>>
+>(() => undefined);
 
 export function DatasetSrcInfoProvider({
 	children,
 	initialValue,
+	resetKey,
 }: {
-	children: React.ReactNode;
+	children: ReactNode;
 	initialValue: DatasetSrcInfo;
+	resetKey?: string;
 }) {
-	const [state, setState] = useState<DatasetSrcInfo>(initialValue);
-
+	const [state, setState] = useResettableState(initialValue, resetKey);
 	return (
-		<JdbcConnectionProvider>
-			<DatasetSrcInfoContext.Provider value={{ state, setState }}>
-				{children}
-			</DatasetSrcInfoContext.Provider>
+		<JdbcConnectionProvider resetKey={resetKey}>
+			<datasetSrcInfoContext.Provider value={state}>
+				<setDatasetSrcInfoContext.Provider value={setState}>
+					{children}
+				</setDatasetSrcInfoContext.Provider>
+			</datasetSrcInfoContext.Provider>
 		</JdbcConnectionProvider>
 	);
 }
 
-export function useDatasetSrcInfo(): DatasetSrcInfo {
-	return useContext(DatasetSrcInfoContext).state;
-}
-
-export function useSetDatasetSrcInfo(): (state: DatasetSrcInfo) => void {
-	return useContext(DatasetSrcInfoContext).setState;
-}
+export const useDatasetSrcInfo = () => use(datasetSrcInfoContext);
+export const useSetDatasetSrcInfo = () => use(setDatasetSrcInfoContext);

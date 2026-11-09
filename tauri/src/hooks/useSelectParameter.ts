@@ -70,7 +70,7 @@ export const useParameterActions = (command: string, name: string) => {
 	const handleRename = (newName: string) =>
 		post("rename", { oldName: name, newName }, () =>
 			setParameter((current) =>
-				current.command === key && current.name === name
+				current?.command === key && current.name === name
 					? new SelectParameter(
 							current.options,
 							current.command,
@@ -211,14 +211,15 @@ export const useRefreshSelectParameter = (command: string) => {
 		try {
 			const response = await fetchData(fetchParams);
 			const parameter: Options = await response.json();
-			setParameter(
-				(current) =>
-					new SelectParameter(
-						parameter,
-						current.command,
-						current.name,
-						current.inputParam,
-					),
+			setParameter((current) =>
+				current
+					? new SelectParameter(
+							parameter,
+							current.command,
+							current.name,
+							current.inputParam,
+						)
+					: current,
 			);
 		} catch (ex) {
 			handleFetchError(getErrorMessage(ex), fetchParams);
@@ -255,7 +256,7 @@ const addUnique = (messages: string[], message: string) => {
 // 違反は関わる全ての入力欄に持たせ、折りたたんだ欄も展開すれば欄の下に出す。表示中の欄が無い違反は結果ダイアログにもまとめて出す
 const toFieldErrors = (
 	violations: OptionViolation[],
-	visibleFields: Set<string>,
+	visibleFields: ReadonlyMap<string, number>,
 ) => {
 	const fieldErrors: FieldErrors = {};
 	const unmatched: string[] = [];
@@ -271,7 +272,7 @@ const toFieldErrors = (
 	return { fieldErrors, unmatched };
 };
 
-// 結果（失敗時はエラーメッセージ）を返す。中断されたときはnull
+// 結果（失敗時はエラーメッセージ）を返す。中断されたとき・パラメータ未選択のときはnull
 const useParameterAction = () => {
 	const parameter = useSelectParameter();
 	const environment = useEnvironment();
@@ -283,6 +284,9 @@ const useParameterAction = () => {
 		signal?: AbortSignal,
 		onLog?: (line: string) => void,
 	): Promise<Running | null> => {
+		if (!parameter) {
+			return null;
+		}
 		const fetchParams = {
 			...postJsonParams(`${environment.apiUrl + parameter.command}/${action}`, {
 				name: parameter.name,

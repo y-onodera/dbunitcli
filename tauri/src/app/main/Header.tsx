@@ -22,7 +22,7 @@ export default function Header() {
 					/>
 					<SectionHelpButton command="dialogs/workspace" label="Workspace" />
 				</div>
-				{selected.name && <h1>{`${selected.command}: ${selected.name}`}</h1>}
+				{selected?.name && <h1>{`${selected.command}: ${selected.name}`}</h1>}
 			</div>
 			{showWorkspaceDialog && (
 				<WorkspaceDialog onClose={() => setShowWorkspaceDialog(false)} />

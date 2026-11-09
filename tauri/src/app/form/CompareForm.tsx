@@ -5,7 +5,10 @@ import { DatasetSrcInfoProvider } from "../../context/DatasetSrcInfoProvider";
 import { ResourceEncodingProvider } from "../../context/ResourceEncodingProvider";
 import { buildDatasetSrcInfo } from "../../model/CommandOption";
 import type { CompareOptions } from "../../model/SelectParameter";
-import { DatasetLoadForm } from "./section/DatasetLoadForm";
+import {
+	DatasetLoadForm,
+	datasetSrcInfoResetKey,
+} from "./section/DatasetLoadForm";
 import CompareKeySettingsDialog, {
 	CompareKeySettingsEditDialog,
 } from "./section/dialog/CompareKeySettingsDialog";
@@ -37,10 +40,13 @@ export function CompareForm(prop: {
 	);
 	const createPatchSqlElement = prop.compare.createPatchSql;
 
-	const oldDataInitialInfo = buildDatasetSrcInfo(oldData);
-
 	return (
-		<>
+		// 比較キーの編集ではold側の入力中のデータセット・JDBC接続からテーブル名・カラム名の候補を取るため、
+		// old側のsrcの入力値をフォーム全体で共有する。new/expect側は各DatasetLoadFormが自前の範囲を持つ
+		<DatasetSrcInfoProvider
+			resetKey={datasetSrcInfoResetKey(prop.name, oldData)}
+			initialValue={buildDatasetSrcInfo(oldData)}
+		>
 			<SectionFieldset>
 				<SectionLegend
 					title="compare"
@@ -53,23 +59,17 @@ export function CompareForm(prop: {
 					element={targetTypeElement}
 				/>
 				{targetType === "data" ? (
-					// 比較キーの編集ではold側のデータセットからテーブル名・カラム名の候補を取る
-					<DatasetSrcInfoProvider
-						key={`${prop.name}compare-setting:${oldData.srcType?.value ?? ""}`}
-						initialValue={oldDataInitialInfo}
+					<ResourceEncodingProvider
+						encodings={{ compareSetting: settingEncoding }}
 					>
-						<ResourceEncodingProvider
-							encodings={{ compareSetting: settingEncoding }}
-						>
-							<DatasetSettingText
-								prefix=""
-								element={settingElement}
-								editDialog={CompareKeySettingsDialog}
-								generateEditDialog={CompareKeySettingsEditDialog}
-								preview={null}
-							/>
-						</ResourceEncodingProvider>
-					</DatasetSrcInfoProvider>
+						<DatasetSettingText
+							prefix=""
+							element={settingElement}
+							editDialog={CompareKeySettingsDialog}
+							generateEditDialog={CompareKeySettingsEditDialog}
+							preview={null}
+						/>
+					</ResourceEncodingProvider>
 				) : (
 					<FileText prefix="" element={settingElement} />
 				)}
@@ -105,6 +105,7 @@ export function CompareForm(prop: {
 				srcData={oldData}
 				helpCommand="sections/dataset-load-form"
 				helpLabel="old"
+				parentSrcInfo
 			/>
 			<SectionFieldset>
 				<legend>{convertResult.prefix}</legend>
@@ -120,6 +121,6 @@ export function CompareForm(prop: {
 				helpCommand="sections/dataset-load-form"
 				helpLabel="expect"
 			/>
-		</>
+		</DatasetSrcInfoProvider>
 	);
 }

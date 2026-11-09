@@ -115,6 +115,10 @@ function DatasetLoadFormContent({
 	);
 }
 
+// srcDataの入力値を初期値から作り直す単位
+export const datasetSrcInfoResetKey = (name: string, srcData: DatasetSource) =>
+	`${name}:${srcData.prefix}:${srcData.srcType?.value ?? ""}`;
+
 // srcDataの入力値を共有する範囲。srcTypeが変わったら初期値から作り直す
 export function DatasetSrcInfoScope({
 	name,
@@ -127,7 +131,7 @@ export function DatasetSrcInfoScope({
 }) {
 	return (
 		<DatasetSrcInfoProvider
-			key={`${name}:${srcData.prefix}:${srcData.srcType?.value ?? ""}`}
+			key={datasetSrcInfoResetKey(name, srcData)}
 			initialValue={buildDatasetSrcInfo(srcData)}
 		>
 			{children}
@@ -143,7 +147,7 @@ export function DatasetLoadForm(prop: {
 	helpCommand?: string;
 	helpLabel?: string;
 	// trueなら自前のDatasetSrcInfoScopeを作らず、親のものへ入力値を反映する
-	// （generateフォームでは-unitSettingのプレビューも同じsrcの入力値を使うため）
+	// （同じsrcの入力値をフォーム内の別の欄でも使うとき。generateの-unitSettingプレビュー、compareの比較キー編集）
 	parentSrcInfo?: boolean;
 }) {
 	if (prop.srcData.srcType?.value === "none") {

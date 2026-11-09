@@ -5,6 +5,7 @@ import {
 	useSetResourcesSettings,
 	useSetWorkspaceContext,
 	useWorkspaceContext,
+	workspaceResourcesParams,
 } from "../context/WorkspaceResourcesProvider";
 import type { Attribute } from "../model/CommandOption";
 import {
@@ -65,12 +66,7 @@ export const useWorkspaceResourcesReload = () => {
 	const applyResources = useApplyWorkspaceResources();
 	const environment = useEnvironment();
 	return async () => {
-		const fetchParams = {
-			endpoint: `${environment.apiUrl}workspace/resources`,
-			options: {
-				method: "GET",
-			},
-		};
+		const fetchParams = workspaceResourcesParams(environment.apiUrl);
 		await fetchData(fetchParams)
 			.then((response) => response.json())
 			.then((resources: WorkspaceResources) => applyResources(resources))

@@ -39,8 +39,8 @@ export default function Footer(prop: {
 	const saveShell = useSaveShell();
 
 	useEffect(() => {
-		setParamInputs(parameter.inputParam ?? {});
-	}, [parameter.inputParam, setParamInputs]);
+		setParamInputs(parameter?.inputParam ?? {});
+	}, [parameter?.inputParam, setParamInputs]);
 
 	// 失敗は例外ではなくRunning（failed）で返り、結果ダイアログに表示する
 	const run = async (
@@ -135,7 +135,7 @@ export default function Footer(prop: {
 					</div>
 				</div>
 			</ResultDialog>
-			{parameter.command && (
+			{parameter && (
 				<div
 					className="fixed bottom-0 right-0 left-(--sidebar-width)
                                 z-modal

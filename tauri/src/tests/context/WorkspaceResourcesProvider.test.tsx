@@ -69,6 +69,26 @@ vi.mock("../../utils/fetchUtils", async (importOriginal) => ({
 	fetchData: mockFetchData,
 }));
 describe("WorkspaceResourcesProviderのテスト", () => {
+	describe("取得失敗のテスト", () => {
+		it("取得に失敗したらエラーと再試行ボタンを表示し、再試行で成功すれば子を表示する", async () => {
+			mockFetchData.mockRejectedValueOnce(new Error("connection refused"));
+			await act(async () => {
+				render(<div>loaded</div>, { wrapper });
+			});
+			expect(
+				screen.getByText(
+					"Failed to load workspace resources: connection refused",
+				),
+			).toBeInTheDocument();
+			expect(screen.queryByText("loaded")).not.toBeInTheDocument();
+
+			await act(async () => {
+				screen.getByRole("button", { name: "Retry" }).click();
+			});
+
+			expect(screen.getByText("loaded")).toBeInTheDocument();
+		});
+	});
 	describe("Workspaceのテスト", () => {
 		it("suspend中のloading表示の確認", async () => {
 			render(<div>test</div>, { wrapper });

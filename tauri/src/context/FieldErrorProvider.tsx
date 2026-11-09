@@ -10,8 +10,21 @@ const fieldErrorsContext = createContext<FieldErrors>({});
 const setFieldErrorsContext = createContext<
 	Dispatch<SetStateAction<FieldErrors>>
 >(() => undefined);
-// 表示中の入力欄のname。エラーを出せる欄かどうかの判定に使い、変わっても再描画は要らないため state にしない
-const visibleFieldsContext = createContext<Set<string>>(new Set());
+// 表示中の入力欄のnameと、そのnameで表示中の欄の数。エラーを出せる欄かどうかの判定に使い、変わっても再描画は要らないため state にしない
+const visibleFieldsContext = createContext<Map<string, number>>(new Map());
+
+// 同じnameの欄が複数あっても、最後の1つが消えるまで表示中として残す
+function addVisibleField(fields: Map<string, number>, name: string) {
+	fields.set(name, (fields.get(name) ?? 0) + 1);
+}
+function removeVisibleField(fields: Map<string, number>, name: string) {
+	const count = (fields.get(name) ?? 0) - 1;
+	if (count > 0) {
+		fields.set(name, count);
+	} else {
+		fields.delete(name);
+	}
+}
 
 // 計算されたキーの分割代入はReact Compilerが未対応のため、コンポーネント外で行う。エラーが無ければ同じ値を返して再描画を避ける
 function omitFieldErrors(errors: FieldErrors, name: string): FieldErrors {
@@ -28,7 +41,7 @@ export default function FieldErrorProvider({
 	children: ReactNode;
 }) {
 	const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
-	const [visibleFields] = useState(() => new Set<string>());
+	const [visibleFields] = useState(() => new Map<string, number>());
 	// 入力し直した欄の検証エラーは消す。欄ごとではなく、バブリングしてくるchangeをここでまとめて受ける
 	const handleChange = (ev: FormEvent<HTMLDivElement>) => {
 		const { name } = ev.target as HTMLInputElement;
@@ -50,7 +63,8 @@ export default function FieldErrorProvider({
 }
 
 export const useSetFieldErrors = () => use(setFieldErrorsContext);
-export const useVisibleFields = () => use(visibleFieldsContext);
+export const useVisibleFields = (): ReadonlyMap<string, number> =>
+	use(visibleFieldsContext);
 
 // changeを起こさずに値を変えたとき（ファイル選択等）に、その欄の検証エラーを消す
 export const useClearFieldErrors = () => {
@@ -66,9 +80,9 @@ export const useFieldErrors = (name: string, visible: boolean): string[] => {
 		if (!visible) {
 			return;
 		}
-		visibleFields.add(name);
+		addVisibleField(visibleFields, name);
 		return () => {
-			visibleFields.delete(name);
+			removeVisibleField(visibleFields, name);
 		};
 	}, [visibleFields, name, visible]);
 	return use(fieldErrorsContext)[name] ?? NO_ERRORS;

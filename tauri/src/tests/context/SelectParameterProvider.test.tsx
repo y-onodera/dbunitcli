@@ -192,7 +192,7 @@ describe("SelectParameterProviderのテスト", () => {
 		it("初期状態が正しいことを確認", () => {
 			const { result } = renderHook(() => useSelectParameter(), { wrapper });
 			waitFor(() => {
-				expect(result.current).toEqual({} as SelectParameter);
+				expect(result.current).toBeUndefined();
 			});
 		});
 	});
@@ -206,13 +206,13 @@ describe("SelectParameterProviderのテスト", () => {
 				{ wrapper },
 			);
 			await waitFor(() => {
-				expect(result.current.parameter).toEqual({} as SelectParameter);
+				expect(result.current.parameter).toBeUndefined();
 			});
 
 			result.current.setParameter(mockConvertParams, "convert", "test-param");
 			await waitFor(() => {
-				expect(result.current.parameter.name).toBe("test-param");
-				expect(result.current.parameter.options.command).toBe("convert");
+				expect(result.current.parameter?.name).toBe("test-param");
+				expect(result.current.parameter?.options.command).toBe("convert");
 			});
 		});
 	});
@@ -232,13 +232,13 @@ describe("SelectParameterProviderのテスト", () => {
 					{ wrapper },
 				);
 				await waitFor(() => {
-					expect(result.current.parameter).toEqual({} as SelectParameter);
+					expect(result.current.parameter).toBeUndefined();
 				});
 
 				result.current.loadParameter(command as Command, "test-param");
 				await waitFor(() => {
-					expect(result.current.parameter.name).toBe("test-param");
-					expect(result.current.parameter.options.command).toBe(command);
+					expect(result.current.parameter?.name).toBe("test-param");
+					expect(result.current.parameter?.options.command).toBe(command);
 					expect(result.current.parameter).toEqual(
 						new SelectParameter(response, command as Command, "test-param"),
 					);
@@ -271,7 +271,7 @@ describe("SelectParameterProviderのテスト", () => {
 					{ wrapper },
 				);
 				await waitFor(() => {
-					expect(result.current.parameter).toEqual({} as SelectParameter);
+					expect(result.current.parameter).toBeUndefined();
 				});
 				result.current.loadParameter(command as Command, "test-param");
 				await waitFor(() => {
@@ -282,8 +282,8 @@ describe("SelectParameterProviderのテスト", () => {
 				const mockData = { test: "value" };
 				result.current.refreshParameter(mockData);
 				await waitFor(() => {
-					expect(result.current.parameter.name).toBe("test-param");
-					expect(result.current.parameter.options.command).toBe(command);
+					expect(result.current.parameter?.name).toBe("test-param");
+					expect(result.current.parameter?.options.command).toBe(command);
 					expect(result.current.parameter).toEqual(
 						new SelectParameter(
 							refreshResponse,
@@ -310,10 +310,13 @@ describe("SelectParameterProviderのテスト", () => {
 				{ wrapper },
 			);
 			await waitFor(() => {
-				expect(result.current.parameter).toEqual({} as SelectParameter);
+				expect(result.current.parameter).toBeUndefined();
 			});
 
 			result.current.setParameter(params, command as Command, "test-param");
+			await waitFor(() => {
+				expect(result.current.parameter).toBeDefined();
+			});
 			const mockInput = { test: "value" };
 			expect(await result.current.saveParameter(mockInput)).toStrictEqual({
 				resultMessage: "Save Success",
@@ -338,6 +341,9 @@ describe("SelectParameterProviderのテスト", () => {
 			);
 
 			result.current.setParameter(params, command as Command, "test-param");
+			await waitFor(() => {
+				expect(result.current.parameter).toBeDefined();
+			});
 			const mockInput = { test: "value" };
 			expect(await result.current.saveParameter(mockInput)).toStrictEqual({
 				resultMessage: mockError.message,
@@ -361,14 +367,17 @@ describe("SelectParameterProviderのテスト", () => {
 				{ wrapper },
 			);
 			await waitFor(() => {
-				expect(result.current.parameter).toEqual({} as SelectParameter);
+				expect(result.current.parameter).toBeUndefined();
 			});
 
 			result.current.setParameter(params, command as Command, "test-param");
+			await waitFor(() => {
+				expect(result.current.parameter).toBeDefined();
+			});
 			const mockInput = { test: "value" };
 			expect(await result.current.execParameter(mockInput)).toStrictEqual({
 				resultMessage: "Execution Success",
-				resultDir: "",
+				resultDir: "success",
 			});
 		});
 
@@ -389,6 +398,9 @@ describe("SelectParameterProviderのテスト", () => {
 			);
 
 			result.current.setParameter(params, command as Command, "test-param");
+			await waitFor(() => {
+				expect(result.current.parameter).toBeDefined();
+			});
 			const mockInput = { test: "value" };
 			expect(await result.current.execParameter(mockInput)).toStrictEqual({
 				resultMessage: mockError.message,

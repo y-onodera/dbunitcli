@@ -1,43 +1,38 @@
-import { createContext, useContext, useState } from "react";
+import type { Dispatch, ReactNode, SetStateAction } from "react";
+import { createContext, use } from "react";
+import { useResettableState } from "../utils/useResettableState";
 
 type JdbcConnectionState = {
 	jdbcValues: Record<string, string>;
 	connectionOk: boolean;
 };
 
-type JdbcConnectionContextValue = {
-	state: JdbcConnectionState;
-	setState: (state: JdbcConnectionState) => void;
+const NOT_CONNECTED: JdbcConnectionState = {
+	jdbcValues: {},
+	connectionOk: false,
 };
 
-const JdbcConnectionContext = createContext<JdbcConnectionContextValue>({
-	state: { jdbcValues: {}, connectionOk: false },
-	setState: () => {},
-});
+const jdbcConnectionContext = createContext<JdbcConnectionState>(NOT_CONNECTED);
+const setJdbcConnectionContext = createContext<
+	Dispatch<SetStateAction<JdbcConnectionState>>
+>(() => undefined);
 
 export function JdbcConnectionProvider({
 	children,
+	resetKey,
 }: {
-	children: React.ReactNode;
+	children: ReactNode;
+	resetKey?: string;
 }) {
-	const [state, setState] = useState<JdbcConnectionState>({
-		jdbcValues: {},
-		connectionOk: false,
-	});
-
+	const [state, setState] = useResettableState(NOT_CONNECTED, resetKey);
 	return (
-		<JdbcConnectionContext.Provider value={{ state, setState }}>
-			{children}
-		</JdbcConnectionContext.Provider>
+		<jdbcConnectionContext.Provider value={state}>
+			<setJdbcConnectionContext.Provider value={setState}>
+				{children}
+			</setJdbcConnectionContext.Provider>
+		</jdbcConnectionContext.Provider>
 	);
 }
 
-export function useJdbcConnectionState(): JdbcConnectionState {
-	return useContext(JdbcConnectionContext).state;
-}
-
-export function useSetJdbcConnectionState(): (
-	state: JdbcConnectionState,
-) => void {
-	return useContext(JdbcConnectionContext).setState;
-}
+export const useJdbcConnectionState = () => use(jdbcConnectionContext);
+export const useSetJdbcConnectionState = () => use(setJdbcConnectionContext);
