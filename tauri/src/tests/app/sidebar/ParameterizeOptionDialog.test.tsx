@@ -154,10 +154,10 @@ describe("NameEditMenuのParameterizeのテスト", () => {
 		);
 
 		await userEvent.click(screen.getByTitle("Parameterize"));
-		expect(setEditName).toHaveBeenCalledWith({});
+		expect(setEditName).toHaveBeenCalledWith(null);
 		expect(mockParameterizeFrom).not.toHaveBeenCalled();
 
-		rerender(<NameEditMenu editName={{} as never} setEditName={setEditName} />);
+		rerender(<NameEditMenu editName={null} setEditName={setEditName} />);
 		await userEvent.click(
 			screen.getByRole("checkbox", { name: "-new.srcType" }),
 		);

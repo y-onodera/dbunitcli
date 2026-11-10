@@ -26,31 +26,15 @@ type MenuEditProp = {
 	handleMenuParameterize?: () => void;
 };
 
+// 名前の⋮メニュー（editNameがnullなら閉じている）と、メニューから開くダイアログ。
+// ダイアログはメニューを閉じた後も開いておくため、メニュー（editName）とは別に持つ
 export default function NameEditMenu({
 	editName,
 	setEditName,
 }: {
-	editName: EditName;
-	setEditName: (editName: EditName) => void;
+	editName: EditName | null;
+	setEditName: (editName: EditName | null) => void;
 }) {
-	const wrapperRef = useRef<HTMLDivElement>(null);
-	useEffect(() => {
-		function handleClickOutside(event: Event) {
-			if (
-				wrapperRef.current &&
-				!wrapperRef.current.contains(event.target as HTMLElement)
-			) {
-				setEditName({} as EditName);
-			}
-		}
-		document.addEventListener("mousedown", handleClickOutside);
-		return () => document.removeEventListener("mousedown", handleClickOutside);
-	}, [setEditName]);
-	const { handleDelete, handleCopy, handleRename } = useParameterActions(
-		editName.command,
-		editName.name,
-	);
-	// メニューを閉じた後も開いておくため、メニュー（editName）とは別に持つ
 	const [parameterizeTarget, setParameterizeTarget] = useState<{
 		command: string;
 		name: string;
@@ -74,51 +58,15 @@ export default function NameEditMenu({
 				setDeleteTarget({ name, files });
 			}
 		});
-	const canParameterize =
-		editName.command && editName.command !== "parameterize";
 	return (
 		<>
-			{editName.name && (
-				<div
-					ref={wrapperRef}
-					className="absolute z-dropdown p-4 pb-0 text-content bg-surface border border-border-subtle rounded-lg shadow-dropdown"
-					style={
-						editName.afterEdge
-							? { left: editName.x, top: editName.y - 150 }
-							: { left: editName.x, top: editName.y }
-					}
-				>
-					<MenuEdit
-						name={editName.name}
-						handleMenuDelete={() => {
-							if (editName.command === "parameterize") {
-								deleteParameterizeOrConfirm(editName.name);
-							} else {
-								handleDelete();
-							}
-							setEditName({} as EditName);
-						}}
-						handleMenuRename={(newName: string) => {
-							handleRename(newName);
-							setEditName({} as EditName);
-						}}
-						handleMenuCopy={() => {
-							handleCopy();
-							setEditName({} as EditName);
-						}}
-						handleMenuParameterize={
-							canParameterize
-								? () => {
-										setParameterizeTarget({
-											command: editName.command,
-											name: editName.name,
-										});
-										setEditName({} as EditName);
-									}
-								: undefined
-						}
-					/>
-				</div>
+			{editName && (
+				<EditMenuPopup
+					editName={editName}
+					closeMenu={() => setEditName(null)}
+					onDeleteParameterize={deleteParameterizeOrConfirm}
+					onParameterize={setParameterizeTarget}
+				/>
 			)}
 			{deleteTarget && (
 				<ParameterizeDeleteDialog
@@ -138,6 +86,80 @@ export default function NameEditMenu({
 				/>
 			)}
 		</>
+	);
+}
+
+// 開いている⋮メニュー。外をクリックしたら閉じる。操作したら閉じる
+function EditMenuPopup({
+	editName,
+	closeMenu,
+	onDeleteParameterize,
+	onParameterize,
+}: {
+	editName: EditName;
+	closeMenu: () => void;
+	onDeleteParameterize: (name: string) => void;
+	onParameterize: (target: { command: string; name: string }) => void;
+}) {
+	const wrapperRef = useRef<HTMLDivElement>(null);
+	useEffect(() => {
+		function handleClickOutside(event: Event) {
+			if (
+				wrapperRef.current &&
+				!wrapperRef.current.contains(event.target as HTMLElement)
+			) {
+				closeMenu();
+			}
+		}
+		document.addEventListener("mousedown", handleClickOutside);
+		return () => document.removeEventListener("mousedown", handleClickOutside);
+	}, [closeMenu]);
+	const { handleDelete, handleCopy, handleRename } = useParameterActions(
+		editName.command,
+		editName.name,
+	);
+	const canParameterize = editName.command !== "parameterize";
+	return (
+		<div
+			ref={wrapperRef}
+			className="absolute z-dropdown p-4 pb-0 text-content bg-surface border border-border-subtle rounded-lg shadow-dropdown"
+			style={
+				editName.afterEdge
+					? { left: editName.x, top: editName.y - 150 }
+					: { left: editName.x, top: editName.y }
+			}
+		>
+			<MenuEdit
+				name={editName.name}
+				handleMenuDelete={() => {
+					if (editName.command === "parameterize") {
+						onDeleteParameterize(editName.name);
+					} else {
+						handleDelete();
+					}
+					closeMenu();
+				}}
+				handleMenuRename={(newName: string) => {
+					handleRename(newName);
+					closeMenu();
+				}}
+				handleMenuCopy={() => {
+					handleCopy();
+					closeMenu();
+				}}
+				handleMenuParameterize={
+					canParameterize
+						? () => {
+								onParameterize({
+									command: editName.command,
+									name: editName.name,
+								});
+								closeMenu();
+							}
+						: undefined
+				}
+			/>
+		</div>
 	);
 }
 function MenuEdit(prop: MenuEditProp) {
