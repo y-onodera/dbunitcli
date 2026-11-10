@@ -164,6 +164,7 @@ describe("XlsxSchemaGenerateDialogの実行テスト", () => {
 			expect(mockSaveSchema).toHaveBeenCalledWith(
 				"generated.json",
 				expect.anything(),
+				false,
 			);
 		});
 		await waitFor(() => {

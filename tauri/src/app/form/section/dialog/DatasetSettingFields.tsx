@@ -405,12 +405,11 @@ export function FilterOrderFields({
 					value={target[editing.field.name][editing.index] ?? ""}
 					columns={columnDatalist}
 					defaultValue={expressionOf(editing.field)?.defaultValue ?? ""}
+					isDuplicated={(text) =>
+						isDuplicated(target[editing.field.name], text, editing.index)
+					}
 					onApply={(text) =>
-						setTarget((cur) =>
-							isDuplicated(cur[editing.field.name], text, editing.index)
-								? cur
-								: editing.field.replace(cur, text, editing.index),
-						)
+						setTarget((cur) => editing.field.replace(cur, text, editing.index))
 					}
 					onClose={() => setEditing(null)}
 				/>

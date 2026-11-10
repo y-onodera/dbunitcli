@@ -41,6 +41,7 @@ function ColumnExpressionFields({
 					id="function"
 					label="function"
 					options={functionOptions}
+					value={option.fn}
 					onChange={(fn) => setOption((cur) => ({ ...cur, fn }))}
 				/>
 			</DialogField>
@@ -95,6 +96,7 @@ export function ExpressionEditDialog({
 	value,
 	columns,
 	defaultValue,
+	isDuplicated,
 	onApply,
 	onClose,
 }: {
@@ -102,6 +104,8 @@ export function ExpressionEditDialog({
 	value: string;
 	columns: string[];
 	defaultValue: string;
+	// 他の行と同じ値なら適用させない
+	isDuplicated?: (value: string) => boolean;
 	onApply: (value: string) => void;
 	onClose: () => void;
 }) {
@@ -116,6 +120,8 @@ export function ExpressionEditDialog({
 	const [option, setOption] = useState(() =>
 		newColumnExpressionOption(defaultValue),
 	);
+
+	const duplicated = isDuplicated?.(text) ?? false;
 
 	const insertText = (inserted: string) =>
 		insert((current, start, end) =>
@@ -137,6 +143,7 @@ export function ExpressionEditDialog({
 						id="column"
 						label="column"
 						options={columns.map((c) => ({ value: c, label: c }))}
+						value={column}
 						onChange={setColumn}
 					/>
 				</DialogField>
@@ -159,6 +166,7 @@ export function ExpressionEditDialog({
 					id="operator"
 					label="operator"
 					options={expressionOperators}
+					value={operator}
 					onChange={setOperator}
 				/>
 			</DialogField>
@@ -178,9 +186,13 @@ export function ExpressionEditDialog({
 					onChange={(ev) => setText(ev.target.value)}
 				/>
 			</DialogField>
+			{duplicated && (
+				<StatusMessage kind="error">{`${name} already has this value.`}</StatusMessage>
+			)}
 			<DialogActions>
 				<BlueButton
 					title="Apply"
+					disabled={duplicated}
 					handleClick={() => {
 						onApply(text);
 						onClose();

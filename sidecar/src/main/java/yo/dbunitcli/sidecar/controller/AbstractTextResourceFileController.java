@@ -37,7 +37,7 @@ public abstract class AbstractTextResourceFileController extends AbstractResourc
     @Override
     public String save(@Body final TemplateRequestDto body) throws IOException {
         try {
-            this.getResourceFile().update(body.getName(), body.getInput().getContent(), body.getEncoding());
+            this.getResourceFile().save(body.getName(), body.getInput().getContent(), body.getEncoding(), body.isOverwrite());
         } catch (final IOException e) {
             throw e;
         } catch (final Throwable th) {

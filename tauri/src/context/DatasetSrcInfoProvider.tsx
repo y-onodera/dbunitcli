@@ -18,7 +18,12 @@ export function DatasetSrcInfoProvider({
 	initialValue: DatasetSrcInfo;
 	resetKey?: string;
 }) {
-	const [state, setState] = useResettableState(initialValue, resetKey);
+	// 入力欄（Text）は要素の値が変わると表示をその値へ戻すため、入力値の写しも作り直す。
+	// 接続状態は値の変化では作り直さない（refreshで入力済みの値が返るたびに接続テストをやり直させない）
+	const [state, setState] = useResettableState(
+		initialValue,
+		`${resetKey ?? ""}\u0000${JSON.stringify(initialValue.values)}`,
+	);
 	return (
 		<JdbcConnectionProvider resetKey={resetKey}>
 			<datasetSrcInfoContext.Provider value={state}>

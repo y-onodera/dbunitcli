@@ -1,8 +1,8 @@
-import { useState } from "react";
 import { SectionFieldset } from "../../components/dialog";
 import { SectionLegend } from "../../components/dialog/SectionFieldset";
 import { ResourceEncodingProvider } from "../../context/ResourceEncodingProvider";
 import type { GenerateOptions } from "../../model/SelectParameter";
+import { useSyncedState } from "../../utils/useResettableState";
 import {
 	DatasetLoadForm,
 	DatasetSrcInfoScope,
@@ -46,7 +46,7 @@ export function GenerateForm(prop: {
 			]
 		: undefined;
 	// unitSettingの編集・プレビューで読む文字コード（入力中の値）
-	const [unitSettingEncoding, setUnitSettingEncoding] = useState(
+	const [unitSettingEncoding, setUnitSettingEncoding] = useSyncedState(
 		generate.unitSettingEncoding?.value ?? "",
 	);
 	const templateEncoding = useTemplateEncoding(generate.templateOption);

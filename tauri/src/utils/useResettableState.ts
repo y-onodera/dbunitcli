@@ -10,3 +10,8 @@ export function useResettableState<T>(initial: T, resetKey?: string) {
 	}
 	return [state, setState] as const;
 }
+
+// 外から与えられる値を入力中の値として持つ。refresh等でvalueが変わったら、入力中の値をその値に戻す
+export function useSyncedState(value: string) {
+	return useResettableState(value, value);
+}

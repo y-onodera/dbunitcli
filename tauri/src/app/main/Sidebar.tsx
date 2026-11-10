@@ -14,7 +14,7 @@ export type EditName = {
 	afterEdge: boolean;
 };
 export default function Sidebar({ setSidebarWidth }: SidebarProps) {
-	const [editName, setEditName] = useState<EditName>({} as EditName);
+	const [editName, setEditName] = useState<EditName | null>(null);
 	const sidebarRef = useRef(null);
 	const [width, setWidth] = useState(200);
 	const minWidth = 200;

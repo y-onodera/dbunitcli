@@ -44,7 +44,9 @@ function DatasetLoadFormContent({
 
 	// src要素の値はすべてそのままsidecarへ渡すため、項目を選ばずに反映する
 	const handleValueChange = (element: CommandOption) => (newValue: string) =>
-		setDatasetSrcInfo(withValues(datasetSrcInfo, { [element.name]: newValue }));
+		setDatasetSrcInfo((current) =>
+			withValues(current, { [element.name]: newValue }),
+		);
 	const handleToggleChecked = (element: CommandOption) => (checked: boolean) =>
 		handleValueChange(element)(String(checked));
 	const jdbcOption = hasJdbcOption(srcData) ? srcData : undefined;
@@ -146,8 +148,7 @@ export function DatasetLoadForm(prop: {
 	defaultType?: SrcType;
 	helpCommand?: string;
 	helpLabel?: string;
-	// trueなら自前のDatasetSrcInfoScopeを作らず、親のものへ入力値を反映する
-	// （同じsrcの入力値をフォーム内の別の欄でも使うとき。generateの-unitSettingプレビュー、compareの比較キー編集）
+	// trueなら自前のDatasetSrcInfoScopeを作らず、親のものへ入力値を反映する（同じsrcの入力値をフォーム内の別の欄でも使うとき）
 	parentSrcInfo?: boolean;
 }) {
 	if (prop.srcData.srcType?.value === "none") {

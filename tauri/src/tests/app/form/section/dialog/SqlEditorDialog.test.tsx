@@ -23,6 +23,7 @@ vi.mock("../../../../../hooks/useResourceFiles", () => ({
 		resourceKinds.save.push(kind);
 		return mockSave;
 	},
+	useResourceLocation: () => ({ location: null, loading: false }),
 }));
 vi.mock("../../../../../hooks/useDatasetSettings", () => ({
 	useDatasetTableNames: (srcInfo: DatasetSrcInfo) => {

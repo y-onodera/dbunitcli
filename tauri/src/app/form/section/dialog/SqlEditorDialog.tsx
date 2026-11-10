@@ -2,7 +2,6 @@ import { type ComponentType, useState } from "react";
 import {
 	DialogBody,
 	DialogField,
-	SettingDialog,
 	StatusMessage,
 } from "../../../../components/dialog";
 import { BlueButton } from "../../../../components/element/Button";
@@ -21,6 +20,7 @@ import {
 import CsvReadInsertDialog from "./CsvReadInsertDialog";
 import { InlinePreviewButton } from "./DatasetTableNamesPreviewButton";
 import type { EditResourceDialogProps } from "./ResourceEditButton";
+import { ResourceSettingDialog } from "./ResourceSettingDialog";
 import SqlTableInsertDialog from "./SqlTableInsertDialog";
 import { useTextareaInsert } from "./useTextareaInsert";
 
@@ -108,14 +108,15 @@ function Dialog(props: SqlEditorDialogProps & { value: string }) {
 	}
 
 	return (
-		<SettingDialog
+		<ResourceSettingDialog
+			resourceKind={props.type}
 			title={table ? "Edit Table Definition" : "Edit SQL"}
 			helpCommand="dialogs/sql-editor"
 			helpLabel="Edit SQL / Edit Table Definition"
 			maximizable
 			handleDialogClose={props.handleDialogClose}
 			fileName={props.fileName}
-			save={(path) => saveDataSource(path, content)}
+			save={(path, overwrite) => saveDataSource(path, content, overwrite)}
 			handleSave={props.handleSave}
 			footerActions={() => (
 				// 保存せず、編集中の内容をsrcのファイルの代わりにしてプレビューする（settingは適用しない）。
@@ -147,6 +148,6 @@ function Dialog(props: SqlEditorDialogProps & { value: string }) {
 				/>
 			</DialogBody>
 			{showSelector && renderSelector()}
-		</SettingDialog>
+		</ResourceSettingDialog>
 	);
 }

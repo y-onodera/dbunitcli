@@ -59,7 +59,7 @@ describe("XlsxSchemaDialogのテスト", () => {
 		await waitFor(() => {
 			expect(screen.getByText("Table List Preview")).toBeInTheDocument();
 		});
-		expect(mockSave).toHaveBeenCalledWith("schema.json", schema);
+		expect(mockSave).toHaveBeenCalledWith("schema.json", schema, false);
 		expect(mockTableNames).toHaveBeenLastCalledWith({
 			values: {
 				srcType: "xlsx",

@@ -1,4 +1,5 @@
 import { type ReactNode, useState } from "react";
+import type { ResourceLocation } from "../../model/ResourceLocation";
 import {
 	type OperationResult,
 	reportError,
@@ -22,6 +23,91 @@ import { DialogBody } from "./DialogLayout";
 import { FullDialog } from "./FullDialog";
 import { DialogFooter, DialogTitle } from "./ModalOverlay";
 
+type SaveTarget = "overwrite" | "defaultFolder";
+
+// 開いたファイルが規定フォルダ直下なら、上書きと規定フォルダへの保存は同じになる
+function inDefaultFolder(location: ResourceLocation): boolean {
+	return location.folder === location.defaultFolder;
+}
+
+// 開いたファイルへ上書きするか、規定フォルダへ同じファイル名で保存するか。場所が無い（新規・名前変更）なら入力した名前で新規保存
+function savePathOf(
+	fileName: string,
+	location: ResourceLocation | null,
+	saveTarget: SaveTarget,
+): { path: string; overwrite: boolean } {
+	if (location === null) {
+		return { path: fileName, overwrite: false };
+	}
+	if (saveTarget === "defaultFolder" && !inDefaultFolder(location)) {
+		return { path: location.fileName, overwrite: false };
+	}
+	return { path: fileName, overwrite: true };
+}
+
+// 開いたファイルのフォルダと保存先の選択。規定フォルダ直下のファイルなら選択肢は同じになるため出さない
+function SaveLocationFields({
+	opened,
+	location,
+	saveTarget,
+	onChange,
+}: {
+	opened: ResourceLocation | null;
+	location: ResourceLocation | null;
+	saveTarget: SaveTarget;
+	onChange: (target: SaveTarget) => void;
+}) {
+	if (opened === null) {
+		return null;
+	}
+	if (location === null) {
+		return (
+			<p className="text-xs text-content-muted pb-2">
+				Name changed: saved as a new file (default folder:{" "}
+				{opened.defaultFolder})
+			</p>
+		);
+	}
+	return (
+		<div className="text-sm pb-2">
+			<p
+				className="text-xs text-content-muted truncate"
+				title={location.folder}
+			>
+				Opened from: {location.folder}
+			</p>
+			{!inDefaultFolder(location) && (
+				<fieldset className="flex flex-col gap-1 pt-1">
+					<label className="flex items-center gap-1">
+						<input
+							type="radio"
+							name="saveTarget"
+							className="w-4 h-4 text-primary"
+							checked={saveTarget === "overwrite"}
+							onChange={() => onChange("overwrite")}
+						/>
+						Overwrite the opened file
+					</label>
+					<label className="flex items-center gap-1">
+						<input
+							type="radio"
+							name="saveTarget"
+							className="w-4 h-4 text-primary"
+							checked={saveTarget === "defaultFolder"}
+							onChange={() => onChange("defaultFolder")}
+						/>
+						<span className="truncate" title={location.defaultFolder}>
+							Save to the default folder: {location.defaultFolder}
+							{location.defaultFolderHasFile &&
+								` (replaces the existing ${location.fileName})`}
+						</span>
+					</label>
+				</fieldset>
+			)}
+		</div>
+	);
+}
+
 type CommonProps = {
 	handleDialogClose: () => void;
 	children: ReactNode;
@@ -34,7 +120,7 @@ type CommonProps = {
 	maximizable?: boolean;
 };
 
-// 入力中のファイル名へ保存し、成功したらonSaved(保存先)を呼ぶ
+// 選んだ保存先へ保存し、成功したらonSaved(入力欄へ入れるパス)を呼ぶ
 export type SaveThen = (onSaved: (path: string) => void) => void;
 
 type SettingMode<T> = {
@@ -43,6 +129,8 @@ type SettingMode<T> = {
 	fileName?: never;
 	save?: never;
 	handleSave?: never;
+	location?: never;
+	locationLoading?: never;
 	// Commitの右に並べる追加ボタン
 	footerActions?: () => ReactNode;
 };
@@ -51,31 +139,45 @@ type FileMode = {
 	setting?: never;
 	handleCommit?: never;
 	fileName: string;
-	// 入力中のファイル名へ保存する。成功したときだけhandleSaveを呼ぶ（失敗時はダイアログを開いたまま）
-	save: (path: string) => Promise<OperationResult>;
+	// pathへ保存する。overwriteなら開いたファイルへ上書き、そうでなければ規定フォルダ基準で新規保存。
+	// 成功したときだけhandleSaveを呼ぶ（失敗時はダイアログを開いたまま）
+	save: (path: string, overwrite: boolean) => Promise<OperationResult>;
 	handleSave: (path: string) => void;
+	// 開いたファイルの場所（見つからなければnull）。省略すると保存先を選ばせない
+	location?: ResourceLocation | null;
+	locationLoading?: boolean;
 	// Saveの右に並べる追加ボタン。保存が必要ならsaveThenを使う
 	footerActions?: (saveThen: SaveThen) => ReactNode;
 };
 
 export type SettingDialogProps<T> = CommonProps & (SettingMode<T> | FileMode);
+export type FileSettingDialogProps = CommonProps & FileMode;
 
 export function SettingDialog<T>(props: SettingDialogProps<T>) {
 	const [fileNameValue, setFileNameValue] = useResettableState(
 		props.fileName ?? "",
 		props.fileName,
 	);
+	const [saveTarget, setSaveTarget] = useState<SaveTarget>("overwrite");
 	const isFileMode = props.fileName !== undefined;
 	const fileNameMissing = isFileMode && fileNameValue.trim() === "";
+	// 名前を変えたら開いたファイルとは別の新規保存にする
+	const location =
+		props.location && fileNameValue === props.fileName ? props.location : null;
 	const saveThen: SaveThen = (onSaved) => {
 		if (isFileMode && !fileNameMissing) {
+			const { path, overwrite } = savePathOf(
+				fileNameValue,
+				location,
+				saveTarget,
+			);
 			saveOnSuccess(
 				() =>
-					props.save(fileNameValue).catch((error): OperationResult => {
+					props.save(path, overwrite).catch((error): OperationResult => {
 						reportError("Save failed", error);
 						return "failed";
 					}),
-				() => onSaved(fileNameValue),
+				() => onSaved(path),
 			);
 		}
 	};
@@ -117,12 +219,20 @@ export function SettingDialog<T>(props: SettingDialogProps<T>) {
 							handleChange={(ev) => setFileNameValue(ev.target.value)}
 						/>
 					</div>
+					<SaveLocationFields
+						opened={props.location ?? null}
+						location={location}
+						saveTarget={saveTarget}
+						onChange={setSaveTarget}
+					/>
 				</div>
 			)}
 			<DialogFooter>
 				<BlueButton
 					title={props.commitLabel ?? "Save"}
-					disabled={props.commitDisabled || fileNameMissing}
+					disabled={
+						props.commitDisabled || fileNameMissing || props.locationLoading
+					}
 					handleClick={() => {
 						if (isFileMode) {
 							saveThen(props.handleSave);

@@ -58,6 +58,7 @@
   <h2 id="section-notes">注意</h2>
   <ol>
     <li><code>sheetName</code>（sheet が <code>pattern</code> のときは <code>string</code> か <code>regex</code>）と <code>tableName</code> の両方が入力されていない行は保存対象から除外されます。</li>
+    <li><code>header</code> のカンマ区切りの各値は前後の空白を除いて読み、空の値は無視します。</li>
     <li><code>header</code> と各 <code>rows</code> のセルアドレス数は一致させてください。<code>header</code> より多いセルアドレスがある場合は、読み込み時（Save 時を含む）にエラーになります。</li>
     <li>セルアドレスは Excel の <code>A1</code> 形式（列は大文字、<code>$</code>・シート名・空白を付けない）で指定します。それ以外の書き方は読み込み時（Save 時を含む）にエラーになります。</li>
     <li>同じシートに同じ <code>tableName</code> の定義を 2 つ以上置くと、読み込み時（Save 時を含む）にエラーになります。</li>

@@ -45,7 +45,15 @@ export default function ColumnDefSettingDialog(props: {
 					handleChange={(ev) => {
 						const text = ev.target.value.replace(/[^0-9]/g, "");
 						setLengthText(text);
-						setTarget((cur) => cur.with({ length: Number(text) }));
+						// 空の間はモデルを直前の長さのまま残し、欄を離れたらその値へ戻す
+						if (text !== "") {
+							setTarget((cur) => cur.with({ length: Number(text) }));
+						}
+					}}
+					handleBlur={(ev) => {
+						if (!ev.target.value) {
+							setLengthText(String(target.length));
+						}
 					}}
 				/>
 				<Select

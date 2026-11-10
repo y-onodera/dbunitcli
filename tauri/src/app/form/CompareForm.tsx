@@ -1,10 +1,10 @@
-import { useState } from "react";
 import { SectionFieldset } from "../../components/dialog";
 import { SectionLegend } from "../../components/dialog/SectionFieldset";
 import { DatasetSrcInfoProvider } from "../../context/DatasetSrcInfoProvider";
 import { ResourceEncodingProvider } from "../../context/ResourceEncodingProvider";
 import { buildDatasetSrcInfo } from "../../model/CommandOption";
 import type { CompareOptions } from "../../model/SelectParameter";
+import { useSyncedState } from "../../utils/useResettableState";
 import {
 	DatasetLoadForm,
 	datasetSrcInfoResetKey,
@@ -35,7 +35,7 @@ export function CompareForm(prop: {
 	const settingElement = prop.compare.setting;
 	const settingEncodingElement = prop.compare.settingEncoding;
 	// 比較キーの設定の編集で読み書きする文字コード（入力中の値）
-	const [settingEncoding, setSettingEncoding] = useState(
+	const [settingEncoding, setSettingEncoding] = useSyncedState(
 		settingEncodingElement.value,
 	);
 	const createPatchSqlElement = prop.compare.createPatchSql;
@@ -108,7 +108,11 @@ export function CompareForm(prop: {
 				parentSrcInfo
 			/>
 			<SectionFieldset>
-				<legend>{convertResult.prefix}</legend>
+				<SectionLegend
+					title={convertResult.prefix}
+					command="sections/result-form"
+					label={convertResult.prefix}
+				/>
 				<ResultFormSection
 					resultOption={convertResult}
 					handleTypeSelect={prop.handleTypeSelect}

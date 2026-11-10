@@ -26,19 +26,21 @@ export const CONJUNCTION_OPTIONS: SelectOption<Conjunction>[] = [
 	{ value: "OR", label: "OR" },
 ];
 
-// 先頭の選択肢が初期値になる。optgroupで分けるときはgroups、分けないときはoptionsを渡す。
+// valueは呼び出し側のstate（再マウントしても表示がずれないよう常に渡す）。optgroupで分けるときはgroups、分けないときはoptionsを渡す。
 // groupsのlabelが空ならoptgroupで囲まない
 export function OptionSelect<T extends string>({
 	id,
 	label,
 	options,
 	groups = [{ label: "", options: options ?? [] }],
+	value,
 	onChange,
 }: {
 	id: string;
 	label: string;
 	options?: SelectOption<T>[];
 	groups?: SelectGroup<T>[];
+	value: T;
 	onChange: (value: T) => void;
 }) {
 	return (
@@ -49,7 +51,7 @@ export function OptionSelect<T extends string>({
 				id={id}
 				required={false}
 				wStyle="w-full"
-				defaultValue={groups[0].options[0].value}
+				defaultValue={value}
 				handleOnChange={(value) => onChange(value as T)}
 			>
 				{groups.map((group) =>

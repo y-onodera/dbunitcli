@@ -1,9 +1,5 @@
 import { useState } from "react";
-import {
-	SettingDialog,
-	SettingTable,
-	StatusMessage,
-} from "../../../../components/dialog";
+import { SettingTable, StatusMessage } from "../../../../components/dialog";
 import { useDatasetSrcInfo } from "../../../../context/DatasetSrcInfoProvider";
 import {
 	useSaveXlsxSchema,
@@ -17,6 +13,7 @@ import {
 	XlsxSchema,
 } from "../../../../model/XlsxSchema";
 import { SaveAndPreviewButton } from "./DatasetTableNamesPreviewButton";
+import { ResourceSettingDialog } from "./ResourceSettingDialog";
 import XlsxCellSettingDialog from "./XlsxCellSettingDialog";
 import XlsxRowSettingDialog from "./XlsxRowSettingDialog";
 
@@ -49,13 +46,16 @@ export function XlsxSchemaEditDialog(props: {
 	const datasetSrcInfo = useDatasetSrcInfo();
 
 	return (
-		<SettingDialog
+		<ResourceSettingDialog
+			resourceKind={"xlsxSchema"}
 			title="Xlsx Schema"
 			helpCommand="dialogs/xlsx-schema"
 			helpLabel="Xlsx Schema"
 			handleDialogClose={props.handleDialogClose}
 			fileName={props.fileName}
-			save={(fileName) => saveSchema(fileName, xlsxSchema)}
+			save={(fileName, overwrite) =>
+				saveSchema(fileName, xlsxSchema, overwrite)
+			}
 			handleSave={props.handleSave}
 			footerActions={(saveThen) =>
 				// 保存したファイルをxlsxSchemaに適用してプレビューする（それ以外のsrc要素はフォームのまま）
@@ -93,6 +93,6 @@ export function XlsxSchemaEditDialog(props: {
 				SettingDialogComponent={XlsxCellSettingDialog}
 				newSetting={createCellSetting}
 			/>
-		</SettingDialog>
+		</ResourceSettingDialog>
 	);
 }

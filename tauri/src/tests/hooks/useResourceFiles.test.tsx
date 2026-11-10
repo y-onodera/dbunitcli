@@ -12,6 +12,7 @@ import {
 	type ResourceKind,
 	useDeleteResource,
 	useResourceContent,
+	useResourceLocation,
 	useSaveResourceContent,
 } from "../../hooks/useResourceFiles";
 import { useSaveXlsxSchema } from "../../hooks/useXlsxSchema";
@@ -185,6 +186,79 @@ describe("useResourceContentのテスト", () => {
 	});
 });
 
+// useResourceLocationはEnvironmentだけを使う（WorkspaceResourcesProviderの読込を挟まない）
+const locationWrapper = ({ children }: { children: React.ReactNode }) => (
+	<environmentContext.Provider value={environmentFixture}>
+		{children}
+	</environmentContext.Provider>
+);
+
+describe("useResourceLocationのテスト", () => {
+	const location = {
+		folder: "/ws/other",
+		defaultFolder: "/ws/resources/sql",
+		fileName: "q.sql",
+		inDefaultFolder: false,
+		defaultFolderHasFile: true,
+	};
+
+	it("名前を送って開いたファイルの場所を受け取る", async () => {
+		mockFetchData.mockImplementationOnce(() =>
+			Promise.resolve(new Response(JSON.stringify(location))),
+		);
+		const { result, rerender } = renderHook(
+			() => useResourceLocation("sql", "other/q.sql"),
+			{ wrapper: locationWrapper },
+		);
+		await act(async () => {
+			rerender();
+		});
+		const [params] = mockFetchData.mock.lastCall ?? [];
+		expect(params?.endpoint).toBe(`${environmentFixture.apiUrl}sql/locate`);
+		expect(JSON.parse(String(params?.options.body))).toStrictEqual({
+			name: "other/q.sql",
+		});
+		expect(result.current).toStrictEqual({ location, loading: false });
+	});
+
+	it("見つからない（{}）ならnull", async () => {
+		mockFetchData.mockImplementationOnce(() =>
+			Promise.resolve(new Response("{}")),
+		);
+		const { result, rerender } = renderHook(
+			() => useResourceLocation("sql", "missing.sql"),
+			{ wrapper: locationWrapper },
+		);
+		await act(async () => {
+			rerender();
+		});
+		expect(result.current).toStrictEqual({ location: null, loading: false });
+	});
+
+	it("名前が空なら問い合わせずnull", () => {
+		mockFetchData.mockClear();
+		const { result } = renderHook(() => useResourceLocation("sql", ""), {
+			wrapper: locationWrapper,
+		});
+		expect(result.current).toStrictEqual({ location: null, loading: false });
+		expect(
+			mockFetchData.mock.calls.some(([params]) =>
+				params.endpoint.endsWith("/locate"),
+			),
+		).toBe(false);
+	});
+});
+
+describe("上書き保存のテスト", () => {
+	it("overwriteを指定するとそのまま送る", async () => {
+		const { params } = await runWithResources(() => {
+			const save = useSaveResourceContent("sql");
+			return (name: string) => save(name, "content", true);
+		});
+		expect(JSON.parse(String(params?.options.body)).overwrite).toBe(true);
+	});
+});
+
 describe("保存フックのテスト", () => {
 	it.each<{
 		name: string;
@@ -199,7 +273,7 @@ describe("保存フックのテスト", () => {
 			name: "useSaveXlsxSchema",
 			useSave: () => {
 				const save = useSaveXlsxSchema();
-				return (name) => save(name, xlsxSchema);
+				return (name) => save(name, xlsxSchema, false);
 			},
 			endpoint: "xlsx-schema/save",
 			input: xlsxSchema,
@@ -210,7 +284,7 @@ describe("保存フックのテスト", () => {
 			name: "useSaveFixedColumnDef",
 			useSave: () => {
 				const save = useSaveFixedColumnDef();
-				return (name) => save(name, fixedColumnDef);
+				return (name) => save(name, fixedColumnDef, false);
 			},
 			endpoint: "fixed-column-def/save",
 			input: fixedColumnDef,
@@ -221,7 +295,7 @@ describe("保存フックのテスト", () => {
 			name: "useSaveDatasetSettings",
 			useSave: () => {
 				const save = useSaveDatasetSettings();
-				return (name) => save(name, datasetSettings);
+				return (name) => save(name, datasetSettings, false);
 			},
 			endpoint: "dataset-setting/save",
 			input: datasetSettings,
@@ -245,7 +319,7 @@ describe("保存フックのテスト", () => {
 			name: `useSaveDatasetSettings(${kind})`,
 			useSave: () => {
 				const save = useSaveDatasetSettings(kind);
-				return (name: string) => save(name, datasetSettings);
+				return (name: string) => save(name, datasetSettings, false);
 			},
 			endpoint,
 			input: datasetSettings,
@@ -268,7 +342,7 @@ describe("保存フックのテスト", () => {
 			name: `useSaveResourceContent(${kind})`,
 			useSave: () => {
 				const save = useSaveResourceContent(kind);
-				return (name: string) => save(name, "content");
+				return (name: string) => save(name, "content", false);
 			},
 			endpoint,
 			input: { content: "content" },
@@ -297,6 +371,8 @@ describe("保存フックのテスト", () => {
 				name: "target",
 				...(encoding === undefined ? {} : { encoding }),
 				input: JSON.parse(JSON.stringify(input)),
+				// save-propertiesは新規作成だけなので上書きの指定を送らない
+				...(endpoint.endsWith("/save") ? { overwrite: false } : {}),
 			});
 			expect(resources[key]).toStrictEqual(mockUpdatedFiles);
 		},

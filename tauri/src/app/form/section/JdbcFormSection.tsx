@@ -16,10 +16,37 @@ import JdbcPropertiesTextField from "./element/JdbcPropertiesTextField";
 import JdbcUrlTextField from "./element/JdbcUrlTextField";
 import PlainText from "./element/PlainText";
 
+// 入力欄（Text）はjdbcOptionの値が変わると表示をその値へ戻すため、テスト・保存に使う写しも作り直す。
+// optional欄の開閉は作り直しても保つ
 export default function JdbcFormSection({
 	jdbcOption,
 }: {
 	jdbcOption: JdbcOption;
+}) {
+	const [showOptional, setShowOptional] = useState(false);
+	return (
+		<JdbcFormSectionContent
+			showOptional={showOptional}
+			toggleOptional={() => setShowOptional(!showOptional)}
+			key={JSON.stringify([
+				jdbcOption.jdbcUrl.value,
+				jdbcOption.jdbcUser.value,
+				jdbcOption.jdbcPass.value,
+				jdbcOption.jdbcProperties.value,
+			])}
+			jdbcOption={jdbcOption}
+		/>
+	);
+}
+
+function JdbcFormSectionContent({
+	jdbcOption,
+	showOptional,
+	toggleOptional,
+}: {
+	jdbcOption: JdbcOption;
+	showOptional: boolean;
+	toggleOptional: () => void;
 }) {
 	const { prefix } = jdbcOption;
 	const setJdbcConnection = useSetJdbcConnectionState();
@@ -50,9 +77,6 @@ export default function JdbcFormSection({
 	const handleConnectionFail = () => {
 		setJdbcConnection({ jdbcValues: {}, connectionOk: false });
 	};
-	const [showOptional, setShowOptional] = useState(false);
-	const toggleOptional = () => setShowOptional(!showOptional);
-
 	return (
 		<SectionFieldset>
 			<legend>jdbc</legend>

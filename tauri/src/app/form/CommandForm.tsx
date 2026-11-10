@@ -52,6 +52,7 @@ function SelectedCommandForm(prop: {
 			case "convert":
 				return (
 					<ConvertForm
+						key={`convert:${select.name}`}
 						handleTypeSelect={handleTypeSelect}
 						name={select.name}
 						convert={select.options}
@@ -60,6 +61,7 @@ function SelectedCommandForm(prop: {
 			case "compare":
 				return (
 					<CompareForm
+						key={`compare:${select.name}`}
 						handleTypeSelect={handleTypeSelect}
 						name={select.name}
 						compare={select.options}
@@ -88,6 +90,7 @@ function SelectedCommandForm(prop: {
 			case "parameterize":
 				return (
 					<ParameterizeForm
+						key={`parameterize:${select.name}`}
 						handleTypeSelect={handleTypeSelect}
 						name={select.name}
 						parameterize={select.options}

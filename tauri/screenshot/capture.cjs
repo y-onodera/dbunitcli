@@ -139,7 +139,8 @@ async function captureDialog(page) {
 		page,
 		"common/arrays.png",
 		[
-			target.locator('label[for="name"]'),
+			// 見出しのlabelは先頭行の入力欄（id は行ごとに name_0, name_1, …）を指す
+			target.locator('label[for="name_0"]'),
 			target.locator('input[name="name"]'),
 			button(target, "remove", "add"),
 		],
@@ -148,7 +149,7 @@ async function captureDialog(page) {
 
 	// filter の式の編集ダイアログ（最大化できる）
 	await row
-		.locator("div.grid-cols-5:has(#filter)")
+		.locator("div.grid-cols-5:has(#filter_0)")
 		.locator('button[aria-label="edit"]')
 		.click();
 	const maximize = page.locator('button:has(title:text-is("Maximize"))');

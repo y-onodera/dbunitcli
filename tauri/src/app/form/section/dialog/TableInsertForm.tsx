@@ -155,6 +155,7 @@ export default function TableInsertForm({
 						id={`${idPrefix}_usage`}
 						label="Usage"
 						groups={usageGroups}
+						value={usage}
 						onChange={handleUsageChange}
 					/>
 					<OptionText
@@ -171,10 +172,10 @@ export default function TableInsertForm({
 				<DialogField>
 					<div className="flex gap-3">
 						<OptionSelect
-							key={usage}
 							id={`${idPrefix}_source`}
 							label="Source"
 							options={TABLE_SOURCE_OPTIONS}
+							value={source}
 							onChange={setSource}
 						/>
 						{derived && (

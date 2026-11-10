@@ -4,7 +4,6 @@ import {
 	Fieldset,
 	type SaveThen,
 	Select,
-	SettingDialog,
 	SettingTable,
 	StatusMessage,
 	Text,
@@ -29,8 +28,10 @@ import {
 	type DatasetSettings,
 	newDatasetSetting,
 } from "../../../../model/DatasetSettings";
+import { removeArray, replaceArray } from "../../../../utils/arrayUtils";
 import DatasetSettingDialog from "./DatasetSettingDialog";
 import { SaveAndPreviewButton } from "./DatasetTableNamesPreviewButton";
+import { ResourceSettingDialog } from "./ResourceSettingDialog";
 
 // kind: 読込・保存先のリソース
 export default function DatasetSettingsDialog(props: {
@@ -74,13 +75,14 @@ export function DatasetSettingsEditDialog(props: {
 	);
 	const datasetSrcInfo = useDatasetSrcInfo();
 	return (
-		<SettingDialog
+		<ResourceSettingDialog
+			resourceKind={props.kind}
 			title="Dataset Settings"
 			helpCommand="dialogs/dataset-settings"
 			helpLabel="Dataset Settings"
 			handleDialogClose={props.handleDialogClose}
 			fileName={props.fileName}
-			save={(path) => saveSettings(path, dataSettings)}
+			save={(path, overwrite) => saveSettings(path, dataSettings, overwrite)}
 			handleSave={props.handleSave}
 			footerActions={
 				props.saveAndPreview ??
@@ -132,7 +134,7 @@ export function DatasetSettingsEditDialog(props: {
 					setDataSettings((cur) => cur.replaceImports(imports))
 				}
 			/>
-		</SettingDialog>
+		</ResourceSettingDialog>
 	);
 }
 
@@ -198,7 +200,7 @@ function OutputFilterFields(props: {
 				defaultValue={kind}
 				handleOnChange={async (select) => {
 					if (select === "name") {
-						setOutputFilter({ name: [""] });
+						setOutputFilter({ name: [] });
 					} else if (select === "pattern") {
 						setOutputFilter({ pattern: { string: "" } });
 					} else {
@@ -216,12 +218,12 @@ function OutputFilterFields(props: {
 					values={outputFilter.name ?? []}
 					handleChange={(text, index) =>
 						setOutputFilter({
-							name: replaceAt(outputFilter.name ?? [], text, index),
+							name: replaceArray(outputFilter.name ?? [], text, index),
 						})
 					}
 					handleRemove={(index) =>
 						setOutputFilter({
-							name: (outputFilter.name ?? []).filter((_, i) => i !== index),
+							name: removeArray(outputFilter.name ?? [], index),
 						})
 					}
 				/>
@@ -256,7 +258,7 @@ function OutputFilterFields(props: {
 							setOutputFilter({
 								pattern: {
 									...outputFilter.pattern,
-									exclude: replaceAt(
+									exclude: replaceArray(
 										outputFilter.pattern?.exclude ?? [],
 										text,
 										index,
@@ -268,8 +270,9 @@ function OutputFilterFields(props: {
 							setOutputFilter({
 								pattern: {
 									...outputFilter.pattern,
-									exclude: (outputFilter.pattern?.exclude ?? []).filter(
-										(_, i) => i !== index,
+									exclude: removeArray(
+										outputFilter.pattern?.exclude ?? [],
+										index,
 									),
 								},
 							})
@@ -286,10 +289,4 @@ function outputFilterKind(outputFilter: OutputFilter): string {
 		return "pattern";
 	}
 	return outputFilter.name ? "name" : "";
-}
-
-function replaceAt(array: string[], text: string, index: number): string[] {
-	const result = [...array];
-	result[index] = text;
-	return result;
 }

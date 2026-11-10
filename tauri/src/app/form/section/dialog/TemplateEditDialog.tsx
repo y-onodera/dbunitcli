@@ -1,15 +1,12 @@
 import { useState } from "react";
-import {
-	DialogBody,
-	SettingDialog,
-	StatusMessage,
-} from "../../../../components/dialog";
+import { DialogBody, StatusMessage } from "../../../../components/dialog";
 import { TextArea } from "../../../../components/element/Input";
 import {
 	useResourceContent,
 	useSaveResourceContent,
 } from "../../../../hooks/useResourceFiles";
 import type { EditResourceDialogProps } from "./ResourceEditButton";
+import { ResourceSettingDialog } from "./ResourceSettingDialog";
 
 export default function TemplateEditDialog({
 	fileName,
@@ -40,14 +37,15 @@ function Dialog({
 	const saveContent = useSaveResourceContent("template");
 
 	return (
-		<SettingDialog
+		<ResourceSettingDialog
+			resourceKind={"template"}
 			maximizable
 			title="Template File Edit"
 			helpCommand="dialogs/template-edit"
 			helpLabel="Template File Edit"
 			fileName={fileName}
 			handleDialogClose={handleDialogClose}
-			save={(path) => saveContent(path, content)}
+			save={(path, overwrite) => saveContent(path, content, overwrite)}
 			handleSave={handleSave}
 		>
 			<DialogBody size="md">
@@ -56,6 +54,6 @@ function Dialog({
 					onChange={(e) => setContent(e.target.value)}
 				/>
 			</DialogBody>
-		</SettingDialog>
+		</ResourceSettingDialog>
 	);
 }

@@ -1,34 +1,29 @@
 import { useState } from "react";
-import {
-	DialogBody,
-	SettingDialog,
-	StatusMessage,
-} from "../../../../components/dialog";
+import { DialogBody, StatusMessage } from "../../../../components/dialog";
 import { TextArea } from "../../../../components/element/Input";
 import {
 	useResourceContent,
 	useSaveResourceContent,
 } from "../../../../hooks/useResourceFiles";
 import type { EditResourceDialogProps } from "./ResourceEditButton";
-
-function extractFileNameFromTemplatePath(templatePath: string): string {
-	return templatePath.replace(/\\/g, "/").split("/").pop() ?? templatePath;
-}
+import { ResourceSettingDialog } from "./ResourceSettingDialog";
 
 export default function ParameterizeTemplateDialog({
 	fileName,
 	handleDialogClose,
 	handleSave,
 }: EditResourceDialogProps) {
-	const name = extractFileNameFromTemplatePath(fileName);
-	const { content, loading } = useResourceContent("parameterizeTemplate", name);
+	const { content, loading } = useResourceContent(
+		"parameterizeTemplate",
+		fileName,
+	);
 	if (loading) {
 		return <StatusMessage kind="loading">Loading...</StatusMessage>;
 	}
 	return (
 		<Dialog
 			content={content}
-			fileName={name}
+			fileName={fileName}
 			handleDialogClose={handleDialogClose}
 			handleSave={handleSave}
 		/>
@@ -45,14 +40,15 @@ function Dialog({
 	const saveContent = useSaveResourceContent("parameterizeTemplate");
 
 	return (
-		<SettingDialog
+		<ResourceSettingDialog
+			resourceKind={"parameterizeTemplate"}
 			maximizable
 			title="Edit Parameterize Template"
 			helpCommand="dialogs/parameterize-template-edit"
 			helpLabel="Edit Parameterize Template"
 			fileName={fileName}
 			handleDialogClose={handleDialogClose}
-			save={(path) => saveContent(path, content)}
+			save={(path, overwrite) => saveContent(path, content, overwrite)}
 			handleSave={handleSave}
 		>
 			<DialogBody size="md">
@@ -64,6 +60,6 @@ function Dialog({
 					spellCheck={false}
 				/>
 			</DialogBody>
-		</SettingDialog>
+		</ResourceSettingDialog>
 	);
 }

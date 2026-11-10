@@ -207,6 +207,89 @@ class ResourceFileTest {
         assertDoesNotThrow(() -> new ResourceFile(nonExistent, FileResources::searchWorkspace, StandardCharsets.UTF_8));
     }
 
+    @Test
+    public void save_overwriteなら探索で見つかったbaseDir外のファイルへ書く() throws IOException {
+        final ResourceFile withFallback = this.withFallbackDir();
+        final Path other = this.tempDir.resolve("other/shared.sql");
+        Files.createDirectories(other.getParent());
+        Files.writeString(other, "old");
+
+        withFallback.save("shared.sql", "new", "", true);
+
+        assertEquals("new", Files.readString(other));
+        assertFalse(Files.exists(this.baseDir().resolve("shared.sql")), "baseDirには作らない");
+    }
+
+    @Test
+    public void save_overwriteでなければbaseDirへ新規保存する() throws IOException {
+        final ResourceFile withFallback = this.withFallbackDir();
+        final Path other = this.tempDir.resolve("other/shared.sql");
+        Files.createDirectories(other.getParent());
+        Files.writeString(other, "old");
+
+        withFallback.save("shared.sql", "new", "", false);
+
+        assertEquals("old", Files.readString(other));
+        assertEquals("new", Files.readString(this.baseDir().resolve("shared.sql")));
+        assertTrue(withFallback.list().contains("shared.sql"));
+    }
+
+    @Test
+    public void save_overwriteで見つからなければ例外() {
+        assertThrows(IOException.class, () -> this.withFallbackDir().save("missing.sql", "new", "", true));
+    }
+
+    @Test
+    public void save_サブディレクトリへの新規保存は一覧に載せない() throws IOException {
+        this.resourceFile.save("sub/new.json", "{}", "", false);
+
+        assertTrue(Files.exists(this.tempDir.resolve("sub/new.json")));
+        assertFalse(this.resourceFile.list().contains("new.json"), "baseDir直下に無い名前を一覧に出さない");
+    }
+
+    @Test
+    public void locate_baseDir外で見つかったファイルの場所と新規保存先を返す() throws IOException {
+        final ResourceFile withFallback = this.withFallbackDir();
+        final Path other = this.tempDir.resolve("other/shared.sql");
+        Files.createDirectories(other.getParent());
+        Files.writeString(other, "old");
+
+        final ResourceFile.Location location = withFallback.locate("shared.sql").orElseThrow();
+
+        assertEquals(other.getParent().toAbsolutePath().normalize().toString(), location.folder());
+        assertEquals(this.baseDir().toAbsolutePath().normalize().toString(), location.defaultFolder());
+        assertEquals("shared.sql", location.fileName());
+        assertFalse(location.defaultFolderHasFile());
+    }
+
+    @Test
+    public void locate_baseDir直下のファイルはフォルダがdefaultFolderと一致する() throws IOException {
+        this.createTestFile("test.json", "{}");
+        this.resourceFile = new ResourceFile(this.parentDir, FileResources::searchWorkspace, StandardCharsets.UTF_8);
+
+        final ResourceFile.Location location = this.resourceFile.locate("test.json").orElseThrow();
+
+        assertEquals(location.defaultFolder(), location.folder());
+        assertTrue(location.defaultFolderHasFile());
+    }
+
+    @Test
+    public void locate_見つからない名前と空の名前はempty() {
+        assertTrue(this.resourceFile.locate("missing.json").isEmpty());
+        assertTrue(this.resourceFile.locate("").isEmpty());
+    }
+
+    // baseDir（tempDir/base）に無ければtempDir/otherを探すResourceFile
+    private ResourceFile withFallbackDir() throws IOException {
+        Files.createDirectories(this.baseDir());
+        return new ResourceFile(this.baseDir().toFile(),
+                name -> new File(this.tempDir.toFile(), "other/" + name), StandardCharsets.UTF_8);
+    }
+
+    private Path baseDir() {
+        return this.tempDir.resolve("base");
+    }
+
     private void createTestFile(final String filename, final String content) throws IOException {
         final Path filePath = this.tempDir.resolve(filename);
         Files.writeString(filePath, content);

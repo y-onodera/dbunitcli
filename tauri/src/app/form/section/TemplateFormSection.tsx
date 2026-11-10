@@ -7,6 +7,7 @@ import type {
 	CommandOption,
 	TemplateOption,
 } from "../../../model/CommandOption";
+import { useSyncedState } from "../../../utils/useResettableState";
 import EncodingText from "./element/EncodingText";
 import PlainText from "./element/PlainText";
 import TemplateText from "./element/TemplateText";
@@ -14,7 +15,7 @@ import TemplateText from "./element/TemplateText";
 // template optionのencodingの入力中の値と、それを追うTemplateFormSectionのhandleValueChange。
 // ResourceEncodingProviderで、template optionを適用するリソースの文字コードにする
 export function useTemplateEncoding(templateOption?: TemplateOption) {
-	const [encoding, setEncoding] = useState(
+	const [encoding, setEncoding] = useSyncedState(
 		templateOption?.encoding?.value ?? "",
 	);
 	const handleValueChange = (param: CommandOption) => (value: string) => {
