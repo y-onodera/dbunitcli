@@ -208,10 +208,12 @@ class ResourceFileTest {
     }
 
     @Test
-    public void read_ディレクトリならemptyを返す() throws IOException {
+    public void ディレクトリはファイルとして扱わない() throws IOException {
         Files.createDirectories(this.tempDir.resolve("dir"));
 
         assertTrue(this.resourceFile.read("dir", "").isEmpty());
+        assertTrue(this.resourceFile.locate("dir").isEmpty());
+        assertThrows(IOException.class, () -> this.resourceFile.save("dir", "x", "", true));
     }
 
     @Test

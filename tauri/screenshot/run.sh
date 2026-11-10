@@ -5,6 +5,16 @@
 #   run.sh smoke  画面を一通り操作し、ブラウザのエラーが出ないかを確かめる（smoke.cjs）
 set -euo pipefail
 
+# 打ち間違いはビルド・起動の前に止める
+mode="${1:-capture}"
+case "$mode" in
+capture | smoke) ;;
+*)
+	echo "使い方: run.sh [capture|smoke]" >&2
+	exit 2
+	;;
+esac
+
 here=$(cd "$(dirname "$0")" && pwd)
 tauri=$(dirname "$here")
 repo=$(dirname "$tauri")
@@ -52,11 +62,8 @@ wait_for() {
 wait_for "http://localhost:$port/dbunit-cli/workspace/resources"
 wait_for "http://localhost:1430/"
 
-case "${1:-capture}" in
-capture) node "$here/capture.cjs" "$tauri/public/help/images" ;;
-smoke) node "$here/smoke.cjs" ;;
-*)
-	echo "使い方: run.sh [capture|smoke]" >&2
-	exit 2
-	;;
-esac
+if [ "$mode" = capture ]; then
+	node "$here/capture.cjs" "$tauri/public/help/images"
+else
+	node "$here/smoke.cjs"
+fi

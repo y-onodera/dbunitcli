@@ -3,8 +3,8 @@
 Tauri v2 のデスクトップ GUI。React 19 + TypeScript 7 + Tailwind CSS 4 のフロントエンドが sidecar (Java) の REST API を使う。ビルドは Bun + Vite、品質管理は Biome v2。
 
 ## 構成
-- `src/` — フロントエンド。`app/`（画面）・`components/`（再利用 UI）・`context/`・`hooks/`・`model/`・`utils/`。テストは `src/tests/` にソース構造をミラーして置く
-- `src-tauri/src/lib.rs` — sidecar（ビルド時に `src-tauri/backend/` へ置く `dbunit-cli-sidecar.exe`）を、`tauri.conf.json` の CLI 引数（`--port` 等）を JVM 引数にして起動し、ウィンドウを閉じたら終了する。`open_directory` コマンドも持つ
+- `src/` — フロントエンド（テストは `src/tests/` にソース構造をミラーして置く）
+- `src-tauri/src/lib.rs` — sidecar（ビルド時に `src-tauri/backend/` へ置く）の起動・終了と Tauri コマンド
 
 ## コマンド（`tauri/` で実行）
 `npx` は使わず `bunx` を使う（別パッケージを取得してしまう）。依存は SessionStart フックで `bun install --frozen-lockfile` 済み。
