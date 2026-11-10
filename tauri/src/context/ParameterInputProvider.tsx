@@ -9,8 +9,7 @@ const setParamInputsContext = createContext<
 	Dispatch<SetStateAction<InputParam>>
 >(() => undefined);
 
-// 編集中の-P。inputParamは読込ごとに別の参照になり、refresh・renameでは同じ参照を引き継ぐ（SelectParameter・useSelectParameter）。
-// 参照で比べて、読込のときだけ保存値へ戻し、refresh・renameでは編集を残す
+// 編集中の-P。inputParamの参照が変わったら（読込。SelectParameter参照）保存値へ戻す
 export default function ParameterInputProvider({
 	children,
 }: {
