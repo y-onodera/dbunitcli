@@ -136,6 +136,7 @@ describe("CompareKeySettingsEditDialogのテスト", () => {
 		render(
 			<CompareKeySettingsEditDialog
 				settings={settings}
+				location={null}
 				fileName="compare.json"
 				kind="compareSetting"
 				handleDialogClose={vi.fn()}
@@ -161,6 +162,7 @@ describe("CompareKeySettingsEditDialogのテスト", () => {
 		render(
 			<CompareKeySettingsEditDialog
 				settings={settings}
+				location={null}
 				fileName="compare.json"
 				kind="compareSetting"
 				handleDialogClose={vi.fn()}

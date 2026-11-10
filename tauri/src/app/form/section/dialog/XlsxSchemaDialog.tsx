@@ -1,11 +1,12 @@
 import { useState } from "react";
-import { SettingTable } from "../../../../components/dialog";
+import { SettingDialog, SettingTable } from "../../../../components/dialog";
 import { useDatasetSrcInfo } from "../../../../context/DatasetSrcInfoProvider";
 import {
 	useSaveXlsxSchema,
 	XLSX_SCHEMA_PARSER,
 } from "../../../../hooks/useXlsxSchema";
 import { srcTypeOf, withValues } from "../../../../model/CommandOption";
+import type { ResourceLocation } from "../../../../model/ResourceLocation";
 import type { CellSetting, RowSetting } from "../../../../model/XlsxSchema";
 import {
 	createCellSetting,
@@ -14,7 +15,6 @@ import {
 } from "../../../../model/XlsxSchema";
 import { SaveAndPreviewButton } from "./DatasetTableNamesPreviewButton";
 import { ResourceLoader } from "./ResourceLoader";
-import { ResourceSettingDialog } from "./ResourceSettingDialog";
 import XlsxCellSettingDialog from "./XlsxCellSettingDialog";
 import XlsxRowSettingDialog from "./XlsxRowSettingDialog";
 
@@ -29,9 +29,10 @@ export default function XlsxSchemaDialog(props: {
 			fileName={props.fileName}
 			parser={XLSX_SCHEMA_PARSER}
 		>
-			{(schema) => (
+			{(schema, location) => (
 				<XlsxSchemaEditDialog
 					schema={schema}
+					location={location}
 					fileName={props.fileName}
 					handleDialogClose={props.handleDialogClose}
 					handleSave={props.handleSave}
@@ -42,6 +43,7 @@ export default function XlsxSchemaDialog(props: {
 }
 export function XlsxSchemaEditDialog(props: {
 	schema: XlsxSchema;
+	location: ResourceLocation | null;
 	fileName: string;
 	handleDialogClose: () => void;
 	handleSave: (path: string) => void;
@@ -51,8 +53,8 @@ export function XlsxSchemaEditDialog(props: {
 	const datasetSrcInfo = useDatasetSrcInfo();
 
 	return (
-		<ResourceSettingDialog
-			resourceKind={"xlsxSchema"}
+		<SettingDialog
+			location={props.location}
 			title="Xlsx Schema"
 			helpCommand="dialogs/xlsx-schema"
 			helpLabel="Xlsx Schema"
@@ -98,6 +100,6 @@ export function XlsxSchemaEditDialog(props: {
 				SettingDialogComponent={XlsxCellSettingDialog}
 				newSetting={createCellSetting}
 			/>
-		</ResourceSettingDialog>
+		</SettingDialog>
 	);
 }

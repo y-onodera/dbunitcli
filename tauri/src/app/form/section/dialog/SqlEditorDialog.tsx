@@ -1,5 +1,9 @@
 import { type ComponentType, useState } from "react";
-import { DialogBody, DialogField } from "../../../../components/dialog";
+import {
+	DialogBody,
+	DialogField,
+	SettingDialog,
+} from "../../../../components/dialog";
 import { BlueButton } from "../../../../components/element/Button";
 import { TextArea } from "../../../../components/element/Input";
 import { useDatasetSrcInfo } from "../../../../context/DatasetSrcInfoProvider";
@@ -9,6 +13,7 @@ import {
 	useSaveResourceContent,
 } from "../../../../hooks/useResourceFiles";
 import type { QueryDatasourceType } from "../../../../model/QueryDatasource";
+import type { ResourceLocation } from "../../../../model/ResourceLocation";
 import {
 	insertAtCursor,
 	insertInlineAtCursor,
@@ -17,7 +22,6 @@ import CsvReadInsertDialog from "./CsvReadInsertDialog";
 import { InlinePreviewButton } from "./DatasetTableNamesPreviewButton";
 import type { EditResourceDialogProps } from "./ResourceEditButton";
 import { ResourceLoader } from "./ResourceLoader";
-import { ResourceSettingDialog } from "./ResourceSettingDialog";
 import SqlTableInsertDialog from "./SqlTableInsertDialog";
 import { useTextareaInsert } from "./useTextareaInsert";
 
@@ -36,7 +40,9 @@ export default function SqlEditorDialog(props: SqlEditorDialogProps) {
 			fileName={props.fileName}
 			parser={CONTENT_PARSER}
 		>
-			{(content) => <Dialog {...props} value={content} />}
+			{(content, location) => (
+				<Dialog {...props} value={content} location={location} />
+			)}
 		</ResourceLoader>
 	);
 }
@@ -56,7 +62,12 @@ export const sqlEditorDialogs: Record<
 	csvq: sqlEditorDialogOf("csvq"),
 };
 
-function Dialog(props: SqlEditorDialogProps & { value: string }) {
+function Dialog(
+	props: SqlEditorDialogProps & {
+		value: string;
+		location: ResourceLocation | null;
+	},
+) {
 	const {
 		value: content,
 		setValue: setContent,
@@ -109,8 +120,8 @@ function Dialog(props: SqlEditorDialogProps & { value: string }) {
 	}
 
 	return (
-		<ResourceSettingDialog
-			resourceKind={props.type}
+		<SettingDialog
+			location={props.location}
 			title={table ? "Edit Table Definition" : "Edit SQL"}
 			helpCommand="dialogs/sql-editor"
 			helpLabel="Edit SQL / Edit Table Definition"
@@ -149,6 +160,6 @@ function Dialog(props: SqlEditorDialogProps & { value: string }) {
 				/>
 			</DialogBody>
 			{showSelector && renderSelector()}
-		</ResourceSettingDialog>
+		</SettingDialog>
 	);
 }

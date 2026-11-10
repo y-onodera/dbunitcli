@@ -1,14 +1,13 @@
 import type { ReactNode } from "react";
 import { StatusMessage } from "../../../../components/dialog";
-import { OpenedResourceProvider } from "../../../../context/OpenedResourceProvider";
 import {
 	type ResourceKind,
 	type ResourceParser,
 	useResourceLoad,
 } from "../../../../hooks/useResourceFiles";
+import type { ResourceLocation } from "../../../../model/ResourceLocation";
 
-// リソースファイルを読み込み終えてから、読み込んだ値で編集ダイアログを描画する。
-// 開いたファイルの場所は、中のResourceSettingDialogがOpenedResourceProviderから受け取る
+// リソースファイルを読み込み終えてから、読み込んだ値と開いたファイルの場所で編集ダイアログを描画する
 export function ResourceLoader<T>({
 	kind,
 	fileName,
@@ -18,15 +17,11 @@ export function ResourceLoader<T>({
 	kind: ResourceKind;
 	fileName: string;
 	parser: ResourceParser<T>;
-	children: (data: T) => ReactNode;
+	children: (data: T, location: ResourceLocation | null) => ReactNode;
 }) {
 	const { data, location, loading } = useResourceLoad(kind, fileName, parser);
 	if (loading) {
 		return <StatusMessage kind="loading">Loading...</StatusMessage>;
 	}
-	return (
-		<OpenedResourceProvider kind={kind} fileName={fileName} location={location}>
-			{children(data)}
-		</OpenedResourceProvider>
-	);
+	return children(data, location);
 }

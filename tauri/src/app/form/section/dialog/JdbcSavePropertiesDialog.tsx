@@ -2,12 +2,13 @@ import {
 	DialogBody,
 	DialogField,
 	DialogTitle,
+	SettingDialog,
 } from "../../../../components/dialog";
 import { PreviewField } from "../../../../components/element/Input";
 import { CONTENT_PARSER } from "../../../../hooks/useResourceFiles";
+import type { ResourceLocation } from "../../../../model/ResourceLocation";
 import type { OperationResult } from "../../../../utils/fetchUtils";
 import { ResourceLoader } from "./ResourceLoader";
-import { ResourceSettingDialog } from "./ResourceSettingDialog";
 
 type JdbcSavePropertiesDialogProps = {
 	jdbcValues: Record<string, string>;
@@ -23,7 +24,9 @@ export default function JdbcSavePropertiesDialog(
 	const fileName = props.jdbcValues.jdbcProperties ?? "";
 	return (
 		<ResourceLoader kind="jdbc" fileName={fileName} parser={CONTENT_PARSER}>
-			{() => <Dialog fileName={fileName} {...props} />}
+			{(_, location) => (
+				<Dialog fileName={fileName} location={location} {...props} />
+			)}
 		</ResourceLoader>
 	);
 }
@@ -34,10 +37,14 @@ function Dialog({
 	save,
 	handleSave,
 	fileName,
-}: JdbcSavePropertiesDialogProps & { fileName: string }) {
+	location,
+}: JdbcSavePropertiesDialogProps & {
+	fileName: string;
+	location: ResourceLocation | null;
+}) {
 	return (
-		<ResourceSettingDialog
-			resourceKind="jdbc"
+		<SettingDialog
+			location={location}
 			fileName={fileName}
 			handleDialogClose={handleDialogClose}
 			save={save}
@@ -73,6 +80,6 @@ function Dialog({
 					/>
 				</DialogField>
 			</DialogBody>
-		</ResourceSettingDialog>
+		</SettingDialog>
 	);
 }

@@ -1,4 +1,4 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, use, useState } from "react";
 import { ButtonIcon } from "../element/ButtonIcon";
 import { CloseFullscreenIcon, OpenInFullIcon } from "../element/Icon";
 
@@ -13,7 +13,7 @@ export const DialogMaximizeContext = createContext<DialogMaximize>({
 });
 
 export function useDialogMaximize() {
-	return useContext(DialogMaximizeContext);
+	return use(DialogMaximizeContext);
 }
 
 // 枠（FullDialog / ModalOverlay）ごとに状態を持つ。入れ子の枠が親の最大化を引き継がないよう、maximizable でなくても Provider で値を上書きする

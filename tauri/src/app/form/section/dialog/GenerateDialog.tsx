@@ -1,6 +1,7 @@
 import { type ReactElement, type ReactNode, useState } from "react";
 import { AddButton } from "../../../../components/element/ButtonIcon";
 import type { JobContext } from "../../../../hooks/useJob";
+import type { ResourceLocation } from "../../../../model/ResourceLocation";
 import type { GenerateOptions } from "../../../../model/SelectParameter";
 import type { FormValues } from "../../../../utils/formValues";
 import { DatasetLoadForm } from "../DatasetLoadForm";
@@ -130,6 +131,7 @@ export type ModelGenerateConfig<BUILDER, MODEL> = GenerateDialogConfig & {
 		model: MODEL,
 		props: {
 			fileName: string;
+			location: ResourceLocation | null;
 			handleDialogClose: () => void;
 			handleSave: (fileName: string) => void;
 		},
@@ -147,8 +149,10 @@ function ModelGenerateDialog<BUILDER, MODEL>({
 }) {
 	const [generated, setGenerated] = useState<MODEL | null>(null);
 	if (generated) {
+		// 生成結果はまだファイルになっていないため、開いたファイルの場所は無い
 		return config.renderEditDialog(generated, {
 			fileName: "",
+			location: null,
 			handleDialogClose,
 			handleSave,
 		});

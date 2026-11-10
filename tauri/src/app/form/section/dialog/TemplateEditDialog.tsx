@@ -1,13 +1,13 @@
 import { useState } from "react";
-import { DialogBody } from "../../../../components/dialog";
+import { DialogBody, SettingDialog } from "../../../../components/dialog";
 import { TextArea } from "../../../../components/element/Input";
 import {
 	CONTENT_PARSER,
 	useSaveResourceContent,
 } from "../../../../hooks/useResourceFiles";
+import type { ResourceLocation } from "../../../../model/ResourceLocation";
 import type { EditResourceDialogProps } from "./ResourceEditButton";
 import { ResourceLoader } from "./ResourceLoader";
-import { ResourceSettingDialog } from "./ResourceSettingDialog";
 
 export default function TemplateEditDialog({
 	fileName,
@@ -20,9 +20,10 @@ export default function TemplateEditDialog({
 			fileName={fileName}
 			parser={CONTENT_PARSER}
 		>
-			{(content) => (
+			{(content, location) => (
 				<Dialog
 					content={content}
+					location={location}
 					fileName={fileName}
 					handleDialogClose={handleDialogClose}
 					handleSave={handleSave}
@@ -34,16 +35,20 @@ export default function TemplateEditDialog({
 
 function Dialog({
 	content: initialContent,
+	location,
 	fileName,
 	handleDialogClose,
 	handleSave,
-}: EditResourceDialogProps & { content: string }) {
+}: EditResourceDialogProps & {
+	content: string;
+	location: ResourceLocation | null;
+}) {
 	const [content, setContent] = useState<string>(initialContent);
 	const saveContent = useSaveResourceContent("template");
 
 	return (
-		<ResourceSettingDialog
-			resourceKind={"template"}
+		<SettingDialog
+			location={location}
 			maximizable
 			title="Template File Edit"
 			helpCommand="dialogs/template-edit"
@@ -59,6 +64,6 @@ function Dialog({
 					onChange={(e) => setContent(e.target.value)}
 				/>
 			</DialogBody>
-		</ResourceSettingDialog>
+		</SettingDialog>
 	);
 }

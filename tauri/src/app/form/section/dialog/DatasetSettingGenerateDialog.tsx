@@ -4,6 +4,7 @@ import {
 	DatasetSettings,
 	type DatasetSettingsBuilder,
 } from "../../../../model/DatasetSettings";
+import type { ResourceLocation } from "../../../../model/ResourceLocation";
 import { DatasetSettingsEditDialog } from "./DatasetSettingsDialog";
 import {
 	type GenerateButtonProps,
@@ -13,6 +14,7 @@ import {
 
 export type DatasetSettingsEditDialogComponent = ComponentType<{
 	settings: DatasetSettings;
+	location: ResourceLocation | null;
 	fileName: string;
 	handleDialogClose: () => void;
 	handleSave: (fileName: string) => void;

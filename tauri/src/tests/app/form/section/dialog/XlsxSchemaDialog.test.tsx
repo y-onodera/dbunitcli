@@ -51,6 +51,7 @@ function renderDialog() {
 	render(
 		<XlsxSchemaEditDialog
 			schema={schema}
+			location={null}
 			fileName="schema.json"
 			handleDialogClose={vi.fn()}
 			handleSave={handleSave}

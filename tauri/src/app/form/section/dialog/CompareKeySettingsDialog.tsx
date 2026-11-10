@@ -10,10 +10,10 @@ import {
 	type DatasetSettings,
 	newDatasetSetting,
 } from "../../../../model/DatasetSettings";
+import type { ResourceLocation } from "../../../../model/ResourceLocation";
 import ColumnDatalistDialog from "./ColumnDatalistDialog";
 import { FilterOrderFields, TargetFields } from "./DatasetSettingFields";
 import { ResourceLoader } from "./ResourceLoader";
-import { ResourceSettingDialog } from "./ResourceSettingDialog";
 import { useColumnCandidates } from "./useColumnCandidates";
 
 const keysOnly = ["keys"] as const;
@@ -40,9 +40,10 @@ export default function CompareKeySettingsDialog(props: {
 			fileName={props.fileName}
 			parser={DATASET_SETTINGS_PARSER}
 		>
-			{(settings) => (
+			{(settings, location) => (
 				<CompareKeySettingsEditDialog
 					settings={settings}
+					location={location}
 					fileName={props.fileName}
 					handleDialogClose={props.handleDialogClose}
 					handleSave={props.handleSave}
@@ -56,6 +57,7 @@ export default function CompareKeySettingsDialog(props: {
 // 編集するのは対象テーブルとkeysだけ。ファイルにあるそれ以外の項目（filter・outputFilter・import等）は保存時もそのまま残る
 export function CompareKeySettingsEditDialog(props: {
 	settings: DatasetSettings;
+	location: ResourceLocation | null;
 	fileName: string;
 	handleDialogClose: () => void;
 	handleSave: (path: string) => void;
@@ -66,8 +68,8 @@ export function CompareKeySettingsEditDialog(props: {
 		props.settings,
 	);
 	return (
-		<ResourceSettingDialog
-			resourceKind={props.kind}
+		<SettingDialog
+			location={props.location}
 			title="Compare Key Settings"
 			helpCommand="dialogs/compare-key-settings"
 			helpLabel="Compare Key Settings"
@@ -100,7 +102,7 @@ export function CompareKeySettingsEditDialog(props: {
 				SettingDialogComponent={CompareKeySettingDialog}
 				newSetting={newDatasetSetting}
 			/>
-		</ResourceSettingDialog>
+		</SettingDialog>
 	);
 }
 
