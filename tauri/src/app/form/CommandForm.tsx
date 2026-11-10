@@ -40,7 +40,7 @@ function SelectedCommandForm(prop: {
 		return prefill;
 	};
 	// scaffold実行結果(txt駆動generateパラメータ)を現在のフォーム値へマージして再描画する
-	// 入力欄は初期値のみstateへ取り込むため、keyを更新して再マウントし反映値を表示させる
+	// srcの入力値（DatasetSrcInfo）は初期値から作るため、keyを更新して再マウントし反映値から作り直す
 	const [scaffoldReflectCount, setScaffoldReflectCount] = useState(0);
 	const handleScaffoldReflect = async (params: Record<string, string>) => {
 		await refreshSelect({ ...prop.formData(false).values, ...params });
