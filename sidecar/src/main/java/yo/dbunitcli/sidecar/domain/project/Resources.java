@@ -38,10 +38,11 @@ public record Resources(
         private File workspace;
 
         public Resources build() {
-            // コマンドが文字コードオプションで読むリソースは、それが空のときと同じシステムの既定。オプションの無いjdbc・fixedColumnDefはUTF-8
+            // コマンドが文字コードオプションで読むリソースは、それが空のときと同じシステムの既定。
+            // jdbcはコマンドがProperties.load(InputStream)で読むISO-8859-1、オプションの無いfixedColumnDefはUTF-8
             final Charset system = Charset.defaultCharset();
             return new Resources(
-                    ResourceFile.of(this.workspace, FileResources.RESOURCES_JDBC_PATH, FileResources::searchJdbc, StandardCharsets.UTF_8),
+                    ResourceFile.of(this.workspace, FileResources.RESOURCES_JDBC_PATH, FileResources::searchJdbc, StandardCharsets.ISO_8859_1),
                     ResourceFile.of(this.workspace, FileResources.RESOURCES_SETTING_PATH, FileResources::searchSetting, system),
                     ResourceFile.of(this.workspace, FileResources.RESOURCES_TEMPLATE_PATH, FileResources::searchTemplate, system),
                     ResourceFile.of(this.workspace, FileResources.RESOURCES_XLSX_SCHEMA_PATH, FileResources::searchXlsxSchema, system),

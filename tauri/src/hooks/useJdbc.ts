@@ -84,9 +84,18 @@ export const useJdbcConnectionTest = () => {
 
 export const useSaveJdbcProperties = () => {
 	const updateResourceFiles = useUpdateResourceFiles("jdbc");
-	return (name: string, jdbcValues: Record<string, string>) =>
+	// overwriteなら読込と同じ探索で見つかったファイルへ上書きし、そうでなければ規定フォルダ基準で新規保存する
+	return (
+		name: string,
+		jdbcValues: Record<string, string>,
+		overwrite: boolean,
+	) =>
 		updateResourceFiles(
 			"save-properties",
-			JSON.stringify({ name, input: toJdbcRequestBody(jdbcValues) }),
+			JSON.stringify({
+				name,
+				overwrite,
+				input: toJdbcRequestBody(jdbcValues),
+			}),
 		);
 };

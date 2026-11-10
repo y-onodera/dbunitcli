@@ -216,7 +216,9 @@ function JdbcSavePropertiesButton({
 				<JdbcSavePropertiesDialog
 					jdbcValues={jdbcValues}
 					handleDialogClose={() => setShowDialog(false)}
-					save={(name) => saveJdbcProperties(name, jdbcValues)}
+					save={(name, overwrite) =>
+						saveJdbcProperties(name, jdbcValues, overwrite)
+					}
 					handleSave={() => setShowDialog(false)}
 				/>
 			)}

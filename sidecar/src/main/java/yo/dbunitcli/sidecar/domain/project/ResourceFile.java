@@ -97,12 +97,21 @@ public record ResourceFile(File baseDir, Set<String> files, Function<String, Opt
      * overwriteなら読込（{@link #load}）と同じ探索で見つかったファイルへ書き、そうでなければ{@link #update}と同じく保存する
      */
     public void save(final String name, final String contents, final String encoding, final boolean overwrite) throws IOException {
+        Files.writeString(this.saveTarget(name, overwrite), contents, this.charsetOf(encoding));
+    }
+
+    /**
+     * 保存先の選び方は{@link #save(String, String, String, boolean)}と同じ
+     */
+    public void save(final String name, final byte[] contents, final boolean overwrite) throws IOException {
+        Files.write(this.saveTarget(name, overwrite), contents);
+    }
+
+    private Path saveTarget(final String name, final boolean overwrite) throws IOException {
         if (!overwrite) {
-            this.update(name, contents, encoding);
-            return;
+            return this.prepareUpdate(name);
         }
-        final Path saveTo = this.select(name).orElseThrow(() -> new IOException("File not found: " + name));
-        Files.writeString(saveTo, contents, this.charsetOf(encoding));
+        return this.select(name).orElseThrow(() -> new IOException("File not found: " + name));
     }
 
     private Location locationOf(final Path found) {
@@ -117,10 +126,6 @@ public record ResourceFile(File baseDir, Set<String> files, Function<String, Opt
      * fileName: ファイル名、defaultFolderHasFile: defaultFolder直下に同名のファイルがあるか
      */
     public record Location(String folder, String defaultFolder, String fileName, boolean defaultFolderHasFile) {
-    }
-
-    public void update(final String name, final byte[] contents) throws IOException {
-        Files.write(this.prepareUpdate(name), contents);
     }
 
     /** バイナリ等、既存ファイルの内容をそのまま取り込む（同名は上書き） */

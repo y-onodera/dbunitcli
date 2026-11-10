@@ -2,44 +2,49 @@ import {
 	DialogBody,
 	DialogField,
 	DialogTitle,
-	SettingDialog,
 } from "../../../../components/dialog";
 import { PreviewField } from "../../../../components/element/Input";
+import { CONTENT_PARSER } from "../../../../hooks/useResourceFiles";
 import type { OperationResult } from "../../../../utils/fetchUtils";
+import { ResourceLoader } from "./ResourceLoader";
+import { ResourceSettingDialog } from "./ResourceSettingDialog";
 
 type JdbcSavePropertiesDialogProps = {
 	jdbcValues: Record<string, string>;
 	handleDialogClose: () => void;
-	save: (name: string) => Promise<OperationResult>;
+	save: (name: string, overwrite: boolean) => Promise<OperationResult>;
 	handleSave: (name: string) => void;
 };
 
-export default function JdbcSavePropertiesDialog({
+// jdbcPropertiesのファイルを開いたファイルとして、上書きか規定フォルダへの保存かを選ばせる
+export default function JdbcSavePropertiesDialog(
+	props: JdbcSavePropertiesDialogProps,
+) {
+	const fileName = props.jdbcValues.jdbcProperties ?? "";
+	return (
+		<ResourceLoader kind="jdbc" fileName={fileName} parser={CONTENT_PARSER}>
+			{() => <Dialog fileName={fileName} {...props} />}
+		</ResourceLoader>
+	);
+}
+
+function Dialog({
 	jdbcValues,
 	handleDialogClose,
 	save,
 	handleSave,
-}: JdbcSavePropertiesDialogProps) {
+	fileName,
+}: JdbcSavePropertiesDialogProps & { fileName: string }) {
 	return (
-		<SettingDialog
-			fileName=""
+		<ResourceSettingDialog
+			resourceKind="jdbc"
+			fileName={fileName}
 			handleDialogClose={handleDialogClose}
 			save={save}
 			handleSave={handleSave}
 		>
 			<DialogBody size="sm">
 				<DialogTitle>Save JDBC Properties</DialogTitle>
-
-				{jdbcValues.jdbcProperties && (
-					<DialogField>
-						<PreviewField
-							id="jdbcSaveProperties_baseFile"
-							label="Base Properties File"
-							value={jdbcValues.jdbcProperties}
-							placeholder="(not set)"
-						/>
-					</DialogField>
-				)}
 
 				<DialogField>
 					<PreviewField
@@ -68,6 +73,6 @@ export default function JdbcSavePropertiesDialog({
 					/>
 				</DialogField>
 			</DialogBody>
-		</SettingDialog>
+		</ResourceSettingDialog>
 	);
 }

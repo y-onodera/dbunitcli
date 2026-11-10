@@ -66,7 +66,12 @@ pass=app_password</pre>
   <p>フォーム値を変更すると接続 OK 状態は解除され、再度テストが必要になります。</p>
 
   <h2 id="section-save-properties">Save as Properties</h2>
-  <p>現在入力中の URL / User / Pass を新規 <code>.properties</code> ファイルとして Workspace の <code>resources/jdbc/</code> に保存します。保存後は <code>jdbcProperties</code> で再利用できます。ダイアログには保存される内容のプレビュー（Pass はマスク）とファイル名入力欄が表示されます。保存に失敗したときは、ダイアログは開いたままになります。英数字以外の文字は <code>\uXXXX</code> 形式にエスケープして保存します（<code>.properties</code> の標準の書式）。</p>
+  <p>現在入力中の URL / User / Pass を <code>.properties</code> ファイルに保存します。保存後は <code>jdbcProperties</code> で再利用できます。ダイアログには保存される内容のプレビュー（Pass はマスク）と <code>name</code> 欄が表示されます。保存に失敗したときは、ダイアログは開いたままになります。英数字以外の文字は <code>\uXXXX</code> 形式にエスケープして保存します（<code>.properties</code> の標準の書式）。</p>
+  <ul>
+    <li><code>jdbcProperties</code> が空のときは、<code>name</code> 欄は空で開き、Workspace の <code>resources/jdbc/</code> に新規保存する</li>
+    <li><code>jdbcProperties</code> にファイルを指定しているときは、そのファイルを開いたファイルとして扱い、<code>name</code> 欄にそのファイル名を入れて開く。保存する内容は、そのファイルの内容に入力中の URL / User / Pass を重ねたもの</li>
+    <li>保存先の選び方（開いたファイルへの上書き・基準ディレクトリ <code>resources/jdbc/</code> への保存・<code>name</code> を変えたときの新規保存）は、他のファイルを編集するダイアログと同じ（<a href="../reference/common.html">画面共通の操作</a>）</li>
+  </ul>
 
   <h2 id="section-related">関連</h2>
   <ul>

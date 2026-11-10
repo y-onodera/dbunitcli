@@ -6,6 +6,8 @@ import io.micronaut.http.annotation.Controller;
 import io.micronaut.http.annotation.Post;
 import io.micronaut.serde.ObjectMapper;
 import jakarta.inject.Inject;
+import jakarta.json.Json;
+import jakarta.json.JsonValue;
 import org.dbunit.database.IDatabaseConnection;
 import org.dbunit.dataset.Column;
 import org.slf4j.Logger;
@@ -22,6 +24,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
+import java.util.Optional;
 import java.util.Properties;
 
 @Controller("jdbc")
@@ -51,7 +54,7 @@ public class JdbcResourceFileController extends AbstractResourceFileController<J
         // コマンド実行時はProperties.load(InputStream)（ISO-8859-1）で読むため、それ以外の文字をエスケープするstore(OutputStream)の出力をそのまま書く
         final ByteArrayOutputStream out = new ByteArrayOutputStream();
         option.loadJdbcTemplate().store(out, null);
-        this.getResourceFile().update(body.getName(), out.toByteArray());
+        this.getResourceFile().save(body.getName(), out.toByteArray(), body.isOverwrite());
         return this.currentFileList();
     }
 
@@ -128,6 +131,14 @@ public class JdbcResourceFileController extends AbstractResourceFileController<J
             final Throwable cause = e.getCause()!=null ? e.getCause():e;
             return "{\"success\":false,\"message\":" + toJsonString(cause.getMessage()) + "}";
         }
+    }
+
+    /**
+     * propertiesはJSONではないため、テキストのまま返す
+     */
+    @Override
+    protected JsonValue toContent(final Optional<String> content) {
+        return Json.createValue(content.orElse(""));
     }
 
     @Override

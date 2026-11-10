@@ -366,7 +366,7 @@ describe("保存フックのテスト", () => {
 			name: "useSaveJdbcProperties",
 			useSave: () => {
 				const save = useSaveJdbcProperties();
-				return (name) => save(name, jdbcValues);
+				return (name) => save(name, jdbcValues, false);
 			},
 			endpoint: "jdbc/save-properties",
 			input: { url: "jdbc:test", user: "user", pass: "pass", properties: "" },
@@ -384,8 +384,7 @@ describe("保存フックのテスト", () => {
 				name: "target",
 				...(encoding === undefined ? {} : { encoding }),
 				input: JSON.parse(JSON.stringify(input)),
-				// save-propertiesは新規作成だけなので上書きの指定を送らない
-				...(endpoint.endsWith("/save") ? { overwrite: false } : {}),
+				overwrite: false,
 			});
 			expect(resources[key]).toStrictEqual(mockUpdatedFiles);
 		},
