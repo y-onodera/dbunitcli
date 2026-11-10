@@ -7,6 +7,7 @@ import {
 import { TextArea } from "../../../../components/element/Input";
 import {
 	useResourceContent,
+	useResourceLocation,
 	useSaveResourceContent,
 } from "../../../../hooks/useResourceFiles";
 import type { EditResourceDialogProps } from "./ResourceEditButton";
@@ -38,6 +39,10 @@ function Dialog({
 }: EditResourceDialogProps & { content: string }) {
 	const [content, setContent] = useState<string>(initialContent);
 	const saveContent = useSaveResourceContent("template");
+	const { location, loading: locationLoading } = useResourceLocation(
+		"template",
+		fileName,
+	);
 
 	return (
 		<SettingDialog
@@ -47,7 +52,9 @@ function Dialog({
 			helpLabel="Template File Edit"
 			fileName={fileName}
 			handleDialogClose={handleDialogClose}
-			save={(path) => saveContent(path, content)}
+			save={(path, overwrite) => saveContent(path, content, overwrite)}
+			location={location}
+			locationLoading={locationLoading}
 			handleSave={handleSave}
 		>
 			<DialogBody size="md">

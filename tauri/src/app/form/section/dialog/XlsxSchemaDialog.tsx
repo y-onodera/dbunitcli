@@ -5,6 +5,7 @@ import {
 	StatusMessage,
 } from "../../../../components/dialog";
 import { useDatasetSrcInfo } from "../../../../context/DatasetSrcInfoProvider";
+import { useResourceLocation } from "../../../../hooks/useResourceFiles";
 import {
 	useSaveXlsxSchema,
 	useXlsxSchemaData,
@@ -45,6 +46,10 @@ export function XlsxSchemaEditDialog(props: {
 	handleSave: (path: string) => void;
 }) {
 	const saveSchema = useSaveXlsxSchema();
+	const { location, loading: locationLoading } = useResourceLocation(
+		"xlsxSchema",
+		props.fileName,
+	);
 	const [xlsxSchema, setXlsxSchema] = useState(props.schema);
 	const datasetSrcInfo = useDatasetSrcInfo();
 
@@ -55,7 +60,11 @@ export function XlsxSchemaEditDialog(props: {
 			helpLabel="Xlsx Schema"
 			handleDialogClose={props.handleDialogClose}
 			fileName={props.fileName}
-			save={(fileName) => saveSchema(fileName, xlsxSchema)}
+			save={(fileName, overwrite) =>
+				saveSchema(fileName, xlsxSchema, overwrite)
+			}
+			location={location}
+			locationLoading={locationLoading}
 			handleSave={props.handleSave}
 			footerActions={(saveThen) =>
 				// 保存したファイルをxlsxSchemaに適用してプレビューする（それ以外のsrc要素はフォームのまま）

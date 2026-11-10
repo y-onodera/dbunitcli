@@ -173,7 +173,7 @@ describe("CompareKeySettingsEditDialogのテスト", () => {
 		await waitFor(() => {
 			expect(handleSave).toHaveBeenCalledWith("compare.json");
 		});
-		expect(mockSave).toHaveBeenCalledWith("compare.json", settings);
+		expect(mockSave).toHaveBeenCalledWith("compare.json", settings, false);
 		expect(mockSaveKind).toHaveBeenCalledWith("compareSetting");
 	});
 });

@@ -147,6 +147,7 @@ describe("FixedColumnDefGenerateDialogの実行テスト", () => {
 			expect(mockSaveDef).toHaveBeenCalledWith(
 				"generated.json",
 				expect.anything(),
+				false,
 			);
 		});
 		await waitFor(() => {

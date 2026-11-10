@@ -58,7 +58,7 @@ describe("DatasetSettingsDialogのテスト", () => {
 		await waitFor(() => {
 			expect(screen.getByText("Table List Preview")).toBeInTheDocument();
 		});
-		expect(mockSave).toHaveBeenCalledWith("setting.json", settings);
+		expect(mockSave).toHaveBeenCalledWith("setting.json", settings, false);
 		expect(mockTableNames).toHaveBeenLastCalledWith({
 			values: {
 				srcType: "csv",

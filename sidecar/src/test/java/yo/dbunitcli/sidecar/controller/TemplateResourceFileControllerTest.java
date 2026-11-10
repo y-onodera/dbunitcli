@@ -97,6 +97,43 @@ class TemplateResourceFileControllerTest {
     }
 
     @Test
+    void testLocate_見つかったファイルのフォルダと新規保存先を返す() {
+        final String response = this.client.toBlocking().retrieve(
+                HttpRequest.POST("dbunit-cli/template/locate", "{\"name\":\"sample.json\"}"));
+        final String templateDir = Paths.get("target/test-temp/workspace/sample/resources/template")
+                .toAbsolutePath().normalize().toString();
+        Assertions.assertTrue(response.contains("\"inDefaultFolder\":true"), response);
+        Assertions.assertTrue(response.contains("\"fileName\":\"sample.json\""), response);
+        Assertions.assertTrue(response.replace("\\\\", "\\").contains(templateDir), response);
+    }
+
+    @Test
+    void testLocate_見つからなければ空のオブジェクトを返す() {
+        final String response = this.client.toBlocking().retrieve(
+                HttpRequest.POST("dbunit-cli/template/locate", "{\"name\":\"missing.stg\"}"));
+        Assertions.assertEquals("{}", response);
+    }
+
+    @Test
+    void testSave_overwriteは見つかったファイルへ上書きする() throws IOException {
+        this.client.toBlocking().retrieve(HttpRequest.POST("dbunit-cli/template/save",
+                "{\"name\":\"savedTemplate.stg\",\"input\":{\"content\":\"first\"}}"));
+        this.client.toBlocking().retrieve(HttpRequest.POST("dbunit-cli/template/save",
+                "{\"name\":\"savedTemplate.stg\",\"overwrite\":true,\"input\":{\"content\":\"second\"}}"));
+        final Path saved = Paths.get("target/test-temp/workspace/sample/resources/template/savedTemplate.stg");
+        Assertions.assertEquals("second", Files.readString(saved));
+    }
+
+    @Test
+    void testSave_overwriteで見つからなければエラー() {
+        Assertions.assertThrows(HttpClientResponseException.class,
+                () -> this.client.toBlocking().retrieve(HttpRequest.POST("dbunit-cli/template/save",
+                        "{\"name\":\"missing.stg\",\"overwrite\":true,\"input\":{\"content\":\"x\"}}")));
+        Assertions.assertFalse(Files.exists(Paths.get(
+                "target/test-temp/workspace/sample/resources/template/missing.stg")));
+    }
+
+    @Test
     void testSave_生テキストとして保存しloadで取得できる() throws IOException {
         final String template = "ddlType(row) ::= <<$row.TYPE_NAME$>>\n";
         final String saveBody = "{\"name\":\"savedTemplate.stg\",\"input\":{\"content\":"

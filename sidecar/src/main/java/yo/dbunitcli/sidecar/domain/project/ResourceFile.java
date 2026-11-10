@@ -83,6 +83,44 @@ public record ResourceFile(File baseDir, Set<String> files, Function<String, Opt
         Files.writeString(saveTo, contents, this.charsetOf(encoding));
     }
 
+    /**
+     * overwriteなら読込（{@link #read}）と同じ探索で見つかったファイルへ書き、そうでなければ{@link #update}と同じく保存する
+     */
+    public void save(final String name, final String contents, final String encoding, final boolean overwrite) throws IOException {
+        if (!overwrite) {
+            this.update(name, contents, encoding);
+            return;
+        }
+        final Path saveTo = this.select(name).orElseThrow(() -> new IOException("File not found: " + name));
+        Files.writeString(saveTo, contents, this.charsetOf(encoding));
+    }
+
+    /**
+     * 読込と同じ探索で見つかったファイルの場所。見つからなければempty
+     */
+    public Optional<Location> locate(final String name) {
+        if (name == null || name.isEmpty()) {
+            return Optional.empty();
+        }
+        return this.select(name)
+                .filter(Files::isRegularFile)
+                .map(it -> {
+                    final Path file = it.toAbsolutePath().normalize();
+                    final Path defaultFolder = this.baseDir.toPath().toAbsolutePath().normalize();
+                    final String fileName = file.getFileName().toString();
+                    return new Location(file.getParent().toString(), defaultFolder.toString(), fileName,
+                            defaultFolder.equals(file.getParent()), this.files.contains(fileName));
+                });
+    }
+
+    /**
+     * folder: 見つかったファイルのフォルダ、defaultFolder: 新規保存先のフォルダ、fileName: ファイル名、
+     * inDefaultFolder: 見つかったファイルがdefaultFolder直下か、defaultFolderHasFile: defaultFolder直下に同名のファイルがあるか
+     */
+    public record Location(String folder, String defaultFolder, String fileName, boolean inDefaultFolder,
+                           boolean defaultFolderHasFile) {
+    }
+
     public void update(final String name, final byte[] contents) throws IOException {
         Files.write(this.prepareUpdate(name), contents);
     }
@@ -173,7 +211,11 @@ public record ResourceFile(File baseDir, Set<String> files, Function<String, Opt
         final Path saveTo = file.toPath();
         if (!saveTo.toFile().exists()) {
             Files.createFile(saveTo);
-            this.files.add(saveTo.getFileName().toString());
+            // 一覧はbaseDir直下のファイル名だけを持つ（サブディレクトリや絶対パスの保存先は名前で引けない）
+            if (this.baseDir.toPath().toAbsolutePath().normalize()
+                    .equals(saveTo.toAbsolutePath().normalize().getParent())) {
+                this.files.add(saveTo.getFileName().toString());
+            }
         }
         return saveTo;
     }

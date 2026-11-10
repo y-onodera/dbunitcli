@@ -158,6 +158,7 @@ describe("DatasetSettingGenerateDialogの実行テスト", () => {
 			expect(mockSaveSettings).toHaveBeenCalledWith(
 				"generated.json",
 				expect.anything(),
+				false,
 			);
 		});
 		await waitFor(() => {

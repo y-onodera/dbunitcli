@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useEnvironment } from "../context/EnvironmentProvider";
 import { useResourceEncoding } from "../context/ResourceEncodingProvider";
 import { useSetResourcesSettings } from "../context/WorkspaceResourcesProvider";
+import type { ResourceLocation } from "../model/ResourceLocation";
 import type {
 	ResourcesSettings,
 	ResourcesSettingsBuilder,
@@ -11,6 +12,7 @@ import {
 	fetchData,
 	getErrorMessage,
 	handleFetchError,
+	logFetchError,
 	type OperationResult,
 	postJsonParams,
 } from "../utils/fetchUtils";
@@ -82,19 +84,78 @@ export const useDeleteResource = (kind: ResourceKind) => {
 	return (name: string) => updateResourceFiles("delete", name, "text/plain");
 };
 
-// `${base}/save`へ名前・内容と、ResourceEncodingProviderのその種類の文字コードを送る（保存で共通）
+// `${base}/save`へ名前・内容と、ResourceEncodingProviderのその種類の文字コードを送る（保存で共通）。
+// overwriteなら読込と同じ探索で見つかったファイルへ上書きし、そうでなければ規定フォルダ基準で新規保存する
 export const useSaveResource = <T>(kind: ResourceKind) => {
 	const updateResourceFiles = useUpdateResourceFiles(kind);
 	const encoding = useResourceEncoding(kind);
-	return (name: string, input: T) =>
-		updateResourceFiles("save", JSON.stringify({ name, encoding, input }));
+	return (name: string, input: T, overwrite = false) =>
+		updateResourceFiles(
+			"save",
+			JSON.stringify({ name, encoding, input, overwrite }),
+		);
 };
 
 // テキスト系リソースの内容を{content}形式で保存する
 export const useSaveResourceContent = (kind: ResourceKind) => {
 	const save = useSaveResource<{ content: string }>(kind);
-	return (name: string, content: string) => save(name, { content });
+	return (name: string, content: string, overwrite = false) =>
+		save(name, { content }, overwrite);
 };
+
+// 開いたファイルの場所。名前が空・見つからない・取得失敗ならnull、取得中はloading
+export const useResourceLocation = (
+	kind: ResourceKind,
+	name: string,
+): { location: ResourceLocation | null; loading: boolean } => {
+	const { apiUrl } = useEnvironment();
+	const [location, setLocation] = useState<ResourceLocation | null>(null);
+	const [loading, setLoading] = useState(name !== "");
+
+	useEffect(() => {
+		if (!name) {
+			setLocation(null);
+			setLoading(false);
+			return;
+		}
+		const controller = new AbortController();
+		setLoading(true);
+		locateResource(apiUrl, kind, name, controller.signal).then((result) => {
+			if (!controller.signal.aborted) {
+				setLocation(result);
+				setLoading(false);
+			}
+		});
+		return () => {
+			controller.abort();
+		};
+	}, [kind, name, apiUrl]);
+
+	return { location, loading };
+};
+
+// 失敗は場所が分からないものとして扱う（保存は規定フォルダ基準の新規保存になる）
+async function locateResource(
+	apiUrl: string,
+	kind: ResourceKind,
+	name: string,
+	signal: AbortSignal,
+): Promise<ResourceLocation | null> {
+	const params = {
+		...postJsonParams(`${apiUrl}${resourceTargets[kind].base}/locate`, {
+			name,
+		}),
+		signal,
+	};
+	try {
+		const response = await fetchData(params);
+		const json = (await response.json()) as Partial<ResourceLocation>;
+		return json.folder === undefined ? null : (json as ResourceLocation);
+	} catch (e) {
+		logFetchError(getErrorMessage(e), params);
+		return null;
+	}
+}
 
 // 名前が空・読込失敗のときの値を作る関数と、応答のJSONから値を作る関数。
 // effectの依存に入るので、モジュールレベルの関数を渡す（hooks-design.md）

@@ -8,7 +8,10 @@ import {
 	useDatasetSettingsData,
 	useSaveDatasetSettings,
 } from "../../../../hooks/useDatasetSettings";
-import type { DatasetSettingKind } from "../../../../hooks/useResourceFiles";
+import {
+	type DatasetSettingKind,
+	useResourceLocation,
+} from "../../../../hooks/useResourceFiles";
 import {
 	type DatasetSetting,
 	type DatasetSettings,
@@ -63,6 +66,10 @@ export function CompareKeySettingsEditDialog(props: {
 	kind: DatasetSettingKind;
 }) {
 	const saveSettings = useSaveDatasetSettings(props.kind);
+	const { location, loading: locationLoading } = useResourceLocation(
+		props.kind,
+		props.fileName,
+	);
 	const [dataSettings, setDataSettings] = useState<DatasetSettings>(
 		props.settings,
 	);
@@ -73,7 +80,9 @@ export function CompareKeySettingsEditDialog(props: {
 			helpLabel="Compare Key Settings"
 			handleDialogClose={props.handleDialogClose}
 			fileName={props.fileName}
-			save={(path) => saveSettings(path, dataSettings)}
+			save={(path, overwrite) => saveSettings(path, dataSettings, overwrite)}
+			location={location}
+			locationLoading={locationLoading}
 			handleSave={props.handleSave}
 		>
 			<SettingTable<DatasetSetting>
