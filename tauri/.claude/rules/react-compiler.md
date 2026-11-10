@@ -1,3 +1,9 @@
+---
+paths:
+  - "src/**/*.ts"
+  - "src/**/*.tsx"
+---
+
 # React Compiler 前提のコーディング規約
 
 `vite.config.ts` の `reactCompilerPreset()` で有効。`@babel/core` は 7 系固定（8 系は compiler 1.0 非対応）。
