@@ -1,3 +1,9 @@
+---
+paths:
+  - "src/**/*.ts"
+  - "src/**/*.tsx"
+---
+
 # コーディングスタイル規約
 
 ## 三項演算子のネスト禁止（Biome `noNestedTernary`）

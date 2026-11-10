@@ -7,12 +7,10 @@ paths:
 # 作業方法
 
 ## バックエンド統合
-- Java プロセス引数は `lib.rs` で設定
 - HTTP API → fetch ユーティリティ、FS操作 → Tauri dialog プラグイン
 
 ## テスト・ファイル拡張子
 テスト: モデル・ユーティリティ → 単体、Context → 統合、コンポーネント → Testing Library
-
 
 | ディレクトリ | 内容 | 拡張子 |
 |---|---|---|

@@ -50,10 +50,14 @@ public record ResourceFile(File baseDir, Set<String> files, Function<String, Opt
         });
     }
 
+    /**
+     * 名前のファイル。ディレクトリ（srcTypeを切り替えた直後のsrc等）はファイルとして扱わない
+     */
     public Optional<Path> select(String target) {
         return this.files.stream().filter(it -> it.equals(target)).findFirst()
                 .map(it -> new File(this.baseDir, it).toPath())
-                .or(() -> this.pathResolver.apply(target));
+                .or(() -> this.pathResolver.apply(target))
+                .filter(Files::isRegularFile);
     }
 
     public List<String> list() {
@@ -103,7 +107,6 @@ public record ResourceFile(File baseDir, Set<String> files, Function<String, Opt
             return Optional.empty();
         }
         return this.select(name)
-                .filter(Files::isRegularFile)
                 .map(it -> {
                     final Path file = it.toAbsolutePath().normalize();
                     final String fileName = file.getFileName().toString();

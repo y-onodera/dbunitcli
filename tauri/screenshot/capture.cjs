@@ -3,9 +3,9 @@
 const { mkdirSync } = require("node:fs");
 const { join } = require("node:path");
 const { chromium } = require("playwright");
+const { button, openApp, topDialog } = require("./common.cjs");
 
 const outDir = process.argv[2];
-const appUrl = "http://localhost:1430/";
 const margin = 8;
 
 async function boxesOf(file, locators) {
@@ -50,21 +50,12 @@ async function shot(page, file, locators, within) {
 // ラベル・入力欄・下の表示・横のボタンをまとめた 1 項目分
 const field = (page, id) => page.locator(`div:has(> label[for="${id}"])`);
 
-const button = (scope, ...labels) =>
-	scope.locator(
-		labels.map((label) => `button[aria-label="${label}"]:visible`).join(","),
-	);
-
 // 入力欄横の ⋮ メニューに並ぶボタン
 const menuButtons = (page) =>
 	button(page, "edit", "generate", "open", "delete", "file", "dir");
 
-// いちばん手前に開いているダイアログ
-const topDialog = (page) => page.locator("dialog[open]").last();
-
 async function openConvertForm(page) {
-	await page.goto(appUrl);
-	await page.getByText("confirm").click();
+	await openApp(page);
 	await page.getByText("Convert", { exact: true }).click();
 	await page.getByText("csvToXlsx").click();
 	await page.locator("#src_setting").waitFor();
