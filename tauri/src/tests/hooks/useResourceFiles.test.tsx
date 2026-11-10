@@ -273,7 +273,7 @@ describe("保存フックのテスト", () => {
 			name: "useSaveXlsxSchema",
 			useSave: () => {
 				const save = useSaveXlsxSchema();
-				return (name) => save(name, xlsxSchema);
+				return (name) => save(name, xlsxSchema, false);
 			},
 			endpoint: "xlsx-schema/save",
 			input: xlsxSchema,
@@ -284,7 +284,7 @@ describe("保存フックのテスト", () => {
 			name: "useSaveFixedColumnDef",
 			useSave: () => {
 				const save = useSaveFixedColumnDef();
-				return (name) => save(name, fixedColumnDef);
+				return (name) => save(name, fixedColumnDef, false);
 			},
 			endpoint: "fixed-column-def/save",
 			input: fixedColumnDef,
@@ -295,7 +295,7 @@ describe("保存フックのテスト", () => {
 			name: "useSaveDatasetSettings",
 			useSave: () => {
 				const save = useSaveDatasetSettings();
-				return (name) => save(name, datasetSettings);
+				return (name) => save(name, datasetSettings, false);
 			},
 			endpoint: "dataset-setting/save",
 			input: datasetSettings,
@@ -319,7 +319,7 @@ describe("保存フックのテスト", () => {
 			name: `useSaveDatasetSettings(${kind})`,
 			useSave: () => {
 				const save = useSaveDatasetSettings(kind);
-				return (name: string) => save(name, datasetSettings);
+				return (name: string) => save(name, datasetSettings, false);
 			},
 			endpoint,
 			input: datasetSettings,
@@ -342,7 +342,7 @@ describe("保存フックのテスト", () => {
 			name: `useSaveResourceContent(${kind})`,
 			useSave: () => {
 				const save = useSaveResourceContent(kind);
-				return (name: string) => save(name, "content");
+				return (name: string) => save(name, "content", false);
 			},
 			endpoint,
 			input: { content: "content" },

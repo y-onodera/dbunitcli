@@ -102,7 +102,6 @@ class TemplateResourceFileControllerTest {
                 HttpRequest.POST("dbunit-cli/template/locate", "{\"name\":\"sample.json\"}"));
         final String templateDir = Paths.get("target/test-temp/workspace/sample/resources/template")
                 .toAbsolutePath().normalize().toString();
-        Assertions.assertTrue(response.contains("\"inDefaultFolder\":true"), response);
         Assertions.assertTrue(response.contains("\"fileName\":\"sample.json\""), response);
         Assertions.assertTrue(response.replace("\\\\", "\\").contains(templateDir), response);
     }

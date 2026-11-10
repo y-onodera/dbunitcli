@@ -2,7 +2,6 @@ import { type ComponentType, useState } from "react";
 import {
 	DialogBody,
 	DialogField,
-	SettingDialog,
 	StatusMessage,
 } from "../../../../components/dialog";
 import { BlueButton } from "../../../../components/element/Button";
@@ -11,7 +10,6 @@ import { useDatasetSrcInfo } from "../../../../context/DatasetSrcInfoProvider";
 import { useJdbcConnectionState } from "../../../../context/JdbcConnectionProvider";
 import {
 	useResourceContent,
-	useResourceLocation,
 	useSaveResourceContent,
 } from "../../../../hooks/useResourceFiles";
 import type { QueryDatasourceType } from "../../../../model/QueryDatasource";
@@ -22,6 +20,7 @@ import {
 import CsvReadInsertDialog from "./CsvReadInsertDialog";
 import { InlinePreviewButton } from "./DatasetTableNamesPreviewButton";
 import type { EditResourceDialogProps } from "./ResourceEditButton";
+import { ResourceSettingDialog } from "./ResourceSettingDialog";
 import SqlTableInsertDialog from "./SqlTableInsertDialog";
 import { useTextareaInsert } from "./useTextareaInsert";
 
@@ -66,10 +65,6 @@ function Dialog(props: SqlEditorDialogProps & { value: string }) {
 	const [showSelector, setShowSelector] = useState(false);
 	const { jdbcValues, connectionOk } = useJdbcConnectionState();
 	const saveDataSource = useSaveResourceContent(props.type);
-	const { location, loading: locationLoading } = useResourceLocation(
-		props.type,
-		props.fileName,
-	);
 
 	const datasetSrcInfo = useDatasetSrcInfo();
 
@@ -113,7 +108,8 @@ function Dialog(props: SqlEditorDialogProps & { value: string }) {
 	}
 
 	return (
-		<SettingDialog
+		<ResourceSettingDialog
+			resourceKind={props.type}
 			title={table ? "Edit Table Definition" : "Edit SQL"}
 			helpCommand="dialogs/sql-editor"
 			helpLabel="Edit SQL / Edit Table Definition"
@@ -121,8 +117,6 @@ function Dialog(props: SqlEditorDialogProps & { value: string }) {
 			handleDialogClose={props.handleDialogClose}
 			fileName={props.fileName}
 			save={(path, overwrite) => saveDataSource(path, content, overwrite)}
-			location={location}
-			locationLoading={locationLoading}
 			handleSave={props.handleSave}
 			footerActions={() => (
 				// 保存せず、編集中の内容をsrcのファイルの代わりにしてプレビューする（settingは適用しない）。
@@ -154,6 +148,6 @@ function Dialog(props: SqlEditorDialogProps & { value: string }) {
 				/>
 			</DialogBody>
 			{showSelector && renderSelector()}
-		</SettingDialog>
+		</ResourceSettingDialog>
 	);
 }

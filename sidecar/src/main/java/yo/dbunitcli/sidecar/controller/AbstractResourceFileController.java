@@ -60,7 +60,6 @@ public abstract class AbstractResourceFileController<DTO extends ResourceSaveReq
                     .add("folder", it.folder())
                     .add("defaultFolder", it.defaultFolder())
                     .add("fileName", it.fileName())
-                    .add("inDefaultFolder", it.inDefaultFolder())
                     .add("defaultFolderHasFile", it.defaultFolderHasFile()));
             return builder.build().toString();
         } catch (final Throwable th) {

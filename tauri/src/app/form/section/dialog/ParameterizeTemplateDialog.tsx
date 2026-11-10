@@ -1,16 +1,12 @@
 import { useState } from "react";
-import {
-	DialogBody,
-	SettingDialog,
-	StatusMessage,
-} from "../../../../components/dialog";
+import { DialogBody, StatusMessage } from "../../../../components/dialog";
 import { TextArea } from "../../../../components/element/Input";
 import {
 	useResourceContent,
-	useResourceLocation,
 	useSaveResourceContent,
 } from "../../../../hooks/useResourceFiles";
 import type { EditResourceDialogProps } from "./ResourceEditButton";
+import { ResourceSettingDialog } from "./ResourceSettingDialog";
 
 export default function ParameterizeTemplateDialog({
 	fileName,
@@ -42,13 +38,10 @@ function Dialog({
 }: EditResourceDialogProps & { content: string }) {
 	const [content, setContent] = useState<string>(initialContent);
 	const saveContent = useSaveResourceContent("parameterizeTemplate");
-	const { location, loading: locationLoading } = useResourceLocation(
-		"parameterizeTemplate",
-		fileName,
-	);
 
 	return (
-		<SettingDialog
+		<ResourceSettingDialog
+			resourceKind={"parameterizeTemplate"}
 			maximizable
 			title="Edit Parameterize Template"
 			helpCommand="dialogs/parameterize-template-edit"
@@ -56,8 +49,6 @@ function Dialog({
 			fileName={fileName}
 			handleDialogClose={handleDialogClose}
 			save={(path, overwrite) => saveContent(path, content, overwrite)}
-			location={location}
-			locationLoading={locationLoading}
 			handleSave={handleSave}
 		>
 			<DialogBody size="md">
@@ -69,6 +60,6 @@ function Dialog({
 					spellCheck={false}
 				/>
 			</DialogBody>
-		</SettingDialog>
+		</ResourceSettingDialog>
 	);
 }

@@ -278,6 +278,7 @@ export function SubqueryColumns({
 					id="sqlSubquery_conjunction"
 					label="Join conditions with"
 					options={CONJUNCTION_OPTIONS}
+					value={conjunction}
 					onChange={setConjunction}
 				/>
 			</DialogField>

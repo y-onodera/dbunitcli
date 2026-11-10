@@ -86,7 +86,6 @@ const OUTSIDE_LOCATION: ResourceLocation = {
 	folder: "/ws/other",
 	defaultFolder: "/ws/resources/sql",
 	fileName: "q.sql",
-	inDefaultFolder: false,
 	defaultFolderHasFile: false,
 };
 
@@ -152,7 +151,6 @@ describe("SettingDialogの保存先の選択のテスト", () => {
 			{
 				...OUTSIDE_LOCATION,
 				folder: "/ws/resources/sql",
-				inDefaultFolder: true,
 			},
 			{ fileName: "q.sql" },
 		);

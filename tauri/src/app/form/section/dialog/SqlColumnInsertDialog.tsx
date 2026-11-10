@@ -248,6 +248,7 @@ export default function SqlColumnInsertDialog({
 								options={
 									queryOnly ? QUERY_COLUMN_USAGE_OPTIONS : COLUMN_USAGE_OPTIONS
 								}
+								value={selectedUsage}
 								onChange={handleUsageChange}
 							/>
 						</DialogField>

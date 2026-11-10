@@ -106,19 +106,17 @@ public record ResourceFile(File baseDir, Set<String> files, Function<String, Opt
                 .filter(Files::isRegularFile)
                 .map(it -> {
                     final Path file = it.toAbsolutePath().normalize();
-                    final Path defaultFolder = this.baseDir.toPath().toAbsolutePath().normalize();
                     final String fileName = file.getFileName().toString();
-                    return new Location(file.getParent().toString(), defaultFolder.toString(), fileName,
-                            defaultFolder.equals(file.getParent()), this.files.contains(fileName));
+                    return new Location(file.getParent().toString(), this.normalizedBaseDir().toString(), fileName,
+                            this.files.contains(fileName));
                 });
     }
 
     /**
-     * folder: 見つかったファイルのフォルダ、defaultFolder: 新規保存先のフォルダ、fileName: ファイル名、
-     * inDefaultFolder: 見つかったファイルがdefaultFolder直下か、defaultFolderHasFile: defaultFolder直下に同名のファイルがあるか
+     * folder: 見つかったファイルのフォルダ、defaultFolder: 新規保存先のフォルダ（どちらも正規化した絶対パス）、
+     * fileName: ファイル名、defaultFolderHasFile: defaultFolder直下に同名のファイルがあるか
      */
-    public record Location(String folder, String defaultFolder, String fileName, boolean inDefaultFolder,
-                           boolean defaultFolderHasFile) {
+    public record Location(String folder, String defaultFolder, String fileName, boolean defaultFolderHasFile) {
     }
 
     public void update(final String name, final byte[] contents) throws IOException {
@@ -137,8 +135,7 @@ public record ResourceFile(File baseDir, Set<String> files, Function<String, Opt
      * @return baseDir直下のファイルだったか
      */
     public boolean deleteIfContains(final File file) throws IOException {
-        final Path parent = file.toPath().toAbsolutePath().normalize().getParent();
-        if (!this.baseDir.toPath().toAbsolutePath().normalize().equals(parent)) {
+        if (!this.isDirectlyInBaseDir(file.toPath())) {
             return false;
         }
         this.delete(file.getName());
@@ -199,6 +196,14 @@ public record ResourceFile(File baseDir, Set<String> files, Function<String, Opt
         }
     }
 
+    private Path normalizedBaseDir() {
+        return this.baseDir.toPath().toAbsolutePath().normalize();
+    }
+
+    private boolean isDirectlyInBaseDir(final Path path) {
+        return this.normalizedBaseDir().equals(path.toAbsolutePath().normalize().getParent());
+    }
+
     private Charset charsetOf(final String encoding) {
         return Charset.forName(EncodingOption.orDefault(encoding, this.defaultCharset));
     }
@@ -212,8 +217,7 @@ public record ResourceFile(File baseDir, Set<String> files, Function<String, Opt
         if (!saveTo.toFile().exists()) {
             Files.createFile(saveTo);
             // 一覧はbaseDir直下のファイル名だけを持つ（サブディレクトリや絶対パスの保存先は名前で引けない）
-            if (this.baseDir.toPath().toAbsolutePath().normalize()
-                    .equals(saveTo.toAbsolutePath().normalize().getParent())) {
+            if (this.isDirectlyInBaseDir(saveTo)) {
                 this.files.add(saveTo.getFileName().toString());
             }
         }

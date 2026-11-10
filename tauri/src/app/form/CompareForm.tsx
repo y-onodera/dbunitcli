@@ -4,7 +4,7 @@ import { DatasetSrcInfoProvider } from "../../context/DatasetSrcInfoProvider";
 import { ResourceEncodingProvider } from "../../context/ResourceEncodingProvider";
 import { buildDatasetSrcInfo } from "../../model/CommandOption";
 import type { CompareOptions } from "../../model/SelectParameter";
-import { useResettableState } from "../../utils/useResettableState";
+import { useSyncedState } from "../../utils/useResettableState";
 import {
 	DatasetLoadForm,
 	datasetSrcInfoResetKey,
@@ -34,9 +34,8 @@ export function CompareForm(prop: {
 	const targetType = prop.compare.targetType.value;
 	const settingElement = prop.compare.setting;
 	const settingEncodingElement = prop.compare.settingEncoding;
-	// 比較キーの設定の編集で読み書きする文字コード（入力中の値）。入力欄と同じく要素の値が変わったら戻す
-	const [settingEncoding, setSettingEncoding] = useResettableState(
-		settingEncodingElement.value,
+	// 比較キーの設定の編集で読み書きする文字コード（入力中の値）
+	const [settingEncoding, setSettingEncoding] = useSyncedState(
 		settingEncodingElement.value,
 	);
 	const createPatchSqlElement = prop.compare.createPatchSql;

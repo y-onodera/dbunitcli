@@ -1,11 +1,6 @@
 import { useState } from "react";
-import {
-	SettingDialog,
-	SettingTable,
-	StatusMessage,
-} from "../../../../components/dialog";
+import { SettingTable, StatusMessage } from "../../../../components/dialog";
 import { useDatasetSrcInfo } from "../../../../context/DatasetSrcInfoProvider";
-import { useResourceLocation } from "../../../../hooks/useResourceFiles";
 import {
 	useSaveXlsxSchema,
 	useXlsxSchemaData,
@@ -18,6 +13,7 @@ import {
 	XlsxSchema,
 } from "../../../../model/XlsxSchema";
 import { SaveAndPreviewButton } from "./DatasetTableNamesPreviewButton";
+import { ResourceSettingDialog } from "./ResourceSettingDialog";
 import XlsxCellSettingDialog from "./XlsxCellSettingDialog";
 import XlsxRowSettingDialog from "./XlsxRowSettingDialog";
 
@@ -46,15 +42,12 @@ export function XlsxSchemaEditDialog(props: {
 	handleSave: (path: string) => void;
 }) {
 	const saveSchema = useSaveXlsxSchema();
-	const { location, loading: locationLoading } = useResourceLocation(
-		"xlsxSchema",
-		props.fileName,
-	);
 	const [xlsxSchema, setXlsxSchema] = useState(props.schema);
 	const datasetSrcInfo = useDatasetSrcInfo();
 
 	return (
-		<SettingDialog
+		<ResourceSettingDialog
+			resourceKind={"xlsxSchema"}
 			title="Xlsx Schema"
 			helpCommand="dialogs/xlsx-schema"
 			helpLabel="Xlsx Schema"
@@ -63,8 +56,6 @@ export function XlsxSchemaEditDialog(props: {
 			save={(fileName, overwrite) =>
 				saveSchema(fileName, xlsxSchema, overwrite)
 			}
-			location={location}
-			locationLoading={locationLoading}
 			handleSave={props.handleSave}
 			footerActions={(saveThen) =>
 				// 保存したファイルをxlsxSchemaに適用してプレビューする（それ以外のsrc要素はフォームのまま）
@@ -102,6 +93,6 @@ export function XlsxSchemaEditDialog(props: {
 				SettingDialogComponent={XlsxCellSettingDialog}
 				newSetting={createCellSetting}
 			/>
-		</SettingDialog>
+		</ResourceSettingDialog>
 	);
 }

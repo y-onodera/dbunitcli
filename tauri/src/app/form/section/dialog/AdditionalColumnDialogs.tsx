@@ -41,6 +41,7 @@ function ColumnExpressionFields({
 					id="function"
 					label="function"
 					options={functionOptions}
+					value={option.fn}
 					onChange={(fn) => setOption((cur) => ({ ...cur, fn }))}
 				/>
 			</DialogField>
@@ -142,6 +143,7 @@ export function ExpressionEditDialog({
 						id="column"
 						label="column"
 						options={columns.map((c) => ({ value: c, label: c }))}
+						value={column}
 						onChange={setColumn}
 					/>
 				</DialogField>
@@ -164,6 +166,7 @@ export function ExpressionEditDialog({
 					id="operator"
 					label="operator"
 					options={expressionOperators}
+					value={operator}
 					onChange={setOperator}
 				/>
 			</DialogField>

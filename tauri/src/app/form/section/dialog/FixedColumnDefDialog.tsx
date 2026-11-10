@@ -1,20 +1,16 @@
 import { useState } from "react";
-import {
-	SettingDialog,
-	SettingTable,
-	StatusMessage,
-} from "../../../../components/dialog";
+import { SettingTable, StatusMessage } from "../../../../components/dialog";
 import {
 	useFixedColumnDefData,
 	useSaveFixedColumnDef,
 } from "../../../../hooks/useFixedColumnDef";
-import { useResourceLocation } from "../../../../hooks/useResourceFiles";
 import {
 	type ColumnDef,
 	createColumnDef,
 	FixedColumnDef,
 } from "../../../../model/FixedColumnDef";
 import ColumnDefSettingDialog from "./ColumnDefSettingDialog";
+import { ResourceSettingDialog } from "./ResourceSettingDialog";
 
 export default function FixedColumnDefDialog(props: {
 	fileName: string;
@@ -42,14 +38,11 @@ export function FixedColumnDefEditDialog(props: {
 	handleSave: (path: string) => void;
 }) {
 	const saveDef = useSaveFixedColumnDef();
-	const { location, loading: locationLoading } = useResourceLocation(
-		"fixedColumnDef",
-		props.fileName,
-	);
 	const [fixedColumnDef, setFixedColumnDef] = useState(props.def);
 
 	return (
-		<SettingDialog
+		<ResourceSettingDialog
+			resourceKind={"fixedColumnDef"}
 			title="Fixed Column Def"
 			helpCommand="dialogs/fixed-column-def"
 			helpLabel="Fixed Column Def"
@@ -58,8 +51,6 @@ export function FixedColumnDefEditDialog(props: {
 			save={(fileName, overwrite) =>
 				saveDef(fileName, fixedColumnDef, overwrite)
 			}
-			location={location}
-			locationLoading={locationLoading}
 			handleSave={props.handleSave}
 		>
 			<SettingTable<ColumnDef>
@@ -71,6 +62,6 @@ export function FixedColumnDefEditDialog(props: {
 				SettingDialogComponent={ColumnDefSettingDialog}
 				newSetting={createColumnDef}
 			/>
-		</SettingDialog>
+		</ResourceSettingDialog>
 	);
 }

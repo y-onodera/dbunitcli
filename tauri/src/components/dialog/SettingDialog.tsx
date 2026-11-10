@@ -25,6 +25,11 @@ import { DialogFooter, DialogTitle } from "./ModalOverlay";
 
 type SaveTarget = "overwrite" | "defaultFolder";
 
+// 開いたファイルが規定フォルダ直下なら、上書きと規定フォルダへの保存は同じになる
+function inDefaultFolder(location: ResourceLocation): boolean {
+	return location.folder === location.defaultFolder;
+}
+
 // 開いたファイルへ上書きするか、規定フォルダへ同じファイル名で保存するか。場所が無い（新規・名前変更）なら入力した名前で新規保存
 function savePathOf(
 	fileName: string,
@@ -34,7 +39,7 @@ function savePathOf(
 	if (location === null) {
 		return { path: fileName, overwrite: false };
 	}
-	if (saveTarget === "defaultFolder" && !location.inDefaultFolder) {
+	if (saveTarget === "defaultFolder" && !inDefaultFolder(location)) {
 		return { path: location.fileName, overwrite: false };
 	}
 	return { path: fileName, overwrite: true };
@@ -71,7 +76,7 @@ function SaveLocationFields({
 			>
 				Opened from: {location.folder}
 			</p>
-			{!location.inDefaultFolder && (
+			{!inDefaultFolder(location) && (
 				<fieldset className="flex flex-col gap-1 pt-1">
 					<label className="flex items-center gap-1">
 						<input
@@ -146,6 +151,7 @@ type FileMode = {
 };
 
 export type SettingDialogProps<T> = CommonProps & (SettingMode<T> | FileMode);
+export type FileSettingDialogProps = CommonProps & FileMode;
 
 export function SettingDialog<T>(props: SettingDialogProps<T>) {
 	const [fileNameValue, setFileNameValue] = useResettableState(

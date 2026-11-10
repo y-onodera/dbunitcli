@@ -259,18 +259,17 @@ class ResourceFileTest {
         assertEquals(other.getParent().toAbsolutePath().normalize().toString(), location.folder());
         assertEquals(this.baseDir().toAbsolutePath().normalize().toString(), location.defaultFolder());
         assertEquals("shared.sql", location.fileName());
-        assertFalse(location.inDefaultFolder());
         assertFalse(location.defaultFolderHasFile());
     }
 
     @Test
-    public void locate_baseDir直下のファイルはinDefaultFolder() throws IOException {
+    public void locate_baseDir直下のファイルはフォルダがdefaultFolderと一致する() throws IOException {
         this.createTestFile("test.json", "{}");
         this.resourceFile = new ResourceFile(this.parentDir, FileResources::searchWorkspace, StandardCharsets.UTF_8);
 
         final ResourceFile.Location location = this.resourceFile.locate("test.json").orElseThrow();
 
-        assertTrue(location.inDefaultFolder());
+        assertEquals(location.defaultFolder(), location.folder());
         assertTrue(location.defaultFolderHasFile());
     }
 

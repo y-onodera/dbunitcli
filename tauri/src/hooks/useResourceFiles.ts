@@ -89,7 +89,7 @@ export const useDeleteResource = (kind: ResourceKind) => {
 export const useSaveResource = <T>(kind: ResourceKind) => {
 	const updateResourceFiles = useUpdateResourceFiles(kind);
 	const encoding = useResourceEncoding(kind);
-	return (name: string, input: T, overwrite = false) =>
+	return (name: string, input: T, overwrite: boolean) =>
 		updateResourceFiles(
 			"save",
 			JSON.stringify({ name, encoding, input, overwrite }),
@@ -99,63 +99,9 @@ export const useSaveResource = <T>(kind: ResourceKind) => {
 // テキスト系リソースの内容を{content}形式で保存する
 export const useSaveResourceContent = (kind: ResourceKind) => {
 	const save = useSaveResource<{ content: string }>(kind);
-	return (name: string, content: string, overwrite = false) =>
+	return (name: string, content: string, overwrite: boolean) =>
 		save(name, { content }, overwrite);
 };
-
-// 開いたファイルの場所。名前が空・見つからない・取得失敗ならnull、取得中はloading
-export const useResourceLocation = (
-	kind: ResourceKind,
-	name: string,
-): { location: ResourceLocation | null; loading: boolean } => {
-	const { apiUrl } = useEnvironment();
-	const [location, setLocation] = useState<ResourceLocation | null>(null);
-	const [loading, setLoading] = useState(name !== "");
-
-	useEffect(() => {
-		if (!name) {
-			setLocation(null);
-			setLoading(false);
-			return;
-		}
-		const controller = new AbortController();
-		setLoading(true);
-		locateResource(apiUrl, kind, name, controller.signal).then((result) => {
-			if (!controller.signal.aborted) {
-				setLocation(result);
-				setLoading(false);
-			}
-		});
-		return () => {
-			controller.abort();
-		};
-	}, [kind, name, apiUrl]);
-
-	return { location, loading };
-};
-
-// 失敗は場所が分からないものとして扱う（保存は規定フォルダ基準の新規保存になる）
-async function locateResource(
-	apiUrl: string,
-	kind: ResourceKind,
-	name: string,
-	signal: AbortSignal,
-): Promise<ResourceLocation | null> {
-	const params = {
-		...postJsonParams(`${apiUrl}${resourceTargets[kind].base}/locate`, {
-			name,
-		}),
-		signal,
-	};
-	try {
-		const response = await fetchData(params);
-		const json = (await response.json()) as Partial<ResourceLocation>;
-		return json.folder === undefined ? null : (json as ResourceLocation);
-	} catch (e) {
-		logFetchError(getErrorMessage(e), params);
-		return null;
-	}
-}
 
 // 名前が空・読込失敗のときの値を作る関数と、応答のJSONから値を作る関数。
 // effectの依存に入るので、モジュールレベルの関数を渡す（hooks-design.md）
@@ -164,14 +110,20 @@ export type ResourceParser<T> = {
 	parse: (json: unknown) => T;
 };
 
-// `${base}/load`へ名前を送り、応答をparserで変換して返す。名前を変えたり離れたりしたら読込を中断する
-export const useResourceLoad = <T>(
+// 失敗の知らせ方。effectの依存に入るので、モジュールレベルの関数を渡す
+type FailureReporter = typeof handleFetchError;
+
+// `${base}/${action}`へ名前（とencoding）を送り、応答をparserで変換して返す。
+// 名前が空なら問い合わせずparser.empty。名前を変えたり離れたりしたら中断する
+const useResourceRequest = <T>(
 	kind: ResourceKind,
+	action: string,
 	name: string,
+	encoding: string | undefined,
 	parser: ResourceParser<T>,
+	reportFailure: FailureReporter,
 ): { data: T; loading: boolean } => {
 	const { apiUrl } = useEnvironment();
-	const encoding = useResourceEncoding(kind);
 	const [data, setData] = useState(parser.empty);
 	const [loading, setLoading] = useState(name !== "");
 
@@ -183,47 +135,83 @@ export const useResourceLoad = <T>(
 		}
 		const controller = new AbortController();
 		setLoading(true);
-		loadResource(apiUrl, kind, name, encoding, parser, controller.signal).then(
-			(result) => {
-				if (!controller.signal.aborted) {
-					setData(result);
-					setLoading(false);
-				}
-			},
-		);
+		requestResource(
+			`${apiUrl}${resourceTargets[kind].base}/${action}`,
+			encoding === undefined ? { name } : { name, encoding },
+			parser,
+			reportFailure,
+			controller.signal,
+		).then((result) => {
+			if (!controller.signal.aborted) {
+				setData(result);
+				setLoading(false);
+			}
+		});
 		return () => {
 			controller.abort();
 		};
-	}, [kind, name, apiUrl, encoding, parser]);
+	}, [kind, action, name, apiUrl, encoding, parser, reportFailure]);
 
 	return { data, loading };
 };
 
-// 失敗はalertで知らせて空の値を返す
-async function loadResource<T>(
-	apiUrl: string,
-	kind: ResourceKind,
-	name: string,
-	encoding: string,
+// 失敗はreportFailureで知らせて空の値を返す
+async function requestResource<T>(
+	endpoint: string,
+	body: object,
 	parser: ResourceParser<T>,
+	reportFailure: FailureReporter,
 	signal: AbortSignal,
 ): Promise<T> {
-	// encodingはコマンド実行時にそのファイルを読む文字コード
-	const params = {
-		...postJsonParams(`${apiUrl}${resourceTargets[kind].base}/load`, {
-			name,
-			encoding,
-		}),
-		signal,
-	};
+	const params = { ...postJsonParams(endpoint, body), signal };
 	try {
 		const response = await fetchData(params);
 		return parser.parse(await response.json());
 	} catch (e) {
-		handleFetchError(getErrorMessage(e), params);
+		reportFailure(getErrorMessage(e), params);
 		return parser.empty();
 	}
 }
+
+// `${base}/load`へ名前と文字コード（コマンド実行時にそのファイルを読む文字コード）を送って読み込む。失敗はalertで知らせる
+export const useResourceLoad = <T>(
+	kind: ResourceKind,
+	name: string,
+	parser: ResourceParser<T>,
+): { data: T; loading: boolean } =>
+	useResourceRequest(
+		kind,
+		"load",
+		name,
+		useResourceEncoding(kind),
+		parser,
+		handleFetchError,
+	);
+
+// 見つからない（{}）ならnull
+const LOCATION_PARSER: ResourceParser<ResourceLocation | null> = {
+	empty: () => null,
+	parse: (json) =>
+		(json as Partial<ResourceLocation>).folder === undefined
+			? null
+			: (json as ResourceLocation),
+};
+
+// 開いたファイルの場所。名前が空・見つからない・取得失敗ならnull（保存は規定フォルダ基準の新規保存になる）
+export const useResourceLocation = (
+	kind: ResourceKind,
+	name: string,
+): { location: ResourceLocation | null; loading: boolean } => {
+	const { data, loading } = useResourceRequest(
+		kind,
+		"locate",
+		name,
+		undefined,
+		LOCATION_PARSER,
+		logFetchError,
+	);
+	return { location: data, loading };
+};
 
 const CONTENT_PARSER: ResourceParser<string> = {
 	empty: () => "",

@@ -8,10 +8,7 @@ import {
 	useDatasetSettingsData,
 	useSaveDatasetSettings,
 } from "../../../../hooks/useDatasetSettings";
-import {
-	type DatasetSettingKind,
-	useResourceLocation,
-} from "../../../../hooks/useResourceFiles";
+import type { DatasetSettingKind } from "../../../../hooks/useResourceFiles";
 import {
 	type DatasetSetting,
 	type DatasetSettings,
@@ -19,6 +16,7 @@ import {
 } from "../../../../model/DatasetSettings";
 import ColumnDatalistDialog from "./ColumnDatalistDialog";
 import { FilterOrderFields, TargetFields } from "./DatasetSettingFields";
+import { ResourceSettingDialog } from "./ResourceSettingDialog";
 import { useColumnCandidates } from "./useColumnCandidates";
 
 const keysOnly = ["keys"] as const;
@@ -66,23 +64,18 @@ export function CompareKeySettingsEditDialog(props: {
 	kind: DatasetSettingKind;
 }) {
 	const saveSettings = useSaveDatasetSettings(props.kind);
-	const { location, loading: locationLoading } = useResourceLocation(
-		props.kind,
-		props.fileName,
-	);
 	const [dataSettings, setDataSettings] = useState<DatasetSettings>(
 		props.settings,
 	);
 	return (
-		<SettingDialog
+		<ResourceSettingDialog
+			resourceKind={props.kind}
 			title="Compare Key Settings"
 			helpCommand="dialogs/compare-key-settings"
 			helpLabel="Compare Key Settings"
 			handleDialogClose={props.handleDialogClose}
 			fileName={props.fileName}
 			save={(path, overwrite) => saveSettings(path, dataSettings, overwrite)}
-			location={location}
-			locationLoading={locationLoading}
 			handleSave={props.handleSave}
 		>
 			<SettingTable<DatasetSetting>
@@ -109,7 +102,7 @@ export function CompareKeySettingsEditDialog(props: {
 				SettingDialogComponent={CompareKeySettingDialog}
 				newSetting={newDatasetSetting}
 			/>
-		</SettingDialog>
+		</ResourceSettingDialog>
 	);
 }
 

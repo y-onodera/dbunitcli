@@ -4,7 +4,6 @@ import {
 	Fieldset,
 	type SaveThen,
 	Select,
-	SettingDialog,
 	SettingTable,
 	StatusMessage,
 	Text,
@@ -18,10 +17,7 @@ import {
 	useDatasetSettingsData,
 	useSaveDatasetSettings,
 } from "../../../../hooks/useDatasetSettings";
-import {
-	type DatasetSettingKind,
-	useResourceLocation,
-} from "../../../../hooks/useResourceFiles";
+import type { DatasetSettingKind } from "../../../../hooks/useResourceFiles";
 import { srcTypeOf, withValues } from "../../../../model/CommandOption";
 import type {
 	DatasetSetting,
@@ -35,6 +31,7 @@ import {
 import { removeArray, replaceArray } from "../../../../utils/arrayUtils";
 import DatasetSettingDialog from "./DatasetSettingDialog";
 import { SaveAndPreviewButton } from "./DatasetTableNamesPreviewButton";
+import { ResourceSettingDialog } from "./ResourceSettingDialog";
 
 // kind: 読込・保存先のリソース
 export default function DatasetSettingsDialog(props: {
@@ -73,24 +70,19 @@ export function DatasetSettingsEditDialog(props: {
 	kind: DatasetSettingKind;
 }) {
 	const saveSettings = useSaveDatasetSettings(props.kind);
-	const { location, loading: locationLoading } = useResourceLocation(
-		props.kind,
-		props.fileName,
-	);
 	const [dataSettings, setDataSettings] = useState<DatasetSettings>(
 		props.settings,
 	);
 	const datasetSrcInfo = useDatasetSrcInfo();
 	return (
-		<SettingDialog
+		<ResourceSettingDialog
+			resourceKind={props.kind}
 			title="Dataset Settings"
 			helpCommand="dialogs/dataset-settings"
 			helpLabel="Dataset Settings"
 			handleDialogClose={props.handleDialogClose}
 			fileName={props.fileName}
 			save={(path, overwrite) => saveSettings(path, dataSettings, overwrite)}
-			location={location}
-			locationLoading={locationLoading}
 			handleSave={props.handleSave}
 			footerActions={
 				props.saveAndPreview ??
@@ -142,7 +134,7 @@ export function DatasetSettingsEditDialog(props: {
 					setDataSettings((cur) => cur.replaceImports(imports))
 				}
 			/>
-		</SettingDialog>
+		</ResourceSettingDialog>
 	);
 }
 
