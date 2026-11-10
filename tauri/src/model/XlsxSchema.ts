@@ -173,7 +173,9 @@ export class XlsxSchema {
 	// sheetPatternはcoreの形式(トップレベルのpatternsに登録し、sheetNameでそのキーを参照する)にして保存する
 	toJSON() {
 		const patterns: Record<string, SheetPattern> = {};
-		const toSaved = <T extends SheetTarget>(settings: T[]) =>
+		const toSaved = <T extends SheetTarget & CommaSeparatedFields>(
+			settings: T[],
+		) =>
 			settings.flatMap(({ sheetPattern, ...rest }) => {
 				const sheet = savedSheet({ ...rest, sheetPattern });
 				if (!rest.tableName || !sheet.sheetName) {
@@ -213,26 +215,31 @@ type SheetTarget = {
 	tableName: string;
 };
 
+// カンマ区切りで入力する項目
+type CommaSeparatedFields = {
+	header: string[];
+	columnIndex?: string[];
+	breakKey?: string[];
+	rows?: { cellAddress: string[] }[];
+};
+
+function nonBlank(values: string[]): string[] {
+	return values.filter((it) => it !== "");
+}
+
 // カンマ区切りの入力欄を空にすると[""]になるため、空文字の要素と、セル番地が空になったrowsの要素は保存しない
-function withoutBlankEntries<T extends object>(setting: T): T {
-	const result: Record<string, unknown> = {
-		...(setting as Record<string, unknown>),
+function withoutBlankEntries<T extends CommaSeparatedFields>(setting: T): T {
+	return {
+		...setting,
+		header: nonBlank(setting.header),
+		...(setting.columnIndex && { columnIndex: nonBlank(setting.columnIndex) }),
+		...(setting.breakKey && { breakKey: nonBlank(setting.breakKey) }),
+		...(setting.rows && {
+			rows: setting.rows
+				.map((row) => ({ cellAddress: nonBlank(row.cellAddress) }))
+				.filter((row) => row.cellAddress.length > 0),
+		}),
 	};
-	for (const key of ["header", "columnIndex", "breakKey"]) {
-		const values = result[key];
-		if (Array.isArray(values)) {
-			result[key] = values.filter((it) => it !== "");
-		}
-	}
-	const rows = result.rows;
-	if (Array.isArray(rows)) {
-		result.rows = rows
-			.map((row: { cellAddress: string[] }) => ({
-				cellAddress: row.cellAddress.filter((it) => it !== ""),
-			}))
-			.filter((row) => row.cellAddress.length > 0);
-	}
-	return result as T;
 }
 
 // 保存するsheetName(パターン指定ならpatternsのキー)と、patternsに登録するパターン。未指定ならsheetNameは空文字

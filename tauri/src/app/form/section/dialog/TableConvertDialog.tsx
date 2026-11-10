@@ -9,7 +9,7 @@ import { BlueButton, WhiteButton } from "../../../../components/element/Button";
 import type { JobContext } from "../../../../hooks/useJob";
 import type { ConvertOptions } from "../../../../model/SelectParameter";
 import type { FormValues } from "../../../../utils/formValues";
-import { openDirectory } from "../element/Chooser";
+import { openDirectory } from "../../../../utils/openDirectory";
 import ResultFormSection from "../ResultFormSection";
 import { RefreshableDialogShell } from "./RefreshableDialogShell";
 import { useRefreshableDialog } from "./useRefreshableDialog";

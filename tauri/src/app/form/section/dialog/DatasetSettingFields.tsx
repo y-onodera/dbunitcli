@@ -17,6 +17,7 @@ import { ResourceDatalist } from "../../../../components/element/Input";
 import type {
 	DatasetSetting,
 	DatasetSettingMode,
+	JoinCondition,
 } from "../../../../model/DatasetSettings";
 import { newDatasetSetting } from "../../../../model/DatasetSettings";
 import {
@@ -520,11 +521,6 @@ function ModeContent({
 	);
 }
 
-// onを選んだ直後の空文字もonとして扱う
-function usesJoinOn(target: DatasetSetting): boolean {
-	return target.join()?.on !== undefined;
-}
-
 function TargetContent({
 	target,
 	setTarget,
@@ -571,21 +567,15 @@ function TargetContent({
 				/>
 				<Select
 					name="condition"
-					defaultValue={usesJoinOn(target) ? "on" : "column"}
+					defaultValue={target.joinCondition()}
 					handleOnChange={async (select) =>
-						setTarget((cur) =>
-							cur.replaceJoin(
-								select === "on"
-									? { on: "", column: undefined }
-									: { on: undefined, column: [] },
-							),
-						)
+						setTarget((cur) => cur.selectJoinCondition(select as JoinCondition))
 					}
 				>
 					<option value="on">on</option>
 					<option value="column">column</option>
 				</Select>
-				{usesJoinOn(target) ? (
+				{target.joinCondition() === "on" ? (
 					<Text
 						name="on"
 						ignoreLabel={true}

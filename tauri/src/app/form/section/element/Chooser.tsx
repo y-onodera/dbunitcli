@@ -1,4 +1,3 @@
-import { core } from "@tauri-apps/api";
 import { sep } from "@tauri-apps/api/path";
 import { open } from "@tauri-apps/plugin-dialog";
 import { useEffect, useRef } from "react";
@@ -10,6 +9,7 @@ import {
 import { useWorkspaceContext } from "../../../../context/WorkspaceResourcesProvider";
 import { useResolveAbsolutePath } from "../../../../hooks/useWorkspaceResources";
 import { reportError } from "../../../../utils/fetchUtils";
+import { openDirectory } from "../../../../utils/openDirectory";
 import type { FileProp } from "./FormElementProp";
 
 function useChooserHandler(prop: FileProp, directory?: boolean) {
@@ -25,42 +25,30 @@ function useChooserHandler(prop: FileProp, directory?: boolean) {
 	}, []);
 	return () => {
 		const basePath = context.getPath(prop.element.attribute.defaultPath);
-		const workspacePath = context.workspace;
 		resolveAbsolutePath(prop.path, prop.element.attribute)
-			.then((defaultPath) =>
-				open({ defaultPath, directory }).then((files) => {
-					if (files && !abortControllerRef.current?.signal.aborted) {
-						const fullPath = files as string;
-						const primaryPrefix = basePath + sep();
-						const secondaryPrefix = workspacePath + sep();
-						let relative: string;
-						// basePathが空だとprimaryPrefixがsepだけになり、絶対パスの先頭を削ってしまう
-						if (basePath !== "" && fullPath.startsWith(primaryPrefix)) {
-							relative = fullPath.slice(primaryPrefix.length);
-						} else if (
-							workspacePath !== "" &&
-							workspacePath !== basePath &&
-							fullPath.startsWith(secondaryPrefix)
-						) {
-							relative = fullPath.slice(secondaryPrefix.length);
-						} else {
-							relative = fullPath;
-						}
-						prop.setPath(relative);
-						prop.onSelect?.();
-					}
-				}),
-			)
+			.then((defaultPath) => open({ defaultPath, directory }))
+			.then((files) => {
+				if (files && !abortControllerRef.current?.signal.aborted) {
+					const fullPath = files as string;
+					prop.setPath(
+						relativeTo(fullPath, basePath) ??
+							relativeTo(fullPath, context.workspace) ??
+							fullPath,
+					);
+					prop.onSelect?.();
+				}
+			})
 			.catch((ex) => reportError("Failed to choose a file", ex));
 	};
 }
 
-export async function openDirectory(path: string): Promise<void> {
-	try {
-		await core.invoke("open_directory", { path });
-	} catch (ex) {
-		reportError("Failed to open directory", ex);
+// baseの配下ならbaseからの相対パス、そうでなければundefined。baseが空なら相対化しない
+function relativeTo(fullPath: string, base: string): string | undefined {
+	const prefix = base + sep();
+	if (base === "" || !fullPath.startsWith(prefix)) {
+		return undefined;
 	}
+	return fullPath.slice(prefix.length);
 }
 
 export function FileChooser(prop: FileProp) {

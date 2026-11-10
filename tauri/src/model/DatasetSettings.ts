@@ -19,6 +19,7 @@ export type TableJoin = {
 	filePath?: string;
 	rightFilePath?: string;
 };
+export type JoinCondition = "on" | "column";
 export type Split = {
 	prefix?: string;
 	tableName?: string;
@@ -624,6 +625,19 @@ export class DatasetSetting {
 	join(): TableJoin | undefined {
 		return this.innerJoin || this.outerJoin || this.fullJoin;
 	}
+
+	// onとcolumnは一方だけを使う。onを選んだ直後の空文字もonとして扱う
+	joinCondition(): JoinCondition {
+		return this.join()?.on !== undefined ? "on" : "column";
+	}
+
+	selectJoinCondition(condition: JoinCondition): DatasetSetting {
+		return this.replaceJoin(
+			condition === "on"
+				? { on: "", column: undefined }
+				: { on: undefined, column: [] },
+		);
+	}
 }
 function target(setting: DatasetSetting): string {
 	if (setting.name) {
@@ -641,7 +655,9 @@ function target(setting: DatasetSetting): string {
 	}
 	const join = setting.join();
 	if (join) {
-		return `${setting.handler()} :${join.left} ${join.right} on ${join.column?.join(",") ?? join.on}`;
+		const condition =
+			setting.joinCondition() === "on" ? join.on : join.column?.join(",");
+		return `${setting.handler()} :${join.left} ${join.right} on ${condition}`;
 	}
 	return "";
 }

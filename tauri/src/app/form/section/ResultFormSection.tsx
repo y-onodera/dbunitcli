@@ -5,7 +5,7 @@ import EncodingText from "./element/EncodingText";
 import FileText from "./element/FileText";
 import FixedColumnDefText from "./element/FixedColumnDefText";
 import PlainText from "./element/PlainText";
-import Select from "./element/Select";
+import Select, { ignoreSelect } from "./element/Select";
 import JdbcFormSection from "./JdbcFormSection";
 
 const EXCEL_TABLE_TYPES = ["SHEET", "BOOK"];
@@ -21,9 +21,6 @@ function excelTableElement(excelTable: CommandOption): CommandOption {
 		attribute: { ...excelTable.attribute, selectOption },
 	};
 }
-
-// 選択値はフォームの値として送るだけで、再構成は要らない
-async function ignoreSelect(_: string): Promise<void> {}
 
 export default function ResultFormSection({
 	resultOption,

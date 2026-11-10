@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { type RefObject, useEffect, useRef, useState } from "react";
 import { useEnvironment } from "../../../../context/EnvironmentProvider";
 import { type JobContext, useJob } from "../../../../hooks/useJob";
 import {
@@ -18,6 +18,14 @@ function addGenerateType(
 	generateType: string | undefined,
 ): FormValues {
 	return generateType ? { ...values, "-generateType": generateType } : values;
+}
+
+// 前の読込を中断し、新しい読込のsignalを返す
+function renewController(ref: RefObject<AbortController | null>): AbortSignal {
+	ref.current?.abort();
+	const controller = new AbortController();
+	ref.current = controller;
+	return controller.signal;
 }
 
 type RefreshableDialogOptions = {
@@ -45,14 +53,11 @@ export function useRefreshableDialog<OPTIONS>({
 	const loadControllerRef = useRef<AbortController | null>(null);
 
 	useEffect(() => {
-		loadControllerRef.current?.abort();
-		const controller = new AbortController();
-		loadControllerRef.current = controller;
 		refreshDialogOptions(
 			apiUrl,
 			refreshEndpoint,
 			addGenerateType(initialValues, generateType),
-			controller.signal,
+			renewController(loadControllerRef),
 			setLoadState,
 		);
 		return () => {
@@ -64,14 +69,11 @@ export function useRefreshableDialog<OPTIONS>({
 		addGenerateType(values, generateType);
 
 	const refresh = async () => {
-		loadControllerRef.current?.abort();
-		const controller = new AbortController();
-		loadControllerRef.current = controller;
 		await refreshDialogOptions(
 			apiUrl,
 			refreshEndpoint,
 			withGenerateType(collectFormValues(formId, false).values),
-			controller.signal,
+			renewController(loadControllerRef),
 			setLoadState,
 		);
 	};
