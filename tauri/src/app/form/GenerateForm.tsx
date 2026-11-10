@@ -1,8 +1,8 @@
-import { useState } from "react";
 import { SectionFieldset } from "../../components/dialog";
 import { SectionLegend } from "../../components/dialog/SectionFieldset";
 import { ResourceEncodingProvider } from "../../context/ResourceEncodingProvider";
 import type { GenerateOptions } from "../../model/SelectParameter";
+import { useResettableState } from "../../utils/useResettableState";
 import {
 	DatasetLoadForm,
 	DatasetSrcInfoScope,
@@ -45,9 +45,11 @@ export function GenerateForm(prop: {
 				<XlsxTemplateGenerateButton key="generate" setPath={setPath} />,
 			]
 		: undefined;
-	// unitSettingの編集・プレビューで読む文字コード（入力中の値）
-	const [unitSettingEncoding, setUnitSettingEncoding] = useState(
-		generate.unitSettingEncoding?.value ?? "",
+	// unitSettingの編集・プレビューで読む文字コード（入力中の値）。入力欄と同じく要素の値が変わったら戻す
+	const unitSettingEncodingValue = generate.unitSettingEncoding?.value ?? "";
+	const [unitSettingEncoding, setUnitSettingEncoding] = useResettableState(
+		unitSettingEncodingValue,
+		unitSettingEncodingValue,
 	);
 	const templateEncoding = useTemplateEncoding(generate.templateOption);
 	// srcの入力値はsrcフォームとunitSettingの編集・プレビューで共有する

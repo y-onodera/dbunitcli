@@ -16,11 +16,26 @@ import JdbcPropertiesTextField from "./element/JdbcPropertiesTextField";
 import JdbcUrlTextField from "./element/JdbcUrlTextField";
 import PlainText from "./element/PlainText";
 
+// 入力欄（Text）はjdbcOptionの値が変わると表示をその値へ戻すため、テスト・保存に使う写しも作り直す
 export default function JdbcFormSection({
 	jdbcOption,
 }: {
 	jdbcOption: JdbcOption;
 }) {
+	return (
+		<JdbcFormSectionContent
+			key={JSON.stringify([
+				jdbcOption.jdbcUrl.value,
+				jdbcOption.jdbcUser.value,
+				jdbcOption.jdbcPass.value,
+				jdbcOption.jdbcProperties.value,
+			])}
+			jdbcOption={jdbcOption}
+		/>
+	);
+}
+
+function JdbcFormSectionContent({ jdbcOption }: { jdbcOption: JdbcOption }) {
 	const { prefix } = jdbcOption;
 	const setJdbcConnection = useSetJdbcConnectionState();
 	const [jdbcValues, setJdbcValues] = useState<Record<string, string>>(() => ({

@@ -350,7 +350,7 @@ id | status   | mark
   <p><code>filter</code> では、カラム名ではなくカラムを参照する式（<code>get('カラム名')</code>）を設定します。Select Columns ダイアログで <code>function</code> も選べます（指定の仕方は Additional Columns の「読み込んだカラムの反映」と同じ。例: startsWith を選ぶと <code>get('区分').startsWith('SALE')</code>）。複数選んだ場合の行への入り方は上と同じで、filter の行は AND で組み合わさります。</p>
 
   <h3>filter の式の編集</h3>
-  <p><code>filter</code> の各行の右にある edit で、式をテキストエリアで編集するダイアログを開きます。値が空の行でも使えます。演算子・カラムの挿入の仕方は Additional Columns の edit ボタンと同じです。Apply で行に反映します。他の行と同じ式になる場合は反映されません。</p>
+  <p><code>filter</code> の各行の右にある edit で、式をテキストエリアで編集するダイアログを開きます。値が空の行でも使えます。演算子・カラムの挿入の仕方は Additional Columns の edit ボタンと同じです。Apply で行に反映します。他の行と同じ式になる場合はダイアログにエラーを表示し、Apply を押せません。</p>
 
   <h3>変化の例</h3>
 

@@ -11,24 +11,22 @@ import {
 } from "../../../../hooks/useResourceFiles";
 import type { EditResourceDialogProps } from "./ResourceEditButton";
 
-function extractFileNameFromTemplatePath(templatePath: string): string {
-	return templatePath.replace(/\\/g, "/").split("/").pop() ?? templatePath;
-}
-
 export default function ParameterizeTemplateDialog({
 	fileName,
 	handleDialogClose,
 	handleSave,
 }: EditResourceDialogProps) {
-	const name = extractFileNameFromTemplatePath(fileName);
-	const { content, loading } = useResourceContent("parameterizeTemplate", name);
+	const { content, loading } = useResourceContent(
+		"parameterizeTemplate",
+		fileName,
+	);
 	if (loading) {
 		return <StatusMessage kind="loading">Loading...</StatusMessage>;
 	}
 	return (
 		<Dialog
 			content={content}
-			fileName={name}
+			fileName={fileName}
 			handleDialogClose={handleDialogClose}
 			handleSave={handleSave}
 		/>

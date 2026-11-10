@@ -259,12 +259,14 @@ export default function SqlColumnInsertDialog({
 									id="sqlColumnInsert_scalarSource"
 									label="Source"
 									options={SCALAR_SOURCE_OPTIONS}
+									value={scalarSource}
 									onChange={setScalarSource}
 								/>
 								<OptionSelect
 									id="sqlColumnInsert_scalarPlace"
 									label="Place in"
 									options={SCALAR_PLACE_OPTIONS}
+									value={scalarPlace}
 									onChange={setScalarPlace}
 								/>
 							</div>
@@ -277,6 +279,7 @@ export default function SqlColumnInsertDialog({
 									id="sqlColumnInsert_operator"
 									label="Operator"
 									options={OPERATOR_OPTIONS}
+									value={operator}
 									onChange={handleOperatorChange}
 								/>
 								<OptionCheck
@@ -326,6 +329,7 @@ export default function SqlColumnInsertDialog({
 									id="sqlColumnInsert_inSource"
 									label="IN source"
 									options={IN_SOURCE_OPTIONS}
+									value={inSource}
 									onChange={setInSource}
 								/>
 								{inSource === "values" && (
@@ -346,6 +350,7 @@ export default function SqlColumnInsertDialog({
 									id="sqlColumnInsert_conjunction"
 									label="Join columns with"
 									options={CONJUNCTION_OPTIONS}
+									value={conjunction}
 									onChange={setConjunction}
 								/>
 								<OptionCheck
@@ -363,6 +368,7 @@ export default function SqlColumnInsertDialog({
 								id="sqlColumnInsert_connector"
 								label="Connect to main query"
 								options={CONNECTOR_OPTIONS}
+								value={connector}
 								onChange={setConnector}
 							/>
 						</DialogField>

@@ -13,6 +13,9 @@ import TemplateFormSection, {
 } from "./section/TemplateFormSection";
 import TraversalFormSection from "./section/TraversalFormSection";
 
+// runは入力値を他の欄で使わないため、値の変化を追わない
+const ignoreValueChange = () => () => {};
+
 export function RunForm(prop: {
 	handleTypeSelect: () => Promise<void>;
 	name: string;
@@ -40,12 +43,12 @@ export function RunForm(prop: {
 						srcElements={run.srcData}
 						srcType={run.scriptType.value === "sql" ? "sql" : undefined}
 						jdbcOption={run.jdbcOption}
-						handleValueChange={() => (_: string) => {}}
+						handleValueChange={ignoreValueChange}
 					/>
 					<TraversalFormSection
 						srcElements={run.srcData}
-						handleValueChange={() => (_: string) => {}}
-						handleToggleChecked={() => (_: boolean) => {}}
+						handleValueChange={ignoreValueChange}
+						handleToggleChecked={ignoreValueChange}
 					/>
 					{run.templateOption && (
 						<TemplateFormSection
@@ -58,19 +61,9 @@ export function RunForm(prop: {
 			</ResourceEncodingProvider>
 			{!run.jdbcOption && (
 				<>
-					<FileText
-						prefix=""
-						element={run.baseDir as CommandOption}
-						handleValueChange={() => {}}
-						hidden={false}
-					/>
+					<FileText prefix="" element={run.baseDir as CommandOption} />
 					{run.scriptType.value === "ant" && (
-						<PlainText
-							prefix=""
-							element={run.antTarget as CommandOption}
-							handleValueChange={() => {}}
-							hidden={false}
-						/>
+						<PlainText prefix="" element={run.antTarget as CommandOption} />
 					)}
 				</>
 			)}
