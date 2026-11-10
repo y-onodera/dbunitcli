@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { SectionHelpButton } from "../../components/dialog";
 import { BlueButton, WhiteButton } from "../../components/element/Button";
 import { BlueEditButton } from "../../components/element/ButtonIcon";
@@ -37,10 +37,6 @@ export default function Footer(prop: {
 	const saveParameter = useSaveParameter();
 	const execParameter = useExecParameter();
 	const saveShell = useSaveShell();
-
-	useEffect(() => {
-		setParamInputs(parameter?.inputParam ?? {});
-	}, [parameter?.inputParam, setParamInputs]);
 
 	// 失敗は例外ではなくRunning（failed）で返り、結果ダイアログに表示する
 	const run = async (
