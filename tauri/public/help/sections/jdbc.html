@@ -55,10 +55,10 @@ pass=app_password</pre>
     <tr><td>postgres</td><td>5432</td><td>jdbc:postgresql://{host}:{port}/{serviceName}</td></tr>
     <tr><td>h2</td><td>9092</td><td>jdbc:h2:tcp://{host}:{port}/{serviceName}</td></tr>
   </table>
-  <p>Database ラベル（Service Name / Database Name）は RDB 種別に応じて切り替わります（Oracle は Service Name、PostgreSQL / H2 は Database Name）。既存 URL を開いた場合、Builder はその URL を解析してフォーム項目を初期値に復元します。</p>
+  <p>Database ラベル（Service Name / Database Name）は RDB 種別に応じて切り替わります（Oracle は Service Name、PostgreSQL / H2 は Database Name）。既存 URL を開いた場合、Builder はその URL を解析してフォーム項目を初期値に復元します。上記以外の URL など解析できない URL のときは警告を表示し、Apply すると組み立てた URL で置き換えます。</p>
 
   <h2 id="section-connection-test">Connection Test</h2>
-  <p>フォーム下部の <code>Connection Test</code> ボタンを押すと実際に接続を試し、結果（成功 / 失敗メッセージ）を隣に表示します。以下のいずれかが揃っていると押下可能です。</p>
+  <p>フォーム下部の <code>Connection Test</code> ボタンを押すと実際に接続を試し、結果（成功 / 失敗メッセージ）を隣に表示します。テスト後に接続情報を変更すると結果は消え、再度テストするまで接続済みとして扱いません。以下のいずれかが揃っていると押下可能です。</p>
   <ul>
     <li><code>jdbcUrl</code> + <code>jdbcUser</code> + <code>jdbcPass</code> がすべて入力されている</li>
     <li><code>jdbcProperties</code> が選択されている</li>

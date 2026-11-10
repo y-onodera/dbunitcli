@@ -143,7 +143,7 @@ export function DatasetLoadForm(prop: {
 	handleTypeSelect: () => Promise<void>;
 	name: string;
 	srcData: DatasetSource;
-	defalutType?: SrcType;
+	defaultType?: SrcType;
 	helpCommand?: string;
 	helpLabel?: string;
 	// trueなら自前のDatasetSrcInfoScopeを作らず、親のものへ入力値を反映する
@@ -171,7 +171,7 @@ export function DatasetLoadForm(prop: {
 		<DatasetLoadFormContent
 			srcData={prop.srcData}
 			handleTypeSelect={prop.handleTypeSelect}
-			defaultType={prop.defalutType}
+			defaultType={prop.defaultType}
 			helpCommand={prop.helpCommand}
 			helpLabel={prop.helpLabel}
 		/>

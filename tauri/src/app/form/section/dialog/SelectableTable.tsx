@@ -29,7 +29,6 @@ export default function SelectableTable({
 	onToggleAll?: (items: string[], checked: boolean) => void;
 	columnLabel: string;
 	filterPlaceholder: string;
-	maxHeightClass?: string;
 	// 指定時、items が空ならテーブルの代わりに表示する
 	emptyMessage?: string;
 	renderItem?: (item: string) => ReactNode;

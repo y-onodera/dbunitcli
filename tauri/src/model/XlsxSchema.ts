@@ -182,7 +182,7 @@ export class XlsxSchema {
 				if (sheet.pattern) {
 					patterns[sheet.sheetName] = sheet.pattern;
 				}
-				return [{ ...rest, sheetName: sheet.sheetName }];
+				return [{ ...withoutBlankEntries(rest), sheetName: sheet.sheetName }];
 			});
 		const rows = toSaved(this.rows);
 		const cells = toSaved(this.cells);
@@ -212,6 +212,28 @@ type SheetTarget = {
 	sheetPattern?: SheetPattern;
 	tableName: string;
 };
+
+// カンマ区切りの入力欄を空にすると[""]になるため、空文字の要素と、セル番地が空になったrowsの要素は保存しない
+function withoutBlankEntries<T extends object>(setting: T): T {
+	const result: Record<string, unknown> = {
+		...(setting as Record<string, unknown>),
+	};
+	for (const key of ["header", "columnIndex", "breakKey"]) {
+		const values = result[key];
+		if (Array.isArray(values)) {
+			result[key] = values.filter((it) => it !== "");
+		}
+	}
+	const rows = result.rows;
+	if (Array.isArray(rows)) {
+		result.rows = rows
+			.map((row: { cellAddress: string[] }) => ({
+				cellAddress: row.cellAddress.filter((it) => it !== ""),
+			}))
+			.filter((row) => row.cellAddress.length > 0);
+	}
+	return result as T;
+}
 
 // 保存するsheetName(パターン指定ならpatternsのキー)と、patternsに登録するパターン。未指定ならsheetNameは空文字
 function savedSheet(setting: SheetTarget): {

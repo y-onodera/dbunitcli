@@ -1,4 +1,4 @@
-import { Children, type ReactNode, useState } from "react";
+import { Children, type ReactNode } from "react";
 import DropDownMenu from "../../../../components/element/DropDownMenu";
 import {
 	ControllTextBox,
@@ -10,6 +10,7 @@ import {
 	useFieldErrors,
 } from "../../../../context/FieldErrorProvider";
 import { useWorkspaceContext } from "../../../../context/WorkspaceResourcesProvider";
+import { useResettableState } from "../../../../utils/useResettableState";
 import { DirectoryChooser, FileChooser, OpenInOS } from "./Chooser";
 import FieldErrorMessages from "./FieldErrorMessages";
 import type { FileProp, TextProp } from "./FormElementProp";
@@ -25,7 +26,8 @@ export default function Text({
 	children,
 	afterContent,
 }: TextProp) {
-	const [path, setPath] = useState(element.value);
+	// refreshで同じ要素の値が変わったら、入力中の値をその値に戻す
+	const [path, setPath] = useResettableState(element.value, element.value);
 	const hasResources = resourceFiles.length > 0;
 	const isValueInDatalist = resourceFiles.includes(path);
 	const id = getId(prefix, element.name);

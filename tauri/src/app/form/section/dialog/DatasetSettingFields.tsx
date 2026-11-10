@@ -520,6 +520,11 @@ function ModeContent({
 	);
 }
 
+// onを選んだ直後の空文字もonとして扱う
+function usesJoinOn(target: DatasetSetting): boolean {
+	return target.join()?.on !== undefined;
+}
+
 function TargetContent({
 	target,
 	setTarget,
@@ -566,17 +571,21 @@ function TargetContent({
 				/>
 				<Select
 					name="condition"
-					defaultValue={target.join()?.on ? "on" : "column"}
+					defaultValue={usesJoinOn(target) ? "on" : "column"}
 					handleOnChange={async (select) =>
 						setTarget((cur) =>
-							cur.replaceJoin({ [select]: select === "on" ? "" : [] }),
+							cur.replaceJoin(
+								select === "on"
+									? { on: "", column: undefined }
+									: { on: undefined, column: [] },
+							),
 						)
 					}
 				>
 					<option value="on">on</option>
 					<option value="column">column</option>
 				</Select>
-				{target.join()?.on ? (
+				{usesJoinOn(target) ? (
 					<Text
 						name="on"
 						ignoreLabel={true}

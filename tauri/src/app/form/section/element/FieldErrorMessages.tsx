@@ -6,7 +6,8 @@ export default function FieldErrorMessages(prop: {
 	if (prop.hidden) {
 		return null;
 	}
-	return prop.messages.map((message) => (
+	// 同じ文言を重ねて出しても意味がなく、keyも重なるため1つにまとめる
+	return [...new Set(prop.messages)].map((message) => (
 		<p key={message} className="text-xs text-error">
 			{message}
 		</p>

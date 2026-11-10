@@ -16,8 +16,8 @@ export async function postDialogForm<T>(
 	apiUrl: string,
 	endpoint: string,
 	values: FormValues,
-	// 実行系（generate・scaffold）はsignalでsidecar側も中断し、onLogで実行中のログを受け取る
-	fetchOptions?: JobContext,
+	// signalでsidecar側も中断する。onLogは実行系（generate・scaffold）が実行中のログを受け取る
+	fetchOptions?: Partial<JobContext>,
 ): Promise<T> {
 	const response = await fetchData({
 		...postJsonParams(`${apiUrl}${endpoint}`, values),
@@ -31,16 +31,18 @@ export async function refreshDialogOptions<OPTIONS>(
 	apiUrl: string,
 	endpoint: string,
 	values: FormValues,
-	signal: AbortSignal | undefined,
+	signal: AbortSignal,
 	setLoadState: (state: DialogLoadState<OPTIONS>) => void,
 ): Promise<void> {
 	try {
-		const options = await postDialogForm<OPTIONS>(apiUrl, endpoint, values);
-		if (!signal?.aborted) {
+		const options = await postDialogForm<OPTIONS>(apiUrl, endpoint, values, {
+			signal,
+		});
+		if (!signal.aborted) {
 			setLoadState({ status: "loaded", options });
 		}
 	} catch (ex) {
-		if (!signal?.aborted) {
+		if (!signal.aborted) {
 			setLoadState({ status: "error", message: getErrorMessage(ex) });
 		}
 	}

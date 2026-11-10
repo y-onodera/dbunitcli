@@ -1,3 +1,4 @@
+import { JdbcConnectionProvider } from "../../../context/JdbcConnectionProvider";
 import type { CommandOption, ResultOption } from "../../../model/CommandOption";
 import Check from "./element/Check";
 import EncodingText from "./element/EncodingText";
@@ -20,6 +21,9 @@ function excelTableElement(excelTable: CommandOption): CommandOption {
 		attribute: { ...excelTable.attribute, selectOption },
 	};
 }
+
+// 選択値はフォームの値として送るだけで、再構成は要らない
+async function ignoreSelect(_: string): Promise<void> {}
 
 export default function ResultFormSection({
 	resultOption,
@@ -92,12 +96,15 @@ export default function ResultFormSection({
 				<Select
 					prefix={prefix}
 					element={resultOption.op}
-					handleTypeSelect={(_: string) => {
-						return new Promise((_) => {});
-					}}
+					handleTypeSelect={ignoreSelect}
 				/>
 			)}
-			{resultOption.jdbc && <JdbcFormSection jdbcOption={resultOption.jdbc} />}
+			{resultOption.jdbc && (
+				// 出力先のjdbcの入力で、同じ範囲にある読込元の接続状態を書き換えないよう分離する
+				<JdbcConnectionProvider>
+					<JdbcFormSection jdbcOption={resultOption.jdbc} />
+				</JdbcConnectionProvider>
+			)}
 		</>
 	);
 }

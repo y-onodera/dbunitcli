@@ -41,11 +41,13 @@ export function useRefreshableDialog<OPTIONS>({
 		status: "loading",
 	});
 	const job = useJob();
-	const abortControllerRef = useRef<AbortController | null>(null);
+	// 最後に始めた読込だけを反映する。新しい読込を始めたら前の読込を中断し、アンマウントでも中断する
+	const loadControllerRef = useRef<AbortController | null>(null);
 
 	useEffect(() => {
+		loadControllerRef.current?.abort();
 		const controller = new AbortController();
-		abortControllerRef.current = controller;
+		loadControllerRef.current = controller;
 		refreshDialogOptions(
 			apiUrl,
 			refreshEndpoint,
@@ -54,7 +56,7 @@ export function useRefreshableDialog<OPTIONS>({
 			setLoadState,
 		);
 		return () => {
-			controller.abort();
+			loadControllerRef.current?.abort();
 		};
 	}, [apiUrl, refreshEndpoint, generateType, initialValues]);
 
@@ -62,11 +64,14 @@ export function useRefreshableDialog<OPTIONS>({
 		addGenerateType(values, generateType);
 
 	const refresh = async () => {
+		loadControllerRef.current?.abort();
+		const controller = new AbortController();
+		loadControllerRef.current = controller;
 		await refreshDialogOptions(
 			apiUrl,
 			refreshEndpoint,
 			withGenerateType(collectFormValues(formId, false).values),
-			abortControllerRef.current?.signal,
+			controller.signal,
 			setLoadState,
 		);
 	};

@@ -9,6 +9,7 @@ import {
 } from "../../../../components/element/ButtonIcon";
 import { useWorkspaceContext } from "../../../../context/WorkspaceResourcesProvider";
 import { useResolveAbsolutePath } from "../../../../hooks/useWorkspaceResources";
+import { reportError } from "../../../../utils/fetchUtils";
 import type { FileProp } from "./FormElementProp";
 
 function useChooserHandler(prop: FileProp, directory?: boolean) {
@@ -25,30 +26,41 @@ function useChooserHandler(prop: FileProp, directory?: boolean) {
 	return () => {
 		const basePath = context.getPath(prop.element.attribute.defaultPath);
 		const workspacePath = context.workspace;
-		resolveAbsolutePath(prop.path, prop.element.attribute).then((defaultPath) =>
-			open({ defaultPath, directory }).then((files) => {
-				if (files && !abortControllerRef.current?.signal.aborted) {
-					const fullPath = files as string;
-					const primaryPrefix = basePath + sep();
-					const secondaryPrefix = workspacePath + sep();
-					let relative: string;
-					if (fullPath.startsWith(primaryPrefix)) {
-						relative = fullPath.slice(primaryPrefix.length);
-					} else if (
-						workspacePath !== "" &&
-						workspacePath !== basePath &&
-						fullPath.startsWith(secondaryPrefix)
-					) {
-						relative = fullPath.slice(secondaryPrefix.length);
-					} else {
-						relative = fullPath;
+		resolveAbsolutePath(prop.path, prop.element.attribute)
+			.then((defaultPath) =>
+				open({ defaultPath, directory }).then((files) => {
+					if (files && !abortControllerRef.current?.signal.aborted) {
+						const fullPath = files as string;
+						const primaryPrefix = basePath + sep();
+						const secondaryPrefix = workspacePath + sep();
+						let relative: string;
+						// basePathが空だとprimaryPrefixがsepだけになり、絶対パスの先頭を削ってしまう
+						if (basePath !== "" && fullPath.startsWith(primaryPrefix)) {
+							relative = fullPath.slice(primaryPrefix.length);
+						} else if (
+							workspacePath !== "" &&
+							workspacePath !== basePath &&
+							fullPath.startsWith(secondaryPrefix)
+						) {
+							relative = fullPath.slice(secondaryPrefix.length);
+						} else {
+							relative = fullPath;
+						}
+						prop.setPath(relative);
+						prop.onSelect?.();
 					}
-					prop.setPath(relative);
-					prop.onSelect?.();
-				}
-			}),
-		);
+				}),
+			)
+			.catch((ex) => reportError("Failed to choose a file", ex));
 	};
+}
+
+export async function openDirectory(path: string): Promise<void> {
+	try {
+		await core.invoke("open_directory", { path });
+	} catch (ex) {
+		reportError("Failed to open directory", ex);
+	}
 }
 
 export function FileChooser(prop: FileProp) {
@@ -69,7 +81,7 @@ export function OpenInOS(prop: FileProp) {
 			prop.path,
 			prop.element.attribute,
 		);
-		await core.invoke("open_directory", { path: absolutePath });
+		await openDirectory(absolutePath);
 	};
 	return <OpenButton handleClick={handleOpen} />;
 }
