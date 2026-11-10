@@ -84,7 +84,6 @@ export const useJdbcConnectionTest = () => {
 
 export const useSaveJdbcProperties = () => {
 	const updateResourceFiles = useUpdateResourceFiles("jdbc");
-	// overwriteなら読込と同じ探索で見つかったファイルへ上書きし、そうでなければ規定フォルダ基準で新規保存する
 	return (
 		name: string,
 		jdbcValues: Record<string, string>,

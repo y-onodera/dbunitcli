@@ -21,10 +21,10 @@ import yo.dbunitcli.sidecar.dto.JdbcSavePropertiesRequestDto;
 import yo.dbunitcli.sidecar.job.Interruptible;
 
 import java.io.ByteArrayOutputStream;
+import java.nio.charset.StandardCharsets;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
-import java.util.Optional;
 import java.util.Properties;
 
 @Controller("jdbc")
@@ -54,7 +54,7 @@ public class JdbcResourceFileController extends AbstractResourceFileController<J
         // コマンド実行時はProperties.load(InputStream)（ISO-8859-1）で読むため、それ以外の文字をエスケープするstore(OutputStream)の出力をそのまま書く
         final ByteArrayOutputStream out = new ByteArrayOutputStream();
         option.loadJdbcTemplate().store(out, null);
-        this.getResourceFile().save(body.getName(), out.toByteArray(), body.isOverwrite());
+        this.getResourceFile().save(body.getName(), out.toString(StandardCharsets.ISO_8859_1), StandardCharsets.ISO_8859_1.name(), body.isOverwrite());
         return this.currentFileList();
     }
 
@@ -137,8 +137,8 @@ public class JdbcResourceFileController extends AbstractResourceFileController<J
      * propertiesはJSONではないため、テキストのまま返す
      */
     @Override
-    protected JsonValue toContent(final Optional<String> content) {
-        return Json.createValue(content.orElse(""));
+    protected JsonValue toContent(final String content) {
+        return Json.createValue(content);
     }
 
     @Override

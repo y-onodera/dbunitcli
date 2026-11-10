@@ -13,14 +13,16 @@ import {
 	useSaveResourceContent,
 } from "../../../../hooks/useResourceFiles";
 import type { QueryDatasourceType } from "../../../../model/QueryDatasource";
-import type { ResourceLocation } from "../../../../model/ResourceLocation";
 import {
 	insertAtCursor,
 	insertInlineAtCursor,
 } from "../../../../utils/textInsert";
 import CsvReadInsertDialog from "./CsvReadInsertDialog";
 import { InlinePreviewButton } from "./DatasetTableNamesPreviewButton";
-import type { EditResourceDialogProps } from "./ResourceEditButton";
+import type {
+	EditResourceDialogProps,
+	LoadedResourceDialogProps,
+} from "./ResourceEditButton";
 import { ResourceLoader } from "./ResourceLoader";
 import SqlTableInsertDialog from "./SqlTableInsertDialog";
 import { useTextareaInsert } from "./useTextareaInsert";
@@ -63,10 +65,7 @@ export const sqlEditorDialogs: Record<
 };
 
 function Dialog(
-	props: SqlEditorDialogProps & {
-		value: string;
-		location: ResourceLocation | null;
-	},
+	props: SqlEditorDialogProps & LoadedResourceDialogProps & { value: string },
 ) {
 	const {
 		value: content,

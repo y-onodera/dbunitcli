@@ -9,8 +9,8 @@ import {
 	createColumnDef,
 	FixedColumnDef,
 } from "../../../../model/FixedColumnDef";
-import type { ResourceLocation } from "../../../../model/ResourceLocation";
 import ColumnDefSettingDialog from "./ColumnDefSettingDialog";
+import type { LoadedResourceDialogProps } from "./ResourceEditButton";
 import { ResourceLoader } from "./ResourceLoader";
 
 export default function FixedColumnDefDialog(props: {
@@ -37,13 +37,11 @@ export default function FixedColumnDefDialog(props: {
 	);
 }
 
-export function FixedColumnDefEditDialog(props: {
-	def: FixedColumnDef;
-	location: ResourceLocation | null;
-	fileName: string;
-	handleDialogClose: () => void;
-	handleSave: (path: string) => void;
-}) {
+export function FixedColumnDefEditDialog(
+	props: LoadedResourceDialogProps & {
+		def: FixedColumnDef;
+	},
+) {
 	const saveDef = useSaveFixedColumnDef();
 	const [fixedColumnDef, setFixedColumnDef] = useState(props.def);
 

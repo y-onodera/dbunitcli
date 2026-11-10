@@ -10,9 +10,9 @@ import {
 	type DatasetSettings,
 	newDatasetSetting,
 } from "../../../../model/DatasetSettings";
-import type { ResourceLocation } from "../../../../model/ResourceLocation";
 import ColumnDatalistDialog from "./ColumnDatalistDialog";
 import { FilterOrderFields, TargetFields } from "./DatasetSettingFields";
+import type { LoadedResourceDialogProps } from "./ResourceEditButton";
 import { ResourceLoader } from "./ResourceLoader";
 import { useColumnCandidates } from "./useColumnCandidates";
 
@@ -55,14 +55,12 @@ export default function CompareKeySettingsDialog(props: {
 }
 
 // 編集するのは対象テーブルとkeysだけ。ファイルにあるそれ以外の項目（filter・outputFilter・import等）は保存時もそのまま残る
-export function CompareKeySettingsEditDialog(props: {
-	settings: DatasetSettings;
-	location: ResourceLocation | null;
-	fileName: string;
-	handleDialogClose: () => void;
-	handleSave: (path: string) => void;
-	kind: DatasetSettingKind;
-}) {
+export function CompareKeySettingsEditDialog(
+	props: LoadedResourceDialogProps & {
+		settings: DatasetSettings;
+		kind: DatasetSettingKind;
+	},
+) {
 	const saveSettings = useSaveDatasetSettings(props.kind);
 	const [dataSettings, setDataSettings] = useState<DatasetSettings>(
 		props.settings,

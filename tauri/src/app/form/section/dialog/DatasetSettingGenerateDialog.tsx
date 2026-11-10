@@ -4,22 +4,20 @@ import {
 	DatasetSettings,
 	type DatasetSettingsBuilder,
 } from "../../../../model/DatasetSettings";
-import type { ResourceLocation } from "../../../../model/ResourceLocation";
 import { DatasetSettingsEditDialog } from "./DatasetSettingsDialog";
 import {
 	type GenerateButtonProps,
 	ModelGenerateButton,
 	type ModelGenerateConfig,
 } from "./GenerateDialog";
+import type { LoadedResourceDialogProps } from "./ResourceEditButton";
 
-export type DatasetSettingsEditDialogComponent = ComponentType<{
-	settings: DatasetSettings;
-	location: ResourceLocation | null;
-	fileName: string;
-	handleDialogClose: () => void;
-	handleSave: (fileName: string) => void;
-	kind: DatasetSettingKind;
-}>;
+export type DatasetSettingsEditDialogComponent = ComponentType<
+	LoadedResourceDialogProps & {
+		settings: DatasetSettings;
+		kind: DatasetSettingKind;
+	}
+>;
 
 // 生成後は渡された編集ダイアログで内容確認し、kindの保存先へ命名保存する
 function datasetSettingGenerateConfig(

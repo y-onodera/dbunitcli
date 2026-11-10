@@ -40,21 +40,21 @@ public abstract class AbstractResourceFileController<DTO extends ResourceSaveReq
 
     /**
      * encodingはコマンド実行時にそのファイルを読む文字コード。GUIからも同じ文字コードで読み書きする。
-     * 応答は{"content": 内容, "location": 開いたファイルの場所}。見つからなければcontentは{@link #toContent}の空の値、locationはnull
+     * 応答は{"content": 内容, "location": 開いたファイルの場所}。見つからなければどちらもnull
      */
     @Post(uri = "load", produces = MediaType.APPLICATION_JSON)
     public String load(@Body final ResourceLoadRequestDto body) {
         try {
             final Optional<ResourceFile.Loaded> loaded = this.getResourceFile().load(body.getName(), body.getEncoding());
-            final JsonObjectBuilder builder = Json.createObjectBuilder()
-                    .add("content", this.toContent(loaded.map(ResourceFile.Loaded::content)));
-            loaded.map(ResourceFile.Loaded::location).ifPresentOrElse(
-                    it -> builder.add("location", Json.createObjectBuilder()
-                            .add("folder", it.folder())
-                            .add("defaultFolder", it.defaultFolder())
-                            .add("fileName", it.fileName())
-                            .add("defaultFolderHasFile", it.defaultFolderHasFile())),
-                    () -> builder.addNull("location"));
+            final JsonObjectBuilder builder = Json.createObjectBuilder();
+            loaded.ifPresentOrElse(
+                    it -> builder.add("content", this.toContent(it.content()))
+                            .add("location", Json.createObjectBuilder()
+                                    .add("folder", it.location().folder())
+                                    .add("defaultFolder", it.location().defaultFolder())
+                                    .add("fileName", it.location().fileName())
+                                    .add("defaultFolderHasFile", it.location().defaultFolderHasFile())),
+                    () -> builder.addNull("content").addNull("location"));
             return builder.build().toString();
         } catch (final Throwable th) {
             LOGGER.error("cause:", th);
@@ -63,14 +63,12 @@ public abstract class AbstractResourceFileController<DTO extends ResourceSaveReq
     }
 
     /**
-     * ファイルの内容をJSONの値にする。JSONのファイルはその値、無ければ空のオブジェクト
+     * ファイルの内容をJSONの値にする。JSONのファイルはその値
      */
-    protected JsonValue toContent(final Optional<String> content) {
-        return content.<JsonValue>map(it -> {
-            try (final JsonReader reader = Json.createReader(new StringReader(it))) {
-                return reader.readValue();
-            }
-        }).orElse(JsonValue.EMPTY_JSON_OBJECT);
+    protected JsonValue toContent(final String content) {
+        try (final JsonReader reader = Json.createReader(new StringReader(content))) {
+            return reader.readValue();
+        }
     }
 
     @Post(uri = "save", produces = MediaType.APPLICATION_JSON)

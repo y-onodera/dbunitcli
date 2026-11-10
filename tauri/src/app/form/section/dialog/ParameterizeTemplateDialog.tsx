@@ -5,8 +5,10 @@ import {
 	CONTENT_PARSER,
 	useSaveResourceContent,
 } from "../../../../hooks/useResourceFiles";
-import type { ResourceLocation } from "../../../../model/ResourceLocation";
-import type { EditResourceDialogProps } from "./ResourceEditButton";
+import type {
+	EditResourceDialogProps,
+	LoadedResourceDialogProps,
+} from "./ResourceEditButton";
 import { ResourceLoader } from "./ResourceLoader";
 
 export default function ParameterizeTemplateDialog({
@@ -39,10 +41,7 @@ function Dialog({
 	fileName,
 	handleDialogClose,
 	handleSave,
-}: EditResourceDialogProps & {
-	content: string;
-	location: ResourceLocation | null;
-}) {
+}: LoadedResourceDialogProps & { content: string }) {
 	const [content, setContent] = useState<string>(initialContent);
 	const saveContent = useSaveResourceContent("parameterizeTemplate");
 

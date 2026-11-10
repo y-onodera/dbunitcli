@@ -6,7 +6,6 @@ import {
 	XLSX_SCHEMA_PARSER,
 } from "../../../../hooks/useXlsxSchema";
 import { srcTypeOf, withValues } from "../../../../model/CommandOption";
-import type { ResourceLocation } from "../../../../model/ResourceLocation";
 import type { CellSetting, RowSetting } from "../../../../model/XlsxSchema";
 import {
 	createCellSetting,
@@ -14,6 +13,7 @@ import {
 	XlsxSchema,
 } from "../../../../model/XlsxSchema";
 import { SaveAndPreviewButton } from "./DatasetTableNamesPreviewButton";
+import type { LoadedResourceDialogProps } from "./ResourceEditButton";
 import { ResourceLoader } from "./ResourceLoader";
 import XlsxCellSettingDialog from "./XlsxCellSettingDialog";
 import XlsxRowSettingDialog from "./XlsxRowSettingDialog";
@@ -41,13 +41,11 @@ export default function XlsxSchemaDialog(props: {
 		</ResourceLoader>
 	);
 }
-export function XlsxSchemaEditDialog(props: {
-	schema: XlsxSchema;
-	location: ResourceLocation | null;
-	fileName: string;
-	handleDialogClose: () => void;
-	handleSave: (path: string) => void;
-}) {
+export function XlsxSchemaEditDialog(
+	props: LoadedResourceDialogProps & {
+		schema: XlsxSchema;
+	},
+) {
 	const saveSchema = useSaveXlsxSchema();
 	const [xlsxSchema, setXlsxSchema] = useState(props.schema);
 	const datasetSrcInfo = useDatasetSrcInfo();

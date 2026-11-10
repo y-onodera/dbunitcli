@@ -15,16 +15,6 @@ vi.mock("../../../../../hooks/useXlsxSchema", () => ({
 	useSaveXlsxSchema: () => mockSave,
 	XLSX_SCHEMA_PARSER: {},
 }));
-vi.mock("../../../../../hooks/useResourceFiles", async (importOriginal) => ({
-	...(await importOriginal<
-		typeof import("../../../../../hooks/useResourceFiles")
-	>()),
-	useResourceLoad: () => ({
-		data: XlsxSchema.create(),
-		location: null,
-		loading: false,
-	}),
-}));
 vi.mock("../../../../../hooks/useDatasetSettings", () => ({
 	useDatasetTableNames: (srcInfo: DatasetSrcInfo) => {
 		mockTableNames(srcInfo);

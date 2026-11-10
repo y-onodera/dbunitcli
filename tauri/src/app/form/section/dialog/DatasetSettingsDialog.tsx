@@ -28,10 +28,10 @@ import {
 	type DatasetSettings,
 	newDatasetSetting,
 } from "../../../../model/DatasetSettings";
-import type { ResourceLocation } from "../../../../model/ResourceLocation";
 import { removeArray, replaceArray } from "../../../../utils/arrayUtils";
 import DatasetSettingDialog from "./DatasetSettingDialog";
 import { SaveAndPreviewButton } from "./DatasetTableNamesPreviewButton";
+import type { LoadedResourceDialogProps } from "./ResourceEditButton";
 import { ResourceLoader } from "./ResourceLoader";
 
 // kind: 読込・保存先のリソース
@@ -63,16 +63,14 @@ export default function DatasetSettingsDialog(props: {
 	);
 }
 
-export function DatasetSettingsEditDialog(props: {
-	settings: DatasetSettings;
-	location: ResourceLocation | null;
-	fileName: string;
-	handleDialogClose: () => void;
-	handleSave: (path: string) => void;
-	// 省略すると、保存したファイルをsrcのsettingに適用してプレビューする（generateの-unitSettingは適用先が違うため差し替える）
-	saveAndPreview?: (saveThen: SaveThen) => ReactNode;
-	kind: DatasetSettingKind;
-}) {
+export function DatasetSettingsEditDialog(
+	props: LoadedResourceDialogProps & {
+		settings: DatasetSettings;
+		// 省略すると、保存したファイルをsrcのsettingに適用してプレビューする（generateの-unitSettingは適用先が違うため差し替える）
+		saveAndPreview?: (saveThen: SaveThen) => ReactNode;
+		kind: DatasetSettingKind;
+	},
+) {
 	const saveSettings = useSaveDatasetSettings(props.kind);
 	const [dataSettings, setDataSettings] = useState<DatasetSettings>(
 		props.settings,

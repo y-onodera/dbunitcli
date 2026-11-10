@@ -113,7 +113,7 @@ class TemplateResourceFileControllerTest {
     void testLoad_見つからなければ空の内容と場所nullを返す() throws IOException {
         final String response = this.client.toBlocking().retrieve(
                 HttpRequest.POST("dbunit-cli/template/load", "{\"name\":\"missing.stg\"}"));
-        JsonTestHelper.assertJsonEquals("{\"content\":\"\",\"location\":null}", response);
+        JsonTestHelper.assertJsonEquals("{\"content\":null,\"location\":null}", response);
     }
 
     @Test

@@ -11,7 +11,6 @@ import yo.dbunitcli.sidecar.domain.project.Workspace;
 import yo.dbunitcli.sidecar.dto.TemplateRequestDto;
 
 import java.io.IOException;
-import java.util.Optional;
 
 /**
  * SQL等の生テキストのリソース。loadのcontentは文字列で返し、saveはcontentを生テキストとして保存する。応答は更新後のファイル一覧
@@ -24,8 +23,8 @@ public abstract class AbstractTextResourceFileController extends AbstractResourc
     }
 
     @Override
-    protected JsonValue toContent(final Optional<String> content) {
-        return Json.createValue(content.orElse(""));
+    protected JsonValue toContent(final String content) {
+        return Json.createValue(content);
     }
 
     @Post(uri = "save", produces = MediaType.APPLICATION_JSON)

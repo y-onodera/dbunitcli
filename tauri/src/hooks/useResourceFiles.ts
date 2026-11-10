@@ -84,7 +84,7 @@ export const useDeleteResource = (kind: ResourceKind) => {
 };
 
 // `${base}/save`へ名前・内容と、ResourceEncodingProviderのその種類の文字コードを送る（保存で共通）。
-// overwriteなら読込と同じ探索で見つかったファイルへ上書きし、そうでなければ規定フォルダ基準で新規保存する
+// 保存先の選び方（overwrite）はsidecarのResourceFile.save
 export const useSaveResource = <T>(kind: ResourceKind) => {
 	const updateResourceFiles = useUpdateResourceFiles(kind);
 	const encoding = useResourceEncoding(kind);

@@ -10,6 +10,7 @@ function renderFileMode(result: OperationResult) {
 	const handleSave = vi.fn();
 	render(
 		<SettingDialog
+			location={null}
 			fileName="before.json"
 			handleDialogClose={vi.fn()}
 			save={save}
@@ -66,6 +67,7 @@ describe("SettingDialogのファイルモードのテスト", () => {
 		const save = vi.fn().mockRejectedValue(new Error("boom"));
 		render(
 			<SettingDialog
+				location={null}
 				fileName="before.json"
 				handleDialogClose={vi.fn()}
 				save={save}

@@ -1,12 +1,12 @@
 import { type ReactElement, type ReactNode, useState } from "react";
 import { AddButton } from "../../../../components/element/ButtonIcon";
 import type { JobContext } from "../../../../hooks/useJob";
-import type { ResourceLocation } from "../../../../model/ResourceLocation";
 import type { GenerateOptions } from "../../../../model/SelectParameter";
 import type { FormValues } from "../../../../utils/formValues";
 import { DatasetLoadForm } from "../DatasetLoadForm";
 import { RefreshableDialogShell } from "./RefreshableDialogShell";
 import ResourceEditButton, {
+	type LoadedResourceDialogProps,
 	type ResourceEditButtonProp,
 } from "./ResourceEditButton";
 import { postDialogForm } from "./refreshableDialogForm";
@@ -129,12 +129,7 @@ export type ModelGenerateConfig<BUILDER, MODEL> = GenerateDialogConfig & {
 	build: (builder: BUILDER) => MODEL;
 	renderEditDialog: (
 		model: MODEL,
-		props: {
-			fileName: string;
-			location: ResourceLocation | null;
-			handleDialogClose: () => void;
-			handleSave: (fileName: string) => void;
-		},
+		props: LoadedResourceDialogProps,
 	) => ReactElement;
 };
 
