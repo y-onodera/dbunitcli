@@ -40,8 +40,11 @@ public record ResourceFile(File baseDir, Set<String> files, Function<String, Opt
         return new ResourceFile(new File(workspace, path), toFile, defaultCharset);
     }
 
+    /**
+     * ファイルが無い・ディレクトリ（srcTypeを切り替えた直後のsrc等）ならempty
+     */
     public Optional<String> read(final String name, final String encoding) {
-        return this.select(name).map(it -> {
+        return this.select(name).filter(Files::isRegularFile).map(it -> {
             try {
                 return Files.readString(it, this.charsetOf(encoding));
             } catch (final IOException e) {

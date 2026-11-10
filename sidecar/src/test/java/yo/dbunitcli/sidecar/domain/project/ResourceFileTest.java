@@ -208,6 +208,13 @@ class ResourceFileTest {
     }
 
     @Test
+    public void read_ディレクトリならemptyを返す() throws IOException {
+        Files.createDirectories(this.tempDir.resolve("dir"));
+
+        assertTrue(this.resourceFile.read("dir", "").isEmpty());
+    }
+
+    @Test
     public void save_overwriteなら探索で見つかったbaseDir外のファイルへ書く() throws IOException {
         final ResourceFile withFallback = this.withFallbackDir();
         final Path other = this.tempDir.resolve("other/shared.sql");

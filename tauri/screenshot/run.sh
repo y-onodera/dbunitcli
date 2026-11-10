@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
-# ヘルプの画面イメージ（public/help/images）を撮り直す。Linux 用（Claude Code on the web で動かす想定）
-# sample/ を作業用の Workspace に複製して sidecar を起動し、Tauri の API を差し替えた画面をブラウザで撮る
+# sample/ を作業用の Workspace に複製して sidecar を起動し、Tauri の API を差し替えた画面をブラウザで操作する。
+# Linux 用（Claude Code on the web で動かす想定）
+#   run.sh        ヘルプの画面イメージ（public/help/images）を撮り直す（capture.cjs）
+#   run.sh smoke  画面を一通り操作し、ブラウザのエラーが出ないかを確かめる（smoke.cjs）
 set -euo pipefail
 
 here=$(cd "$(dirname "$0")" && pwd)
@@ -50,4 +52,11 @@ wait_for() {
 wait_for "http://localhost:$port/dbunit-cli/workspace/resources"
 wait_for "http://localhost:1430/"
 
-node "$here/capture.cjs" "$tauri/public/help/images"
+case "${1:-capture}" in
+capture) node "$here/capture.cjs" "$tauri/public/help/images" ;;
+smoke) node "$here/smoke.cjs" ;;
+*)
+	echo "使い方: run.sh [capture|smoke]" >&2
+	exit 2
+	;;
+esac

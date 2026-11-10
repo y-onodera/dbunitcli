@@ -35,6 +35,7 @@ src/
 - 型チェック `bunx tsc --noEmit` / テスト `bunx vitest run` / Lint `bunx biome check`
 - `bunx biome check --write` は変更したファイルだけに使う（未整形の既存ファイルに無関係な差分が出る）
 - アプリ起動 `bun tauri dev` / 配布ビルド `bun tauri build`
+- 画面のスモークテスト `bash screenshot/run.sh smoke`（web 環境専用。vitest で捕まらない描画中の例外等を検出。大きな変更の後に流す）
 
 ## 重要な実装ノート
 
