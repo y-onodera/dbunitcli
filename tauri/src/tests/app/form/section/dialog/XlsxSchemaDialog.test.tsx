@@ -13,7 +13,7 @@ const { mockSave, mockTableNames, srcInfoFixture } = vi.hoisted(() => ({
 }));
 vi.mock("../../../../../hooks/useXlsxSchema", () => ({
 	useSaveXlsxSchema: () => mockSave,
-	useXlsxSchemaData: () => ({ schema: XlsxSchema.create(), loading: false }),
+	XLSX_SCHEMA_PARSER: {},
 }));
 vi.mock("../../../../../hooks/useDatasetSettings", () => ({
 	useDatasetTableNames: (srcInfo: DatasetSrcInfo) => {
@@ -41,6 +41,7 @@ function renderDialog() {
 	render(
 		<XlsxSchemaEditDialog
 			schema={schema}
+			location={null}
 			fileName="schema.json"
 			handleDialogClose={vi.fn()}
 			handleSave={handleSave}

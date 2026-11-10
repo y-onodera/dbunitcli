@@ -130,7 +130,6 @@ type SettingMode<T> = {
 	save?: never;
 	handleSave?: never;
 	location?: never;
-	locationLoading?: never;
 	// Commitの右に並べる追加ボタン
 	footerActions?: () => ReactNode;
 };
@@ -143,15 +142,13 @@ type FileMode = {
 	// 成功したときだけhandleSaveを呼ぶ（失敗時はダイアログを開いたまま）
 	save: (path: string, overwrite: boolean) => Promise<OperationResult>;
 	handleSave: (path: string) => void;
-	// 開いたファイルの場所（見つからなければnull）。省略すると保存先を選ばせない
-	location?: ResourceLocation | null;
-	locationLoading?: boolean;
+	// 開いたファイルの場所（見つからない・未保存ならnull）
+	location: ResourceLocation | null;
 	// Saveの右に並べる追加ボタン。保存が必要ならsaveThenを使う
 	footerActions?: (saveThen: SaveThen) => ReactNode;
 };
 
 export type SettingDialogProps<T> = CommonProps & (SettingMode<T> | FileMode);
-export type FileSettingDialogProps = CommonProps & FileMode;
 
 export function SettingDialog<T>(props: SettingDialogProps<T>) {
 	const [fileNameValue, setFileNameValue] = useResettableState(
@@ -230,9 +227,7 @@ export function SettingDialog<T>(props: SettingDialogProps<T>) {
 			<DialogFooter>
 				<BlueButton
 					title={props.commitLabel ?? "Save"}
-					disabled={
-						props.commitDisabled || fileNameMissing || props.locationLoading
-					}
+					disabled={props.commitDisabled || fileNameMissing}
 					handleClick={() => {
 						if (isFileMode) {
 							saveThen(props.handleSave);

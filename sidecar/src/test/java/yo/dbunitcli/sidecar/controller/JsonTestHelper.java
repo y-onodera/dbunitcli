@@ -2,7 +2,12 @@ package yo.dbunitcli.sidecar.controller;
 
 import org.junit.jupiter.api.Assertions;
 
+import jakarta.json.Json;
+import jakarta.json.JsonObject;
+import jakarta.json.JsonReader;
+
 import java.io.IOException;
+import java.io.StringReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.regex.Pattern;
@@ -25,5 +30,18 @@ class JsonTestHelper {
 
     static void assertJsonEquals(final Path expectedFile, final String actual, final String... args) throws IOException {
         assertJsonEquals(String.format(Files.readString(expectedFile), (Object[]) args), actual);
+    }
+
+    /**
+     * リソースのloadの応答（{"content": ..., "location": ...}）のcontentをJSONの文字列にする
+     */
+    static String contentOf(final String loadResponse) {
+        return loadResponseOf(loadResponse).get("content").toString();
+    }
+
+    static JsonObject loadResponseOf(final String loadResponse) {
+        try (final JsonReader reader = Json.createReader(new StringReader(loadResponse))) {
+            return reader.readObject();
+        }
     }
 }

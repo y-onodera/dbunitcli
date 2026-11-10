@@ -17,7 +17,7 @@ export class SelectParameter {
 	readonly name: string;
 	readonly command: Command;
 	readonly options: Options & { inputParam?: InputParam };
-	// 保存済みの-Pオプション。読み込みごとに別インスタンスにしてFooterの入力を初期化する
+	// 保存済みの-Pオプション。読込ごとに別インスタンスにし、ParameterInputProviderが参照の変化で編集中の-Pを初期化する
 	readonly inputParam: InputParam;
 
 	constructor(

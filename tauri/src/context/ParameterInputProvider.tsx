@@ -1,19 +1,25 @@
 import type { Dispatch, ReactNode, SetStateAction } from "react";
-import { createContext, use, useState } from "react";
+import { createContext, use } from "react";
+import type { InputParam } from "../model/SelectParameter";
+import { useResettableState } from "../utils/useResettableState";
+import { useSelectParameter } from "./SelectParameterProvider";
 
-type ParamInputs = { [key: string]: string };
-
-const paramInputsContext = createContext<ParamInputs>({});
+const paramInputsContext = createContext<InputParam>({});
 const setParamInputsContext = createContext<
-	Dispatch<SetStateAction<ParamInputs>>
+	Dispatch<SetStateAction<InputParam>>
 >(() => undefined);
 
+// 編集中の-P。inputParamの参照が変わったら（読込。SelectParameter参照）保存値へ戻す
 export default function ParameterInputProvider({
 	children,
 }: {
 	children: ReactNode;
 }) {
-	const [paramInputs, setParamInputs] = useState<ParamInputs>({});
+	const inputParam = useSelectParameter()?.inputParam;
+	const [paramInputs, setParamInputs] = useResettableState(
+		inputParam ?? {},
+		inputParam,
+	);
 	return (
 		<paramInputsContext.Provider value={paramInputs}>
 			<setParamInputsContext.Provider value={setParamInputs}>

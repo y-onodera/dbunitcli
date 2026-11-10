@@ -34,7 +34,7 @@ class ParameterizeTemplateResourceFileControllerTest {
                 .retrieve(HttpRequest.POST("dbunit-cli/parameterize/template/load", "{\"name\":\"sample.json\"}"));
         JsonTestHelper.assertJsonEquals(
                 Paths.get("src/test/resources/yo/dbunitcli/sidecar/controller/parameterize-template-load-response.json"),
-                response);
+                JsonTestHelper.contentOf(response));
     }
 
     @Test

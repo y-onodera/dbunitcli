@@ -7,7 +7,7 @@ import {
 } from "../../context/EnvironmentProvider";
 import SelectParameterProvider, {
 	useSelectParameter,
-	useSetSelectParameter,
+	useSetSelectParameterState,
 } from "../../context/SelectParameterProvider";
 import WorkspaceResourcesProvider, {
 	useParameterList,
@@ -196,27 +196,6 @@ describe("SelectParameterProviderのテスト", () => {
 			});
 		});
 	});
-	describe("useSetSelectParameter", () => {
-		it("パラメータを設定できることを確認", async () => {
-			const { result } = renderHook(
-				() => ({
-					parameter: useSelectParameter(),
-					setParameter: useSetSelectParameter(),
-				}),
-				{ wrapper },
-			);
-			await waitFor(() => {
-				expect(result.current.parameter).toBeUndefined();
-			});
-
-			result.current.setParameter(mockConvertParams, "convert", "test-param");
-			await waitFor(() => {
-				expect(result.current.parameter?.name).toBe("test-param");
-				expect(result.current.parameter?.options.command).toBe("convert");
-			});
-		});
-	});
-
 	describe("useLoadSelectParameter", () => {
 		it.each([
 			{ command: "convert", response: mockConvertParams },
@@ -304,7 +283,7 @@ describe("SelectParameterProviderのテスト", () => {
 			const { result } = renderHook(
 				() => ({
 					parameter: useSelectParameter(),
-					setParameter: useSetSelectParameter(),
+					setParameter: useSetSelectParameterState(),
 					saveParameter: useSaveParameter(),
 				}),
 				{ wrapper },
@@ -313,7 +292,9 @@ describe("SelectParameterProviderのテスト", () => {
 				expect(result.current.parameter).toBeUndefined();
 			});
 
-			result.current.setParameter(params, command as Command, "test-param");
+			result.current.setParameter(
+				new SelectParameter(params, command as Command, "test-param"),
+			);
 			await waitFor(() => {
 				expect(result.current.parameter).toBeDefined();
 			});
@@ -334,13 +315,15 @@ describe("SelectParameterProviderのテスト", () => {
 			const { result } = renderHook(
 				() => ({
 					parameter: useSelectParameter(),
-					setParameter: useSetSelectParameter(),
+					setParameter: useSetSelectParameterState(),
 					saveParameter: useSaveParameter(),
 				}),
 				{ wrapper },
 			);
 
-			result.current.setParameter(params, command as Command, "test-param");
+			result.current.setParameter(
+				new SelectParameter(params, command as Command, "test-param"),
+			);
 			await waitFor(() => {
 				expect(result.current.parameter).toBeDefined();
 			});
@@ -361,7 +344,7 @@ describe("SelectParameterProviderのテスト", () => {
 			const { result } = renderHook(
 				() => ({
 					parameter: useSelectParameter(),
-					setParameter: useSetSelectParameter(),
+					setParameter: useSetSelectParameterState(),
 					execParameter: useExecParameter(),
 				}),
 				{ wrapper },
@@ -370,7 +353,9 @@ describe("SelectParameterProviderのテスト", () => {
 				expect(result.current.parameter).toBeUndefined();
 			});
 
-			result.current.setParameter(params, command as Command, "test-param");
+			result.current.setParameter(
+				new SelectParameter(params, command as Command, "test-param"),
+			);
 			await waitFor(() => {
 				expect(result.current.parameter).toBeDefined();
 			});
@@ -391,13 +376,15 @@ describe("SelectParameterProviderのテスト", () => {
 			const { result } = renderHook(
 				() => ({
 					parameter: useSelectParameter(),
-					setParameter: useSetSelectParameter(),
+					setParameter: useSetSelectParameterState(),
 					execParameter: useExecParameter(),
 				}),
 				{ wrapper },
 			);
 
-			result.current.setParameter(params, command as Command, "test-param");
+			result.current.setParameter(
+				new SelectParameter(params, command as Command, "test-param"),
+			);
 			await waitFor(() => {
 				expect(result.current.parameter).toBeDefined();
 			});
@@ -424,13 +411,15 @@ describe("SelectParameterProviderのテスト", () => {
 			vi.mocked(isAbortError).mockReturnValueOnce(true);
 			const { result } = renderHook(
 				() => ({
-					setParameter: useSetSelectParameter(),
+					setParameter: useSetSelectParameterState(),
 					execParameter: useExecParameter(),
 				}),
 				{ wrapper },
 			);
 
-			result.current.setParameter(mockConvertParams, "convert", "test-param");
+			result.current.setParameter(
+				new SelectParameter(mockConvertParams, "convert", "test-param"),
+			);
 
 			expect(await result.current.execParameter({ test: "value" })).toBeNull();
 			expect(handleFetchError).not.toHaveBeenCalled();

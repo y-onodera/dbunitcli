@@ -41,7 +41,7 @@ const { mockSaveDef } = vi.hoisted(() => ({
 }));
 vi.mock("../../../../../hooks/useFixedColumnDef", () => ({
 	useSaveFixedColumnDef: () => mockSaveDef,
-	useFixedColumnDefData: () => ({ def: null, loading: true }),
+	FIXED_COLUMN_DEF_PARSER: {},
 }));
 
 const { mockFetchData, refreshResponse, generateResponse } = vi.hoisted(() => {

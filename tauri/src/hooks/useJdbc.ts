@@ -84,9 +84,17 @@ export const useJdbcConnectionTest = () => {
 
 export const useSaveJdbcProperties = () => {
 	const updateResourceFiles = useUpdateResourceFiles("jdbc");
-	return (name: string, jdbcValues: Record<string, string>) =>
+	return (
+		name: string,
+		jdbcValues: Record<string, string>,
+		overwrite: boolean,
+	) =>
 		updateResourceFiles(
 			"save-properties",
-			JSON.stringify({ name, input: toJdbcRequestBody(jdbcValues) }),
+			JSON.stringify({
+				name,
+				overwrite,
+				input: toJdbcRequestBody(jdbcValues),
+			}),
 		);
 };

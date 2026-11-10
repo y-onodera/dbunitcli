@@ -7,6 +7,7 @@ import {
 	type ResourceKind,
 	useDeleteResource,
 } from "../../../../hooks/useResourceFiles";
+import type { ResourceLocation } from "../../../../model/ResourceLocation";
 import { reportError } from "../../../../utils/fetchUtils";
 
 export type ResourceEditButtonProp = {
@@ -98,6 +99,11 @@ export type EditResourceDialogProps = {
 	fileName: string;
 	handleDialogClose: () => void;
 	handleSave: (path: string) => void;
+};
+
+// ResourceLoaderで読み込んだファイルの編集ダイアログのprops
+export type LoadedResourceDialogProps = EditResourceDialogProps & {
+	location: ResourceLocation | null;
 };
 
 // ファイル名で開く編集ダイアログ（保存したらパスを反映して閉じる）を持つ編集ボタン。

@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { SettingTable, StatusMessage } from "../../../../components/dialog";
+import { SettingDialog, SettingTable } from "../../../../components/dialog";
 import {
-	useFixedColumnDefData,
+	FIXED_COLUMN_DEF_PARSER,
 	useSaveFixedColumnDef,
 } from "../../../../hooks/useFixedColumnDef";
 import {
@@ -10,39 +10,44 @@ import {
 	FixedColumnDef,
 } from "../../../../model/FixedColumnDef";
 import ColumnDefSettingDialog from "./ColumnDefSettingDialog";
-import { ResourceSettingDialog } from "./ResourceSettingDialog";
+import type { LoadedResourceDialogProps } from "./ResourceEditButton";
+import { ResourceLoader } from "./ResourceLoader";
 
 export default function FixedColumnDefDialog(props: {
 	fileName: string;
 	handleDialogClose: () => void;
 	handleSave: (path: string) => void;
 }) {
-	const { def, loading } = useFixedColumnDefData(props.fileName);
-	if (loading) {
-		return <StatusMessage kind="loading">Loading...</StatusMessage>;
-	}
 	return (
-		<FixedColumnDefEditDialog
-			def={def}
+		<ResourceLoader
+			kind="fixedColumnDef"
 			fileName={props.fileName}
-			handleDialogClose={props.handleDialogClose}
-			handleSave={props.handleSave}
-		/>
+			parser={FIXED_COLUMN_DEF_PARSER}
+		>
+			{(def, location) => (
+				<FixedColumnDefEditDialog
+					def={def}
+					location={location}
+					fileName={props.fileName}
+					handleDialogClose={props.handleDialogClose}
+					handleSave={props.handleSave}
+				/>
+			)}
+		</ResourceLoader>
 	);
 }
 
-export function FixedColumnDefEditDialog(props: {
-	def: FixedColumnDef;
-	fileName: string;
-	handleDialogClose: () => void;
-	handleSave: (path: string) => void;
-}) {
+export function FixedColumnDefEditDialog(
+	props: LoadedResourceDialogProps & {
+		def: FixedColumnDef;
+	},
+) {
 	const saveDef = useSaveFixedColumnDef();
 	const [fixedColumnDef, setFixedColumnDef] = useState(props.def);
 
 	return (
-		<ResourceSettingDialog
-			resourceKind={"fixedColumnDef"}
+		<SettingDialog
+			location={props.location}
 			title="Fixed Column Def"
 			helpCommand="dialogs/fixed-column-def"
 			helpLabel="Fixed Column Def"
@@ -62,6 +67,6 @@ export function FixedColumnDefEditDialog(props: {
 				SettingDialogComponent={ColumnDefSettingDialog}
 				newSetting={createColumnDef}
 			/>
-		</ResourceSettingDialog>
+		</SettingDialog>
 	);
 }

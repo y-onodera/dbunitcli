@@ -20,7 +20,6 @@ export {
 	SectionOptionHeader,
 } from "./SectionFieldset";
 export type {
-	FileSettingDialogProps,
 	SaveThen,
 	SettingDialogProps,
 } from "./SettingDialog";

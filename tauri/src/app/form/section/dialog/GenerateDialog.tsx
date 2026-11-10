@@ -6,6 +6,7 @@ import type { FormValues } from "../../../../utils/formValues";
 import { DatasetLoadForm } from "../DatasetLoadForm";
 import { RefreshableDialogShell } from "./RefreshableDialogShell";
 import ResourceEditButton, {
+	type LoadedResourceDialogProps,
 	type ResourceEditButtonProp,
 } from "./ResourceEditButton";
 import { postDialogForm } from "./refreshableDialogForm";
@@ -128,11 +129,7 @@ export type ModelGenerateConfig<BUILDER, MODEL> = GenerateDialogConfig & {
 	build: (builder: BUILDER) => MODEL;
 	renderEditDialog: (
 		model: MODEL,
-		props: {
-			fileName: string;
-			handleDialogClose: () => void;
-			handleSave: (fileName: string) => void;
-		},
+		props: LoadedResourceDialogProps,
 	) => ReactElement;
 };
 
@@ -147,8 +144,10 @@ function ModelGenerateDialog<BUILDER, MODEL>({
 }) {
 	const [generated, setGenerated] = useState<MODEL | null>(null);
 	if (generated) {
+		// 生成結果はまだファイルになっていないため、開いたファイルの場所は無い
 		return config.renderEditDialog(generated, {
 			fileName: "",
+			location: null,
 			handleDialogClose,
 			handleSave,
 		});

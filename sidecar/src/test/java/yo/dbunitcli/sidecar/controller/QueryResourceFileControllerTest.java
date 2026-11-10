@@ -47,7 +47,7 @@ class QueryResourceFileControllerTest {
 
         final String loaded = this.client.toBlocking()
                 .retrieve(HttpRequest.POST("dbunit-cli/" + resource + "/load", "{\"name\":\"" + FILE_NAME + "\"}"));
-        Assertions.assertEquals("{\"content\":\"select * from t\\n\"}", loaded);
+        Assertions.assertEquals("\"select * from t\\n\"", JsonTestHelper.contentOf(loaded));
 
         final String list = this.client.toBlocking().retrieve(HttpRequest.GET("dbunit-cli/" + resource + "/list"));
         Assertions.assertEquals("[\"" + FILE_NAME + "\"]", list);

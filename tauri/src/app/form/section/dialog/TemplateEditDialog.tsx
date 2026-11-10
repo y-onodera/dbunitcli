@@ -1,44 +1,53 @@
 import { useState } from "react";
-import { DialogBody, StatusMessage } from "../../../../components/dialog";
+import { DialogBody, SettingDialog } from "../../../../components/dialog";
 import { TextArea } from "../../../../components/element/Input";
 import {
-	useResourceContent,
+	CONTENT_PARSER,
 	useSaveResourceContent,
 } from "../../../../hooks/useResourceFiles";
-import type { EditResourceDialogProps } from "./ResourceEditButton";
-import { ResourceSettingDialog } from "./ResourceSettingDialog";
+import type {
+	EditResourceDialogProps,
+	LoadedResourceDialogProps,
+} from "./ResourceEditButton";
+import { ResourceLoader } from "./ResourceLoader";
 
 export default function TemplateEditDialog({
 	fileName,
 	handleDialogClose,
 	handleSave,
 }: EditResourceDialogProps) {
-	const { content, loading } = useResourceContent("template", fileName);
-	if (loading) {
-		return <StatusMessage kind="loading">Loading...</StatusMessage>;
-	}
 	return (
-		<Dialog
-			content={content}
+		<ResourceLoader
+			kind={"template"}
 			fileName={fileName}
-			handleDialogClose={handleDialogClose}
-			handleSave={handleSave}
-		/>
+			parser={CONTENT_PARSER}
+		>
+			{(content, location) => (
+				<Dialog
+					content={content}
+					location={location}
+					fileName={fileName}
+					handleDialogClose={handleDialogClose}
+					handleSave={handleSave}
+				/>
+			)}
+		</ResourceLoader>
 	);
 }
 
 function Dialog({
 	content: initialContent,
+	location,
 	fileName,
 	handleDialogClose,
 	handleSave,
-}: EditResourceDialogProps & { content: string }) {
+}: LoadedResourceDialogProps & { content: string }) {
 	const [content, setContent] = useState<string>(initialContent);
 	const saveContent = useSaveResourceContent("template");
 
 	return (
-		<ResourceSettingDialog
-			resourceKind={"template"}
+		<SettingDialog
+			location={location}
 			maximizable
 			title="Template File Edit"
 			helpCommand="dialogs/template-edit"
@@ -54,6 +63,6 @@ function Dialog({
 					onChange={(e) => setContent(e.target.value)}
 				/>
 			</DialogBody>
-		</ResourceSettingDialog>
+		</SettingDialog>
 	);
 }

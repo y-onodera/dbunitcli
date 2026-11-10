@@ -8,30 +8,15 @@ import {
 	logFetchError,
 	postJsonParams,
 } from "../utils/fetchUtils";
-import {
-	type ResourceParser,
-	useResourceLoad,
-	useSaveResource,
-} from "./useResourceFiles";
+import { type ResourceParser, useSaveResource } from "./useResourceFiles";
 
 export const useSaveXlsxSchema = () => {
 	return useSaveResource<XlsxSchema>("xlsxSchema");
 };
 
-const XLSX_SCHEMA_PARSER: ResourceParser<XlsxSchema> = {
+export const XLSX_SCHEMA_PARSER: ResourceParser<XlsxSchema> = {
 	empty: () => XlsxSchema.create(),
-	parse: (json) => XlsxSchema.build(json as XlsxSchemaBuilder),
-};
-
-export const useXlsxSchemaData = (
-	fileName: string,
-): { schema: XlsxSchema; loading: boolean } => {
-	const { data, loading } = useResourceLoad(
-		"xlsxSchema",
-		fileName,
-		XLSX_SCHEMA_PARSER,
-	);
-	return { schema: data, loading };
+	parse: (content) => XlsxSchema.build(content as XlsxSchemaBuilder),
 };
 
 // 空にするたびに別の配列を作って再描画しないよう共有する

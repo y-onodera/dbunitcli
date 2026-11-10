@@ -23,7 +23,6 @@ import { appendLogLines } from "./useJobLog";
 import {
 	type DatasetSettingKind,
 	type ResourceParser,
-	useResourceLoad,
 	useSaveResource,
 } from "./useResourceFiles";
 
@@ -293,21 +292,9 @@ export const useSaveDatasetSettings = (
 	return useSaveResource<DatasetSettings>(kind);
 };
 
-const DATASET_SETTINGS_PARSER: ResourceParser<DatasetSettings> = {
+export const DATASET_SETTINGS_PARSER: ResourceParser<DatasetSettings> = {
 	empty: () => DatasetSettings.create(),
-	parse: (json) => DatasetSettings.build(json as DatasetSettingsBuilder),
-};
-
-export const useDatasetSettingsData = (
-	fileName: string,
-	kind: DatasetSettingKind = "datasetSetting",
-): { settings: DatasetSettings; loading: boolean } => {
-	const { data, loading } = useResourceLoad(
-		kind,
-		fileName,
-		DATASET_SETTINGS_PARSER,
-	);
-	return { settings: data, loading };
+	parse: (content) => DatasetSettings.build(content as DatasetSettingsBuilder),
 };
 
 const IDLE_ALL_COLUMNS = idleLoad<Record<string, string[]>>({});

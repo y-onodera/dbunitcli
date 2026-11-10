@@ -40,14 +40,20 @@ public record ResourceFile(File baseDir, Set<String> files, Function<String, Opt
         return new ResourceFile(new File(workspace, path), toFile, defaultCharset);
     }
 
-    public Optional<String> read(final String name, final String encoding) {
+    /**
+     * 1回の探索で、内容と場所を合わせて返す（別々に探すと間でファイルが変わったときに食い違う）。見つからなければempty
+     */
+    public Optional<Loaded> load(final String name, final String encoding) {
         return this.select(name).map(it -> {
             try {
-                return Files.readString(it, this.charsetOf(encoding));
+                return new Loaded(Files.readString(it, this.charsetOf(encoding)), this.locationOf(it));
             } catch (final IOException e) {
                 throw new RuntimeException(e);
             }
         });
+    }
+
+    public record Loaded(String content, Location location) {
     }
 
     /**
@@ -88,7 +94,7 @@ public record ResourceFile(File baseDir, Set<String> files, Function<String, Opt
     }
 
     /**
-     * overwriteなら読込（{@link #read}）と同じ探索で見つかったファイルへ書き、そうでなければ{@link #update}と同じく保存する
+     * overwriteなら読込（{@link #load}）と同じ探索で見つかったファイルへ書き、そうでなければ{@link #update}と同じく保存する
      */
     public void save(final String name, final String contents, final String encoding, final boolean overwrite) throws IOException {
         if (!overwrite) {
@@ -99,20 +105,11 @@ public record ResourceFile(File baseDir, Set<String> files, Function<String, Opt
         Files.writeString(saveTo, contents, this.charsetOf(encoding));
     }
 
-    /**
-     * 読込と同じ探索で見つかったファイルの場所。見つからなければempty
-     */
-    public Optional<Location> locate(final String name) {
-        if (name == null || name.isEmpty()) {
-            return Optional.empty();
-        }
-        return this.select(name)
-                .map(it -> {
-                    final Path file = it.toAbsolutePath().normalize();
-                    final String fileName = file.getFileName().toString();
-                    return new Location(file.getParent().toString(), this.normalizedBaseDir().toString(), fileName,
-                            this.files.contains(fileName));
-                });
+    private Location locationOf(final Path found) {
+        final Path file = found.toAbsolutePath().normalize();
+        final String fileName = file.getFileName().toString();
+        return new Location(file.getParent().toString(), this.normalizedBaseDir().toString(), fileName,
+                this.files.contains(fileName));
     }
 
     /**
@@ -120,10 +117,6 @@ public record ResourceFile(File baseDir, Set<String> files, Function<String, Opt
      * fileName: ファイル名、defaultFolderHasFile: defaultFolder直下に同名のファイルがあるか
      */
     public record Location(String folder, String defaultFolder, String fileName, boolean defaultFolderHasFile) {
-    }
-
-    public void update(final String name, final byte[] contents) throws IOException {
-        Files.write(this.prepareUpdate(name), contents);
     }
 
     /** バイナリ等、既存ファイルの内容をそのまま取り込む（同名は上書き） */

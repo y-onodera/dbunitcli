@@ -41,7 +41,7 @@ const { mockSaveSettings } = vi.hoisted(() => ({
 }));
 vi.mock("../../../../../hooks/useDatasetSettings", () => ({
 	useSaveDatasetSettings: () => mockSaveSettings,
-	useDatasetSettingsData: () => ({ settings: null, loading: true }),
+	DATASET_SETTINGS_PARSER: {},
 	useDatasetTableNames: () => ({ tableNames: [], loading: false }),
 	useDatasetTablePreview: () => ({ preview: null, loading: false }),
 	useSrcInfoColumnNames: () => [],

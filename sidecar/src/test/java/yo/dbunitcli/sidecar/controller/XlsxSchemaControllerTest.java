@@ -67,7 +67,7 @@ class XlsxSchemaControllerTest {
         System.out.println(response);
         JsonTestHelper.assertJsonEquals(
                 Paths.get("src/test/resources/yo/dbunitcli/sidecar/controller/xlsx-schema-load-response.json"),
-                response);
+                JsonTestHelper.contentOf(response));
     }
 
     @Test
@@ -89,7 +89,7 @@ class XlsxSchemaControllerTest {
         System.out.println(loadResponse);
         JsonTestHelper.assertJsonEquals(
                 Paths.get("src/test/resources/yo/dbunitcli/sidecar/controller/xlsx-schema-save-load-response.json"),
-                loadResponse);
+                JsonTestHelper.contentOf(loadResponse));
     }
 
     @Test
@@ -103,7 +103,7 @@ class XlsxSchemaControllerTest {
         System.out.println(loadResponse);
         JsonTestHelper.assertJsonEquals(
                 Paths.get("src/test/resources/yo/dbunitcli/sidecar/controller/xlsx-schema-save-patterns-load-response.json"),
-                loadResponse);
+                JsonTestHelper.contentOf(loadResponse));
     }
 
     @Test

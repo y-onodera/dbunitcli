@@ -5,6 +5,7 @@ import {
 	SectionOptionHeader,
 } from "../../../components/dialog";
 import { BlueButton } from "../../../components/element/Button";
+import { useClearFieldErrors } from "../../../context/FieldErrorProvider";
 import { useSetJdbcConnectionState } from "../../../context/JdbcConnectionProvider";
 import {
 	useJdbcConnectionTest,
@@ -12,6 +13,7 @@ import {
 } from "../../../hooks/useJdbc";
 import type { JdbcOption } from "../../../model/CommandOption";
 import JdbcSavePropertiesDialog from "./dialog/JdbcSavePropertiesDialog";
+import { getName } from "./element/FormElementProp";
 import JdbcPropertiesTextField from "./element/JdbcPropertiesTextField";
 import JdbcUrlTextField from "./element/JdbcUrlTextField";
 import PlainText from "./element/PlainText";
@@ -50,6 +52,7 @@ function JdbcFormSectionContent({
 }) {
 	const { prefix } = jdbcOption;
 	const setJdbcConnection = useSetJdbcConnectionState();
+	const clearFieldErrors = useClearFieldErrors();
 	const [jdbcValues, setJdbcValues] = useState<Record<string, string>>(() => ({
 		jdbcUrl: jdbcOption.jdbcUrl.value,
 		jdbcUser: jdbcOption.jdbcUser.value,
@@ -77,6 +80,13 @@ function JdbcFormSectionContent({
 	const handleConnectionFail = () => {
 		setJdbcConnection({ jdbcValues: {}, connectionOk: false });
 	};
+
+	// 保存したファイルをjdbcPropertiesに入れる。jdbcUrl・jdbcUser・jdbcPassは入力のまま残す
+	const handlePropertiesSaved = (path: string) => {
+		const { name } = jdbcOption.jdbcProperties;
+		handleJdbcValueChange(name, path);
+		clearFieldErrors(getName(prefix, name));
+	};
 	return (
 		<SectionFieldset>
 			<legend>jdbc</legend>
@@ -89,7 +99,10 @@ function JdbcFormSectionContent({
 			/>
 			<JdbcPropertiesTextField
 				prefix={prefix}
-				element={jdbcOption.jdbcProperties}
+				element={{
+					...jdbcOption.jdbcProperties,
+					value: jdbcValues.jdbcProperties,
+				}}
 				onValueChange={handleJdbcValueChange}
 				hidden={!showOptional}
 			/>
@@ -122,7 +135,11 @@ function JdbcFormSectionContent({
 					onConnectionOk={handleConnectionOk}
 					onConnectionFail={handleConnectionFail}
 				/>
-				<JdbcSavePropertiesButton prefix={prefix} jdbcValues={jdbcValues} />
+				<JdbcSavePropertiesButton
+					prefix={prefix}
+					jdbcValues={jdbcValues}
+					onSaved={handlePropertiesSaved}
+				/>
 			</InlineActions>
 		</SectionFieldset>
 	);
@@ -194,9 +211,11 @@ function JdbcConnectionTestButton({
 function JdbcSavePropertiesButton({
 	prefix,
 	jdbcValues,
+	onSaved,
 }: {
 	prefix: string;
 	jdbcValues: Record<string, string>;
+	onSaved: (path: string) => void;
 }) {
 	const saveJdbcProperties = useSaveJdbcProperties();
 	const [showDialog, setShowDialog] = useState(false);
@@ -216,8 +235,13 @@ function JdbcSavePropertiesButton({
 				<JdbcSavePropertiesDialog
 					jdbcValues={jdbcValues}
 					handleDialogClose={() => setShowDialog(false)}
-					save={(name) => saveJdbcProperties(name, jdbcValues)}
-					handleSave={() => setShowDialog(false)}
+					save={(name, overwrite) =>
+						saveJdbcProperties(name, jdbcValues, overwrite)
+					}
+					handleSave={(path) => {
+						setShowDialog(false);
+						onSaved(path);
+					}}
 				/>
 			)}
 		</>

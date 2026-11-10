@@ -1,11 +1,7 @@
 import { useState } from "react";
+import { SettingDialog, SettingTable } from "../../../../components/dialog";
 import {
-	SettingDialog,
-	SettingTable,
-	StatusMessage,
-} from "../../../../components/dialog";
-import {
-	useDatasetSettingsData,
+	DATASET_SETTINGS_PARSER,
 	useSaveDatasetSettings,
 } from "../../../../hooks/useDatasetSettings";
 import type { DatasetSettingKind } from "../../../../hooks/useResourceFiles";
@@ -16,7 +12,8 @@ import {
 } from "../../../../model/DatasetSettings";
 import ColumnDatalistDialog from "./ColumnDatalistDialog";
 import { FilterOrderFields, TargetFields } from "./DatasetSettingFields";
-import { ResourceSettingDialog } from "./ResourceSettingDialog";
+import type { LoadedResourceDialogProps } from "./ResourceEditButton";
+import { ResourceLoader } from "./ResourceLoader";
 import { useColumnCandidates } from "./useColumnCandidates";
 
 const keysOnly = ["keys"] as const;
@@ -37,39 +34,40 @@ export default function CompareKeySettingsDialog(props: {
 	handleSave: (path: string) => void;
 	kind: DatasetSettingKind;
 }) {
-	const { settings, loading } = useDatasetSettingsData(
-		props.fileName,
-		props.kind,
-	);
-	if (loading) {
-		return <StatusMessage kind="loading">Loading...</StatusMessage>;
-	}
 	return (
-		<CompareKeySettingsEditDialog
-			settings={settings}
-			fileName={props.fileName}
-			handleDialogClose={props.handleDialogClose}
-			handleSave={props.handleSave}
+		<ResourceLoader
 			kind={props.kind}
-		/>
+			fileName={props.fileName}
+			parser={DATASET_SETTINGS_PARSER}
+		>
+			{(settings, location) => (
+				<CompareKeySettingsEditDialog
+					settings={settings}
+					location={location}
+					fileName={props.fileName}
+					handleDialogClose={props.handleDialogClose}
+					handleSave={props.handleSave}
+					kind={props.kind}
+				/>
+			)}
+		</ResourceLoader>
 	);
 }
 
 // 編集するのは対象テーブルとkeysだけ。ファイルにあるそれ以外の項目（filter・outputFilter・import等）は保存時もそのまま残る
-export function CompareKeySettingsEditDialog(props: {
-	settings: DatasetSettings;
-	fileName: string;
-	handleDialogClose: () => void;
-	handleSave: (path: string) => void;
-	kind: DatasetSettingKind;
-}) {
+export function CompareKeySettingsEditDialog(
+	props: LoadedResourceDialogProps & {
+		settings: DatasetSettings;
+		kind: DatasetSettingKind;
+	},
+) {
 	const saveSettings = useSaveDatasetSettings(props.kind);
 	const [dataSettings, setDataSettings] = useState<DatasetSettings>(
 		props.settings,
 	);
 	return (
-		<ResourceSettingDialog
-			resourceKind={props.kind}
+		<SettingDialog
+			location={props.location}
 			title="Compare Key Settings"
 			helpCommand="dialogs/compare-key-settings"
 			helpLabel="Compare Key Settings"
@@ -102,7 +100,7 @@ export function CompareKeySettingsEditDialog(props: {
 				SettingDialogComponent={CompareKeySettingDialog}
 				newSetting={newDatasetSetting}
 			/>
-		</ResourceSettingDialog>
+		</SettingDialog>
 	);
 }
 

@@ -10,14 +10,14 @@ import {
 	ModelGenerateButton,
 	type ModelGenerateConfig,
 } from "./GenerateDialog";
+import type { LoadedResourceDialogProps } from "./ResourceEditButton";
 
-export type DatasetSettingsEditDialogComponent = ComponentType<{
-	settings: DatasetSettings;
-	fileName: string;
-	handleDialogClose: () => void;
-	handleSave: (fileName: string) => void;
-	kind: DatasetSettingKind;
-}>;
+export type DatasetSettingsEditDialogComponent = ComponentType<
+	LoadedResourceDialogProps & {
+		settings: DatasetSettings;
+		kind: DatasetSettingKind;
+	}
+>;
 
 // 生成後は渡された編集ダイアログで内容確認し、kindの保存先へ命名保存する
 function datasetSettingGenerateConfig(
