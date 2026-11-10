@@ -7,6 +7,7 @@ import {
 	type ResourceKind,
 	useDeleteResource,
 } from "../../../../hooks/useResourceFiles";
+import { reportError } from "../../../../utils/fetchUtils";
 
 export type ResourceEditButtonProp = {
 	path: string;
@@ -45,7 +46,7 @@ async function confirmAndDelete(
 		}
 		alert("削除に失敗しました");
 	} catch (ex) {
-		alert(ex);
+		reportError("Delete failed", ex);
 	}
 	return false;
 }

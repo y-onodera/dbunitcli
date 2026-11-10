@@ -1,4 +1,3 @@
-import { core } from "@tauri-apps/api";
 import { useEffect, useState } from "react";
 import { SectionHelpButton } from "../../components/dialog";
 import { BlueButton, WhiteButton } from "../../components/element/Button";
@@ -18,6 +17,7 @@ import {
 	useSaveShell,
 } from "../../hooks/useSelectParameter";
 import type { CollectedFormValues, FormValues } from "../../utils/formValues";
+import { openDirectory } from "../../utils/openDirectory";
 import { ParameterInputDialog } from "../form/section/dialog/ParameterInputDialog";
 import ResultDialog from "./ResultDialog";
 
@@ -75,10 +75,6 @@ export default function Footer(prop: {
 		);
 
 	const handleSaveShell = () => run(({ signal }) => saveShell(signal));
-
-	const openDirectory = async (path: string) => {
-		await core.invoke("open_directory", { path });
-	};
 
 	const handleCancel = () => {
 		job.cancel();

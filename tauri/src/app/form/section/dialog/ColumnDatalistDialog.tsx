@@ -15,7 +15,10 @@ import { JobProgress } from "../../../../components/element/JobProgress";
 import { useDatasetSrcInfo } from "../../../../context/DatasetSrcInfoProvider";
 import { useColumnNamesFetcher } from "../../../../hooks/useDatasetSettings";
 import { useJob } from "../../../../hooks/useJob";
-import type { DatasetSetting } from "../../../../model/DatasetSettings";
+import type {
+	DatasetSetting,
+	Pattern,
+} from "../../../../model/DatasetSettings";
 
 export default function ColumnDatalistDialog({
 	tableNames,
@@ -105,13 +108,27 @@ function filterTablesByTarget(
 		const nameSet = new Set(target.name.map((n) => n.toLowerCase()));
 		return tableNames.filter((t) => nameSet.has(t.toLowerCase()));
 	}
-	if (target.handler() === "pattern" && target.pattern?.string) {
-		try {
-			const regex = new RegExp(target.pattern.string, "i");
-			return tableNames.filter((t) => regex.test(t));
-		} catch {
-			return tableNames;
-		}
+	if (target.handler() === "pattern" && target.pattern) {
+		const matches = patternMatcher(target.pattern);
+		const exclude = target.pattern.exclude ?? [];
+		return tableNames.filter((t) => matches(t) && !exclude.includes(t));
 	}
 	return tableNames;
+}
+
+// 判定は core: TableMetaDataFilterParser#parseContainFilter に合わせる。不正な正規表現や未入力なら絞らない
+function patternMatcher(pattern: Pattern): (tableName: string) => boolean {
+	if (pattern.regex) {
+		try {
+			const regex = new RegExp(`^(?:${pattern.regex})$`);
+			return (tableName) => regex.test(tableName);
+		} catch {
+			return () => true;
+		}
+	}
+	const text = pattern.string;
+	if (!text || text === "*") {
+		return () => true;
+	}
+	return (tableName) => tableName.includes(text);
 }

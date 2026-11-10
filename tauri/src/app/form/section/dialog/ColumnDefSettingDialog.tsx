@@ -16,6 +16,8 @@ export default function ColumnDefSettingDialog(props: {
 	handleCommit: (newSetting: ColumnDef) => void;
 }) {
 	const [target, setTarget] = useState(props.setting);
+	// 打ち直すために空にできるよう、入力中の文字列はモデルの数値と別に持つ
+	const [lengthText, setLengthText] = useState(String(props.setting.length));
 	const datasetSrcInfo = useDatasetSrcInfo();
 	const columnNames = useSrcInfoColumnNames(datasetSrcInfo);
 
@@ -39,12 +41,12 @@ export default function ColumnDefSettingDialog(props: {
 				/>
 				<Text
 					name="length"
-					value={String(target.length)}
-					handleChange={(ev) =>
-						setTarget((cur) =>
-							cur.with({ length: Number(ev.target.value) || 0 }),
-						)
-					}
+					value={lengthText}
+					handleChange={(ev) => {
+						const text = ev.target.value.replace(/[^0-9]/g, "");
+						setLengthText(text);
+						setTarget((cur) => cur.with({ length: Number(text) }));
+					}}
 				/>
 				<Select
 					name="align"

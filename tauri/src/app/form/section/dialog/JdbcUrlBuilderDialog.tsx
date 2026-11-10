@@ -4,6 +4,7 @@ import {
 	DialogField,
 	DialogTitle,
 	SettingDialog,
+	StatusMessage,
 } from "../../../../components/dialog";
 import { BlueEditButton } from "../../../../components/element/ButtonIcon";
 import {
@@ -67,6 +68,12 @@ export default function JdbcUrlBuilderDialog({
 		>
 			<DialogBody size="sm">
 				<DialogTitle>JDBC URL Builder</DialogTitle>
+				{currentUrl && parsed.rdbType === undefined && (
+					// 組み立てられない種類のURLは初期値がOracleになり、Applyで置き換わることを知らせる
+					<StatusMessage kind="error">
+						Unsupported URL: {currentUrl}. Apply replaces it with the URL below.
+					</StatusMessage>
+				)}
 
 				<DialogField>
 					<InputLabel

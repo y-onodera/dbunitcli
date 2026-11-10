@@ -4,6 +4,9 @@ import FieldErrorMessages from "./FieldErrorMessages";
 import type { SelectProp } from "./FormElementProp";
 import { getId, getName } from "./FormElementProp";
 
+// 選択値をフォームの値として送るだけで、再構成が要らないSelectのhandleTypeSelect
+export async function ignoreSelect(_: string): Promise<void> {}
+
 export default function Select(prop: SelectProp) {
 	const id = getId(prop.prefix, prop.element.name);
 	const name = getName(prop.prefix, prop.element.name);

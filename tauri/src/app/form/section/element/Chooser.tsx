@@ -1,4 +1,3 @@
-import { core } from "@tauri-apps/api";
 import { sep } from "@tauri-apps/api/path";
 import { open } from "@tauri-apps/plugin-dialog";
 import { useEffect, useRef } from "react";
@@ -9,6 +8,8 @@ import {
 } from "../../../../components/element/ButtonIcon";
 import { useWorkspaceContext } from "../../../../context/WorkspaceResourcesProvider";
 import { useResolveAbsolutePath } from "../../../../hooks/useWorkspaceResources";
+import { reportError } from "../../../../utils/fetchUtils";
+import { openDirectory } from "../../../../utils/openDirectory";
 import type { FileProp } from "./FormElementProp";
 
 function useChooserHandler(prop: FileProp, directory?: boolean) {
@@ -24,31 +25,30 @@ function useChooserHandler(prop: FileProp, directory?: boolean) {
 	}, []);
 	return () => {
 		const basePath = context.getPath(prop.element.attribute.defaultPath);
-		const workspacePath = context.workspace;
-		resolveAbsolutePath(prop.path, prop.element.attribute).then((defaultPath) =>
-			open({ defaultPath, directory }).then((files) => {
+		resolveAbsolutePath(prop.path, prop.element.attribute)
+			.then((defaultPath) => open({ defaultPath, directory }))
+			.then((files) => {
 				if (files && !abortControllerRef.current?.signal.aborted) {
 					const fullPath = files as string;
-					const primaryPrefix = basePath + sep();
-					const secondaryPrefix = workspacePath + sep();
-					let relative: string;
-					if (fullPath.startsWith(primaryPrefix)) {
-						relative = fullPath.slice(primaryPrefix.length);
-					} else if (
-						workspacePath !== "" &&
-						workspacePath !== basePath &&
-						fullPath.startsWith(secondaryPrefix)
-					) {
-						relative = fullPath.slice(secondaryPrefix.length);
-					} else {
-						relative = fullPath;
-					}
-					prop.setPath(relative);
+					prop.setPath(
+						relativeTo(fullPath, basePath) ??
+							relativeTo(fullPath, context.workspace) ??
+							fullPath,
+					);
 					prop.onSelect?.();
 				}
-			}),
-		);
+			})
+			.catch((ex) => reportError("Failed to choose a file", ex));
 	};
+}
+
+// baseの配下ならbaseからの相対パス、そうでなければundefined。baseが空なら相対化しない
+function relativeTo(fullPath: string, base: string): string | undefined {
+	const prefix = base + sep();
+	if (base === "" || !fullPath.startsWith(prefix)) {
+		return undefined;
+	}
+	return fullPath.slice(prefix.length);
 }
 
 export function FileChooser(prop: FileProp) {
@@ -69,7 +69,7 @@ export function OpenInOS(prop: FileProp) {
 			prop.path,
 			prop.element.attribute,
 		);
-		await core.invoke("open_directory", { path: absolutePath });
+		await openDirectory(absolutePath);
 	};
 	return <OpenButton handleClick={handleOpen} />;
 }

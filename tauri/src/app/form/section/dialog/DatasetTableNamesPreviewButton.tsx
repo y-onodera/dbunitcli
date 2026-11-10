@@ -282,16 +282,19 @@ export function TablePreviewTable({
 					: `${totalRows} rows`}
 			</p>
 			<DataTable
-				head={preview.headers.map((header) => (
-					<Th key={header} nowrap>
+				head={preview.headers.map((header, i) => (
+					// biome-ignore lint/suspicious/noArrayIndexKey: 同名の列があり得るうえ、表示専用で並び替えない
+					<Th key={i} nowrap>
 						{header}
 					</Th>
 				))}
 			>
-				{preview.rows?.map((row) => (
-					<Tr key={row.join("\x00")}>
-						{preview.headers.map((header, i) => (
-							<Td key={header} nowrap>
+				{preview.rows?.map((row, rowIndex) => (
+					// biome-ignore lint/suspicious/noArrayIndexKey: 同じ内容の行があり得るうえ、表示専用で並び替えない
+					<Tr key={rowIndex}>
+						{preview.headers.map((_, i) => (
+							// biome-ignore lint/suspicious/noArrayIndexKey: 列の位置で対応付ける
+							<Td key={i} nowrap>
 								{row[i] ?? ""}
 							</Td>
 						))}

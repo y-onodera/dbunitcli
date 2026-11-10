@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import {
 	InlineActions,
 	SectionFieldset,
@@ -30,12 +30,20 @@ export default function JdbcFormSection({
 		jdbcProperties: jdbcOption.jdbcProperties.value,
 	}));
 
+	// 接続テストの応答が届く前に入力が変わったら、その結果で接続済みにしない
+	const latestJdbcValuesRef = useRef(jdbcValues);
+
 	const handleJdbcValueChange = (name: string, value: string) => {
-		setJdbcValues((prev) => ({ ...prev, [name]: value }));
+		const next = { ...latestJdbcValuesRef.current, [name]: value };
+		latestJdbcValuesRef.current = next;
+		setJdbcValues(next);
 		setJdbcConnection({ jdbcValues: {}, connectionOk: false });
 	};
 
 	const handleConnectionOk = (values: Record<string, string>) => {
+		if (values !== latestJdbcValuesRef.current) {
+			return;
+		}
 		setJdbcConnection({ jdbcValues: values, connectionOk: true });
 	};
 
@@ -108,9 +116,11 @@ function JdbcConnectionTestButton({
 	onConnectionFail: () => void;
 }) {
 	const jdbcConnectionTest = useJdbcConnectionTest();
+	// 結果はテストした値と組で持ち、入力が変わったら出さない
 	const [result, setResult] = useState<{
 		success: boolean;
 		message: string;
+		values: Record<string, string>;
 	} | null>(null);
 	const [testing, setTesting] = useState(false);
 
@@ -125,7 +135,7 @@ function JdbcConnectionTestButton({
 		// catchの無いtry/finallyはReact Compilerが未対応のため、Promiseのfinallyで書く
 		await jdbcConnectionTest(jdbcValues)
 			.then((testResult) => {
-				setResult(testResult);
+				setResult(testResult && { ...testResult, values: jdbcValues });
 				if (testResult?.success) {
 					onConnectionOk(jdbcValues);
 				} else {
@@ -145,7 +155,7 @@ function JdbcConnectionTestButton({
 				id={`${prefix}_jdbcConnectionTest`}
 				handleClick={handleTest}
 			/>
-			{result && (
+			{result && result.values === jdbcValues && (
 				<span
 					className={`text-sm font-medium ${result.success ? "text-success" : "text-error"}`}
 				>

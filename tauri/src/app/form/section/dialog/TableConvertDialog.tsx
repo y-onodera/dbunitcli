@@ -1,4 +1,3 @@
-import { core } from "@tauri-apps/api";
 import { useState } from "react";
 import {
 	DialogBody,
@@ -7,10 +6,10 @@ import {
 	FullDialog,
 } from "../../../../components/dialog";
 import { BlueButton, WhiteButton } from "../../../../components/element/Button";
-import { JdbcConnectionProvider } from "../../../../context/JdbcConnectionProvider";
 import type { JobContext } from "../../../../hooks/useJob";
 import type { ConvertOptions } from "../../../../model/SelectParameter";
 import type { FormValues } from "../../../../utils/formValues";
+import { openDirectory } from "../../../../utils/openDirectory";
 import ResultFormSection from "../ResultFormSection";
 import { RefreshableDialogShell } from "./RefreshableDialogShell";
 import { useRefreshableDialog } from "./useRefreshableDialog";
@@ -27,7 +26,6 @@ export default function TableConvertDialog({
 	onClose,
 }: {
 	tableName: string;
-	// 読込元のJDBC接続はプレビュー側で確定させたものを使う（下のJdbcConnectionProviderの影響を受けない）
 	convert: TableConvert;
 	onClose: () => void;
 }) {
@@ -41,16 +39,13 @@ export default function TableConvertDialog({
 			/>
 		);
 	}
-	// resultのjdbc入力で読込元（プレビュー）の接続状態を書き換えないよう分離する
 	return (
-		<JdbcConnectionProvider>
-			<TableConvertFormDialog
-				tableName={tableName}
-				convert={convert}
-				onDone={setResultDir}
-				onClose={onClose}
-			/>
-		</JdbcConnectionProvider>
+		<TableConvertFormDialog
+			tableName={tableName}
+			convert={convert}
+			onDone={setResultDir}
+			onClose={onClose}
+		/>
 	);
 }
 
@@ -116,9 +111,7 @@ function TableConvertResultDialog({
 				{resultDir && (
 					<BlueButton
 						title="Open Directory"
-						handleClick={() =>
-							core.invoke("open_directory", { path: resultDir })
-						}
+						handleClick={() => openDirectory(resultDir)}
 					/>
 				)}
 				<WhiteButton title="Close" handleClick={onClose} />

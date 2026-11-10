@@ -173,7 +173,9 @@ export class XlsxSchema {
 	// sheetPatternはcoreの形式(トップレベルのpatternsに登録し、sheetNameでそのキーを参照する)にして保存する
 	toJSON() {
 		const patterns: Record<string, SheetPattern> = {};
-		const toSaved = <T extends SheetTarget>(settings: T[]) =>
+		const toSaved = <T extends SheetTarget & CommaSeparatedFields>(
+			settings: T[],
+		) =>
 			settings.flatMap(({ sheetPattern, ...rest }) => {
 				const sheet = savedSheet({ ...rest, sheetPattern });
 				if (!rest.tableName || !sheet.sheetName) {
@@ -182,7 +184,7 @@ export class XlsxSchema {
 				if (sheet.pattern) {
 					patterns[sheet.sheetName] = sheet.pattern;
 				}
-				return [{ ...rest, sheetName: sheet.sheetName }];
+				return [{ ...withoutBlankEntries(rest), sheetName: sheet.sheetName }];
 			});
 		const rows = toSaved(this.rows);
 		const cells = toSaved(this.cells);
@@ -212,6 +214,33 @@ type SheetTarget = {
 	sheetPattern?: SheetPattern;
 	tableName: string;
 };
+
+// カンマ区切りで入力する項目
+type CommaSeparatedFields = {
+	header: string[];
+	columnIndex?: string[];
+	breakKey?: string[];
+	rows?: { cellAddress: string[] }[];
+};
+
+function nonBlank(values: string[]): string[] {
+	return values.filter((it) => it !== "");
+}
+
+// カンマ区切りの入力欄を空にすると[""]になるため、空文字の要素と、セル番地が空になったrowsの要素は保存しない
+function withoutBlankEntries<T extends CommaSeparatedFields>(setting: T): T {
+	return {
+		...setting,
+		header: nonBlank(setting.header),
+		...(setting.columnIndex && { columnIndex: nonBlank(setting.columnIndex) }),
+		...(setting.breakKey && { breakKey: nonBlank(setting.breakKey) }),
+		...(setting.rows && {
+			rows: setting.rows
+				.map((row) => ({ cellAddress: nonBlank(row.cellAddress) }))
+				.filter((row) => row.cellAddress.length > 0),
+		}),
+	};
+}
 
 // 保存するsheetName(パターン指定ならpatternsのキー)と、patternsに登録するパターン。未指定ならsheetNameは空文字
 function savedSheet(setting: SheetTarget): {

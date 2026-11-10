@@ -17,6 +17,7 @@ import { ResourceDatalist } from "../../../../components/element/Input";
 import type {
 	DatasetSetting,
 	DatasetSettingMode,
+	JoinCondition,
 } from "../../../../model/DatasetSettings";
 import { newDatasetSetting } from "../../../../model/DatasetSettings";
 import {
@@ -566,17 +567,15 @@ function TargetContent({
 				/>
 				<Select
 					name="condition"
-					defaultValue={target.join()?.on ? "on" : "column"}
+					defaultValue={target.joinCondition()}
 					handleOnChange={async (select) =>
-						setTarget((cur) =>
-							cur.replaceJoin({ [select]: select === "on" ? "" : [] }),
-						)
+						setTarget((cur) => cur.selectJoinCondition(select as JoinCondition))
 					}
 				>
 					<option value="on">on</option>
 					<option value="column">column</option>
 				</Select>
-				{target.join()?.on ? (
+				{target.joinCondition() === "on" ? (
 					<Text
 						name="on"
 						ignoreLabel={true}

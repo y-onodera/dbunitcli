@@ -225,6 +225,38 @@ describe("XlsxSchemaクラス", () => {
 		expect(json.rows[0].sheetName).toBe("Sheet1");
 		expect(json.cells[0].sheetName).toBe("Sheet2");
 	});
+
+	it("空にしたカンマ区切りの欄・セル番地は保存しないこと", () => {
+		const schema = new XlsxSchema(
+			[
+				new RowSetting({
+					sheetName: "Sheet1",
+					tableName: "Table1",
+					header: [""],
+					columnIndex: ["A", ""],
+					breakKey: [""],
+				}),
+			],
+			[
+				new CellSetting({
+					sheetName: "Sheet2",
+					tableName: "Table2",
+					header: ["H1", ""],
+					rows: [{ cellAddress: [""] }, { cellAddress: ["A1", ""] }],
+				}),
+			],
+		);
+		const json = schema.toJSON();
+		expect(json.rows[0]).toMatchObject({
+			header: [],
+			columnIndex: ["A"],
+			breakKey: [],
+		});
+		expect(json.cells[0]).toMatchObject({
+			header: ["H1"],
+			rows: [{ cellAddress: ["A1"] }],
+		});
+	});
 });
 
 describe("XlsxSchemaのシートパターン", () => {

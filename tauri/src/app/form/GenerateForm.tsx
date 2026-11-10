@@ -20,7 +20,7 @@ import DatasetSettingText from "./section/element/DatasetSettingText";
 import EncodingText from "./section/element/EncodingText";
 import FileText from "./section/element/FileText";
 import PlainText from "./section/element/PlainText";
-import Select from "./section/element/Select";
+import Select, { ignoreSelect } from "./section/element/Select";
 import TemplateText from "./section/element/TemplateText";
 import JxlsFormSection from "./section/JxlsFormSection";
 import TemplateFormSection, {
@@ -139,9 +139,7 @@ export function GenerateForm(prop: {
 						<Select
 							prefix=""
 							element={generate.op}
-							handleTypeSelect={(_: string) => {
-								return new Promise((_) => {});
-							}}
+							handleTypeSelect={ignoreSelect}
 						/>
 					)}
 					{generate.sqlFilePrefix && (
