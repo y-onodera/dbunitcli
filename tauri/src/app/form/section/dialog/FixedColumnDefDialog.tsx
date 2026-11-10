@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { SettingTable, StatusMessage } from "../../../../components/dialog";
+import { SettingTable } from "../../../../components/dialog";
 import {
-	useFixedColumnDefData,
+	FIXED_COLUMN_DEF_PARSER,
 	useSaveFixedColumnDef,
 } from "../../../../hooks/useFixedColumnDef";
 import {
@@ -10,6 +10,7 @@ import {
 	FixedColumnDef,
 } from "../../../../model/FixedColumnDef";
 import ColumnDefSettingDialog from "./ColumnDefSettingDialog";
+import { ResourceLoader } from "./ResourceLoader";
 import { ResourceSettingDialog } from "./ResourceSettingDialog";
 
 export default function FixedColumnDefDialog(props: {
@@ -17,17 +18,21 @@ export default function FixedColumnDefDialog(props: {
 	handleDialogClose: () => void;
 	handleSave: (path: string) => void;
 }) {
-	const { def, loading } = useFixedColumnDefData(props.fileName);
-	if (loading) {
-		return <StatusMessage kind="loading">Loading...</StatusMessage>;
-	}
 	return (
-		<FixedColumnDefEditDialog
-			def={def}
+		<ResourceLoader
+			kind="fixedColumnDef"
 			fileName={props.fileName}
-			handleDialogClose={props.handleDialogClose}
-			handleSave={props.handleSave}
-		/>
+			parser={FIXED_COLUMN_DEF_PARSER}
+		>
+			{(def) => (
+				<FixedColumnDefEditDialog
+					def={def}
+					fileName={props.fileName}
+					handleDialogClose={props.handleDialogClose}
+					handleSave={props.handleSave}
+				/>
+			)}
+		</ResourceLoader>
 	);
 }
 

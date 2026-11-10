@@ -13,7 +13,17 @@ const { mockSave, mockTableNames, srcInfoFixture } = vi.hoisted(() => ({
 }));
 vi.mock("../../../../../hooks/useXlsxSchema", () => ({
 	useSaveXlsxSchema: () => mockSave,
-	useXlsxSchemaData: () => ({ schema: XlsxSchema.create(), loading: false }),
+	XLSX_SCHEMA_PARSER: {},
+}));
+vi.mock("../../../../../hooks/useResourceFiles", async (importOriginal) => ({
+	...(await importOriginal<
+		typeof import("../../../../../hooks/useResourceFiles")
+	>()),
+	useResourceLoad: () => ({
+		data: XlsxSchema.create(),
+		location: null,
+		loading: false,
+	}),
 }));
 vi.mock("../../../../../hooks/useDatasetSettings", () => ({
 	useDatasetTableNames: (srcInfo: DatasetSrcInfo) => {

@@ -1,9 +1,9 @@
 import { useState } from "react";
-import { SettingTable, StatusMessage } from "../../../../components/dialog";
+import { SettingTable } from "../../../../components/dialog";
 import { useDatasetSrcInfo } from "../../../../context/DatasetSrcInfoProvider";
 import {
 	useSaveXlsxSchema,
-	useXlsxSchemaData,
+	XLSX_SCHEMA_PARSER,
 } from "../../../../hooks/useXlsxSchema";
 import { srcTypeOf, withValues } from "../../../../model/CommandOption";
 import type { CellSetting, RowSetting } from "../../../../model/XlsxSchema";
@@ -13,6 +13,7 @@ import {
 	XlsxSchema,
 } from "../../../../model/XlsxSchema";
 import { SaveAndPreviewButton } from "./DatasetTableNamesPreviewButton";
+import { ResourceLoader } from "./ResourceLoader";
 import { ResourceSettingDialog } from "./ResourceSettingDialog";
 import XlsxCellSettingDialog from "./XlsxCellSettingDialog";
 import XlsxRowSettingDialog from "./XlsxRowSettingDialog";
@@ -22,17 +23,21 @@ export default function XlsxSchemaDialog(props: {
 	handleDialogClose: () => void;
 	handleSave: (path: string) => void;
 }) {
-	const { schema, loading } = useXlsxSchemaData(props.fileName);
-	if (loading) {
-		return <StatusMessage kind="loading">Loading...</StatusMessage>;
-	}
 	return (
-		<XlsxSchemaEditDialog
-			schema={schema}
+		<ResourceLoader
+			kind="xlsxSchema"
 			fileName={props.fileName}
-			handleDialogClose={props.handleDialogClose}
-			handleSave={props.handleSave}
-		/>
+			parser={XLSX_SCHEMA_PARSER}
+		>
+			{(schema) => (
+				<XlsxSchemaEditDialog
+					schema={schema}
+					fileName={props.fileName}
+					handleDialogClose={props.handleDialogClose}
+					handleSave={props.handleSave}
+				/>
+			)}
+		</ResourceLoader>
 	);
 }
 export function XlsxSchemaEditDialog(props: {

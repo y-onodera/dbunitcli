@@ -68,6 +68,6 @@ class OptionSettingControllerTest {
     void testLoad_resourcesのsettingにあるファイルは読まない(final String command) {
         final String loaded = this.client.toBlocking()
                 .retrieve(HttpRequest.POST("dbunit-cli/" + command + "/setting/load", "{\"name\":\"test.json\"}"));
-        Assertions.assertEquals("{}", loaded);
+        JsonTestHelper.assertJsonEquals("{\"content\":{},\"location\":null}", loaded);
     }
 }

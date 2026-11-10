@@ -6,7 +6,8 @@ import {
 } from "../../context/EnvironmentProvider";
 import { ResourceEncodingProvider } from "../../context/ResourceEncodingProvider";
 import WorkspaceResourcesProvider from "../../context/WorkspaceResourcesProvider";
-import { useXlsxSchemaData } from "../../hooks/useXlsxSchema";
+import { useResourceLoad } from "../../hooks/useResourceFiles";
+import { XLSX_SCHEMA_PARSER } from "../../hooks/useXlsxSchema";
 import type { WorkspaceResources } from "../../model/WorkspaceResources";
 import type { XlsxSchemaBuilder } from "../../model/XlsxSchema";
 import { XlsxSchema } from "../../model/XlsxSchema";
@@ -59,7 +60,19 @@ const { mockFetchData, mockFetchAndUpdate } = vi.hoisted(() => {
 			);
 		}
 		if (params.endpoint.includes("/xlsx-schema/load")) {
-			return Promise.resolve(new Response(JSON.stringify(mockXlsxSchema)));
+			return Promise.resolve(
+				new Response(
+					JSON.stringify({
+						content: mockXlsxSchema,
+						location: {
+							folder: "/ws/resources/xlsx-schema",
+							defaultFolder: "/ws/resources/xlsx-schema",
+							fileName: "test-setting",
+							defaultFolderHasFile: true,
+						},
+					}),
+				),
+			);
 		}
 		return Promise.resolve(new Response());
 	});
@@ -81,44 +94,50 @@ vi.mock("../../utils/fetchUtils", async (importOriginal) => ({
 }));
 
 describe("XlsxSchemaProviderのテスト", () => {
-	describe("useXlsxSchemaData", () => {
+	describe("XLSX_SCHEMA_PARSERでの読込（useResourceLoad）", () => {
 		it("名前が空文字の場合にデフォルト値を返しloadingがfalseになることを確認", async () => {
-			const { result, rerender } = renderHook(() => useXlsxSchemaData(""), {
-				wrapper,
-			});
+			const { result, rerender } = renderHook(
+				() => useResourceLoad("xlsxSchema", "", XLSX_SCHEMA_PARSER),
+				{
+					wrapper,
+				},
+			);
 			await act(async () => {
 				rerender();
 			});
 			expect(result.current.loading).toBe(false);
-			expect(result.current.schema).toEqual(XlsxSchema.create());
+			expect(result.current.data).toEqual(XlsxSchema.create());
 		});
 
 		it("正常なロードが行われることを確認", async () => {
 			const { result, rerender } = renderHook(
-				() => useXlsxSchemaData("test-setting"),
+				() => useResourceLoad("xlsxSchema", "test-setting", XLSX_SCHEMA_PARSER),
 				{ wrapper },
 			);
 			await act(async () => {
 				rerender();
 			});
 			expect(result.current.loading).toBe(false);
-			expect(result.current.schema.rows).toHaveLength(1);
-			expect(result.current.schema.cells).toHaveLength(1);
+			expect(result.current.data.rows).toHaveLength(1);
+			expect(result.current.data.cells).toHaveLength(1);
 		});
 
 		it("ResourceEncodingProviderのxlsxSchemaの文字コードで読み込むことを確認", async () => {
 			mockFetchData.mockClear();
-			const { rerender } = renderHook(() => useXlsxSchemaData("test-setting"), {
-				wrapper: ({ children }: { children: React.ReactNode }) => (
-					<MockProvider>
-						<ResourceEncodingProvider
-							encodings={{ xlsxSchema: "MS932", datasetSetting: "UTF-8" }}
-						>
-							{children}
-						</ResourceEncodingProvider>
-					</MockProvider>
-				),
-			});
+			const { rerender } = renderHook(
+				() => useResourceLoad("xlsxSchema", "test-setting", XLSX_SCHEMA_PARSER),
+				{
+					wrapper: ({ children }: { children: React.ReactNode }) => (
+						<MockProvider>
+							<ResourceEncodingProvider
+								encodings={{ xlsxSchema: "MS932", datasetSetting: "UTF-8" }}
+							>
+								{children}
+							</ResourceEncodingProvider>
+						</MockProvider>
+					),
+				},
+			);
 			await act(async () => {
 				rerender();
 			});

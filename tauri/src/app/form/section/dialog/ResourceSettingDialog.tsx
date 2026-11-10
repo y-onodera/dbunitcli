@@ -2,23 +2,16 @@ import {
 	type FileSettingDialogProps,
 	SettingDialog,
 } from "../../../../components/dialog";
-import {
-	type ResourceKind,
-	useResourceLocation,
-} from "../../../../hooks/useResourceFiles";
+import { useOpenedResourceLocation } from "../../../../context/OpenedResourceProvider";
+import type { ResourceKind } from "../../../../hooks/useResourceFiles";
 
-// リソースファイルを編集するSettingDialog。開いたファイルの場所を調べ、上書きか規定フォルダへの保存かを選ばせる
+// リソースファイルを編集するSettingDialog。開いたファイルの場所（ResourceLoaderが読み込んだもの）から、上書きか規定フォルダへの保存かを選ばせる
 export function ResourceSettingDialog({
 	resourceKind,
 	...props
-}: Omit<FileSettingDialogProps, "location" | "locationLoading"> & {
+}: Omit<FileSettingDialogProps, "location"> & {
 	resourceKind: ResourceKind;
 }) {
-	const { location, loading } = useResourceLocation(
-		resourceKind,
-		props.fileName,
-	);
-	return (
-		<SettingDialog {...props} location={location} locationLoading={loading} />
-	);
+	const location = useOpenedResourceLocation(resourceKind, props.fileName);
+	return <SettingDialog {...props} location={location} />;
 }

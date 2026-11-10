@@ -6,15 +6,16 @@ import {
 } from "../../context/EnvironmentProvider";
 import WorkspaceResourcesProvider from "../../context/WorkspaceResourcesProvider";
 import {
+	DATASET_SETTINGS_PARSER,
 	useColumnNamesFetcher,
 	useCsvColumnNamesFetcher,
-	useDatasetSettingsData,
 	useDatasetTableConvert,
 	useDatasetTableNames,
 	useDatasetTablePreview,
 	useDatasetUnitTablePreview,
 	useSrcInfoColumnNames,
 } from "../../hooks/useDatasetSettings";
+import { useResourceLoad } from "../../hooks/useResourceFiles";
 import type { DatasetSrcInfo } from "../../model/CommandOption";
 import { DatasetSettings } from "../../model/DatasetSettings";
 import type { WorkspaceResources } from "../../model/WorkspaceResources";
@@ -65,7 +66,17 @@ const { mockFetchData, mockFetchAndUpdate } = vi.hoisted(() => {
 		}
 		if (params.endpoint.includes("/dataset-setting/load")) {
 			return Promise.resolve(
-				new Response(JSON.stringify(mockDatasetSettingsResponse)),
+				new Response(
+					JSON.stringify({
+						content: mockDatasetSettingsResponse,
+						location: {
+							folder: "/ws/resources/setting",
+							defaultFolder: "/ws/resources/setting",
+							fileName: "test-setting",
+							defaultFolderHasFile: true,
+						},
+					}),
+				),
 			);
 		}
 		if (params.endpoint.includes("/dataset-setting/table-columns")) {
@@ -138,31 +149,38 @@ const srcInfo: DatasetSrcInfo = {
 };
 
 describe("DatasetSettingsProviderのテスト", () => {
-	describe("useDatasetSettingsDataのテスト", () => {
+	describe("DATASET_SETTINGS_PARSERでの読込（useResourceLoad）のテスト", () => {
 		it("設定ファイル名が空白のときは初期値が返却されloadingがfalseになることを確認", async () => {
 			const { result, rerender } = renderHook(
-				() => useDatasetSettingsData(""),
+				() => useResourceLoad("datasetSetting", "", DATASET_SETTINGS_PARSER),
 				{ wrapper },
 			);
 			await act(async () => {
 				rerender();
 			});
 			expect(result.current.loading).toBe(false);
-			expect(result.current.settings).toEqual(DatasetSettings.create());
+			expect(result.current.data).toEqual(DatasetSettings.create());
+			expect(result.current.location).toBeNull();
 		});
 		it("データセット設定を正常に読み込めることを確認", async () => {
 			const { result, rerender } = renderHook(
-				() => useDatasetSettingsData("test-setting"),
+				() =>
+					useResourceLoad(
+						"datasetSetting",
+						"test-setting",
+						DATASET_SETTINGS_PARSER,
+					),
 				{ wrapper },
 			);
 			await act(async () => {
 				rerender();
 			});
 			expect(result.current.loading).toBe(false);
-			expect(result.current.settings.settings).toHaveLength(1);
-			expect(result.current.settings.settings[0].name).toStrictEqual(
+			expect(result.current.data.settings).toHaveLength(1);
+			expect(result.current.data.settings[0].name).toStrictEqual(
 				mockDatasetSettingsResponse.settings[0].name,
 			);
+			expect(result.current.location?.fileName).toBe("test-setting");
 		});
 		it.each([
 			{ kind: "compareSetting", endpoint: "compare/setting/load" },
@@ -172,7 +190,7 @@ describe("DatasetSettingsProviderのテスト", () => {
 			async ({ kind, endpoint }) => {
 				mockFetchData.mockClear();
 				const { rerender } = renderHook(
-					() => useDatasetSettingsData("test-setting", kind),
+					() => useResourceLoad(kind, "test-setting", DATASET_SETTINGS_PARSER),
 					{ wrapper },
 				);
 				await act(async () => {

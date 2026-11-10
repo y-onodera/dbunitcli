@@ -65,7 +65,7 @@ class FixedColumnDefControllerTest {
         System.out.println(response);
         JsonTestHelper.assertJsonEquals(
                 Paths.get("src/test/resources/yo/dbunitcli/sidecar/controller/fixed-column-def-load-response.json"),
-                response);
+                JsonTestHelper.contentOf(response));
     }
 
     @Test
@@ -87,7 +87,7 @@ class FixedColumnDefControllerTest {
         System.out.println(loadResponse);
         JsonTestHelper.assertJsonEquals(
                 Paths.get("src/test/resources/yo/dbunitcli/sidecar/controller/fixed-column-def-save-load-response.json"),
-                loadResponse);
+                JsonTestHelper.contentOf(loadResponse));
     }
 
     @Test

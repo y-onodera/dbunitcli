@@ -1,15 +1,11 @@
 import { type ComponentType, useState } from "react";
-import {
-	DialogBody,
-	DialogField,
-	StatusMessage,
-} from "../../../../components/dialog";
+import { DialogBody, DialogField } from "../../../../components/dialog";
 import { BlueButton } from "../../../../components/element/Button";
 import { TextArea } from "../../../../components/element/Input";
 import { useDatasetSrcInfo } from "../../../../context/DatasetSrcInfoProvider";
 import { useJdbcConnectionState } from "../../../../context/JdbcConnectionProvider";
 import {
-	useResourceContent,
+	CONTENT_PARSER,
 	useSaveResourceContent,
 } from "../../../../hooks/useResourceFiles";
 import type { QueryDatasourceType } from "../../../../model/QueryDatasource";
@@ -20,6 +16,7 @@ import {
 import CsvReadInsertDialog from "./CsvReadInsertDialog";
 import { InlinePreviewButton } from "./DatasetTableNamesPreviewButton";
 import type { EditResourceDialogProps } from "./ResourceEditButton";
+import { ResourceLoader } from "./ResourceLoader";
 import { ResourceSettingDialog } from "./ResourceSettingDialog";
 import SqlTableInsertDialog from "./SqlTableInsertDialog";
 import { useTextareaInsert } from "./useTextareaInsert";
@@ -33,11 +30,15 @@ type SqlEditorDialogProps = EditResourceDialogProps &
 	};
 
 export default function SqlEditorDialog(props: SqlEditorDialogProps) {
-	const { content, loading } = useResourceContent(props.type, props.fileName);
-	if (loading) {
-		return <StatusMessage kind="loading">Loading...</StatusMessage>;
-	}
-	return <Dialog {...props} value={content} />;
+	return (
+		<ResourceLoader
+			kind={props.type}
+			fileName={props.fileName}
+			parser={CONTENT_PARSER}
+		>
+			{(content) => <Dialog {...props} value={content} />}
+		</ResourceLoader>
+	);
 }
 
 // EditResourceButtonへ渡すため、srcTypeごとに種類を固定した編集ダイアログ（モジュールで1度だけ作り、再マウントを防ぐ）

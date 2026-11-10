@@ -50,14 +50,14 @@ class ResourceFileTest {
     }
 
     @Test
-    public void read_ファイルが存在する場合はその内容を返す() throws IOException {
+    public void load_ファイルが存在する場合はその内容を返す() throws IOException {
         final String expectedContent = "{\"key\": \"value\"}";
         this.createTestFile("test.json", expectedContent);
 
         // 新しいResourceFileインスタンスを作成
         this.resourceFile = new ResourceFile(this.parentDir, FileResources::searchWorkspace, StandardCharsets.UTF_8);
 
-        final String content = this.resourceFile.read("test.json", "").orElseThrow();
+        final String content = this.resourceFile.load("test.json", "").orElseThrow().content();
         assertEquals(expectedContent, content);
     }
 
@@ -105,8 +105,8 @@ class ResourceFileTest {
     }
 
     @Test
-    public void read_ファイルが存在しない場合はemptyを返す() {
-        final var result = this.resourceFile.read("nonexistent.json", "");
+    public void load_ファイルが存在しない場合はemptyを返す() {
+        final var result = this.resourceFile.load("nonexistent.json", "");
         assertTrue(result.isEmpty());
     }
 
@@ -211,8 +211,7 @@ class ResourceFileTest {
     public void ディレクトリはファイルとして扱わない() throws IOException {
         Files.createDirectories(this.tempDir.resolve("dir"));
 
-        assertTrue(this.resourceFile.read("dir", "").isEmpty());
-        assertTrue(this.resourceFile.locate("dir").isEmpty());
+        assertTrue(this.resourceFile.load("dir", "").isEmpty());
         assertThrows(IOException.class, () -> this.resourceFile.save("dir", "x", "", true));
     }
 
@@ -257,13 +256,13 @@ class ResourceFileTest {
     }
 
     @Test
-    public void locate_baseDir外で見つかったファイルの場所と新規保存先を返す() throws IOException {
+    public void load_baseDir外で見つかったファイルの場所と新規保存先を返す() throws IOException {
         final ResourceFile withFallback = this.withFallbackDir();
         final Path other = this.tempDir.resolve("other/shared.sql");
         Files.createDirectories(other.getParent());
         Files.writeString(other, "old");
 
-        final ResourceFile.Location location = withFallback.locate("shared.sql").orElseThrow();
+        final ResourceFile.Location location = withFallback.load("shared.sql", "").orElseThrow().location();
 
         assertEquals(other.getParent().toAbsolutePath().normalize().toString(), location.folder());
         assertEquals(this.baseDir().toAbsolutePath().normalize().toString(), location.defaultFolder());
@@ -272,20 +271,20 @@ class ResourceFileTest {
     }
 
     @Test
-    public void locate_baseDir直下のファイルはフォルダがdefaultFolderと一致する() throws IOException {
+    public void load_baseDir直下のファイルはフォルダがdefaultFolderと一致する() throws IOException {
         this.createTestFile("test.json", "{}");
         this.resourceFile = new ResourceFile(this.parentDir, FileResources::searchWorkspace, StandardCharsets.UTF_8);
 
-        final ResourceFile.Location location = this.resourceFile.locate("test.json").orElseThrow();
+        final ResourceFile.Location location = this.resourceFile.load("test.json", "").orElseThrow().location();
 
         assertEquals(location.defaultFolder(), location.folder());
         assertTrue(location.defaultFolderHasFile());
     }
 
     @Test
-    public void locate_見つからない名前と空の名前はempty() {
-        assertTrue(this.resourceFile.locate("missing.json").isEmpty());
-        assertTrue(this.resourceFile.locate("").isEmpty());
+    public void load_見つからない名前と空の名前はempty() {
+        assertTrue(this.resourceFile.load("missing.json", "").isEmpty());
+        assertTrue(this.resourceFile.load("", "").isEmpty());
     }
 
     // baseDir（tempDir/base）に無ければtempDir/otherを探すResourceFile

@@ -114,7 +114,7 @@ class DatasetSettingsControllerTest {
         System.out.println(response);
         JsonTestHelper.assertJsonEquals(
                 Paths.get("src/test/resources/yo/dbunitcli/sidecar/controller/setting-load-response.json"),
-                response);
+                JsonTestHelper.contentOf(response));
     }
 
     @Test
@@ -136,7 +136,7 @@ class DatasetSettingsControllerTest {
         System.out.println(loadResponse);
         JsonTestHelper.assertJsonEquals(
                 Paths.get("src/test/resources/yo/dbunitcli/sidecar/controller/setting-save-load-response.json"),
-                loadResponse);
+                JsonTestHelper.contentOf(loadResponse));
     }
 
     @Test
@@ -164,7 +164,7 @@ class DatasetSettingsControllerTest {
 
             final String loaded = this.client.toBlocking()
                     .retrieve(HttpRequest.POST("dbunit-cli/dataset-setting/load", "{\"name\":\"outputFilterSetting.json\"}"));
-            JsonTestHelper.assertJsonEquals("{\"outputFilter\":" + filter + "}", loaded);
+            JsonTestHelper.assertJsonEquals("{\"outputFilter\":" + filter + "}", JsonTestHelper.contentOf(loaded));
         }
     }
 
@@ -177,7 +177,7 @@ class DatasetSettingsControllerTest {
 
         final String loaded = this.client.toBlocking()
                 .retrieve(HttpRequest.POST("dbunit-cli/dataset-setting/load", "{\"name\":\"importSetting.json\"}"));
-        JsonTestHelper.assertJsonEquals("{\"import\":" + imports + "}", loaded);
+        JsonTestHelper.assertJsonEquals("{\"import\":" + imports + "}", JsonTestHelper.contentOf(loaded));
     }
 
     @Test

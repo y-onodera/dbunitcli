@@ -15,15 +15,15 @@ const { mockSave, mockTableNames, mockTablePreview, jdbcState, resourceKinds } =
 		resourceKinds: { load: [] as string[], save: [] as string[] },
 	}));
 vi.mock("../../../../../hooks/useResourceFiles", () => ({
-	useResourceContent: (kind: string) => {
+	CONTENT_PARSER: {},
+	useResourceLoad: (kind: string) => {
 		resourceKinds.load.push(kind);
-		return { content: "select 1", loading: false };
+		return { data: "select 1", location: null, loading: false };
 	},
 	useSaveResourceContent: (kind: string) => {
 		resourceKinds.save.push(kind);
 		return mockSave;
 	},
-	useResourceLocation: () => ({ location: null, loading: false }),
 }));
 vi.mock("../../../../../hooks/useDatasetSettings", () => ({
 	useDatasetTableNames: (srcInfo: DatasetSrcInfo) => {

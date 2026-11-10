@@ -41,7 +41,7 @@ const { mockSaveSchema } = vi.hoisted(() => ({
 }));
 vi.mock("../../../../../hooks/useXlsxSchema", () => ({
 	useSaveXlsxSchema: () => mockSaveSchema,
-	useXlsxSchemaData: () => ({ schema: null, loading: true }),
+	XLSX_SCHEMA_PARSER: {},
 	useSrcInfoSheets: () => [],
 }));
 

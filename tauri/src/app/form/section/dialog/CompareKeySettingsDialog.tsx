@@ -1,11 +1,7 @@
 import { useState } from "react";
+import { SettingDialog, SettingTable } from "../../../../components/dialog";
 import {
-	SettingDialog,
-	SettingTable,
-	StatusMessage,
-} from "../../../../components/dialog";
-import {
-	useDatasetSettingsData,
+	DATASET_SETTINGS_PARSER,
 	useSaveDatasetSettings,
 } from "../../../../hooks/useDatasetSettings";
 import type { DatasetSettingKind } from "../../../../hooks/useResourceFiles";
@@ -16,6 +12,7 @@ import {
 } from "../../../../model/DatasetSettings";
 import ColumnDatalistDialog from "./ColumnDatalistDialog";
 import { FilterOrderFields, TargetFields } from "./DatasetSettingFields";
+import { ResourceLoader } from "./ResourceLoader";
 import { ResourceSettingDialog } from "./ResourceSettingDialog";
 import { useColumnCandidates } from "./useColumnCandidates";
 
@@ -37,21 +34,22 @@ export default function CompareKeySettingsDialog(props: {
 	handleSave: (path: string) => void;
 	kind: DatasetSettingKind;
 }) {
-	const { settings, loading } = useDatasetSettingsData(
-		props.fileName,
-		props.kind,
-	);
-	if (loading) {
-		return <StatusMessage kind="loading">Loading...</StatusMessage>;
-	}
 	return (
-		<CompareKeySettingsEditDialog
-			settings={settings}
-			fileName={props.fileName}
-			handleDialogClose={props.handleDialogClose}
-			handleSave={props.handleSave}
+		<ResourceLoader
 			kind={props.kind}
-		/>
+			fileName={props.fileName}
+			parser={DATASET_SETTINGS_PARSER}
+		>
+			{(settings) => (
+				<CompareKeySettingsEditDialog
+					settings={settings}
+					fileName={props.fileName}
+					handleDialogClose={props.handleDialogClose}
+					handleSave={props.handleSave}
+					kind={props.kind}
+				/>
+			)}
+		</ResourceLoader>
 	);
 }
 

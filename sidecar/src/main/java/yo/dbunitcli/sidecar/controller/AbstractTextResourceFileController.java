@@ -4,18 +4,17 @@ import io.micronaut.http.MediaType;
 import io.micronaut.http.annotation.Body;
 import io.micronaut.http.annotation.Post;
 import jakarta.json.Json;
-import jakarta.json.JsonWriter;
+import jakarta.json.JsonValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import yo.dbunitcli.sidecar.domain.project.Workspace;
 import yo.dbunitcli.sidecar.dto.TemplateRequestDto;
 
 import java.io.IOException;
-import java.io.StringWriter;
 import java.util.Optional;
 
 /**
- * SQL等の生テキストのリソース。loadは{"content": ...}形式で返し、saveはcontentを生テキストとして保存する。応答は更新後のファイル一覧
+ * SQL等の生テキストのリソース。loadのcontentは文字列で返し、saveはcontentを生テキストとして保存する。応答は更新後のファイル一覧
  */
 public abstract class AbstractTextResourceFileController extends AbstractResourceFileController<TemplateRequestDto> {
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractTextResourceFileController.class);
@@ -25,12 +24,8 @@ public abstract class AbstractTextResourceFileController extends AbstractResourc
     }
 
     @Override
-    protected String toLoadResponse(final Optional<String> content) {
-        final StringWriter sw = new StringWriter();
-        try (final JsonWriter writer = Json.createWriter(sw)) {
-            writer.writeObject(Json.createObjectBuilder().add("content", content.orElse("")).build());
-        }
-        return sw.toString();
+    protected JsonValue toContent(final Optional<String> content) {
+        return Json.createValue(content.orElse(""));
     }
 
     @Post(uri = "save", produces = MediaType.APPLICATION_JSON)

@@ -8,6 +8,7 @@ import io.micronaut.http.client.annotation.Client;
 import io.micronaut.runtime.server.EmbeddedServer;
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
 import jakarta.inject.Inject;
+import jakarta.json.JsonObject;
 import org.junit.jupiter.api.Test;
 import yo.dbunitcli.resource.FileResources;
 
@@ -48,7 +49,7 @@ class TemplateResourceFileControllerTest {
         System.out.println(response);
         JsonTestHelper.assertJsonEquals(
                 Paths.get("src/test/resources/yo/dbunitcli/sidecar/controller/template-load-response.json"),
-                response);
+                JsonTestHelper.contentOf(response));
     }
 
     @AfterEach
@@ -97,20 +98,22 @@ class TemplateResourceFileControllerTest {
     }
 
     @Test
-    void testLocate_見つかったファイルのフォルダと新規保存先を返す() {
-        final String response = this.client.toBlocking().retrieve(
-                HttpRequest.POST("dbunit-cli/template/locate", "{\"name\":\"sample.json\"}"));
+    void testLoad_見つかったファイルのフォルダと新規保存先を返す() {
+        final JsonObject location = JsonTestHelper.loadResponseOf(this.client.toBlocking().retrieve(
+                HttpRequest.POST("dbunit-cli/template/load", "{\"name\":\"sample.json\"}"))).getJsonObject("location");
         final String templateDir = Paths.get("target/test-temp/workspace/sample/resources/template")
                 .toAbsolutePath().normalize().toString();
-        Assertions.assertTrue(response.contains("\"fileName\":\"sample.json\""), response);
-        Assertions.assertTrue(response.replace("\\\\", "\\").contains(templateDir), response);
+        Assertions.assertEquals("sample.json", location.getString("fileName"));
+        Assertions.assertEquals(templateDir, location.getString("folder"));
+        Assertions.assertEquals(templateDir, location.getString("defaultFolder"));
+        Assertions.assertTrue(location.getBoolean("defaultFolderHasFile"));
     }
 
     @Test
-    void testLocate_見つからなければ空のオブジェクトを返す() {
+    void testLoad_見つからなければ空の内容と場所nullを返す() throws IOException {
         final String response = this.client.toBlocking().retrieve(
-                HttpRequest.POST("dbunit-cli/template/locate", "{\"name\":\"missing.stg\"}"));
-        Assertions.assertEquals("{}", response);
+                HttpRequest.POST("dbunit-cli/template/load", "{\"name\":\"missing.stg\"}"));
+        JsonTestHelper.assertJsonEquals("{\"content\":\"\",\"location\":null}", response);
     }
 
     @Test

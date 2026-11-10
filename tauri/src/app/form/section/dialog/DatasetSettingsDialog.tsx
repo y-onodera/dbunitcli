@@ -5,7 +5,6 @@ import {
 	type SaveThen,
 	Select,
 	SettingTable,
-	StatusMessage,
 	Text,
 } from "../../../../components/dialog";
 import {
@@ -14,7 +13,7 @@ import {
 } from "../../../../components/element/ButtonIcon";
 import { useDatasetSrcInfo } from "../../../../context/DatasetSrcInfoProvider";
 import {
-	useDatasetSettingsData,
+	DATASET_SETTINGS_PARSER,
 	useSaveDatasetSettings,
 } from "../../../../hooks/useDatasetSettings";
 import type { DatasetSettingKind } from "../../../../hooks/useResourceFiles";
@@ -31,6 +30,7 @@ import {
 import { removeArray, replaceArray } from "../../../../utils/arrayUtils";
 import DatasetSettingDialog from "./DatasetSettingDialog";
 import { SaveAndPreviewButton } from "./DatasetTableNamesPreviewButton";
+import { ResourceLoader } from "./ResourceLoader";
 import { ResourceSettingDialog } from "./ResourceSettingDialog";
 
 // kind: 読込・保存先のリソース
@@ -41,22 +41,23 @@ export default function DatasetSettingsDialog(props: {
 	saveAndPreview?: (saveThen: SaveThen) => ReactNode;
 	kind: DatasetSettingKind;
 }) {
-	const { settings, loading } = useDatasetSettingsData(
-		props.fileName,
-		props.kind,
-	);
-	if (loading) {
-		return <StatusMessage kind="loading">Loading...</StatusMessage>;
-	}
 	return (
-		<DatasetSettingsEditDialog
-			settings={settings}
-			fileName={props.fileName}
-			handleDialogClose={props.handleDialogClose}
-			handleSave={props.handleSave}
-			saveAndPreview={props.saveAndPreview}
+		<ResourceLoader
 			kind={props.kind}
-		/>
+			fileName={props.fileName}
+			parser={DATASET_SETTINGS_PARSER}
+		>
+			{(settings) => (
+				<DatasetSettingsEditDialog
+					settings={settings}
+					fileName={props.fileName}
+					handleDialogClose={props.handleDialogClose}
+					handleSave={props.handleSave}
+					saveAndPreview={props.saveAndPreview}
+					kind={props.kind}
+				/>
+			)}
+		</ResourceLoader>
 	);
 }
 

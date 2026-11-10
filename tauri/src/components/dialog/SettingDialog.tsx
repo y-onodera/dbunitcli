@@ -130,7 +130,6 @@ type SettingMode<T> = {
 	save?: never;
 	handleSave?: never;
 	location?: never;
-	locationLoading?: never;
 	// Commitの右に並べる追加ボタン
 	footerActions?: () => ReactNode;
 };
@@ -145,7 +144,6 @@ type FileMode = {
 	handleSave: (path: string) => void;
 	// 開いたファイルの場所（見つからなければnull）。省略すると保存先を選ばせない
 	location?: ResourceLocation | null;
-	locationLoading?: boolean;
 	// Saveの右に並べる追加ボタン。保存が必要ならsaveThenを使う
 	footerActions?: (saveThen: SaveThen) => ReactNode;
 };
@@ -230,9 +228,7 @@ export function SettingDialog<T>(props: SettingDialogProps<T>) {
 			<DialogFooter>
 				<BlueButton
 					title={props.commitLabel ?? "Save"}
-					disabled={
-						props.commitDisabled || fileNameMissing || props.locationLoading
-					}
+					disabled={props.commitDisabled || fileNameMissing}
 					handleClick={() => {
 						if (isFileMode) {
 							saveThen(props.handleSave);

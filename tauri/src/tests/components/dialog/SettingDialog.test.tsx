@@ -91,7 +91,7 @@ const OUTSIDE_LOCATION: ResourceLocation = {
 
 function renderWithLocation(
 	location: ResourceLocation | null,
-	{ fileName = "other/q.sql", locationLoading = false } = {},
+	{ fileName = "other/q.sql" } = {},
 ) {
 	const save = vi.fn().mockResolvedValue("success");
 	const handleSave = vi.fn();
@@ -102,7 +102,6 @@ function renderWithLocation(
 			save={save}
 			handleSave={handleSave}
 			location={location}
-			locationLoading={locationLoading}
 		>
 			<div />
 		</SettingDialog>,
@@ -180,10 +179,5 @@ describe("SettingDialogの保存先の選択のテスト", () => {
 			expect(handleSave).toHaveBeenCalledWith("renamed.sql");
 		});
 		expect(save).toHaveBeenCalledWith("renamed.sql", false);
-	});
-
-	it("場所の取得中はSaveできない", () => {
-		renderWithLocation(null, { locationLoading: true });
-		expect(screen.getByRole("button", { name: "Save" })).toBeDisabled();
 	});
 });

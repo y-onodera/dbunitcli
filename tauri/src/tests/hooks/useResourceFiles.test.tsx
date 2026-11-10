@@ -9,10 +9,10 @@ import { useSaveDatasetSettings } from "../../hooks/useDatasetSettings";
 import { useSaveFixedColumnDef } from "../../hooks/useFixedColumnDef";
 import { useSaveJdbcProperties } from "../../hooks/useJdbc";
 import {
+	CONTENT_PARSER,
 	type ResourceKind,
 	useDeleteResource,
-	useResourceContent,
-	useResourceLocation,
+	useResourceLoad,
 	useSaveResourceContent,
 } from "../../hooks/useResourceFiles";
 import { useSaveXlsxSchema } from "../../hooks/useXlsxSchema";
@@ -166,11 +166,18 @@ const jdbcValues = {
 	jdbcProperties: "",
 };
 
-describe("useResourceContentのテスト", () => {
+describe("useResourceLoadのテスト", () => {
+	const location = {
+		folder: "/ws/other",
+		defaultFolder: "/ws/resources/sql",
+		fileName: "q.sql",
+		defaultFolderHasFile: true,
+	};
+
 	it("名前と、ResourceEncodingProviderのその種類の文字コードを送って読み込むことを確認", async () => {
 		mockFetchData.mockClear();
 		const { rerender } = renderHook(
-			() => useResourceContent("sql", "target.sql"),
+			() => useResourceLoad("sql", "target.sql", CONTENT_PARSER),
 			{ wrapper },
 		);
 		await act(async () => {
@@ -184,66 +191,72 @@ describe("useResourceContentのテスト", () => {
 			encoding: encodingOf("sql"),
 		});
 	});
-});
 
-// useResourceLocationはEnvironmentだけを使う（WorkspaceResourcesProviderの読込を挟まない）
-const locationWrapper = ({ children }: { children: React.ReactNode }) => (
-	<environmentContext.Provider value={environmentFixture}>
-		{children}
-	</environmentContext.Provider>
-);
-
-describe("useResourceLocationのテスト", () => {
-	const location = {
-		folder: "/ws/other",
-		defaultFolder: "/ws/resources/sql",
-		fileName: "q.sql",
-		inDefaultFolder: false,
-		defaultFolderHasFile: true,
-	};
-
-	it("名前を送って開いたファイルの場所を受け取る", async () => {
-		mockFetchData.mockImplementationOnce(() =>
-			Promise.resolve(new Response(JSON.stringify(location))),
+	it("内容と開いたファイルの場所を受け取る", async () => {
+		mockFetchData.mockImplementation((params: FetchParams) =>
+			Promise.resolve(
+				new Response(
+					params.endpoint.endsWith("/sql/load")
+						? JSON.stringify({ content: "select 1", location })
+						: JSON.stringify(workspaceResourcesFixture),
+				),
+			),
 		);
 		const { result, rerender } = renderHook(
-			() => useResourceLocation("sql", "other/q.sql"),
-			{ wrapper: locationWrapper },
+			() => useResourceLoad("sql", "other/q.sql", CONTENT_PARSER),
+			{ wrapper },
 		);
 		await act(async () => {
 			rerender();
 		});
-		const [params] = mockFetchData.mock.lastCall ?? [];
-		expect(params?.endpoint).toBe(`${environmentFixture.apiUrl}sql/locate`);
-		expect(JSON.parse(String(params?.options.body))).toStrictEqual({
-			name: "other/q.sql",
+		expect(result.current).toStrictEqual({
+			data: "select 1",
+			location,
+			loading: false,
 		});
-		expect(result.current).toStrictEqual({ location, loading: false });
 	});
 
-	it("見つからない（{}）ならnull", async () => {
-		mockFetchData.mockImplementationOnce(() =>
-			Promise.resolve(new Response("{}")),
+	it("見つからない（locationがnull）なら空の値とnull", async () => {
+		mockFetchData.mockImplementation((params: FetchParams) =>
+			Promise.resolve(
+				new Response(
+					params.endpoint.endsWith("/sql/load")
+						? JSON.stringify({ content: "", location: null })
+						: JSON.stringify(workspaceResourcesFixture),
+				),
+			),
 		);
 		const { result, rerender } = renderHook(
-			() => useResourceLocation("sql", "missing.sql"),
-			{ wrapper: locationWrapper },
+			() => useResourceLoad("sql", "missing.sql", CONTENT_PARSER),
+			{ wrapper },
 		);
 		await act(async () => {
 			rerender();
 		});
-		expect(result.current).toStrictEqual({ location: null, loading: false });
+		expect(result.current).toStrictEqual({
+			data: "",
+			location: null,
+			loading: false,
+		});
 	});
 
-	it("名前が空なら問い合わせずnull", () => {
+	it("名前が空なら問い合わせず空の値とnull", async () => {
 		mockFetchData.mockClear();
-		const { result } = renderHook(() => useResourceLocation("sql", ""), {
-			wrapper: locationWrapper,
+		const { result, rerender } = renderHook(
+			() => useResourceLoad("sql", "", CONTENT_PARSER),
+			{ wrapper },
+		);
+		await act(async () => {
+			rerender();
 		});
-		expect(result.current).toStrictEqual({ location: null, loading: false });
+		expect(result.current).toStrictEqual({
+			data: "",
+			location: null,
+			loading: false,
+		});
 		expect(
 			mockFetchData.mock.calls.some(([params]) =>
-				params.endpoint.endsWith("/locate"),
+				params.endpoint.endsWith("/load"),
 			),
 		).toBe(false);
 	});

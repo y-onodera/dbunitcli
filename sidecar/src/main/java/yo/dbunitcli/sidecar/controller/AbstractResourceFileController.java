@@ -8,6 +8,8 @@ import io.micronaut.json.JsonMapper;
 import io.micronaut.serde.ObjectMapper;
 import jakarta.json.Json;
 import jakarta.json.JsonObjectBuilder;
+import jakarta.json.JsonReader;
+import jakarta.json.JsonValue;
 import jakarta.json.JsonWriter;
 import jakarta.json.stream.JsonGenerator;
 import org.slf4j.Logger;
@@ -37,30 +39,22 @@ public abstract class AbstractResourceFileController<DTO extends ResourceSaveReq
     }
 
     /**
-     * encodingはコマンド実行時にそのファイルを読む文字コード。GUIからも同じ文字コードで読み書きする
+     * encodingはコマンド実行時にそのファイルを読む文字コード。GUIからも同じ文字コードで読み書きする。
+     * 応答は{"content": 内容, "location": 開いたファイルの場所}。見つからなければcontentは{@link #toContent}の空の値、locationはnull
      */
     @Post(uri = "load", produces = MediaType.APPLICATION_JSON)
     public String load(@Body final ResourceLoadRequestDto body) {
         try {
-            return this.toLoadResponse(this.getResourceFile().read(body.getName(), body.getEncoding()));
-        } catch (final Throwable th) {
-            LOGGER.error("cause:", th);
-            throw new ApplicationException(th);
-        }
-    }
-
-    /**
-     * loadと同じ探索で見つかったファイルの場所。保存ダイアログで上書き先・新規保存先を示す。見つからなければ{}
-     */
-    @Post(uri = "locate", produces = MediaType.APPLICATION_JSON)
-    public String locate(@Body final ResourceLoadRequestDto body) {
-        try {
-            final JsonObjectBuilder builder = Json.createObjectBuilder();
-            this.getResourceFile().locate(body.getName()).ifPresent(it -> builder
-                    .add("folder", it.folder())
-                    .add("defaultFolder", it.defaultFolder())
-                    .add("fileName", it.fileName())
-                    .add("defaultFolderHasFile", it.defaultFolderHasFile()));
+            final Optional<ResourceFile.Loaded> loaded = this.getResourceFile().load(body.getName(), body.getEncoding());
+            final JsonObjectBuilder builder = Json.createObjectBuilder()
+                    .add("content", this.toContent(loaded.map(ResourceFile.Loaded::content)));
+            loaded.map(ResourceFile.Loaded::location).ifPresentOrElse(
+                    it -> builder.add("location", Json.createObjectBuilder()
+                            .add("folder", it.folder())
+                            .add("defaultFolder", it.defaultFolder())
+                            .add("fileName", it.fileName())
+                            .add("defaultFolderHasFile", it.defaultFolderHasFile())),
+                    () -> builder.addNull("location"));
             return builder.build().toString();
         } catch (final Throwable th) {
             LOGGER.error("cause:", th);
@@ -68,8 +62,15 @@ public abstract class AbstractResourceFileController<DTO extends ResourceSaveReq
         }
     }
 
-    protected String toLoadResponse(final Optional<String> content) {
-        return content.orElse("{}");
+    /**
+     * ファイルの内容をJSONの値にする。JSONのファイルはその値、無ければ空のオブジェクト
+     */
+    protected JsonValue toContent(final Optional<String> content) {
+        return content.<JsonValue>map(it -> {
+            try (final JsonReader reader = Json.createReader(new StringReader(it))) {
+                return reader.readValue();
+            }
+        }).orElse(JsonValue.EMPTY_JSON_OBJECT);
     }
 
     @Post(uri = "save", produces = MediaType.APPLICATION_JSON)

@@ -12,7 +12,6 @@ import {
 	fetchData,
 	getErrorMessage,
 	handleFetchError,
-	logFetchError,
 	type OperationResult,
 	postJsonParams,
 } from "../utils/fetchUtils";
@@ -103,126 +102,83 @@ export const useSaveResourceContent = (kind: ResourceKind) => {
 		save(name, { content }, overwrite);
 };
 
-// 名前が空・読込失敗のときの値を作る関数と、応答のJSONから値を作る関数。
+// 名前が空・読込失敗・見つからないときの値を作る関数と、応答のcontentから値を作る関数。
 // effectの依存に入るので、モジュールレベルの関数を渡す（hooks-design.md）
 export type ResourceParser<T> = {
 	empty: () => T;
-	parse: (json: unknown) => T;
+	parse: (content: unknown) => T;
 };
 
-// 失敗の知らせ方。effectの依存に入るので、モジュールレベルの関数を渡す
-type FailureReporter = typeof handleFetchError;
+type Loaded<T> = { data: T; location: ResourceLocation | null };
 
-// `${base}/${action}`へ名前（とencoding）を送り、応答をparserで変換して返す。
-// 名前が空なら問い合わせずparser.empty。名前を変えたり離れたりしたら中断する
-const useResourceRequest = <T>(
+// `${base}/load`へ名前と文字コード（コマンド実行時にそのファイルを読む文字コード）を送り、内容と開いたファイルの場所を読み込む。
+// 名前が空なら問い合わせない。名前を変えたり離れたりしたら中断する。失敗はalertで知らせる
+export const useResourceLoad = <T>(
 	kind: ResourceKind,
-	action: string,
 	name: string,
-	encoding: string | undefined,
 	parser: ResourceParser<T>,
-	reportFailure: FailureReporter,
-): { data: T; loading: boolean } => {
+): Loaded<T> & { loading: boolean } => {
 	const { apiUrl } = useEnvironment();
-	const [data, setData] = useState(parser.empty);
+	const encoding = useResourceEncoding(kind);
+	const [loaded, setLoaded] = useState(() => emptyLoaded(parser));
 	const [loading, setLoading] = useState(name !== "");
 
 	useEffect(() => {
 		if (!name) {
-			setData(parser.empty());
+			setLoaded(emptyLoaded(parser));
 			setLoading(false);
 			return;
 		}
 		const controller = new AbortController();
 		setLoading(true);
-		requestResource(
-			`${apiUrl}${resourceTargets[kind].base}/${action}`,
-			encoding === undefined ? { name } : { name, encoding },
+		requestLoad(
+			`${apiUrl}${resourceTargets[kind].base}/load`,
+			{ name, encoding },
 			parser,
-			reportFailure,
 			controller.signal,
 		).then((result) => {
 			if (!controller.signal.aborted) {
-				setData(result);
+				setLoaded(result);
 				setLoading(false);
 			}
 		});
 		return () => {
 			controller.abort();
 		};
-	}, [kind, action, name, apiUrl, encoding, parser, reportFailure]);
+	}, [kind, name, apiUrl, encoding, parser]);
 
-	return { data, loading };
+	return { ...loaded, loading };
 };
 
-// 失敗はreportFailureで知らせて空の値を返す
-async function requestResource<T>(
+function emptyLoaded<T>(parser: ResourceParser<T>): Loaded<T> {
+	return { data: parser.empty(), location: null };
+}
+
+async function requestLoad<T>(
 	endpoint: string,
 	body: object,
 	parser: ResourceParser<T>,
-	reportFailure: FailureReporter,
 	signal: AbortSignal,
-): Promise<T> {
+): Promise<Loaded<T>> {
 	const params = { ...postJsonParams(endpoint, body), signal };
 	try {
 		const response = await fetchData(params);
-		return parser.parse(await response.json());
+		const json = (await response.json()) as {
+			content: unknown;
+			location: ResourceLocation | null;
+		};
+		if (json.location === null) {
+			return emptyLoaded(parser);
+		}
+		return { data: parser.parse(json.content), location: json.location };
 	} catch (e) {
-		reportFailure(getErrorMessage(e), params);
-		return parser.empty();
+		handleFetchError(getErrorMessage(e), params);
+		return emptyLoaded(parser);
 	}
 }
 
-// `${base}/load`へ名前と文字コード（コマンド実行時にそのファイルを読む文字コード）を送って読み込む。失敗はalertで知らせる
-export const useResourceLoad = <T>(
-	kind: ResourceKind,
-	name: string,
-	parser: ResourceParser<T>,
-): { data: T; loading: boolean } =>
-	useResourceRequest(
-		kind,
-		"load",
-		name,
-		useResourceEncoding(kind),
-		parser,
-		handleFetchError,
-	);
-
-// 見つからない（{}）ならnull
-const LOCATION_PARSER: ResourceParser<ResourceLocation | null> = {
-	empty: () => null,
-	parse: (json) =>
-		(json as Partial<ResourceLocation>).folder === undefined
-			? null
-			: (json as ResourceLocation),
-};
-
-// 開いたファイルの場所。名前が空・見つからない・取得失敗ならnull（保存は規定フォルダ基準の新規保存になる）
-export const useResourceLocation = (
-	kind: ResourceKind,
-	name: string,
-): { location: ResourceLocation | null; loading: boolean } => {
-	const { data, loading } = useResourceRequest(
-		kind,
-		"locate",
-		name,
-		undefined,
-		LOCATION_PARSER,
-		logFetchError,
-	);
-	return { location: data, loading };
-};
-
-const CONTENT_PARSER: ResourceParser<string> = {
+// テキスト系リソースの内容（contentが文字列）
+export const CONTENT_PARSER: ResourceParser<string> = {
 	empty: () => "",
-	parse: (json) => (json as { content?: string }).content ?? "",
-};
-
-// {"content": ...}形式の応答から内容を読み込む（テキスト系リソースで共通）
-export const useResourceContent = (
-	kind: ResourceKind,
-	name: string,
-): { content: string; loading: boolean } => {
-	const { data, loading } = useResourceLoad(kind, name, CONTENT_PARSER);
-	return { content: data, loading };
+	parse: (content) => content as string,
 };

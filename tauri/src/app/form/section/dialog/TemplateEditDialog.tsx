@@ -1,11 +1,12 @@
 import { useState } from "react";
-import { DialogBody, StatusMessage } from "../../../../components/dialog";
+import { DialogBody } from "../../../../components/dialog";
 import { TextArea } from "../../../../components/element/Input";
 import {
-	useResourceContent,
+	CONTENT_PARSER,
 	useSaveResourceContent,
 } from "../../../../hooks/useResourceFiles";
 import type { EditResourceDialogProps } from "./ResourceEditButton";
+import { ResourceLoader } from "./ResourceLoader";
 import { ResourceSettingDialog } from "./ResourceSettingDialog";
 
 export default function TemplateEditDialog({
@@ -13,17 +14,21 @@ export default function TemplateEditDialog({
 	handleDialogClose,
 	handleSave,
 }: EditResourceDialogProps) {
-	const { content, loading } = useResourceContent("template", fileName);
-	if (loading) {
-		return <StatusMessage kind="loading">Loading...</StatusMessage>;
-	}
 	return (
-		<Dialog
-			content={content}
+		<ResourceLoader
+			kind={"template"}
 			fileName={fileName}
-			handleDialogClose={handleDialogClose}
-			handleSave={handleSave}
-		/>
+			parser={CONTENT_PARSER}
+		>
+			{(content) => (
+				<Dialog
+					content={content}
+					fileName={fileName}
+					handleDialogClose={handleDialogClose}
+					handleSave={handleSave}
+				/>
+			)}
+		</ResourceLoader>
 	);
 }
 

@@ -1,11 +1,12 @@
 import { useState } from "react";
-import { DialogBody, StatusMessage } from "../../../../components/dialog";
+import { DialogBody } from "../../../../components/dialog";
 import { TextArea } from "../../../../components/element/Input";
 import {
-	useResourceContent,
+	CONTENT_PARSER,
 	useSaveResourceContent,
 } from "../../../../hooks/useResourceFiles";
 import type { EditResourceDialogProps } from "./ResourceEditButton";
+import { ResourceLoader } from "./ResourceLoader";
 import { ResourceSettingDialog } from "./ResourceSettingDialog";
 
 export default function ParameterizeTemplateDialog({
@@ -13,20 +14,21 @@ export default function ParameterizeTemplateDialog({
 	handleDialogClose,
 	handleSave,
 }: EditResourceDialogProps) {
-	const { content, loading } = useResourceContent(
-		"parameterizeTemplate",
-		fileName,
-	);
-	if (loading) {
-		return <StatusMessage kind="loading">Loading...</StatusMessage>;
-	}
 	return (
-		<Dialog
-			content={content}
+		<ResourceLoader
+			kind={"parameterizeTemplate"}
 			fileName={fileName}
-			handleDialogClose={handleDialogClose}
-			handleSave={handleSave}
-		/>
+			parser={CONTENT_PARSER}
+		>
+			{(content) => (
+				<Dialog
+					content={content}
+					fileName={fileName}
+					handleDialogClose={handleDialogClose}
+					handleSave={handleSave}
+				/>
+			)}
+		</ResourceLoader>
 	);
 }
 
