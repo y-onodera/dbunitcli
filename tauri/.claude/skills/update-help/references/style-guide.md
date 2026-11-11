@@ -59,6 +59,7 @@
 
 - オプション名・値・ファイル名・パスは `<code>` で囲む（例: `<code>srcType</code>`、`<code>csv</code>`）
 - ボタン名・ダイアログ名は画面の英語表記をそのまま書き、`<code>` は付けない（例: Execute を押します）
+- フォームのセクションは画面の見出し（`src`、`result`、`old`、`param`、`template`、`jdbc` など）で呼び、コード上の名前（`srcData`、`convertResult` など）は書かない。本文と例では同名の項目（Generate の `result` など）と区別するため「`src` セクション」「`result` セクションの `resultType`」と書く。オプション表の「項目」列は見出しだけでよい（同じ表に同名の項目があれば「セクション」を付ける）
 - 種類を選ぶオプションは、項目名で呼ぶ（`srcType`、`resultType`、`targetType`、`scriptType`、`generateType`）。「Source Type」「ソースタイプ」とは書かない
 
 ## 4. 表の書き方
