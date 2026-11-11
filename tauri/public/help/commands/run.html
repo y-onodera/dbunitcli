@@ -8,7 +8,7 @@
 <body>
   <p><a href="../index.html">&larr; ヘルプ一覧に戻る</a></p>
   <h1>Run</h1>
-  <p>SQL ファイル・Ant のビルドファイル・Windows バッチファイルを実行します。実行するファイルは <code>srcData</code> で指定し、種類は <code>scriptType</code> で選びます。</p>
+  <p>SQL ファイル・Ant のビルドファイル・Windows バッチファイルを実行します。実行するファイルは <code>src</code> セクションで指定し、種類は <code>scriptType</code> で選びます。</p>
 
   <h2 id="section-simple">シンプルな使い方</h2>
   <p><code>scriptType</code> のデフォルトは <code>sql</code> です。実行する SQL ファイルと接続先を指定するだけで実行できます。</p>
@@ -18,8 +18,8 @@
   resources/jdbc/dev.properties   (url= / user= / pass= の 3 行)
 
 指定:
-  srcData の src               = sql/recreate_orders.sql
-  jdbcOption の jdbcProperties = dev.properties
+  src セクションの src             = sql/recreate_orders.sql
+  jdbc セクションの jdbcProperties = dev.properties
 
 結果:
   recreate_orders.sql の SQL が、書かれた順に dev.properties の接続先で実行される</pre>
@@ -34,9 +34,9 @@
     <tr><th>項目</th><th>説明</th><th>デフォルト</th></tr>
     <tr><td>scriptType</td><td>実行するファイルの種類（下記「scriptType 一覧」を参照）</td><td><code>sql</code></td></tr>
     <tr><td>parallel</td><td>同時に実行するファイル数（下記「並列実行」を参照）</td><td>（空）＝ 逐次</td></tr>
-    <tr><td>srcData</td><td>実行するファイル、またはファイルを置いたディレクトリ。拡張子は <code>scriptType</code> に応じて決まる（<code>sql</code>→<code>.sql</code>、<code>ant</code>→<code>.xml</code>、<code>bat</code>→<code>.bat</code>、<code>cmd</code>→<code>.cmd</code>）。ディレクトリの走査条件も変えられる（<a href="../sections/dataset-load-form.html">Dataset Load Form</a>）</td><td>—</td></tr>
-    <tr><td>templateOption</td><td>SQL をテンプレートとして処理するときの設定（<a href="../sections/template.html">Template</a>）。<code>sql</code> のときだけ使う</td><td>—</td></tr>
-    <tr><td>jdbcOption</td><td>接続先データベース（<a href="../sections/jdbc.html">JDBC</a>）。<code>sql</code> のときだけ使う</td><td>—</td></tr>
+    <tr><td>src</td><td>実行するファイル、またはファイルを置いたディレクトリ。拡張子は <code>scriptType</code> に応じて決まる（<code>sql</code>→<code>.sql</code>、<code>ant</code>→<code>.xml</code>、<code>bat</code>→<code>.bat</code>、<code>cmd</code>→<code>.cmd</code>）。ディレクトリの走査条件も変えられる（<a href="../sections/dataset-load-form.html">Dataset Load Form</a>）</td><td>—</td></tr>
+    <tr><td>template</td><td>SQL をテンプレートとして処理するときの設定（<a href="../sections/template.html">Template</a>）。<code>sql</code> のときだけ使う</td><td>—</td></tr>
+    <tr><td>jdbc</td><td>接続先データベース（<a href="../sections/jdbc.html">JDBC</a>）。<code>sql</code> のときだけ使う</td><td>—</td></tr>
     <tr><td>baseDir</td><td>実行時の作業ディレクトリ。<code>ant</code> / <code>bat</code> / <code>cmd</code> のときだけ使う</td><td>—</td></tr>
     <tr><td>antTarget</td><td>実行する Ant のターゲット名。<code>ant</code> のときだけ使う</td><td>（空）＝ デフォルトターゲット</td></tr>
   </table>
@@ -52,7 +52,7 @@
 
   <h3 id="section-parallel">並列実行（parallel）</h3>
   <ul>
-    <li><code>2</code> 以上を指定すると、<code>srcData</code> の各ファイルを指定した数まで同時に実行します。実行順は決まりません</li>
+    <li><code>2</code> 以上を指定すると、<code>src</code> セクションの各ファイルを指定した数まで同時に実行します。実行順は決まりません</li>
     <li>空欄または <code>1</code> のときは、パスの順に 1 ファイルずつ実行します（文字の順で比べるため、<code>10.sql</code> は <code>2.sql</code> より先になります）</li>
     <li>並列実行中にいずれかが失敗すると、まだ始めていないファイルは実行せず、実行中のファイルが終わるのを待ってからエラーになります</li>
   </ul>

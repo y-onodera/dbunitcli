@@ -8,7 +8,7 @@
 <body>
   <p><a href="../../run.html">&larr; Run に戻る</a></p>
   <h1>scriptType: bat / cmd</h1>
-  <p>Windows バッチファイルを実行します。<code>bat</code> と <code>cmd</code> の違いは対象の拡張子（<code>.bat</code> / <code>.cmd</code>）だけです。<code>srcData</code> にディレクトリを指定した場合は、配下のファイルを 1 ファイルずつ実行します。</p>
+  <p>Windows バッチファイルを実行します。<code>bat</code> と <code>cmd</code> の違いは対象の拡張子（<code>.bat</code> / <code>.cmd</code>）だけです。<code>src</code> セクションにディレクトリを指定した場合は、配下のファイルを 1 ファイルずつ実行します。</p>
 
   <h2 id="section-options">固有オプション</h2>
   <table>
@@ -22,10 +22,10 @@
   copy data\%TARGET%.csv backup\
 
 指定:
-  scriptType      = bat
-  srcData の src  = scripts/backup.bat
-  baseDir         = work/
-  -P 値           = TARGET=orders
+  scriptType           = bat
+  src セクションの src = scripts/backup.bat
+  baseDir              = work/
+  -P 値                = TARGET=orders
 
 実行される処理:
   work\data\orders.csv を work\backup\ にコピー</pre>

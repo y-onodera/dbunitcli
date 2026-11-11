@@ -8,13 +8,13 @@
 <body>
   <p><a href="../../run.html">&larr; Run に戻る</a></p>
   <h1>scriptType: sql</h1>
-  <p>SQL ファイルをテンプレートとして処理してから、接続先のデータベースで実行します。<code>srcData</code> にディレクトリを指定した場合は、配下の <code>.sql</code> ファイルを 1 ファイルずつ実行します。</p>
+  <p>SQL ファイルをテンプレートとして処理してから、接続先のデータベースで実行します。<code>src</code> セクションにディレクトリを指定した場合は、配下の <code>.sql</code> ファイルを 1 ファイルずつ実行します。</p>
 
   <h2 id="section-options">固有オプション</h2>
   <table>
     <tr><th>項目</th><th>説明</th></tr>
-    <tr><td>templateOption</td><td>SQL をテンプレートとして処理するときの設定（<a href="../../../sections/template.html">Template</a>）</td></tr>
-    <tr><td>jdbcOption</td><td>接続先データベース（<a href="../../../sections/jdbc.html">JDBC</a>）</td></tr>
+    <tr><td>template</td><td>SQL をテンプレートとして処理するときの設定（<a href="../../../sections/template.html">Template</a>）</td></tr>
+    <tr><td>jdbc</td><td>接続先データベース（<a href="../../../sections/jdbc.html">JDBC</a>）</td></tr>
   </table>
 
   <h2 id="section-example">設定例</h2>
@@ -23,10 +23,10 @@
   DELETE FROM ORDERS WHERE ORDER_DATE = '$param.orderDate$';
 
 指定:
-  scriptType        = sql
-  srcData の src    = sql/delete_orders.sql
-  jdbcOption        = 接続先の .properties ファイル
-  -P 値             = orderDate=2026-10-01
+  scriptType           = sql
+  src セクションの src = sql/delete_orders.sql
+  jdbc セクション      = 接続先の .properties ファイル
+  -P 値                = orderDate=2026-10-01
 
 実行される SQL:
   DELETE FROM ORDERS WHERE ORDER_DATE = '2026-10-01';</pre>

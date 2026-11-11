@@ -18,9 +18,9 @@
   data/orders/ITEMS.csv
 
 指定:
-  srcData の src              = data/orders
-  convertResult の resultType = xlsx
-  convertResult の result     = out
+  src セクションの src           = data/orders
+  result セクションの resultType = xlsx
+  result セクションの result     = out
 
 結果:
   out/orders_export.xlsx  (シート ORDERS / ITEMS)</pre>
@@ -34,14 +34,34 @@
   <h2 id="section-options">変更できる設定</h2>
   <table>
     <tr><th>項目</th><th>説明</th></tr>
-    <tr><td>srcData</td><td>変換元のデータセット。入力の形式（Excel・DB テーブル・SQL の結果など）、文字コード、ディレクトリの走査条件、テーブルごとの主キー・フィルタなどを変えられる（<a href="../sections/dataset-load-form.html">Dataset Load Form</a>）</td></tr>
-    <tr><td>convertResult</td><td>出力形式と出力先。DB テーブルへの書き込み、ブックの作り方（<code>excelTable</code>）、ファイル名（<code>resultPath</code>）、ヘッダ行の有無、並列読込などを変えられる（<a href="../sections/result-form.html">Result Form</a>）</td></tr>
+    <tr><td>src</td><td>変換元のデータセット。入力の形式（Excel・DB テーブル・SQL の結果など）、文字コード、ディレクトリの走査条件、テーブルごとの主キー・フィルタなどを変えられる（<a href="../sections/dataset-load-form.html">Dataset Load Form</a>）</td></tr>
+    <tr><td>result</td><td>出力形式と出力先。DB テーブルへの書き込み、ブックの作り方（<code>excelTable</code>）、ファイル名（<code>resultPath</code>）、ヘッダ行の有無、並列読込などを変えられる（<a href="../sections/result-form.html">Result Form</a>）</td></tr>
   </table>
+
+  <h3 id="section-example">応用例</h3>
+  <h4>複数のソースを 1 つのテーブルにまとめる</h4>
+  <p>1 回の読み込みで同じテーブル名になったデータは、1 つのテーブルにまとめて出力されます。</p>
+  <pre>入力:
+  data/branch/tokyo/ORDERS.csv  (1001,pen / 1002,note)
+  data/branch/osaka/ORDERS.csv  (2001,ink)
+
+指定:
+  src セクションの src       = data/branch
+  src セクションの recursive = ON
+
+結果:
+  ORDERS.csv  (1001,pen / 1002,note / 2001,ink の 3 行)</pre>
+  <ul>
+    <li>ファイル名が違うテーブルも、<a href="../dialogs/dataset-setting.html">Dataset Setting</a> の <code>tableName</code> で同じ名前にすればまとまる（例: <code>ORDERS_TOKYO</code> と <code>ORDERS_OSAKA</code> を <code>ORDERS</code> に）</li>
+    <li>まとめた行の順は、ソースを読み込む順で変わる</li>
+  </ul>
+  <p>1 回の Convert で読み込めるのは、1 つの <code>src</code>・1 つの <code>srcType</code> です。形式の違うソース（Excel と CSV、別の接続先の DB など）や、別々の場所にあるソースをまとめるときは、<a href="parameterize.html">Parameterize</a> で Convert をソースごとに実行し、<code>result</code> セクションの <code>append</code> を ON にして 1 つのファイルに追記してください（Parameterize の「応用例」を参照）。</p>
 
   <h2 id="section-related">関連</h2>
   <ul>
     <li><a href="../sections/dataset-load-form.html">Dataset Load Form</a> — 変換元のデータセットの指定</li>
     <li><a href="../sections/result-form.html">Result Form</a> — 出力形式と出力先、並列読込</li>
+    <li><a href="parameterize.html">Parameterize</a> — 複数のソースを append で 1 ファイルにまとめる例</li>
   </ul>
 </body>
 </html>

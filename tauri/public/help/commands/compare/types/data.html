@@ -10,7 +10,7 @@
   <h1>targetType: data</h1>
   <p>CSV・Excel・DB テーブルなど、表形式のデータセットを比較します。<code>setting</code> に指定した <a href="../../../dialogs/dataset-settings.html">Dataset Settings</a> ファイルで主キー・カラム選択・ソート順などを制御できます。</p>
   <ul>
-    <li><code>oldData</code> と <code>newData</code> で対応するテーブルを 1 対 1 に突き合わせます</li>
+    <li><code>old</code> と <code>new</code> セクションで対応するテーブルを 1 対 1 に突き合わせます</li>
     <li>テーブルの一致は名前で行われます。名前が対応しないテーブルは追加／削除として検出されます</li>
     <li><code>setting</code> を省略するとすべてのカラムを対象に順序比較します</li>
   </ul>
@@ -79,7 +79,7 @@
   <p><code>filePath</code> の値はファイルパス全体に対する Java 正規表現です。<code>.*/domestic/.*</code> はパス中に <code>domestic/</code> を含むファイルにのみマッチします。どちらの設定にもマッチしないファイルは <code>commonSettings</code> が適用されます（指定がなければ全カラム順序比較）。</p>
 
   <h2 id="section-result">比較結果の形式</h2>
-  <p>比較結果は <code>convertResult</code> の出力先に、全テーブルの差分サマリ <code>COMPARE_RESULT</code> と、差分があるテーブルごとの詳細ファイル（<code>$MODIFY</code> / <code>$DELETE</code> / <code>$ADD</code>、<code>createPatchSql</code> が ON のときは <code>$PATCH.sql</code>）として出力されます。各ファイルのカラムと <code>DIFF</code> の値は <a href="../../compare.html">Compare</a> の「比較結果の形式」を参照してください。</p>
+  <p>比較結果は <code>result</code> セクションの出力先に、全テーブルの差分サマリ <code>COMPARE_RESULT</code> と、差分があるテーブルごとの詳細ファイル（<code>$MODIFY</code> / <code>$DELETE</code> / <code>$ADD</code>、<code>createPatchSql</code> が ON のときは <code>$PATCH.sql</code>）として出力されます。各ファイルのカラムと <code>DIFF</code> の値は <a href="../../compare.html">Compare</a> の「比較結果の形式」を参照してください。</p>
 
   <h2 id="section-related">関連</h2>
   <ul>

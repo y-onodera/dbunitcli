@@ -8,10 +8,10 @@
 <body>
   <p><a href="../index.html">&larr; ヘルプ一覧に戻る</a></p>
   <h1>Parameterize</h1>
-  <p>パラメータデータ（<code>paramData</code>）の行ごとに、対象のコマンド（<code>cmd</code>）を繰り返し実行します。コマンドに渡すオプションはテンプレートに書き、パラメータデータの値を埋め込みます。</p>
+  <p>パラメータデータ（<code>param</code> セクション）の行ごとに、対象のコマンド（<code>cmd</code>）を繰り返し実行します。コマンドに渡すオプションはテンプレートに書き、パラメータデータの値を埋め込みます。</p>
 
   <h2 id="section-simple">シンプルな使い方</h2>
-  <p>実行するコマンド、オプションを書いたテンプレート、パラメータデータの <code>src</code> を指定します。<code>unit</code> のデフォルトは <code>record</code>（パラメータデータの 1 行ごとに 1 回実行）、<code>paramData</code> の <code>srcType</code> のデフォルトは <code>csv</code> です。</p>
+  <p>実行するコマンド、オプションを書いたテンプレート、パラメータデータの <code>src</code> を指定します。<code>unit</code> のデフォルトは <code>record</code>（パラメータデータの 1 行ごとに 1 回実行）、<code>param</code> セクションの <code>srcType</code> のデフォルトは <code>csv</code> です。</p>
   <p>例: 月ごとのディレクトリにある CSV を、月ごとに Excel へ変換します。</p>
   <pre>パラメータデータ (params/months.csv):
   MONTH
@@ -19,18 +19,18 @@
   202610
 
 テンプレート (convert_monthly.txt):
-  -srcData.src=data/$param.MONTH$
-  -convertResult.resultType=xlsx
-  -convertResult.result=out/$param.MONTH$
+  -src=data/$param.MONTH$
+  -resultType=xlsx
+  -result=out/$param.MONTH$
 
 指定:
-  cmd              = convert
-  template         = convert_monthly.txt
-  paramData の src = params/months.csv
+  cmd                    = convert
+  template               = convert_monthly.txt
+  param セクションの src = params/months.csv
 
 結果:
-  1 行目: srcData の src = data/202609、result = out/202609 で Convert を実行
-  2 行目: srcData の src = data/202610、result = out/202610 で Convert を実行</pre>
+  1 行目: src セクションの src = data/202609、result セクションの result = out/202609 で Convert を実行
+  2 行目: src セクションの src = data/202610、result セクションの result = out/202610 で Convert を実行</pre>
   <p>テンプレートの <code>$param.列名$</code> が行ごとの値に置き換わり、行数分だけコマンドが実行されます。</p>
   <p>テンプレートとパラメータデータは手で書かなくても作れます。元にするコマンドを Save し、サイドバーの ⋮ から Parameterize を選んでパラメータにするオプションを選ぶと、その今の値を 1 行だけ入れたパラメータデータと、残りのオプションを保存値のまま書いたテンプレートが作られます（<a href="../guide/getting-started.html">基本的な使い方</a> の「6. Parameterize で繰り返し実行する」を参照）。</p>
 
@@ -44,8 +44,8 @@
     <tr><td>cmd（必須）</td><td>実行するコマンド（<a href="compare.html">Compare</a> / <a href="convert.html">Convert</a> / <a href="generate.html">Generate</a> / <a href="run.html">Run</a>）。<code>$param.列名$</code> で行ごとに切り替えることもできる</td><td>—</td></tr>
     <tr><td>cmdParam</td><td>コマンドのオプションを書いたファイルのパス。パスに <code>$param.列名$</code> を書くと行ごとに別のファイルを使える（下記「応用例」を参照）。<code>template</code> と同時には指定できない</td><td>（空）</td></tr>
     <tr><td>template</td><td>コマンドのオプションを書いたテンプレートファイル（<a href="../dialogs/parameterize-template-edit.html">Edit Parameterize Template</a> で編集）。<code>option/parameterize/template</code> のファイルを候補から選べ、⋮ メニューの delete で削除もできる。<code>cmdParam</code> と同時には指定できない</td><td>（空）</td></tr>
-    <tr><td>paramData</td><td>パラメータデータ。Excel や DB テーブルなど、CSV 以外の形式にも変えられる（<a href="../sections/dataset-load-form.html">Dataset Load Form</a>）</td><td>—</td></tr>
-    <tr><td>templateOption</td><td>テンプレート処理の設定。変数の区切り文字などを変えられる（<a href="../sections/template.html">Template</a>）</td><td>—</td></tr>
+    <tr><td>param セクション</td><td>パラメータデータ。Excel や DB テーブルなど、CSV 以外の形式にも変えられる（<a href="../sections/dataset-load-form.html">Dataset Load Form</a>）</td><td>—</td></tr>
+    <tr><td>template セクション</td><td>テンプレート処理の設定。変数の区切り文字などを変えられる（<a href="../sections/template.html">Template</a>）</td><td>—</td></tr>
   </table>
 
   <h3 id="section-unit">unit 一覧</h3>
@@ -61,7 +61,7 @@
     <li><code>2</code> 以上を指定すると、<code>unit</code> の単位ごとのコマンドを指定した数まで同時に実行します。実行順は決まりません</li>
     <li>空欄または <code>1</code> のときは、1 件ずつ順に実行します</li>
     <li><code>ignoreFail</code> が OFF のときは、1 件失敗すると未着手のコマンドは始めず、実行中のコマンドが終わるのを待ってからエラーになります。ON のときは全件を実行し、最後に失敗件数があればエラーになります</li>
-    <li>並列実行中のコマンドでは、Compare / Convert / Generate の並列数（Generate は <code>parallel</code>、Compare / Convert は <code>convertResult</code> の <code>parallel</code>）が空欄なら逐次になります。値を書いた場合はその並列数で動きます</li>
+    <li>並列実行中のコマンドでは、Compare / Convert / Generate の並列数（Generate は <code>parallel</code>、Compare / Convert は <code>result</code> セクションの <code>parallel</code>）が空欄なら逐次になります。値を書いた場合はその並列数で動きます</li>
   </ul>
   <p>テーブルの作成とデータの投入のように実行順に依存するコマンドは、並列にしないでください。複数の行が同じ出力先へ書く場合、最後に残る内容は決まりません。</p>
 
@@ -74,16 +74,16 @@ orders,data/old/orders,data/new/orders,settings/orders.json
 products,data/old/products,data/new/products,settings/products.json
 
 テンプレート (compare_param.txt):
--oldData.src=$param.OLD_DIR$
--newData.src=$param.NEW_DIR$
+-old.src=$param.OLD_DIR$
+-new.src=$param.NEW_DIR$
 -setting=$param.SETTING$
--convertResult.result=result/compare/$param.NAME$
+-result=result/compare/$param.NAME$
 
 指定:
-  ignoreFail       = ON
-  cmd              = compare
-  template         = compare_param.txt
-  paramData の src = params/compare_params.csv
+  ignoreFail             = ON
+  cmd                    = compare
+  template               = compare_param.txt
+  param セクションの src = params/compare_params.csv
 
 結果:
   result/compare/orders/COMPARE_RESULT.csv     (1 行目の比較結果)
@@ -99,16 +99,108 @@ products
 customers
 
 指定:
-  cmd              = convert
-  cmdParam         = params/$param.TARGET$.txt
-  paramData の src = params/targets.csv</pre>
+  cmd                    = convert
+  cmdParam               = params/$param.TARGET$.txt
+  param セクションの src = params/targets.csv</pre>
   <p>1 行目では <code>params/orders.txt</code>、2 行目では <code>params/products.txt</code>、3 行目では <code>params/customers.txt</code> に書かれたオプションで Convert が実行されます。</p>
+
+  <h4>ケーススタディ: 複数のソースを 1 つにまとめて Generate する</h4>
+  <p>やりたいこと: 支店ごとに管理している注文データ（東京は Excel、大阪は CSV）を 1 つにまとめ、全支店分の INSERT 文を作りたい。</p>
+  <pre>入力:
+  data/tokyo/orders.xlsx  (シート ORDERS: 1001,pen / 1002,note)
+  data/osaka/ORDERS.csv   (2001,ink)
+  data/osaka/ITEMS.csv    (9)</pre>
+  <p>まとめ方は、ソースの置き方と、まとめた結果をどう使うかで選びます。</p>
+  <table>
+    <tr><th>状況</th><th>考えられる方法</th></tr>
+    <tr><td>ソースが同じ形式で、1 つのディレクトリの下にある</td><td>Parameterize を使わず、Convert または Generate の 1 回の読み込みでまとめる。同じテーブル名のデータは 1 つのテーブルになる（<a href="convert.html">Convert</a> の「応用例」を参照）</td></tr>
+    <tr><td>形式・置き場所・接続先がソースごとに違い、1 つのファイルにまとめたい</td><td>Parameterize で Convert をソースごとに実行し、<code>result</code> セクションの <code>append</code> で 1 つの出力先に追記する（下記「方法 1」「方法 2」）。まとめたファイルを Generate の <code>src</code> セクションに指定する</td></tr>
+    <tr><td>ソースごとに別の SQL ファイルでよい</td><td>まとめずに、Parameterize で Generate をソースごとに実行する。<code>result</code> に行ごとの値を入れて出力先を分ける（全行で同じ出力先にすると上書きされる）</td></tr>
+  </table>
+  <p>append で追記する場合は、まとめる先を 1 つの Excel ブックにするか、テーブルごとの CSV にするかで設定が変わります。どちらも、前回の出力を作り直すために <code>append</code> を OFF にする行を最初に置くと、出力先を消さずに何度実行しても前回の分と重なりません（方法 1 はブックに 1 行、方法 2 はテーブルごとに 1 行）。</p>
+
+  <p><strong>方法 1: 1 つの Excel ブックにまとめる</strong></p>
+  <p>ブックは <code>append</code> が OFF のときにまるごと作り直されるため、1 行目だけ OFF にします。</p>
+  <pre>パラメータデータ (params/sources.csv):
+  SRC,TYPE,APPEND
+  data/tokyo/orders.xlsx,xlsx,false
+  data/osaka,csv,true
+
+テンプレート (merge_orders.txt):
+  -src=$param.SRC$
+  -srcType=$param.TYPE$
+  -result=merged
+  -resultType=xlsx
+  -resultPath=orders_all
+  -append=$param.APPEND$
+
+指定:
+  parallel               = 1
+  cmd                    = convert
+  template               = merge_orders.txt
+  param セクションの src = params/sources.csv
+
+結果:
+  merged/orders_all.xlsx  (シート ORDERS: 1001,pen / 1002,note / 2001,ink、シート ITEMS: 9)</pre>
+
+  <p><strong>方法 2: テーブルごとの CSV にまとめる</strong></p>
+  <p>CSV はテーブルごとのファイルなので、<code>append</code> が OFF でも作り直されるのはそのソースにあるテーブルのファイルだけです。2 行目以降のソースにしかないテーブル（ここでは ITEMS）は前回のファイルに追記されて重なります。1 回の Convert で読むテーブルを 1 つに絞り、テーブルごとに最初の行だけ <code>append</code> を OFF にします。</p>
+  <pre>パラメータデータ (params/tables.csv):
+  SRC,TYPE,TABLE,APPEND
+  data/tokyo/orders.xlsx,xlsx,^ORDERS$,false
+  data/osaka,csv,^ORDERS$,true
+  data/osaka,csv,^ITEMS$,false
+
+テンプレート (merge_tables.txt):
+  -src=$param.SRC$
+  -srcType=$param.TYPE$
+  -regTableInclude=$param.TABLE$
+  -result=merged
+  -append=$param.APPEND$
+
+指定:
+  parallel               = 1
+  cmd                    = convert
+  template               = merge_tables.txt
+  param セクションの src = params/tables.csv
+
+結果:
+  merged/ORDERS.csv  (1001,pen / 1002,note / 2001,ink)
+  merged/ITEMS.csv   (9)</pre>
+  <ul>
+    <li><code>regTableInclude</code>（<a href="../sections/data-load.html">Data Load</a>）はテーブル名の一部に一致すれば対象にするため、<code>^ORDERS$</code> のように前後を固定する。<code>$</code> はテンプレートの区切り文字なので、正規表現はパラメータデータの列に書く</li>
+    <li><code>regTableInclude</code> の代わりに、対象のテーブルを name に書いた <code>setting</code> を指定し、<code>settingTargetOnly</code> を ON にしても絞れる（<a href="../sections/dataset-load-form.html">Dataset Load Form</a>）</li>
+    <li>テーブルごとに分けずに済ませたいときは、やり直す前に出力先のファイルを消してから実行する</li>
+  </ul>
+
+  <p><strong>まとめたファイルから Generate する</strong></p>
+  <p>方法 1 のブックを読む例です。方法 2 なら、<code>src</code> セクションの <code>src</code> を <code>merged</code> にし、<code>srcType</code> はデフォルトの <code>csv</code> のままにします。</p>
+  <pre>指定:
+  generateType             = sql
+  op                       = INSERT
+  src セクションの src     = merged/orders_all.xlsx
+  src セクションの srcType = xlsx
+
+結果:
+  ORDERS.sql:
+    insert into ORDERS (ORDER_ID ,ITEM ) values ('1001' ,'pen' );
+    insert into ORDERS (ORDER_ID ,ITEM ) values ('1002' ,'note' );
+    insert into ORDERS (ORDER_ID ,ITEM ) values ('2001' ,'ink' );
+    commit;
+  ITEMS.sql</pre>
+
+  <p><strong>どの方法でも気を付けること</strong></p>
+  <ul>
+    <li><code>parallel</code> は <code>1</code>（または空欄）にして、パラメータデータの行の順に実行してください。並列にすると、<code>append</code> が OFF の行が後から実行されて、先に追記した分を消すことがあります</li>
+    <li>追記はヘッダ行を確かめずに行うため、同じテーブル名のソースは列の並びをそろえてください</li>
+  </ul>
 
   <h2 id="section-related">関連</h2>
   <ul>
     <li><a href="../guide/getting-started.html">基本的な使い方</a> — 保存済みオプションから Parameterize を作る手順</li>
     <li><a href="../dialogs/parameterize-template-edit.html">Edit Parameterize Template</a> — テンプレートの編集</li>
     <li><a href="../sections/template.html">Template</a> — テンプレート処理の設定</li>
+    <li><a href="../sections/result-form.html">Result Form</a> — <code>append</code> などの出力の設定</li>
   </ul>
 </body>
 </html>

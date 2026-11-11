@@ -8,7 +8,7 @@
 <body>
   <p><a href="../../compare.html">&larr; Compare に戻る</a></p>
   <h1>targetType: image</h1>
-  <p>PNG 画像ファイルをピクセル単位で比較します。<code>oldData</code> / <code>newData</code> には <code>srcType</code> = <code>file</code> のディレクトリを指定してください。拡張子は自動的に <code>.png</code> に固定されます。</p>
+  <p>PNG 画像ファイルをピクセル単位で比較します。<code>old</code> / <code>new</code> セクションには <code>srcType</code> = <code>file</code> のディレクトリを指定してください。拡張子は自動的に <code>.png</code> に固定されます。</p>
   <ul>
     <li>ファイル名が一致するペアを 1 対 1 で突き合わせます</li>
     <li><code>setting</code> は使いません</li>
@@ -17,7 +17,7 @@
   <h2 id="section-options">固有オプション</h2>
   <table>
     <tr><th>項目</th><th>説明</th></tr>
-    <tr><td>imageOption</td><td>差分とみなすしきい値・比較から除外する領域・差分の描画方法（<a href="../../../sections/image.html">Image Option</a>）</td></tr>
+    <tr><td>image</td><td>差分とみなすしきい値・比較から除外する領域・差分の描画方法（<a href="../../../sections/image.html">Image Option</a>）</td></tr>
   </table>
 
   <h2 id="section-result">比較結果の形式</h2>
@@ -41,7 +41,7 @@
     <tr><td><code>File Add</code></td><td>新データにあるファイルが旧データに存在しない</td></tr>
     <tr><td><code>[x1,y1,x2,y2]...</code></td><td>ピクセル差分あり。差分矩形の座標リスト（左上・右下のピクセル座標を <code>[x1,y1,x2,y2]</code> 形式で連結）</td></tr>
   </table>
-  <p>ピクセル差分があるファイルは、差分を強調描画した PNG 画像が <code>convertResult</code> の出力先に <code>{ファイル名}.png</code> として保存されます。</p>
+  <p>ピクセル差分があるファイルは、差分を強調描画した PNG 画像が <code>result</code> セクションの出力先に <code>{ファイル名}.png</code> として保存されます。</p>
   <h2 id="section-related">関連</h2>
   <ul>
     <li><a href="../../../sections/image.html">Image Option</a> — しきい値・除外領域・差分の描画</li>
