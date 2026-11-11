@@ -146,7 +146,30 @@ customers
     <li><code>parallel</code> は <code>1</code>（または空欄）にして、パラメータデータの行の順に実行してください。並列にすると、<code>append</code> が OFF の行が後から実行されて、先に追記した分を消すことがある</li>
     <li>追記はヘッダ行を確かめずに行うため、同じテーブル名のソースは列の並びをそろえてください</li>
   </ul>
-  <p><code>resultType</code> を <code>csv</code> にすると、テーブルごとの CSV に追記されます。この場合、1 行目で上書きされるのは 1 行目のソースにあるテーブルのファイルだけです。2 行目以降のソースにしかないテーブルは前回のファイルに追記されて重なるため、やり直す前に出力先のファイルを消してください。</p>
+  <p><code>resultType</code> を <code>csv</code> にすると、テーブルごとの CSV に追記されます。この場合、1 行目で上書きされるのは 1 行目のソースにあるテーブルのファイルだけです。2 行目以降のソースにしかないテーブルは、前回のファイルに追記されて重なります。重ならないようにするには、1 回の Convert で読むテーブルを 1 つに絞り、テーブルごとに最初の行だけ <code>append</code> を OFF にします。</p>
+  <pre>入力 (上の例に加えて):
+  data/osaka/ITEMS.csv   (9)
+
+パラメータデータ (params/tables.csv):
+  SRC,TYPE,TABLE,APPEND
+  data/tokyo/orders.xlsx,xlsx,^ORDERS$,false
+  data/osaka,csv,^ORDERS$,true
+  data/osaka,csv,^ITEMS$,false
+
+テンプレート (merge_tables.txt):
+  -src=$param.SRC$
+  -srcType=$param.TYPE$
+  -regTableInclude=$param.TABLE$
+  -result=merged
+  -append=$param.APPEND$
+
+結果 (何度実行しても同じ):
+  merged/ORDERS.csv  (1001,pen / 1002,note / 2001,ink)
+  merged/ITEMS.csv   (9)</pre>
+  <ul>
+    <li><code>regTableInclude</code>（<a href="../sections/data-load.html">Data Load</a>）はテーブル名の一部に一致すれば対象にするため、<code>^ORDERS$</code> のように前後を固定してください。<code>$</code> はテンプレートの区切り文字なので、正規表現はパラメータデータの列に書きます</li>
+    <li><code>regTableInclude</code> の代わりに、対象のテーブルを name に書いた <code>setting</code> を指定し、<code>settingTargetOnly</code> を ON にしても絞れる（<a href="../sections/dataset-load-form.html">Dataset Load Form</a>）</li>
+  </ul>
   <p>Convert でまとめずに Parameterize で Generate を行ごとに実行すると、ソースごとに別の SQL ファイルができます（出力先が同じなら上書きされます）。1 つのファイルにしたいときは、この例のように先にデータをまとめてください。</p>
 
   <h2 id="section-related">関連</h2>
