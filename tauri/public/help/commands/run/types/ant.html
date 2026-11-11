@@ -8,7 +8,7 @@
 <body>
   <p><a href="../../run.html">&larr; Run に戻る</a></p>
   <h1>scriptType: ant</h1>
-  <p>Apache Ant のビルドファイル（<code>.xml</code>）を実行します。<code>srcData</code> にディレクトリを指定した場合は、配下の <code>.xml</code> ファイルを 1 ファイルずつ実行します。</p>
+  <p>Apache Ant のビルドファイル（<code>.xml</code>）を実行します。<code>src</code> セクションにディレクトリを指定した場合は、配下の <code>.xml</code> ファイルを 1 ファイルずつ実行します。</p>
 
   <h2 id="section-options">固有オプション</h2>
   <table>
@@ -26,11 +26,11 @@
   &lt;/project&gt;
 
 指定:
-  scriptType      = ant
-  srcData の src  = scripts/build.xml
-  baseDir         = work/
-  antTarget       = deploy
-  -P 値           = stage=staging
+  scriptType           = ant
+  src セクションの src = scripts/build.xml
+  baseDir              = work/
+  antTarget            = deploy
+  -P 値                = stage=staging
 
 出力:
   [echo] deploy to staging</pre>

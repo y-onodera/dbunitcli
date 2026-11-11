@@ -26,8 +26,8 @@
   テーブル USERS（カラム ID / NAME / EMAIL）
 
 指定:
-  fileName       = users
-  srcData の src = （USERS を含むデータセット）
+  fileName             = users
+  src セクションの src = （USERS を含むデータセット）
   → Execute
 
 結果:
@@ -50,7 +50,7 @@
   <table>
     <tr><th>項目</th><th>説明</th></tr>
     <tr><td>fileName（必須）</td><td>保存するテンプレートのファイル名。拡張子が <code>.xlsx</code> でなければ <code>.xlsx</code> が付与される（<code>generateType=xls</code> を選択していても出力は常に <code>.xlsx</code> 形式）。ディレクトリ区切り（<code>/</code> <code>\</code>）や <code>..</code> は使えない。同名のファイルがある場合は上書きされる。</td></tr>
-    <tr><td>srcData</td><td>テンプレートの元にするデータセット。<code>srcType</code>・パス・文字コード・ヘッダ指定などを <a href="../sections/dataset-load-form.html">Dataset Load Form</a> と同じ要領で指定する。</td></tr>
+    <tr><td>src</td><td>テンプレートの元にするデータセット。<code>srcType</code>・パス・文字コード・ヘッダ指定などを <a href="../sections/dataset-load-form.html">Dataset Load Form</a> と同じ要領で指定する。</td></tr>
   </table>
 
   <h2 id="section-flow">操作の流れ</h2>

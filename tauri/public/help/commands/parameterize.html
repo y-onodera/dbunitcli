@@ -8,10 +8,10 @@
 <body>
   <p><a href="../index.html">&larr; ヘルプ一覧に戻る</a></p>
   <h1>Parameterize</h1>
-  <p>パラメータデータ（<code>paramData</code>）の行ごとに、対象のコマンド（<code>cmd</code>）を繰り返し実行します。コマンドに渡すオプションはテンプレートに書き、パラメータデータの値を埋め込みます。</p>
+  <p>パラメータデータ（<code>param</code> セクション）の行ごとに、対象のコマンド（<code>cmd</code>）を繰り返し実行します。コマンドに渡すオプションはテンプレートに書き、パラメータデータの値を埋め込みます。</p>
 
   <h2 id="section-simple">シンプルな使い方</h2>
-  <p>実行するコマンド、オプションを書いたテンプレート、パラメータデータの <code>src</code> を指定します。<code>unit</code> のデフォルトは <code>record</code>（パラメータデータの 1 行ごとに 1 回実行）、<code>paramData</code> の <code>srcType</code> のデフォルトは <code>csv</code> です。</p>
+  <p>実行するコマンド、オプションを書いたテンプレート、パラメータデータの <code>src</code> を指定します。<code>unit</code> のデフォルトは <code>record</code>（パラメータデータの 1 行ごとに 1 回実行）、<code>param</code> セクションの <code>srcType</code> のデフォルトは <code>csv</code> です。</p>
   <p>例: 月ごとのディレクトリにある CSV を、月ごとに Excel へ変換します。</p>
   <pre>パラメータデータ (params/months.csv):
   MONTH
@@ -24,13 +24,13 @@
   -result=out/$param.MONTH$
 
 指定:
-  cmd              = convert
-  template         = convert_monthly.txt
-  paramData の src = params/months.csv
+  cmd                    = convert
+  template               = convert_monthly.txt
+  param セクションの src = params/months.csv
 
 結果:
-  1 行目: srcData の src = data/202609、result = out/202609 で Convert を実行
-  2 行目: srcData の src = data/202610、result = out/202610 で Convert を実行</pre>
+  1 行目: src セクションの src = data/202609、result セクションの result = out/202609 で Convert を実行
+  2 行目: src セクションの src = data/202610、result セクションの result = out/202610 で Convert を実行</pre>
   <p>テンプレートの <code>$param.列名$</code> が行ごとの値に置き換わり、行数分だけコマンドが実行されます。</p>
   <p>テンプレートとパラメータデータは手で書かなくても作れます。元にするコマンドを Save し、サイドバーの ⋮ から Parameterize を選んでパラメータにするオプションを選ぶと、その今の値を 1 行だけ入れたパラメータデータと、残りのオプションを保存値のまま書いたテンプレートが作られます（<a href="../guide/getting-started.html">基本的な使い方</a> の「6. Parameterize で繰り返し実行する」を参照）。</p>
 
@@ -44,8 +44,8 @@
     <tr><td>cmd（必須）</td><td>実行するコマンド（<a href="compare.html">Compare</a> / <a href="convert.html">Convert</a> / <a href="generate.html">Generate</a> / <a href="run.html">Run</a>）。<code>$param.列名$</code> で行ごとに切り替えることもできる</td><td>—</td></tr>
     <tr><td>cmdParam</td><td>コマンドのオプションを書いたファイルのパス。パスに <code>$param.列名$</code> を書くと行ごとに別のファイルを使える（下記「応用例」を参照）。<code>template</code> と同時には指定できない</td><td>（空）</td></tr>
     <tr><td>template</td><td>コマンドのオプションを書いたテンプレートファイル（<a href="../dialogs/parameterize-template-edit.html">Edit Parameterize Template</a> で編集）。<code>option/parameterize/template</code> のファイルを候補から選べ、⋮ メニューの delete で削除もできる。<code>cmdParam</code> と同時には指定できない</td><td>（空）</td></tr>
-    <tr><td>paramData</td><td>パラメータデータ。Excel や DB テーブルなど、CSV 以外の形式にも変えられる（<a href="../sections/dataset-load-form.html">Dataset Load Form</a>）</td><td>—</td></tr>
-    <tr><td>templateOption</td><td>テンプレート処理の設定。変数の区切り文字などを変えられる（<a href="../sections/template.html">Template</a>）</td><td>—</td></tr>
+    <tr><td>param セクション</td><td>パラメータデータ。Excel や DB テーブルなど、CSV 以外の形式にも変えられる（<a href="../sections/dataset-load-form.html">Dataset Load Form</a>）</td><td>—</td></tr>
+    <tr><td>template セクション</td><td>テンプレート処理の設定。変数の区切り文字などを変えられる（<a href="../sections/template.html">Template</a>）</td><td>—</td></tr>
   </table>
 
   <h3 id="section-unit">unit 一覧</h3>
@@ -61,7 +61,7 @@
     <li><code>2</code> 以上を指定すると、<code>unit</code> の単位ごとのコマンドを指定した数まで同時に実行します。実行順は決まりません</li>
     <li>空欄または <code>1</code> のときは、1 件ずつ順に実行します</li>
     <li><code>ignoreFail</code> が OFF のときは、1 件失敗すると未着手のコマンドは始めず、実行中のコマンドが終わるのを待ってからエラーになります。ON のときは全件を実行し、最後に失敗件数があればエラーになります</li>
-    <li>並列実行中のコマンドでは、Compare / Convert / Generate の並列数（Generate は <code>parallel</code>、Compare / Convert は <code>convertResult</code> の <code>parallel</code>）が空欄なら逐次になります。値を書いた場合はその並列数で動きます</li>
+    <li>並列実行中のコマンドでは、Compare / Convert / Generate の並列数（Generate は <code>parallel</code>、Compare / Convert は <code>result</code> セクションの <code>parallel</code>）が空欄なら逐次になります。値を書いた場合はその並列数で動きます</li>
   </ul>
   <p>テーブルの作成とデータの投入のように実行順に依存するコマンドは、並列にしないでください。複数の行が同じ出力先へ書く場合、最後に残る内容は決まりません。</p>
 
@@ -80,10 +80,10 @@ products,data/old/products,data/new/products,settings/products.json
 -result=result/compare/$param.NAME$
 
 指定:
-  ignoreFail       = ON
-  cmd              = compare
-  template         = compare_param.txt
-  paramData の src = params/compare_params.csv
+  ignoreFail             = ON
+  cmd                    = compare
+  template               = compare_param.txt
+  param セクションの src = params/compare_params.csv
 
 結果:
   result/compare/orders/COMPARE_RESULT.csv     (1 行目の比較結果)
@@ -99,9 +99,9 @@ products
 customers
 
 指定:
-  cmd              = convert
-  cmdParam         = params/$param.TARGET$.txt
-  paramData の src = params/targets.csv</pre>
+  cmd                    = convert
+  cmdParam               = params/$param.TARGET$.txt
+  param セクションの src = params/targets.csv</pre>
   <p>1 行目では <code>params/orders.txt</code>、2 行目では <code>params/products.txt</code>、3 行目では <code>params/customers.txt</code> に書かれたオプションで Convert が実行されます。</p>
 
   <h4>複数のソースを 1 ファイルにまとめてから Generate する（append）</h4>
@@ -124,14 +124,14 @@ customers
   -append=true
 
 指定 (1 つ目: Parameterize):
-  cmd              = convert
-  template         = merge_orders.txt
-  paramData の src = params/sources.csv
+  cmd                    = convert
+  template               = merge_orders.txt
+  param セクションの src = params/sources.csv
 
 指定 (2 つ目: Generate):
-  generateType   = sql
-  op             = INSERT
-  srcData の src = merged/orders_all.xlsx
+  generateType         = sql
+  op                   = INSERT
+  src セクションの src = merged/orders_all.xlsx
 
 結果:
   merged/orders_all.xlsx  (シート ORDERS: 1001,pen / 1002,note / 2001,ink)

@@ -8,7 +8,7 @@
 <body>
   <p><a href="../index.html">&larr; ヘルプ一覧に戻る</a></p>
   <h1>Result Form</h1>
-  <p>各コマンドで「出力先と出力形式」を指定するための共通フォームです。<a href="../commands/convert.html">Convert</a> の <code>convertResult</code>、<a href="../commands/compare.html">Compare</a> の出力設定などで使用されます。</p>
+  <p>各コマンドで「出力先と出力形式」を指定するための共通フォームです。<a href="../commands/convert.html">Convert</a> の <code>result</code> セクション、<a href="../commands/compare.html">Compare</a> の出力設定などで使用されます。</p>
   <p>フォームの構成は <code>resultType</code> により変わります。選択した形式ごとに表示される項目が異なります。各形式の固有オプションと出力例は、形式名のリンク先の個別ページを参照してください。</p>
 
   <h2 id="section-simple">シンプルな使い方</h2>
@@ -96,7 +96,7 @@
     <tr><td>Convert</td><td>GUI の Exec では保存済みオプションの名前。CLI では <code>result</code>（<code>@オプションファイル</code> で実行した場合はそのファイル名から拡張子を除いたもの）</td><td><code>C:/work/out/daily/orders_export.xlsx</code></td></tr>
     <tr><td>Compare</td><td><code>result</code> に指定したディレクトリの名前</td><td><code>C:/work/out/daily/daily.xlsx</code></td></tr>
   </table>
-  <p>Compare で <code>expectData</code> を指定した場合、想定差分との比較結果は <code>result</code> の下の <code>expectedDiff</code> ディレクトリに出力されます。</p>
+  <p>Compare で <code>expect</code> セクションを指定した場合、想定差分との比較結果は <code>result</code> の下の <code>expectedDiff</code> ディレクトリに出力されます。</p>
 
   <h3 id="section-result-path-generate">Generate</h3>
   <p><a href="../commands/generate.html">Generate</a> の <code>resultPath</code> は <code>result</code> からの相対パスで、サブディレクトリも書けます。<strong>テンプレートとして処理される</strong>ため、テーブル名や行の値を変数として使えます。変数の書き方は <a href="template.html">Template</a> の設定に従います（以下はデフォルトの <code>templateParameterAttribute=param</code>、区切り文字 <code>$</code> の場合。<code>templateParameterAttribute</code> を空にした場合は <code>param.</code> を付けずに <code>$tableName$</code> と書きます）。</p>
@@ -109,7 +109,7 @@
     <tr><td>table</td><td>（空）</td><td><code>$param.tableName$.xlsx</code></td><td><code>C:/work/ORDERS.xlsx</code><br><code>C:/work/ITEMS.xlsx</code></td></tr>
     <tr><td>table</td><td><code>gen</code></td><td><code>$param.tableName; format="snakeToUpperCamel"$.java</code></td><td>（テーブル <code>order_detail</code> の場合）<code>C:/work/gen/OrderDetail.java</code></td></tr>
     <tr><td>record</td><td><code>gen</code></td><td><code>$param.tableName$_$param.rowNumber$.txt</code></td><td><code>C:/work/gen/ORDERS_0.txt</code>、<code>C:/work/gen/ORDERS_1.txt</code>、…（行番号はテーブルごとに 0 始まり）</td></tr>
-    <tr><td>record</td><td><code>gen</code></td><td><code>$param.ORDER_ID$.txt</code></td><td>（列 <code>ORDER_ID</code> の値が 1001, 1002 の場合）<code>C:/work/gen/1001.txt</code>、<code>C:/work/gen/1002.txt</code>。srcData の <code>includeMetaData</code> が ON のときは <code>$param.row.ORDER_ID$</code> と書く</td></tr>
+    <tr><td>record</td><td><code>gen</code></td><td><code>$param.ORDER_ID$.txt</code></td><td>（列 <code>ORDER_ID</code> の値が 1001, 1002 の場合）<code>C:/work/gen/1001.txt</code>、<code>C:/work/gen/1002.txt</code>。src セクションの <code>includeMetaData</code> が ON のときは <code>$param.row.ORDER_ID$</code> と書く</td></tr>
     <tr><td>dataset</td><td><code>gen</code></td><td><code>all.txt</code></td><td><code>C:/work/gen/all.txt</code></td></tr>
     <tr><td>table</td><td><code>gen</code></td><td><code>all.txt</code>（変数なし）</td><td><code>C:/work/gen/all.txt</code>。全テーブルが同じファイルに出力され、<strong>最後のテーブルの内容だけが残る</strong></td></tr>
     <tr><td>（任意）</td><td><code>gen</code></td><td>（空）</td><td><code>C:/work/gen/orders_export</code>（保存済みオプションの名前。拡張子なし。CLI では <code>result</code>）</td></tr>
@@ -174,10 +174,10 @@ items,items_all
 -resultPath=$param.BOOK$
 
 指定:
-  unit            = record
-  cmd             = convert
-  template        = convert_param.txt
-  paramData の src = params/targets.csv
+  unit                   = record
+  cmd                    = convert
+  template               = convert_param.txt
+  param セクションの src = params/targets.csv
 
 → C:/work/out/orders/orders_all.xlsx
   C:/work/out/items/items_all.xlsx</pre>
@@ -197,12 +197,12 @@ items
 -resultPath=$param.tableName$.sql
 
 指定:
-  unit             = record
-  cmd              = generate
-  template         = generate_param.txt
-  templateVarStart = #   (templateOption)
-  templateVarStop  = #   (templateOption)
-  paramData の src  = params/targets.csv
+  unit                   = record
+  cmd                    = generate
+  template               = generate_param.txt
+  templateVarStart       = #   (template セクション)
+  templateVarStop        = #   (template セクション)
+  param セクションの src = params/targets.csv
 
 → C:/work/gen/orders/ORDERS.sql
   C:/work/gen/items/ITEMS.sql</pre>

@@ -8,7 +8,7 @@
 <body>
   <p><a href="../index.html">&larr; ヘルプ一覧に戻る</a></p>
   <h1>Generate</h1>
-  <p>入力データ（<code>srcData</code>）から、SQL・DDL・テキスト・Excel などのファイルを生成します。生成するファイルの種類は <code>generateType</code> で選びます。</p>
+  <p>入力データ（<code>src</code> セクション）から、SQL・DDL・テキスト・Excel などのファイルを生成します。生成するファイルの種類は <code>generateType</code> で選びます。</p>
 
   <h2 id="section-simple">シンプルな使い方</h2>
   <p><code>generateType</code>、入力元の <code>src</code>、出力先の <code>result</code> を指定します（<code>generateType</code> によっては固有の必須項目があります）。入力の <code>srcType</code> のデフォルトは <code>csv</code> です。</p>
@@ -18,10 +18,10 @@
   data/orders/ITEMS.csv
 
 指定:
-  generateType   = sql
-  op             = INSERT
-  srcData の src = data/orders
-  result         = gen
+  generateType         = sql
+  op                   = INSERT
+  src セクションの src = data/orders
+  result               = gen
 
 結果:
   gen/orders_insert/ORDERS.sql
@@ -41,11 +41,11 @@ ORDERS.sql の中身:
   商品: $param.ITEM$
 
 指定:
-  generateType   = txt
-  template       = template/order.txt
-  srcData の src = data/orders/ORDERS.csv
-  result         = gen
-  resultPath     = $param.ORDER_ID$.txt
+  generateType         = txt
+  template             = template/order.txt
+  src セクションの src = data/orders/ORDERS.csv
+  result               = gen
+  resultPath           = $param.ORDER_ID$.txt
 
 結果:
   gen/1001.txt   (注文番号: 1001 / 商品: pen)
@@ -62,7 +62,7 @@ ORDERS.sql の中身:
     <tr><td>unitSettingEncoding</td><td><code>unitSetting</code> の文字コード</td><td>システムデフォルト</td></tr>
     <tr><td>template</td><td>テンプレートファイルのパス。<code>txt</code> / <code>xlsx</code> / <code>xls</code> のときだけ使う。Workspace のテンプレートを候補から選べる。⋮ メニューで、<code>txt</code> のときは edit で編集（<a href="../dialogs/template-edit.html">Template File Edit</a>）、<code>xlsx</code> / <code>xls</code> のときは generate で雛型を作れ、候補にあるファイルは delete で削除できる</td><td>—</td></tr>
     <tr><td>parallel</td><td>並列処理のスレッド数。並列化できる組み合わせのときだけ表示（下記「並列処理」を参照）</td><td>（空）＝ CPU コア数</td></tr>
-    <tr><td>srcData</td><td>入力データセット。入力の形式（Excel・DB テーブル・SQL の結果など）や文字コードを変えられる（<a href="../sections/dataset-load-form.html">Dataset Load Form</a>）</td><td>—</td></tr>
+    <tr><td>src</td><td>入力データセット。入力の形式（Excel・DB テーブル・SQL の結果など）や文字コードを変えられる（<a href="../sections/dataset-load-form.html">Dataset Load Form</a>）</td><td>—</td></tr>
     <tr><td>result</td><td>生成したファイルを置くディレクトリ</td><td>—</td></tr>
     <tr><td>resultPath</td><td><code>result</code> からの相対パス。テンプレート変数（<code>$param.tableName$</code> など）を使える。テーブル単位の固定成果物タイプではディレクトリとして扱い、その下にテーブルごとのファイルを作る。組み合わせごとの生成例は <a href="../sections/result-form.html">Result Form</a> の「result と resultPath の生成例」を参照</td><td>（空）＝ 保存済みオプションの名前</td></tr>
     <tr><td>outputEncoding</td><td>出力ファイルの文字コード。<code>txt</code> のときだけ使う</td><td>UTF-8</td></tr>
@@ -98,24 +98,24 @@ ORDERS.sql の中身:
   <p>テンプレートの中で参照できる変数は <code>unit</code> によって変わります。詳細は <a href="generate/types/txt.html">generateType: txt</a> を参照してください。</p>
 
   <h3 id="section-parallel">並列処理（parallel）</h3>
-  <p><code>parallel</code> は、<code>srcData</code> の <code>srcType</code> が <code>file</code> / <code>dir</code> / <code>none</code> 以外のとき、または <code>unit=record</code> のとき（<code>srcType</code> が <code>none</code> の場合を除く）に表示されます。指定したスレッド数で次の処理を並列にします。</p>
+  <p><code>parallel</code> は、<code>src</code> セクションの <code>srcType</code> が <code>file</code> / <code>dir</code> / <code>none</code> 以外のとき、または <code>unit=record</code> のとき（<code>srcType</code> が <code>none</code> の場合を除く）に表示されます。指定したスレッド数で次の処理を並列にします。</p>
   <table>
     <tr><th>処理</th><th>並列の仕方</th></tr>
-    <tr><td>srcData の読み込み</td><td>ソース（ファイル・SQL など）ごとに並列に読み込む。条件は Convert の並列読込と同じ（<a href="../sections/result-form.html">Result Form</a> を参照）</td></tr>
+    <tr><td>src セクションの読み込み</td><td>ソース（ファイル・SQL など）ごとに並列に読み込む。条件は Convert の並列読込と同じ（<a href="../sections/result-form.html">Result Form</a> を参照）</td></tr>
     <tr><td><code>unit=record</code> の出力</td><td>行ごとの出力を並列にする。データセット全体をメモリに読み込まずに出力するため、1 行ごとに 1 ブックを作る <code>xlsx</code> / <code>xls</code> で特に効果がある</td></tr>
     <tr><td><code>unit=table</code> の出力</td><td>テーブルごとの出力を並列にする（<code>txt</code> / <code>xlsx</code> / <code>xls</code> と、<code>unit</code> が <code>table</code> 固定の固定成果物タイプ）。<code>xlsx</code> / <code>xls</code> で <code>lazyLoad</code> が OFF のときは、全件を読み込んでから出力だけを並列にする</td></tr>
   </table>
   <p>次の場合は、<code>unit=table</code> の出力を逐次で処理します。</p>
   <ul>
     <li>出力するテーブルが 1 つだけの場合</li>
-    <li><code>srcData</code> の設定ファイルで join または件数分割（split）を使っている場合（<code>lazyLoad</code> が OFF の <code>xlsx</code> / <code>xls</code> を除く）</li>
+    <li><code>src</code> セクションの設定ファイルで join または件数分割（split）を使っている場合（<code>lazyLoad</code> が OFF の <code>xlsx</code> / <code>xls</code> を除く）</li>
   </ul>
   <p>注意:</p>
   <ul>
     <li>ファイルは並列に書かれるため、書き込まれる順番は決まりません。各ファイルの内容は逐次処理と同じです</li>
     <li><code>resultPath</code> に行やテーブルを区別する値がなく、複数の行・テーブルが同じファイルに出力される場合、別のソースから来た内容のどれが残るかは決まりません</li>
     <li><code>srcType</code> が <code>table</code> / <code>sql</code> の場合は、並列数まで DB 接続を同時に使います</li>
-    <li>並列数を増やすと、同時に処理する行・テーブルの分だけメモリ使用量も増えます。<code>srcData</code> の <code>includeMetaData</code> が ON の <code>unit=record</code> では、テーブル全体を保持します</li>
+    <li>並列数を増やすと、同時に処理する行・テーブルの分だけメモリ使用量も増えます。<code>src</code> セクションの <code>includeMetaData</code> が ON の <code>unit=record</code> では、テーブル全体を保持します</li>
     <li>Parameterize の並列実行の中では、空欄のときは逐次になります</li>
   </ul>
 
@@ -127,14 +127,14 @@ ORDERS.sql の中身:
   data/branch/osaka/ORDERS.csv
 
 指定:
-  generateType         = sql
-  op                   = INSERT
-  srcData の src       = data/branch
-  srcData の recursive = ON
+  generateType               = sql
+  op                         = INSERT
+  src セクションの src       = data/branch
+  src セクションの recursive = ON
 
 結果:
   ORDERS.sql  (tokyo と osaka の全行の INSERT 文)</pre>
-  <p>まとまる条件（ファイル名の違うテーブルを <code>tableName</code> でそろえる方法など）は <a href="convert.html">Convert</a> の「応用例」と同じです。形式の違うソース（Excel と CSV、別の接続先の DB など）は 1 回では読み込めないため、<a href="parameterize.html">Parameterize</a> で Convert の <code>append</code> を使って先に 1 ファイルにまとめ、そのファイルを <code>srcData</code> に指定してください（Parameterize の「応用例」を参照）。</p>
+  <p>まとまる条件（ファイル名の違うテーブルを <code>tableName</code> でそろえる方法など）は <a href="convert.html">Convert</a> の「応用例」と同じです。形式の違うソース（Excel と CSV、別の接続先の DB など）は 1 回では読み込めないため、<a href="parameterize.html">Parameterize</a> で Convert の <code>append</code> を使って先に 1 ファイルにまとめ、そのファイルを <code>src</code> セクションに指定してください（Parameterize の「応用例」を参照）。</p>
 
   <h2 id="section-related">関連</h2>
   <ul>

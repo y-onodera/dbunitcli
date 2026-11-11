@@ -8,7 +8,7 @@
 <body>
   <p><a href="../index.html">&larr; ヘルプ一覧に戻る</a></p>
   <h1>Compare</h1>
-  <p>旧データ（<code>oldData</code>）と新データ（<code>newData</code>）を突き合わせ、差分を <code>convertResult</code> に出力します。比較の対象は表形式のデータセット・PNG 画像・PDF から <code>targetType</code> で選びます。</p>
+  <p>旧データ（<code>old</code> セクション）と新データ（<code>new</code> セクション）を突き合わせ、差分を <code>result</code> セクションに出力します。比較の対象は表形式のデータセット・PNG 画像・PDF から <code>targetType</code> で選びます。</p>
 
   <h2 id="section-simple">シンプルな使い方</h2>
   <p>旧データと新データの <code>src</code>、比較結果の出力先を指定するだけで比較できます。<code>targetType</code> のデフォルトは <code>data</code>（表形式のデータセット）、入力の <code>srcType</code> と出力の <code>resultType</code> のデフォルトは <code>csv</code> です。</p>
@@ -18,9 +18,9 @@
   data/new/ORDERS.csv   (2 行目の PRICE だけが違う)
 
 指定:
-  oldData の src          = data/old
-  newData の src          = data/new
-  convertResult の result = out/compare
+  old セクションの src       = data/old
+  new セクションの src       = data/new
+  result セクションの result = out/compare
 
 結果:
   out/compare/COMPARE_RESULT.csv   (全テーブルの差分サマリ。DIFF=MODIFY_VALUE の行が出る)
@@ -33,7 +33,7 @@
   <p>比較結果のファイルの見方は、下記「<a href="#section-result">比較結果の形式</a>」を参照してください。行の並びが違うデータは、次の <code>setting</code> で主キーを指定すると正しく突き合わせられます。</p>
 
   <h2 id="section-result">比較結果の形式</h2>
-  <p><code>targetType=data</code> の比較結果は <code>convertResult</code> で指定した出力先ディレクトリに、以下の 2 種類のファイルとして書き出されます。</p>
+  <p><code>targetType=data</code> の比較結果は <code>result</code> セクションで指定した出力先ディレクトリに、以下の 2 種類のファイルとして書き出されます。</p>
   <ol>
     <li><strong>COMPARE_RESULT</strong> — 全テーブルの差分サマリ（常に出力）</li>
     <li><strong>テーブルごとの詳細ファイル</strong> — 行レベルの差分詳細（差分がある場合のみ出力）</li>
@@ -70,7 +70,7 @@
   </table>
 
   <h3 id="result-detail">テーブルごとの詳細ファイル</h3>
-  <p>行レベルの差分がある場合、<code>convertResult</code> の出力先に以下 3 種類のテーブルが追加で書き出されます。テーブル名はすべて元テーブル名に接尾辞を付けた形式です。</p>
+  <p>行レベルの差分がある場合、<code>result</code> セクションの出力先に以下 3 種類のテーブルが追加で書き出されます。テーブル名はすべて元テーブル名に接尾辞を付けた形式です。</p>
 
   <h4>{テーブル名}$MODIFY — 値が変化した行</h4>
   <p>主キーが一致するが値が異なる行について、旧値（OLD）と新値（NEW）を 2 行ペアで記録します。<code>$ROW_AFTER_SORT</code> → <code>$MODIFY</code> の順でソートされます。</p>
@@ -100,7 +100,7 @@
   </table>
 
   <h3 id="result-create-patch-sql">createPatchSql によるパッチ SQL の出力</h3>
-  <p><code>createPatchSql</code> を ON にすると、行レベルの差分が検出されたテーブルごとに、旧データを新データへ補正するパッチ SQL 文が <code>{テーブル名}$PATCH.sql</code>（UTF-8）として <code>convertResult</code> の出力先に書き出されます。主キー（<code>setting</code> の <code>keys</code>）が設定されていないテーブルは対象外です。</p>
+  <p><code>createPatchSql</code> を ON にすると、行レベルの差分が検出されたテーブルごとに、旧データを新データへ補正するパッチ SQL 文が <code>{テーブル名}$PATCH.sql</code>（UTF-8）として <code>result</code> セクションの出力先に書き出されます。主キー（<code>setting</code> の <code>keys</code>）が設定されていないテーブルは対象外です。</p>
   <ul>
     <li><code>MODIFY_VALUE</code>（値が変化した行）→ <code>UPDATE</code> 文（主キー以外の全カラムを新データの値に更新）</li>
     <li><code>KEY_DELETE</code>（旧データにのみ存在する行）→ <code>DELETE</code> 文</li>
@@ -113,14 +113,14 @@
     <tr><td>targetType</td><td>比較対象の種類（下記「targetType 一覧」を参照）</td><td><code>data</code></td></tr>
     <tr><td>setting</td><td>比較の設定ファイル（<a href="../dialogs/dataset-settings.html">Dataset Settings</a> 形式）。主キー・比較から除くカラム・並び順などをテーブルごとに指定する。<code>data</code> のときだけ使う。⋮ メニューの edit で、比較キーを <a href="../dialogs/compare-key-settings.html">Compare Key Settings</a> で編集できる</td><td>（空）</td></tr>
     <tr><td>settingEncoding</td><td><code>setting</code> の文字コード</td><td>システムデフォルト</td></tr>
-    <tr><td>oldData</td><td>比較元（旧）のデータセット。入力の形式（Excel・DB テーブルなど）や文字コードを変えられる</td><td>—</td></tr>
-    <tr><td>newData</td><td>比較先（新）のデータセット</td><td>—</td></tr>
-    <tr><td>expectData</td><td>期待値のデータセット。省略すると期待値との検証をしない（下記「expectData による検証」を参照）</td><td>（空）</td></tr>
+    <tr><td>old</td><td>比較元（旧）のデータセット。入力の形式（Excel・DB テーブルなど）や文字コードを変えられる</td><td>—</td></tr>
+    <tr><td>new</td><td>比較先（新）のデータセット</td><td>—</td></tr>
+    <tr><td>expect</td><td>期待値のデータセット。省略すると期待値との検証をしない（下記「expect による検証」を参照）</td><td>（空）</td></tr>
     <tr><td>createPatchSql</td><td>旧データを新データへ補正するパッチ SQL を出力する。<code>data</code> のときだけ使う</td><td>OFF</td></tr>
-    <tr><td>imageOption</td><td>画像比較のしきい値・除外領域など（<a href="../sections/image.html">Image Option</a>）。<code>image</code> / <code>pdf</code> のときだけ表示</td><td>—</td></tr>
-    <tr><td>convertResult</td><td>比較結果の出力形式と出力先。Excel や DB テーブルへの出力に変えられる（<a href="../sections/result-form.html">Result Form</a>）</td><td>—</td></tr>
+    <tr><td>image</td><td>画像比較のしきい値・除外領域など（<a href="../sections/image.html">Image Option</a>）。<code>image</code> / <code>pdf</code> のときだけ表示</td><td>—</td></tr>
+    <tr><td>result</td><td>比較結果の出力形式と出力先。Excel や DB テーブルへの出力に変えられる（<a href="../sections/result-form.html">Result Form</a>）</td><td>—</td></tr>
   </table>
-  <p><code>oldData</code> / <code>newData</code> / <code>expectData</code> の指定方法は <a href="../sections/dataset-load-form.html">Dataset Load Form</a> を参照してください。</p>
+  <p><code>old</code> / <code>new</code> / <code>expect</code> セクションの指定方法は <a href="../sections/dataset-load-form.html">Dataset Load Form</a> を参照してください。</p>
 
   <h3 id="section-target-type">targetType 一覧</h3>
   <p><code>setting</code> を適用するかどうか（<code>data</code> だけで適用し、<code>image</code> / <code>pdf</code> では使わない）と比較結果の形式は、<code>targetType</code> ごとに異なります。<code>data</code> の比較結果は上記「比較結果の形式」、<code>image</code> / <code>pdf</code> の比較結果は各値のページを参照してください。</p>
@@ -131,8 +131,8 @@
     <tr><td><a href="compare/types/pdf.html">pdf</a></td><td>PDF ファイルをページごとの画像として比較し、差分を描画した画像を出力</td></tr>
   </table>
 
-  <h3 id="section-expect">expectData による検証</h3>
-  <p><code>expectData</code> に期待値のデータセットを指定すると、<code>convertResult</code> に出力した比較結果を期待値と突き合わせて検証します。期待値と一致しない差分は、<code>convertResult</code> の出力先の <code>expectedDiff/</code> ディレクトリに同じ形式で出力されます。</p>
+  <h3 id="section-expect">expect による検証</h3>
+  <p><code>expect</code> セクションに期待値のデータセットを指定すると、<code>result</code> セクションに出力した比較結果を期待値と突き合わせて検証します。期待値と一致しない差分は、<code>result</code> セクションの出力先の <code>expectedDiff/</code> ディレクトリに同じ形式で出力されます。</p>
 
   <h2 id="section-related">関連</h2>
   <ul>
