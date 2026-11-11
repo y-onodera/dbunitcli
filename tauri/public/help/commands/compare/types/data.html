@@ -12,7 +12,7 @@
   <ul>
     <li><code>old</code> と <code>new</code> セクションで対応するテーブルを 1 対 1 に突き合わせます</li>
     <li>テーブルの一致は名前で行われます。名前が対応しないテーブルは追加／削除として検出されます</li>
-    <li><code>setting</code> を省略するとすべてのカラムを対象に順序比較します</li>
+    <li>カラム・行・値まで比較するのは、<code>setting</code> で対象にしたテーブルだけです（下記「比較の対象になるテーブル」を参照）</li>
   </ul>
 
   <h2 id="section-options">固有オプション</h2>
@@ -24,6 +24,17 @@
 
   <h2 id="section-setting">setting による比較の制御</h2>
   <p><code>setting</code> に <a href="../../../dialogs/dataset-settings.html">Dataset Settings</a> 形式の JSON ファイルを指定することで、テーブルごとに比較内容を細かく制御できます。</p>
+
+  <h3>比較の対象になるテーブル</h3>
+  <p>名前が対応するテーブルのうち、カラム・行・値まで比較するのは次のテーブルだけです。</p>
+  <ul>
+    <li><code>settings</code> の name / pattern に当たり、下記「主な項目」（<code>keys</code>・<code>include</code>・<code>exclude</code>・<code>order</code>・<code>filter</code> など）を 1 つ以上書いた設定があるテーブル</li>
+    <li>設定を書いた <code>commonSettings</code> に当たるテーブル（name / pattern の無い <code>commonSettings</code> なら全テーブル）</li>
+  </ul>
+  <p>name / pattern だけで、ほかの項目を書いていない設定は対象になりません。対象にならないテーブルと、<code>setting</code> を指定しない場合は、テーブルの数と有無（追加・削除）だけを比較します。</p>
+  <pre>{"settings": [{"name": "orders"}]}                      → orders は比較しない
+{"settings": [{"name": "orders", "keys": ["order_id"]}]} → orders を order_id で突き合わせて比較する
+{"commonSettings": [{"exclude": ["updated_at"]}]}       → 全テーブルを行の順番どおりに比較する</pre>
 
   <h3>主な項目</h3>
   <table>
@@ -76,7 +87,7 @@
     }
   ]
 }</pre>
-  <p><code>filePath</code> の値はファイルパス全体に対する Java 正規表現です。<code>.*/domestic/.*</code> はパス中に <code>domestic/</code> を含むファイルにのみマッチします。どちらの設定にもマッチしないファイルは <code>commonSettings</code> が適用されます（指定がなければ全カラム順序比較）。</p>
+  <p><code>filePath</code> の値はファイルパス全体に対する Java 正規表現です。<code>.*/domestic/.*</code> はパス中に <code>domestic/</code> を含むファイルにのみマッチします。どちらの設定にもマッチしないファイルは <code>commonSettings</code> が適用されます（<code>commonSettings</code> も無ければ、そのファイルは中身を比較しません）。</p>
 
   <h2 id="section-result">比較結果の形式</h2>
   <p>比較結果は <code>result</code> セクションの出力先に、全テーブルの差分サマリ <code>COMPARE_RESULT</code> と、差分があるテーブルごとの詳細ファイル（<code>$MODIFY</code> / <code>$DELETE</code> / <code>$ADD</code>、<code>createPatchSql</code> が ON のときは <code>$PATCH.sql</code>）として出力されます。各ファイルのカラムと <code>DIFF</code> の値は <a href="../../compare.html">Compare</a> の「比較結果の形式」を参照してください。</p>
