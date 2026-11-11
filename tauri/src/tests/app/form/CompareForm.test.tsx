@@ -114,6 +114,17 @@ describe("CompareFormの描画テスト", () => {
 			).toBeInTheDocument();
 		});
 
+		it("resultセクションにappendを表示しない", () => {
+			render(<CompareForm {...makeCompareProps()} />);
+
+			expect(
+				document.querySelector('[name="-result.result"]'),
+			).toBeInTheDocument();
+			expect(
+				document.querySelector('[name="-result.append"]'),
+			).not.toBeInTheDocument();
+		});
+
 		it("imageオプションセクションは表示されない", () => {
 			render(<CompareForm {...makeCompareProps()} />);
 

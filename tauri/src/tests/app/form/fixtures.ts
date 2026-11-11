@@ -361,7 +361,12 @@ function parallelElement(parallel: boolean) {
 		: {};
 }
 
-function makeCsvConvertResult(required = false, parallel = true) {
+// Compareの応答にはappendが含まれない（CompareOption#toParametersBuilder）
+function makeCsvConvertResult(
+	required = false,
+	parallel = true,
+	append = true,
+) {
 	return {
 		prefix: "result",
 		resultType: makeElement(
@@ -387,7 +392,9 @@ function makeCsvConvertResult(required = false, parallel = true) {
 			"WORKSPACE",
 			false,
 		),
-		append: makeElement("append", "FLG", "false", "WORKSPACE", false),
+		...(append
+			? { append: makeElement("append", "FLG", "false", "WORKSPACE", false) }
+			: {}),
 		outputEncoding: makeTextWithDefault("outputEncoding", "", "UTF-8"),
 		...parallelElement(parallel),
 	};
@@ -494,7 +501,6 @@ export const compareLoadResponseFixture = {
 			"WORKSPACE",
 			false,
 		),
-		append: makeElement("append", "FLG", "false", "WORKSPACE", false),
 		outputEncoding: makeTextWithDefault("outputEncoding", "", "UTF-8"),
 		...parallelElement(true),
 	},
@@ -743,7 +749,7 @@ export const compareRefreshTargetTypeImageResponseFixture = {
 	},
 	newData: makeImageFileSrcData("new"),
 	oldData: makeImageFileSrcData("old"),
-	convertResult: makeCsvConvertResult(true, false),
+	convertResult: makeCsvConvertResult(true, false, false),
 	expectData: {
 		prefix: "expect",
 		srcType: makeElement(
@@ -779,7 +785,7 @@ export const compareRefreshNewSrcTypeTableResponseFixture = {
 	settingEncoding: makeTextWithDefault("settingEncoding", "", "UTF-8"),
 	newData: makeTableSrcData("new"),
 	oldData: makeCsvSrcData("old", ""),
-	convertResult: makeCsvConvertResult(true),
+	convertResult: makeCsvConvertResult(true, true, false),
 	expectData: {
 		prefix: "expect",
 		srcType: makeElement(
@@ -815,7 +821,7 @@ export const compareRefreshExpectSrcTypeCsvResponseFixture = {
 	settingEncoding: makeTextWithDefault("settingEncoding", "", "UTF-8"),
 	newData: makeCsvSrcData("new", ""),
 	oldData: makeCsvSrcData("old", ""),
-	convertResult: makeCsvConvertResult(true),
+	convertResult: makeCsvConvertResult(true, true, false),
 	expectData: makeCsvSrcData("expect", "", EXPECT_SRC_TYPE_OPTIONS),
 } as CompareOptions;
 

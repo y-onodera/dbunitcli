@@ -11,13 +11,15 @@
   <p>旧データ（<code>old</code> セクション）と新データ（<code>new</code> セクション）を突き合わせ、差分を <code>result</code> セクションに出力します。比較の対象は表形式のデータセット・PNG 画像・PDF から <code>targetType</code> で選びます。</p>
 
   <h2 id="section-simple">シンプルな使い方</h2>
-  <p>旧データと新データの <code>src</code>、比較結果の出力先を指定するだけで比較できます。<code>targetType</code> のデフォルトは <code>data</code>（表形式のデータセット）、入力の <code>srcType</code> と出力の <code>resultType</code> のデフォルトは <code>csv</code> です。</p>
+  <p>旧データと新データの <code>src</code>、比較結果の出力先、比較するテーブルを書いた <code>setting</code> を指定します。<code>targetType</code> のデフォルトは <code>data</code>（表形式のデータセット）、入力の <code>srcType</code> と出力の <code>resultType</code> のデフォルトは <code>csv</code> です。</p>
   <p>例: 修正前と修正後の CSV を比較します。</p>
   <pre>入力:
   data/old/ORDERS.csv
   data/new/ORDERS.csv   (2 行目の PRICE だけが違う)
+  settings/orders.json  ({"settings": [{"name": "ORDERS", "keys": ["ORDER_ID"]}]})
 
 指定:
+  setting                    = settings/orders.json
   old セクションの src       = data/old
   new セクションの src       = data/new
   result セクションの result = out/compare
@@ -27,10 +29,11 @@
   out/compare/ORDERS$MODIFY.csv    (値が違う行の旧値・新値)</pre>
   <ul>
     <li>同じ名前のテーブル（CSV ではファイル名）同士を比較する</li>
-    <li><code>setting</code> を指定しないと、主キーを使わずに行の順番どおりに突き合わせる</li>
+    <li>カラム・行・値まで比較するのは、<code>setting</code> の name / pattern に当たり、<code>keys</code> などの設定を 1 つ以上書いたテーブルだけ。<code>setting</code> が無いと、テーブルの数と有無しか比較しない（<a href="compare/types/data.html">targetType: data</a> の「比較の対象になるテーブル」を参照）</li>
+    <li>この例では <code>ORDER_ID</code> が同じ行同士を突き合わせる</li>
     <li>差分がなければ <code>COMPARE_RESULT.csv</code> だけが出力され、中身は空になる</li>
   </ul>
-  <p>比較結果のファイルの見方は、下記「<a href="#section-result">比較結果の形式</a>」を参照してください。行の並びが違うデータは、次の <code>setting</code> で主キーを指定すると正しく突き合わせられます。</p>
+  <p>比較結果のファイルの見方は、下記「<a href="#section-result">比較結果の形式</a>」を参照してください。<code>keys</code> を書かずに <code>exclude</code> などだけを書いたテーブルは、行の順番どおりに突き合わせます。</p>
 
   <h2 id="section-result">比較結果の形式</h2>
   <p><code>targetType=data</code> の比較結果は <code>result</code> セクションで指定した出力先ディレクトリに、以下の 2 種類のファイルとして書き出されます。</p>
