@@ -152,6 +152,8 @@ public record CompareOption(
                                 || this.oldData.srcType().isParallelizable())
                         .put("-resultType", this.result().convertResult().resultType()
                                 , ResultType.class, Filter.exclude(ResultType.table), true)
+                        // 比較の前に出力先を消す（DataSetCompare#result）ため追記できない
+                        .remove("-result.append")
                         .build())
                 .addComponent("expectData", this.expectData.toParametersBuilder()
                         .put("-srcType", this.expectData.srcType(), DataSourceType.class

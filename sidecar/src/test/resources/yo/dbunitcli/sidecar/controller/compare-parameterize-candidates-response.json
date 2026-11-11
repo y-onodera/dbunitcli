@@ -88,10 +88,6 @@
     "value": "true"
   },
   {
-    "key": "-result.append",
-    "value": "false"
-  },
-  {
     "key": "-expect.srcType",
     "value": "none"
   }
