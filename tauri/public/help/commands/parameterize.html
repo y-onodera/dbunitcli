@@ -104,13 +104,24 @@ customers
   param セクションの src = params/targets.csv</pre>
   <p>1 行目では <code>params/orders.txt</code>、2 行目では <code>params/products.txt</code>、3 行目では <code>params/customers.txt</code> に書かれたオプションで Convert が実行されます。</p>
 
-  <h4>複数のソースを 1 ファイルにまとめてから Generate する（append）</h4>
-  <p>形式が違うソースを Convert で 1 つの Excel ブックに追記していき、まとめたブックから Generate で INSERT 文を作ります。ソースが同じ形式で 1 つのディレクトリの下にあるなら、Parameterize を使わずに 1 回の Convert でまとめられます（<a href="convert.html">Convert</a> の「応用例」を参照）。</p>
+  <h4>ケーススタディ: 複数のソースを 1 つにまとめて Generate する</h4>
+  <p>やりたいこと: 支店ごとに管理している注文データ（東京は Excel、大阪は CSV）を 1 つにまとめ、全支店分の INSERT 文を作りたい。</p>
   <pre>入力:
   data/tokyo/orders.xlsx  (シート ORDERS: 1001,pen / 1002,note)
   data/osaka/ORDERS.csv   (2001,ink)
+  data/osaka/ITEMS.csv    (9)</pre>
+  <p>まとめ方は、ソースの置き方と、まとめた結果をどう使うかで選びます。</p>
+  <table>
+    <tr><th>状況</th><th>考えられる方法</th></tr>
+    <tr><td>ソースが同じ形式で、1 つのディレクトリの下にある</td><td>Parameterize を使わず、Convert または Generate の 1 回の読み込みでまとめる。同じテーブル名のデータは 1 つのテーブルになる（<a href="convert.html">Convert</a> の「応用例」を参照）</td></tr>
+    <tr><td>形式・置き場所・接続先がソースごとに違い、1 つのファイルにまとめたい</td><td>Parameterize で Convert をソースごとに実行し、<code>result</code> セクションの <code>append</code> で 1 つの出力先に追記する（下記「方法 1」「方法 2」）。まとめたファイルを Generate の <code>src</code> セクションに指定する</td></tr>
+    <tr><td>ソースごとに別の SQL ファイルでよい</td><td>まとめずに、Parameterize で Generate をソースごとに実行する。<code>result</code> に行ごとの値を入れて出力先を分ける（全行で同じ出力先にすると上書きされる）</td></tr>
+  </table>
+  <p>append で追記する場合は、まとめる先を 1 つの Excel ブックにするか、テーブルごとの CSV にするかで設定が変わります。どちらも、前回の出力を作り直すために <code>append</code> を OFF にする行を最初に置くと、出力先を消さずに何度実行しても前回の分と重なりません（方法 1 はブックに 1 行、方法 2 はテーブルごとに 1 行）。</p>
 
-パラメータデータ (params/sources.csv):
+  <p><strong>方法 1: 1 つの Excel ブックにまとめる</strong></p>
+  <p>ブックは <code>append</code> が OFF のときにまるごと作り直されるため、1 行目だけ OFF にします。</p>
+  <pre>パラメータデータ (params/sources.csv):
   SRC,TYPE,APPEND
   data/tokyo/orders.xlsx,xlsx,false
   data/osaka,csv,true
@@ -123,34 +134,18 @@ customers
   -resultPath=orders_all
   -append=$param.APPEND$
 
-指定 (1 つ目: Parameterize):
+指定:
   parallel               = 1
   cmd                    = convert
   template               = merge_orders.txt
   param セクションの src = params/sources.csv
 
-指定 (2 つ目: Generate):
-  generateType         = sql
-  op                   = INSERT
-  src セクションの src = merged/orders_all.xlsx
-
 結果:
-  merged/orders_all.xlsx  (シート ORDERS: 1001,pen / 1002,note / 2001,ink)
-  ORDERS.sql:
-    insert into ORDERS (ORDER_ID ,ITEM ) values ('1001' ,'pen' );
-    insert into ORDERS (ORDER_ID ,ITEM ) values ('1002' ,'note' );
-    insert into ORDERS (ORDER_ID ,ITEM ) values ('2001' ,'ink' );
-    commit;</pre>
-  <ul>
-    <li>1 行目は <code>append</code> が OFF なので、前回の出力を上書きして作り直す。2 行目以降は ON なので、同名のシートの末尾に行を追記する。何度実行しても前回の分とは重ならない</li>
-    <li><code>parallel</code> は <code>1</code>（または空欄）にして、パラメータデータの行の順に実行してください。並列にすると、<code>append</code> が OFF の行が後から実行されて、先に追記した分を消すことがある</li>
-    <li>追記はヘッダ行を確かめずに行うため、同じテーブル名のソースは列の並びをそろえてください</li>
-  </ul>
-  <p><code>resultType</code> を <code>csv</code> にすると、テーブルごとの CSV に追記されます。この場合、1 行目で上書きされるのは 1 行目のソースにあるテーブルのファイルだけです。2 行目以降のソースにしかないテーブルは、前回のファイルに追記されて重なります。重ならないようにするには、1 回の Convert で読むテーブルを 1 つに絞り、テーブルごとに最初の行だけ <code>append</code> を OFF にします。</p>
-  <pre>入力 (上の例に加えて):
-  data/osaka/ITEMS.csv   (9)
+  merged/orders_all.xlsx  (シート ORDERS: 1001,pen / 1002,note / 2001,ink、シート ITEMS: 9)</pre>
 
-パラメータデータ (params/tables.csv):
+  <p><strong>方法 2: テーブルごとの CSV にまとめる</strong></p>
+  <p>CSV はテーブルごとのファイルなので、<code>append</code> が OFF でも作り直されるのはそのソースにあるテーブルのファイルだけです。2 行目以降のソースにしかないテーブル（ここでは ITEMS）は前回のファイルに追記されて重なります。1 回の Convert で読むテーブルを 1 つに絞り、テーブルごとに最初の行だけ <code>append</code> を OFF にします。</p>
+  <pre>パラメータデータ (params/tables.csv):
   SRC,TYPE,TABLE,APPEND
   data/tokyo/orders.xlsx,xlsx,^ORDERS$,false
   data/osaka,csv,^ORDERS$,true
@@ -163,14 +158,42 @@ customers
   -result=merged
   -append=$param.APPEND$
 
-結果 (何度実行しても同じ):
+指定:
+  parallel               = 1
+  cmd                    = convert
+  template               = merge_tables.txt
+  param セクションの src = params/tables.csv
+
+結果:
   merged/ORDERS.csv  (1001,pen / 1002,note / 2001,ink)
   merged/ITEMS.csv   (9)</pre>
   <ul>
-    <li><code>regTableInclude</code>（<a href="../sections/data-load.html">Data Load</a>）はテーブル名の一部に一致すれば対象にするため、<code>^ORDERS$</code> のように前後を固定してください。<code>$</code> はテンプレートの区切り文字なので、正規表現はパラメータデータの列に書きます</li>
+    <li><code>regTableInclude</code>（<a href="../sections/data-load.html">Data Load</a>）はテーブル名の一部に一致すれば対象にするため、<code>^ORDERS$</code> のように前後を固定する。<code>$</code> はテンプレートの区切り文字なので、正規表現はパラメータデータの列に書く</li>
     <li><code>regTableInclude</code> の代わりに、対象のテーブルを name に書いた <code>setting</code> を指定し、<code>settingTargetOnly</code> を ON にしても絞れる（<a href="../sections/dataset-load-form.html">Dataset Load Form</a>）</li>
+    <li>テーブルごとに分けずに済ませたいときは、やり直す前に出力先のファイルを消してから実行する</li>
   </ul>
-  <p>Convert でまとめずに Parameterize で Generate を行ごとに実行すると、ソースごとに別の SQL ファイルができます（出力先が同じなら上書きされます）。1 つのファイルにしたいときは、この例のように先にデータをまとめてください。</p>
+
+  <p><strong>まとめたファイルから Generate する</strong></p>
+  <p>方法 1 のブックを読む例です。方法 2 なら、<code>src</code> セクションの <code>src</code> を <code>merged</code> にし、<code>srcType</code> はデフォルトの <code>csv</code> のままにします。</p>
+  <pre>指定:
+  generateType             = sql
+  op                       = INSERT
+  src セクションの src     = merged/orders_all.xlsx
+  src セクションの srcType = xlsx
+
+結果:
+  ORDERS.sql:
+    insert into ORDERS (ORDER_ID ,ITEM ) values ('1001' ,'pen' );
+    insert into ORDERS (ORDER_ID ,ITEM ) values ('1002' ,'note' );
+    insert into ORDERS (ORDER_ID ,ITEM ) values ('2001' ,'ink' );
+    commit;
+  ITEMS.sql</pre>
+
+  <p><strong>どの方法でも気を付けること</strong></p>
+  <ul>
+    <li><code>parallel</code> は <code>1</code>（または空欄）にして、パラメータデータの行の順に実行してください。並列にすると、<code>append</code> が OFF の行が後から実行されて、先に追記した分を消すことがあります</li>
+    <li>追記はヘッダ行を確かめずに行うため、同じテーブル名のソースは列の並びをそろえてください</li>
+  </ul>
 
   <h2 id="section-related">関連</h2>
   <ul>
