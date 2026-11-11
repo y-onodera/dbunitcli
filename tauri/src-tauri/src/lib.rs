@@ -45,8 +45,13 @@ pub fn run() {
         .plugin(tauri_plugin_cli::init())
         .setup(|app: &mut tauri::App| {
             // 起動時のカレントディレクトリに依存しないよう、同梱リソース（exeと同じディレクトリ）から解決する。
+            // resource_dir()はcanonicalize済みの\\?\形式（Box Drive等ではドライブレターの無いVolume{GUID}形式）になり、
+            // sidecarが出力する.batで起動ディレクトリからの相対パスにできないため、canonicalizeしないexeのパスを使う。
             // sidecarのカレントディレクトリは変えない（workspace等の既定値"."の基準になっている）
-            let backend = app.path().resource_dir()?.join("backend");
+            let backend = env::current_exe()?
+                .parent()
+                .ok_or("exe has no parent directory")?
+                .join("backend");
             let mut args = vec![format!("-Djava.home={}", backend.display())];
 
             match app.cli().matches() {

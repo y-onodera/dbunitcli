@@ -196,7 +196,7 @@ public class Workspace {
 
     public String saveShell(final Type commandType, final String name) throws IOException {
         final Path launchDir = Path.of(System.getProperty("user.dir")).toAbsolutePath().normalize();
-        final Path backendDir = this.installDir().resolve("backend");
+        final Path backendDir = backendDir();
         final STGroup group = new STGroupFile("shell/saveShell.stg", '$', '$');
         final ST template = group.getInstanceOf("saveShell");
         template.add("sidecarExe", toRelative(launchDir, backendDir.resolve("dbunit-cli-sidecar.exe")));
@@ -323,13 +323,15 @@ public class Workspace {
         return result;
     }
 
-    private Path installDir() {
-        // sidecarはbackend/dbunit-cli-sidecar.exeとして配置されるため
-        // 自身のexeパスから2階層上(backend/の親)がインストールディレクトリ
-        return ProcessHandle.current().info().command()
-                .map(cmd -> Path.of(cmd).toAbsolutePath().normalize().getParent())
-                .map(Path::getParent)
-                .orElseGet(() -> Path.of(System.getProperty("user.dir")));
+    private static Path backendDir() {
+        // tauriが起動時に渡すjava.homeを優先する。ProcessHandleのexeパスはBox Drive等で
+        // ドライブレターの無い形式になり、起動ディレクトリからの相対パスにできないことがある
+        return Optional.ofNullable(System.getProperty("java.home"))
+                .filter(home -> new File(home, "dbunit-cli-sidecar.exe").isFile())
+                .map(home -> Path.of(home).toAbsolutePath().normalize())
+                .or(() -> ProcessHandle.current().info().command()
+                        .map(cmd -> Path.of(cmd).toAbsolutePath().normalize().getParent()))
+                .orElseGet(() -> Path.of(System.getProperty("user.dir")).resolve("backend"));
     }
 
     private File saveParameterSources(final String name, final Map<String, ?> parameters, final ParamSource paramSource) {
