@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { type ReactNode, useState } from "react";
 import { DialogActions, DialogField } from "../../../../components/dialog";
 import { BlueButton, WhiteButton } from "../../../../components/element/Button";
 import {
@@ -77,6 +77,7 @@ export default function TableInsertForm({
 	queryOnly = false,
 	onInsert,
 	onClose,
+	children,
 }: {
 	idPrefix: string;
 	// 選んでいなければnull
@@ -93,6 +94,8 @@ export default function TableInsertForm({
 	// inlineは列選択ダイアログの条件の右辺の挿入
 	onInsert: (lines: string[], inline?: boolean) => void;
 	onClose: () => void;
+	// テーブルを選ぶ一覧。長い一覧のスクロールで用途を見落とさないよう、用途の下に置く
+	children?: ReactNode;
 }) {
 	// 列まで選ぶ用途のときの、選んだテーブルの列の読込
 	const columnLoad = useColumnLoad(subquerySource.onQueryColumns);
@@ -190,6 +193,7 @@ export default function TableInsertForm({
 					</div>
 				</DialogField>
 			)}
+			{children}
 			<InsertPreview
 				lines={
 					// 列まで選ぶ用途は、列選択ダイアログで文全体を見せる
