@@ -119,6 +119,23 @@ ORDERS.sql の中身:
     <li>Parameterize の並列実行の中では、空欄のときは逐次になります</li>
   </ul>
 
+  <h3 id="section-example">応用例</h3>
+  <h4>複数のソースのデータから 1 つのファイルを生成する</h4>
+  <p>1 回の読み込みで同じテーブル名になったデータは 1 つのテーブルにまとまるため、そのまま 1 つのファイルを生成できます。</p>
+  <pre>入力:
+  data/branch/tokyo/ORDERS.csv
+  data/branch/osaka/ORDERS.csv
+
+指定:
+  generateType         = sql
+  op                   = INSERT
+  srcData の src       = data/branch
+  srcData の recursive = ON
+
+結果:
+  ORDERS.sql  (tokyo と osaka の全行の INSERT 文)</pre>
+  <p>まとまる条件（ファイル名の違うテーブルを <code>tableName</code> でそろえる方法など）は <a href="convert.html">Convert</a> の「応用例」と同じです。形式の違うソース（Excel と CSV、別の接続先の DB など）は 1 回では読み込めないため、<a href="parameterize.html">Parameterize</a> で Convert の <code>append</code> を使って先に 1 ファイルにまとめ、そのファイルを <code>srcData</code> に指定してください（Parameterize の「応用例」を参照）。</p>
+
   <h2 id="section-related">関連</h2>
   <ul>
     <li><a href="../sections/result-form.html">Result Form</a> — result / resultPath の組み合わせと生成例（環境変数・-P 値・Parameterize との組み合わせを含む）</li>
@@ -126,6 +143,7 @@ ORDERS.sql の中身:
     <li><a href="../sections/template.html">Template</a> — テキストテンプレートの設定</li>
     <li><a href="../sections/jxls.html">Jxls</a> — Excel テンプレートの設定</li>
     <li><a href="../dialogs/txt-template-generate.html">Scaffold</a> — 組み込みテンプレートを書き出してカスタマイズする</li>
+    <li><a href="parameterize.html">Parameterize</a> — 複数のソースを 1 ファイルにまとめてから Generate する例</li>
   </ul>
 </body>
 </html>

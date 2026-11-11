@@ -104,11 +104,56 @@ customers
   paramData の src = params/targets.csv</pre>
   <p>1 行目では <code>params/orders.txt</code>、2 行目では <code>params/products.txt</code>、3 行目では <code>params/customers.txt</code> に書かれたオプションで Convert が実行されます。</p>
 
+  <h4>複数のソースを 1 ファイルにまとめてから Generate する（append）</h4>
+  <p>形式が違うソースを Convert で 1 つの Excel ブックに追記していき、まとめたブックから Generate で INSERT 文を作ります。ソースが同じ形式で 1 つのディレクトリの下にあるなら、Parameterize を使わずに 1 回の Convert でまとめられます（<a href="convert.html">Convert</a> の「応用例」を参照）。</p>
+  <pre>入力:
+  data/tokyo/orders.xlsx  (シート ORDERS: 1001,pen / 1002,note)
+  data/osaka/ORDERS.csv   (2001,ink)
+
+パラメータデータ (params/sources.csv):
+  SRC,TYPE
+  data/tokyo/orders.xlsx,xlsx
+  data/osaka,csv
+
+テンプレート (merge_orders.txt):
+  -src=$param.SRC$
+  -srcType=$param.TYPE$
+  -result=merged
+  -resultType=xlsx
+  -resultPath=orders_all
+  -append=true
+
+指定 (1 つ目: Parameterize):
+  cmd              = convert
+  template         = merge_orders.txt
+  paramData の src = params/sources.csv
+
+指定 (2 つ目: Generate):
+  generateType   = sql
+  op             = INSERT
+  srcData の src = merged/orders_all.xlsx
+
+結果:
+  merged/orders_all.xlsx  (シート ORDERS: 1001,pen / 1002,note / 2001,ink)
+  ORDERS.sql:
+    insert into ORDERS (ORDER_ID ,ITEM ) values ('1001' ,'pen' );
+    insert into ORDERS (ORDER_ID ,ITEM ) values ('1002' ,'note' );
+    insert into ORDERS (ORDER_ID ,ITEM ) values ('2001' ,'ink' );
+    commit;</pre>
+  <ul>
+    <li><code>append</code> を ON にすると、2 行目以降は同名のシート（CSV なら同名のファイル）の末尾に行が追記される。<code>resultType</code> を <code>csv</code> にすれば、テーブルごとの CSV にまとまる</li>
+    <li>追記先が既にあると、1 行目の分もそこに追記される。やり直すときは、先に出力先（ここでは <code>merged/orders_all.xlsx</code>）を消してください</li>
+    <li>追記はヘッダ行を確かめずに行うため、同じテーブル名のソースは列の並びをそろえてください</li>
+    <li><code>parallel</code> を空欄のままにすると、パラメータデータの行の順に追記される</li>
+  </ul>
+  <p>Convert でまとめずに Parameterize で Generate を行ごとに実行すると、ソースごとに別の SQL ファイルができます（出力先が同じなら上書きされます）。1 つのファイルにしたいときは、この例のように先にデータをまとめてください。</p>
+
   <h2 id="section-related">関連</h2>
   <ul>
     <li><a href="../guide/getting-started.html">基本的な使い方</a> — 保存済みオプションから Parameterize を作る手順</li>
     <li><a href="../dialogs/parameterize-template-edit.html">Edit Parameterize Template</a> — テンプレートの編集</li>
     <li><a href="../sections/template.html">Template</a> — テンプレート処理の設定</li>
+    <li><a href="../sections/result-form.html">Result Form</a> — <code>append</code> などの出力の設定</li>
   </ul>
 </body>
 </html>
