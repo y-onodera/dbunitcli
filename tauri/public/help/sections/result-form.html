@@ -46,7 +46,7 @@
     <tr><td>resultPath</td><td>全テーブルをまとめたブックのファイル名（拡張子なし）。xls / xlsx のときだけ表示し、<code>excelTable=BOOK</code> のときは表示しない（下記「<a href="#section-result-path-examples">result と resultPath の生成例</a>」を参照）</td><td>（空）</td></tr>
     <tr><td>exportEmptyTable</td><td>ON にすると、データ行が 0 件のテーブルも出力する</td><td>ON</td></tr>
     <tr><td>exportHeader</td><td>ON にすると、出力ファイルにヘッダ行を含める。<code>format</code> / <code>fixed</code> ではヘッダ行を出力しないため表示しない</td><td>ON</td></tr>
-    <tr><td>append</td><td>ON にすると、出力先に同名のファイル（xls / xlsx は同名のシート）が既にある場合、ヘッダ行が書かれているものとして中身を確かめずに末尾へデータ行を追記する（ヘッダ行は書かない）。無い場合は OFF と同じく新しく作る。OFF では既存のファイルを上書きする</td><td>OFF</td></tr>
+    <tr><td>append</td><td>ON にすると、出力先に同名のファイル（xls / xlsx は同名のシート）が既にある場合、ヘッダ行が書かれているものとして中身を確かめずに末尾へデータ行を追記する（ヘッダ行は書かない）。無い場合は OFF と同じく新しく作る。OFF では既存のファイルを上書きする。Compare では表示しない（実行のたびに出力先ディレクトリを消してから比較結果を書くため、追記できない）</td><td>OFF</td></tr>
     <tr><td>parallel</td><td>入力ソースを並列に読み込むスレッド数。並列化できる組み合わせのときだけ表示（<code>table</code> でも表示）。<code>1</code> で逐次。空欄なら並列化できる場合に CPU コア数で並列化する（Parameterize の並列実行の中では逐次）。詳細は下記「並列読込」を参照</td><td>（空）</td></tr>
   </table>
 
