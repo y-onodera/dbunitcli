@@ -111,9 +111,9 @@ customers
   data/osaka/ORDERS.csv   (2001,ink)
 
 パラメータデータ (params/sources.csv):
-  SRC,TYPE
-  data/tokyo/orders.xlsx,xlsx
-  data/osaka,csv
+  SRC,TYPE,APPEND
+  data/tokyo/orders.xlsx,xlsx,false
+  data/osaka,csv,true
 
 テンプレート (merge_orders.txt):
   -src=$param.SRC$
@@ -121,9 +121,10 @@ customers
   -result=merged
   -resultType=xlsx
   -resultPath=orders_all
-  -append=true
+  -append=$param.APPEND$
 
 指定 (1 つ目: Parameterize):
+  parallel               = 1
   cmd                    = convert
   template               = merge_orders.txt
   param セクションの src = params/sources.csv
@@ -141,11 +142,11 @@ customers
     insert into ORDERS (ORDER_ID ,ITEM ) values ('2001' ,'ink' );
     commit;</pre>
   <ul>
-    <li><code>append</code> を ON にすると、2 行目以降は同名のシート（CSV なら同名のファイル）の末尾に行が追記される。<code>resultType</code> を <code>csv</code> にすれば、テーブルごとの CSV にまとまる</li>
-    <li>追記先が既にあると、1 行目の分もそこに追記される。やり直すときは、先に出力先（ここでは <code>merged/orders_all.xlsx</code>）を消してください</li>
+    <li>1 行目は <code>append</code> が OFF なので、前回の出力を上書きして作り直す。2 行目以降は ON なので、同名のシートの末尾に行を追記する。何度実行しても前回の分とは重ならない</li>
+    <li><code>parallel</code> は <code>1</code>（または空欄）にして、パラメータデータの行の順に実行してください。並列にすると、<code>append</code> が OFF の行が後から実行されて、先に追記した分を消すことがある</li>
     <li>追記はヘッダ行を確かめずに行うため、同じテーブル名のソースは列の並びをそろえてください</li>
-    <li><code>parallel</code> を空欄のままにすると、パラメータデータの行の順に追記される</li>
   </ul>
+  <p><code>resultType</code> を <code>csv</code> にすると、テーブルごとの CSV に追記されます。この場合、1 行目で上書きされるのは 1 行目のソースにあるテーブルのファイルだけです。2 行目以降のソースにしかないテーブルは前回のファイルに追記されて重なるため、やり直す前に出力先のファイルを消してください。</p>
   <p>Convert でまとめずに Parameterize で Generate を行ごとに実行すると、ソースごとに別の SQL ファイルができます（出力先が同じなら上書きされます）。1 つのファイルにしたいときは、この例のように先にデータをまとめてください。</p>
 
   <h2 id="section-related">関連</h2>
