@@ -292,23 +292,6 @@ export default function SqlColumnInsertDialog({
 							</div>
 						</DialogField>
 					)}
-				</>
-			)}
-			{!noColumns && (
-				<DialogField last={plain}>
-					<SelectableTable
-						items={columns}
-						selected={selected}
-						onToggle={singleColumn ? toggleOnly : toggle}
-						onToggleAll={singleColumn ? undefined : toggleAll}
-						columnLabel="Column Name"
-						filterPlaceholder="Filter columns..."
-						emptyMessage="No columns found"
-					/>
-				</DialogField>
-			)}
-			{!plain && (
-				<>
 					{scalar && (
 						<ScalarOptions
 							source={scalarSource}
@@ -415,8 +398,24 @@ export default function SqlColumnInsertDialog({
 							/>
 						</DialogField>
 					)}
-					<InsertPreview lines={canInsert ? linesOf(previewSubquery) : []} />
 				</>
+			)}
+			{/* 長い一覧のスクロールで用途・オプションを見落とさないよう、一覧はオプションの下に置く */}
+			{!noColumns && (
+				<DialogField last={plain}>
+					<SelectableTable
+						items={columns}
+						selected={selected}
+						onToggle={singleColumn ? toggleOnly : toggle}
+						onToggleAll={singleColumn ? undefined : toggleAll}
+						columnLabel="Column Name"
+						filterPlaceholder="Filter columns..."
+						emptyMessage="No columns found"
+					/>
+				</DialogField>
+			)}
+			{!plain && (
+				<InsertPreview lines={canInsert ? linesOf(previewSubquery) : []} />
 			)}
 			<DialogActions>
 				{needsSubquery ? (

@@ -80,7 +80,9 @@ function ListSubqueryTable({
 	return (
 		renderSubqueryColumns(columnLoad, mode, alias, onComplete, onClose) ?? (
 			<NestedDialogFrame title="Subquery Table" onClose={onClose}>
-				<DialogField>
+				{/* 長い一覧のスクロールで別名を見落とさないよう、一覧の上に置く */}
+				<SubqueryAliasField alias={alias} onAliasChange={setAlias} />
+				<DialogField last>
 					<SelectableTable
 						items={tables}
 						selected={selected}
@@ -90,8 +92,6 @@ function ListSubqueryTable({
 					/>
 				</DialogField>
 				<SubqueryTableActions
-					alias={alias}
-					onAliasChange={setAlias}
 					canProceed={selectedTable !== null}
 					onNext={() => selectedTable && columnLoad.open(selectedTable)}
 					onClose={onClose}
@@ -120,9 +120,12 @@ function CsvSubqueryTable({
 		renderSubqueryColumns(columnLoad, mode, csv.alias, onComplete, onClose) ?? (
 			<NestedDialogFrame title="Subquery Table" onClose={onClose}>
 				<CsvFileFields idPrefix="sqlSubquery" {...csv.fields} />
-				<SubqueryTableActions
+				<SubqueryAliasField
+					last
 					alias={csv.alias}
 					onAliasChange={csv.setAlias}
+				/>
+				<SubqueryTableActions
 					canProceed={csv.ready}
 					onNext={() => columnLoad.open(csv.expression)}
 					onClose={onClose}
@@ -158,34 +161,41 @@ function renderSubqueryColumns(
 	);
 }
 
-function SubqueryTableActions({
+function SubqueryAliasField({
+	last = false,
 	alias,
 	onAliasChange,
+}: {
+	last?: boolean;
+	alias: string;
+	onAliasChange: (value: string) => void;
+}) {
+	return (
+		<DialogField last={last}>
+			<OptionText
+				id="sqlSubquery_alias"
+				label="Table alias"
+				value={alias}
+				onChange={onAliasChange}
+			/>
+		</DialogField>
+	);
+}
+
+function SubqueryTableActions({
 	canProceed,
 	onNext,
 	onClose,
 }: {
-	alias: string;
-	onAliasChange: (value: string) => void;
 	canProceed: boolean;
 	onNext: () => void;
 	onClose: () => void;
 }) {
 	return (
-		<>
-			<DialogField last>
-				<OptionText
-					id="sqlSubquery_alias"
-					label="Table alias"
-					value={alias}
-					onChange={onAliasChange}
-				/>
-			</DialogField>
-			<DialogActions>
-				<BlueButton title="Next" handleClick={onNext} disabled={!canProceed} />
-				<WhiteButton title="Cancel" handleClick={onClose} />
-			</DialogActions>
-		</>
+		<DialogActions>
+			<BlueButton title="Next" handleClick={onNext} disabled={!canProceed} />
+			<WhiteButton title="Cancel" handleClick={onClose} />
+		</DialogActions>
 	);
 }
 
@@ -243,6 +253,26 @@ export function SubqueryColumns({
 
 	return (
 		<NestedDialogFrame title="Subquery Columns" table={table} onClose={onClose}>
+			{/* 長い一覧のスクロールで見落とさないよう、オプションは一覧の上に置く */}
+			<DialogField>
+				<OptionSelect
+					id="sqlSubquery_conjunction"
+					label="Join conditions with"
+					options={CONJUNCTION_OPTIONS}
+					value={conjunction}
+					onChange={setConjunction}
+				/>
+			</DialogField>
+			{alias !== "" && (
+				<DialogField>
+					<OptionCheck
+						id="sqlSubquery_qualify"
+						label={`Prefix table alias (${alias})`}
+						checked={qualify}
+						onChange={setQualify}
+					/>
+				</DialogField>
+			)}
 			{mode !== "exists" && (
 				<DialogField>
 					<p className="text-sm font-medium mb-1">
@@ -273,25 +303,6 @@ export function SubqueryColumns({
 					emptyMessage="No columns found"
 				/>
 			</DialogField>
-			<DialogField>
-				<OptionSelect
-					id="sqlSubquery_conjunction"
-					label="Join conditions with"
-					options={CONJUNCTION_OPTIONS}
-					value={conjunction}
-					onChange={setConjunction}
-				/>
-			</DialogField>
-			{alias !== "" && (
-				<DialogField>
-					<OptionCheck
-						id="sqlSubquery_qualify"
-						label={`Prefix table alias (${alias})`}
-						checked={qualify}
-						onChange={setQualify}
-					/>
-				</DialogField>
-			)}
 			<InsertPreview lines={lines} />
 			<DialogActions>
 				<BlueButton

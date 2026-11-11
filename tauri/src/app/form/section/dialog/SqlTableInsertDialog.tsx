@@ -162,30 +162,38 @@ function TablesContent({
 			? { alias: alias.trim(), qualify: alias.trim() !== "" }
 			: { alias: defaultTableAlias(table), qualify: false };
 
+	const list = (
+		<DialogField last={plain}>
+			{tables.length === 0 ? (
+				<StatusMessage kind="empty">No tables found</StatusMessage>
+			) : (
+				<TableList
+					tables={tables}
+					selected={selected}
+					onToggleAll={plain ? toggleAll : undefined}
+					onToggle={handleToggle}
+					onSelectTable={columnLoad.open}
+				/>
+			)}
+		</DialogField>
+	);
+
 	return (
 		<>
-			<DialogField last={plain}>
-				{tables.length === 0 ? (
-					<StatusMessage kind="empty">No tables found</StatusMessage>
-				) : (
-					<TableList
-						tables={tables}
-						selected={selected}
-						onToggleAll={plain ? toggleAll : undefined}
-						onToggle={handleToggle}
-						onSelectTable={columnLoad.open}
-					/>
-				)}
-			</DialogField>
 			{plain ? (
-				<DialogActions>
-					<BlueButton
-						title="Insert"
-						handleClick={() => onInsert(tables.filter((t) => selected.has(t)))}
-						disabled={selected.size === 0}
-					/>
-					<WhiteButton title="Cancel" handleClick={onClose} />
-				</DialogActions>
+				<>
+					{list}
+					<DialogActions>
+						<BlueButton
+							title="Insert"
+							handleClick={() =>
+								onInsert(tables.filter((t) => selected.has(t)))
+							}
+							disabled={selected.size === 0}
+						/>
+						<WhiteButton title="Cancel" handleClick={onClose} />
+					</DialogActions>
+				</>
 			) : (
 				<TableInsertForm
 					idPrefix="sqlTableInsert"
@@ -201,7 +209,9 @@ function TablesContent({
 					queryOnly={queryOnly}
 					onInsert={onInsert}
 					onClose={onClose}
-				/>
+				>
+					{list}
+				</TableInsertForm>
 			)}
 			{columnLoad.target !== null && (
 				<SqlColumnInsertDialog
