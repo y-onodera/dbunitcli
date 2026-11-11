@@ -19,9 +19,9 @@
   202610
 
 テンプレート (convert_monthly.txt):
-  -srcData.src=data/$param.MONTH$
-  -convertResult.resultType=xlsx
-  -convertResult.result=out/$param.MONTH$
+  -src=data/$param.MONTH$
+  -resultType=xlsx
+  -result=out/$param.MONTH$
 
 指定:
   cmd              = convert
@@ -74,10 +74,10 @@ orders,data/old/orders,data/new/orders,settings/orders.json
 products,data/old/products,data/new/products,settings/products.json
 
 テンプレート (compare_param.txt):
--oldData.src=$param.OLD_DIR$
--newData.src=$param.NEW_DIR$
+-old.src=$param.OLD_DIR$
+-new.src=$param.NEW_DIR$
 -setting=$param.SETTING$
--convertResult.result=result/compare/$param.NAME$
+-result=result/compare/$param.NAME$
 
 指定:
   ignoreFail       = ON
