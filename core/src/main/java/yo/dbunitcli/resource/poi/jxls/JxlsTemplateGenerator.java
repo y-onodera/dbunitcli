@@ -9,8 +9,9 @@ import yo.dbunitcli.common.Parameter;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
-import java.util.stream.IntStream;
 
 public class JxlsTemplateGenerator {
 
@@ -21,39 +22,59 @@ public class JxlsTemplateGenerator {
             for (final Map.Entry<String, Map<String, Object>> tableEntry : dataSet.entrySet()) {
                 final String tableName = tableEntry.getKey();
                 final Map<String, Object> tableData = tableEntry.getValue();
-                final Column[] columns = (Column[]) tableData.get("columns");
+                final List<String> columns = Arrays.stream((Column[]) tableData.get("columns"))
+                        .map(Column::getColumnName)
+                        .toList();
                 final Sheet sheet = workbook.createSheet(tableName);
-                createHeaderRow(sheet, columns);
-                createJxlsRow(sheet, columns);
-                addJxlsComments(sheet, new CellReference(1, columns.length - 1).formatAsString());
+                createRow(sheet, 0, columns);
+                createRow(sheet, 1, columns.stream().map(JxlsTemplateGenerator::rowValue).toList());
+                addAreaComments(sheet, 0, 1, columns.size() - 1);
             }
-            try (final FileOutputStream fos = new FileOutputStream(resultFile)) {
-                workbook.write(fos);
-            }
+            write(workbook, resultFile);
         }
     }
 
-    private static void createHeaderRow(final Sheet sheet, final Column[] columns) {
-        final Row headerRow = sheet.createRow(0);
-        IntStream.range(0, columns.length)
-                .forEach(i -> {
-                    final Cell cell = headerRow.createCell(i);
-                    cell.setCellValue(columns[i].getColumnName());
-                });
+    static void write(final Workbook workbook, final File resultFile) throws IOException {
+        try (final FileOutputStream fos = new FileOutputStream(resultFile)) {
+            workbook.write(fos);
+        }
     }
 
-    private static void createJxlsRow(final Sheet sheet, final Column[] columns) {
-        final Row dataRow = sheet.createRow(1);
-        IntStream.range(0, columns.length)
-                .forEach(i -> {
-                    final Cell cell = dataRow.createCell(i);
-                    cell.setCellValue("${row.get('" + columns[i].getColumnName() + "')}");
-                });
+    /** jx:eachの1行分で列の値を出す式 */
+    static String rowValue(final String columnName) {
+        return "${row.get('" + columnName + "')}";
     }
 
-    private static void addJxlsComments(final Sheet sheet, final String lastCell) {
-        addComment(sheet, 0, "jx:area(lastCell=\"" + lastCell + "\")");
-        addComment(sheet, 1, "jx:each(items=\"param.dataSet.get('" + sheet.getSheetName() + "').rows\" var=\"row\" varIndex=\"index\" lastCell=\"" + lastCell + "\")");
+    static Row createRow(final Sheet sheet, final int rowIndex, final List<?> values) {
+        final Row row = sheet.createRow(rowIndex);
+        for (int i = 0; i < values.size(); i++) {
+            row.createCell(i).setCellValue(String.valueOf(values.get(i)));
+        }
+        return row;
+    }
+
+    /**
+     * jxlsのパラメータ化数式（$[…]）として書く数式（先頭の"="なし）。
+     * 通常の数式セルはjxlsがセル参照を含まないものを0に置き換え、formulaProcess=falseでは参照をずらさないため使わない
+     */
+    record Formula(String text) {
+        @Override
+        public String toString() {
+            return "$[" + this.text + "]";
+        }
+    }
+
+    /**
+     * A{areaRow+1}からeach行の最終列までをjx:area、each行をシート名のテーブルの全行を回すjx:eachにする
+     */
+    static void addAreaComments(final Sheet sheet, final int areaRow, final int eachRow, final int lastColumn) {
+        addAreaComments(sheet, areaRow, eachRow, lastColumn, sheet.getSheetName());
+    }
+
+    static void addAreaComments(final Sheet sheet, final int areaRow, final int eachRow, final int lastColumn, final String tableName) {
+        final String lastCell = new CellReference(eachRow, lastColumn).formatAsString();
+        addComment(sheet, areaRow, "jx:area(lastCell=\"" + lastCell + "\")");
+        addComment(sheet, eachRow, "jx:each(items=\"param.dataSet.get('" + tableName + "').rows\" var=\"row\" varIndex=\"index\" lastCell=\"" + lastCell + "\")");
     }
 
     private static void addComment(final Sheet sheet, final int rowIndex, final String commentText) {
