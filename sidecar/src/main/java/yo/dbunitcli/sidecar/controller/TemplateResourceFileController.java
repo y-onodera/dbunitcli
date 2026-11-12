@@ -20,6 +20,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 @Controller("template")
 public class TemplateResourceFileController extends AbstractTextResourceFileController {
@@ -89,8 +90,8 @@ public class TemplateResourceFileController extends AbstractTextResourceFileCont
                 throw new IllegalArgumentException("first and second are required");
             }
             return new JxlsCompareTemplateGenerator(
-                    new JxlsCompareTemplateGenerator.DataSheet(request.first().sheetName(), nonNull(request.first().columns()))
-                    , new JxlsCompareTemplateGenerator.DataSheet(request.second().sheetName(), nonNull(request.second().columns()))
+                    new JxlsCompareTemplateGenerator.DataSheet(request.first().sheetName(), Objects.requireNonNullElse(request.first().columns(), List.of()))
+                    , new JxlsCompareTemplateGenerator.DataSheet(request.second().sheetName(), Objects.requireNonNullElse(request.second().columns(), List.of()))
                     , toPairs(request.keys())
                     , toPairs(request.compares())
                     , request.compareSheetName());
@@ -100,13 +101,9 @@ public class TemplateResourceFileController extends AbstractTextResourceFileCont
     }
 
     private static List<JxlsCompareTemplateGenerator.ColumnPair> toPairs(final List<XlsxCompareTemplateRequestDto.ColumnPair> pairs) {
-        return nonNull(pairs).stream()
+        return Objects.requireNonNullElse(pairs, List.<XlsxCompareTemplateRequestDto.ColumnPair>of()).stream()
                 .map(pair -> new JxlsCompareTemplateGenerator.ColumnPair(pair.first(), pair.second()))
                 .toList();
-    }
-
-    private static <T> List<T> nonNull(final List<T> list) {
-        return list == null ? List.of() : list;
     }
 
     private String toXlsxFileName(final String name) {

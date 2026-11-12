@@ -28,7 +28,7 @@ public class JxlsTemplateGenerator {
                 final Sheet sheet = workbook.createSheet(tableName);
                 createRow(sheet, 0, columns);
                 createRow(sheet, 1, columns.stream().map(JxlsTemplateGenerator::rowValue).toList());
-                addAreaComments(sheet, 0, 1, columns.size() - 1);
+                addAreaComments(sheet, 0, 1, columns.size() - 1, tableName);
             }
             write(workbook, resultFile);
         }
@@ -45,12 +45,11 @@ public class JxlsTemplateGenerator {
         return "${row.get('" + columnName + "')}";
     }
 
-    static Row createRow(final Sheet sheet, final int rowIndex, final List<?> values) {
+    static void createRow(final Sheet sheet, final int rowIndex, final List<?> values) {
         final Row row = sheet.createRow(rowIndex);
         for (int i = 0; i < values.size(); i++) {
             row.createCell(i).setCellValue(String.valueOf(values.get(i)));
         }
-        return row;
     }
 
     /**
@@ -65,12 +64,8 @@ public class JxlsTemplateGenerator {
     }
 
     /**
-     * A{areaRow+1}からeach行の最終列までをjx:area、each行をシート名のテーブルの全行を回すjx:eachにする
+     * A{areaRow+1}からeach行の最終列までをjx:area、each行をtableNameのテーブルの全行を回すjx:eachにする
      */
-    static void addAreaComments(final Sheet sheet, final int areaRow, final int eachRow, final int lastColumn) {
-        addAreaComments(sheet, areaRow, eachRow, lastColumn, sheet.getSheetName());
-    }
-
     static void addAreaComments(final Sheet sheet, final int areaRow, final int eachRow, final int lastColumn, final String tableName) {
         final String lastCell = new CellReference(eachRow, lastColumn).formatAsString();
         addComment(sheet, areaRow, "jx:area(lastCell=\"" + lastCell + "\")");

@@ -29,12 +29,10 @@ export type XlsxCompareTemplateInput = {
 	fileName: string;
 	compareSheetName: string;
 	first: DatasetColumns;
-	// nullなら1データセット: 2枚目のシートもfirstと同じ列で作る
-	second: DatasetColumns | null;
-	secondSheetName: string;
-	// 1データセットのときはfirstの列名を両シートで使う
+	second: DatasetColumns;
 	keys: ColumnPair[];
-	compares: ColumnPair[];
+	// nullならキー以外の全列を同名どうしで比べる（1データセット）
+	compares: ColumnPair[] | null;
 };
 
 const isFilled = (pair: ColumnPair) => pair.first !== "" && pair.second !== "";
@@ -53,11 +51,7 @@ export function selectTable(
 	};
 }
 
-// 1データセットのときの比較ペア: キー以外の全列を同名どうしで比べる
-export function sameNamePairs(
-	columns: string[],
-	keyColumns: string[],
-): ColumnPair[] {
+function sameNamePairs(columns: string[], keyColumns: string[]): ColumnPair[] {
 	return columns
 		.filter((column) => !keyColumns.includes(column))
 		.map((column) => ({ first: column, second: column }));
@@ -70,28 +64,27 @@ export function buildCompareTemplateRequest(
 	if (input.first.columns.length === 0) {
 		throw new Error("Load the columns of the old dataset.");
 	}
-	if (input.second && input.second.columns.length === 0) {
+	if (input.second.columns.length === 0) {
 		throw new Error("Load the columns of the new dataset.");
 	}
 	const keys = input.keys.filter(isFilled);
 	if (keys.length === 0) {
 		throw new Error("Select at least one key column.");
 	}
-	const second = input.second ?? {
-		...input.first,
-		sheetName: input.secondSheetName,
-	};
-	const compares = input.second
-		? input.compares.filter(isFilled)
-		: sameNamePairs(
-				input.first.columns,
-				keys.map((key) => key.first),
-			);
+	const compares =
+		input.compares?.filter(isFilled) ??
+		sameNamePairs(
+			input.first.columns,
+			keys.map((key) => key.first),
+		);
 	return {
 		fileName: input.fileName,
 		compareSheetName: input.compareSheetName,
 		first: { sheetName: input.first.sheetName, columns: input.first.columns },
-		second: { sheetName: second.sheetName, columns: second.columns },
+		second: {
+			sheetName: input.second.sheetName,
+			columns: input.second.columns,
+		},
 		keys,
 		compares,
 	};

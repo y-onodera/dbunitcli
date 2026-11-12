@@ -179,7 +179,7 @@ describe("XlsxCompareTemplateGenerateDialogの実行テスト", () => {
 		await user.type(inputByName("-fileName"), "cmp.xlsx");
 		await loadColumns(user, "old", "OLD_TABLE", 0);
 		await user.type(inputByName("new sheetName"), "after");
-		await user.click(screen.getByRole("checkbox", { name: "key ID" }));
+		await user.click(screen.getByRole("cell", { name: "ID" }));
 		await user.click(screen.getByRole("button", { name: "Execute" }));
 
 		await waitFor(() => {

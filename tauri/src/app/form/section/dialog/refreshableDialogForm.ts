@@ -15,7 +15,7 @@ export type DialogLoadState<OPTIONS> =
 export async function postDialogForm<T>(
 	apiUrl: string,
 	endpoint: string,
-	values: FormValues,
+	values: object,
 	// signalでsidecar側も中断する。onLogは実行系（generate・scaffold）が実行中のログを受け取る
 	fetchOptions?: Partial<JobContext>,
 ): Promise<T> {

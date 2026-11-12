@@ -11,7 +11,6 @@ const input: XlsxCompareTemplateInput = {
 	compareSheetName: "compare",
 	first: { tableName: "T1", sheetName: "old", columns: ["ID", "NAME"] },
 	second: { tableName: "T2", sheetName: "new", columns: ["CODE", "NAME"] },
-	secondSheetName: "",
 	keys: [{ first: "ID", second: "CODE" }],
 	compares: [{ first: "NAME", second: "NAME" }],
 };
@@ -40,10 +39,26 @@ describe("buildCompareTemplateRequest", () => {
 		const request = buildCompareTemplateRequest({
 			...input,
 			keys: [...input.keys, { first: "NAME", second: "" }],
-			compares: [...input.compares, { first: "", second: "" }],
+			compares: [
+				{ first: "NAME", second: "NAME" },
+				{ first: "", second: "" },
+			],
 		});
 		expect(request.keys).toEqual([{ first: "ID", second: "CODE" }]);
 		expect(request.compares).toEqual([{ first: "NAME", second: "NAME" }]);
+	});
+
+	it("comparesがnullならキー以外の全列を同名どうしで比べる", () => {
+		const request = buildCompareTemplateRequest({
+			...input,
+			first: { tableName: "T1", sheetName: "old", columns: ["ID", "A", "B"] },
+			keys: [{ first: "ID", second: "ID" }],
+			compares: null,
+		});
+		expect(request.compares).toEqual([
+			{ first: "A", second: "A" },
+			{ first: "B", second: "B" },
+		]);
 	});
 
 	it("キーが無ければエラー", () => {

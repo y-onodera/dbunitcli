@@ -103,7 +103,7 @@ public record JxlsCompareTemplateGenerator(DataSheet first, DataSheet second, Li
                 .collect(Collectors.joining("&\"" + KEY_SEPARATOR + "\"&", "", keyColumns.size() == 1 ? "&\"\"" : ""))));
         dataSheet.columns().stream().map(JxlsTemplateGenerator::rowValue).forEach(values::add);
         JxlsTemplateGenerator.createRow(sheet, DATA_SHEET_EACH_ROW, values);
-        JxlsTemplateGenerator.addAreaComments(sheet, 0, DATA_SHEET_EACH_ROW, header.size() - 1);
+        JxlsTemplateGenerator.addAreaComments(sheet, 0, DATA_SHEET_EACH_ROW, header.size() - 1, dataSheet.sheetName());
     }
 
     /*
@@ -116,26 +116,28 @@ public record JxlsCompareTemplateGenerator(DataSheet first, DataSheet second, Li
         final String secondRow = at(columnName(COMPARE, 1), 0);
 
         final List<String> header = new ArrayList<>(List.of(KEY_HEADER, this.second.sheetName() + " row", "STATUS"));
-        final List<Object> values = new ArrayList<>();
-        values.add(new Formula(at(columnName(FIRST, 0), ROW_OFFSET)));
-        values.add(new Formula("IFERROR(MATCH(" + at(columnName(COMPARE, 0), 0) + "," + columnName(SECOND, 0) + ",0),\"\")"));
-        values.add(null);
+        final List<Object> pairValues = new ArrayList<>();
         final List<String> differences = new ArrayList<>();
         for (final ColumnPair pair : this.compares) {
+            final int column = header.size();
             header.add(pair.first() + "(" + this.first.sheetName() + ")");
             header.add(pair.second() + "(" + this.second.sheetName() + ")");
             header.add(pair.first() + " diff");
-            final String firstValue = at(columnName(COMPARE, values.size()), 0);
-            final String secondValue = at(columnName(COMPARE, values.size() + 1), 0);
-            differences.add(at(columnName(COMPARE, values.size() + 2), 0) + "<>\"\"");
-            values.add(new Formula(at(columnName(FIRST, this.first.columnIndex(pair.first())), ROW_OFFSET) + "&\"\""));
-            values.add(new Formula("IF(" + secondRow + "=\"\",\"\",INDEX(" + columnName(SECOND, this.second.columnIndex(pair.second())) + "," + secondRow + ")&\"\")"));
-            values.add(new Formula("IF(EXACT(" + firstValue + "," + secondValue + "),\"\",\"" + DIFF_MARK + "\")"));
+            final String firstValue = at(columnName(COMPARE, column), 0);
+            final String secondValue = at(columnName(COMPARE, column + 1), 0);
+            differences.add(at(columnName(COMPARE, column + 2), 0) + "<>\"\"");
+            pairValues.add(new Formula(at(columnName(FIRST, this.first.columnIndex(pair.first())), ROW_OFFSET) + "&\"\""));
+            pairValues.add(new Formula("IF(" + secondRow + "=\"\",\"\",INDEX(" + columnName(SECOND, this.second.columnIndex(pair.second())) + "," + secondRow + ")&\"\")"));
+            pairValues.add(new Formula("IF(EXACT(" + firstValue + "," + secondValue + "),\"\",\"" + DIFF_MARK + "\")"));
         }
         final String status = differences.isEmpty()
                 ? "\"\""
                 : "IF(OR(" + String.join(",", differences) + "),\"" + DIFF_STATUS + "\",\"\")";
-        values.set(2, new Formula("IF(" + secondRow + "=\"\",\"" + MISSING_STATUS + "\"," + status + ")"));
+        final List<Object> values = new ArrayList<>(List.of(
+                new Formula(at(columnName(FIRST, 0), ROW_OFFSET))
+                , new Formula("IFERROR(MATCH(" + at(columnName(COMPARE, 0), 0) + "," + columnName(SECOND, 0) + ",0),\"\")")
+                , new Formula("IF(" + secondRow + "=\"\",\"" + MISSING_STATUS + "\"," + status + ")")));
+        values.addAll(pairValues);
 
         for (int i = 0; i < header.size(); i++) {
             defineColumnName(workbook, sheet, COMPARE, i);
