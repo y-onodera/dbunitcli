@@ -9,13 +9,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import yo.dbunitcli.Strings;
 import yo.dbunitcli.application.command.GenerateType;
+import yo.dbunitcli.resource.poi.jxls.JxlsCompareTemplateGenerator;
+import yo.dbunitcli.sidecar.dto.XlsxCompareTemplateRequestDto;
 import yo.dbunitcli.sidecar.domain.project.ResourceFile;
 import yo.dbunitcli.sidecar.domain.project.Workspace;
 import yo.dbunitcli.sidecar.job.Interruptible;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 @Controller("template")
 public class TemplateResourceFileController extends AbstractTextResourceFileController {
@@ -59,6 +64,46 @@ public class TemplateResourceFileController extends AbstractTextResourceFileCont
         } finally {
             GenerateTemplateSupport.deleteRecursively(tempDir);
         }
+    }
+
+    /**
+     * データシート2枚と、複合キーで突合する比較シートからなるxlsxテンプレートを生成し、fileNameでtemplateリソースへ保存する。
+     * 応答はsave同様に更新後のファイル一覧
+     */
+    @Post(uri = "generate-compare", produces = MediaType.APPLICATION_JSON)
+    public String generateCompare(@Body final XlsxCompareTemplateRequestDto request) throws IOException {
+        final String fileName = this.toXlsxFileName(request.fileName());
+        final JxlsCompareTemplateGenerator generator = toGenerator(request);
+        final Path tempDir = Files.createTempDirectory("xlsxCompareTemplateGenerate");
+        try {
+            generator.write(tempDir.resolve(GENERATED_FILE).toFile());
+            this.getResourceFile().updateFrom(fileName, tempDir.resolve(GENERATED_FILE));
+            return this.currentFileList();
+        } finally {
+            GenerateTemplateSupport.deleteRecursively(tempDir);
+        }
+    }
+
+    private static JxlsCompareTemplateGenerator toGenerator(final XlsxCompareTemplateRequestDto request) {
+        try {
+            if (request.first() == null || request.second() == null) {
+                throw new IllegalArgumentException("first and second are required");
+            }
+            return new JxlsCompareTemplateGenerator(
+                    new JxlsCompareTemplateGenerator.DataSheet(request.first().sheetName(), Objects.requireNonNullElse(request.first().columns(), List.of()))
+                    , new JxlsCompareTemplateGenerator.DataSheet(request.second().sheetName(), Objects.requireNonNullElse(request.second().columns(), List.of()))
+                    , toPairs(request.keys())
+                    , toPairs(request.compares())
+                    , request.compareSheetName());
+        } catch (final IllegalArgumentException e) {
+            throw new ApplicationException(e);
+        }
+    }
+
+    private static List<JxlsCompareTemplateGenerator.ColumnPair> toPairs(final List<XlsxCompareTemplateRequestDto.ColumnPair> pairs) {
+        return Objects.requireNonNullElse(pairs, List.<XlsxCompareTemplateRequestDto.ColumnPair>of()).stream()
+                .map(pair -> new JxlsCompareTemplateGenerator.ColumnPair(pair.first(), pair.second()))
+                .toList();
     }
 
     private String toXlsxFileName(final String name) {

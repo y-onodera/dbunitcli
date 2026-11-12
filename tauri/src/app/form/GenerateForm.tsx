@@ -14,6 +14,7 @@ import {
 import UnitSettingPreviewButton, {
 	UnitSettingsDialog,
 } from "./section/dialog/UnitSettingPreviewButton";
+import { XlsxCompareTemplateGenerateButton } from "./section/dialog/XlsxCompareTemplateGenerateDialog";
 import { XlsxTemplateGenerateButton } from "./section/dialog/XlsxTemplateGenerateDialog";
 import Check from "./section/element/Check";
 import DatasetSettingText from "./section/element/DatasetSettingText";
@@ -39,10 +40,14 @@ export function GenerateForm(prop: {
 	const generateTypeValue = generate.generateType.value;
 	const isExcelGenerate =
 		generateTypeValue === "xlsx" || generateTypeValue === "xls";
-	// template欄のdropdown: xlsx/xlsはテキスト編集の代わりにxlsxTemplate生成を出す
+	// template欄のdropdown: xlsx/xlsはテキスト編集の代わりにxlsxTemplate生成（テーブルごと・比較用）を出す
 	const templateEditButtons = isExcelGenerate
 		? (_: string, setPath: (value: string) => void) => [
 				<XlsxTemplateGenerateButton key="generate" setPath={setPath} />,
+				<XlsxCompareTemplateGenerateButton
+					key="generateCompare"
+					setPath={setPath}
+				/>,
 			]
 		: undefined;
 	// unitSettingの編集・プレビューで読む文字コード（入力中の値）

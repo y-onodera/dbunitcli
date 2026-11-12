@@ -25,7 +25,7 @@ const dialogConfig = {
 };
 
 // sidecarはxlsxTemplateを常に.xlsxで保存し、拡張子が無ければ補う。template欄へも同名を反映する
-function toSavedFileName(name: string): string {
+export function toSavedFileName(name: string): string {
 	return name.toLowerCase().endsWith(xlsxExtension)
 		? name
 		: name + xlsxExtension;

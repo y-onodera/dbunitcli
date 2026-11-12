@@ -9,6 +9,8 @@ import io.micronaut.runtime.server.EmbeddedServer;
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
 import jakarta.inject.Inject;
 import jakarta.json.JsonObject;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.junit.jupiter.api.Test;
 import yo.dbunitcli.resource.FileResources;
 
@@ -21,6 +23,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 
 @MicronautTest
 @Property(name = FileResources.PROPERTY_WORKSPACE, value = "target/test-temp/workspace/sample")
@@ -94,6 +97,45 @@ class TemplateResourceFileControllerTest {
                 () -> this.client.toBlocking().retrieve(
                         HttpRequest.POST("dbunit-cli/template/generate",
                                 "{\"-src.src\":\"resources/src/csv\",\"-src.srcType\":\"csv\",\"-fileName\":\"../a\"}")));
+        Assertions.assertEquals(HttpStatus.BAD_REQUEST, ex.getStatus());
+    }
+
+    private static final String COMPARE_REQUEST = """
+            {"fileName":"generatedTemplate","compareSheetName":"compare",
+             "first":{"sheetName":"old","columns":["ID","NAME"]},
+             "second":{"sheetName":"new","columns":["CODE","NAME"]},
+             "keys":[{"first":"ID","second":"CODE"}],
+             "compares":[{"first":"NAME","second":"NAME"}]}
+            """;
+
+    @Test
+    void testGenerateCompare_比較用xlsxテンプレートを生成して保存する() throws IOException {
+        final String response = this.client.toBlocking().retrieve(
+                HttpRequest.POST("dbunit-cli/template/generate-compare", COMPARE_REQUEST));
+        Assertions.assertTrue(response.contains("generatedTemplate.xlsx"), response);
+        final Path saved = Paths.get("target/test-temp/workspace/sample/resources/template/generatedTemplate.xlsx");
+        try (final Workbook workbook = WorkbookFactory.create(saved.toFile())) {
+            Assertions.assertEquals(List.of("old", "new", "compare")
+                    , List.of(workbook.getSheetName(0), workbook.getSheetName(1), workbook.getSheetName(2)));
+        }
+    }
+
+    @Test
+    void testGenerateCompare_存在しない列は400を返す() {
+        final HttpClientResponseException ex = Assertions.assertThrows(
+                HttpClientResponseException.class,
+                () -> this.client.toBlocking().retrieve(
+                        HttpRequest.POST("dbunit-cli/template/generate-compare", COMPARE_REQUEST.replace("\"CODE\"}", "\"MISSING\"}"))));
+        Assertions.assertEquals(HttpStatus.BAD_REQUEST, ex.getStatus());
+        Assertions.assertFalse(Files.exists(Paths.get("target/test-temp/workspace/sample/resources/template/generatedTemplate.xlsx")));
+    }
+
+    @Test
+    void testGenerateCompare_fileNameにパス区切りは400を返す() {
+        final HttpClientResponseException ex = Assertions.assertThrows(
+                HttpClientResponseException.class,
+                () -> this.client.toBlocking().retrieve(
+                        HttpRequest.POST("dbunit-cli/template/generate-compare", COMPARE_REQUEST.replace("generatedTemplate", "../a"))));
         Assertions.assertEquals(HttpStatus.BAD_REQUEST, ex.getStatus());
     }
 
