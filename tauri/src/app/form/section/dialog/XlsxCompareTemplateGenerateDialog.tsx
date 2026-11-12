@@ -20,7 +20,7 @@ import {
 } from "../../../../hooks/useDatasetSettings";
 import { useJob } from "../../../../hooks/useJob";
 import { withAllTables } from "../../../../model/CommandOption";
-import type { CompareOptions } from "../../../../model/SelectParameter";
+import type { GenerateOptions } from "../../../../model/SelectParameter";
 import {
 	buildCompareTemplateRequest,
 	type ColumnPair,
@@ -100,18 +100,19 @@ function renderColumnsState(
 	);
 }
 
-// データセット欄（DatasetSrcInfoScopeの内側）: テーブルを選んで列を読み込み、シート名を決める
+// テーブル欄（DatasetSrcInfoScopeの内側）: テーブルを選んで列を読み込み、シート名を決める
 function DatasetColumnsField({
 	name,
+	tableNames,
 	value,
 	onChange,
 }: {
 	name: string;
+	tableNames: string[];
 	value: DatasetColumns;
 	onChange: (value: DatasetColumns) => void;
 }) {
 	const srcInfo = useDatasetSrcInfo();
-	const { tableNames } = useDatasetTableNames(withAllTables(srcInfo));
 	const fetchColumns = useColumnNamesFetcher();
 	const job = useJob();
 	const loadColumns = async () => {
@@ -151,7 +152,55 @@ function DatasetColumnsField({
 	);
 }
 
-// 2データセットのときの列ペア（キー・比較ペア）の編集
+// 比較する2テーブルの選択（DatasetSrcInfoScopeの内側）。
+// generateはsrcのデータセットを1つしか読めないため、2テーブルとも同じデータセット（traversal・テーブル名の絞込・settingの結果）から選ぶ
+function CompareTablesField({
+	useSecond,
+	first,
+	second,
+	onChangeFirst,
+	onChangeSecond,
+}: {
+	useSecond: boolean;
+	first: DatasetColumns;
+	second: DatasetColumns;
+	onChangeFirst: (value: DatasetColumns) => void;
+	onChangeSecond: (value: DatasetColumns) => void;
+}) {
+	const srcInfo = useDatasetSrcInfo();
+	const { tableNames } = useDatasetTableNames(withAllTables(srcInfo));
+	return (
+		<>
+			{useSecond && tableNames.length !== 2 && (
+				<StatusMessage kind="empty">
+					{`The dataset has ${tableNames.length} tables. Narrow it down to the two tables to compare with traversal, table name filter or setting.`}
+				</StatusMessage>
+			)}
+			<DatasetColumnsField
+				name="old"
+				tableNames={tableNames}
+				value={first}
+				onChange={onChangeFirst}
+			/>
+			{useSecond ? (
+				<DatasetColumnsField
+					name="new"
+					tableNames={tableNames}
+					value={second}
+					onChange={onChangeSecond}
+				/>
+			) : (
+				<TextField
+					name="new sheetName"
+					value={second.sheetName}
+					onChange={(sheetName) => onChangeSecond({ ...second, sheetName })}
+				/>
+			)}
+		</>
+	);
+}
+
+// 2テーブルのときの列ペア（キー・比較ペア）の編集
 function ColumnPairsField({
 	caption,
 	firstColumns,
@@ -200,7 +249,7 @@ function ColumnPairsField({
 	);
 }
 
-// 1データセットのときのキー列の選択。選んだ順に複合キーにする
+// 1テーブルのときのキー列の選択。選んだ順に複合キーにする
 function KeyColumnsField({
 	columns,
 	selected,
@@ -248,9 +297,10 @@ function XlsxCompareTemplateGenerateDialog({
 	onClose: () => void;
 	onSaved: (fileName: string) => void;
 }) {
-	const dialog = useRefreshableDialog<CompareOptions>({
-		refreshEndpoint: "compare/refresh",
+	const dialog = useRefreshableDialog<GenerateOptions>({
+		refreshEndpoint: "generate/refresh",
 		formId,
+		generateType: "xlsxTemplate",
 	});
 	const setResourcesSettings = useSetResourcesSettings();
 	const [fileName, setFileName] = useState("");
@@ -291,11 +341,7 @@ function XlsxCompareTemplateGenerateDialog({
 		}
 	};
 
-	const renderDataset = (
-		srcData: CompareOptions["oldData"],
-		value: DatasetColumns,
-		onChange: (value: DatasetColumns) => void,
-	) => (
+	const renderDataset = (srcData: GenerateOptions["srcData"]) => (
 		<DatasetSrcInfoScope name={formId} srcData={srcData}>
 			<DatasetLoadForm
 				handleTypeSelect={dialog.refresh}
@@ -303,26 +349,15 @@ function XlsxCompareTemplateGenerateDialog({
 				srcData={srcData}
 				parentSrcInfo
 			/>
-			<DatasetColumnsField
-				name={srcData.prefix}
-				value={value}
-				onChange={onChange}
+			<CompareTablesField
+				useSecond={useSecond}
+				first={first}
+				second={second}
+				onChangeFirst={setFirst}
+				onChangeSecond={setSecond}
 			/>
 		</DatasetSrcInfoScope>
 	);
-
-	const renderSecond = (options: CompareOptions) => {
-		if (useSecond) {
-			return renderDataset(options.newData, second, setSecond);
-		}
-		return (
-			<TextField
-				name="new sheetName"
-				value={second.sheetName}
-				onChange={(sheetName) => setSecond({ ...second, sheetName })}
-			/>
-		);
-	};
 
 	const renderKeysAndCompares = () => {
 		if (!useSecond) {
@@ -381,14 +416,13 @@ function XlsxCompareTemplateGenerateDialog({
 							onChange={setCompareSheetName}
 						/>
 						<OptionCheck
-							id="useSecondDataset"
-							label="Use second dataset"
+							id="useSecondTable"
+							label="Use second table"
 							checked={useSecond}
 							onChange={setUseSecond}
 						/>
 					</div>
-					{renderDataset(options.oldData, first, setFirst)}
-					{renderSecond(options)}
+					{renderDataset(options.srcData)}
 					{renderKeysAndCompares()}
 				</>
 			)}
