@@ -328,6 +328,46 @@ public class GenerateTest {
         }
 
         @Test
+        public void testGenerateTxtWithLoadMetaDataAppliesUnitSettingToDescriptorRows() throws Exception {
+            final String url = "jdbc:h2:mem:generatetxtmetadata;DB_CLOSE_DELAY=-1";
+            final String resultDir = "target/test-classes/yo/dbunitcli/application/generate/ddl/loadMetaData";
+            try (final java.sql.Connection conn = java.sql.DriverManager.getConnection(url, "sa", "sa")) {
+                try (final java.sql.Statement st = conn.createStatement()) {
+                    st.execute("DROP TABLE IF EXISTS PERSON");
+                    st.execute("CREATE TABLE PERSON (ID INT NOT NULL, NAME VARCHAR(50) NOT NULL, MEMO VARCHAR(100)"
+                            + ", CONSTRAINT PK_PERSON PRIMARY KEY (ID))");
+                    st.execute("COMMENT ON TABLE PERSON IS 'people table'");
+                    st.execute("COMMENT ON COLUMN PERSON.NAME IS 'person name'");
+                }
+                final java.util.List<String> src = java.util.List.of(
+                        "-srcType=table"
+                        , "-src=" + GenerateTest.RESOURCES_DIR + "/src/generate/db/table"
+                        , "-jdbcUrl=" + url
+                        , "-jdbcUser=sa"
+                        , "-jdbcPass=sa");
+                Generate.main(java.util.stream.Stream.concat(src.stream(), java.util.stream.Stream.of(
+                        "-generateType=ddl"
+                        , "-resultPath=" + resultDir + "/builtin")).toArray(String[]::new));
+                // 組み込みddlと同じテンプレート・unitSettingを、記述子行（-src.loadMetaData）に対して使う
+                Generate.main(java.util.stream.Stream.concat(src.stream(), java.util.stream.Stream.of(
+                        "-generateType=txt"
+                        , "-unit=table"
+                        , "-src.useJdbcMetaData=true"
+                        , "-src.loadData=false"
+                        , "-src.loadMetaData=true"
+                        , "-template=src/main/resources/sql/ddlTemplate.txt"
+                        , "-template.templateGroup=src/main/resources/sql/ddlTemplate.stg"
+                        , "-unitSetting=src/main/resources/sql/ddlSettings.json"
+                        , "-resultPath=" + resultDir + "/txt/$param.tableName$.sql")).toArray(String[]::new));
+                GenerateTest.subDirectory = "generate/ddl/loadMetaData";
+                final String builtin = Files.readString(new File(this.getBaseDir() + "/generate/ddl/loadMetaData/builtin", "PERSON.sql").toPath(), StandardCharsets.UTF_8);
+                Assertions.assertTrue(builtin.contains("CONSTRAINT PK_PERSON PRIMARY KEY (ID)"), builtin);
+                Assertions.assertEquals(builtin
+                        , Files.readString(new File(this.getBaseDir() + "/generate/ddl/loadMetaData/txt", "PERSON.sql").toPath(), StandardCharsets.UTF_8));
+            }
+        }
+
+        @Test
         public void testGenerateDdlWithMapping() throws Exception {
             Generate.main(new String[]{"@" + GenerateTest.PARAMETER_DIR + "/paramGenerateDdlWithMapping.txt"});
             GenerateTest.subDirectory = "generate/ddl";
