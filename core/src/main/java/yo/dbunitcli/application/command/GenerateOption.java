@@ -47,7 +47,7 @@ public record GenerateOption(Parameter parameter, String resultFile, String resu
                              String commit, String template, String outputEncoding, DataSetLoadOption srcData,
                              TemplateRenderOption templateOption, String includeAllColumns, String lazyLoad,
                              String fixedLength, String defaultLength, String align,
-                             XlsxTemplateType templateType, String keys, String compares, String compareSheetName,
+                             XlsxTemplateType templateType, String oldTable, String newTable, String keys, String compares, String compareSheetName,
                              String parallel)
         implements CommandLineOption<GenerateDto>, GenerateContext {
 
@@ -72,6 +72,8 @@ public record GenerateOption(Parameter parameter, String resultFile, String resu
              dto.getDefaultLength(),
              dto.getAlign(),
              dto.getTemplateType() != null ? dto.getTemplateType() : XlsxTemplateType.table,
+             Strings.isNotEmpty(dto.getOldTable()) ? dto.getOldTable() : "",
+             Strings.isNotEmpty(dto.getNewTable()) ? dto.getNewTable() : "",
              Strings.isNotEmpty(dto.getKeys()) ? dto.getKeys() : "",
              Strings.isNotEmpty(dto.getCompares()) ? dto.getCompares() : "",
              dto.getCompareSheetName(),

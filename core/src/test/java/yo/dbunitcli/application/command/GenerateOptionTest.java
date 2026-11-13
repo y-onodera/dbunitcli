@@ -76,6 +76,8 @@ class GenerateOptionTest {
             final Option.Parameters result = GenerateOptionTest.this.createTarget().toParameters();
             assertEquals("table", result.getArg("-templateType").value());
             assertEquals(Arrays.asList("table", "compare"), result.getArg("-templateType").attribute().selectOption());
+            assertNull(result.getArg("-oldTable"));
+            assertNull(result.getArg("-newTable"));
             assertNull(result.getArg("-keys"));
             assertNull(result.getArg("-compares"));
             assertNull(result.getArg("-compareSheetName"));
@@ -84,11 +86,17 @@ class GenerateOptionTest {
         @Test
         void compareShowsCompareOptions() {
             GenerateOptionTest.this.src.setTemplateType(yo.dbunitcli.application.command.generate.XlsxTemplateType.compare);
+            GenerateOptionTest.this.src.setOldTable("OLD");
+            GenerateOptionTest.this.src.setNewTable("NEW");
             GenerateOptionTest.this.src.setKeys("ID:CODE,SUB");
             GenerateOptionTest.this.src.setCompares("NAME");
             final GenerateOption target = GenerateOptionTest.this.createTarget();
             final Option.Parameters result = target.toParameters();
             assertEquals("compare", result.getArg("-templateType").value());
+            assertEquals("OLD", result.getArg("-oldTable").value());
+            assertTrue(result.getArg("-oldTable").attribute().required());
+            assertEquals("NEW", result.getArg("-newTable").value());
+            assertTrue(result.getArg("-newTable").attribute().required());
             assertEquals("ID:CODE,SUB", result.getArg("-keys").value());
             assertTrue(result.getArg("-keys").attribute().required());
             assertEquals("NAME", result.getArg("-compares").value());
@@ -96,15 +104,19 @@ class GenerateOptionTest {
             assertEquals("compare", result.getArg("-compareSheetName").attribute().defaultValue());
             final GenerateDto roundTrip = target.toDto();
             assertEquals(yo.dbunitcli.application.command.generate.XlsxTemplateType.compare, roundTrip.getTemplateType());
+            assertEquals("OLD", roundTrip.getOldTable());
+            assertEquals("NEW", roundTrip.getNewTable());
             assertEquals("ID:CODE,SUB", roundTrip.getKeys());
             assertEquals("NAME", roundTrip.getCompares());
         }
 
         @Test
-        void compareRequiresKeys() {
+        void compareRequiresTablesAndKeys() {
             GenerateOptionTest.this.src.setTemplateType(yo.dbunitcli.application.command.generate.XlsxTemplateType.compare);
             final List<Option.Violation> violations = GenerateOptionTest.this.createTarget().validate();
-            assertTrue(violations.stream().anyMatch(it -> it.options().contains("-keys")), violations.toString());
+            for (final String key : List.of("-oldTable", "-newTable", "-keys")) {
+                assertTrue(violations.stream().anyMatch(it -> it.options().contains(key)), key + ":" + violations);
+            }
         }
     }
 

@@ -43,11 +43,15 @@ public class GenerateDto extends CommandDto {
     private String defaultLength;
     @CommandLine.Option(names = "-align", description = "column alignment for fixedColumnDef generation (left or right)")
     private String align;
-    @CommandLine.Option(names = "-templateType", description = "xlsxTemplate generation: table (sheet per table) or compare (two tables and a compare sheet)")
+    @CommandLine.Option(names = "-templateType", description = "xlsxTemplate generation: table (sheet per table) or compare (oldTable and newTable sheets and a compare sheet)")
     private XlsxTemplateType templateType;
-    @CommandLine.Option(names = "-keys", description = "comma-separated key columns for compare xlsxTemplate. firstColumn:secondColumn or column")
+    @CommandLine.Option(names = "-oldTable", description = "table name in src (after setting) used as the old data sheet for compare xlsxTemplate")
+    private String oldTable;
+    @CommandLine.Option(names = "-newTable", description = "table name in src (after setting) used as the new data sheet for compare xlsxTemplate")
+    private String newTable;
+    @CommandLine.Option(names = "-keys", description = "comma-separated key columns for compare xlsxTemplate. oldColumn:newColumn or column")
     private String keys;
-    @CommandLine.Option(names = "-compares", description = "comma-separated columns to compare for compare xlsxTemplate. firstColumn:secondColumn or column")
+    @CommandLine.Option(names = "-compares", description = "comma-separated columns to compare for compare xlsxTemplate. oldColumn:newColumn or column")
     private String compares;
     @CommandLine.Option(names = "-compareSheetName", description = "compare sheet name for compare xlsxTemplate")
     private String compareSheetName;
@@ -199,6 +203,22 @@ public class GenerateDto extends CommandDto {
 
     public void setTemplateType(final XlsxTemplateType templateType) {
         this.templateType = templateType;
+    }
+
+    public String getOldTable() {
+        return this.oldTable;
+    }
+
+    public void setOldTable(final String oldTable) {
+        this.oldTable = oldTable;
+    }
+
+    public String getNewTable() {
+        return this.newTable;
+    }
+
+    public void setNewTable(final String newTable) {
+        this.newTable = newTable;
     }
 
     public String getKeys() {

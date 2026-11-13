@@ -42,7 +42,7 @@ loadData/useJdbcMetaDataは`GenerateStrategy`実装の`loadData()`/`useJdbcMetaD
 | `lazyLoad` | xlsx/xls用 | `parameterStream()` / `forEachParameter()` の分岐（検証・出力と`-template.*`のExcel固有項目は`ExcelGenerateStrategy`） |
 | `parallel` | srcが並列読込できる形式か、unit=recordのとき表示（srcType=noneを除く） | `dataSetParam()`で`setParallel`に渡し、srcの並列読込と`unit=record`・`unit=table`の並列出力の並列数になる（値の検証・解釈は`DataSetConverterOption.parallel(String)`/`parallelism(String)`を共用） |
 | `fixedLength` / `defaultLength` / `align` | fixedColumnDef用 | `FixedColumnDefGenerateStrategy.wrapDescriptor()` が `ComparableFixedColumnDefMetaDataProducer` に渡す |
-| `templateType` / `keys` / `compares` / `compareSheetName` | xlsxTemplate用 | `XlsxTemplateGenerateStrategy`。compareはsrcのデータセットがちょうど2テーブルであることを要し、列挙順の1つ目をfirst・2つ目をsecondにする（ファイル入力の列挙順はOS依存）。`keys`/`compares`は`first:second`か同名の`column`のカンマ区切り、`compares`省略時はキー以外で両方にある同名列 |
+| `templateType` / `oldTable` / `newTable` / `keys` / `compares` / `compareSheetName` | xlsxTemplate用 | `XlsxTemplateGenerateStrategy`。compareはsrcのテーブル（`-setting`適用後）から`oldTable`/`newTable`を名前で選び、テーブル名をそのままデータシート名にする（他のテーブルは使わない）。`keys`/`compares`は`old:new`か同名の`column`のカンマ区切り、`compares`省略時はキー以外で両方にある同名列 |
 
 ## 実装チェックリスト（generateType追加/修正時の変更箇所）
 

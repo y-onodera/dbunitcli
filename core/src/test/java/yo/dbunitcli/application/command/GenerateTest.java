@@ -981,29 +981,27 @@ public class GenerateTest {
             Generate.main(new String[]{
                     "-srcType=csv"
                     , "-src=" + src
-                    , "-regInclude=Test[23]"
                     , "-encoding=UTF-8"
                     , "-generateType=xlsxTemplate"
                     , "-templateType=compare"
+                    , "-oldTable=Test3"
+                    , "-newTable=Test2"
                     , "-keys=PrimaryKey"
                     , "-resultPath=" + resultDir + "/compareTemplate.xlsx"
             });
             try (final Workbook workbook = WorkbookFactory.create(new File(resultDir + "/compareTemplate.xlsx"))) {
-                // ファイルの列挙順でfirst・secondが決まるため、どちらの順でも成り立つことだけを確かめる
-                final String first = workbook.getSheetName(0);
-                final String second = workbook.getSheetName(1);
-                Assertions.assertEquals(java.util.Set.of("Test2", "Test3"), java.util.Set.of(first, second));
-                Assertions.assertEquals("compare", workbook.getSheetName(2));
+                Assertions.assertEquals(3, workbook.getNumberOfSheets());
+                Assertions.assertEquals(java.util.List.of("Test3", "Test2", "compare")
+                        , java.util.List.of(workbook.getSheetName(0), workbook.getSheetName(1), workbook.getSheetName(2)));
                 final Row header = workbook.getSheet("compare").getRow(1);
-                Assertions.assertEquals(java.util.List.of("KEY", second + " row", "STATUS"
-                                , "ColumnA(" + first + ")", "ColumnA(" + second + ")", "ColumnA diff"
-                                , "ColumnB(" + first + ")", "ColumnB(" + second + ")", "ColumnB diff")
+                Assertions.assertEquals(java.util.List.of("KEY", "Test2 row", "STATUS"
+                                , "ColumnA(Test3)", "ColumnA(Test2)", "ColumnA diff"
+                                , "ColumnB(Test3)", "ColumnB(Test2)", "ColumnB diff")
                         , java.util.stream.StreamSupport.stream(header.spliterator(), false).map(it -> it.getStringCellValue()).toList());
             }
             Generate.main(new String[]{
                     "-srcType=csv"
                     , "-src=" + src
-                    , "-regInclude=Test[23]"
                     , "-encoding=UTF-8"
                     , "-generateType=xlsx"
                     , "-unit=dataset"
@@ -1011,21 +1009,32 @@ public class GenerateTest {
                     , "-resultPath=" + resultDir + "/compareGenerated.xlsx"
             });
             try (final Workbook workbook = WorkbookFactory.create(new File(resultDir + "/compareGenerated.xlsx"))) {
-                // 集計行・見出し行の後にfirstの3行
-                Assertions.assertEquals(4, workbook.getSheet("compare").getLastRowNum());
+                final Sheet compare = workbook.getSheet("compare");
+                final org.apache.poi.ss.usermodel.FormulaEvaluator evaluator = workbook.getCreationHelper().createFormulaEvaluator();
+                final org.apache.poi.ss.usermodel.DataFormatter formatter = new org.apache.poi.ss.usermodel.DataFormatter();
+                // 集計行・見出し行の後にTest3の3行。PrimaryKey=1はTest2の1行目と突合する
+                Assertions.assertEquals(4, compare.getLastRowNum());
+                Assertions.assertEquals(java.util.List.of("1", "1", "29")
+                        , java.util.stream.IntStream.rangeClosed(2, 4)
+                                .mapToObj(i -> formatter.formatCellValue(compare.getRow(i).getCell(0), evaluator)).toList());
+                Assertions.assertEquals(java.util.List.of("", "diff", "")
+                        , java.util.stream.IntStream.rangeClosed(2, 4)
+                                .mapToObj(i -> formatter.formatCellValue(compare.getRow(i).getCell(2), evaluator)).toList());
             }
         }
 
         @Test
-        public void testGenerateXlsxCompareTemplateRequiresTwoTables() {
+        public void testGenerateXlsxCompareTemplateTableNotFound() {
             Assertions.assertThrows(Throwable.class, () -> Generate.main(new String[]{
                     "-srcType=csv"
                     , "-src=src/test/resources/yo/dbunitcli/application/src/generate/with_metadata/source/csv"
                     , "-encoding=UTF-8"
                     , "-generateType=xlsxTemplate"
                     , "-templateType=compare"
+                    , "-oldTable=Test2"
+                    , "-newTable=Unknown"
                     , "-keys=PrimaryKey"
-                    , "-resultPath=target/test-classes/yo/dbunitcli/application/generate/xlsxTemplate/result/compareTemplate3.xlsx"
+                    , "-resultPath=target/test-classes/yo/dbunitcli/application/generate/xlsxTemplate/result/compareTemplateNotFound.xlsx"
             }));
         }
 

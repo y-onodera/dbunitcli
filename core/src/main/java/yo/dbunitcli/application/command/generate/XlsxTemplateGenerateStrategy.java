@@ -14,7 +14,7 @@ import java.util.Map;
 
 /**
  * xlsxTemplate: データセットのメタデータからjxlsテンプレート（Excel）をコードで組み立てる型（テンプレート不要）。
- * -templateType=compareは、データセットの1つ目と2つ目のテーブルをシート名そのままのデータシートにし、
+ * -templateType=compareは、srcのテーブル（-setting適用後）から-oldTable・-newTableを選んでテーブル名そのままのデータシートにし、
  * -keysで突合する比較シートを加える
  */
 public final class XlsxTemplateGenerateStrategy implements GenerateStrategy {
@@ -41,7 +41,9 @@ public final class XlsxTemplateGenerateStrategy implements GenerateStrategy {
     @Override
     public List<Option.Violation> validateOption(final GenerateContext option) {
         return option.templateType() == XlsxTemplateType.compare
-                ? option.validateRequired("-keys", option.keys())
+                ? Option.concat(option.validateRequired("-oldTable", option.oldTable())
+                , option.validateRequired("-newTable", option.newTable())
+                , option.validateRequired("-keys", option.keys()))
                 : List.of();
     }
 
@@ -49,7 +51,9 @@ public final class XlsxTemplateGenerateStrategy implements GenerateStrategy {
     public void putOptionParameters(final GenerateContext option, final Option.ParametersBuilder builder) {
         builder.put("-templateType", option.templateType(), XlsxTemplateType.class, true);
         if (option.templateType() == XlsxTemplateType.compare) {
-            builder.put("-keys", option.keys(), true)
+            builder.put("-oldTable", option.oldTable(), true)
+                   .put("-newTable", option.newTable(), true)
+                   .put("-keys", option.keys(), true)
                    .put("-compares", option.compares())
                    .putWithDefault("-compareSheetName", option.compareSheetName(), DEFAULT_COMPARE_SHEET_NAME);
         }
@@ -61,24 +65,17 @@ public final class XlsxTemplateGenerateStrategy implements GenerateStrategy {
             return JxlsTemplateGenerator::createTemplate;
         }
         final String compareSheetName = Strings.orDefault(option.compareSheetName(), DEFAULT_COMPARE_SHEET_NAME);
-        return (resultFile, param) -> compareGenerator(param, option.keys(), option.compares(), compareSheetName)
+        return (resultFile, param) -> compareGenerator(param, option.oldTable(), option.newTable()
+                , option.keys(), option.compares(), compareSheetName)
                 .write(resultFile);
     }
 
     @SuppressWarnings("unchecked")
-    static JxlsCompareTemplateGenerator compareGenerator(final Parameter param, final String keys, final String compares
-            , final String compareSheetName) {
+    static JxlsCompareTemplateGenerator compareGenerator(final Parameter param, final String oldTable, final String newTable
+            , final String keys, final String compares, final String compareSheetName) {
         final Map<String, Map<String, Object>> dataSet = (Map<String, Map<String, Object>>) param.get("dataSet");
-        if (dataSet.size() != 2) {
-            throw new IllegalArgumentException("compare xlsxTemplate requires exactly 2 tables in src, but " + dataSet.size() + ":" + dataSet.keySet());
-        }
-        final List<JxlsCompareTemplateGenerator.DataSheet> sheets = dataSet.entrySet().stream()
-                .map(it -> new JxlsCompareTemplateGenerator.DataSheet(it.getKey(), Arrays.stream((Column[]) it.getValue().get("columns"))
-                        .map(Column::getColumnName)
-                        .toList()))
-                .toList();
-        final JxlsCompareTemplateGenerator.DataSheet first = sheets.get(0);
-        final JxlsCompareTemplateGenerator.DataSheet second = sheets.get(1);
+        final JxlsCompareTemplateGenerator.DataSheet first = dataSheet(dataSet, "-oldTable", oldTable);
+        final JxlsCompareTemplateGenerator.DataSheet second = dataSheet(dataSet, "-newTable", newTable);
         final List<JxlsCompareTemplateGenerator.ColumnPair> keyPairs = toPairs(keys);
         final List<JxlsCompareTemplateGenerator.ColumnPair> comparePairs = Strings.isEmpty(compares)
                 ? sameNamePairs(first, second, keyPairs)
@@ -86,7 +83,19 @@ public final class XlsxTemplateGenerateStrategy implements GenerateStrategy {
         return new JxlsCompareTemplateGenerator(first, second, keyPairs, comparePairs, compareSheetName);
     }
 
-    /** "firstColumn:secondColumn" または同名の"column"をカンマ区切りで並べた値 */
+    // データシート名はテーブル名と同じにする（generate時にシート名のテーブルの行を流し込むため）
+    private static JxlsCompareTemplateGenerator.DataSheet dataSheet(final Map<String, Map<String, Object>> dataSet
+            , final String key, final String tableName) {
+        final Map<String, Object> table = dataSet.get(tableName);
+        if (table == null) {
+            throw new IllegalArgumentException(key + " table not found in src:" + tableName + " tables:" + dataSet.keySet());
+        }
+        return new JxlsCompareTemplateGenerator.DataSheet(tableName, Arrays.stream((Column[]) table.get("columns"))
+                .map(Column::getColumnName)
+                .toList());
+    }
+
+    /** "oldColumn:newColumn" または同名の"column"をカンマ区切りで並べた値 */
     private static List<JxlsCompareTemplateGenerator.ColumnPair> toPairs(final String value) {
         return Arrays.stream(value.split(","))
                 .map(String::trim)

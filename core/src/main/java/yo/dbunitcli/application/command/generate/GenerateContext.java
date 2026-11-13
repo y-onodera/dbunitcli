@@ -39,6 +39,10 @@ public interface GenerateContext extends Option, DescriptorOption {
 
     XlsxTemplateType templateType();
 
+    String oldTable();
+
+    String newTable();
+
     String keys();
 
     String compares();

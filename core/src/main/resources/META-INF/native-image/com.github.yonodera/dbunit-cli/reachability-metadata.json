@@ -6647,6 +6647,12 @@
           "name": "lazyLoad"
         },
         {
+          "name": "newTable"
+        },
+        {
+          "name": "oldTable"
+        },
+        {
           "name": "operation"
         },
         {
