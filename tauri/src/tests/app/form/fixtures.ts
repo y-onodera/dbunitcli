@@ -1125,13 +1125,16 @@ function makeScaffoldOptionsBase(target: string) {
 	};
 }
 
-// scaffoldのdatasetはloadMetaDataを持たない
+// scaffoldのdatasetはloadData・loadMetaDataを持たない
 function scaffoldDataset(): DatasetSource {
-	const { loadMetaData: _, ...dataset } = makeCsvSrcData(
-		"dataset",
-		"resources/src/csv",
-		["none", ...SRC_TYPE_OPTIONS],
-	);
+	const {
+		loadData: _loadData,
+		loadMetaData: _loadMetaData,
+		...dataset
+	} = makeCsvSrcData("dataset", "resources/src/csv", [
+		"none",
+		...SRC_TYPE_OPTIONS,
+	]);
 	return dataset as DatasetSource;
 }
 

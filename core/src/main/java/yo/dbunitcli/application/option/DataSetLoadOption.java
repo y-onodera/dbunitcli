@@ -7,6 +7,7 @@ import yo.dbunitcli.application.json.FromJsonTableSeparatorsBuilder;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.dataset.DataSourceType;
 import yo.dbunitcli.dataset.TableSeparators;
+import yo.dbunitcli.dataset.producer.ComparableDdlMetaDataProducer;
 
 import java.io.File;
 import java.io.IOException;
@@ -120,7 +121,9 @@ public record DataSetLoadOption(
                 .setRegTableExclude(this.regTableExclude)
                 .setLoadData(Boolean.parseBoolean(this.loadData))
                 // 行を読む指定（-loadData=true）のときは-loadMetaDataを使わない
-                .setLoadMetaData(!Boolean.parseBoolean(this.loadData) && Boolean.parseBoolean(this.loadMetaData))
+                .setDescriptor(!Boolean.parseBoolean(this.loadData) && Boolean.parseBoolean(this.loadMetaData)
+                        ? ComparableDdlMetaDataProducer::forSource
+                        : null)
                 .setMapIncludeMetaData(Boolean.parseBoolean(this.includeMetaData))
         );
     }

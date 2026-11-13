@@ -20,7 +20,7 @@ public record ComparableDataSetLoader(Parameter parameter) {
 
     public ComparableDataSetProducer getComparableDataSetProducer(final ComparableDataSetParam param) {
         final ComparableDataSetProducer producer = this.sourceProducer(param);
-        return param.loadMetaData() ? ComparableDdlMetaDataProducer.forSource(producer) : producer;
+        return param.descriptor() != null ? param.descriptor().wrap(producer) : producer;
     }
 
     private ComparableDataSetProducer sourceProducer(final ComparableDataSetParam param) {

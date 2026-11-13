@@ -141,9 +141,8 @@ public record GenerateOption(Parameter parameter, String resultFile, String resu
                               param, ParallelTableMapping.parallelism(param) > 1, resultFiles, action);
             return;
         }
-        final ComparableDataSetProducer source = loader.getComparableDataSetProducer(param);
         // 行はテーブルごとの出力の中で読むため、全テーブルの出力が終わるまで接続を保つ
-        try (final ComparableDataSetProducer producer = this.strategy().wrapProducer(this, source)) {
+        try (final ComparableDataSetProducer producer = loader.getComparableDataSetProducer(param)) {
             final List<ParameterUnit.TableTemplate> templates = this.strategy().isExcel()
                     ? ParameterUnit.streamingTableTemplates(loader, producer).toList()
                     : ParameterUnit.tableTemplates(loader, producer, this.unitTableSeparators()).toList();
@@ -344,7 +343,7 @@ public record GenerateOption(Parameter parameter, String resultFile, String resu
             }
         }
         if (!this.strategy().loadData()) {
-            builder.setLoadData(false).setLoadMetaData(false);
+            builder.setLoadData(false).setDescriptor(this.strategy().descriptor(this));
         }
         builder.setUseJdbcMetaData(this.strategy().useJdbcMetaData())
                .setParallel(this.parallelism());

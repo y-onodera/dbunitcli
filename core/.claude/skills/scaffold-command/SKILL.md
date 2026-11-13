@@ -18,4 +18,4 @@ Scaffoldは、Generateの固定成果物型（`isFixedTemplate()=true`）を`gen
 
 ## 関連スキル
 
-Generate側は`generate-command`。固定成果物型のunit/テンプレート形/`wrapProducer()`変更時は、`ScaffoldTarget`と`ScaffoldTest`のE2Eバイト一致検証が壊れないか確認。
+Generate側は`generate-command`。固定成果物型のunit/テンプレート形/`wrapDescriptor()`変更時は、`ScaffoldTarget`と`ScaffoldTest`のE2Eバイト一致検証が壊れないか確認。

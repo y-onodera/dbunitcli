@@ -12,9 +12,7 @@ import yo.dbunitcli.application.ParameterUnit;
 import yo.dbunitcli.application.option.DataSetConverterOption;
 import yo.dbunitcli.application.option.DataSetLoadOption;
 import yo.dbunitcli.common.Parameter;
-import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.dataset.ComparableDataSetProducer;
-import yo.dbunitcli.dataset.ComparableDataSetProducerWrapper;
 import yo.dbunitcli.dataset.DataSetConverterParam;
 import yo.dbunitcli.dataset.DataSourceType;
 import yo.dbunitcli.dataset.IDataSetConverter;
@@ -144,8 +142,7 @@ public record ScaffoldOption(
             }
         }
         if (this.hasDataset()) {
-            this.writeWrappedDatasetSrcFiles(new File(baseDir, DATASET_SRC_DIR),
-                                             scaffoldTarget.wrapProducer(this, this.sourceProducer()));
+            this.writeDescriptorSrcFiles(new File(baseDir, DATASET_SRC_DIR), scaffoldTarget);
         }
         if (Strings.isNotEmpty(this.parameterName)) {
             final File paramDir = new File(baseDir, "option");
@@ -207,9 +204,12 @@ public record ScaffoldOption(
         return result;
     }
 
-    // 記述子行はtargetごとのproducerで合成するため、-dataset.loadMetaDataは扱わない
+    // 行は読まずtargetごとの記述子行を合成するため、-dataset.loadData・-dataset.loadMetaDataは扱わない
     private Parameters datasetParameters() {
-        return this.dataset.toParametersBuilder().remove("-dataset.loadMetaData").build();
+        return this.dataset.toParametersBuilder()
+                .remove("-dataset.loadData")
+                .remove("-dataset.loadMetaData")
+                .build();
     }
 
     private static ArrayList<String> targetSelectOption() {
@@ -232,10 +232,9 @@ public record ScaffoldOption(
         return this.datasetType == ResultType.csv || this.datasetType == ResultType.fixed;
     }
 
-    private void writeWrappedDatasetSrcFiles(final File srcDir,
-                                              final ComparableDataSetProducerWrapper wrapped) throws IOException {
-        try (wrapped) {
-            this.writeConverted(srcDir, Arrays.asList(wrapped.loadDataSet().getTables()));
+    private void writeDescriptorSrcFiles(final File srcDir, final ScaffoldTarget scaffoldTarget) throws IOException {
+        try (final ComparableDataSetProducer descriptor = this.descriptorProducer(scaffoldTarget)) {
+            this.writeConverted(srcDir, Arrays.asList(descriptor.loadDataSet().getTables()));
         }
     }
 
@@ -252,15 +251,11 @@ public record ScaffoldOption(
         }
     }
 
-    private ComparableDataSetProducer sourceProducer() {
-        return new ComparableDataSetLoader(this.parameter).getComparableDataSetProducer(this.sourceParam());
-    }
-
-    private ComparableDataSetParam sourceParam() {
-        return this.dataset.getParam()
+    private ComparableDataSetProducer descriptorProducer(final ScaffoldTarget scaffoldTarget) {
+        return new ComparableDataSetLoader(this.parameter).getComparableDataSetProducer(this.dataset.getParam()
                 .setLoadData(false)
-                .setLoadMetaData(false)
-                .build();
+                .setDescriptor(source -> scaffoldTarget.wrapProducer(this, source))
+                .build());
     }
 
     private IDataSetConverter createSrcConverter(final File srcDir) {

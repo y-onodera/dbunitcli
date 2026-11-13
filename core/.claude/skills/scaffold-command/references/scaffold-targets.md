@@ -52,7 +52,7 @@
 
 ## builtin駆動とtxt駆動の関係
 
-- **builtin駆動**（`.param`の`-generateType=<target>`）: 元ソースを`-src`に取り、`GenerateStrategy.wrapProducer()`（→`wrapDescriptor()`）が生成時に記述子行を合成する。メタデータに無い値（カラムサイズ・コメント等）は空のまま（ddl/javaBeanのDBソースはJDBCから補完される）
+- **builtin駆動**（`.param`の`-generateType=<target>`）: 元ソースを`-src`に取り、`GenerateStrategy.descriptor()`（→`wrapDescriptor()`）が生成時に記述子行を合成する。メタデータに無い値（カラムサイズ・コメント等）は空のまま（ddl/javaBeanのDBソースはJDBCから補完される）
 - **txt駆動**（`.param`の`generateType=txt -unit=table`）: scaffoldが書き出した記述子dataset（編集済み）を`-src`に取り、コピーした組み込みテンプレート＋unitSettingで生成する。メタデータに無い値を人手で補える
 - 同じ元ソース・未編集の記述子datasetなら両駆動の出力はバイト一致する（`ScaffoldTest.ScaffoldToGenerate.assertScaffoldWithTemplateMatchesBuiltIn`が4target全てで検証）
 

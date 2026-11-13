@@ -5,11 +5,12 @@ import yo.dbunitcli.application.Option;
 import yo.dbunitcli.application.ParameterUnit;
 import yo.dbunitcli.dataset.ComparableDataSetProducer;
 import yo.dbunitcli.dataset.ComparableDataSetProducerWrapper;
+import yo.dbunitcli.dataset.DescriptorProducerFactory;
 import yo.dbunitcli.resource.st4.TemplateRender;
 
 /**
  * 元ソースのメタデータから「列ごとに1行」の記述子行を合成して生成する固定成果物型（ddl/javaBean/xlsxSchema/fixedColumnDef）。
- * 記述子producerはGenerate（wrapProducer）とScaffoldの記述子dataset雛型（ScaffoldTarget）で共有する
+ * 記述子producerはGenerateとScaffoldの記述子dataset雛型（ScaffoldTarget）で共有する
  */
 public interface DescriptorGenerateStrategy extends GenerateStrategy {
 
@@ -50,8 +51,8 @@ public interface DescriptorGenerateStrategy extends GenerateStrategy {
     }
 
     @Override
-    default ComparableDataSetProducer wrapProducer(final GenerateContext option, final ComparableDataSetProducer producer) {
-        return this.wrapDescriptor(option, producer);
+    default DescriptorProducerFactory descriptor(final GenerateContext option) {
+        return source -> this.wrapDescriptor(option, source);
     }
 
     @Override

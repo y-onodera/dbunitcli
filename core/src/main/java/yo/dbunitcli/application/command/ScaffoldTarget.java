@@ -73,7 +73,7 @@ enum ScaffoldTarget {
         return this.descriptor.descriptorSchema();
     }
 
-    /** 記述子dataset合成用producer。Generate側のwrapProducer()と同じDescriptorGenerateStrategy#wrapDescriptor()を使う */
+    /** 記述子dataset合成用producer。Generate側と同じDescriptorGenerateStrategy#wrapDescriptor()を使う */
     ComparableDataSetProducerWrapper wrapProducer(final ScaffoldOption option, final ComparableDataSetProducer source) {
         return this.descriptor.wrapDescriptor(option, source);
     }
