@@ -6,6 +6,7 @@ import yo.dbunitcli.application.Option;
 import yo.dbunitcli.application.ParameterUnit;
 import yo.dbunitcli.common.Parameter;
 import yo.dbunitcli.resource.poi.jxls.JxlsCompareTemplateGenerator;
+import yo.dbunitcli.resource.poi.jxls.JxlsMetaDataTemplateGenerator;
 import yo.dbunitcli.resource.poi.jxls.JxlsTemplateGenerator;
 
 import java.util.Arrays;
@@ -15,7 +16,7 @@ import java.util.Map;
 /**
  * xlsxTemplate: データセットのメタデータからjxlsテンプレート（Excel）をコードで組み立てる型（テンプレート不要）。
  * -templateType=compareは、srcのテーブル（-setting適用後）から-oldTable・-newTableを選んでテーブル名そのままのデータシートにし、
- * -keysで突合する比較シートを加える
+ * -keysで突合する比較シートを加える。-templateType=metadataはsrcに依らない固定レイアウトのテーブル定義書を出す
  */
 public final class XlsxTemplateGenerateStrategy implements GenerateStrategy {
 
@@ -61,6 +62,9 @@ public final class XlsxTemplateGenerateStrategy implements GenerateStrategy {
 
     @Override
     public GenerateWriter writer(final GenerateContext option) {
+        if (option.templateType() == XlsxTemplateType.metadata) {
+            return (resultFile, _) -> JxlsMetaDataTemplateGenerator.write(resultFile);
+        }
         if (option.templateType() != XlsxTemplateType.compare) {
             return JxlsTemplateGenerator::createTemplate;
         }

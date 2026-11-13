@@ -121,6 +121,26 @@ class TemplateResourceFileControllerTest {
     }
 
     @Test
+    void testGenerateMetaData_テーブル定義書のxlsxテンプレートを生成して保存する() throws IOException {
+        final String response = this.client.toBlocking().retrieve(
+                HttpRequest.POST("dbunit-cli/template/generate-metadata", "{\"-fileName\":\"generatedTemplate\"}"));
+        Assertions.assertTrue(response.contains("generatedTemplate.xlsx"), response);
+        final Path saved = Paths.get("target/test-temp/workspace/sample/resources/template/generatedTemplate.xlsx");
+        try (final Workbook workbook = WorkbookFactory.create(saved.toFile())) {
+            Assertions.assertEquals("${param.tableName}", workbook.getSheetAt(0).getRow(0).getCell(1).getStringCellValue());
+        }
+    }
+
+    @Test
+    void testGenerateMetaData_fileNameにパス区切りは400を返す() {
+        final HttpClientResponseException ex = Assertions.assertThrows(
+                HttpClientResponseException.class,
+                () -> this.client.toBlocking().retrieve(
+                        HttpRequest.POST("dbunit-cli/template/generate-metadata", "{\"-fileName\":\"../a\"}")));
+        Assertions.assertEquals(HttpStatus.BAD_REQUEST, ex.getStatus());
+    }
+
+    @Test
     void testGenerateCompare_存在しない列は400を返す() {
         final HttpClientResponseException ex = Assertions.assertThrows(
                 HttpClientResponseException.class,

@@ -173,6 +173,13 @@ function makeCsvSrcData(
 			false,
 		),
 		loadData: makeElement("loadData", "FLG", "true", "WORKSPACE", false),
+		loadMetaData: makeElement(
+			"loadMetaData",
+			"FLG",
+			"false",
+			"WORKSPACE",
+			false,
+		),
 		includeMetaData: makeElement(
 			"includeMetaData",
 			"FLG",
@@ -227,6 +234,13 @@ function makeXlsxSrcData() {
 			false,
 		),
 		loadData: makeElement("loadData", "FLG", "true", "WORKSPACE", false),
+		loadMetaData: makeElement(
+			"loadMetaData",
+			"FLG",
+			"false",
+			"WORKSPACE",
+			false,
+		),
 		includeMetaData: makeElement(
 			"includeMetaData",
 			"FLG",
@@ -299,6 +313,13 @@ function makeTableSrcData(prefix: string) {
 			false,
 		),
 		loadData: makeElement("loadData", "FLG", "true", "WORKSPACE", false),
+		loadMetaData: makeElement(
+			"loadMetaData",
+			"FLG",
+			"false",
+			"WORKSPACE",
+			false,
+		),
 		includeMetaData: makeElement(
 			"includeMetaData",
 			"FLG",
@@ -344,6 +365,13 @@ function makeImageFileSrcData(prefix: string) {
 			false,
 		),
 		loadData: makeElement("loadData", "FLG", "true", "WORKSPACE", false),
+		loadMetaData: makeElement(
+			"loadMetaData",
+			"FLG",
+			"false",
+			"WORKSPACE",
+			false,
+		),
 		includeMetaData: makeElement(
 			"includeMetaData",
 			"FLG",
@@ -990,7 +1018,7 @@ export const generateRefreshXlsxTemplateCompareResponseFixture = {
 		"compare",
 		"WORKSPACE",
 		true,
-		["table", "compare"],
+		["table", "compare", "metadata"],
 	),
 	oldTable: makeElement("oldTable", "TEXT", "", "WORKSPACE", true),
 	newTable: makeElement("newTable", "TEXT", "", "WORKSPACE", true),

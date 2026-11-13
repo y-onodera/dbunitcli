@@ -18,6 +18,8 @@ export default function DataLoadFormSection({
 	handleToggleChecked: (param: CommandOption) => (checked: boolean) => void;
 }) {
 	const [showOptional, setShowOptional] = useState(false);
+	// loadMetaDataは行を読まない（loadData=false）ときだけ選べる
+	const [loadData, setLoadData] = useState(options.loadData?.value !== "false");
 	const toggleOptional = () => setShowOptional(!showOptional);
 	const prefix = options.prefix;
 	return (
@@ -58,7 +60,18 @@ export default function DataLoadFormSection({
 				<Check
 					prefix={prefix}
 					element={options.loadData}
-					handleOnChange={handleToggleChecked(options.loadData)}
+					handleOnChange={(checked) => {
+						setLoadData(checked);
+						handleToggleChecked(options.loadData)(checked);
+					}}
+					hidden={!showOptional}
+				/>
+			)}
+			{options.loadMetaData && !loadData && (
+				<Check
+					prefix={prefix}
+					element={options.loadMetaData}
+					handleOnChange={handleToggleChecked(options.loadMetaData)}
 					hidden={!showOptional}
 				/>
 			)}

@@ -1,16 +1,22 @@
 import { useState } from "react";
+import { AddButton } from "../../../../components/element/ButtonIcon";
 import {
 	ControllTextBox,
 	InputLabel,
 } from "../../../../components/element/Input";
 import { useSetResourcesSettings } from "../../../../context/WorkspaceResourcesProvider";
+import type { GenerateOptions } from "../../../../model/SelectParameter";
 import type { FormValues } from "../../../../utils/formValues";
 import {
 	FileGenerateButton,
 	type GenerateExecuteContext,
 } from "./GenerateDialog";
-import type { ResourceEditButtonProp } from "./ResourceEditButton";
+import { RefreshableDialogShell } from "./RefreshableDialogShell";
+import ResourceEditButton, {
+	type ResourceEditButtonProp,
+} from "./ResourceEditButton";
 import { postDialogForm } from "./refreshableDialogForm";
+import { useRefreshableDialog } from "./useRefreshableDialog";
 
 const fileNameField = "-fileName";
 const xlsxExtension = ".xlsx";
@@ -78,6 +84,82 @@ export function XlsxTemplateGenerateButton({
 			config={dialogConfig}
 			leading={<FileNameField />}
 			generate={generate}
+		/>
+	);
+}
+
+const metaDataFormId = "xlsxMetaDataTemplateGenerateForm";
+
+// テーブル定義書のテンプレートはsrcに依らないため、ファイル名だけを入力する
+function XlsxMetaDataTemplateGenerateDialog({
+	onSaved,
+	onClose,
+}: {
+	onSaved: (fileName: string) => void;
+	onClose: () => void;
+}) {
+	const setResourcesSettings = useSetResourcesSettings();
+	const dialog = useRefreshableDialog<GenerateOptions>({
+		refreshEndpoint: "generate/refresh",
+		formId: metaDataFormId,
+		generateType: dialogConfig.generateType,
+	});
+	const execute = async () => {
+		const result = await dialog.execute(async (values, context) => {
+			const templateFiles = await postDialogForm<string[]>(
+				dialog.apiUrl,
+				"template/generate-metadata",
+				values,
+				context,
+			);
+			setResourcesSettings((current) => current.with({ templateFiles }));
+			return toSavedFileName(String(values[fileNameField]));
+		});
+		if (result) {
+			onSaved(result.value);
+		}
+	};
+	return (
+		<RefreshableDialogShell
+			command="dialogs/xlsx-metadata-template-generate"
+			label="Generate Table Definition Template"
+			title="Generate Table Definition Template"
+			formId={metaDataFormId}
+			loadState={dialog.loadState}
+			executing={dialog.executing}
+			executeError={dialog.executeError}
+			logs={dialog.logs}
+			onExecute={execute}
+			onClose={onClose}
+		>
+			{() => <FileNameField />}
+		</RefreshableDialogShell>
+	);
+}
+
+// template欄のdropdownに出す「テーブル定義書テンプレート生成」
+export function XlsxMetaDataTemplateGenerateButton({
+	setPath,
+}: Pick<ResourceEditButtonProp, "setPath">) {
+	return (
+		<ResourceEditButton
+			renderDialog={(open, closeDialog) =>
+				open ? (
+					<XlsxMetaDataTemplateGenerateDialog
+						onClose={closeDialog}
+						onSaved={(fileName) => {
+							setPath(fileName);
+							closeDialog();
+						}}
+					/>
+				) : null
+			}
+			renderTrigger={(openDialog) => (
+				<AddButton
+					title="generate table definition template"
+					handleClick={openDialog}
+				/>
+			)}
 		/>
 	);
 }

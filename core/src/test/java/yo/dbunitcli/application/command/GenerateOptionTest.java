@@ -75,7 +75,7 @@ class GenerateOptionTest {
         void tableHasNoCompareOptions() {
             final Option.Parameters result = GenerateOptionTest.this.createTarget().toParameters();
             assertEquals("table", result.getArg("-templateType").value());
-            assertEquals(Arrays.asList("table", "compare"), result.getArg("-templateType").attribute().selectOption());
+            assertEquals(Arrays.asList("table", "compare", "metadata"), result.getArg("-templateType").attribute().selectOption());
             assertNull(result.getArg("-oldTable"));
             assertNull(result.getArg("-newTable"));
             assertNull(result.getArg("-keys"));

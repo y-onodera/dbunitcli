@@ -43,7 +43,7 @@ public class GenerateDto extends CommandDto {
     private String defaultLength;
     @CommandLine.Option(names = "-align", description = "column alignment for fixedColumnDef generation (left or right)")
     private String align;
-    @CommandLine.Option(names = "-templateType", description = "xlsxTemplate generation: table (sheet per table) or compare (oldTable and newTable sheets and a compare sheet)")
+    @CommandLine.Option(names = "-templateType", description = "xlsxTemplate generation: table (sheet per table), compare (oldTable and newTable sheets and a compare sheet) or metadata (table definition document filled with -src.loadMetaData rows by -generateType=xlsx -unit=table)")
     private XlsxTemplateType templateType;
     @CommandLine.Option(names = "-oldTable", description = "table name in src (after setting) used as the old data sheet for compare xlsxTemplate")
     private String oldTable;

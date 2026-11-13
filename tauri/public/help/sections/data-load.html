@@ -36,11 +36,30 @@
     <tr><td>startRow</td><td>読み込みを始める行番号（<strong>1 始まり</strong>。デフォルトは <code>1</code>）。詳細は下記</td></tr>
     <tr><td>addFileInfo</td><td>ON にすると、元ファイル情報を表す 3 カラム（<code>$FILE_PATH</code> / <code>$FILE_NAME</code> / <code>$SHEET_NAME</code>）を各行に追加する。詳細は下記</td></tr>
     <tr><td>loadData</td><td>OFF にすると、データ行を読み込まずにテーブル名とカラムだけを読み込む</td></tr>
+    <tr><td>loadMetaData</td><td><code>loadData</code> が OFF のときだけ選べる。ON にすると、データ行の代わりにテーブル定義（1 カラムを 1 行）を読み込む。詳細は下記</td></tr>
     <tr><td>includeMetaData</td><td>メタデータカラムを含めるか</td></tr>
     <tr><td>regTableInclude</td><td>対象にするテーブル名の条件（正規表現）。setting を適用する前のテーブル名と照合し、一部に一致すれば対象にする</td></tr>
     <tr><td>regTableExclude</td><td>対象から外すテーブル名の条件（正規表現）。setting を適用する前のテーブル名と照合し、一部に一致すれば外す</td></tr>
   </table>
   <p><code>regTableInclude</code> / <code>regTableExclude</code> の横の編集ボタンを押すと、読み込まれるテーブルの一覧から選んで正規表現を組み立てられます（<a href="../dialogs/regex-filter.html">Select from Table List</a>）。</p>
+
+  <h2 id="section-load-meta-data">loadMetaData の詳細</h2>
+  <p>ON にすると、各テーブルの行が「そのテーブルのカラム 1 つにつき 1 行」のテーブル定義に置き換わります（テーブル名は元のまま）。テーブル定義書などをテンプレートから生成するときに使います。</p>
+  <table>
+    <tr><th>カラム</th><th>内容</th></tr>
+    <tr><td>COLUMN_NAME</td><td>カラム名</td></tr>
+    <tr><td>TYPE_NAME</td><td>型名</td></tr>
+    <tr><td>COLUMN_SIZE / DECIMAL_DIGITS</td><td>桁数 / 小数桁数</td></tr>
+    <tr><td>NULLABLE</td><td>NULL を許すか（<code>true</code> / <code>false</code>）</td></tr>
+    <tr><td>IS_PK / PK_NAME</td><td>主キーか（<code>true</code> / <code>false</code>）/ 主キー制約名</td></tr>
+    <tr><td>REMARKS / TABLE_REMARKS</td><td>カラムのコメント / テーブルのコメント</td></tr>
+    <tr><td>TABLE_NAME</td><td>テーブル名</td></tr>
+  </table>
+  <ul>
+    <li><code>srcType = table</code> ではデータベースの定義から全項目を取得する。それ以外の <code>srcType</code> では、読み込んだカラム情報から分かる項目だけが入り、分からない項目は空になる</li>
+    <li><code>setting</code> は置き換える前の元のカラムに対して適用される</li>
+    <li>generate の <code>generateType = xlsx</code> でテーブル定義書を出すテンプレートは、<a href="../dialogs/xlsx-metadata-template-generate.html">Generate Table Definition Template</a> で作れる</li>
+  </ul>
 
   <h2 id="section-header-name">headerName の詳細</h2>
   <p>カラム名をカンマ区切りで与えると、その名前順にテーブル列が構築されます。<strong>指定された場合は先頭行も自動的にはヘッダとみなされず、すべての行がデータ行になります</strong>。既にヘッダ行が存在するファイルでヘッダを上書きしたい場合は、<code>startRow</code> と併用してヘッダ行をスキップしてください。</p>

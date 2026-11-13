@@ -27,7 +27,8 @@
       "type": "ENUM",
       "selectOption": [
         "table",
-        "compare"
+        "compare",
+        "metadata"
       ],
       "required": true,
       "defaultPath": "WORKSPACE"

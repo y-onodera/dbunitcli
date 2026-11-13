@@ -30,6 +30,7 @@ public record ComparableDataSetParam(
         , int startRow
         , String headerName
         , boolean loadData
+        , boolean loadMetaData
         , boolean addFileInfo
         , String fixedLength
         , String fixedLengthType
@@ -63,6 +64,7 @@ public record ComparableDataSetParam(
                 , builder.getStartRow()
                 , builder.getHeaderName()
                 , builder.isLoadData()
+                , builder.isLoadMetaData()
                 , builder.addFileInfo()
                 , builder.getFixedLength()
                 , builder.getFixedLengthType()
@@ -148,6 +150,7 @@ public record ComparableDataSetParam(
                 .setStartRow(this.startRow)
                 .setHeaderName(this.headerName)
                 .setLoadData(this.loadData)
+                .setLoadMetaData(this.loadMetaData)
                 .setAddFileInfo(this.addFileInfo)
                 .setFixedLength(this.fixedLength)
                 .setFixedLengthType(this.fixedLengthType)
@@ -177,6 +180,7 @@ public record ComparableDataSetParam(
         private int startRow = 1;
         private String headerName;
         private boolean loadData = true;
+        private boolean loadMetaData = false;
         private boolean addFileInfo = false;
         private String fixedLength;
         private String fixedLengthType;
@@ -248,6 +252,10 @@ public record ComparableDataSetParam(
 
         public boolean isLoadData() {
             return this.loadData;
+        }
+
+        public boolean isLoadMetaData() {
+            return this.loadMetaData;
         }
 
         public boolean addFileInfo() {
@@ -380,6 +388,14 @@ public record ComparableDataSetParam(
 
         public Builder setLoadData(final boolean loadData) {
             this.loadData = loadData;
+            return this;
+        }
+
+        /**
+         * trueなら行の代わりに、テーブル定義を列ごとに1行にした記述子行を読み込む
+         */
+        public Builder setLoadMetaData(final boolean loadMetaData) {
+            this.loadMetaData = loadMetaData;
             return this;
         }
 

@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import yo.dbunitcli.Strings;
 import yo.dbunitcli.application.command.GenerateType;
 import yo.dbunitcli.resource.poi.jxls.JxlsCompareTemplateGenerator;
+import yo.dbunitcli.resource.poi.jxls.JxlsMetaDataTemplateGenerator;
 import yo.dbunitcli.sidecar.dto.XlsxCompareTemplateRequestDto;
 import yo.dbunitcli.sidecar.domain.project.ResourceFile;
 import yo.dbunitcli.sidecar.domain.project.Workspace;
@@ -77,6 +78,23 @@ public class TemplateResourceFileController extends AbstractTextResourceFileCont
         final Path tempDir = Files.createTempDirectory("xlsxCompareTemplateGenerate");
         try {
             generator.write(tempDir.resolve(GENERATED_FILE).toFile());
+            this.getResourceFile().updateFrom(fileName, tempDir.resolve(GENERATED_FILE));
+            return this.currentFileList();
+        } finally {
+            GenerateTemplateSupport.deleteRecursively(tempDir);
+        }
+    }
+
+    /**
+     * テーブル定義書のxlsxテンプレート（jxls）を生成し、-fileNameでtemplateリソースへ保存する。
+     * 応答はsave同様に更新後のファイル一覧
+     */
+    @Post(uri = "generate-metadata", produces = MediaType.APPLICATION_JSON)
+    public String generateMetaData(@Body final Map<String, String> input) throws IOException {
+        final String fileName = this.toXlsxFileName(input.get("-fileName"));
+        final Path tempDir = Files.createTempDirectory("xlsxMetaDataTemplateGenerate");
+        try {
+            JxlsMetaDataTemplateGenerator.write(tempDir.resolve(GENERATED_FILE).toFile());
             this.getResourceFile().updateFrom(fileName, tempDir.resolve(GENERATED_FILE));
             return this.currentFileList();
         } finally {

@@ -302,7 +302,7 @@ public record GenerateOption(Parameter parameter, String resultFile, String resu
             srcComponent.remove("-src.useJdbcMetaData");
         }
         if (!this.strategy().loadData()) {
-            srcComponent.remove("-src.loadData");
+            srcComponent.remove("-src.loadData").remove("-src.loadMetaData");
         }
         this.strategy().putOptionParameters(this, result);
         if (this.isParallelizable()) {
@@ -343,8 +343,10 @@ public record GenerateOption(Parameter parameter, String resultFile, String resu
                 builder.setTableSeparators(defaultTableSeparators);
             }
         }
+        if (!this.strategy().loadData()) {
+            builder.setLoadData(false).setLoadMetaData(false);
+        }
         builder.setUseJdbcMetaData(this.strategy().useJdbcMetaData())
-               .setLoadData(this.strategy().loadData())
                .setParallel(this.parallelism());
         return builder.build();
     }

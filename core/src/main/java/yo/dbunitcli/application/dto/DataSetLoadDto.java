@@ -19,6 +19,8 @@ public class DataSetLoadDto implements CompositeDto {
     private String settingTargetOnly;
     @CommandLine.Option(names = "-loadData", description = "if false data row didn't load")
     private String loadData;
+    @CommandLine.Option(names = "-loadMetaData", description = "default false. with -loadData=false, load one row per column describing table definition instead of data rows")
+    private String loadMetaData;
     @CommandLine.Option(names = "-includeMetaData", description = "whether param include tableName and columns or not ")
     private String includeMetaData;
     @CommandLine.Option(names = "-regInclude", description = "regex to include src file")
@@ -104,6 +106,14 @@ public class DataSetLoadDto implements CompositeDto {
 
     public void setLoadData(final String loadData) {
         this.loadData = loadData;
+    }
+
+    public String getLoadMetaData() {
+        return this.loadMetaData;
+    }
+
+    public void setLoadMetaData(final String loadMetaData) {
+        this.loadMetaData = loadMetaData;
     }
 
     public String getSettingTargetOnly() {

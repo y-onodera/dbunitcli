@@ -23,6 +23,7 @@ public record DataSetLoadOption(
         , String regTableInclude
         , String regTableExclude
         , String loadData
+        , String loadMetaData
         , String includeMetaData
         , ComparableDataSetParamOption dataSetParam
 ) implements Option {
@@ -48,6 +49,7 @@ public record DataSetLoadOption(
                 , dto.getRegTableInclude()
                 , dto.getRegTableExclude()
                 , Strings.isNotEmpty(dto.getLoadData()) ? dto.getLoadData() : "true"
+                , Strings.isNotEmpty(dto.getLoadMetaData()) ? dto.getLoadMetaData() : "false"
                 , Strings.isNotEmpty(dto.getIncludeMetaData()) ? dto.getIncludeMetaData() : "false"
                 , new DataSourceTypeOptionFactory().create(prefix, DataSetLoadOption.getSrcType(dto), dto)
         );
@@ -79,6 +81,7 @@ public record DataSetLoadOption(
                 .put("-regTableInclude", this.regTableInclude)
                 .put("-regTableExclude", this.regTableExclude)
                 .putFlag("-loadData", this.loadData)
+                .putFlag("-loadMetaData", this.loadMetaData)
                 .putFlag("-includeMetaData", this.includeMetaData);
     }
 
@@ -98,6 +101,7 @@ public record DataSetLoadOption(
                 , this.validatePattern("-regTableInclude", this.regTableInclude)
                 , this.validatePattern("-regTableExclude", this.regTableExclude)
                 , this.validateBoolean("-loadData", this.loadData)
+                , this.validateBoolean("-loadMetaData", this.loadMetaData)
                 , this.validateBoolean("-includeMetaData", this.includeMetaData)
                 , this.dataSetParam.validate());
     }
@@ -115,6 +119,8 @@ public record DataSetLoadOption(
                 .setRegTableInclude(this.regTableInclude)
                 .setRegTableExclude(this.regTableExclude)
                 .setLoadData(Boolean.parseBoolean(this.loadData))
+                // 行を読む指定（-loadData=true）のときは-loadMetaDataを使わない
+                .setLoadMetaData(!Boolean.parseBoolean(this.loadData) && Boolean.parseBoolean(this.loadMetaData))
                 .setMapIncludeMetaData(Boolean.parseBoolean(this.includeMetaData))
         );
     }

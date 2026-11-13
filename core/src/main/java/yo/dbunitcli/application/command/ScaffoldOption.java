@@ -254,6 +254,7 @@ public record ScaffoldOption(
     private ComparableDataSetParam sourceParam() {
         return this.dataset.getParam()
                 .setLoadData(false)
+                .setLoadMetaData(false)
                 .build();
     }
 
