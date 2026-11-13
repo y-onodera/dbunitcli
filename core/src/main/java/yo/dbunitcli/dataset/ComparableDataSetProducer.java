@@ -90,8 +90,7 @@ public interface ComparableDataSetProducer extends AutoCloseable {
     default Map<String, Object> lazyLoad(final boolean includeMetaData) {
         final Map<String, Object> result = new LinkedHashMap<>();
         LOGGER.info("lazyLoad() - start, includeMetaData={}", includeMetaData);
-        this.<Collection<ComparableTableDto>>mapTasks(tasks -> LazyloadTaskMapper.mappingFrom(this.param(), tasks)
-                        , lanes -> LazyloadTaskMapper.mappingFrom(this.param(), lanes))
+        this.lazyloadTables()
                 .forEach(it -> {
                     LOGGER.info("lazyLoad() - processing tableName={}", it.getTableName());
                     if (includeMetaData) {
@@ -102,6 +101,23 @@ public interface ComparableDataSetProducer extends AutoCloseable {
                 });
         LOGGER.info("lazyLoad() - end, result size={}", result.size());
         return result;
+    }
+
+    /**
+     * 読み込まれるテーブルごとに、その行を読み込むソース（行を入れた順）を返す。行は分割後の名前を求める場合だけ読む
+     */
+    default Map<String, List<Source>> tableSources() {
+        final Map<String, List<Source>> result = new LinkedHashMap<>();
+        this.lazyloadTables().forEach(it -> result.put(it.getTableName(), it.getTask().tasks().stream()
+                .map(ComparableTableMappingTask::source)
+                .distinct()
+                .toList()));
+        return result;
+    }
+
+    private Collection<ComparableTableDto> lazyloadTables() {
+        return this.mapTasks(tasks -> LazyloadTaskMapper.mappingFrom(this.param(), tasks)
+                , lanes -> LazyloadTaskMapper.mappingFrom(this.param(), lanes));
     }
 
     default Stream<? extends Source> getSourceStream() {

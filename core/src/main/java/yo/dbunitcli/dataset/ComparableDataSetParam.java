@@ -1,6 +1,7 @@
 package yo.dbunitcli.dataset;
 
 import yo.dbunitcli.Strings;
+import yo.dbunitcli.common.Source;
 import yo.dbunitcli.resource.jdbc.DatabaseConnectionLoader;
 import yo.dbunitcli.resource.poi.XlsxSchema;
 import yo.dbunitcli.resource.st4.TemplateRender;
@@ -95,6 +96,28 @@ public record ComparableDataSetParam(
             walk.close();
             throw new AssertionError(e);
         }
+    }
+
+    /**
+     * ソースのファイルのsrcからの相対パス。srcがディレクトリでない、またはファイルがsrcの外にあれば空
+     */
+    public Optional<Path> srcRelativePath(final Source source) {
+        if (this.src() == null || !this.src().isDirectory() || Strings.isEmpty(source.filePath())) {
+            return Optional.empty();
+        }
+        final Path srcDir = this.src().getAbsoluteFile().toPath().normalize();
+        final Path path = Path.of(source.filePath()).normalize();
+        return path.startsWith(srcDir) ? Optional.of(srcDir.relativize(path)) : Optional.empty();
+    }
+
+    /**
+     * ソースのファイルを-regInclude・-regExclude（{@link #srcPathFilter()}）に当てるときの文字列。{@link #getWalk()}と同じく、
+     * srcを入力のまま辿ったパスにする。srcの外のファイル（srcがファイルの場合など）はそのパス
+     */
+    public String srcPathFilterTarget(final Source source) {
+        return this.srcRelativePath(source)
+                .map(relative -> this.src().toPath().resolve(relative).toString())
+                .orElse(source.filePath());
     }
 
     public String[] headerNames() {

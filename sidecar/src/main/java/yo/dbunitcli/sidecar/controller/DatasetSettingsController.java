@@ -28,14 +28,12 @@ import yo.dbunitcli.application.json.FromJsonXlsxSchemaBuilder;
 import yo.dbunitcli.application.option.DataSetLoadOption;
 import yo.dbunitcli.application.option.ResultOption;
 import yo.dbunitcli.common.Parameter;
-import yo.dbunitcli.common.Source;
 import yo.dbunitcli.dataset.AddSettingTableMetaData;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.dataset.ComparableDataSetProducer;
 import yo.dbunitcli.dataset.ComparableTable;
 import yo.dbunitcli.dataset.ComparableTableDto;
 import yo.dbunitcli.dataset.ComparableTableJoin;
-import yo.dbunitcli.dataset.ComparableTableMappingTask;
 import yo.dbunitcli.dataset.InlineSource;
 import yo.dbunitcli.dataset.IDataSetConverter;
 import yo.dbunitcli.dataset.MetaDataCapture;
@@ -132,49 +130,22 @@ public class DatasetSettingsController extends AbstractResourceFileController<Da
     public String tableSources(@Body final DatasetTableNamesRequestDto request) {
         try {
             final ComparableDataSetParam param = this.toParam(request).get().build();
-            final SrcDir srcDir = SrcDir.of(param.src());
             try (final ComparableDataSetProducer producer = new ComparableDataSetLoader(this.buildParameter(request))
                     .getComparableDataSetProducer(param)) {
-                final List<DatasetTableSourceDto> result = producer.lazyLoad(false).entrySet().stream()
-                        .filter(entry -> entry.getValue() instanceof ComparableTableMappingTask.WithTargetTable)
-                        .flatMap(entry -> ((ComparableTableMappingTask.WithTargetTable) entry.getValue()).tasks().stream()
-                                .map(ComparableTableMappingTask::source)
-                                .map(source -> srcDir.toDto(entry.getKey(), source)))
-                        .distinct()
+                final List<DatasetTableSourceDto> result = producer.tableSources().entrySet().stream()
+                        .flatMap(entry -> entry.getValue().stream()
+                                .map(source -> new DatasetTableSourceDto(entry.getKey()
+                                        , param.srcRelativePath(source)
+                                               .map(relative -> relative.toString().replace('\\', '/'))
+                                               .orElse(source.filePath())
+                                        , param.srcPathFilterTarget(source)
+                                        , source.getTableName())))
                         .toList();
                 return ObjectMapper.getDefault().writeValueAsString(result);
             }
         } catch (final Throwable th) {
             LOGGER.error("cause:", th);
             throw new ApplicationException(th);
-        }
-    }
-
-    /**
-     * srcのディレクトリ。-regInclude・-regExcludeはsrcを入力のまま辿ったパス（{@link ComparableDataSetParam#getWalk()}）に当たるため、
-     * 照合用のパスはsrcの入力値に相対パスを足して作る
-     */
-    private record SrcDir(Path walkRoot, Path absolute) {
-
-        static SrcDir of(final File src) {
-            return src != null && src.isDirectory()
-                    ? new SrcDir(src.toPath(), src.getAbsoluteFile().toPath().normalize())
-                    : new SrcDir(null, null);
-        }
-
-        DatasetTableSourceDto toDto(final String tableName, final Source source) {
-            if (Strings.isEmpty(source.filePath())) {
-                return new DatasetTableSourceDto(tableName, "", "", source.getTableName());
-            }
-            final Path path = Path.of(source.filePath()).normalize();
-            if (this.absolute == null || !path.startsWith(this.absolute)) {
-                return new DatasetTableSourceDto(tableName, source.filePath(), source.filePath(), source.getTableName());
-            }
-            final Path relative = this.absolute.relativize(path);
-            return new DatasetTableSourceDto(tableName
-                    , relative.toString().replace('\\', '/')
-                    , this.walkRoot.resolve(relative).toString()
-                    , source.getTableName());
         }
     }
 
