@@ -133,13 +133,10 @@ public class DatasetSettingsController extends AbstractResourceFileController<Da
             try (final ComparableDataSetProducer producer = new ComparableDataSetLoader(this.buildParameter(request))
                     .getComparableDataSetProducer(param)) {
                 final List<DatasetTableSourceDto> result = producer.tableSources().entrySet().stream()
-                        .flatMap(entry -> entry.getValue().stream()
-                                .map(source -> new DatasetTableSourceDto(entry.getKey()
-                                        , param.srcRelativePath(source)
-                                               .map(relative -> relative.toString().replace('\\', '/'))
-                                               .orElse(source.filePath())
-                                        , param.srcPathFilterTarget(source)
-                                        , source.getTableName())))
+                        .flatMap(entry -> entry.getValue().stream().map(source -> {
+                            final ComparableDataSetParam.SrcPath path = param.srcPath(source);
+                            return new DatasetTableSourceDto(entry.getKey(), path.display(), path.filterTarget(), source.getTableName());
+                        }))
                         .toList();
                 return ObjectMapper.getDefault().writeValueAsString(result);
             }

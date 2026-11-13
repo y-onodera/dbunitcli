@@ -3,7 +3,6 @@ package yo.dbunitcli.dataset;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
-import yo.dbunitcli.common.Source;
 import yo.dbunitcli.dataset.producer.ComparableCsvDataSetProducer;
 
 import java.io.IOException;
@@ -65,26 +64,6 @@ class TableSourcesTest {
         Assertions.assertEquals(List.of("big.csv", "small.csv"), actual.get("joined"));
     }
 
-    @Test
-    void srcPathFilterTargetはsrcを入力のまま辿ったパスにする() throws IOException {
-        this.writeSources();
-        final ComparableDataSetParam param = this.param("{}");
-        final Source nested = new Source(this.src.resolve("sub/nested.csv").toFile(), false);
-
-        Assertions.assertEquals(Path.of("sub/nested.csv"), param.srcRelativePath(nested).orElseThrow());
-        Assertions.assertEquals(this.src.resolve("sub").resolve("nested.csv").toString(), param.srcPathFilterTarget(nested));
-    }
-
-    @Test
-    void srcの外のファイルはそのパスで照合する() throws IOException {
-        this.writeSources();
-        final ComparableDataSetParam param = this.param("{}");
-        final Source outside = new Source(this.src.getParent().resolve("outside.csv").toFile(), false);
-
-        Assertions.assertTrue(param.srcRelativePath(outside).isEmpty());
-        Assertions.assertEquals(outside.filePath(), param.srcPathFilterTarget(outside));
-    }
-
     private void writeSources() throws IOException {
         Files.writeString(this.src.resolve("big.csv"), "key,value\n1,a\n2,b\n");
         Files.writeString(this.src.resolve("small.csv"), "key,other\n1,x\n");
@@ -93,24 +72,23 @@ class TableSourcesTest {
     }
 
     private ComparableDataSetParam param(final String setting) {
-        return ComparableDataSetParam.builder()
+        return DataSetTestSupport.param(setting).toBuilder()
                 .setSource(DataSourceType.csv)
                 .setSrc(this.src.toFile())
                 .setEncoding("UTF-8")
                 .setRecursive(true)
-                .setTableSeparators(DataSetTestSupport.separators(setting))
                 .build();
     }
 
     /**
-     * テーブル名→読込元のsrcからの相対パス（区切りは/）
+     * テーブル名→読込元の表示用のパス
      */
     private Map<String, List<String>> tableSources(final String setting) {
         final ComparableDataSetParam param = this.param(setting);
         return new ComparableCsvDataSetProducer(param).tableSources().entrySet().stream()
                 .collect(Collectors.toMap(Map.Entry::getKey
                         , entry -> entry.getValue().stream()
-                                .map(source -> param.srcRelativePath(source).orElseThrow().toString().replace('\\', '/'))
+                                .map(source -> param.srcPath(source).display())
                                 .sorted()
                                 .toList()
                         , (a, b) -> a, TreeMap::new));

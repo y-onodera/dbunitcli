@@ -104,14 +104,11 @@ public interface ComparableDataSetProducer extends AutoCloseable {
     }
 
     /**
-     * 読み込まれるテーブルごとに、その行を読み込むソース（行を入れた順）を返す。行は分割後の名前を求める場合だけ読む
+     * 読み込まれるテーブルごとに、その行を読み込むソース（行を入れた順）を返す
      */
     default Map<String, List<Source>> tableSources() {
         final Map<String, List<Source>> result = new LinkedHashMap<>();
-        this.lazyloadTables().forEach(it -> result.put(it.getTableName(), it.getTask().tasks().stream()
-                .map(ComparableTableMappingTask::source)
-                .distinct()
-                .toList()));
+        this.lazyloadTables().forEach(it -> result.put(it.getTableName(), it.getTask().sources()));
         return result;
     }
 
