@@ -37,6 +37,14 @@ public interface GenerateContext extends Option, DescriptorOption {
 
     String lazyLoad();
 
+    XlsxTemplateType templateType();
+
+    String keys();
+
+    String compares();
+
+    String compareSheetName();
+
     /** -templateのファイル */
     File getTemplatePath();
 }

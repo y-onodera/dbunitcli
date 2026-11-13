@@ -974,6 +974,61 @@ public class GenerateTest {
             });
         }
 
+        @Test
+        public void testGenerateXlsxCompareTemplate() throws IOException {
+            final String resultDir = "target/test-classes/yo/dbunitcli/application/generate/xlsxTemplate/result";
+            final String src = "src/test/resources/yo/dbunitcli/application/src/generate/with_metadata/source/csv";
+            Generate.main(new String[]{
+                    "-srcType=csv"
+                    , "-src=" + src
+                    , "-regInclude=Test[23]"
+                    , "-encoding=UTF-8"
+                    , "-generateType=xlsxTemplate"
+                    , "-templateType=compare"
+                    , "-keys=PrimaryKey"
+                    , "-resultPath=" + resultDir + "/compareTemplate.xlsx"
+            });
+            try (final Workbook workbook = WorkbookFactory.create(new File(resultDir + "/compareTemplate.xlsx"))) {
+                // ファイルの列挙順でfirst・secondが決まるため、どちらの順でも成り立つことだけを確かめる
+                final String first = workbook.getSheetName(0);
+                final String second = workbook.getSheetName(1);
+                Assertions.assertEquals(java.util.Set.of("Test2", "Test3"), java.util.Set.of(first, second));
+                Assertions.assertEquals("compare", workbook.getSheetName(2));
+                final Row header = workbook.getSheet("compare").getRow(1);
+                Assertions.assertEquals(java.util.List.of("KEY", second + " row", "STATUS"
+                                , "ColumnA(" + first + ")", "ColumnA(" + second + ")", "ColumnA diff"
+                                , "ColumnB(" + first + ")", "ColumnB(" + second + ")", "ColumnB diff")
+                        , java.util.stream.StreamSupport.stream(header.spliterator(), false).map(it -> it.getStringCellValue()).toList());
+            }
+            Generate.main(new String[]{
+                    "-srcType=csv"
+                    , "-src=" + src
+                    , "-regInclude=Test[23]"
+                    , "-encoding=UTF-8"
+                    , "-generateType=xlsx"
+                    , "-unit=dataset"
+                    , "-template=" + this.getBaseDir() + "/generate/xlsxTemplate/result/compareTemplate.xlsx"
+                    , "-resultPath=" + resultDir + "/compareGenerated.xlsx"
+            });
+            try (final Workbook workbook = WorkbookFactory.create(new File(resultDir + "/compareGenerated.xlsx"))) {
+                // 集計行・見出し行の後にfirstの3行
+                Assertions.assertEquals(4, workbook.getSheet("compare").getLastRowNum());
+            }
+        }
+
+        @Test
+        public void testGenerateXlsxCompareTemplateRequiresTwoTables() {
+            Assertions.assertThrows(Throwable.class, () -> Generate.main(new String[]{
+                    "-srcType=csv"
+                    , "-src=src/test/resources/yo/dbunitcli/application/src/generate/with_metadata/source/csv"
+                    , "-encoding=UTF-8"
+                    , "-generateType=xlsxTemplate"
+                    , "-templateType=compare"
+                    , "-keys=PrimaryKey"
+                    , "-resultPath=target/test-classes/yo/dbunitcli/application/generate/xlsxTemplate/result/compareTemplate3.xlsx"
+            }));
+        }
+
         private void assertGenerateFileEquals(final String target, final String encode) throws IOException {
             final Charset charset = Charset.forName(encode);
             final String expect = Files.readString(new File(GenerateTest.testResourcesDir + "expect/" + GenerateTest.subDirectory + "/expect/txt", target).toPath(), charset).replace("\r\n", "\n").replace("\r", "\n");

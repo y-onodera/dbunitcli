@@ -6623,6 +6623,12 @@
           "name": "commit"
         },
         {
+          "name": "compares"
+        },
+        {
+          "name": "compareSheetName"
+        },
+        {
           "name": "defaultLength"
         },
         {
@@ -6633,6 +6639,9 @@
         },
         {
           "name": "includeAllColumns"
+        },
+        {
+          "name": "keys"
         },
         {
           "name": "lazyLoad"
@@ -6657,6 +6666,9 @@
         },
         {
           "name": "template"
+        },
+        {
+          "name": "templateType"
         },
         {
           "name": "unit"

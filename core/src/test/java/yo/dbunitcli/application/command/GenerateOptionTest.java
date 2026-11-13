@@ -10,6 +10,7 @@ import yo.dbunitcli.dataset.DataSourceType;
 import yo.dbunitcli.dataset.DbOperation;
 
 import java.util.Arrays;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -59,6 +60,51 @@ class GenerateOptionTest {
             assertEquals(GenerateOptionTest.this.src.getSrcData().getUseJdbcMetaData(), result.getArg("-src.useJdbcMetaData").value());
             assertEquals(GenerateOptionTest.this.src.getSrcData().getLoadData(), result.getArg("-src.loadData").value());
             assertEquals(GenerateOptionTest.this.src.getTemplateOption().getEncoding(), result.getArg("-template.encoding").value());
+        }
+    }
+
+    @Nested
+    class GenerateTypeXlsxTemplate {
+
+        @BeforeEach
+        void setUp() {
+            GenerateOptionTest.this.src.setGenerateType(GenerateType.xlsxTemplate);
+        }
+
+        @Test
+        void tableHasNoCompareOptions() {
+            final Option.Parameters result = GenerateOptionTest.this.createTarget().toParameters();
+            assertEquals("table", result.getArg("-templateType").value());
+            assertEquals(Arrays.asList("table", "compare"), result.getArg("-templateType").attribute().selectOption());
+            assertNull(result.getArg("-keys"));
+            assertNull(result.getArg("-compares"));
+            assertNull(result.getArg("-compareSheetName"));
+        }
+
+        @Test
+        void compareShowsCompareOptions() {
+            GenerateOptionTest.this.src.setTemplateType(yo.dbunitcli.application.command.generate.XlsxTemplateType.compare);
+            GenerateOptionTest.this.src.setKeys("ID:CODE,SUB");
+            GenerateOptionTest.this.src.setCompares("NAME");
+            final GenerateOption target = GenerateOptionTest.this.createTarget();
+            final Option.Parameters result = target.toParameters();
+            assertEquals("compare", result.getArg("-templateType").value());
+            assertEquals("ID:CODE,SUB", result.getArg("-keys").value());
+            assertTrue(result.getArg("-keys").attribute().required());
+            assertEquals("NAME", result.getArg("-compares").value());
+            assertEquals("", result.getArg("-compareSheetName").value());
+            assertEquals("compare", result.getArg("-compareSheetName").attribute().defaultValue());
+            final GenerateDto roundTrip = target.toDto();
+            assertEquals(yo.dbunitcli.application.command.generate.XlsxTemplateType.compare, roundTrip.getTemplateType());
+            assertEquals("ID:CODE,SUB", roundTrip.getKeys());
+            assertEquals("NAME", roundTrip.getCompares());
+        }
+
+        @Test
+        void compareRequiresKeys() {
+            GenerateOptionTest.this.src.setTemplateType(yo.dbunitcli.application.command.generate.XlsxTemplateType.compare);
+            final List<Option.Violation> violations = GenerateOptionTest.this.createTarget().validate();
+            assertTrue(violations.stream().anyMatch(it -> it.options().contains("-keys")), violations.toString());
         }
     }
 

@@ -9,6 +9,7 @@ import yo.dbunitcli.application.RecordConverter;
 import yo.dbunitcli.application.command.generate.GenerateContext;
 import yo.dbunitcli.application.command.generate.GenerateStrategy;
 import yo.dbunitcli.application.command.generate.GenerateWriter;
+import yo.dbunitcli.application.command.generate.XlsxTemplateType;
 import yo.dbunitcli.application.json.FromJsonTableSeparatorsBuilder;
 import yo.dbunitcli.application.option.DataSetConverterOption;
 import yo.dbunitcli.application.option.DataSetLoadOption;
@@ -45,7 +46,9 @@ public record GenerateOption(Parameter parameter, String resultFile, String resu
                              String sqlFilePrefix, String sqlFileSuffix,
                              String commit, String template, String outputEncoding, DataSetLoadOption srcData,
                              TemplateRenderOption templateOption, String includeAllColumns, String lazyLoad,
-                             String fixedLength, String defaultLength, String align, String parallel)
+                             String fixedLength, String defaultLength, String align,
+                             XlsxTemplateType templateType, String keys, String compares, String compareSheetName,
+                             String parallel)
         implements CommandLineOption<GenerateDto>, GenerateContext {
 
     public GenerateOption(final String resultFile, final GenerateDto dto, final Parameter param) {
@@ -68,6 +71,10 @@ public record GenerateOption(Parameter parameter, String resultFile, String resu
              Strings.isNotEmpty(dto.getFixedLength()) ? dto.getFixedLength() : "",
              dto.getDefaultLength(),
              dto.getAlign(),
+             dto.getTemplateType() != null ? dto.getTemplateType() : XlsxTemplateType.table,
+             Strings.isNotEmpty(dto.getKeys()) ? dto.getKeys() : "",
+             Strings.isNotEmpty(dto.getCompares()) ? dto.getCompares() : "",
+             dto.getCompareSheetName(),
              DataSetConverterOption.parallel(dto.getParallel()));
     }
 
