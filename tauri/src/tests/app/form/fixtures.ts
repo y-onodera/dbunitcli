@@ -1121,11 +1121,18 @@ function makeScaffoldOptionsBase(target: string) {
 			SCAFFOLD_DATASET_TYPE_OPTIONS,
 		),
 		datasetEncoding: makeTextWithDefault("datasetEncoding", "", "UTF-8"),
-		dataset: makeCsvSrcData("dataset", "resources/src/csv", [
-			"none",
-			...SRC_TYPE_OPTIONS,
-		]) as DatasetSource,
+		dataset: scaffoldDataset(),
 	};
+}
+
+// scaffoldのdatasetはloadMetaDataを持たない
+function scaffoldDataset(): DatasetSource {
+	const { loadMetaData: _, ...dataset } = makeCsvSrcData(
+		"dataset",
+		"resources/src/csv",
+		["none", ...SRC_TYPE_OPTIONS],
+	);
+	return dataset as DatasetSource;
 }
 
 export const scaffoldRefreshTargetDdlResponseFixture = makeScaffoldOptionsBase(
