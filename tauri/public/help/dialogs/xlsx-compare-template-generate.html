@@ -8,7 +8,7 @@
 <body>
   <p><a href="../index.html">&larr; ヘルプ一覧に戻る</a></p>
   <h1>Generate Compare Template</h1>
-  <p>2 つ（または 1 つ）のデータセットのカラム構成から、データを流し込むシート 2 枚と、その 2 枚を複合キーで突合して値を比べるシート 1 枚からなる jxls 用の Excel テンプレート（<code>.xlsx</code>）を生成し、template リソースへ保存します。generateType が <code>xlsx</code> / <code>xls</code> のとき、template の ⋮ メニューの generate compare template から開きます。</p>
+  <p>1 つのデータセットに含まれる 2 つ（または 1 つ）のテーブルのカラム構成から、データを流し込むシート 2 枚と、その 2 枚を複合キーで突合して値を比べるシート 1 枚からなる jxls 用の Excel テンプレート（<code>.xlsx</code>）を生成し、template リソースへ保存します。generateType が <code>xlsx</code> / <code>xls</code> のとき、template の ⋮ メニューの generate compare template から開きます。</p>
 
   <h2 id="toc">目次</h2>
   <ol>
@@ -23,19 +23,18 @@
   </ol>
 
   <h2 id="section-simple">シンプルな使い方</h2>
-  <p>2 つのデータセットのテーブルを選んでカラムを読み込み、突合のキーと比較するカラムの組を選んで Execute を押すと、比較用のテンプレートが保存されます。</p>
+  <p>データセットを指定し、その中から比較する 2 つのテーブルを選んでカラムを読み込み、突合のキーと比較するカラムの組を選んで Execute を押すと、比較用のテンプレートが保存されます。</p>
   <pre>入力:
   テーブル OLD_USERS（カラム ID / NAME）
   テーブル NEW_USERS（カラム USER_ID / NAME）
 
 指定:
-  fileName             = users_compare
-  old セクションの src = （OLD_USERS を含むデータセット）
-  old table            = OLD_USERS → Load Columns
-  new セクションの src = （NEW_USERS を含むデータセット）
-  new table            = NEW_USERS → Load Columns
-  keys                 = old: ID / new: USER_ID
-  compares             = old: NAME / new: NAME
+  fileName         = users_compare
+  src セクション   = （OLD_USERS・NEW_USERS の 2 テーブルだけを読むデータセット）
+  old table        = OLD_USERS → Load Columns
+  new table        = NEW_USERS → Load Columns
+  keys             = old: ID / new: USER_ID
+  compares         = old: NAME / new: NAME
   → Execute
 
 結果:
@@ -45,13 +44,14 @@
   <ul>
     <li>このテンプレートは <code>unit=dataset</code> で使う。データシートには、シート名と同じ名前のテーブルの全行が流し込まれる</li>
     <li>シート名は、選んだテーブル名がデフォルト</li>
+    <li>generate の src に指定できるデータセットは 1 つなので、src セクションには generate で使うのと同じデータセットを指定する。2 テーブルが別のディレクトリにあるときは、共通の親ディレクトリを src にして traversal・テーブル名の絞り込み（正規表現のグループ等）・setting で 2 テーブルに絞る</li>
   </ul>
 
   <h2 id="section-overview">できること</h2>
   <ul>
     <li>データシートを 2 枚作る。A 列は選んだキーのカラムを <code>|</code> でつないだ複合キーの数式、B 列以降はデータセットの全カラム</li>
     <li>比較シートを 1 枚作る。old のシートの行ごとに、複合キーで new のシートの行を探し、比較するカラムの組ごとに 2 つの値と判定を並べる</li>
-    <li>データセットを 1 つだけ指定した場合は、同じカラム構成のデータシートを 2 枚作り、キー以外の全カラムを同じ名前どうしで比べる</li>
+    <li>Use second table を OFF にした場合は、同じカラム構成のデータシートを 2 枚作り、キー以外の全カラムを同じ名前どうしで比べる</li>
     <li>生成したファイルを template リソースに保存し、template テキストボックスへ設定する</li>
   </ul>
   <p>比較シートは Excel の関数で突合するため、生成した Excel のデータシートを書き換えたり、別のデータを貼り付けたりすると、比較結果も更新されます。</p>
@@ -61,19 +61,19 @@
     <tr><th>項目</th><th>説明</th><th>デフォルト</th></tr>
     <tr><td><code>fileName</code>（必須）</td><td>保存するテンプレートのファイル名。拡張子が <code>.xlsx</code> でなければ <code>.xlsx</code> が付く。ディレクトリ区切り（<code>/</code> <code>\</code>）や <code>..</code> は使えない。同名のファイルがあれば上書きする</td><td>（空）</td></tr>
     <tr><td><code>compare sheetName</code>（必須）</td><td>比較シートの名前</td><td><code>compare</code></td></tr>
-    <tr><td>Use second dataset</td><td>ON なら old・new の 2 つのデータセットを指定する。OFF なら old だけを指定し、new のシートは old と同じカラムで作る</td><td>ON</td></tr>
-    <tr><td><code>old</code> / <code>new</code> セクション</td><td>カラムを読み込むデータセット。<a href="../sections/dataset-load-form.html">Dataset Load Form</a> と同じ要領で指定する</td><td>—</td></tr>
-    <tr><td><code>old table</code> / <code>new table</code></td><td>カラムを読み込むテーブル。選んでから Load Columns を押すと、カラム名を読み込んで一覧を表示する</td><td>（空）</td></tr>
-    <tr><td><code>old sheetName</code> / <code>new sheetName</code>（必須）</td><td>データシートの名前。generate のとき、この名前のテーブルの行が流し込まれる。Use second dataset が OFF のときは <code>new sheetName</code> だけを入力する</td><td>選んだテーブル名</td></tr>
-    <tr><td><code>keys</code>（必須）</td><td>突合のキーにするカラム。Use second dataset が ON なら old と new のカラムの組を、OFF なら old のカラムをチェックで選ぶ。複数選ぶと選んだ順に複合キーになる</td><td>—</td></tr>
-    <tr><td><code>compares</code></td><td>値を比べる old と new のカラムの組（Use second dataset が ON のときだけ）。OFF のときはキー以外の全カラムを同じ名前どうしで比べる</td><td>—</td></tr>
+    <tr><td>Use second table</td><td>ON なら old・new の 2 つのテーブルを選ぶ。OFF なら old だけを選び、new のシートは old と同じカラムで作る</td><td>ON</td></tr>
+    <tr><td><code>src</code> セクション</td><td>カラムを読み込むデータセット（old・new 共通）。<a href="../sections/dataset-load-form.html">Dataset Load Form</a> と同じ要領で指定する。Use second table が ON でテーブルが 2 つでないときは、絞り込みを促すメッセージを表示する</td><td>—</td></tr>
+    <tr><td><code>old table</code> / <code>new table</code></td><td>カラムを読み込むテーブル。src セクションのデータセットのテーブルから選ぶ。選んでから Load Columns を押すと、カラム名を読み込んで一覧を表示する</td><td>（空）</td></tr>
+    <tr><td><code>old sheetName</code> / <code>new sheetName</code>（必須）</td><td>データシートの名前。generate のとき、この名前のテーブルの行が流し込まれる。Use second table が OFF のときは <code>new sheetName</code> だけを入力する</td><td>選んだテーブル名</td></tr>
+    <tr><td><code>keys</code>（必須）</td><td>突合のキーにするカラム。Use second table が ON なら old と new のカラムの組を、OFF なら old のカラムをチェックで選ぶ。複数選ぶと選んだ順に複合キーになる</td><td>—</td></tr>
+    <tr><td><code>compares</code></td><td>値を比べる old と new のカラムの組（Use second table が ON のときだけ）。OFF のときはキー以外の全カラムを同じ名前どうしで比べる</td><td>—</td></tr>
   </table>
   <p><code>keys</code>・<code>compares</code> の行は + で追加、− で削除します。old・new のどちらかが空の行は無視します。</p>
 
   <h2 id="section-flow">操作の流れ</h2>
   <ol>
-    <li>fileName を入力します。データセットが 1 つだけなら Use second dataset を OFF にします。</li>
-    <li>old（と new）のセクションでデータセットを指定し、table を選んで Load Columns を押します。</li>
+    <li>fileName を入力します。1 つのテーブルを複製して比べるなら Use second table を OFF にします。</li>
+    <li>src セクションでデータセットを指定し、old（と new）の table を選んでそれぞれ Load Columns を押します。</li>
     <li>必要ならシート名を変え、keys と compares を選びます。</li>
     <li>Execute を押すと、テンプレートが template リソースへ保存されます。ダイアログが閉じ、保存したファイル名が template テキストボックスに設定されます。</li>
   </ol>

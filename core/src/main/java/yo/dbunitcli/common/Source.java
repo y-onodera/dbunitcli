@@ -96,9 +96,11 @@ public record Source(String filePath, String fileName, String sheetName, String 
     }
 
     public String getTableName() {
-        return this.tableName.isEmpty()
-                ? this.fileName.substring(0, this.fileName.lastIndexOf("."))
-                : this.tableName;
+        if (!this.tableName.isEmpty()) {
+            return this.tableName;
+        }
+        final int extension = this.fileName.lastIndexOf(".");
+        return extension < 0 ? this.fileName : this.fileName.substring(0, extension);
     }
 
     public TableMetaDataWithSource createMetaData(final Column[] columns) {

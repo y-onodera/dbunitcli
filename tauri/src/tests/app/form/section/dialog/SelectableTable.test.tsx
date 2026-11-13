@@ -1,15 +1,19 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it } from "vitest";
-import SelectableTable from "../../../../../app/form/section/dialog/SelectableTable";
+import SelectableTable, {
+	type ExtraColumn,
+} from "../../../../../app/form/section/dialog/SelectableTable";
 import { useTableSelection } from "../../../../../hooks/useTableSelection";
 
 function Harness({
 	items,
 	emptyMessage,
+	extraColumns,
 }: {
 	items: string[];
 	emptyMessage?: string;
+	extraColumns?: ExtraColumn[];
 }) {
 	const { selected, toggle, toggleAll } = useTableSelection();
 	return (
@@ -22,6 +26,7 @@ function Harness({
 				columnLabel="Table Name"
 				filterPlaceholder="Filter..."
 				emptyMessage={emptyMessage}
+				extraColumns={extraColumns}
 			/>
 			<output data-testid="selected">{[...selected].sort().join(",")}</output>
 		</>
@@ -29,6 +34,23 @@ function Harness({
 }
 
 describe("SelectableTable", () => {
+	it("extraColumnsの列を並べ、その値でもフィルタする", async () => {
+		const user = userEvent.setup();
+		const owners: Record<string, string> = { USERS: "alice", ORDERS: "bob" };
+		render(
+			<Harness
+				items={["USERS", "ORDERS"]}
+				extraColumns={[{ label: "owner", value: (item) => owners[item] }]}
+			/>,
+		);
+		expect(
+			screen.getByRole("columnheader", { name: "owner" }),
+		).toBeInTheDocument();
+		await user.type(screen.getByPlaceholderText("Filter..."), "bob");
+		expect(screen.queryByText("USERS")).toBeNull();
+		expect(screen.getByRole("cell", { name: "bob" })).toBeInTheDocument();
+	});
+
 	it("行クリックで選択が切り替わる", async () => {
 		const user = userEvent.setup();
 		render(<Harness items={["USERS", "ORDERS"]} />);

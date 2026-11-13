@@ -37,9 +37,10 @@
     <tr><td>addFileInfo</td><td>ON にすると、元ファイル情報を表す 3 カラム（<code>$FILE_PATH</code> / <code>$FILE_NAME</code> / <code>$SHEET_NAME</code>）を各行に追加する。詳細は下記</td></tr>
     <tr><td>loadData</td><td>OFF にすると、データ行を読み込まずにテーブル名とカラムだけを読み込む</td></tr>
     <tr><td>includeMetaData</td><td>メタデータカラムを含めるか</td></tr>
-    <tr><td>regTableInclude</td><td>対象にするテーブル名の条件（正規表現）</td></tr>
-    <tr><td>regTableExclude</td><td>対象から外すテーブル名の条件（正規表現）</td></tr>
+    <tr><td>regTableInclude</td><td>対象にするテーブル名の条件（正規表現）。setting を適用する前のテーブル名と照合し、一部に一致すれば対象にする</td></tr>
+    <tr><td>regTableExclude</td><td>対象から外すテーブル名の条件（正規表現）。setting を適用する前のテーブル名と照合し、一部に一致すれば外す</td></tr>
   </table>
+  <p><code>regTableInclude</code> / <code>regTableExclude</code> の横の編集ボタンを押すと、読み込まれるテーブルの一覧から選んで正規表現を組み立てられます（<a href="../dialogs/regex-filter.html">Select from Table List</a>）。</p>
 
   <h2 id="section-header-name">headerName の詳細</h2>
   <p>カラム名をカンマ区切りで与えると、その名前順にテーブル列が構築されます。<strong>指定された場合は先頭行も自動的にはヘッダとみなされず、すべての行がデータ行になります</strong>。既にヘッダ行が存在するファイルでヘッダを上書きしたい場合は、<code>startRow</code> と併用してヘッダ行をスキップしてください。</p>
@@ -137,6 +138,7 @@ id,name
   <ul>
     <li><a href="dataset-load-form.html">Dataset Load Form</a> — 入力データセットの指定</li>
     <li><a href="../dialogs/dataset-settings.html">Dataset Settings</a> — 追加したカラムを比較から外す</li>
+    <li><a href="../dialogs/regex-filter.html">Select from Table List</a> — 一覧から選んで正規表現を組み立てる</li>
   </ul>
 </body>
 </html>

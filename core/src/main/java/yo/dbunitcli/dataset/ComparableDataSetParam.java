@@ -1,6 +1,7 @@
 package yo.dbunitcli.dataset;
 
 import yo.dbunitcli.Strings;
+import yo.dbunitcli.common.Source;
 import yo.dbunitcli.resource.jdbc.DatabaseConnectionLoader;
 import yo.dbunitcli.resource.poi.XlsxSchema;
 import yo.dbunitcli.resource.st4.TemplateRender;
@@ -90,11 +91,33 @@ public record ComparableDataSetParam(
         try {
             walk = Files.walk(this.src.toPath(), this.recursive() ? Integer.MAX_VALUE : 1);
             return walk
-                    .filter(path -> this.srcPathFilter().predicate(path.toString()));
+                    .filter(path -> this.srcPathFilter().predicate(ComparableDataSetParam.srcPathFilterTarget(path)));
         } catch (final Throwable e) {
             walk.close();
             throw new AssertionError(e);
         }
+    }
+
+    /**
+     * ソースのファイルのパス。srcがディレクトリでその中のファイルなら、表示用はsrcからの相対パス（区切りは/）、
+     * 照合用は-regInclude・-regExcludeを当てる文字列（{@link #getWalk()}が辿るパス）にする
+     */
+    public SrcPath srcPath(final Source source) {
+        if (this.src() != null && this.src().isDirectory() && Strings.isNotEmpty(source.filePath())) {
+            final Path srcDir = this.src().getAbsoluteFile().toPath().normalize();
+            final Path path = Path.of(source.filePath()).normalize();
+            if (path.startsWith(srcDir)) {
+                final Path relative = srcDir.relativize(path);
+                return new SrcPath(relative.toString().replace('\\', '/')
+                        , ComparableDataSetParam.srcPathFilterTarget(this.src().toPath().resolve(relative)));
+            }
+        }
+        return new SrcPath(source.filePath(), source.filePath());
+    }
+
+    // getWalkの絞り込みとsrcPathの照合用で、同じ文字列に当てる
+    private static String srcPathFilterTarget(final Path walked) {
+        return walked.toString();
     }
 
     public String[] headerNames() {
@@ -464,5 +487,12 @@ public record ComparableDataSetParam(
             }
             return CHAR;
         }
+    }
+
+    /**
+     * @param display     表示用のパス
+     * @param filterTarget -regInclude・-regExcludeを当てる文字列
+     */
+    public record SrcPath(String display, String filterTarget) {
     }
 }

@@ -47,6 +47,7 @@ import yo.dbunitcli.sidecar.dto.DatasetRequestDto;
 import yo.dbunitcli.sidecar.dto.DatasetSettingDto;
 import yo.dbunitcli.sidecar.dto.DatasetTableConvertRequestDto;
 import yo.dbunitcli.sidecar.dto.DatasetTableNamesRequestDto;
+import yo.dbunitcli.sidecar.dto.DatasetTableSourceDto;
 import yo.dbunitcli.sidecar.dto.DatasetTablePreviewRequestDto;
 import yo.dbunitcli.sidecar.dto.DatasetTablePreviewResponseDto;
 import yo.dbunitcli.sidecar.dto.DatasetUnitTablePreviewRequestDto;
@@ -117,6 +118,31 @@ public class DatasetSettingsController extends AbstractResourceFileController<Da
         } catch (final Throwable th) {
             LOGGER.warn("Could not get table names", th);
             return "[]";
+        }
+    }
+
+    /**
+     * 読み込まれるテーブルごとに、その行の読込元（ファイル・setting適用前のテーブル名）を返す。
+     * 1つのテーブルに複数の読込元があれば読込元ごとに1件ずつ返す。読めなかったときはエラーを返す
+     */
+    @Interruptible
+    @Post(uri = "table-sources", produces = MediaType.APPLICATION_JSON)
+    public String tableSources(@Body final DatasetTableNamesRequestDto request) {
+        try {
+            final ComparableDataSetParam param = this.toParam(request).get().build();
+            try (final ComparableDataSetProducer producer = new ComparableDataSetLoader(this.buildParameter(request))
+                    .getComparableDataSetProducer(param)) {
+                final List<DatasetTableSourceDto> result = producer.tableSources().entrySet().stream()
+                        .flatMap(entry -> entry.getValue().stream().map(source -> {
+                            final ComparableDataSetParam.SrcPath path = param.srcPath(source);
+                            return new DatasetTableSourceDto(entry.getKey(), path.display(), path.filterTarget(), source.getTableName());
+                        }))
+                        .toList();
+                return ObjectMapper.getDefault().writeValueAsString(result);
+            }
+        } catch (final Throwable th) {
+            LOGGER.error("cause:", th);
+            throw new ApplicationException(th);
         }
     }
 

@@ -11,6 +11,11 @@ import { FilterInput } from "../../../../components/element/Input";
 // 引数の既定値にアロー関数を書くとReact Compilerが未対応のため、モジュールレベルで定義する
 const renderAsText = (item: string): ReactNode => item;
 
+// 項目の横に並べる列。フィルタの対象にもする
+export type ExtraColumn = { label: string; value: (item: string) => string };
+
+const NO_EXTRA_COLUMNS: ExtraColumn[] = [];
+
 // フィルタ入力・全選択チェック・行クリックでの選択切替を持つ一覧
 export default function SelectableTable({
 	items,
@@ -21,6 +26,7 @@ export default function SelectableTable({
 	filterPlaceholder,
 	emptyMessage,
 	renderItem = renderAsText,
+	extraColumns = NO_EXTRA_COLUMNS,
 }: {
 	items: string[];
 	selected: Set<string>;
@@ -32,11 +38,16 @@ export default function SelectableTable({
 	// 指定時、items が空ならテーブルの代わりに表示する
 	emptyMessage?: string;
 	renderItem?: (item: string) => ReactNode;
+	extraColumns?: ExtraColumn[];
 }) {
 	const [filter, setFilter] = useState("");
 	const filterLower = filter.toLowerCase();
 	const filteredItems = filterLower
-		? items.filter((it) => it.toLowerCase().includes(filterLower))
+		? items.filter((it) =>
+				[it, ...extraColumns.map((column) => column.value(it))].some((text) =>
+					text.toLowerCase().includes(filterLower),
+				),
+			)
 		: items;
 	const allSelected =
 		filteredItems.length > 0 && filteredItems.every((it) => selected.has(it));
@@ -68,6 +79,9 @@ export default function SelectableTable({
 								)}
 							</Th>
 							<Th>{columnLabel}</Th>
+							{extraColumns.map((column) => (
+								<Th key={column.label}>{column.label}</Th>
+							))}
 						</>
 					}
 				>
@@ -83,6 +97,9 @@ export default function SelectableTable({
 								/>
 							</Td>
 							<Td>{renderItem(item)}</Td>
+							{extraColumns.map((column) => (
+								<Td key={column.label}>{column.value(item)}</Td>
+							))}
 						</Tr>
 					))}
 				</DataTable>

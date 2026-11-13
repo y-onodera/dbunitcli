@@ -4,6 +4,7 @@ import {
 	SectionOptionHeader,
 } from "../../../components/dialog";
 import type { CommandOption, SrcElements } from "../../../model/CommandOption";
+import { regexFilterSlot } from "./dialog/RegexFilterDialog";
 import Check from "./element/Check";
 import PlainText from "./element/PlainText";
 
@@ -74,13 +75,17 @@ export default function DataLoadFormSection({
 				element={options.regTableInclude}
 				handleValueChange={handleValueChange(options.regTableInclude)}
 				hidden={!showOptional}
-			/>
+			>
+				{regexFilterSlot("table", options.regTableInclude.name)}
+			</PlainText>
 			<PlainText
 				prefix={prefix}
 				element={options.regTableExclude}
 				handleValueChange={handleValueChange(options.regTableExclude)}
 				hidden={!showOptional}
-			/>
+			>
+				{regexFilterSlot("table", options.regTableExclude.name)}
+			</PlainText>
 		</SectionFieldset>
 	);
 }

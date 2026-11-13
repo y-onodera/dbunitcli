@@ -7,7 +7,7 @@ import {
 	environmentFixture,
 	workspaceResourcesFixture,
 } from "../../../../setup";
-import { compareLoadResponseFixture } from "../../fixtures";
+import { generateLoadResponseFixture } from "../../fixtures";
 
 vi.mock("@tauri-apps/plugin-dialog", () => ({ open: vi.fn() }));
 vi.mock("@tauri-apps/api", () => ({ core: { invoke: vi.fn() } }));
@@ -36,13 +36,16 @@ vi.mock("../../../../../hooks/useWorkspaceResources", () => ({
 	useResolveAbsolutePath: () => vi.fn(async (path: string) => path),
 }));
 
+const { tableNamesState } = vi.hoisted(() => ({
+	tableNamesState: { value: ["OLD_TABLE", "NEW_TABLE"] },
+}));
 const COLUMNS: Record<string, string[]> = {
 	OLD_TABLE: ["ID", "SUB", "NAME"],
 	NEW_TABLE: ["CODE", "SUB", "NAME2"],
 };
 vi.mock("../../../../../hooks/useDatasetSettings", () => ({
 	useDatasetTableNames: () => ({
-		tableNames: ["OLD_TABLE", "NEW_TABLE"],
+		tableNames: tableNamesState.value,
 		loading: false,
 		logs: [],
 		error: "",
@@ -61,10 +64,11 @@ vi.mock("../../../../../utils/fetchUtils", async (importOriginal) => {
 });
 
 async function openDialog(setPath: (value: string) => void = vi.fn()) {
+	tableNamesState.value = ["OLD_TABLE", "NEW_TABLE"];
 	mockFetchData.mockImplementation((params: FetchParams) => {
-		if (params.endpoint.includes("compare/refresh")) {
+		if (params.endpoint.includes("generate/refresh")) {
 			return Promise.resolve(
-				new Response(JSON.stringify(compareLoadResponseFixture)),
+				new Response(JSON.stringify(generateLoadResponseFixture)),
 			);
 		}
 		if (params.endpoint.includes("template/generate-compare")) {
@@ -114,30 +118,46 @@ function postedBody() {
 }
 
 describe("XlsxCompareTemplateGenerateDialogの描画テスト", () => {
-	it("compare/refreshで2つのデータセット欄を描画する", async () => {
+	it("generate/refreshのsrcでデータセット欄を1つだけ描画し、old・newのテーブルをそこから選ばせる", async () => {
 		await openDialog();
 		expect(inputByName("-fileName")).toBeRequired();
 		expect(inputByName("compare sheetName").value).toBe("compare");
+		expect(document.querySelectorAll('select[name$=".srcType"]')).toHaveLength(
+			1,
+		);
 		expect(
-			document.querySelector('select[name="-old.srcType"]'),
+			document.querySelector('select[name="-src.srcType"]'),
 		).toBeInTheDocument();
-		expect(
-			document.querySelector('select[name="-new.srcType"]'),
-		).toBeInTheDocument();
+		expect(byId("oldTableName")).toBeInTheDocument();
+		expect(byId("newTableName")).toBeInTheDocument();
+		expect(screen.queryByText(/Narrow it down/)).not.toBeInTheDocument();
+		const refreshCall = mockFetchData.mock.calls.find(([params]) =>
+			params.endpoint.includes("generate/refresh"),
+		);
+		expect(String(refreshCall?.[0].options.body)).toContain("xlsxTemplate");
 	});
 
-	it("Use second datasetを外すとnewのデータセット欄の代わりにシート名だけを入力させる", async () => {
+	it("データセットのテーブルが2つでなければ絞り込みを促す", async () => {
 		const user = await openDialog();
-		await user.click(byId("useSecondDataset"));
+		tableNamesState.value = ["OLD_TABLE", "NEW_TABLE", "OTHER"];
+		await user.type(inputByName("-fileName"), "x");
 		expect(
-			document.querySelector('select[name="-new.srcType"]'),
-		).not.toBeInTheDocument();
+			screen.getByText(/The dataset has 3 tables\. Narrow it down/),
+		).toBeInTheDocument();
+		await user.click(byId("useSecondTable"));
+		expect(screen.queryByText(/Narrow it down/)).not.toBeInTheDocument();
+	});
+
+	it("Use second tableを外すとnewのテーブル欄の代わりにシート名だけを入力させる", async () => {
+		const user = await openDialog();
+		await user.click(byId("useSecondTable"));
+		expect(document.getElementById("newTableName")).toBeNull();
 		expect(inputByName("new sheetName")).toBeInTheDocument();
 	});
 });
 
 describe("XlsxCompareTemplateGenerateDialogの実行テスト", () => {
-	it("2データセット: 選んだキー・比較ペアでtemplate/generate-compareへPOSTし、template欄へ反映する", async () => {
+	it("2テーブル: 選んだキー・比較ペアでtemplate/generate-compareへPOSTし、template欄へ反映する", async () => {
 		const setPath = vi.fn();
 		const user = await openDialog(setPath);
 		await user.type(inputByName("-fileName"), "cmp");
@@ -172,10 +192,10 @@ describe("XlsxCompareTemplateGenerateDialogの実行テスト", () => {
 		expect(mockSetResourcesSettings).toHaveBeenCalled();
 	});
 
-	it("1データセット: キー以外の列を同名で比較し、2枚目は同じ列で入力したシート名にする", async () => {
+	it("1テーブル: キー以外の列を同名で比較し、2枚目は同じ列で入力したシート名にする", async () => {
 		const setPath = vi.fn();
 		const user = await openDialog(setPath);
-		await user.click(byId("useSecondDataset"));
+		await user.click(byId("useSecondTable"));
 		await user.type(inputByName("-fileName"), "cmp.xlsx");
 		await loadColumns(user, "old", "OLD_TABLE", 0);
 		await user.type(inputByName("new sheetName"), "after");
