@@ -49,6 +49,7 @@ export function RunForm(prop: {
 						srcElements={run.srcData}
 						handleValueChange={ignoreValueChange}
 						handleToggleChecked={ignoreValueChange}
+						regexFilter={false}
 					/>
 					{run.templateOption && (
 						<TemplateFormSection

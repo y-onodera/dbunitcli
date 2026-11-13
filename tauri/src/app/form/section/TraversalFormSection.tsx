@@ -12,10 +12,13 @@ export default function TraversalFormSection({
 	srcElements,
 	handleValueChange,
 	handleToggleChecked,
+	regexFilter = true,
 }: {
 	srcElements: SrcElements;
 	handleValueChange: (param: CommandOption) => (newValue: string) => void;
 	handleToggleChecked: (param: CommandOption) => (checked: boolean) => void;
+	// falseならテーブル一覧から選ぶボタンを出さない（データセットを読まないrun）
+	regexFilter?: boolean;
 }) {
 	const [showOptional, setShowOptional] = useState(false);
 	const toggleOptional = () => setShowOptional(!showOptional);
@@ -50,14 +53,16 @@ export default function TraversalFormSection({
 				handleValueChange={handleValueChange(srcElements.regInclude)}
 				hidden={!showOptional}
 			>
-				{({ path, setPath }) => (
-					<RegexFilterButton
-						kind="path"
-						fieldName={srcElements.regInclude.name}
-						value={path}
-						onApply={setPath}
-					/>
-				)}
+				{regexFilter
+					? ({ path, setPath }) => (
+							<RegexFilterButton
+								kind="path"
+								fieldName={srcElements.regInclude.name}
+								value={path}
+								onApply={setPath}
+							/>
+						)
+					: undefined}
 			</PlainText>
 			<PlainText
 				prefix={prefix}
@@ -65,14 +70,16 @@ export default function TraversalFormSection({
 				handleValueChange={handleValueChange(srcElements.regExclude)}
 				hidden={!showOptional}
 			>
-				{({ path, setPath }) => (
-					<RegexFilterButton
-						kind="path"
-						fieldName={srcElements.regExclude.name}
-						value={path}
-						onApply={setPath}
-					/>
-				)}
+				{regexFilter
+					? ({ path, setPath }) => (
+							<RegexFilterButton
+								kind="path"
+								fieldName={srcElements.regExclude.name}
+								value={path}
+								onApply={setPath}
+							/>
+						)
+					: undefined}
 			</PlainText>
 		</SectionFieldset>
 	);

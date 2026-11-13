@@ -101,6 +101,21 @@ describe("RunFormの描画テスト", () => {
 			).not.toBeInTheDocument();
 		});
 
+		it("traversalのregInclude・regExcludeにテーブル一覧から選ぶボタンを出さない", async () => {
+			const user = userEvent.setup();
+			render(<RunForm {...makeRunProps()} />);
+			await user.click(
+				screen.getByRole("button", { name: "Show traversal option" }),
+			);
+
+			expect(
+				document.querySelector('input[name="-src.regInclude"]'),
+			).toBeVisible();
+			expect(
+				screen.queryByRole("button", { name: /from table list/ }),
+			).not.toBeInTheDocument();
+		});
+
 		it("srcが含まれる", () => {
 			render(<RunForm {...makeRunProps()} />);
 
