@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <title>ヘルプ - Select from Table List</title>
+  <link rel="stylesheet" href="../help.css" />
+</head>
+<body>
+  <p><a href="../index.html">&larr; ヘルプ一覧に戻る</a></p>
+  <h1>Select from Table List</h1>
+  <p>読み込まれるテーブルの一覧からチェックした行で、絞り込みの正規表現を組み立てるダイアログです。<code>traversal</code> の <code>regInclude</code> / <code>regExclude</code>、<code>data load</code> の <code>regTableInclude</code> / <code>regTableExclude</code> の横の編集ボタンから開きます。</p>
+
+  <h2 id="section-simple">シンプルな使い方</h2>
+  <p>正規表現を書かずに、読み込むファイルやテーブルを一覧から選んで絞り込みます。</p>
+  <pre>入力 (src = C:\data):
+  old\users.csv
+  new\users.csv
+  other.csv
+
+指定:
+  regInclude の横の編集ボタン → old\users.csv と new\users.csv をチェック → Apply
+
+結果:
+  regInclude = (?:^|[\\/])(?:old[\\/]users\.csv|new[\\/]users\.csv)$</pre>
+  <ul>
+    <li>一覧は、編集している項目だけを空にして、ほかの項目（traversal・テーブル名の絞り込み・setting など）は今の値のまま読み込む</li>
+    <li>開いたときは、編集している項目の今の値に一致する行にチェックが付いている</li>
+  </ul>
+
+  <h2 id="section-open">開き方</h2>
+  <p>各項目は optional の項目のため、<code>traversal option</code> / <code>data load option</code> を開いてから、項目の横の編集ボタンを押します。<code>src</code> を指定していないとき（JDBC 系の <code>srcType</code> では接続テストに成功していないとき）は一覧を読み込めません。</p>
+
+  <h2 id="section-options">設定項目</h2>
+  <p>一覧の列は、開いた項目によって変わります。どの項目でも、その行から読み込まれる最終的なテーブル名（setting 適用後）を <code>table</code> 列に並べます。</p>
+  <table>
+    <tr><th>項目</th><th>一覧の行（チェックする値）</th><th>組み立てる正規表現</th></tr>
+    <tr><td><code>regInclude</code> / <code>regExclude</code></td><td><code>file</code>: 読み込むファイル。<code>src</code> がディレクトリなら <code>src</code> からの相対パス</td><td>チェックしたパスのどれかでパスが終わる条件。区切りは <code>\</code> と <code>/</code> の両方に一致する</td></tr>
+    <tr><td><code>regTableInclude</code> / <code>regTableExclude</code></td><td><code>source table</code>: setting を適用する前のテーブル名</td><td>チェックしたテーブル名のどれかに完全に一致する条件（<code>^(?:A|B)$</code>）</td></tr>
+  </table>
+  <ul>
+    <li>正規表現で意味を持つ文字（<code>.</code> など）は <code>\</code> を付けて文字そのものとして扱う</li>
+    <li>include の項目ではチェックした行が読み込む対象に、exclude の項目ではチェックした行が外す対象になる</li>
+    <li>1 つの最終テーブルが複数のファイル・テーブルから読み込まれる場合は、読込元ごとに行が分かれる</li>
+  </ul>
+
+  <h2 id="section-operation">操作</h2>
+  <table>
+    <tr><th>操作</th><th>説明</th></tr>
+    <tr><td>Filter</td><td>入力した文字を含む行だけを表示する（チェックしたままの行も、表示されていなければそのまま残る）</td></tr>
+    <tr><td>見出しのチェックボックス</td><td>表示している行をまとめてチェック・解除する</td></tr>
+    <tr><td>Apply</td><td>一覧の下に表示している正規表現を項目に設定して閉じる。何もチェックしていなければ項目を空にする</td></tr>
+    <tr><td>Cancel</td><td>項目を変えずに閉じる</td></tr>
+  </table>
+
+  <h2 id="section-notes">注意</h2>
+  <ul>
+    <li>開いたときのチェックは、今の値をブラウザの正規表現として解釈して判定します。Java だけが解釈できる書き方（所有量指定子など）では、一致する行があってもチェックが付かないことがあります。</li>
+    <li>Apply すると項目の値は組み立てた正規表現で置き換わります。手で書いた条件と組み合わせたいときは、Apply の後に編集してください。</li>
+  </ul>
+
+  <h2 id="section-related">関連</h2>
+  <ul>
+    <li><a href="../sections/traversal.html">Traversal</a> — <code>regInclude</code> / <code>regExclude</code></li>
+    <li><a href="../sections/data-load.html">Data Load</a> — <code>regTableInclude</code> / <code>regTableExclude</code></li>
+  </ul>
+</body>
+</html>

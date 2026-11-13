@@ -12,6 +12,7 @@ import {
 	DatasetSettings,
 	type DatasetSettingsBuilder,
 } from "../model/DatasetSettings";
+import type { TableSource } from "../model/RegexFilter";
 import {
 	fetchData,
 	getErrorMessage,
@@ -200,6 +201,29 @@ export const useDatasetTableNames = (
 		withLogs,
 	);
 	return { tableNames: data, loading, logs, error };
+};
+
+const IDLE_TABLE_SOURCES = idleLoad<TableSource[]>([]);
+
+// 読み込まれるテーブルごとの読込元（ファイル・setting適用前のテーブル名）。enabledの間だけ読む
+export const useDatasetTableSources = (
+	srcInfo: DatasetSrcInfo,
+	enabled: boolean,
+): {
+	sources: TableSource[];
+	loading: boolean;
+	logs: string[];
+	error: string;
+} => {
+	const { data, loading, logs, error } = useDatasetLoad(
+		srcInfo,
+		"table-sources",
+		{},
+		enabled,
+		IDLE_TABLE_SOURCES,
+		true,
+	);
+	return { sources: data, loading, logs, error };
 };
 
 // rowsは先頭の一部だけ（sidecarが件数を制限する）。totalRowsが対象テーブルの全行数

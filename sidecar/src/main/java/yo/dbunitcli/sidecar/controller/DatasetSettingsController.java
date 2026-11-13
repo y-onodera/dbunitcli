@@ -28,12 +28,14 @@ import yo.dbunitcli.application.json.FromJsonXlsxSchemaBuilder;
 import yo.dbunitcli.application.option.DataSetLoadOption;
 import yo.dbunitcli.application.option.ResultOption;
 import yo.dbunitcli.common.Parameter;
+import yo.dbunitcli.common.Source;
 import yo.dbunitcli.dataset.AddSettingTableMetaData;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.dataset.ComparableDataSetProducer;
 import yo.dbunitcli.dataset.ComparableTable;
 import yo.dbunitcli.dataset.ComparableTableDto;
 import yo.dbunitcli.dataset.ComparableTableJoin;
+import yo.dbunitcli.dataset.ComparableTableMappingTask;
 import yo.dbunitcli.dataset.InlineSource;
 import yo.dbunitcli.dataset.IDataSetConverter;
 import yo.dbunitcli.dataset.MetaDataCapture;
@@ -47,6 +49,7 @@ import yo.dbunitcli.sidecar.dto.DatasetRequestDto;
 import yo.dbunitcli.sidecar.dto.DatasetSettingDto;
 import yo.dbunitcli.sidecar.dto.DatasetTableConvertRequestDto;
 import yo.dbunitcli.sidecar.dto.DatasetTableNamesRequestDto;
+import yo.dbunitcli.sidecar.dto.DatasetTableSourceDto;
 import yo.dbunitcli.sidecar.dto.DatasetTablePreviewRequestDto;
 import yo.dbunitcli.sidecar.dto.DatasetTablePreviewResponseDto;
 import yo.dbunitcli.sidecar.dto.DatasetUnitTablePreviewRequestDto;
@@ -118,6 +121,55 @@ public class DatasetSettingsController extends AbstractResourceFileController<Da
             LOGGER.warn("Could not get table names", th);
             return "[]";
         }
+    }
+
+    /**
+     * 読み込まれるテーブルごとに、その行の読込元（ファイル・setting適用前のテーブル名）を返す。
+     * 1つのテーブルに複数の読込元があれば読込元ごとに1件ずつ返す。読めなかったときはエラーを返す
+     */
+    @Interruptible
+    @Post(uri = "table-sources", produces = MediaType.APPLICATION_JSON)
+    public String tableSources(@Body final DatasetTableNamesRequestDto request) {
+        try {
+            final ComparableDataSetParam param = this.toParam(request).get().build();
+            final Path srcDir = param.src() != null && param.src().isDirectory()
+                    ? param.src().getAbsoluteFile().toPath().normalize()
+                    : null;
+            try (final ComparableDataSetProducer producer = new ComparableDataSetLoader(this.buildParameter(request))
+                    .getComparableDataSetProducer(param)) {
+                final List<DatasetTableSourceDto> result = producer.lazyLoad(false).entrySet().stream()
+                        .filter(entry -> entry.getValue() instanceof ComparableTableMappingTask.WithTargetTable)
+                        .flatMap(entry -> ((ComparableTableMappingTask.WithTargetTable) entry.getValue()).tasks().stream()
+                                .map(ComparableTableMappingTask::source)
+                                .map(source -> new DatasetTableSourceDto(entry.getKey()
+                                        , relativePath(srcDir, source.filePath())
+                                        , sourceTableName(source))))
+                        .distinct()
+                        .toList();
+                return ObjectMapper.getDefault().writeValueAsString(result);
+            }
+        } catch (final Throwable th) {
+            LOGGER.error("cause:", th);
+            throw new ApplicationException(th);
+        }
+    }
+
+    private static String relativePath(final Path srcDir, final String filePath) {
+        if (Strings.isEmpty(filePath) || srcDir == null) {
+            return Strings.isEmpty(filePath) ? "" : filePath;
+        }
+        final Path path = Path.of(filePath).normalize();
+        return path.startsWith(srcDir)
+                ? srcDir.relativize(path).toString().replace('\\', '/')
+                : filePath;
+    }
+
+    // joinの結果等、ファイルを持たない読込元は名前を求められない
+    private static String sourceTableName(final Source source) {
+        if (Strings.isNotEmpty(source.tableName())) {
+            return source.tableName();
+        }
+        return source.fileName().contains(".") ? source.getTableName() : source.fileName();
     }
 
     /**

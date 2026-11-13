@@ -4,6 +4,7 @@ import {
 	SectionOptionHeader,
 } from "../../../components/dialog";
 import type { CommandOption, SrcElements } from "../../../model/CommandOption";
+import { RegexFilterButton } from "./dialog/RegexFilterDialog";
 import Check from "./element/Check";
 import PlainText from "./element/PlainText";
 
@@ -48,13 +49,31 @@ export default function TraversalFormSection({
 				element={srcElements.regInclude}
 				handleValueChange={handleValueChange(srcElements.regInclude)}
 				hidden={!showOptional}
-			/>
+			>
+				{({ path, setPath }) => (
+					<RegexFilterButton
+						kind="path"
+						fieldName={srcElements.regInclude.name}
+						value={path}
+						onApply={setPath}
+					/>
+				)}
+			</PlainText>
 			<PlainText
 				prefix={prefix}
 				element={srcElements.regExclude}
 				handleValueChange={handleValueChange(srcElements.regExclude)}
 				hidden={!showOptional}
-			/>
+			>
+				{({ path, setPath }) => (
+					<RegexFilterButton
+						kind="path"
+						fieldName={srcElements.regExclude.name}
+						value={path}
+						onApply={setPath}
+					/>
+				)}
+			</PlainText>
 		</SectionFieldset>
 	);
 }

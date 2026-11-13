@@ -394,6 +394,28 @@ class DatasetSettingsControllerTest {
     }
 
     @Test
+    void testTableSources_setting適用後のテーブル名に読込元の相対パスと元のテーブル名を添えて返す() throws IOException {
+        this.createPreviewSrc();
+        Files.createDirectories(PREVIEW_SRC_DIR.resolve("sub"));
+        Files.writeString(PREVIEW_SRC_DIR.resolve("sub/nested.csv"), "key\n1\n");
+
+        Assertions.assertEquals(List.of(
+                        Map.of("tableName", "nested", "filePath", "sub/nested.csv", "sourceTableName", "nested"),
+                        Map.of("tableName", "renamed", "filePath", "big.csv", "sourceTableName", "big"),
+                        Map.of("tableName", "small", "filePath", "small.csv", "sourceTableName", "small")),
+                this.tableSources(this.tableBody("csv", this.writeRenameSetting(), "", Map.of("recursive", "true"))));
+    }
+
+    @Test
+    void testTableSources_regTableIncludeで外したテーブルは返さない() throws IOException {
+        this.createPreviewSrc();
+
+        Assertions.assertEquals(List.of(
+                        Map.of("tableName", "small", "filePath", "small.csv", "sourceTableName", "small")),
+                this.tableSources(this.tableBody("csv", "", "", Map.of("regTableInclude", "^small$"))));
+    }
+
+    @Test
     void testTableNames_settingTargetOnlyならsettingの対象のテーブルだけを返す() throws IOException {
         this.createPreviewSrc();
 
@@ -858,6 +880,19 @@ class DatasetSettingsControllerTest {
         final String response = this.client.toBlocking().retrieve(
                 HttpRequest.POST("dbunit-cli/dataset-setting/table-names", ObjectMapper.getDefault().writeValueAsString(body)));
         return List.of(ObjectMapper.getDefault().readValue(response, String[].class)).stream().sorted().toList();
+    }
+
+    /**
+     * table-sourcesの結果（テーブル名順）
+     */
+    @SuppressWarnings("unchecked")
+    private List<Map<String, String>> tableSources(final Map<String, Object> body) throws IOException {
+        final String response = this.client.toBlocking().retrieve(
+                HttpRequest.POST("dbunit-cli/dataset-setting/table-sources", ObjectMapper.getDefault().writeValueAsString(body)));
+        return List.of(ObjectMapper.getDefault().readValue(response, Map[].class)).stream()
+                .map(it -> (Map<String, String>) it)
+                .sorted(java.util.Comparator.comparing(it -> it.get("tableName")))
+                .toList();
     }
 
     @SuppressWarnings("unchecked")
