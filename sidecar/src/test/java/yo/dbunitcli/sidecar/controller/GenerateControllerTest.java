@@ -142,6 +142,11 @@ class GenerateControllerTest {
         assertRefresh("{\"-src.srcType\":\"file\"}", "generate-refresh-srcType-file-response.json");
     }
 
+    @Test
+    public void testRefresh_xlsxTemplateCompare_比較用の項目が追加されtemplateが削除される() throws IOException {
+        assertRefresh("{\"-generateType\":\"xlsxTemplate\",\"-templateType\":\"compare\"}", "generate-refresh-xlsxTemplate-compare-response.json");
+    }
+
     private void assertRefresh(final String requestJson, final String expectedFile) throws IOException {
         final String jsonResponse = this.client.toBlocking().retrieve(
                 HttpRequest.POST("dbunit-cli/generate/refresh", requestJson));

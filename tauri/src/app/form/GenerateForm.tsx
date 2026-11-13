@@ -27,6 +27,7 @@ import JxlsFormSection from "./section/JxlsFormSection";
 import TemplateFormSection, {
 	useTemplateEncoding,
 } from "./section/TemplateFormSection";
+import XlsxCompareFormSection from "./section/XlsxCompareFormSection";
 
 export function GenerateForm(prop: {
 	handleTypeSelect: () => Promise<void>;
@@ -80,6 +81,13 @@ export function GenerateForm(prop: {
 						<TxtTemplateGenerateButton
 							scaffoldPrefill={prop.scaffoldPrefill}
 							handleReflect={prop.handleScaffoldReflect}
+						/>
+					)}
+					{generate.templateType && (
+						<Select
+							handleTypeSelect={prop.handleTypeSelect}
+							prefix=""
+							element={generate.templateType}
 						/>
 					)}
 					{generate.unit && (
@@ -158,6 +166,7 @@ export function GenerateForm(prop: {
 					)}
 					{generate.lazyLoad && <Check prefix="" element={generate.lazyLoad} />}
 				</SectionFieldset>
+				<XlsxCompareFormSection generate={generate} />
 				<DatasetLoadForm
 					handleTypeSelect={prop.handleTypeSelect}
 					name={prop.name}

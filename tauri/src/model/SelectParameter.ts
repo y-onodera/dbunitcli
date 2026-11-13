@@ -103,6 +103,12 @@ export type GenerateOptions = CommandOptions & {
 	fixedLength?: CommandOption;
 	defaultLength?: CommandOption;
 	align?: CommandOption;
+	templateType?: CommandOption;
+	oldTable?: CommandOption;
+	newTable?: CommandOption;
+	keys?: CommandOption;
+	compares?: CommandOption;
+	compareSheetName?: CommandOption;
 	result: CommandOption;
 	resultPath: CommandOption;
 	outputEncoding: CommandOption;
