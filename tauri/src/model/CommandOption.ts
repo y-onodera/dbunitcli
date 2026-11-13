@@ -179,7 +179,8 @@ export type CsvqOptions = CommandOptions & {
 	srcType: Csvq;
 };
 type DBTypeOptions = CommandOptions & {
-	useJdbcMetaData: CommandOption;
+	// JDBCメタデータを使うgenerateTypeでは項目ごと除外される（GenerateOption参照）
+	useJdbcMetaData?: CommandOption;
 };
 export type SqlOptions = DBTypeOptions & {
 	srcType: Sql;

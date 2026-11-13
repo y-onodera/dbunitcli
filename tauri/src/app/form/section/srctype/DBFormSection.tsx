@@ -13,13 +13,16 @@ export default function DBFormSection({
 	handleToggleChecked: (param: CommandOption) => (checked: boolean) => void;
 }) {
 	const prefix = settings.prefix;
+	const useJdbcMetaData = settings.useJdbcMetaData;
 
 	return (
-		<Check
-			prefix={prefix}
-			element={settings.useJdbcMetaData}
-			handleOnChange={handleToggleChecked(settings.useJdbcMetaData)}
-			hidden={false}
-		/>
+		useJdbcMetaData && (
+			<Check
+				prefix={prefix}
+				element={useJdbcMetaData}
+				handleOnChange={handleToggleChecked(useJdbcMetaData)}
+				hidden={false}
+			/>
+		)
 	);
 }
