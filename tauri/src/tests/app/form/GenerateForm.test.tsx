@@ -11,6 +11,7 @@ import {
 	generateRefreshGenerateTypeXlsResponseFixture,
 	generateRefreshGenerateTypeXlsxResponseFixture,
 	generateRefreshSrcTypeTableResponseFixture,
+	generateRefreshXlsxTemplateCompareResponseFixture,
 } from "./fixtures";
 
 vi.mock("@tauri-apps/plugin-dialog", () => ({ open: vi.fn() }));
@@ -368,6 +369,79 @@ describe("GenerateFormの描画テスト", () => {
 			);
 
 			expect(await templateMenuItem("generate")).not.toBeInTheDocument();
+		});
+	});
+
+	describe("xlsxTemplateの比較用（templateType=compare）", () => {
+		it("generateセクションにtemplateTypeがselectとして表示される", () => {
+			render(
+				<GenerateForm
+					{...makeGenerateProps(
+						generateRefreshXlsxTemplateCompareResponseFixture,
+					)}
+				/>,
+			);
+
+			const select = document.querySelector('select[name="-templateType"]');
+			expect(
+				select?.closest("fieldset")?.querySelector("legend"),
+			).toHaveTextContent("generate");
+			expect(select).toHaveValue("compare");
+		});
+
+		it("compareセクションがgenerateとsrcの間に表示され、比較用の項目がこの順で並ぶ", () => {
+			render(
+				<GenerateForm
+					{...makeGenerateProps(
+						generateRefreshXlsxTemplateCompareResponseFixture,
+					)}
+				/>,
+			);
+
+			const legends = document.querySelectorAll("fieldset legend");
+			expect(legends[0]).toHaveTextContent("generate");
+			expect(legends[1]).toHaveTextContent("compare");
+			expect(legends[2]).toHaveTextContent("src");
+			const compareSection = document.querySelectorAll("fieldset")[1];
+			expect(
+				[...compareSection.querySelectorAll("input[type='text']")].map(
+					(input) => input.getAttribute("name"),
+				),
+			).toEqual([
+				"-oldTable",
+				"-newTable",
+				"-keys",
+				"-compares",
+				"-compareSheetName",
+			]);
+			expect(compareSection.querySelector("legend button")).toBeInTheDocument();
+		});
+
+		it("templateTypeを変えるとフォームを再構成する", async () => {
+			const props = makeGenerateProps(
+				generateRefreshXlsxTemplateCompareResponseFixture,
+			);
+			render(<GenerateForm {...props} />);
+
+			await userEvent.selectOptions(
+				document.querySelector('select[name="-templateType"]') as HTMLElement,
+				"table",
+			);
+
+			expect(props.handleTypeSelect).toHaveBeenCalled();
+		});
+
+		it("templateTypeの無いgenerateTypeではcompareセクションを表示しない", () => {
+			render(<GenerateForm {...makeGenerateProps()} />);
+
+			expect(
+				document.querySelector('select[name="-templateType"]'),
+			).not.toBeInTheDocument();
+			expect(
+				[...document.querySelectorAll("fieldset legend")].some((legend) =>
+					legend.textContent?.startsWith("compare"),
+				),
+			).toBe(false);
 		});
 	});
 });

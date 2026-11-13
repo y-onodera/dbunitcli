@@ -12,7 +12,7 @@
 | xlsxSchema | table固定 | false / false | true | テーブル毎（`<table>.json`） | `xlsxschema/xlsxSchemaTemplate.stg,.txt`、既定settings`xlsxschema/xlsxSchemaSettings.json` |
 | javaBean | table固定 | false / true | true | テーブル毎（`<Table（snakeToUpperCamel）>.java`） | `javabean/javaBeanTemplate.stg,.txt`、既定settings`javabean/javaBeanSettings.json` |
 | fixedColumnDef | table固定 | false / false | true | テーブル毎（`<table>.json`） | `fixedcolumndef/fixedColumnDefTemplate.stg,.txt` |
-| xlsxTemplate | dataset固定 | false / false | true | 単一ファイル・コード生成専用（テンプレート不要、`writer()`が`JxlsTemplateGenerator`でExcelを直接組み立てる） | （なし） |
+| xlsxTemplate | dataset固定 | false / false | true | 単一ファイル・コード生成専用（テンプレート不要、`writer()`が`-templateType`に応じて`JxlsTemplateGenerator`（table）か`JxlsCompareTemplateGenerator`（compare）でExcelを直接組み立てる） | （なし） |
 
 loadData/useJdbcMetaDataは`GenerateStrategy`実装の`loadData()`/`useJdbcMetaData()`をオーバーライドして決まる（デフォルトは`loadData()=true`, `useJdbcMetaData()=false`）。`GenerateOption.dataSetParam()`はこの2メソッドを呼ぶ他、`defaultSettingsPath()`のロード時適用を`loadData()=true`型に限定する（wrapProducer型に適用すると変換ルールが合成前の元ソース列に評価され記述子を汚染するため）。
 
@@ -42,6 +42,7 @@ loadData/useJdbcMetaDataは`GenerateStrategy`実装の`loadData()`/`useJdbcMetaD
 | `lazyLoad` | xlsx/xls用 | `parameterStream()` / `forEachParameter()` の分岐（検証・出力と`-template.*`のExcel固有項目は`ExcelGenerateStrategy`） |
 | `parallel` | srcが並列読込できる形式か、unit=recordのとき表示（srcType=noneを除く） | `dataSetParam()`で`setParallel`に渡し、srcの並列読込と`unit=record`・`unit=table`の並列出力の並列数になる（値の検証・解釈は`DataSetConverterOption.parallel(String)`/`parallelism(String)`を共用） |
 | `fixedLength` / `defaultLength` / `align` | fixedColumnDef用 | `FixedColumnDefGenerateStrategy.wrapDescriptor()` が `ComparableFixedColumnDefMetaDataProducer` に渡す |
+| `templateType` / `oldTable` / `newTable` / `keys` / `compares` / `compareSheetName` | xlsxTemplate用 | `XlsxTemplateGenerateStrategy`。compareはsrcのテーブル（`-setting`適用後）から`oldTable`/`newTable`を名前で選び、テーブル名をそのままデータシート名にする（他のテーブルは使わない）。`keys`/`compares`は`old:new`か同名の`column`のカンマ区切り、`compares`省略時はキー以外で両方にある同名列 |
 
 ## 実装チェックリスト（generateType追加/修正時の変更箇所）
 

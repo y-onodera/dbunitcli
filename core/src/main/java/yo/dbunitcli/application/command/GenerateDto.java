@@ -3,6 +3,7 @@ package yo.dbunitcli.application.command;
 import picocli.CommandLine;
 import yo.dbunitcli.application.CommandDto;
 import yo.dbunitcli.application.ParameterUnit;
+import yo.dbunitcli.application.command.generate.XlsxTemplateType;
 import yo.dbunitcli.application.dto.DataSetLoadDto;
 import yo.dbunitcli.application.dto.TemplateRenderDto;
 import yo.dbunitcli.dataset.DbOperation;
@@ -42,6 +43,18 @@ public class GenerateDto extends CommandDto {
     private String defaultLength;
     @CommandLine.Option(names = "-align", description = "column alignment for fixedColumnDef generation (left or right)")
     private String align;
+    @CommandLine.Option(names = "-templateType", description = "xlsxTemplate generation: table (sheet per table) or compare (oldTable and newTable sheets and a compare sheet)")
+    private XlsxTemplateType templateType;
+    @CommandLine.Option(names = "-oldTable", description = "table name in src (after setting) used as the old data sheet for compare xlsxTemplate")
+    private String oldTable;
+    @CommandLine.Option(names = "-newTable", description = "table name in src (after setting) used as the new data sheet for compare xlsxTemplate")
+    private String newTable;
+    @CommandLine.Option(names = "-keys", description = "comma-separated key columns for compare xlsxTemplate. oldColumn:newColumn or column")
+    private String keys;
+    @CommandLine.Option(names = "-compares", description = "comma-separated columns to compare for compare xlsxTemplate. oldColumn:newColumn or column")
+    private String compares;
+    @CommandLine.Option(names = "-compareSheetName", description = "compare sheet name for compare xlsxTemplate")
+    private String compareSheetName;
     @CommandLine.Option(names = "-parallel", description = "number of threads to load sources and generate per table in parallel. 1 is sequential (default: CPU cores if possible)")
     private String parallel;
     private DataSetLoadDto srcData = new DataSetLoadDto();
@@ -182,6 +195,54 @@ public class GenerateDto extends CommandDto {
 
     public void setAlign(final String align) {
         this.align = align;
+    }
+
+    public XlsxTemplateType getTemplateType() {
+        return this.templateType;
+    }
+
+    public void setTemplateType(final XlsxTemplateType templateType) {
+        this.templateType = templateType;
+    }
+
+    public String getOldTable() {
+        return this.oldTable;
+    }
+
+    public void setOldTable(final String oldTable) {
+        this.oldTable = oldTable;
+    }
+
+    public String getNewTable() {
+        return this.newTable;
+    }
+
+    public void setNewTable(final String newTable) {
+        this.newTable = newTable;
+    }
+
+    public String getKeys() {
+        return this.keys;
+    }
+
+    public void setKeys(final String keys) {
+        this.keys = keys;
+    }
+
+    public String getCompares() {
+        return this.compares;
+    }
+
+    public void setCompares(final String compares) {
+        this.compares = compares;
+    }
+
+    public String getCompareSheetName() {
+        return this.compareSheetName;
+    }
+
+    public void setCompareSheetName(final String compareSheetName) {
+        this.compareSheetName = compareSheetName;
     }
 
     public String getParallel() {

@@ -973,6 +973,36 @@ export const generateRefreshGenerateTypeSqlResponseFixture = {
 	srcData: makeTableSrcData("src"),
 } as GenerateOptions;
 
+// generate-refresh-xlsxTemplate-compare-response.json をもとにしたフィクスチャ
+export const generateRefreshXlsxTemplateCompareResponseFixture = {
+	prefix: "",
+	generateType: makeElement(
+		"generateType",
+		"ENUM",
+		"xlsxTemplate",
+		"WORKSPACE",
+		false,
+		GENERATE_TYPE_OPTIONS,
+	),
+	templateType: makeElement(
+		"templateType",
+		"ENUM",
+		"compare",
+		"WORKSPACE",
+		true,
+		["table", "compare"],
+	),
+	oldTable: makeElement("oldTable", "TEXT", "", "WORKSPACE", true),
+	newTable: makeElement("newTable", "TEXT", "", "WORKSPACE", true),
+	keys: makeElement("keys", "TEXT", "", "WORKSPACE", true),
+	compares: makeElement("compares", "TEXT", "", "WORKSPACE", false),
+	compareSheetName: makeTextWithDefault("compareSheetName", "", "compare"),
+	...parallelElement(true),
+	result: makeElement("result", "DIR", "", "RESULT", false),
+	resultPath: makeTextWithDefault("resultPath", "", "(parameter name)"),
+	srcData: makeCsvSrcData("src", ""),
+} as GenerateOptions;
+
 // xlsxSchema生成ダイアログ（generate/refresh generateType=xlsxSchema）用fixture
 export const generateRefreshXlsxSchemaResponseFixture = {
 	prefix: "",

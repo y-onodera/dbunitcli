@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <title>ヘルプ - compare</title>
+  <link rel="stylesheet" href="../help.css" />
+</head>
+<body>
+  <p><a href="../index.html">&larr; ヘルプ一覧に戻る</a></p>
+  <h1>compare</h1>
+  <p><a href="../commands/generate.html">Generate</a> で比較用の Excel テンプレートを生成するときに、比べる 2 テーブルと突合に使うカラムを指定するセクションです。<code>generate</code> セクションで <code>generateType = xlsxTemplate</code>、<code>templateType = compare</code> を選ぶと表示されます。</p>
+
+  <h2 id="toc">目次</h2>
+  <ul>
+    <li><a href="#section-simple">シンプルな使い方</a></li>
+    <li><a href="#section-options">設定項目</a></li>
+    <li><a href="#section-columns">keys / compares の書き方</a></li>
+    <li><a href="#section-tables">比べるテーブルの用意</a></li>
+    <li><a href="#section-traversal">traversal と setting の組み合わせ</a></li>
+    <li><a href="#section-example">例</a></li>
+    <li><a href="#section-notes">注意</a></li>
+    <li><a href="#section-related">関連</a></li>
+  </ul>
+
+  <h2 id="section-simple">シンプルな使い方</h2>
+  <p><code>src</code> から読み込んだテーブルのうち 2 つを名前で選び、キーで行を突き合わせて値を比べる Excel テンプレートを作ります。</p>
+  <pre>入力 (src = data):
+  data/USERS_OLD.csv   ID,NAME,AMT
+  data/USERS_NEW.csv   ID,NAME,AMT
+
+指定:
+  generateType = xlsxTemplate
+  templateType = compare
+  oldTable     = USERS_OLD
+  newTable     = USERS_NEW
+  keys         = ID
+  resultPath   = compare.xlsx
+
+結果 (compare.xlsx):
+  シート USERS_OLD / USERS_NEW / compare
+  compare シートは USERS_OLD の行ごとに、ID が同じ USERS_NEW の行と NAME・AMT を並べて比べる</pre>
+  <ul>
+    <li><code>compares</code> を省くと、キー以外で両方のテーブルにある同じ名前のカラム（上の例では <code>NAME</code> と <code>AMT</code>）を比べる</li>
+    <li>データのシート名はテーブル名と同じになる。生成したファイルを <a href="../commands/generate/types/xlsx.html">generateType: xlsx / xls</a>（<code>unit = dataset</code>）の <code>template</code> に指定し、同じ <code>src</code> で実行すると、シート名と同じ名前のテーブルの行が流し込まれる</li>
+    <li>比較シートの列と STATUS の意味は <a href="../dialogs/xlsx-compare-template-generate.html">Generate Compare Template</a> の「生成ルール」と同じ</li>
+  </ul>
+
+  <h2 id="section-options">設定項目</h2>
+  <table>
+    <tr><th>項目</th><th>説明</th><th>デフォルト</th></tr>
+    <tr><td><code>oldTable</code>（必須）</td><td>比べる基準にするテーブルの名前。<code>src</code> の setting を適用した後のテーブル名で、大文字・小文字も含めて完全に一致させる</td><td>—</td></tr>
+    <tr><td><code>newTable</code>（必須）</td><td><code>oldTable</code> と突き合わせるテーブルの名前。<code>oldTable</code> と同じ名前は指定できない</td><td>—</td></tr>
+    <tr><td><code>keys</code>（必須）</td><td>行を突き合わせるキーのカラム。複数あれば複合キーにする（下記「keys / compares の書き方」）</td><td>—</td></tr>
+    <tr><td><code>compares</code></td><td>値を比べるカラム（下記「keys / compares の書き方」）</td><td>（空）。キー以外で両方のテーブルにある同じ名前のカラム</td></tr>
+    <tr><td><code>compareSheetName</code></td><td>比較シートの名前。テーブル名と同じ名前は指定できない</td><td><code>compare</code></td></tr>
+  </table>
+
+  <h2 id="section-columns">keys / compares の書き方</h2>
+  <p>カラムをカンマ区切りで並べます。old と new でカラム名が違う場合は <code>old のカラム:new のカラム</code> と書き、同じ名前なら 1 つだけ書きます。</p>
+  <pre>keys     = ID:CODE,SUB      → old の ID と new の CODE、両方の SUB を複合キーにする
+compares = NAME:NAME2,AMT   → old の NAME と new の NAME2、両方の AMT を比べる</pre>
+  <ul>
+    <li>書いた順に複合キーを連結し、比較シートの列も書いた順に並ぶ</li>
+    <li>テーブルに無いカラムを書くと、実行時にエラーになる</li>
+  </ul>
+
+  <h2 id="section-tables">比べるテーブルの用意</h2>
+  <p><code>oldTable</code> / <code>newTable</code> には、<code>src</code> の読み込みと setting の適用が終わった後のテーブル名を書きます。読み込んだテーブルの名前が比べたい形になっていないときは、setting で名前を付けます。</p>
+  <table>
+    <tr><th>状況</th><th>setting の書き方</th></tr>
+    <tr><td>比べる 2 つのファイル（テーブル）の名前が違う</td><td>不要。テーブル名をそのまま <code>oldTable</code> / <code>newTable</code> に書く（シンプルな使い方）</td></tr>
+    <tr><td>1 つのテーブルの中に old と new の行がある</td><td>1 つの設定に <code>separate</code> を書き、派生テーブルごとに <code>tableName</code> と <code>filter</code> を指定する（例 1）</td></tr>
+    <tr><td>同じカラムのテーブルどうしを比べるテンプレートを、手元のファイル 1 つで作る</td><td>同じ <code>name</code> を対象にした設定を 2 つ書き、<code>tableName</code> を変える。同じ内容で名前の違うテーブルが 2 つでき、テンプレートだけを先に作れる（例 2）</td></tr>
+    <tr><td>別のディレクトリにある同じ名前のファイルを比べる（<code>old/USERS.csv</code> と <code>new/USERS.csv</code>）</td><td>上と同じく設定を 2 つ書き、<code>name</code> に <code>filePath</code> を添えて読み込み元のパスで分ける（例 3）。例 2 で作ったテンプレートでデータを出力するときも、この setting を使う</td></tr>
+  </table>
+  <p>名前・パスを指定する箇所は 3 つあり、照合する相手と一致の仕方が違います。</p>
+  <table>
+    <tr><th>項目</th><th>照合する相手</th><th>一致の仕方</th></tr>
+    <tr><td><code>compare</code> セクションの <code>oldTable</code> / <code>newTable</code></td><td>setting を適用した後のテーブル名</td><td>完全一致（正規表現ではない）</td></tr>
+    <tr><td>setting の <code>filePath</code></td><td>読み込み元ファイルの絶対パス（区切りは <code>/</code>）</td><td>正規表現がパス全体に一致する。先頭は <code>.*/</code> から書く（例: <code>.*/old/USERS\.csv</code>）</td></tr>
+    <tr><td><code>traversal</code> の <code>regInclude</code></td><td>読み込むファイルのパス（区切りは OS のもの。Windows では <code>\</code>）</td><td>正規表現がパスの一部に一致すれば読み込む</td></tr>
+  </table>
+  <ul>
+    <li>setting の <code>name</code> は読み込んだときのテーブル名（CSV ならファイル名から拡張子を除いたもの）で、<code>tableName</code> が付け直した後の名前になる。<code>oldTable</code> / <code>newTable</code> に書くのは <code>tableName</code> の方</li>
+  </ul>
+
+  <h2 id="section-traversal">traversal と setting の組み合わせ</h2>
+  <p><code>traversal</code> と setting は役割が違うため、どちらかを選ぶのではなく、必要に応じて組み合わせます。</p>
+  <table>
+    <tr><th>設定</th><th>役割</th></tr>
+    <tr><td><code>traversal</code>（<code>recursive</code> / <code>regInclude</code> / <code>regExclude</code>）</td><td>どのファイルを読み込むかを決める。名前は変えない</td></tr>
+    <tr><td>setting（<code>name</code> / <code>filePath</code> / <code>tableName</code> / <code>separate</code>）</td><td>読み込んだテーブルに名前を付け、行を分ける</td></tr>
+  </table>
+  <p>処理は「<code>traversal</code> でファイルを読み込む → setting で名前を付ける → <code>oldTable</code> / <code>newTable</code> で 2 つを選ぶ」の順に進みます。別のディレクトリにあるファイルを比べるときは、次のように組み合わせてください。</p>
+  <ol>
+    <li><code>recursive</code> を ON にして、<code>src</code> の下のディレクトリまで探します。</li>
+    <li>比べないファイル（バックアップなど）まで見つかるなら、<code>regInclude</code> で比べるファイルのパスだけに絞ります。</li>
+    <li>残ったファイルに同じ名前のものがあれば、setting の <code>filePath</code> で別の名前を付けます。</li>
+  </ol>
+  <ul>
+    <li><code>traversal</code> だけでは、同じ名前のファイルは 1 つのテーブルにまとまる。名前を付け分けるには setting が要る</li>
+    <li>setting だけでも比べられるが、比べないファイルも読み込まれ、余分なテーブルが残る。読み込むファイルが多いと時間がかかるため、<code>regInclude</code> で絞ってください</li>
+    <li><code>regInclude</code> の横の編集ボタンを押すと、読み込まれるファイルの一覧（<code>src</code> からの相対パスと、setting を適用した後のテーブル名）からチェックして正規表現を組み立てられる。区切り文字の違いも吸収するため、手で書くよりこちらを使ってください。一覧の <code>table</code> 列で、setting の名前の付け方も確かめられる（<a href="../dialogs/regex-filter.html">Select from Table List</a>）</li>
+  </ul>
+
+  <h2 id="section-example">例</h2>
+
+  <h3>例 1: 1 つのテーブルの行を separate で 2 つに分ける</h3>
+  <p><code>separate</code> の要素ごとに派生テーブルが 1 つでき、<code>filter</code> でそれぞれに入る行を分けます。元のテーブル <code>USERS</code> は残りません。</p>
+  <pre>入力 (src = one):
+  one/USERS.csv
+    ID,KIND,NAME,AMT
+    1,old,a,10
+    2,old,b,20
+    1,new,a,11
+    3,new,c,30
+
+setting:
+  {
+    "settings": [
+      { "name": "USERS", "separate": [
+          { "tableName": "OLD_USERS", "filter": ["KIND == 'old'"] },
+          { "tableName": "NEW_USERS", "filter": ["KIND == 'new'"] }
+      ] }
+    ]
+  }
+
+指定:
+  oldTable = OLD_USERS
+  newTable = NEW_USERS
+  keys     = ID
+
+結果:
+  OLD_USERS: ID=1, 2 の行 / NEW_USERS: ID=1, 3 の行
+  compares を省いたので KIND・NAME・AMT を比べる</pre>
+
+  <h3>例 2: 1 つのファイルからテンプレートを作る</h3>
+  <p>比べたいデータがまだ揃っていなくても、カラムが同じなら手元のファイル 1 つでテンプレートを作れます。同じ <code>name</code> を対象にした設定を 2 つ書くと、同じ内容で名前の違うテーブルが 2 つできます。</p>
+  <pre>入力 (src = tpl):
+  tpl/USERS.csv   ID,NAME,AMT
+
+setting:
+  {
+    "settings": [
+      { "name": "USERS", "tableName": "OLD_USERS" },
+      { "name": "USERS", "tableName": "NEW_USERS" }
+    ]
+  }
+
+指定:
+  oldTable   = OLD_USERS
+  newTable   = NEW_USERS
+  keys       = ID
+  resultPath = compare.xlsx
+
+結果 (compare.xlsx):
+  シート OLD_USERS / NEW_USERS / compare</pre>
+  <ul>
+    <li>できたテンプレートは、<code>OLD_USERS</code> と <code>NEW_USERS</code> のテーブルを読み込む <code>src</code> で使う。別のディレクトリの同じ名前のファイルを比べるなら、例 3 の setting を指定する</li>
+  </ul>
+
+  <h3>例 3: 別のディレクトリにある同じ名前のファイルを分ける</h3>
+  <p>例 2 と同じく設定を 2 つ書き、対象を <code>name</code> と <code>filePath</code> で指定します。同じテーブル名でも、読み込み元のパスごとに別の名前を付けられます。<code>regInclude</code> で読み込むファイルを先に絞っておきます。</p>
+  <pre>入力 (src = data):
+  data/old/USERS.csv
+  data/new/USERS.csv
+  data/old/backup/USERS.csv
+
+指定:
+  recursive  = ON
+  regInclude = [\\/](old|new)[\\/]USERS\.csv$
+  setting:
+    {
+      "settings": [
+        { "name": { "any": "USERS", "filePath": ".*/old/USERS\\.csv" }, "tableName": "OLD_USERS" },
+        { "name": { "any": "USERS", "filePath": ".*/new/USERS\\.csv" }, "tableName": "NEW_USERS" }
+      ]
+    }
+  oldTable   = OLD_USERS
+  newTable   = NEW_USERS
+  keys       = ID
+
+結果:
+  テーブル OLD_USERS（old/USERS.csv）/ NEW_USERS（new/USERS.csv）
+  old/backup/USERS.csv は regInclude に一致しないため読み込まない</pre>
+  <ul>
+    <li><code>regInclude</code> の <code>[\\/]</code> は <code>\</code> と <code>/</code> のどちらにも一致する。Windows と Linux・macOS で同じ値を使える</li>
+    <li><code>regInclude</code> を指定しなくても比べられる。そのときは <code>old/backup/USERS.csv</code> も読み込まれ、<code>filePath</code> はパス全体と照合するため一致せず、名前が <code>USERS</code> のテーブルとして残る</li>
+    <li>JSON の中では <code>\</code> を <code>\\</code> と書く</li>
+  </ul>
+
+  <h2 id="section-notes">注意</h2>
+  <ul>
+    <li>同じ名前のファイルを setting なしで読み込むと、1 つのテーブルにまとまります。別々に比べるには例 3 のように名前を付け分けてください。</li>
+    <li><code>oldTable</code> / <code>newTable</code> の名前のテーブルが無いと、実行時にエラーになります。エラーメッセージに、読み込んだテーブル名の一覧が出ます。</li>
+    <li>生成したテンプレートで Excel を出力するときは、テンプレートを作ったときと同じ <code>src</code>・setting を指定してください。テーブル名が変わると、シートに行が流し込まれません。</li>
+  </ul>
+
+  <h2 id="section-related">関連</h2>
+  <ul>
+    <li><a href="../commands/generate/types/xlsxTemplate.html">generateType: xlsxTemplate</a> — テンプレートの雛型を生成する</li>
+    <li><a href="../dialogs/xlsx-compare-template-generate.html">Generate Compare Template</a> — 画面から比較用テンプレートを作る。比較シートの生成ルール</li>
+    <li><a href="../dialogs/dataset-setting.html">Dataset Setting</a> — <code>name</code>・<code>filePath</code>・<code>tableName</code>・<code>separate</code>・<code>filter</code></li>
+    <li><a href="traversal.html">Traversal</a> — <code>recursive</code>・<code>regInclude</code></li>
+    <li><a href="../dialogs/regex-filter.html">Select from Table List</a> — 一覧から正規表現を組み立てる</li>
+  </ul>
+</body>
+</html>
