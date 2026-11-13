@@ -399,10 +399,14 @@ class DatasetSettingsControllerTest {
         Files.createDirectories(PREVIEW_SRC_DIR.resolve("sub"));
         Files.writeString(PREVIEW_SRC_DIR.resolve("sub/nested.csv"), "key\n1\n");
 
+        final Path src = PREVIEW_SRC_DIR.toAbsolutePath();
         Assertions.assertEquals(List.of(
-                        Map.of("tableName", "nested", "filePath", "sub/nested.csv", "sourceTableName", "nested"),
-                        Map.of("tableName", "renamed", "filePath", "big.csv", "sourceTableName", "big"),
-                        Map.of("tableName", "small", "filePath", "small.csv", "sourceTableName", "small")),
+                        Map.of("tableName", "nested", "filePath", "sub/nested.csv"
+                                , "matchPath", src.resolve("sub").resolve("nested.csv").toString(), "sourceTableName", "nested"),
+                        Map.of("tableName", "renamed", "filePath", "big.csv"
+                                , "matchPath", src.resolve("big.csv").toString(), "sourceTableName", "big"),
+                        Map.of("tableName", "small", "filePath", "small.csv"
+                                , "matchPath", src.resolve("small.csv").toString(), "sourceTableName", "small")),
                 this.tableSources(this.tableBody("csv", this.writeRenameSetting(), "", Map.of("recursive", "true"))));
     }
 
@@ -411,7 +415,8 @@ class DatasetSettingsControllerTest {
         this.createPreviewSrc();
 
         Assertions.assertEquals(List.of(
-                        Map.of("tableName", "small", "filePath", "small.csv", "sourceTableName", "small")),
+                        Map.of("tableName", "small", "filePath", "small.csv"
+                                , "matchPath", PREVIEW_SRC_DIR.toAbsolutePath().resolve("small.csv").toString(), "sourceTableName", "small")),
                 this.tableSources(this.tableBody("csv", "", "", Map.of("regTableInclude", "^small$"))));
     }
 

@@ -205,10 +205,9 @@ export const useDatasetTableNames = (
 
 const IDLE_TABLE_SOURCES = idleLoad<TableSource[]>([]);
 
-// 読み込まれるテーブルごとの読込元（ファイル・setting適用前のテーブル名）。enabledの間だけ読む
+// 読み込まれるテーブルごとの読込元（ファイル・setting適用前のテーブル名）
 export const useDatasetTableSources = (
 	srcInfo: DatasetSrcInfo,
-	enabled: boolean,
 ): {
 	sources: TableSource[];
 	loading: boolean;
@@ -219,7 +218,7 @@ export const useDatasetTableSources = (
 		srcInfo,
 		"table-sources",
 		{},
-		enabled,
+		true,
 		IDLE_TABLE_SOURCES,
 		true,
 	);

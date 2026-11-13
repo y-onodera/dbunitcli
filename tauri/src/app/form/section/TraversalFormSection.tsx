@@ -4,7 +4,7 @@ import {
 	SectionOptionHeader,
 } from "../../../components/dialog";
 import type { CommandOption, SrcElements } from "../../../model/CommandOption";
-import { RegexFilterButton } from "./dialog/RegexFilterDialog";
+import { regexFilterSlot } from "./dialog/RegexFilterDialog";
 import Check from "./element/Check";
 import PlainText from "./element/PlainText";
 
@@ -12,13 +12,10 @@ export default function TraversalFormSection({
 	srcElements,
 	handleValueChange,
 	handleToggleChecked,
-	regexFilter = true,
 }: {
 	srcElements: SrcElements;
 	handleValueChange: (param: CommandOption) => (newValue: string) => void;
 	handleToggleChecked: (param: CommandOption) => (checked: boolean) => void;
-	// falseならテーブル一覧から選ぶボタンを出さない（データセットを読まないrun）
-	regexFilter?: boolean;
 }) {
 	const [showOptional, setShowOptional] = useState(false);
 	const toggleOptional = () => setShowOptional(!showOptional);
@@ -53,16 +50,7 @@ export default function TraversalFormSection({
 				handleValueChange={handleValueChange(srcElements.regInclude)}
 				hidden={!showOptional}
 			>
-				{regexFilter
-					? ({ path, setPath }) => (
-							<RegexFilterButton
-								kind="path"
-								fieldName={srcElements.regInclude.name}
-								value={path}
-								onApply={setPath}
-							/>
-						)
-					: undefined}
+				{regexFilterSlot("path", srcElements.regInclude.name)}
 			</PlainText>
 			<PlainText
 				prefix={prefix}
@@ -70,16 +58,7 @@ export default function TraversalFormSection({
 				handleValueChange={handleValueChange(srcElements.regExclude)}
 				hidden={!showOptional}
 			>
-				{regexFilter
-					? ({ path, setPath }) => (
-							<RegexFilterButton
-								kind="path"
-								fieldName={srcElements.regExclude.name}
-								value={path}
-								onApply={setPath}
-							/>
-						)
-					: undefined}
+				{regexFilterSlot("path", srcElements.regExclude.name)}
 			</PlainText>
 		</SectionFieldset>
 	);

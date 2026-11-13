@@ -132,18 +132,14 @@ public class DatasetSettingsController extends AbstractResourceFileController<Da
     public String tableSources(@Body final DatasetTableNamesRequestDto request) {
         try {
             final ComparableDataSetParam param = this.toParam(request).get().build();
-            final Path srcDir = param.src() != null && param.src().isDirectory()
-                    ? param.src().getAbsoluteFile().toPath().normalize()
-                    : null;
+            final SrcDir srcDir = SrcDir.of(param.src());
             try (final ComparableDataSetProducer producer = new ComparableDataSetLoader(this.buildParameter(request))
                     .getComparableDataSetProducer(param)) {
                 final List<DatasetTableSourceDto> result = producer.lazyLoad(false).entrySet().stream()
                         .filter(entry -> entry.getValue() instanceof ComparableTableMappingTask.WithTargetTable)
                         .flatMap(entry -> ((ComparableTableMappingTask.WithTargetTable) entry.getValue()).tasks().stream()
                                 .map(ComparableTableMappingTask::source)
-                                .map(source -> new DatasetTableSourceDto(entry.getKey()
-                                        , relativePath(srcDir, source.filePath())
-                                        , sourceTableName(source))))
+                                .map(source -> srcDir.toDto(entry.getKey(), source)))
                         .distinct()
                         .toList();
                 return ObjectMapper.getDefault().writeValueAsString(result);
@@ -154,22 +150,32 @@ public class DatasetSettingsController extends AbstractResourceFileController<Da
         }
     }
 
-    private static String relativePath(final Path srcDir, final String filePath) {
-        if (Strings.isEmpty(filePath) || srcDir == null) {
-            return Strings.isEmpty(filePath) ? "" : filePath;
-        }
-        final Path path = Path.of(filePath).normalize();
-        return path.startsWith(srcDir)
-                ? srcDir.relativize(path).toString().replace('\\', '/')
-                : filePath;
-    }
+    /**
+     * srcのディレクトリ。-regInclude・-regExcludeはsrcを入力のまま辿ったパス（{@link ComparableDataSetParam#getWalk()}）に当たるため、
+     * 照合用のパスはsrcの入力値に相対パスを足して作る
+     */
+    private record SrcDir(Path walkRoot, Path absolute) {
 
-    // joinの結果等、ファイルを持たない読込元は名前を求められない
-    private static String sourceTableName(final Source source) {
-        if (Strings.isNotEmpty(source.tableName())) {
-            return source.tableName();
+        static SrcDir of(final File src) {
+            return src != null && src.isDirectory()
+                    ? new SrcDir(src.toPath(), src.getAbsoluteFile().toPath().normalize())
+                    : new SrcDir(null, null);
         }
-        return source.fileName().contains(".") ? source.getTableName() : source.fileName();
+
+        DatasetTableSourceDto toDto(final String tableName, final Source source) {
+            if (Strings.isEmpty(source.filePath())) {
+                return new DatasetTableSourceDto(tableName, "", "", source.getTableName());
+            }
+            final Path path = Path.of(source.filePath()).normalize();
+            if (this.absolute == null || !path.startsWith(this.absolute)) {
+                return new DatasetTableSourceDto(tableName, source.filePath(), source.filePath(), source.getTableName());
+            }
+            final Path relative = this.absolute.relativize(path);
+            return new DatasetTableSourceDto(tableName
+                    , relative.toString().replace('\\', '/')
+                    , this.walkRoot.resolve(relative).toString()
+                    , source.getTableName());
+        }
     }
 
     /**

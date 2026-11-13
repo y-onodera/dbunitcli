@@ -1,10 +1,11 @@
 // -regInclude・-regExclude（ファイルパス）と -regTableInclude・-regTableExclude（setting適用前のテーブル名）を
 // 一覧から選んだ値で組み立てる。sidecarのdataset-setting/table-sourcesの応答を使う
 
-// sidecarのDatasetTableSourceDto。filePathはsrcがディレクトリならsrcからの相対パス（区切りは/）
+// sidecarのDatasetTableSourceDto
 export type TableSource = {
 	tableName: string;
 	filePath: string;
+	matchPath: string;
 	sourceTableName: string;
 };
 
@@ -13,7 +14,7 @@ export type RegexFilterKind = "path" | "table";
 // 一覧の1行: 正規表現を当てる値と、その値から読み込まれる最終的なテーブル名
 export type RegexFilterRow = { key: string; tableNames: string[] };
 
-export function escapeRegex(value: string): string {
+function escapeRegex(value: string): string {
 	return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
@@ -41,7 +42,7 @@ export function buildFilterRegex(
 	return kind === "path" ? pathRegex(keys) : tableNameRegex(keys);
 }
 
-export function filterKey(kind: RegexFilterKind, source: TableSource): string {
+function keyOf(kind: RegexFilterKind, source: TableSource): string {
 	return kind === "path" ? source.filePath : source.sourceTableName;
 }
 
@@ -52,7 +53,7 @@ export function toFilterRows(
 ): RegexFilterRow[] {
 	const rows = new Map<string, string[]>();
 	for (const source of sources) {
-		const key = filterKey(kind, source);
+		const key = keyOf(kind, source);
 		const tableNames = rows.get(key) ?? [];
 		if (!tableNames.includes(source.tableName)) {
 			tableNames.push(source.tableName);
@@ -62,13 +63,11 @@ export function toFilterRows(
 	return [...rows].map(([key, tableNames]) => ({ key, tableNames }));
 }
 
-// 入力中の正規表現に一致する値（初期のチェックに使う）。JavaScriptで解釈できなければ何も選ばない。
-// パスはsidecarがsrcを付けたパスに当てるため、相対パスとsrcを付けたパスのどちらかに一致すれば選ぶ
+// 入力中の正規表現に一致する値（初期のチェックに使う）。JavaScriptで解釈できなければ何も選ばない
 export function matchedKeys(
 	kind: RegexFilterKind,
 	regex: string,
-	keys: string[],
-	src: string,
+	sources: TableSource[],
 ): string[] {
 	if (regex === "") {
 		return [];
@@ -79,10 +78,9 @@ export function matchedKeys(
 	} catch {
 		return [];
 	}
-	const base = src.replace(/[\\/]+$/, "");
-	return keys.filter(
-		(key) =>
-			pattern.test(key) ||
-			(kind === "path" && base !== "" && pattern.test(`${base}/${key}`)),
-	);
+	return sources
+		.filter((source) =>
+			pattern.test(kind === "path" ? source.matchPath : source.sourceTableName),
+		)
+		.map((source) => keyOf(kind, source));
 }

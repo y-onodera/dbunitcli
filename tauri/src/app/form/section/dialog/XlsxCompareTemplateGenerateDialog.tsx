@@ -341,24 +341,6 @@ function XlsxCompareTemplateGenerateDialog({
 		}
 	};
 
-	const renderDataset = (srcData: GenerateOptions["srcData"]) => (
-		<DatasetSrcInfoScope name={formId} srcData={srcData}>
-			<DatasetLoadForm
-				handleTypeSelect={dialog.refresh}
-				name={formId}
-				srcData={srcData}
-				parentSrcInfo
-			/>
-			<CompareTablesField
-				useSecond={useSecond}
-				first={first}
-				second={second}
-				onChangeFirst={setFirst}
-				onChangeSecond={setSecond}
-			/>
-		</DatasetSrcInfoScope>
-	);
-
 	const renderKeysAndCompares = () => {
 		if (!useSecond) {
 			return (
@@ -422,7 +404,21 @@ function XlsxCompareTemplateGenerateDialog({
 							onChange={setUseSecond}
 						/>
 					</div>
-					{renderDataset(options.srcData)}
+					<DatasetSrcInfoScope name={formId} srcData={options.srcData}>
+						<DatasetLoadForm
+							handleTypeSelect={dialog.refresh}
+							name={formId}
+							srcData={options.srcData}
+							parentSrcInfo
+						/>
+						<CompareTablesField
+							useSecond={useSecond}
+							first={first}
+							second={second}
+							onChangeFirst={setFirst}
+							onChangeSecond={setSecond}
+						/>
+					</DatasetSrcInfoScope>
 					{renderKeysAndCompares()}
 				</>
 			)}

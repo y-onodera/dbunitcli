@@ -2,8 +2,18 @@ import { describe, expect, it } from "vitest";
 import {
 	buildFilterRegex,
 	matchedKeys,
+	type TableSource,
 	toFilterRows,
 } from "../../model/RegexFilter";
+
+function source(
+	tableName: string,
+	filePath: string,
+	sourceTableName: string,
+	matchPath = filePath,
+): TableSource {
+	return { tableName, filePath, matchPath, sourceTableName };
+}
 
 describe("buildFilterRegex", () => {
 	it("テーブル名は特殊文字をエスケープして完全一致のORにする", () => {
@@ -31,10 +41,10 @@ describe("buildFilterRegex", () => {
 describe("toFilterRows", () => {
 	it("正規表現を当てる値ごとに最終的なテーブル名をまとめる", () => {
 		const sources = [
-			{ tableName: "merged", filePath: "a.csv", sourceTableName: "a" },
-			{ tableName: "merged", filePath: "b.csv", sourceTableName: "b" },
-			{ tableName: "c", filePath: "book.xlsx", sourceTableName: "c" },
-			{ tableName: "d", filePath: "book.xlsx", sourceTableName: "d" },
+			source("merged", "a.csv", "a"),
+			source("merged", "b.csv", "b"),
+			source("c", "book.xlsx", "c"),
+			source("d", "book.xlsx", "d"),
 		];
 		expect(toFilterRows("path", sources)).toEqual([
 			{ key: "a.csv", tableNames: ["merged"] },
@@ -51,14 +61,23 @@ describe("toFilterRows", () => {
 });
 
 describe("matchedKeys", () => {
-	it("パスは相対パスかsrcを付けたパスに一致する値を返す", () => {
+	it("パスはsidecarが照合に使うパスに当て、一致した行の相対パスを返す", () => {
+		const sources = [
+			source("OLD", "old/a.csv", "a", "data/old/a.csv"),
+			source("NEW", "new/a.csv", "a", "data/new/a.csv"),
+		];
+		expect(matchedKeys("path", "^data/old", sources)).toEqual(["old/a.csv"]);
+	});
+
+	it("テーブル名は元のテーブル名に当てる", () => {
 		expect(
-			matchedKeys("path", "^/data/old", ["old/a.csv", "new/a.csv"], "/data/"),
-		).toEqual(["old/a.csv"]);
+			matchedKeys("table", "^a$", [source("renamed", "a.csv", "a")]),
+		).toEqual(["a"]);
 	});
 
 	it("解釈できない正規表現や空なら何も返さない", () => {
-		expect(matchedKeys("table", "(", ["a"], "")).toEqual([]);
-		expect(matchedKeys("table", "", ["a"], "")).toEqual([]);
+		const sources = [source("a", "a.csv", "a")];
+		expect(matchedKeys("table", "(", sources)).toEqual([]);
+		expect(matchedKeys("table", "", sources)).toEqual([]);
 	});
 });

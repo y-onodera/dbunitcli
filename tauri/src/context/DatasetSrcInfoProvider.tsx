@@ -4,7 +4,9 @@ import type { DatasetSrcInfo } from "../model/CommandOption";
 import { useResettableState } from "../utils/useResettableState";
 import { JdbcConnectionProvider } from "./JdbcConnectionProvider";
 
-const datasetSrcInfoContext = createContext<DatasetSrcInfo>({ values: {} });
+// Providerの外かを見分けるため、既定値は同じ参照を使う
+const OUTSIDE_PROVIDER: DatasetSrcInfo = { values: {} };
+const datasetSrcInfoContext = createContext<DatasetSrcInfo>(OUTSIDE_PROVIDER);
 const setDatasetSrcInfoContext = createContext<
 	Dispatch<SetStateAction<DatasetSrcInfo>>
 >(() => undefined);
@@ -36,4 +38,7 @@ export function DatasetSrcInfoProvider({
 }
 
 export const useDatasetSrcInfo = () => use(datasetSrcInfoContext);
+// データセットの読込フォームの中（データセットを読める範囲）か
+export const useInDatasetSrcInfoScope = () =>
+	use(datasetSrcInfoContext) !== OUTSIDE_PROVIDER;
 export const useSetDatasetSrcInfo = () => use(setDatasetSrcInfoContext);

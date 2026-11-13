@@ -1,33 +1,31 @@
 import { useState } from "react";
 import {
-	DataTable,
 	DialogActions,
 	DialogField,
 	DialogTitle,
 	JobFailure,
 	ModalOverlay,
 	StatusMessage,
-	Td,
-	Th,
-	Tr,
 } from "../../../../components/dialog";
 import { BlueButton, WhiteButton } from "../../../../components/element/Button";
 import { BlueEditButton } from "../../../../components/element/ButtonIcon";
-import { FilterInput } from "../../../../components/element/Input";
 import { JobProgress } from "../../../../components/element/JobProgress";
-import { useDatasetSrcInfo } from "../../../../context/DatasetSrcInfoProvider";
-import { useDatasetTableSources } from "../../../../hooks/useDatasetSettings";
 import {
-	type DatasetSrcInfo,
-	withValues,
-} from "../../../../model/CommandOption";
+	useDatasetSrcInfo,
+	useInDatasetSrcInfoScope,
+} from "../../../../context/DatasetSrcInfoProvider";
+import { useDatasetTableSources } from "../../../../hooks/useDatasetSettings";
+import { useTableSelection } from "../../../../hooks/useTableSelection";
+import { withValues } from "../../../../model/CommandOption";
 import {
 	buildFilterRegex,
 	matchedKeys,
 	type RegexFilterKind,
-	type RegexFilterRow,
+	type TableSource,
 	toFilterRows,
 } from "../../../../model/RegexFilter";
+import type { TextProp } from "../element/FormElementProp";
+import SelectableTable from "./SelectableTable";
 
 // 正規表現を当てる値の列名
 const KEY_COLUMN_LABEL: Record<RegexFilterKind, string> = {
@@ -43,9 +41,28 @@ type RegexFilterProps = {
 	onApply: (regex: string) => void;
 };
 
-// 正規表現の項目の横に置き、読み込まれるテーブルの一覧から選んで正規表現を組み立てるダイアログを開く
+// 正規表現の項目（Text）のchildrenに渡し、項目の横にRegexFilterButtonを置く
+export function regexFilterSlot(
+	kind: RegexFilterKind,
+	fieldName: string,
+): NonNullable<TextProp["children"]> {
+	return ({ path, setPath }) => (
+		<RegexFilterButton
+			kind={kind}
+			fieldName={fieldName}
+			value={path}
+			onApply={setPath}
+		/>
+	);
+}
+
+// 読み込まれるテーブルの一覧から選んで正規表現を組み立てるダイアログを開く。データセットを読めない範囲（runのtraversal等）では出さない
 export function RegexFilterButton(props: RegexFilterProps) {
+	const inScope = useInDatasetSrcInfoScope();
 	const [open, setOpen] = useState(false);
+	if (!inScope) {
+		return null;
+	}
 	return (
 		<>
 			<BlueEditButton
@@ -66,152 +83,94 @@ export function RegexFilterButton(props: RegexFilterProps) {
 	);
 }
 
-function withoutField(info: DatasetSrcInfo, fieldName: string): DatasetSrcInfo {
-	return withValues(info, { [fieldName]: "" });
-}
+type DialogProps = RegexFilterProps & { onClose: () => void };
 
-function toggled(selected: Set<string>, key: string): Set<string> {
-	const next = new Set(selected);
-	if (next.has(key)) {
-		next.delete(key);
-	} else {
-		next.add(key);
-	}
-	return next;
-}
-
-function toggledAll(
-	selected: Set<string>,
-	keys: string[],
-	checked: boolean,
-): Set<string> {
-	const next = new Set(selected);
-	for (const key of keys) {
-		if (checked) {
-			next.add(key);
-		} else {
-			next.delete(key);
-		}
-	}
-	return next;
-}
-
-function matchesFilter(row: RegexFilterRow, filter: string): boolean {
-	return [row.key, ...row.tableNames].some((it) =>
-		it.toLowerCase().includes(filter),
-	);
-}
-
-function RegexFilterDialog({
-	kind,
-	fieldName,
-	value,
-	onApply,
-	onClose,
-}: RegexFilterProps & { onClose: () => void }) {
+function RegexFilterDialog(props: DialogProps) {
 	const srcInfo = useDatasetSrcInfo();
 	// 開いた時点のフォームで1回だけ読む（毎回作り直すと読込が繰り返される）
-	const [loadInfo] = useState(() => withoutField(srcInfo, fieldName));
-	const { sources, loading, logs, error } = useDatasetTableSources(
-		loadInfo,
-		true,
+	const [loadInfo] = useState(() =>
+		withValues(srcInfo, { [props.fieldName]: "" }),
 	);
-	const [edited, setEdited] = useState<Set<string> | null>(null);
-	const [filter, setFilter] = useState("");
-	const rows = toFilterRows(kind, sources);
-	const keys = rows.map((row) => row.key);
-	// 選び直すまでは、入力中の正規表現に一致する行を選んだ状態にする
-	const selected =
-		edited ??
-		new Set(matchedKeys(kind, value, keys, loadInfo.values.src ?? ""));
-	const regex = buildFilterRegex(
-		kind,
-		keys.filter((key) => selected.has(key)),
-	);
-	const filterLower = filter.toLowerCase();
-	const visibleRows = rows.filter((row) => matchesFilter(row, filterLower));
-	const visibleKeys = visibleRows.map((row) => row.key);
-	const allSelected =
-		visibleKeys.length > 0 && visibleKeys.every((key) => selected.has(key));
+	const { sources, loading, logs, error } = useDatasetTableSources(loadInfo);
 
-	const renderRows = () => {
+	const renderContent = () => {
 		if (loading) {
 			return <JobProgress title="Loading..." lines={logs} />;
 		}
 		if (error) {
 			return <JobFailure message={error} lines={logs} />;
 		}
-		if (rows.length === 0) {
-			return <StatusMessage kind="empty">No tables loaded.</StatusMessage>;
-		}
-		return (
-			<>
-				<FilterInput value={filter} onChange={setFilter} placeholder="Filter" />
-				<DataTable
-					head={
-						<>
-							<Th narrow>
-								<input
-									type="checkbox"
-									aria-label="Select all"
-									checked={allSelected}
-									onChange={(e) =>
-										setEdited(
-											toggledAll(selected, visibleKeys, e.target.checked),
-										)
-									}
-									className="w-4 h-4 text-primary"
-								/>
-							</Th>
-							<Th>{KEY_COLUMN_LABEL[kind]}</Th>
-							<Th>table</Th>
-						</>
-					}
-				>
-					{visibleRows.map((row) => (
-						<Tr
-							key={row.key}
-							onClick={() => setEdited(toggled(selected, row.key))}
-						>
-							<Td>
-								<input
-									type="checkbox"
-									aria-label={row.key}
-									checked={selected.has(row.key)}
-									onChange={() => setEdited(toggled(selected, row.key))}
-									onClick={(e) => e.stopPropagation()}
-									className="w-4 h-4 text-primary"
-								/>
-							</Td>
-							<Td>{row.key}</Td>
-							<Td>{row.tableNames.join(", ")}</Td>
-						</Tr>
-					))}
-				</DataTable>
-			</>
-		);
+		return null;
 	};
-
+	const content = renderContent();
 	return (
-		<ModalOverlay onClose={onClose} size="lg">
+		<ModalOverlay onClose={props.onClose} size="lg">
 			<DialogTitle
 				command="dialogs/regex-filter"
 				label="Select from Table List"
 			>
 				Select from Table List
 			</DialogTitle>
-			<DialogField>{renderRows()}</DialogField>
+			{content === null ? (
+				<RegexFilterSelection {...props} sources={sources} />
+			) : (
+				<>
+					<DialogField last>{content}</DialogField>
+					<DialogActions>
+						<BlueButton title="Apply" disabled={true} handleClick={() => {}} />
+						<WhiteButton title="Cancel" handleClick={props.onClose} />
+					</DialogActions>
+				</>
+			)}
+		</ModalOverlay>
+	);
+}
+
+// 読み込んだ後に描画し、入力中の正規表現に一致する行を選んだ状態から始める
+function RegexFilterSelection({
+	kind,
+	fieldName,
+	value,
+	onApply,
+	onClose,
+	sources,
+}: DialogProps & { sources: TableSource[] }) {
+	const rows = toFilterRows(kind, sources);
+	const tableNames = new Map(rows.map((row) => [row.key, row.tableNames]));
+	const keys = rows.map((row) => row.key);
+	const { selected, toggle, toggleAll } = useTableSelection(
+		matchedKeys(kind, value, sources),
+	);
+	const regex = buildFilterRegex(
+		kind,
+		keys.filter((key) => selected.has(key)),
+	);
+	return (
+		<>
+			<DialogField>
+				<SelectableTable
+					items={keys}
+					selected={selected}
+					onToggle={toggle}
+					onToggleAll={toggleAll}
+					columnLabel={KEY_COLUMN_LABEL[kind]}
+					extraColumns={[
+						{
+							label: "table",
+							value: (key) => (tableNames.get(key) ?? []).join(", "),
+						},
+					]}
+					filterPlaceholder="Filter"
+					emptyMessage="No tables loaded."
+				/>
+			</DialogField>
 			<DialogField last>
 				<StatusMessage kind="loading">{`${fieldName}: ${regex}`}</StatusMessage>
 			</DialogField>
 			<DialogActions>
-				<BlueButton
-					title="Apply"
-					disabled={loading}
-					handleClick={() => onApply(regex)}
-				/>
+				<BlueButton title="Apply" handleClick={() => onApply(regex)} />
 				<WhiteButton title="Cancel" handleClick={onClose} />
 			</DialogActions>
-		</ModalOverlay>
+		</>
 	);
 }
