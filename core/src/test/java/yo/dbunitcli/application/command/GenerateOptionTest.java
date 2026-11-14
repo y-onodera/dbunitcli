@@ -111,6 +111,16 @@ class GenerateOptionTest {
         }
 
         @Test
+        void metadataHasNoSrcOptions() {
+            GenerateOptionTest.this.src.setTemplateType(yo.dbunitcli.application.command.generate.XlsxTemplateType.metadata);
+            GenerateOptionTest.this.src.getSrcData().setSrc("not/exists");
+            final GenerateOption target = GenerateOptionTest.this.createTarget();
+            assertTrue(target.validate().isEmpty(), String.valueOf(target.validate()));
+            assertTrue(target.toParameters().toList(true).stream().noneMatch(it -> it.startsWith("-src.")
+                    || it.startsWith("-parallel")), String.valueOf(target.toParameters().toList(true)));
+        }
+
+        @Test
         void compareRequiresTablesAndKeys() {
             GenerateOptionTest.this.src.setTemplateType(yo.dbunitcli.application.command.generate.XlsxTemplateType.compare);
             final List<Option.Violation> violations = GenerateOptionTest.this.createTarget().validate();

@@ -64,7 +64,7 @@ public record GenerateOption(Parameter parameter, String resultFile, String resu
              Strings.isNotEmpty(dto.getSqlFileSuffix()) ? dto.getSqlFileSuffix() : "",
              Strings.isNotEmpty(dto.getCommit()) ? dto.getCommit() : "true", dto.getTemplate(),
              dto.getOutputEncoding(),
-             new DataSetLoadOption("src", dto.getSrcData()),
+             GenerateOption.srcData(dto),
              new TemplateRenderOption("template", dto.getTemplateOption()),
              Strings.isNotEmpty(dto.getIncludeAllColumns()) ? dto.getIncludeAllColumns() : "false",
              Strings.isNotEmpty(dto.getLazyLoad()) ? dto.getLazyLoad() : "true",
@@ -102,6 +102,15 @@ public record GenerateOption(Parameter parameter, String resultFile, String resu
     @Override
     public String outputEncoding() {
         return Strings.orDefault(this.outputEncoding, DataSetConverterOption.DEFAULT_OUTPUT_ENCODING);
+    }
+
+    // srcを読まない型は、-src.*の指定に関わらずsrcなしにする
+    private static DataSetLoadOption srcData(final GenerateDto dto) {
+        if (GenerateOption.getGenerateType(dto).strategy().usesSource(dto.getTemplateType())) {
+            return new DataSetLoadOption("src", dto.getSrcData());
+        }
+        dto.getSrcData().setSrcType(DataSourceType.none);
+        return new DataSetLoadOption("src", dto.getSrcData(), true);
     }
 
     private static GenerateType getGenerateType(final GenerateDto dto) {
@@ -301,6 +310,9 @@ public record GenerateOption(Parameter parameter, String resultFile, String resu
                 : this.srcData.toParametersBuilderWithoutLoadData();
         if (this.strategy().useJdbcMetaData()) {
             srcComponent.remove("-src.useJdbcMetaData");
+        }
+        if (this.srcData.srcType() == DataSourceType.none) {
+            srcComponent.remove("-src.srcType");
         }
         this.strategy().putOptionParameters(this, result);
         if (this.isParallelizable()) {

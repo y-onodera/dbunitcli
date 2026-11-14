@@ -75,6 +75,11 @@ public interface GenerateStrategy {
         return true;
     }
 
+    /** srcを読むか。falseならsrcの指定を使わず、srcなしで1回だけ出力する */
+    default boolean usesSource(final XlsxTemplateType templateType) {
+        return true;
+    }
+
     default boolean useJdbcMetaData() {
         return false;
     }

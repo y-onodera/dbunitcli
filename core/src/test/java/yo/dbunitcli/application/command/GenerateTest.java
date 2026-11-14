@@ -1252,10 +1252,7 @@ public class GenerateTest {
 
     private static void generateMetaDataTemplate(final String resultDir) {
         Generate.main(new String[]{
-                "-srcType=csv"
-                , "-src=src/test/resources/yo/dbunitcli/application/src/generate/with_metadata/source/csv"
-                , "-encoding=UTF-8"
-                , "-generateType=xlsxTemplate"
+                "-generateType=xlsxTemplate"
                 , "-templateType=metadata"
                 , "-resultPath=" + resultDir + "/metadataTemplate.xlsx"
         });

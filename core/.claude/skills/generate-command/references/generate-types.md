@@ -42,7 +42,7 @@ loadData/useJdbcMetaDataは`GenerateStrategy`実装の`loadData()`/`useJdbcMetaD
 | `lazyLoad` | xlsx/xls用 | `parameterStream()` / `forEachParameter()` の分岐（検証・出力と`-template.*`のExcel固有項目は`ExcelGenerateStrategy`） |
 | `parallel` | srcが並列読込できる形式か、unit=recordのとき表示（srcType=noneを除く） | `dataSetParam()`で`setParallel`に渡し、srcの並列読込と`unit=record`・`unit=table`の並列出力の並列数になる（値の検証・解釈は`DataSetConverterOption.parallel(String)`/`parallelism(String)`を共用） |
 | `fixedLength` / `defaultLength` / `align` | fixedColumnDef用 | `FixedColumnDefGenerateStrategy.wrapDescriptor()` が `ComparableFixedColumnDefMetaDataProducer` に渡す |
-| `templateType` / `oldTable` / `newTable` / `keys` / `compares` / `compareSheetName` | xlsxTemplate用 | `XlsxTemplateGenerateStrategy`。compareはsrcのテーブル（`-setting`適用後）から`oldTable`/`newTable`を名前で選び、テーブル名をそのままデータシート名にする（他のテーブルは使わない）。`keys`/`compares`は`old:new`か同名の`column`のカンマ区切り、`compares`省略時はキー以外で両方にある同名列。metadataはsrcに依らない固定レイアウトのテーブル定義書で、`generateType=xlsx`・`unit=table`・`-src.loadData=false`・`-src.loadMetaData=true`（`DataSetLoadOption`が`ComparableDdlMetaDataProducer::forSource`を記述子に指定する）で流し込む |
+| `templateType` / `oldTable` / `newTable` / `keys` / `compares` / `compareSheetName` | xlsxTemplate用 | `XlsxTemplateGenerateStrategy`。compareはsrcのテーブル（`-setting`適用後）から`oldTable`/`newTable`を名前で選び、テーブル名をそのままデータシート名にする（他のテーブルは使わない）。`keys`/`compares`は`old:new`か同名の`column`のカンマ区切り、`compares`省略時はキー以外で両方にある同名列。metadataはsrcに依らない固定レイアウトのテーブル定義書（`usesSource()=false`で`GenerateOption`がsrcを`srcType=none`に固定し、`-src.*`を出さない）で、`generateType=xlsx`・`unit=table`・`-src.loadData=false`・`-src.loadMetaData=true`（`DataSetLoadOption`が`ComparableDdlMetaDataProducer::forSource`を記述子に指定する）で流し込む |
 
 ## 実装チェックリスト（generateType追加/修正時の変更箇所）
 

@@ -40,6 +40,11 @@ public final class XlsxTemplateGenerateStrategy implements GenerateStrategy {
     }
 
     @Override
+    public boolean usesSource(final XlsxTemplateType templateType) {
+        return templateType != XlsxTemplateType.metadata;
+    }
+
+    @Override
     public List<Option.Violation> validateOption(final GenerateContext option) {
         return option.templateType() == XlsxTemplateType.compare
                 ? Option.concat(option.validateRequired("-oldTable", option.oldTable())

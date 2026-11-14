@@ -174,14 +174,17 @@ export function GenerateForm(prop: {
 					{generate.lazyLoad && <Check prefix="" element={generate.lazyLoad} />}
 				</SectionFieldset>
 				<XlsxCompareFormSection generate={generate} />
-				<DatasetLoadForm
-					handleTypeSelect={prop.handleTypeSelect}
-					name={prop.name}
-					srcData={srcData}
-					helpCommand="sections/dataset-load-form"
-					helpLabel="src"
-					parentSrcInfo={true}
-				/>
+				{/* srcを読まない生成（xlsxTemplateのmetadata）ではsrcの項目が返らない */}
+				{srcData.srcType && (
+					<DatasetLoadForm
+						handleTypeSelect={prop.handleTypeSelect}
+						name={prop.name}
+						srcData={srcData}
+						helpCommand="sections/dataset-load-form"
+						helpLabel="src"
+						parentSrcInfo={true}
+					/>
+				)}
 			</ResourceEncodingProvider>
 		</DatasetSrcInfoScope>
 	);
