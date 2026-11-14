@@ -16,7 +16,7 @@
 
 | ファイル（`application/`配下） | 内容 |
 |---|---|
-| `command/ScaffoldTarget.java` | enum定数追加。記述子列定義（`datasetSchema()`）と記述子dataset合成producer（`wrapProducer()`）は対応`GenerateType`の`DescriptorGenerateStrategy`（`descriptorSchema()`/`wrapDescriptor()`）へ委譲するため、Generate側に実装すればtarget側は不要。フック: `sampleUnitSettingPath()`（サンプルunitSettingのclasspathパス）/`customTemplateResultPath()`（txt駆動時の`-resultPath`。既定は`DescriptorGenerateStrategy.tableFileName()`で、拡張子・名前formatはGenerate側の`extension()`/`tableNameFormat()`）/`putBuiltinExtraParams()`（builtin駆動時のtarget固有オプション。既定は`DescriptorGenerateStrategy.putDescriptorParameters()`に委譲） |
+| `command/ScaffoldTarget.java` | enum定数追加。記述子列定義（`datasetSchema()`）と記述子dataset合成producer（`descriptor()`）は対応`GenerateType`の`DescriptorGenerateStrategy`（`descriptorSchema()`/`wrapDescriptor()`）へ委譲するため、Generate側に実装すればtarget側は不要。フック: `sampleUnitSettingPath()`（サンプルunitSettingのclasspathパス）/`customTemplateResultPath()`（txt駆動時の`-resultPath`。既定は`DescriptorGenerateStrategy.tableFileName()`で、拡張子・名前formatはGenerate側の`extension()`/`tableNameFormat()`）/`putBuiltinExtraParams()`（builtin駆動時のtarget固有オプション。既定は`DescriptorGenerateStrategy.putDescriptorParameters()`に委譲） |
 | `command/ScaffoldDto.java` | `-target`の説明文（対応target一覧）を更新。target固有オプションがあれば追加 |
 | `command/ScaffoldOption.java` | 通常変更不要（`executeTarget()`は4target共通フロー）。target固有オプションを追加する場合のみrecordフィールド追加 |
 | `dataset/producer/Comparable{TypeName}MetaDataProducer.java` | `command/generate/{Type}GenerateStrategy.wrapDescriptor()`が生成する記述子行合成producer（`ComparableDataSetProducerWrapper`継承、`outputSchema()`静的メソッド、`convertTable()`で`Conversion#writeColumnRows()`利用） |

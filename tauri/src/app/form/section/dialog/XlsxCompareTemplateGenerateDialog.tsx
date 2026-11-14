@@ -30,10 +30,9 @@ import {
 } from "../../../../model/XlsxCompareTemplate";
 import { removeArray, replaceArray } from "../../../../utils/arrayUtils";
 import { DatasetLoadForm, DatasetSrcInfoScope } from "../DatasetLoadForm";
+import { GenerateButton } from "./GenerateDialog";
 import { RefreshableDialogShell } from "./RefreshableDialogShell";
-import ResourceEditButton, {
-	type ResourceEditButtonProp,
-} from "./ResourceEditButton";
+import type { ResourceEditButtonProp } from "./ResourceEditButton";
 import { postDialogForm } from "./refreshableDialogForm";
 import SelectableTable from "./SelectableTable";
 import {
@@ -431,21 +430,13 @@ export function XlsxCompareTemplateGenerateButton({
 	setPath,
 }: Pick<ResourceEditButtonProp, "setPath">) {
 	return (
-		<ResourceEditButton
-			renderDialog={(open, closeDialog) =>
-				open ? (
-					<XlsxCompareTemplateGenerateDialog
-						onClose={closeDialog}
-						onSaved={(fileName) => {
-							setPath(fileName);
-							closeDialog();
-						}}
-					/>
-				) : null
-			}
-			renderTrigger={(openDialog) => (
-				<AddButton title="generate compare template" handleClick={openDialog} />
+		<GenerateButton setPath={setPath} title="generate compare template">
+			{(handleDialogClose, handleSave) => (
+				<XlsxCompareTemplateGenerateDialog
+					onClose={handleDialogClose}
+					onSaved={handleSave}
+				/>
 			)}
-		/>
+		</GenerateButton>
 	);
 }

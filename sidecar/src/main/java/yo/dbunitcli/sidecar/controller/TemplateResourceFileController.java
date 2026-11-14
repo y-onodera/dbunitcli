@@ -16,6 +16,7 @@ import yo.dbunitcli.sidecar.domain.project.ResourceFile;
 import yo.dbunitcli.sidecar.domain.project.Workspace;
 import yo.dbunitcli.sidecar.job.Interruptible;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -74,15 +75,7 @@ public class TemplateResourceFileController extends AbstractTextResourceFileCont
     @Post(uri = "generate-compare", produces = MediaType.APPLICATION_JSON)
     public String generateCompare(@Body final XlsxCompareTemplateRequestDto request) throws IOException {
         final String fileName = this.toXlsxFileName(request.fileName());
-        final JxlsCompareTemplateGenerator generator = toGenerator(request);
-        final Path tempDir = Files.createTempDirectory("xlsxCompareTemplateGenerate");
-        try {
-            generator.write(tempDir.resolve(GENERATED_FILE).toFile());
-            this.getResourceFile().updateFrom(fileName, tempDir.resolve(GENERATED_FILE));
-            return this.currentFileList();
-        } finally {
-            GenerateTemplateSupport.deleteRecursively(tempDir);
-        }
+        return this.saveGenerated(fileName, "xlsxCompareTemplateGenerate", toGenerator(request)::write);
     }
 
     /**
@@ -91,10 +84,20 @@ public class TemplateResourceFileController extends AbstractTextResourceFileCont
      */
     @Post(uri = "generate-metadata", produces = MediaType.APPLICATION_JSON)
     public String generateMetaData(@Body final Map<String, String> input) throws IOException {
-        final String fileName = this.toXlsxFileName(input.get("-fileName"));
-        final Path tempDir = Files.createTempDirectory("xlsxMetaDataTemplateGenerate");
+        return this.saveGenerated(this.toXlsxFileName(input.get("-fileName")), "xlsxMetaDataTemplateGenerate"
+                , JxlsMetaDataTemplateGenerator::write);
+    }
+
+    @FunctionalInterface
+    private interface TemplateWriter {
+        void write(File resultFile) throws IOException;
+    }
+
+    // 一時ディレクトリへ書き出してからtemplateリソースへ取り込む
+    private String saveGenerated(final String fileName, final String tempDirPrefix, final TemplateWriter writer) throws IOException {
+        final Path tempDir = Files.createTempDirectory(tempDirPrefix);
         try {
-            JxlsMetaDataTemplateGenerator.write(tempDir.resolve(GENERATED_FILE).toFile());
+            writer.write(tempDir.resolve(GENERATED_FILE).toFile());
             this.getResourceFile().updateFrom(fileName, tempDir.resolve(GENERATED_FILE));
             return this.currentFileList();
         } finally {

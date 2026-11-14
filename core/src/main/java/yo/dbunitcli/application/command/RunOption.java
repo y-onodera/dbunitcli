@@ -40,7 +40,6 @@ public record RunOption(
         dto.getSrcData().setSrcType(DataSourceType.file);
         dto.getSrcData().setIncludeMetaData("false");
         dto.getSrcData().setLoadData("true");
-        dto.getSrcData().setLoadMetaData("false");
         new ArgumentMapper("src").populate(args, dto.getSrcData());
         new ArgumentMapper("jdbc").populate(args, dto.getJdbcOption());
         new ArgumentMapper("template").populate(args, dto.getTemplateOption());
@@ -105,12 +104,10 @@ public record RunOption(
     @Override
     public ParametersBuilder toParametersBuilder() {
         final ParametersBuilder result = new ParametersBuilder()
-                .addComponent("srcData", this.srcData.toParametersBuilder()
+                .addComponent("srcData", this.srcData.toParametersBuilderWithoutLoadData()
                         .remove("-src.srcType")
                         .remove("-src.extension")
                         .remove("-src.includeMetaData")
-                        .remove("-src.loadData")
-                        .remove("-src.loadMetaData")
                         .build()
                 )
                 .put("-scriptType", this.scriptType, ScriptType.class)

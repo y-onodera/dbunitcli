@@ -90,12 +90,14 @@ function GenerateFormDialog<T>({
 	);
 }
 
-// 「generate」トリガーボタンとダイアログの開閉・保存後のパス反映を担う
-function GenerateButton({
+// トリガーボタンとダイアログの開閉・保存後のパス反映を担う
+export function GenerateButton({
 	setPath,
+	title = "generate",
 	children,
 }: {
 	setPath: (value: string) => void;
+	title?: string;
 	children: (
 		handleDialogClose: () => void,
 		handleSave: (fileName: string) => void,
@@ -114,7 +116,7 @@ function GenerateButton({
 		<ResourceEditButton
 			renderDialog={renderDialog}
 			renderTrigger={(openDialog) => (
-				<AddButton title="generate" handleClick={openDialog} />
+				<AddButton title={title} handleClick={openDialog} />
 			)}
 		/>
 	);

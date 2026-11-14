@@ -87,6 +87,15 @@ public record DataSetLoadOption(
     }
 
     /**
+     * 行を読むかどうかをコマンドが決める場合のパラメータ（-loadData・-loadMetaDataを出さない）
+     */
+    public ParametersBuilder toParametersBuilderWithoutLoadData() {
+        return this.toParametersBuilder()
+                .remove("-" + this.prefix + ".loadData")
+                .remove("-" + this.prefix + ".loadMetaData");
+    }
+
+    /**
      * srcType=noneは読み込まないため検証しない。-srcは未指定ならカレントディレクトリを読むため必須にしない
      */
     @Override
@@ -120,10 +129,7 @@ public record DataSetLoadOption(
                 .setRegTableInclude(this.regTableInclude)
                 .setRegTableExclude(this.regTableExclude)
                 .setLoadData(Boolean.parseBoolean(this.loadData))
-                // 行を読む指定（-loadData=true）のときは-loadMetaDataを使わない
-                .setDescriptor(!Boolean.parseBoolean(this.loadData) && Boolean.parseBoolean(this.loadMetaData)
-                        ? ComparableDdlMetaDataProducer::forSource
-                        : null)
+                .setDescriptor(Boolean.parseBoolean(this.loadMetaData) ? ComparableDdlMetaDataProducer::forSource : null)
                 .setMapIncludeMetaData(Boolean.parseBoolean(this.includeMetaData))
         );
     }

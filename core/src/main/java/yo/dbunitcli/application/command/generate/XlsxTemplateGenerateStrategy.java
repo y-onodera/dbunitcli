@@ -62,16 +62,16 @@ public final class XlsxTemplateGenerateStrategy implements GenerateStrategy {
 
     @Override
     public GenerateWriter writer(final GenerateContext option) {
-        if (option.templateType() == XlsxTemplateType.metadata) {
-            return (resultFile, _) -> JxlsMetaDataTemplateGenerator.write(resultFile);
-        }
-        if (option.templateType() != XlsxTemplateType.compare) {
-            return JxlsTemplateGenerator::createTemplate;
-        }
-        final String compareSheetName = Strings.orDefault(option.compareSheetName(), DEFAULT_COMPARE_SHEET_NAME);
-        return (resultFile, param) -> compareGenerator(param, option.oldTable(), option.newTable()
-                , option.keys(), option.compares(), compareSheetName)
-                .write(resultFile);
+        return switch (option.templateType()) {
+            case table -> JxlsTemplateGenerator::createTemplate;
+            case metadata -> (resultFile, _) -> JxlsMetaDataTemplateGenerator.write(resultFile);
+            case compare -> {
+                final String compareSheetName = Strings.orDefault(option.compareSheetName(), DEFAULT_COMPARE_SHEET_NAME);
+                yield (resultFile, param) -> compareGenerator(param, option.oldTable(), option.newTable()
+                        , option.keys(), option.compares(), compareSheetName)
+                        .write(resultFile);
+            }
+        };
     }
 
     @SuppressWarnings("unchecked")

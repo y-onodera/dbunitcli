@@ -206,10 +206,7 @@ public record ScaffoldOption(
 
     // 行は読まずtargetごとの記述子行を合成するため、-dataset.loadData・-dataset.loadMetaDataは扱わない
     private Parameters datasetParameters() {
-        return this.dataset.toParametersBuilder()
-                .remove("-dataset.loadData")
-                .remove("-dataset.loadMetaData")
-                .build();
+        return this.dataset.toParametersBuilderWithoutLoadData().build();
     }
 
     private static ArrayList<String> targetSelectOption() {
@@ -254,7 +251,7 @@ public record ScaffoldOption(
     private ComparableDataSetProducer descriptorProducer(final ScaffoldTarget scaffoldTarget) {
         return new ComparableDataSetLoader(this.parameter).getComparableDataSetProducer(this.dataset.getParam()
                 .setLoadData(false)
-                .setDescriptor(source -> scaffoldTarget.wrapProducer(this, source))
+                .setDescriptor(scaffoldTarget.descriptor(this))
                 .build());
     }
 

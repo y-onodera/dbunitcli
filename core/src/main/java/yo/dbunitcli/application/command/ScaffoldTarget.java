@@ -3,8 +3,7 @@ package yo.dbunitcli.application.command;
 import org.dbunit.dataset.Column;
 import yo.dbunitcli.application.Option;
 import yo.dbunitcli.application.command.generate.DescriptorGenerateStrategy;
-import yo.dbunitcli.dataset.ComparableDataSetProducer;
-import yo.dbunitcli.dataset.ComparableDataSetProducerWrapper;
+import yo.dbunitcli.dataset.DescriptorProducerFactory;
 import yo.dbunitcli.resource.st4.TemplateRender;
 
 import java.util.Arrays;
@@ -73,9 +72,9 @@ enum ScaffoldTarget {
         return this.descriptor.descriptorSchema();
     }
 
-    /** 記述子dataset合成用producer。Generate側と同じDescriptorGenerateStrategy#wrapDescriptor()を使う */
-    ComparableDataSetProducerWrapper wrapProducer(final ScaffoldOption option, final ComparableDataSetProducer source) {
-        return this.descriptor.wrapDescriptor(option, source);
+    /** 記述子datasetの合成。Generate側と同じDescriptorGenerateStrategy#wrapDescriptor()を使う */
+    DescriptorProducerFactory descriptor(final ScaffoldOption option) {
+        return this.descriptor.descriptorFactory(option);
     }
 
     /** カスタムテンプレート（generateType=txt）駆動時の-resultPathパターン。builtin駆動と同じファイル名にする */

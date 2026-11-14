@@ -299,13 +299,7 @@ public class GenerateTest {
         public void testGenerateDdlFromDbMetaData() throws Exception {
             final String url = "jdbc:h2:mem:generateddl;DB_CLOSE_DELAY=-1";
             try (final java.sql.Connection conn = java.sql.DriverManager.getConnection(url, "sa", "sa")) {
-                try (final java.sql.Statement st = conn.createStatement()) {
-                    st.execute("DROP TABLE IF EXISTS PERSON");
-                    st.execute("CREATE TABLE PERSON (ID INT NOT NULL, NAME VARCHAR(50) NOT NULL, MEMO VARCHAR(100)"
-                            + ", CONSTRAINT PK_PERSON PRIMARY KEY (ID))");
-                    st.execute("COMMENT ON TABLE PERSON IS 'people table'");
-                    st.execute("COMMENT ON COLUMN PERSON.NAME IS 'person name'");
-                }
+                GenerateTest.createPersonTable(conn);
                 Generate.main(new String[]{
                         "-generateType=ddl"
                         , "-srcType=table"
@@ -332,13 +326,7 @@ public class GenerateTest {
             final String url = "jdbc:h2:mem:generatetxtmetadata;DB_CLOSE_DELAY=-1";
             final String resultDir = "target/test-classes/yo/dbunitcli/application/generate/ddl/loadMetaData";
             try (final java.sql.Connection conn = java.sql.DriverManager.getConnection(url, "sa", "sa")) {
-                try (final java.sql.Statement st = conn.createStatement()) {
-                    st.execute("DROP TABLE IF EXISTS PERSON");
-                    st.execute("CREATE TABLE PERSON (ID INT NOT NULL, NAME VARCHAR(50) NOT NULL, MEMO VARCHAR(100)"
-                            + ", CONSTRAINT PK_PERSON PRIMARY KEY (ID))");
-                    st.execute("COMMENT ON TABLE PERSON IS 'people table'");
-                    st.execute("COMMENT ON COLUMN PERSON.NAME IS 'person name'");
-                }
+                GenerateTest.createPersonTable(conn);
                 final java.util.List<String> src = java.util.List.of(
                         "-srcType=table"
                         , "-src=" + GenerateTest.RESOURCES_DIR + "/src/generate/db/table"
@@ -1066,23 +1054,10 @@ public class GenerateTest {
         @Test
         public void testGenerateXlsxMetaDataTemplate() throws Exception {
             final String resultDir = "target/test-classes/yo/dbunitcli/application/generate/xlsxTemplate/result/metadata";
-            Generate.main(new String[]{
-                    "-srcType=csv"
-                    , "-src=src/test/resources/yo/dbunitcli/application/src/generate/with_metadata/source/csv"
-                    , "-encoding=UTF-8"
-                    , "-generateType=xlsxTemplate"
-                    , "-templateType=metadata"
-                    , "-resultPath=" + resultDir + "/metadataTemplate.xlsx"
-            });
+            GenerateTest.generateMetaDataTemplate(resultDir);
             final String url = "jdbc:h2:mem:generatexlsxmetadata;DB_CLOSE_DELAY=-1";
             try (final java.sql.Connection conn = java.sql.DriverManager.getConnection(url, "sa", "sa")) {
-                try (final java.sql.Statement st = conn.createStatement()) {
-                    st.execute("DROP TABLE IF EXISTS PERSON");
-                    st.execute("CREATE TABLE PERSON (ID INT NOT NULL, NAME VARCHAR(50) NOT NULL, MEMO VARCHAR(100)"
-                            + ", CONSTRAINT PK_PERSON PRIMARY KEY (ID))");
-                    st.execute("COMMENT ON TABLE PERSON IS 'people table'");
-                    st.execute("COMMENT ON COLUMN PERSON.NAME IS 'person name'");
-                }
+                GenerateTest.createPersonTable(conn);
                 for (final boolean lazyLoad : new boolean[]{true, false}) {
                     Generate.main(new String[]{
                             "-generateType=xlsx"
@@ -1115,14 +1090,7 @@ public class GenerateTest {
         @Test
         public void testGenerateXlsxMetaDataTemplateFromCsv() throws Exception {
             final String resultDir = "target/test-classes/yo/dbunitcli/application/generate/xlsxTemplate/result/metadataCsv";
-            Generate.main(new String[]{
-                    "-srcType=csv"
-                    , "-src=src/test/resources/yo/dbunitcli/application/src/generate/with_metadata/source/csv"
-                    , "-encoding=UTF-8"
-                    , "-generateType=xlsxTemplate"
-                    , "-templateType=metadata"
-                    , "-resultPath=" + resultDir + "/metadataTemplate.xlsx"
-            });
+            GenerateTest.generateMetaDataTemplate(resultDir);
             Generate.main(new String[]{
                     "-generateType=xlsx"
                     , "-unit=table"
@@ -1281,6 +1249,27 @@ public class GenerateTest {
 
     }
 
+
+    private static void generateMetaDataTemplate(final String resultDir) {
+        Generate.main(new String[]{
+                "-srcType=csv"
+                , "-src=src/test/resources/yo/dbunitcli/application/src/generate/with_metadata/source/csv"
+                , "-encoding=UTF-8"
+                , "-generateType=xlsxTemplate"
+                , "-templateType=metadata"
+                , "-resultPath=" + resultDir + "/metadataTemplate.xlsx"
+        });
+    }
+
+    private static void createPersonTable(final java.sql.Connection conn) throws java.sql.SQLException {
+        try (final java.sql.Statement st = conn.createStatement()) {
+            st.execute("DROP TABLE IF EXISTS PERSON");
+            st.execute("CREATE TABLE PERSON (ID INT NOT NULL, NAME VARCHAR(50) NOT NULL, MEMO VARCHAR(100)"
+                    + ", CONSTRAINT PK_PERSON PRIMARY KEY (ID))");
+            st.execute("COMMENT ON TABLE PERSON IS 'people table'");
+            st.execute("COMMENT ON COLUMN PERSON.NAME IS 'person name'");
+        }
+    }
 
     private static java.util.List<java.util.List<String>> readSheet(final File file) throws IOException {
         final org.apache.poi.ss.usermodel.DataFormatter formatter = new org.apache.poi.ss.usermodel.DataFormatter();

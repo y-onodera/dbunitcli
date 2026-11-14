@@ -50,9 +50,14 @@ public interface DescriptorGenerateStrategy extends GenerateStrategy {
         this.putDescriptorParameters(option, builder);
     }
 
+    /** 記述子行を合成するproducerの作り方（GenerateとScaffoldの記述子dataset雛型で共有） */
+    default DescriptorProducerFactory descriptorFactory(final DescriptorOption option) {
+        return source -> this.wrapDescriptor(option, source);
+    }
+
     @Override
     default DescriptorProducerFactory descriptor(final GenerateContext option) {
-        return source -> this.wrapDescriptor(option, source);
+        return this.descriptorFactory(option);
     }
 
     @Override

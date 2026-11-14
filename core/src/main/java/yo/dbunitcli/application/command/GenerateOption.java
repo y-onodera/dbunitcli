@@ -296,12 +296,11 @@ public record GenerateOption(Parameter parameter, String resultFile, String resu
         if (!this.strategy().isFixedTemplate()) {
             result.putFile("-template", this.template, true, BaseDir.TEMPLATE);
         }
-        final ParametersBuilder srcComponent = this.srcData.toParametersBuilder();
+        final ParametersBuilder srcComponent = this.strategy().loadData()
+                ? this.srcData.toParametersBuilder()
+                : this.srcData.toParametersBuilderWithoutLoadData();
         if (this.strategy().useJdbcMetaData()) {
             srcComponent.remove("-src.useJdbcMetaData");
-        }
-        if (!this.strategy().loadData()) {
-            srcComponent.remove("-src.loadData").remove("-src.loadMetaData");
         }
         this.strategy().putOptionParameters(this, result);
         if (this.isParallelizable()) {
@@ -336,14 +335,13 @@ public record GenerateOption(Parameter parameter, String resultFile, String resu
 
     public ComparableDataSetParam dataSetParam() {
         final ComparableDataSetParam.Builder builder = this.srcData.getParam();
-        if (this.strategy().loadData() && Strings.isEmpty(this.srcData.getSetting())) {
+        if (!this.strategy().loadData()) {
+            builder.setLoadData(false).setDescriptor(this.strategy().descriptor(this));
+        } else if (Strings.isEmpty(this.srcData.getSetting())) {
             final TableSeparators defaultTableSeparators = this.classpathDefaultTableSeparators();
             if (defaultTableSeparators != null) {
                 builder.setTableSeparators(defaultTableSeparators);
             }
-        }
-        if (!this.strategy().loadData()) {
-            builder.setLoadData(false).setDescriptor(this.strategy().descriptor(this));
         }
         builder.setUseJdbcMetaData(this.strategy().useJdbcMetaData())
                .setParallel(this.parallelism());
