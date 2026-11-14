@@ -64,7 +64,7 @@ ORDERS.sql の中身:
     <tr><td>parallel</td><td>並列処理のスレッド数。並列化できる組み合わせのときだけ表示（下記「並列処理」を参照）</td><td>（空）＝ CPU コア数</td></tr>
     <tr><td>src</td><td>入力データセット。入力の形式（Excel・DB テーブル・SQL の結果など）や文字コードを変えられる（<a href="../sections/dataset-load-form.html">Dataset Load Form</a>）</td><td>—</td></tr>
     <tr><td>result</td><td>生成したファイルを置くディレクトリ</td><td>—</td></tr>
-    <tr><td>resultPath</td><td><code>result</code> からの相対パス。テンプレート変数（<code>$param.tableName$</code> など）を使える。テーブル単位の固定成果物タイプではディレクトリとして扱い、その下にテーブルごとのファイルを作る。組み合わせごとの生成例は <a href="../sections/result-form.html">Result Form</a> の「result と resultPath の生成例」を参照</td><td>（空）＝ 保存済みオプションの名前</td></tr>
+    <tr><td>resultPath</td><td><code>result</code> からの相対パス。テンプレート変数（<code>$param.tableName$</code> など）を使える。横の編集ボタンで <a href="../dialogs/result-path-template.html">Result Path Template</a> を開き、変数を埋め込める。テーブル単位の固定成果物タイプではディレクトリとして扱い、その下にテーブルごとのファイルを作る。組み合わせごとの生成例は <a href="../sections/result-form.html">Result Form</a> の「result と resultPath の生成例」を参照</td><td>（空）＝ 保存済みオプションの名前</td></tr>
     <tr><td>outputEncoding</td><td>出力ファイルの文字コード。<code>txt</code> のときだけ使う</td><td>UTF-8</td></tr>
   </table>
 

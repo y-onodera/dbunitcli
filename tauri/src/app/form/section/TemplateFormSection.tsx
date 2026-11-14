@@ -7,6 +7,10 @@ import type {
 	CommandOption,
 	TemplateOption,
 } from "../../../model/CommandOption";
+import {
+	DEFAULT_TEMPLATE_EXPRESSION_SYNTAX,
+	type TemplateExpressionSyntax,
+} from "../../../model/TemplateExpression";
 import { useSyncedState } from "../../../utils/useResettableState";
 import EncodingText from "./element/EncodingText";
 import PlainText from "./element/PlainText";
@@ -24,6 +28,59 @@ export function useTemplateEncoding(templateOption?: TemplateOption) {
 		}
 	};
 	return { encoding, handleValueChange };
+}
+
+// 空欄はcore側で既定値になるため、プレースホルダーの既定値に置き換える
+function effectiveValue(
+	value: string,
+	option: CommandOption | undefined,
+	fallback: string,
+) {
+	if (value !== "") {
+		return value;
+	}
+	return option?.attribute.defaultValue || fallback;
+}
+
+// template optionの式の書き方（templateParameterAttribute・templateVarStart/Stop）の入力中の値と、
+// それを追うhandleValueChange。テンプレートとして描画される欄（-resultPath等）に挿入する式の組み立てに使う
+export function useTemplateExpressionSyntax(templateOption?: TemplateOption) {
+	const [parameterAttribute, setParameterAttribute] = useSyncedState(
+		templateOption?.templateParameterAttribute?.value ?? "",
+	);
+	const [varStart, setVarStart] = useSyncedState(
+		templateOption?.templateVarStart?.value ?? "",
+	);
+	const [varStop, setVarStop] = useSyncedState(
+		templateOption?.templateVarStop?.value ?? "",
+	);
+	const handleValueChange = (param: CommandOption) => (value: string) => {
+		if (param === templateOption?.templateParameterAttribute) {
+			setParameterAttribute(value);
+		} else if (param === templateOption?.templateVarStart) {
+			setVarStart(value);
+		} else if (param === templateOption?.templateVarStop) {
+			setVarStop(value);
+		}
+	};
+	const syntax: TemplateExpressionSyntax = {
+		parameterAttribute: effectiveValue(
+			parameterAttribute,
+			templateOption?.templateParameterAttribute,
+			DEFAULT_TEMPLATE_EXPRESSION_SYNTAX.parameterAttribute,
+		),
+		varStart: effectiveValue(
+			varStart,
+			templateOption?.templateVarStart,
+			DEFAULT_TEMPLATE_EXPRESSION_SYNTAX.varStart,
+		),
+		varStop: effectiveValue(
+			varStop,
+			templateOption?.templateVarStop,
+			DEFAULT_TEMPLATE_EXPRESSION_SYNTAX.varStop,
+		),
+	};
+	return { syntax, handleValueChange };
 }
 
 export default function TemplateFormSection({
