@@ -14,7 +14,7 @@ import PlainText from "./section/element/PlainText";
 import Select from "./section/element/Select";
 import Text, { TextDropDownMenu } from "./section/element/Text";
 import TemplateFormSection, {
-	useTemplateEncoding,
+	useTemplateOptionValues,
 } from "./section/TemplateFormSection";
 
 export function ParameterizeForm(prop: {
@@ -25,7 +25,7 @@ export function ParameterizeForm(prop: {
 	const parameterize = prop.parameterize;
 	const paramData = parameterize.paramData;
 	const templateOption = parameterize.templateOption;
-	const templateEncoding = useTemplateEncoding(templateOption);
+	const templateEncoding = useTemplateOptionValues(templateOption);
 	const settings = useResourcesSettings();
 
 	return (

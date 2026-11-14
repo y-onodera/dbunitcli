@@ -7,6 +7,7 @@ import {
 	DatasetLoadForm,
 	DatasetSrcInfoScope,
 } from "./section/DatasetLoadForm";
+import { ResultPathTemplateButton } from "./section/dialog/ResultPathTemplateDialog";
 import {
 	TxtTemplateGenerateButton,
 	type TxtTemplateGenerateFormValues,
@@ -28,7 +29,7 @@ import Select, { ignoreSelect } from "./section/element/Select";
 import TemplateText from "./section/element/TemplateText";
 import JxlsFormSection from "./section/JxlsFormSection";
 import TemplateFormSection, {
-	useTemplateEncoding,
+	useTemplateOptionValues,
 } from "./section/TemplateFormSection";
 import XlsxCompareFormSection from "./section/XlsxCompareFormSection";
 
@@ -62,7 +63,8 @@ export function GenerateForm(prop: {
 	const [unitSettingEncoding, setUnitSettingEncoding] = useSyncedState(
 		generate.unitSettingEncoding?.value ?? "",
 	);
-	const templateEncoding = useTemplateEncoding(generate.templateOption);
+	// resultPathはtemplate optionの設定でテンプレートとして描画される
+	const templateOptionValues = useTemplateOptionValues(generate.templateOption);
 	// srcの入力値はsrcフォームとunitSettingの編集・プレビューで共有する
 	// （テーブル名・カラム名の候補とプレビューの読込元にsrcのデータセットを使う）
 	return (
@@ -70,7 +72,7 @@ export function GenerateForm(prop: {
 			<ResourceEncodingProvider
 				encodings={{
 					generateSetting: unitSettingEncoding,
-					template: templateEncoding.encoding,
+					template: templateOptionValues.encoding,
 				}}
 			>
 				<SectionFieldset>
@@ -133,11 +135,14 @@ export function GenerateForm(prop: {
 						<TemplateFormSection
 							templateOption={prop.generate.templateOption}
 							showEncoding={true}
-							handleValueChange={templateEncoding.handleValueChange}
+							handleValueChange={templateOptionValues.handleValueChange}
 						/>
 					)}
 					{prop.generate.templateOption && isExcelGenerate && (
-						<JxlsFormSection templateOption={prop.generate.templateOption} />
+						<JxlsFormSection
+							templateOption={prop.generate.templateOption}
+							handleValueChange={templateOptionValues.handleValueChange}
+						/>
 					)}
 					{[generate.fixedLength, generate.defaultLength, generate.align]
 						.filter(
@@ -150,7 +155,15 @@ export function GenerateForm(prop: {
 						<PlainText prefix="" element={generate.parallel} />
 					)}
 					<FileText prefix="" element={generate.result} />
-					<PlainText prefix="" element={generate.resultPath} />
+					<PlainText prefix="" element={generate.resultPath}>
+						{({ path, setPath }) => (
+							<ResultPathTemplateButton
+								value={path}
+								setValue={setPath}
+								syntax={templateOptionValues.syntax}
+							/>
+						)}
+					</PlainText>
 					{generate.outputEncoding && (
 						<EncodingText prefix="" element={generate.outputEncoding} />
 					)}

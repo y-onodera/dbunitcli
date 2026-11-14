@@ -9,7 +9,7 @@ import PlainText from "./section/element/PlainText";
 import Select from "./section/element/Select";
 import SrcFormSection from "./section/SrcFormSection";
 import TemplateFormSection, {
-	useTemplateEncoding,
+	useTemplateOptionValues,
 } from "./section/TemplateFormSection";
 import TraversalFormSection from "./section/TraversalFormSection";
 
@@ -22,7 +22,7 @@ export function RunForm(prop: {
 	run: RunOptions;
 }) {
 	const run = prop.run;
-	const templateEncoding = useTemplateEncoding(run.templateOption);
+	const templateEncoding = useTemplateOptionValues(run.templateOption);
 	return (
 		<SectionFieldset>
 			<SectionLegend title="run" command="commands/run" label="Run" />

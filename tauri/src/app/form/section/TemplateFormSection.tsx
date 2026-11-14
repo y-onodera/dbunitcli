@@ -7,23 +7,71 @@ import type {
 	CommandOption,
 	TemplateOption,
 } from "../../../model/CommandOption";
+import {
+	DEFAULT_TEMPLATE_EXPRESSION_SYNTAX,
+	type TemplateExpressionSyntax,
+} from "../../../model/TemplateExpression";
 import { useSyncedState } from "../../../utils/useResettableState";
 import EncodingText from "./element/EncodingText";
 import PlainText from "./element/PlainText";
 import TemplateText from "./element/TemplateText";
 
-// template optionのencodingの入力中の値と、それを追うTemplateFormSectionのhandleValueChange。
-// ResourceEncodingProviderで、template optionを適用するリソースの文字コードにする
-export function useTemplateEncoding(templateOption?: TemplateOption) {
-	const [encoding, setEncoding] = useSyncedState(
-		templateOption?.encoding?.value ?? "",
-	);
-	const handleValueChange = (param: CommandOption) => (value: string) => {
-		if (param === templateOption?.encoding) {
-			setEncoding(value);
+// optionの入力中の値と、変更されたのがこのoptionなら値を追うtrack
+function useTrackedValue(option: CommandOption | undefined) {
+	const [value, setValue] = useSyncedState(option?.value ?? "");
+	const track = (param: CommandOption, newValue: string) => {
+		if (param === option) {
+			setValue(newValue);
 		}
 	};
-	return { encoding, handleValueChange };
+	return { value, track };
+}
+
+// 空欄はcore側でデフォルトになるため、プレースホルダーのデフォルトに置き換える
+function effectiveValue(
+	tracked: { value: string },
+	option: CommandOption | undefined,
+	fallback: string,
+) {
+	if (tracked.value !== "") {
+		return tracked.value;
+	}
+	return option?.attribute.defaultValue || fallback;
+}
+
+// template optionの入力中の値と、それを追うhandleValueChange。
+// encodingはResourceEncodingProviderで、template optionを適用するリソースの文字コードにする。
+// syntaxはテンプレートとして描画される欄（Generateの-resultPath等）に挿入する式の組み立てに使う
+export function useTemplateOptionValues(templateOption?: TemplateOption) {
+	const encoding = useTrackedValue(templateOption?.encoding);
+	const parameterAttribute = useTrackedValue(
+		templateOption?.templateParameterAttribute,
+	);
+	const varStart = useTrackedValue(templateOption?.templateVarStart);
+	const varStop = useTrackedValue(templateOption?.templateVarStop);
+	const handleValueChange = (param: CommandOption) => (value: string) => {
+		for (const tracked of [encoding, parameterAttribute, varStart, varStop]) {
+			tracked.track(param, value);
+		}
+	};
+	const syntax: TemplateExpressionSyntax = {
+		parameterAttribute: effectiveValue(
+			parameterAttribute,
+			templateOption?.templateParameterAttribute,
+			DEFAULT_TEMPLATE_EXPRESSION_SYNTAX.parameterAttribute,
+		),
+		varStart: effectiveValue(
+			varStart,
+			templateOption?.templateVarStart,
+			DEFAULT_TEMPLATE_EXPRESSION_SYNTAX.varStart,
+		),
+		varStop: effectiveValue(
+			varStop,
+			templateOption?.templateVarStop,
+			DEFAULT_TEMPLATE_EXPRESSION_SYNTAX.varStop,
+		),
+	};
+	return { encoding: encoding.value, syntax, handleValueChange };
 }
 
 export default function TemplateFormSection({

@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <title>ヘルプ - Result Path Template</title>
+  <link rel="stylesheet" href="../help.css" />
+</head>
+<body>
+  <p><a href="../index.html">&larr; ヘルプ一覧に戻る</a></p>
+  <h1>Result Path Template</h1>
+  <p>Generate の <code>resultPath</code> にテンプレート変数を埋め込むダイアログです。<code>resultPath</code> の横の編集ボタンから開きます。主な使い方は、<code>unit=table</code> のときにテーブルごとに別のファイルへ出力するための、テーブル名の埋め込みです。</p>
+
+  <h2 id="section-simple">シンプルな使い方</h2>
+  <pre>指定:
+  generateType = txt、unit = table
+  resultPath の横の編集ボタン → resultPath の欄の末尾にカーソルを置く
+  → Variable = tableName のまま Insert → 続けて .sql と入力 → Apply
+
+結果:
+  resultPath = $param.tableName$.sql
+
+出力されるファイル（テーブルが ORDERS / ITEMS のとき）:
+  ORDERS.sql
+  ITEMS.sql</pre>
+
+  <h2 id="section-options">設定項目</h2>
+  <table>
+    <tr><th>項目</th><th>説明</th><th>デフォルト</th></tr>
+    <tr><td><code>resultPath</code></td><td>編集中の <code>resultPath</code>。Insert はこの欄のカーソル位置に式を入れる（文字を選んでいれば置き換える）。直接入力もできる</td><td>開いたときの <code>resultPath</code> の値</td></tr>
+    <tr><td><code>Variable</code>（必須）</td><td>埋め込む変数名。候補から <code>tableName</code> / <code>rowNumber</code> を選ぶか、<code>row.ID</code>（<code>unit=record</code> の行の値）・<code>inputParam.xxx</code>（-P 値）などを直接入力する。使える変数は <a href="../commands/generate/types/txt.html">generateType: txt</a> の「テンプレート変数」を参照</td><td><code>tableName</code></td></tr>
+    <tr><td><code>Format</code></td><td>値の書き方の変換。<code>snakeToCamel</code>（<code>ORDER_ITEMS</code> → <code>orderItems</code>）・<code>camelToUpperSnake</code> など。文字列の変数にだけ効く</td><td><code>(none)</code>＝変換しない</td></tr>
+    <tr><td><code>Expression</code></td><td>Insert で入る式。<code>template option</code> の <code>templateParameterAttribute</code> / <code>templateVarStart</code> / <code>templateVarStop</code>（<code>generateType</code> が xlsx / xls なら <code>jxls option</code> の <code>templateParameterAttribute</code>）の入力中の値で組み立てる</td><td>—</td></tr>
+  </table>
+
+  <h2 id="section-operation">操作</h2>
+  <table>
+    <tr><th>操作</th><th>説明</th></tr>
+    <tr><td>Insert</td><td><code>Expression</code> の式を <code>resultPath</code> の欄のカーソル位置に入れる。何度でも押せる</td></tr>
+    <tr><td>Apply</td><td>編集した値を <code>resultPath</code> に設定して閉じる</td></tr>
+    <tr><td>Close</td><td><code>resultPath</code> を変えずに閉じる</td></tr>
+  </table>
+
+  <h2 id="section-notes">注意</h2>
+  <ul>
+    <li>ボタンは <code>generateType</code> や <code>unit</code> によらず表示されますが、使える変数は <code>unit</code> によって変わります。<code>unit=dataset</code> では <code>tableName</code> は使えません。</li>
+    <li>テーブル単位の固定成果物タイプ（sql など）では <code>resultPath</code> はディレクトリとして扱われ、その下にテーブルごとのファイルが作られます。</li>
+  </ul>
+
+  <h2 id="section-related">関連</h2>
+  <ul>
+    <li><a href="../commands/generate.html">Generate</a> — <code>resultPath</code></li>
+    <li><a href="../commands/generate/types/txt.html">generateType: txt</a> — テンプレート変数</li>
+    <li><a href="../sections/template.html">Template</a> — 式の区切り文字</li>
+  </ul>
+</body>
+</html>

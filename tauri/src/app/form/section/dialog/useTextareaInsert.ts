@@ -1,9 +1,11 @@
 import { useLayoutEffect, useRef, useState } from "react";
 import type { InsertResult } from "../../../../utils/textInsert";
 
-export function useTextareaInsert(initialValue: string) {
+export function useTextareaInsert<
+	E extends HTMLTextAreaElement | HTMLInputElement = HTMLTextAreaElement,
+>(initialValue: string) {
 	const [value, setValue] = useState(initialValue);
-	const textareaRef = useRef<HTMLTextAreaElement>(null);
+	const textareaRef = useRef<E>(null);
 	const pendingCursorRef = useRef<number | null>(null);
 
 	const insert = (
