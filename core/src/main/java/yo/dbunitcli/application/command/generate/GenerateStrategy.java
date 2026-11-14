@@ -4,7 +4,7 @@ import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
 import yo.dbunitcli.application.Option;
 import yo.dbunitcli.application.ParameterUnit;
-import yo.dbunitcli.dataset.ComparableDataSetProducer;
+import yo.dbunitcli.dataset.DescriptorProducerFactory;
 import yo.dbunitcli.resource.FileResources;
 import yo.dbunitcli.resource.st4.TemplateRender;
 
@@ -75,13 +75,18 @@ public interface GenerateStrategy {
         return true;
     }
 
+    /** srcを読むか。falseならsrcの指定を使わず、srcなしで1回だけ出力する */
+    default boolean usesSource(final XlsxTemplateType templateType) {
+        return true;
+    }
+
     default boolean useJdbcMetaData() {
         return false;
     }
 
-    // unit=table以外の出力では呼ばれない（呼び出し元はGenerateOption#forEachParameter）
-    default ComparableDataSetProducer wrapProducer(final GenerateContext option, final ComparableDataSetProducer producer) {
-        return producer;
+    /** loadData()=falseの型が、行の代わりに読み込む記述子行の作り方。記述子行を使わなければnull */
+    default DescriptorProducerFactory descriptor(final GenerateContext option) {
+        return null;
     }
 
     default String resultPathTemplate(final GenerateContext option) {

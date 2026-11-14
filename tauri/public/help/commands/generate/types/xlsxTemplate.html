@@ -8,7 +8,7 @@
 <body>
   <p><a href="../../generate.html">&larr; Generate に戻る</a></p>
   <h1>generateType: xlsxTemplate</h1>
-  <p>jxls の Excel テンプレートの雛型（<code>.xlsx</code>）を生成します。<code>unit</code> は <code>dataset</code> 固定で、<code>template</code> は使いません。<code>templateType</code> で、テーブルごとのシートを作るか、2 テーブルを比べるシートを作るかを選びます。生成したファイルは、そのまま <a href="xlsx.html">generateType: xlsx / xls</a> の <code>template</code> に使えます。</p>
+  <p>jxls の Excel テンプレートの雛型（<code>.xlsx</code>）を生成します。<code>unit</code> は <code>dataset</code> 固定で、<code>template</code> は使いません。<code>templateType</code> で、テーブルごとのシートを作るか、2 テーブルを比べるシートを作るか、テーブル定義書を作るかを選びます。生成したファイルは、そのまま <a href="xlsx.html">generateType: xlsx / xls</a> の <code>template</code> に使えます。</p>
 
   <h2 id="section-options">固有オプション</h2>
   <table>
@@ -19,6 +19,7 @@
     <tr><th>値</th><th>説明</th></tr>
     <tr><td>table</td><td><code>src</code> のテーブルごとに 1 シートを作り、1 行目にカラム名、2 行目に jxls の埋め込み式を置き、繰り返し範囲をセルコメントで設定する</td></tr>
     <tr><td>compare</td><td><code>src</code> のテーブルから 2 つを選び、それぞれのシートと、キーで行を突き合わせて値を比べるシートを作る。比べるテーブルと列は <code>compare</code> セクションで指定する（<a href="../../../sections/xlsx-compare.html">compare</a>）</td></tr>
+    <tr><td>metadata</td><td>テーブル定義書（テーブル名・コメントと、カラムの一覧）のテンプレートを作る。レイアウトは固定で <code>src</code> を使わないため、選ぶと <code>src</code> セクションは表示されない。使い方は <a href="../../../dialogs/xlsx-metadata-template-generate.html">Generate Table Definition Template</a> を参照</td></tr>
   </table>
 
   <h2 id="section-example">出力例</h2>
@@ -34,6 +35,7 @@
   <ul>
     <li><a href="../../../sections/xlsx-compare.html">compare</a> — <code>templateType = compare</code> で比べるテーブルと列を指定する</li>
     <li><a href="../../../dialogs/xlsx-template-generate.html">Generate Xlsx Template</a> — 画面から雛型を作る</li>
+    <li><a href="../../../dialogs/xlsx-metadata-template-generate.html">Generate Table Definition Template</a> — <code>templateType = metadata</code> のテンプレートの内容と使い方</li>
     <li><a href="../../../sections/jxls.html">Jxls</a> — テンプレートの書き方</li>
   </ul>
 </body>

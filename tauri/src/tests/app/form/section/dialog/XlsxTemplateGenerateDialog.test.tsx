@@ -1,7 +1,10 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
-import { XlsxTemplateGenerateButton } from "../../../../../app/form/section/dialog/XlsxTemplateGenerateDialog";
+import {
+	XlsxMetaDataTemplateGenerateButton,
+	XlsxTemplateGenerateButton,
+} from "../../../../../app/form/section/dialog/XlsxTemplateGenerateDialog";
 import type { FetchParams } from "../../../../../utils/fetchUtils";
 import {
 	environmentFixture,
@@ -157,5 +160,41 @@ describe("XlsxTemplateGenerateDialogの実行テスト", () => {
 			expect(screen.getByText(/generate failed/)).toBeInTheDocument();
 		});
 		expect(setPath).not.toHaveBeenCalled();
+	});
+});
+
+describe("XlsxMetaDataTemplateGenerateDialogの実行テスト", () => {
+	it("fileNameだけを入力し、template/generate-metadataへPOSTして拡張子を補った名前をtemplate欄へ反映する", async () => {
+		generateResponse.current = ["tableDef.xlsx"];
+		const setPath = vi.fn();
+		const user = userEvent.setup();
+		render(<XlsxMetaDataTemplateGenerateButton setPath={setPath} />);
+		await user.click(
+			screen.getByRole("button", {
+				name: "generate table definition template",
+			}),
+		);
+		await waitFor(() => {
+			expect(
+				document.querySelector("#xlsxMetaDataTemplateGenerateForm"),
+			).toBeInTheDocument();
+		});
+		expect(document.querySelector('[name="-src.srcType"]')).toBeNull();
+
+		await user.type(
+			document.querySelector('input[name="-fileName"]') as HTMLElement,
+			"tableDef",
+		);
+		await user.click(screen.getByRole("button", { name: "Execute" }));
+
+		await waitFor(() => {
+			expect(setPath).toHaveBeenCalledWith("tableDef.xlsx");
+		});
+		const call = mockFetchData.mock.calls.find(([params]) =>
+			params.endpoint.includes("template/generate-metadata"),
+		);
+		expect(JSON.parse(String(call?.[0].options.body))).toEqual({
+			"-fileName": "tableDef",
+		});
 	});
 });

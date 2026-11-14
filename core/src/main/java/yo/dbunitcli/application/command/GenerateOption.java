@@ -64,7 +64,7 @@ public record GenerateOption(Parameter parameter, String resultFile, String resu
              Strings.isNotEmpty(dto.getSqlFileSuffix()) ? dto.getSqlFileSuffix() : "",
              Strings.isNotEmpty(dto.getCommit()) ? dto.getCommit() : "true", dto.getTemplate(),
              dto.getOutputEncoding(),
-             new DataSetLoadOption("src", dto.getSrcData()),
+             GenerateOption.srcData(dto),
              new TemplateRenderOption("template", dto.getTemplateOption()),
              Strings.isNotEmpty(dto.getIncludeAllColumns()) ? dto.getIncludeAllColumns() : "false",
              Strings.isNotEmpty(dto.getLazyLoad()) ? dto.getLazyLoad() : "true",
@@ -104,6 +104,15 @@ public record GenerateOption(Parameter parameter, String resultFile, String resu
         return Strings.orDefault(this.outputEncoding, DataSetConverterOption.DEFAULT_OUTPUT_ENCODING);
     }
 
+    // srcを読まない型は、-src.*の指定に関わらずsrcなしにする
+    private static DataSetLoadOption srcData(final GenerateDto dto) {
+        if (GenerateOption.getGenerateType(dto).strategy().usesSource(dto.getTemplateType())) {
+            return new DataSetLoadOption("src", dto.getSrcData());
+        }
+        dto.getSrcData().setSrcType(DataSourceType.none);
+        return new DataSetLoadOption("src", dto.getSrcData(), true);
+    }
+
     private static GenerateType getGenerateType(final GenerateDto dto) {
         return dto.getGenerateType() != null ? dto.getGenerateType() : GenerateType.txt;
     }
@@ -141,9 +150,8 @@ public record GenerateOption(Parameter parameter, String resultFile, String resu
                               param, ParallelTableMapping.parallelism(param) > 1, resultFiles, action);
             return;
         }
-        final ComparableDataSetProducer source = loader.getComparableDataSetProducer(param);
         // 行はテーブルごとの出力の中で読むため、全テーブルの出力が終わるまで接続を保つ
-        try (final ComparableDataSetProducer producer = this.strategy().wrapProducer(this, source)) {
+        try (final ComparableDataSetProducer producer = loader.getComparableDataSetProducer(param)) {
             final List<ParameterUnit.TableTemplate> templates = this.strategy().isExcel()
                     ? ParameterUnit.streamingTableTemplates(loader, producer).toList()
                     : ParameterUnit.tableTemplates(loader, producer, this.unitTableSeparators()).toList();
@@ -297,12 +305,14 @@ public record GenerateOption(Parameter parameter, String resultFile, String resu
         if (!this.strategy().isFixedTemplate()) {
             result.putFile("-template", this.template, true, BaseDir.TEMPLATE);
         }
-        final ParametersBuilder srcComponent = this.srcData.toParametersBuilder();
+        final ParametersBuilder srcComponent = this.strategy().loadData()
+                ? this.srcData.toParametersBuilder()
+                : this.srcData.toParametersBuilderWithoutLoadData();
         if (this.strategy().useJdbcMetaData()) {
             srcComponent.remove("-src.useJdbcMetaData");
         }
-        if (!this.strategy().loadData()) {
-            srcComponent.remove("-src.loadData");
+        if (this.srcData.srcType() == DataSourceType.none) {
+            srcComponent.remove("-src.srcType");
         }
         this.strategy().putOptionParameters(this, result);
         if (this.isParallelizable()) {
@@ -337,14 +347,15 @@ public record GenerateOption(Parameter parameter, String resultFile, String resu
 
     public ComparableDataSetParam dataSetParam() {
         final ComparableDataSetParam.Builder builder = this.srcData.getParam();
-        if (this.strategy().loadData() && Strings.isEmpty(this.srcData.getSetting())) {
+        if (!this.strategy().loadData()) {
+            builder.setLoadData(false).setDescriptor(this.strategy().descriptor(this));
+        } else if (Strings.isEmpty(this.srcData.getSetting())) {
             final TableSeparators defaultTableSeparators = this.classpathDefaultTableSeparators();
             if (defaultTableSeparators != null) {
                 builder.setTableSeparators(defaultTableSeparators);
             }
         }
         builder.setUseJdbcMetaData(this.strategy().useJdbcMetaData())
-               .setLoadData(this.strategy().loadData())
                .setParallel(this.parallelism());
         return builder.build();
     }

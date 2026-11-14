@@ -19,6 +19,12 @@ public record ComparableDataSetLoader(Parameter parameter) {
     }
 
     public ComparableDataSetProducer getComparableDataSetProducer(final ComparableDataSetParam param) {
+        final ComparableDataSetProducer producer = this.sourceProducer(param);
+        // 記述子行は行を読まないときだけ使う
+        return !param.loadData() && param.descriptor() != null ? param.descriptor().wrap(producer) : producer;
+    }
+
+    private ComparableDataSetProducer sourceProducer(final ComparableDataSetParam param) {
         return switch (param.source()) {
             case table -> new ComparableDBDataSetProducer(param);
             case sql -> new ComparableQueryDataSetProducer(param, this.parameter);

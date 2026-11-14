@@ -1,0 +1,60 @@
+{
+  "prefix": "",
+  "generateType": {
+    "name": "generateType",
+    "attribute": {
+      "type": "ENUM",
+      "selectOption": [
+        "txt",
+        "xlsx",
+        "xls",
+        "settings",
+        "sql",
+        "ddl",
+        "xlsxTemplate",
+        "xlsxSchema",
+        "javaBean",
+        "fixedColumnDef"
+      ],
+      "required": false,
+      "defaultPath": "WORKSPACE"
+    },
+    "value": "xlsxTemplate"
+  },
+  "templateType": {
+    "name": "templateType",
+    "attribute": {
+      "type": "ENUM",
+      "selectOption": [
+        "table",
+        "compare",
+        "metadata"
+      ],
+      "required": true,
+      "defaultPath": "WORKSPACE"
+    },
+    "value": "metadata"
+  },
+  "result": {
+    "name": "result",
+    "attribute": {
+      "type": "DIR",
+      "required": false,
+      "defaultPath": "RESULT"
+    },
+    "value": ""
+  },
+  "resultPath": {
+    "name": "resultPath",
+    "attribute": {
+      "type": "TEXT",
+      "required": false,
+      "defaultPath": "WORKSPACE",
+      "defaultValue": "(parameter name)"
+    },
+    "value": ""
+  },
+  "srcData": {
+    "prefix": "src"
+  }
+}

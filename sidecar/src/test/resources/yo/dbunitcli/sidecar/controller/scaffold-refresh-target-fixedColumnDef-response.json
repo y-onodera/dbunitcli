@@ -289,15 +289,6 @@
       },
       "value": ""
     },
-    "loadData": {
-      "name": "loadData",
-      "attribute": {
-        "type": "FLG",
-        "required": false,
-        "defaultPath": "WORKSPACE"
-      },
-      "value": "true"
-    },
     "includeMetaData": {
       "name": "includeMetaData",
       "attribute": {

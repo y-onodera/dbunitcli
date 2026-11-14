@@ -12,6 +12,7 @@ import {
 	generateRefreshGenerateTypeXlsxResponseFixture,
 	generateRefreshSrcTypeTableResponseFixture,
 	generateRefreshXlsxTemplateCompareResponseFixture,
+	generateRefreshXlsxTemplateMetaDataResponseFixture,
 } from "./fixtures";
 
 vi.mock("@tauri-apps/plugin-dialog", () => ({ open: vi.fn() }));
@@ -440,6 +441,28 @@ describe("GenerateFormの描画テスト", () => {
 			expect(
 				[...document.querySelectorAll("fieldset legend")].some((legend) =>
 					legend.textContent?.startsWith("compare"),
+				),
+			).toBe(false);
+		});
+	});
+
+	describe("xlsxTemplateのテーブル定義書（templateType=metadata）", () => {
+		it("srcセクションを表示しない", () => {
+			render(
+				<GenerateForm
+					{...makeGenerateProps(
+						generateRefreshXlsxTemplateMetaDataResponseFixture,
+					)}
+				/>,
+			);
+
+			expect(
+				document.querySelector('select[name="-templateType"]'),
+			).toHaveValue("metadata");
+			expect(document.querySelector('[name^="-src."]')).toBeNull();
+			expect(
+				[...document.querySelectorAll("fieldset legend")].some((legend) =>
+					legend.textContent?.startsWith("src"),
 				),
 			).toBe(false);
 		});

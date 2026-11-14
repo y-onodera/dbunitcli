@@ -75,7 +75,7 @@ class GenerateOptionTest {
         void tableHasNoCompareOptions() {
             final Option.Parameters result = GenerateOptionTest.this.createTarget().toParameters();
             assertEquals("table", result.getArg("-templateType").value());
-            assertEquals(Arrays.asList("table", "compare"), result.getArg("-templateType").attribute().selectOption());
+            assertEquals(Arrays.asList("table", "compare", "metadata"), result.getArg("-templateType").attribute().selectOption());
             assertNull(result.getArg("-oldTable"));
             assertNull(result.getArg("-newTable"));
             assertNull(result.getArg("-keys"));
@@ -108,6 +108,16 @@ class GenerateOptionTest {
             assertEquals("NEW", roundTrip.getNewTable());
             assertEquals("ID:CODE,SUB", roundTrip.getKeys());
             assertEquals("NAME", roundTrip.getCompares());
+        }
+
+        @Test
+        void metadataHasNoSrcOptions() {
+            GenerateOptionTest.this.src.setTemplateType(yo.dbunitcli.application.command.generate.XlsxTemplateType.metadata);
+            GenerateOptionTest.this.src.getSrcData().setSrc("not/exists");
+            final GenerateOption target = GenerateOptionTest.this.createTarget();
+            assertTrue(target.validate().isEmpty(), String.valueOf(target.validate()));
+            assertTrue(target.toParameters().toList(true).stream().noneMatch(it -> it.startsWith("-src.")
+                    || it.startsWith("-parallel")), String.valueOf(target.toParameters().toList(true)));
         }
 
         @Test

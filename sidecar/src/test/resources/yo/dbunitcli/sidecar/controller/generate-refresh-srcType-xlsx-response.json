@@ -244,6 +244,15 @@
       },
       "value": "true"
     },
+    "loadMetaData": {
+      "name": "loadMetaData",
+      "attribute": {
+        "type": "FLG",
+        "required": false,
+        "defaultPath": "WORKSPACE"
+      },
+      "value": "false"
+    },
     "includeMetaData": {
       "name": "includeMetaData",
       "attribute": {

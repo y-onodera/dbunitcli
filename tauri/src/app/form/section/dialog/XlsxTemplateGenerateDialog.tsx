@@ -3,12 +3,19 @@ import {
 	ControllTextBox,
 	InputLabel,
 } from "../../../../components/element/Input";
+import { useEnvironment } from "../../../../context/EnvironmentProvider";
 import { useSetResourcesSettings } from "../../../../context/WorkspaceResourcesProvider";
-import type { FormValues } from "../../../../utils/formValues";
+import { useJob } from "../../../../hooks/useJob";
+import {
+	collectFormValues,
+	type FormValues,
+} from "../../../../utils/formValues";
 import {
 	FileGenerateButton,
+	GenerateButton,
 	type GenerateExecuteContext,
 } from "./GenerateDialog";
+import { RefreshableDialogShell } from "./RefreshableDialogShell";
 import type { ResourceEditButtonProp } from "./ResourceEditButton";
 import { postDialogForm } from "./refreshableDialogForm";
 
@@ -51,15 +58,19 @@ function FileNameField() {
 	);
 }
 
-function useGenerateXlsxTemplate() {
+// 生成したテンプレートをtemplateリソースへ保存し、保存したファイル名を返す
+function useGenerateXlsxTemplate(endpoint: string) {
 	const setResourcesSettings = useSetResourcesSettings();
 	return async (
 		values: FormValues,
-		{ apiUrl, fetchOptions }: GenerateExecuteContext,
+		{
+			apiUrl,
+			fetchOptions,
+		}: Pick<GenerateExecuteContext, "apiUrl" | "fetchOptions">,
 	) => {
 		const templateFiles = await postDialogForm<string[]>(
 			apiUrl,
-			"template/generate",
+			endpoint,
 			values,
 			fetchOptions,
 		);
@@ -71,7 +82,7 @@ function useGenerateXlsxTemplate() {
 export function XlsxTemplateGenerateButton({
 	setPath,
 }: Pick<ResourceEditButtonProp, "setPath">) {
-	const generate = useGenerateXlsxTemplate();
+	const generate = useGenerateXlsxTemplate("template/generate");
 	return (
 		<FileGenerateButton
 			setPath={setPath}
@@ -79,5 +90,69 @@ export function XlsxTemplateGenerateButton({
 			leading={<FileNameField />}
 			generate={generate}
 		/>
+	);
+}
+
+const metaDataFormId = "xlsxMetaDataTemplateGenerateForm";
+// srcを読まないため、開いた時点で入力できる
+const loadedState = { status: "loaded", options: null } as const;
+
+// テーブル定義書のテンプレートはsrcに依らないため、ファイル名だけを入力する
+function XlsxMetaDataTemplateGenerateDialog({
+	onSaved,
+	onClose,
+}: {
+	onSaved: (fileName: string) => void;
+	onClose: () => void;
+}) {
+	const { apiUrl } = useEnvironment();
+	const generate = useGenerateXlsxTemplate("template/generate-metadata");
+	const job = useJob();
+	const execute = async () => {
+		const { values, validationError } = collectFormValues(metaDataFormId, true);
+		if (validationError) {
+			return;
+		}
+		const result = await job.run((fetchOptions) =>
+			generate(values, { apiUrl, fetchOptions }),
+		);
+		if (result) {
+			onSaved(result.value);
+		}
+	};
+	return (
+		<RefreshableDialogShell
+			command="dialogs/xlsx-metadata-template-generate"
+			label="Generate Table Definition Template"
+			title="Generate Table Definition Template"
+			formId={metaDataFormId}
+			loadState={loadedState}
+			executing={job.running}
+			executeError={job.error}
+			logs={job.logs}
+			onExecute={execute}
+			onClose={onClose}
+		>
+			{() => <FileNameField />}
+		</RefreshableDialogShell>
+	);
+}
+
+// template欄のdropdownに出す「テーブル定義書テンプレート生成」
+export function XlsxMetaDataTemplateGenerateButton({
+	setPath,
+}: Pick<ResourceEditButtonProp, "setPath">) {
+	return (
+		<GenerateButton
+			setPath={setPath}
+			title="generate table definition template"
+		>
+			{(handleDialogClose, handleSave) => (
+				<XlsxMetaDataTemplateGenerateDialog
+					onClose={handleDialogClose}
+					onSaved={handleSave}
+				/>
+			)}
+		</GenerateButton>
 	);
 }

@@ -173,6 +173,13 @@ function makeCsvSrcData(
 			false,
 		),
 		loadData: makeElement("loadData", "FLG", "true", "WORKSPACE", false),
+		loadMetaData: makeElement(
+			"loadMetaData",
+			"FLG",
+			"false",
+			"WORKSPACE",
+			false,
+		),
 		includeMetaData: makeElement(
 			"includeMetaData",
 			"FLG",
@@ -227,6 +234,13 @@ function makeXlsxSrcData() {
 			false,
 		),
 		loadData: makeElement("loadData", "FLG", "true", "WORKSPACE", false),
+		loadMetaData: makeElement(
+			"loadMetaData",
+			"FLG",
+			"false",
+			"WORKSPACE",
+			false,
+		),
 		includeMetaData: makeElement(
 			"includeMetaData",
 			"FLG",
@@ -299,6 +313,13 @@ function makeTableSrcData(prefix: string) {
 			false,
 		),
 		loadData: makeElement("loadData", "FLG", "true", "WORKSPACE", false),
+		loadMetaData: makeElement(
+			"loadMetaData",
+			"FLG",
+			"false",
+			"WORKSPACE",
+			false,
+		),
 		includeMetaData: makeElement(
 			"includeMetaData",
 			"FLG",
@@ -344,6 +365,13 @@ function makeImageFileSrcData(prefix: string) {
 			false,
 		),
 		loadData: makeElement("loadData", "FLG", "true", "WORKSPACE", false),
+		loadMetaData: makeElement(
+			"loadMetaData",
+			"FLG",
+			"false",
+			"WORKSPACE",
+			false,
+		),
 		includeMetaData: makeElement(
 			"includeMetaData",
 			"FLG",
@@ -990,7 +1018,7 @@ export const generateRefreshXlsxTemplateCompareResponseFixture = {
 		"compare",
 		"WORKSPACE",
 		true,
-		["table", "compare"],
+		["table", "compare", "metadata"],
 	),
 	oldTable: makeElement("oldTable", "TEXT", "", "WORKSPACE", true),
 	newTable: makeElement("newTable", "TEXT", "", "WORKSPACE", true),
@@ -1002,6 +1030,30 @@ export const generateRefreshXlsxTemplateCompareResponseFixture = {
 	resultPath: makeTextWithDefault("resultPath", "", "(parameter name)"),
 	srcData: makeCsvSrcData("src", ""),
 } as GenerateOptions;
+
+// generate-refresh-xlsxTemplate-metadata-response.json をもとにしたフィクスチャ（srcの項目は返らない）
+export const generateRefreshXlsxTemplateMetaDataResponseFixture = {
+	prefix: "",
+	generateType: makeElement(
+		"generateType",
+		"ENUM",
+		"xlsxTemplate",
+		"WORKSPACE",
+		false,
+		GENERATE_TYPE_OPTIONS,
+	),
+	templateType: makeElement(
+		"templateType",
+		"ENUM",
+		"metadata",
+		"WORKSPACE",
+		true,
+		["table", "compare", "metadata"],
+	),
+	result: makeElement("result", "DIR", "", "RESULT", false),
+	resultPath: makeTextWithDefault("resultPath", "", "(parameter name)"),
+	srcData: { prefix: "src" },
+} as unknown as GenerateOptions;
 
 // xlsxSchema生成ダイアログ（generate/refresh generateType=xlsxSchema）用fixture
 export const generateRefreshXlsxSchemaResponseFixture = {
@@ -1093,11 +1145,21 @@ function makeScaffoldOptionsBase(target: string) {
 			SCAFFOLD_DATASET_TYPE_OPTIONS,
 		),
 		datasetEncoding: makeTextWithDefault("datasetEncoding", "", "UTF-8"),
-		dataset: makeCsvSrcData("dataset", "resources/src/csv", [
-			"none",
-			...SRC_TYPE_OPTIONS,
-		]) as DatasetSource,
+		dataset: scaffoldDataset(),
 	};
+}
+
+// scaffoldのdatasetはloadData・loadMetaDataを持たない
+function scaffoldDataset(): DatasetSource {
+	const {
+		loadData: _loadData,
+		loadMetaData: _loadMetaData,
+		...dataset
+	} = makeCsvSrcData("dataset", "resources/src/csv", [
+		"none",
+		...SRC_TYPE_OPTIONS,
+	]);
+	return dataset as DatasetSource;
 }
 
 export const scaffoldRefreshTargetDdlResponseFixture = makeScaffoldOptionsBase(

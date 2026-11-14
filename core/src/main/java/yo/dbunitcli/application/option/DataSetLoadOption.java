@@ -7,6 +7,7 @@ import yo.dbunitcli.application.json.FromJsonTableSeparatorsBuilder;
 import yo.dbunitcli.dataset.ComparableDataSetParam;
 import yo.dbunitcli.dataset.DataSourceType;
 import yo.dbunitcli.dataset.TableSeparators;
+import yo.dbunitcli.dataset.producer.ComparableDdlMetaDataProducer;
 
 import java.io.File;
 import java.io.IOException;
@@ -23,6 +24,7 @@ public record DataSetLoadOption(
         , String regTableInclude
         , String regTableExclude
         , String loadData
+        , String loadMetaData
         , String includeMetaData
         , ComparableDataSetParamOption dataSetParam
 ) implements Option {
@@ -48,6 +50,7 @@ public record DataSetLoadOption(
                 , dto.getRegTableInclude()
                 , dto.getRegTableExclude()
                 , Strings.isNotEmpty(dto.getLoadData()) ? dto.getLoadData() : "true"
+                , Strings.isNotEmpty(dto.getLoadMetaData()) ? dto.getLoadMetaData() : "false"
                 , Strings.isNotEmpty(dto.getIncludeMetaData()) ? dto.getIncludeMetaData() : "false"
                 , new DataSourceTypeOptionFactory().create(prefix, DataSetLoadOption.getSrcType(dto), dto)
         );
@@ -79,7 +82,17 @@ public record DataSetLoadOption(
                 .put("-regTableInclude", this.regTableInclude)
                 .put("-regTableExclude", this.regTableExclude)
                 .putFlag("-loadData", this.loadData)
+                .putFlag("-loadMetaData", this.loadMetaData)
                 .putFlag("-includeMetaData", this.includeMetaData);
+    }
+
+    /**
+     * 行を読むかどうかをコマンドが決める場合のパラメータ（-loadData・-loadMetaDataを出さない）
+     */
+    public ParametersBuilder toParametersBuilderWithoutLoadData() {
+        return this.toParametersBuilder()
+                .remove("-" + this.prefix + ".loadData")
+                .remove("-" + this.prefix + ".loadMetaData");
     }
 
     /**
@@ -98,6 +111,7 @@ public record DataSetLoadOption(
                 , this.validatePattern("-regTableInclude", this.regTableInclude)
                 , this.validatePattern("-regTableExclude", this.regTableExclude)
                 , this.validateBoolean("-loadData", this.loadData)
+                , this.validateBoolean("-loadMetaData", this.loadMetaData)
                 , this.validateBoolean("-includeMetaData", this.includeMetaData)
                 , this.dataSetParam.validate());
     }
@@ -115,6 +129,7 @@ public record DataSetLoadOption(
                 .setRegTableInclude(this.regTableInclude)
                 .setRegTableExclude(this.regTableExclude)
                 .setLoadData(Boolean.parseBoolean(this.loadData))
+                .setDescriptor(Boolean.parseBoolean(this.loadMetaData) ? ComparableDdlMetaDataProducer::forSource : null)
                 .setMapIncludeMetaData(Boolean.parseBoolean(this.includeMetaData))
         );
     }

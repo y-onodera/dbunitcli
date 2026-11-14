@@ -299,13 +299,7 @@ public class GenerateTest {
         public void testGenerateDdlFromDbMetaData() throws Exception {
             final String url = "jdbc:h2:mem:generateddl;DB_CLOSE_DELAY=-1";
             try (final java.sql.Connection conn = java.sql.DriverManager.getConnection(url, "sa", "sa")) {
-                try (final java.sql.Statement st = conn.createStatement()) {
-                    st.execute("DROP TABLE IF EXISTS PERSON");
-                    st.execute("CREATE TABLE PERSON (ID INT NOT NULL, NAME VARCHAR(50) NOT NULL, MEMO VARCHAR(100)"
-                            + ", CONSTRAINT PK_PERSON PRIMARY KEY (ID))");
-                    st.execute("COMMENT ON TABLE PERSON IS 'people table'");
-                    st.execute("COMMENT ON COLUMN PERSON.NAME IS 'person name'");
-                }
+                GenerateTest.createPersonTable(conn);
                 Generate.main(new String[]{
                         "-generateType=ddl"
                         , "-srcType=table"
@@ -324,6 +318,40 @@ public class GenerateTest {
                 Assertions.assertTrue(ddl.contains("CONSTRAINT PK_PERSON PRIMARY KEY (ID)"), ddl);
                 Assertions.assertTrue(ddl.contains("COMMENT ON TABLE PERSON IS 'people table';"), ddl);
                 Assertions.assertTrue(ddl.contains("COMMENT ON COLUMN PERSON.NAME IS 'person name';"), ddl);
+            }
+        }
+
+        @Test
+        public void testGenerateTxtWithLoadMetaDataAppliesUnitSettingToDescriptorRows() throws Exception {
+            final String url = "jdbc:h2:mem:generatetxtmetadata;DB_CLOSE_DELAY=-1";
+            final String resultDir = "target/test-classes/yo/dbunitcli/application/generate/ddl/loadMetaData";
+            try (final java.sql.Connection conn = java.sql.DriverManager.getConnection(url, "sa", "sa")) {
+                GenerateTest.createPersonTable(conn);
+                final java.util.List<String> src = java.util.List.of(
+                        "-srcType=table"
+                        , "-src=" + GenerateTest.RESOURCES_DIR + "/src/generate/db/table"
+                        , "-jdbcUrl=" + url
+                        , "-jdbcUser=sa"
+                        , "-jdbcPass=sa");
+                Generate.main(java.util.stream.Stream.concat(src.stream(), java.util.stream.Stream.of(
+                        "-generateType=ddl"
+                        , "-resultPath=" + resultDir + "/builtin")).toArray(String[]::new));
+                // 組み込みddlと同じテンプレート・unitSettingを、記述子行（-src.loadMetaData）に対して使う
+                Generate.main(java.util.stream.Stream.concat(src.stream(), java.util.stream.Stream.of(
+                        "-generateType=txt"
+                        , "-unit=table"
+                        , "-src.useJdbcMetaData=true"
+                        , "-src.loadData=false"
+                        , "-src.loadMetaData=true"
+                        , "-template=src/main/resources/sql/ddlTemplate.txt"
+                        , "-template.templateGroup=src/main/resources/sql/ddlTemplate.stg"
+                        , "-unitSetting=src/main/resources/sql/ddlSettings.json"
+                        , "-resultPath=" + resultDir + "/txt/$param.tableName$.sql")).toArray(String[]::new));
+                GenerateTest.subDirectory = "generate/ddl/loadMetaData";
+                final String builtin = Files.readString(new File(this.getBaseDir() + "/generate/ddl/loadMetaData/builtin", "PERSON.sql").toPath(), StandardCharsets.UTF_8);
+                Assertions.assertTrue(builtin.contains("CONSTRAINT PK_PERSON PRIMARY KEY (ID)"), builtin);
+                Assertions.assertEquals(builtin
+                        , Files.readString(new File(this.getBaseDir() + "/generate/ddl/loadMetaData/txt", "PERSON.sql").toPath(), StandardCharsets.UTF_8));
             }
         }
 
@@ -1024,6 +1052,64 @@ public class GenerateTest {
         }
 
         @Test
+        public void testGenerateXlsxMetaDataTemplate() throws Exception {
+            final String resultDir = "target/test-classes/yo/dbunitcli/application/generate/xlsxTemplate/result/metadata";
+            GenerateTest.generateMetaDataTemplate(resultDir);
+            final String url = "jdbc:h2:mem:generatexlsxmetadata;DB_CLOSE_DELAY=-1";
+            try (final java.sql.Connection conn = java.sql.DriverManager.getConnection(url, "sa", "sa")) {
+                GenerateTest.createPersonTable(conn);
+                for (final boolean lazyLoad : new boolean[]{true, false}) {
+                    Generate.main(new String[]{
+                            "-generateType=xlsx"
+                            , "-unit=table"
+                            , "-lazyLoad=" + lazyLoad
+                            , "-template=" + this.getBaseDir() + "/generate/xlsxTemplate/result/metadata/metadataTemplate.xlsx"
+                            , "-srcType=table"
+                            , "-src=" + GenerateTest.RESOURCES_DIR + "/src/generate/db/table"
+                            , "-jdbcUrl=" + url
+                            , "-jdbcUser=sa"
+                            , "-jdbcPass=sa"
+                            , "-src.useJdbcMetaData=true"
+                            , "-src.loadData=false"
+                            , "-src.loadMetaData=true"
+                            , "-resultPath=" + resultDir + "/lazyLoad_" + lazyLoad + "/$param.tableName$.xlsx"
+                    });
+                    Assertions.assertEquals(java.util.List.of(
+                                    java.util.List.of("テーブル名", "PERSON")
+                                    , java.util.List.of("コメント", "people table")
+                                    , java.util.List.of()
+                                    , java.util.List.of("No", "カラム名", "型", "桁", "小数", "NOT NULL", "PK", "コメント")
+                                    , java.util.List.of("1", "ID", "INTEGER", "32", "", "○", "○", "")
+                                    , java.util.List.of("2", "NAME", "CHARACTER VARYING", "50", "", "○", "", "person name")
+                                    , java.util.List.of("3", "MEMO", "CHARACTER VARYING", "100", "", "", "", ""))
+                            , GenerateTest.readSheet(new File(resultDir + "/lazyLoad_" + lazyLoad + "/PERSON.xlsx")));
+                }
+            }
+        }
+
+        @Test
+        public void testGenerateXlsxMetaDataTemplateFromCsv() throws Exception {
+            final String resultDir = "target/test-classes/yo/dbunitcli/application/generate/xlsxTemplate/result/metadataCsv";
+            GenerateTest.generateMetaDataTemplate(resultDir);
+            Generate.main(new String[]{
+                    "-generateType=xlsx"
+                    , "-unit=table"
+                    , "-template=" + this.getBaseDir() + "/generate/xlsxTemplate/result/metadataCsv/metadataTemplate.xlsx"
+                    , "-srcType=csv"
+                    , "-src=src/test/resources/yo/dbunitcli/application/src/generate/with_metadata/source/csv"
+                    , "-encoding=UTF-8"
+                    , "-src.loadData=false"
+                    , "-src.loadMetaData=true"
+                    , "-resultPath=" + resultDir + "/$param.tableName$.xlsx"
+            });
+            final java.util.List<java.util.List<String>> rows = GenerateTest.readSheet(new File(resultDir + "/Test2.xlsx"));
+            Assertions.assertEquals(java.util.List.of("テーブル名", "Test2"), rows.get(0));
+            Assertions.assertEquals("PrimaryKey", rows.get(4).get(1));
+            Assertions.assertEquals(java.util.List.of("1", "2", "3")
+                    , rows.subList(4, rows.size()).stream().map(it -> it.get(0)).toList());
+        }
+
+        @Test
         public void testGenerateXlsxCompareTemplateTableNotFound() {
             Assertions.assertThrows(Throwable.class, () -> Generate.main(new String[]{
                     "-srcType=csv"
@@ -1163,4 +1249,34 @@ public class GenerateTest {
 
     }
 
+
+    private static void generateMetaDataTemplate(final String resultDir) {
+        Generate.main(new String[]{
+                "-generateType=xlsxTemplate"
+                , "-templateType=metadata"
+                , "-resultPath=" + resultDir + "/metadataTemplate.xlsx"
+        });
+    }
+
+    private static void createPersonTable(final java.sql.Connection conn) throws java.sql.SQLException {
+        try (final java.sql.Statement st = conn.createStatement()) {
+            st.execute("DROP TABLE IF EXISTS PERSON");
+            st.execute("CREATE TABLE PERSON (ID INT NOT NULL, NAME VARCHAR(50) NOT NULL, MEMO VARCHAR(100)"
+                    + ", CONSTRAINT PK_PERSON PRIMARY KEY (ID))");
+            st.execute("COMMENT ON TABLE PERSON IS 'people table'");
+            st.execute("COMMENT ON COLUMN PERSON.NAME IS 'person name'");
+        }
+    }
+
+    private static java.util.List<java.util.List<String>> readSheet(final File file) throws IOException {
+        final org.apache.poi.ss.usermodel.DataFormatter formatter = new org.apache.poi.ss.usermodel.DataFormatter();
+        try (final Workbook workbook = WorkbookFactory.create(file)) {
+            final Sheet sheet = workbook.getSheetAt(0);
+            return java.util.stream.IntStream.rangeClosed(0, sheet.getLastRowNum())
+                    .mapToObj(sheet::getRow)
+                    .map(row -> row == null ? java.util.List.<String>of()
+                            : java.util.stream.StreamSupport.stream(row.spliterator(), false).map(formatter::formatCellValue).toList())
+                    .toList();
+        }
+    }
 }

@@ -6,6 +6,7 @@ import yo.dbunitcli.application.Option;
 import yo.dbunitcli.application.ParameterUnit;
 import yo.dbunitcli.common.Parameter;
 import yo.dbunitcli.resource.poi.jxls.JxlsCompareTemplateGenerator;
+import yo.dbunitcli.resource.poi.jxls.JxlsMetaDataTemplateGenerator;
 import yo.dbunitcli.resource.poi.jxls.JxlsTemplateGenerator;
 
 import java.util.Arrays;
@@ -15,7 +16,7 @@ import java.util.Map;
 /**
  * xlsxTemplate: データセットのメタデータからjxlsテンプレート（Excel）をコードで組み立てる型（テンプレート不要）。
  * -templateType=compareは、srcのテーブル（-setting適用後）から-oldTable・-newTableを選んでテーブル名そのままのデータシートにし、
- * -keysで突合する比較シートを加える
+ * -keysで突合する比較シートを加える。-templateType=metadataはsrcに依らない固定レイアウトのテーブル定義書を出す
  */
 public final class XlsxTemplateGenerateStrategy implements GenerateStrategy {
 
@@ -36,6 +37,11 @@ public final class XlsxTemplateGenerateStrategy implements GenerateStrategy {
     @Override
     public boolean loadData() {
         return false;
+    }
+
+    @Override
+    public boolean usesSource(final XlsxTemplateType templateType) {
+        return templateType != XlsxTemplateType.metadata;
     }
 
     @Override
@@ -61,13 +67,16 @@ public final class XlsxTemplateGenerateStrategy implements GenerateStrategy {
 
     @Override
     public GenerateWriter writer(final GenerateContext option) {
-        if (option.templateType() != XlsxTemplateType.compare) {
-            return JxlsTemplateGenerator::createTemplate;
-        }
-        final String compareSheetName = Strings.orDefault(option.compareSheetName(), DEFAULT_COMPARE_SHEET_NAME);
-        return (resultFile, param) -> compareGenerator(param, option.oldTable(), option.newTable()
-                , option.keys(), option.compares(), compareSheetName)
-                .write(resultFile);
+        return switch (option.templateType()) {
+            case table -> JxlsTemplateGenerator::createTemplate;
+            case metadata -> (resultFile, _) -> JxlsMetaDataTemplateGenerator.write(resultFile);
+            case compare -> {
+                final String compareSheetName = Strings.orDefault(option.compareSheetName(), DEFAULT_COMPARE_SHEET_NAME);
+                yield (resultFile, param) -> compareGenerator(param, option.oldTable(), option.newTable()
+                        , option.keys(), option.compares(), compareSheetName)
+                        .write(resultFile);
+            }
+        };
     }
 
     @SuppressWarnings("unchecked")

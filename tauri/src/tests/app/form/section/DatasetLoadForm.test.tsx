@@ -86,4 +86,15 @@ describe("DatasetLoadFormのテスト", () => {
 			}),
 		);
 	});
+
+	it("loadMetaDataはloadDataをOFFにしたときだけ表示する", async () => {
+		const user = renderForm();
+		expect(document.getElementById("src_loadMetaData")).toBeNull();
+
+		await user.click(document.getElementById("src_loadData") as Element);
+		expect(document.getElementById("src_loadMetaData")).toBeInTheDocument();
+
+		await user.click(document.getElementById("src_loadData") as Element);
+		expect(document.getElementById("src_loadMetaData")).toBeNull();
+	});
 });

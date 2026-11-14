@@ -4,6 +4,7 @@ import {
 	SectionOptionHeader,
 } from "../../../components/dialog";
 import type { CommandOption, SrcElements } from "../../../model/CommandOption";
+import { useSyncedState } from "../../../utils/useResettableState";
 import { regexFilterSlot } from "./dialog/RegexFilterDialog";
 import Check from "./element/Check";
 import PlainText from "./element/PlainText";
@@ -18,6 +19,10 @@ export default function DataLoadFormSection({
 	handleToggleChecked: (param: CommandOption) => (checked: boolean) => void;
 }) {
 	const [showOptional, setShowOptional] = useState(false);
+	// loadMetaDataは行を読まない（loadData=false）ときだけ選べる
+	const [loadData, setLoadData] = useSyncedState(
+		options.loadData?.value ?? "true",
+	);
 	const toggleOptional = () => setShowOptional(!showOptional);
 	const prefix = options.prefix;
 	return (
@@ -58,7 +63,18 @@ export default function DataLoadFormSection({
 				<Check
 					prefix={prefix}
 					element={options.loadData}
-					handleOnChange={handleToggleChecked(options.loadData)}
+					handleOnChange={(checked) => {
+						setLoadData(String(checked));
+						handleToggleChecked(options.loadData)(checked);
+					}}
+					hidden={!showOptional}
+				/>
+			)}
+			{options.loadMetaData && loadData === "false" && (
+				<Check
+					prefix={prefix}
+					element={options.loadMetaData}
+					handleOnChange={handleToggleChecked(options.loadMetaData)}
 					hidden={!showOptional}
 				/>
 			)}

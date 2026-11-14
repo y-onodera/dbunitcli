@@ -147,6 +147,12 @@ class GenerateControllerTest {
         assertRefresh("{\"-generateType\":\"xlsxTemplate\",\"-templateType\":\"compare\"}", "generate-refresh-xlsxTemplate-compare-response.json");
     }
 
+    @Test
+    public void testRefresh_xlsxTemplateMetaData_srcの項目がなくなる() throws IOException {
+        assertRefresh("{\"-generateType\":\"xlsxTemplate\",\"-templateType\":\"metadata\",\"-src.srcType\":\"csv\",\"-src.src\":\"not/exists\"}"
+                , "generate-refresh-xlsxTemplate-metadata-response.json");
+    }
+
     private void assertRefresh(final String requestJson, final String expectedFile) throws IOException {
         final String jsonResponse = this.client.toBlocking().retrieve(
                 HttpRequest.POST("dbunit-cli/generate/refresh", requestJson));

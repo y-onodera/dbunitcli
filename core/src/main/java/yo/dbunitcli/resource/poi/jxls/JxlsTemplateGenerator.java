@@ -68,23 +68,23 @@ public class JxlsTemplateGenerator {
      */
     static void addAreaComments(final Sheet sheet, final int areaRow, final int eachRow, final int lastColumn, final String tableName) {
         final String lastCell = new CellReference(eachRow, lastColumn).formatAsString();
-        addComment(sheet, areaRow, "jx:area(lastCell=\"" + lastCell + "\")");
-        addComment(sheet, eachRow, "jx:each(items=\"param.dataSet.get('" + tableName + "').rows\" var=\"row\" varIndex=\"index\" lastCell=\"" + lastCell + "\")");
+        addComment(sheet, areaRow, 0, "jx:area(lastCell=\"" + lastCell + "\")");
+        addComment(sheet, eachRow, 0, "jx:each(items=\"param.dataSet.get('" + tableName + "').rows\" var=\"row\" varIndex=\"index\" lastCell=\"" + lastCell + "\")");
     }
 
-    private static void addComment(final Sheet sheet, final int rowIndex, final String commentText) {
+    static void addComment(final Sheet sheet, final int rowIndex, final int columnIndex, final String commentText) {
         final Drawing<?> drawing = sheet.createDrawingPatriarch();
         final CreationHelper factory = sheet.getWorkbook().getCreationHelper();
 
         final ClientAnchor anchor = factory.createClientAnchor();
-        anchor.setCol1(0);
+        anchor.setCol1(columnIndex);
         anchor.setRow1(rowIndex);
-        anchor.setCol2(0);
+        anchor.setCol2(columnIndex);
         anchor.setRow2(rowIndex);
 
         final Comment comment = drawing.createCellComment(anchor);
         comment.setString(factory.createRichTextString(commentText));
-        final Cell cell = sheet.getRow(rowIndex).getCell(0);
+        final Cell cell = sheet.getRow(rowIndex).getCell(columnIndex);
         cell.setCellComment(comment);
     }
 

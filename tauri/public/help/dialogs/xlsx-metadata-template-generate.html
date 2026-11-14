@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <title>ヘルプ - Generate Table Definition Template</title>
+  <link rel="stylesheet" href="../help.css" />
+</head>
+<body>
+  <p><a href="../index.html">&larr; ヘルプ一覧に戻る</a></p>
+  <h1>Generate Table Definition Template</h1>
+  <p>テーブル定義書（テーブル名・コメントと、カラムの一覧）を出す jxls 用の Excel テンプレート（<code>.xlsx</code>）を生成して template リソースへ保存します。generateType が <code>xlsx</code> / <code>xls</code> のとき、template の ⋮ メニューの generate table definition template から開きます。</p>
+
+  <h2 id="toc">目次</h2>
+  <ol>
+    <li><a href="#section-simple">シンプルな使い方</a></li>
+    <li><a href="#section-input">入力</a></li>
+    <li><a href="#section-template">生成されるテンプレート</a></li>
+    <li><a href="#section-use">テンプレートの使い方</a></li>
+    <li><a href="#section-related">関連</a></li>
+  </ol>
+
+  <h2 id="section-simple">シンプルな使い方</h2>
+  <pre>指定:
+  fileName = tableDef
+  → Execute
+
+結果:
+  template リソースに tableDef.xlsx を保存し、template に tableDef.xlsx を設定する
+
+続けて generate フォームで:
+  unit              = table
+  src の loadData     = OFF
+  src の loadMetaData = ON
+  resultPath        = $param.tableName$.xlsx
+  → テーブルごとに 1 ファイルのテーブル定義書を出力する</pre>
+
+  <h2 id="section-input">入力</h2>
+  <table>
+    <tr><th>項目</th><th>説明</th></tr>
+    <tr><td>fileName（必須）</td><td>保存するテンプレートのファイル名。拡張子が <code>.xlsx</code> でなければ <code>.xlsx</code> が付与される。ディレクトリ区切り（<code>/</code> <code>\</code>）や <code>..</code> は使えない。同名のファイルがある場合は上書きされる。</td></tr>
+  </table>
+  <p>テンプレートのレイアウトは固定のため、元にするデータセットは指定しません。</p>
+
+  <h2 id="section-template">生成されるテンプレート</h2>
+  <table>
+    <tr><th>シート: テーブル定義</th><th>A</th><th>B</th><th>C</th><th>D</th><th>E</th><th>F</th><th>G</th><th>H</th></tr>
+    <tr><td>1</td><td>テーブル名</td><td>${param.tableName}</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+    <tr><td>2</td><td>コメント</td><td>${row.get('TABLE_REMARKS')}</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+    <tr><td>3</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+    <tr><td>4</td><td>No</td><td>カラム名</td><td>型</td><td>桁</td><td>小数</td><td>NOT NULL</td><td>PK</td><td>コメント</td></tr>
+    <tr><td>5</td><td>${index + 1}</td><td>COLUMN_NAME</td><td>TYPE_NAME</td><td>COLUMN_SIZE</td><td>DECIMAL_DIGITS</td><td>NULLABLE が false なら ○</td><td>IS_PK が true なら ○</td><td>REMARKS</td></tr>
+  </table>
+  <table>
+    <tr><th>セル</th><th>コメント（jxls コマンド）</th></tr>
+    <tr><td>A1</td><td><code>jx:area(lastCell="H5")</code></td></tr>
+    <tr><td>B2</td><td><code>jx:each(items="param.rows" var="row" varIndex="index" select="index == 0" lastCell="B2")</code>（テーブルのコメントを最初の 1 行から取る）</td></tr>
+    <tr><td>A5</td><td><code>jx:each(items="param.rows" var="row" varIndex="index" lastCell="H5")</code></td></tr>
+  </table>
+  <p>見出しや列の並び・書式は、保存されたファイルを Excel で開いて変更できます。5 行目の各セルが参照する項目は <a href="../sections/data-load.html">loadMetaData の詳細</a> を参照してください。</p>
+
+  <h2 id="section-use">テンプレートの使い方</h2>
+  <ul>
+    <li><code>unit = table</code> で使う（1 テーブルにつき 1 ファイルを出力する）。<code>resultPath</code> に <code>$param.tableName$</code> を含めて、テーブルごとに出力先を分ける</li>
+    <li><code>src</code> の <code>loadData</code> を OFF、<code>loadMetaData</code> を ON にして、テーブル定義を読み込む</li>
+    <li>桁数・主キー・コメントまで出すには、<code>srcType = table</code> でデータベースを読み込む</li>
+  </ul>
+
+  <h2 id="section-related">関連</h2>
+  <ul>
+    <li><a href="../sections/data-load.html">Data Load</a> — <code>loadMetaData</code> で読み込む項目</li>
+    <li><a href="../sections/jxls.html">Jxls</a> — テンプレートの書き方</li>
+    <li><a href="../commands/generate/types/xlsxTemplate.html">generateType: xlsxTemplate</a> — Generate で同じテンプレートを作る（<code>templateType = metadata</code>）</li>
+    <li><a href="xlsx-template-generate.html">Generate Xlsx Template</a> — データセットのテーブルごとのシートを持つテンプレートを作る</li>
+  </ul>
+</body>
+</html>

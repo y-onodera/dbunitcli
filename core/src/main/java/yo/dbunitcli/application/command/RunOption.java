@@ -104,11 +104,10 @@ public record RunOption(
     @Override
     public ParametersBuilder toParametersBuilder() {
         final ParametersBuilder result = new ParametersBuilder()
-                .addComponent("srcData", this.srcData.toParametersBuilder()
+                .addComponent("srcData", this.srcData.toParametersBuilderWithoutLoadData()
                         .remove("-src.srcType")
                         .remove("-src.extension")
                         .remove("-src.includeMetaData")
-                        .remove("-src.loadData")
                         .build()
                 )
                 .put("-scriptType", this.scriptType, ScriptType.class)

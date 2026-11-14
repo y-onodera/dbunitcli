@@ -30,6 +30,7 @@ public record ComparableDataSetParam(
         , int startRow
         , String headerName
         , boolean loadData
+        , DescriptorProducerFactory descriptor
         , boolean addFileInfo
         , String fixedLength
         , String fixedLengthType
@@ -63,6 +64,7 @@ public record ComparableDataSetParam(
                 , builder.getStartRow()
                 , builder.getHeaderName()
                 , builder.isLoadData()
+                , builder.getDescriptor()
                 , builder.addFileInfo()
                 , builder.getFixedLength()
                 , builder.getFixedLengthType()
@@ -148,6 +150,7 @@ public record ComparableDataSetParam(
                 .setStartRow(this.startRow)
                 .setHeaderName(this.headerName)
                 .setLoadData(this.loadData)
+                .setDescriptor(this.descriptor)
                 .setAddFileInfo(this.addFileInfo)
                 .setFixedLength(this.fixedLength)
                 .setFixedLengthType(this.fixedLengthType)
@@ -177,6 +180,7 @@ public record ComparableDataSetParam(
         private int startRow = 1;
         private String headerName;
         private boolean loadData = true;
+        private DescriptorProducerFactory descriptor;
         private boolean addFileInfo = false;
         private String fixedLength;
         private String fixedLengthType;
@@ -248,6 +252,10 @@ public record ComparableDataSetParam(
 
         public boolean isLoadData() {
             return this.loadData;
+        }
+
+        public DescriptorProducerFactory getDescriptor() {
+            return this.descriptor;
         }
 
         public boolean addFileInfo() {
@@ -380,6 +388,14 @@ public record ComparableDataSetParam(
 
         public Builder setLoadData(final boolean loadData) {
             this.loadData = loadData;
+            return this;
+        }
+
+        /**
+         * 指定すると、読み込んだテーブルを記述子テーブルに置き換える。nullなら置き換えない
+         */
+        public Builder setDescriptor(final DescriptorProducerFactory descriptor) {
+            this.descriptor = descriptor;
             return this;
         }
 

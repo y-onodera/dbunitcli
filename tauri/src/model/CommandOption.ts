@@ -99,6 +99,7 @@ export type SrcElements = CommandOptions & {
 	startRow?: CommandOption;
 	addFileInfo?: CommandOption;
 	loadData: CommandOption;
+	loadMetaData?: CommandOption;
 	includeMetaData: CommandOption;
 	regTableInclude: CommandOption;
 	regTableExclude: CommandOption;

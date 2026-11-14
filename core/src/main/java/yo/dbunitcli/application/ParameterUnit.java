@@ -68,10 +68,11 @@ public enum ParameterUnit {
         return Stream.of(loader.parameter()
                                .asInputParam()
                                .withRowNumber(0)
-                               .add("dataSet", dataSet.toMap(true)
-                                                      .collect(Collectors.toMap(it -> it.get("tableName").toString(),
-                                                                                it -> it, (_, other) -> other,
-                                                                                LinkedHashMap::new))));
+                               .add("dataSet", Arrays.stream(dataSet.getTables())
+                                                     .flatMap(table -> table.toMap(true).stream())
+                                                     .collect(Collectors.toMap(it -> it.get("tableName").toString(),
+                                                                               it -> it, (_, other) -> other,
+                                                                               LinkedHashMap::new))));
     }
 
     public Stream<Parameter> lazyLoadStream(final ComparableDataSetLoader loader, final ComparableDataSetParam param) {
