@@ -1,4 +1,4 @@
-import { type Dispatch, type SetStateAction, useEffect, useState } from "react";
+import { useState } from "react";
 import {
 	DialogBody,
 	DialogField,
@@ -16,10 +16,11 @@ import {
 } from "../../../../components/element/Input";
 import {
 	buildTemplateExpression,
-	insertText,
 	NAME_FORMATS,
 	type TemplateExpressionSyntax,
 } from "../../../../model/TemplateExpression";
+import { replaceSelection } from "../../../../utils/textInsert";
+import { useTextareaInsert } from "./useTextareaInsert";
 
 const VALUE_ID = "resultPathTemplate_value";
 const VARIABLE_ID = "resultPathTemplate_variable";
@@ -39,41 +40,18 @@ export default function ResultPathTemplateDialog({
 	handleDialogClose,
 	handleSave,
 }: ResultPathTemplateDialogProps) {
-	const [value, setValue] = useState(currentValue);
+	const { value, setValue, textareaRef, insert } =
+		useTextareaInsert<HTMLInputElement>(currentValue);
 	const [variable, setVariable] = useState("tableName");
 	const [format, setFormat] = useState("");
-	// 挿入のたびに新しいオブジェクトにして、同じ位置への連続挿入でもカーソルを戻す
-	const [caret, setCaret] = useState<{ position: number } | null>(null);
 	const expression = variable
 		? buildTemplateExpression(syntax, variable, format)
 		: "";
 
-	useEffect(() => {
-		if (caret === null) {
-			return;
-		}
-		const input = document.getElementById(VALUE_ID);
-		if (input instanceof HTMLInputElement) {
-			input.focus();
-			input.setSelectionRange(caret.position, caret.position);
-		}
-	}, [caret]);
-
 	const handleInsert = () => {
-		if (!expression) {
-			return;
+		if (expression) {
+			insert((v, start, end) => replaceSelection(v, expression, start, end));
 		}
-		// Insertボタンを押してフォーカスが外れても、入力欄の選択範囲は残っている
-		const input = document.getElementById(VALUE_ID);
-		const start =
-			input instanceof HTMLInputElement
-				? (input.selectionStart ?? value.length)
-				: value.length;
-		const end =
-			input instanceof HTMLInputElement ? (input.selectionEnd ?? start) : start;
-		const inserted = insertText(value, expression, start, end);
-		setValue(inserted.value);
-		setCaret({ position: inserted.cursor });
 	};
 
 	return (
@@ -90,6 +68,7 @@ export default function ResultPathTemplateDialog({
 				<DialogField>
 					<InputLabel text="resultPath" id={VALUE_ID} required={false} />
 					<ControllTextBox
+						ref={textareaRef}
 						name={VALUE_ID}
 						id={VALUE_ID}
 						required={false}
@@ -157,7 +136,7 @@ export function ResultPathTemplateButton({
 	syntax,
 }: {
 	value: string;
-	setValue: Dispatch<SetStateAction<string>>;
+	setValue: (value: string) => void;
 	syntax: TemplateExpressionSyntax;
 }) {
 	const [showDialog, setShowDialog] = useState(false);

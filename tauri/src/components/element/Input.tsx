@@ -51,6 +51,7 @@ function ClearButton(props: { label: string; handleClick: () => void }) {
 	);
 }
 export function ControllTextBox(props: {
+	ref?: React.Ref<HTMLInputElement>;
 	name: string;
 	id: string;
 	required: boolean;
@@ -69,13 +70,17 @@ export function ControllTextBox(props: {
 	const inputRef = useRef<HTMLInputElement>(null);
 	const showClear =
 		(props.clearable ?? true) && props.value !== "" && !props.disabled;
+	const setRefs = (element: HTMLInputElement | null) => {
+		inputRef.current = element;
+		assignRef(props.ref, element);
+	};
 	return (
 		<div
 			className={`relative ${props.wStyle ?? "w-full"}`}
 			style={props.hidden ? { display: "none" } : {}}
 		>
 			<input
-				ref={inputRef}
+				ref={setRefs}
 				name={props.name}
 				id={props.id}
 				type="text"
@@ -97,6 +102,13 @@ export function ControllTextBox(props: {
 			)}
 		</div>
 	);
+}
+function assignRef<T>(ref: React.Ref<T> | undefined, value: T | null) {
+	if (typeof ref === "function") {
+		ref(value);
+	} else if (ref) {
+		ref.current = value;
+	}
 }
 export function SelectBox(props: {
 	name: string;

@@ -34,16 +34,3 @@ export function buildTemplateExpression(
 	const formatPart = format ? `; format="${format}"` : "";
 	return `${syntax.varStart}${name}${formatPart}${syntax.varStop}`;
 }
-
-// value の [start, end) を text で置き換え、置き換え後のカーソル位置も返す
-export function insertText(
-	value: string,
-	text: string,
-	start: number,
-	end: number,
-): { value: string; cursor: number } {
-	return {
-		value: value.slice(0, start) + text + value.slice(end),
-		cursor: start + text.length,
-	};
-}

@@ -13,7 +13,7 @@ export default function JxlsFormSection({
 	handleValueChange,
 }: {
 	templateOption: GenerateTemplateOption;
-	handleValueChange?: (param: CommandOption) => (newValue: string) => void;
+	handleValueChange: (param: CommandOption) => (newValue: string) => void;
 }) {
 	const [showOptional, setShowOptional] = useState(false);
 	const toggleOptional = () => setShowOptional(!showOptional);
@@ -31,7 +31,7 @@ export default function JxlsFormSection({
 				prefix={templateOption.prefix}
 				element={templateOption.templateParameterAttribute}
 				hidden={!showOptional}
-				handleValueChange={handleValueChange?.(
+				handleValueChange={handleValueChange(
 					templateOption.templateParameterAttribute,
 				)}
 			/>

@@ -1,7 +1,6 @@
 import { SectionFieldset } from "../../components/dialog";
 import { SectionLegend } from "../../components/dialog/SectionFieldset";
 import { ResourceEncodingProvider } from "../../context/ResourceEncodingProvider";
-import type { CommandOption } from "../../model/CommandOption";
 import type { GenerateOptions } from "../../model/SelectParameter";
 import { useSyncedState } from "../../utils/useResettableState";
 import {
@@ -30,8 +29,7 @@ import Select, { ignoreSelect } from "./section/element/Select";
 import TemplateText from "./section/element/TemplateText";
 import JxlsFormSection from "./section/JxlsFormSection";
 import TemplateFormSection, {
-	useTemplateEncoding,
-	useTemplateExpressionSyntax,
+	useTemplateOptionValues,
 } from "./section/TemplateFormSection";
 import XlsxCompareFormSection from "./section/XlsxCompareFormSection";
 
@@ -65,14 +63,8 @@ export function GenerateForm(prop: {
 	const [unitSettingEncoding, setUnitSettingEncoding] = useSyncedState(
 		generate.unitSettingEncoding?.value ?? "",
 	);
-	const templateEncoding = useTemplateEncoding(generate.templateOption);
 	// resultPathはtemplate optionの設定でテンプレートとして描画される
-	const templateSyntax = useTemplateExpressionSyntax(generate.templateOption);
-	const handleTemplateOptionChange =
-		(param: CommandOption) => (value: string) => {
-			templateEncoding.handleValueChange(param)(value);
-			templateSyntax.handleValueChange(param)(value);
-		};
+	const templateOptionValues = useTemplateOptionValues(generate.templateOption);
 	// srcの入力値はsrcフォームとunitSettingの編集・プレビューで共有する
 	// （テーブル名・カラム名の候補とプレビューの読込元にsrcのデータセットを使う）
 	return (
@@ -80,7 +72,7 @@ export function GenerateForm(prop: {
 			<ResourceEncodingProvider
 				encodings={{
 					generateSetting: unitSettingEncoding,
-					template: templateEncoding.encoding,
+					template: templateOptionValues.encoding,
 				}}
 			>
 				<SectionFieldset>
@@ -143,13 +135,13 @@ export function GenerateForm(prop: {
 						<TemplateFormSection
 							templateOption={prop.generate.templateOption}
 							showEncoding={true}
-							handleValueChange={handleTemplateOptionChange}
+							handleValueChange={templateOptionValues.handleValueChange}
 						/>
 					)}
 					{prop.generate.templateOption && isExcelGenerate && (
 						<JxlsFormSection
 							templateOption={prop.generate.templateOption}
-							handleValueChange={handleTemplateOptionChange}
+							handleValueChange={templateOptionValues.handleValueChange}
 						/>
 					)}
 					{[generate.fixedLength, generate.defaultLength, generate.align]
@@ -168,7 +160,7 @@ export function GenerateForm(prop: {
 							<ResultPathTemplateButton
 								value={path}
 								setValue={setPath}
-								syntax={templateSyntax.syntax}
+								syntax={templateOptionValues.syntax}
 							/>
 						)}
 					</PlainText>
