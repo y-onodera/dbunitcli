@@ -35,14 +35,15 @@ vi.mock("../../../hooks/useJdbc", () => ({
 	useJdbcConnectionTest: () => vi.fn(),
 	useSaveJdbcProperties: () => vi.fn(),
 }));
-// srcの入力値で呼ばれたときだけ候補を返す（読む前は値の無いsrcInfoで呼ばれる）
+// 読む指定（enabled）のときだけ候補を返す
 const { useDatasetTableNamesMock } = vi.hoisted(() => ({
 	useDatasetTableNamesMock: vi.fn(
-		(srcInfo: { values: Record<string, string> }) => ({
-			tableNames:
-				Object.keys(srcInfo.values).length > 0
-					? ["OLD_USERS", "NEW_USERS"]
-					: [],
+		(
+			_srcInfo: unknown,
+			_withLogs?: boolean,
+			options?: { enabled?: boolean },
+		) => ({
+			tableNames: (options?.enabled ?? true) ? ["OLD_USERS", "NEW_USERS"] : [],
 			loading: false,
 			logs: [],
 			error: "",
@@ -466,9 +467,6 @@ describe("GenerateFormの描画テスト", () => {
 					...(document.querySelector<HTMLInputElement>(`input[name="${name}"]`)
 						?.list?.options ?? []),
 				].map((option) => option.value);
-			await userEvent.click(
-				document.querySelector('input[name="-oldTable"]') as HTMLElement,
-			);
 			expect(datalistValues("-oldTable")).toEqual([]);
 
 			await userEvent.click(

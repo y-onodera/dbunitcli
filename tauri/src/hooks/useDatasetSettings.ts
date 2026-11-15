@@ -121,7 +121,7 @@ async function fetchDatasetJson<T>(
 	return fetchData(fetchParams).then((r) => r.json());
 }
 
-// srcの読込準備ができていてenabledなら、endpointへextraを付けて読み込む。srcInfoやextraが変わるたびに読み直す。
+// srcの読込準備ができていてenabledなら、endpointへextraを付けて読み込む。srcInfo・extra・reloadKeyが変わるたびに読み直す。
 // extraは文字列だけの値にする（毎回作り直されるオブジェクトでも読み直さないよう、JSON文字列にして比較する）。
 // withLogs: 読込中のログも受け取る
 function useDatasetLoad<T>(
@@ -131,6 +131,7 @@ function useDatasetLoad<T>(
 	enabled: boolean,
 	idle: Load<T>,
 	withLogs: boolean,
+	reloadKey = 0,
 ): Load<T> {
 	const [load, setLoad] = useState<Load<T>>(idle);
 	const { apiUrl } = useEnvironment();
@@ -138,7 +139,8 @@ function useDatasetLoad<T>(
 	const paramInputs = useParamInputs();
 
 	const ready = enabled && isSrcReady(srcInfo, connectionOk);
-	const extraKey = JSON.stringify(extra);
+	// reloadKeyはsidecarへ送らない
+	const requestKey = JSON.stringify({ extra, reloadKey });
 
 	useEffect(() => {
 		if (!ready) {
@@ -154,7 +156,7 @@ function useDatasetLoad<T>(
 					srcInfo,
 					jdbcValues,
 					paramInputs,
-					JSON.parse(extraKey),
+					JSON.parse(requestKey).extra,
 					controller.signal,
 					withLogs ? onLog : undefined,
 				),
@@ -172,7 +174,7 @@ function useDatasetLoad<T>(
 		ready,
 		jdbcValues,
 		paramInputs,
-		extraKey,
+		requestKey,
 		idle,
 		withLogs,
 	]);
@@ -183,9 +185,11 @@ function useDatasetLoad<T>(
 const IDLE_TABLE_NAMES = idleLoad<string[]>([]);
 
 // withLogs: 読込中のログも受け取る（読込中の表示に使う場合）
+// enabled・reloadKey: 利用者の操作でだけ読む場合に、読むかどうかと読み直しの契機を渡す
 export const useDatasetTableNames = (
 	srcInfo: DatasetSrcInfo,
 	withLogs = false,
+	{ enabled = true, reloadKey = 0 } = {},
 ): {
 	tableNames: string[];
 	loading: boolean;
@@ -196,9 +200,10 @@ export const useDatasetTableNames = (
 		srcInfo,
 		"table-names",
 		{},
-		true,
+		enabled,
 		IDLE_TABLE_NAMES,
 		withLogs,
+		reloadKey,
 	);
 	return { tableNames: data, loading, logs, error };
 };

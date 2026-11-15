@@ -11,11 +11,10 @@ import { JobProgress } from "../../../../components/element/JobProgress";
 import { useDatasetSrcInfo } from "../../../../context/DatasetSrcInfoProvider";
 import { useDatasetTableColumns } from "../../../../hooks/useDatasetSettings";
 import {
-	parseCompareColumns,
 	selectedOldColumns,
-	toggleCompareColumn,
 	toggleCompareColumns,
 } from "../../../../model/CompareColumns";
+import { splitComma } from "../../../../utils/arrayUtils";
 import SelectableTable from "./SelectableTable";
 
 // oldTableの列からkeys / comparesを選ぶ。"old:new"と書いた対応は、oldの列を選んでいる間は残す
@@ -37,9 +36,8 @@ function CompareColumnsDialog({
 		srcInfo,
 		oldTable,
 	);
-	const [entries, setEntries] = useState(() =>
-		parseCompareColumns(currentValue),
-	);
+	const [entries, setEntries] = useState(() => splitComma(currentValue));
+	const selected = selectedOldColumns(entries);
 
 	const renderColumns = () => {
 		if (oldTable === "") {
@@ -54,8 +52,12 @@ function CompareColumnsDialog({
 		return (
 			<SelectableTable
 				items={columns}
-				selected={selectedOldColumns(entries)}
-				onToggle={(column) => setEntries(toggleCompareColumn(entries, column))}
+				selected={selected}
+				onToggle={(column) =>
+					setEntries(
+						toggleCompareColumns(entries, [column], !selected.has(column)),
+					)
+				}
 				onToggleAll={(items, checked) =>
 					setEntries(toggleCompareColumns(entries, items, checked))
 				}

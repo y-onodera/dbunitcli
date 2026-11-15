@@ -389,6 +389,36 @@ describe("DatasetSettingsProviderのテスト", () => {
 			).toHaveLength(0);
 		});
 
+		it("enabled=falseなら読まず、reloadKeyが変わると同じsrcでも読み直すことを確認", async () => {
+			const tableNamesCalls = () =>
+				mockFetchData.mock.calls.filter(([p]) =>
+					p.endpoint.includes("/dataset-setting/table-names"),
+				);
+			const { rerender } = renderHook(
+				(options: { enabled: boolean; reloadKey: number }) =>
+					useDatasetTableNames(srcInfo, false, options),
+				{
+					wrapper: envWrapper,
+					initialProps: { enabled: false, reloadKey: 0 },
+				},
+			);
+			await act(async () => {});
+			expect(tableNamesCalls()).toHaveLength(0);
+
+			rerender({ enabled: true, reloadKey: 1 });
+			await waitFor(() => {
+				expect(tableNamesCalls()).toHaveLength(1);
+			});
+			rerender({ enabled: true, reloadKey: 2 });
+			await waitFor(() => {
+				expect(tableNamesCalls()).toHaveLength(2);
+			});
+			const bodies = tableNamesCalls().map(([p]) =>
+				JSON.parse(String(p.options.body)),
+			);
+			expect(bodies[1]).toStrictEqual(bodies[0]);
+		});
+
 		it("入力候補（useSrcInfoColumnNames）は、列名の読込に失敗しても空配列のままにすることを確認", async () => {
 			failWithLogs();
 			const { result } = renderHook(() => useSrcInfoColumnNames(srcInfo), {

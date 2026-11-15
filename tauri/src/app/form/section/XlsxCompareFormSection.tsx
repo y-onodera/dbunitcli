@@ -14,8 +14,8 @@ import { CompareColumnsButton } from "./dialog/CompareColumnsDialog";
 import PlainText from "./element/PlainText";
 import Text from "./element/Text";
 
-// srcが未指定なので読まない
-const NOT_LOADED: DatasetSrcInfo = { values: {} };
+// reloadを押したときのsrcの入力値と、押した回数（同じ値でも読み直す）
+type TableNamesLoad = { srcInfo: DatasetSrcInfo; count: number };
 
 // generateType=xlsxTemplate・templateType=compareで、比べる2テーブルと突合の列を指定する
 export default function XlsxCompareFormSection({
@@ -27,25 +27,65 @@ export default function XlsxCompareFormSection({
 	// 実行時に照合するのはsrcの読込とsettingの適用が終わった後のテーブル名なので、
 	// srcの入力値（settingTargetOnlyを含む）のまま読んだテーブル名を候補にする。
 	// 読むたびにsidecarがデータセットを読み直すため、reloadボタンを押したときだけ読む
-	const [tableNamesSrcInfo, setTableNamesSrcInfo] = useState(NOT_LOADED);
-	const { tableNames } = useDatasetTableNames(tableNamesSrcInfo);
+	const [tableNamesLoad, setTableNamesLoad] = useState<TableNamesLoad | null>(
+		null,
+	);
+	const { tableNames } = useDatasetTableNames(
+		tableNamesLoad?.srcInfo ?? srcInfo,
+		false,
+		{ enabled: tableNamesLoad !== null, reloadKey: tableNamesLoad?.count },
+	);
 	// keys / comparesの列の選択はoldTableの入力中の値から読む
 	const [oldTable, setOldTable] = useSyncedState(
 		generate.oldTable?.value ?? "",
 	);
-	const tables = [generate.oldTable, generate.newTable].filter(
-		(field): field is CommandOption => field != null,
-	);
-	const columns = [generate.keys, generate.compares].filter(
-		(field): field is CommandOption => field != null,
-	);
+	const { newTable, keys, compares, compareSheetName } = generate;
 	if (
-		tables.length === 0 &&
-		columns.length === 0 &&
-		!generate.compareSheetName
+		!generate.oldTable &&
+		!newTable &&
+		!keys &&
+		!compares &&
+		!compareSheetName
 	) {
 		return null;
 	}
+
+	const renderTableText = (
+		field: CommandOption,
+		handleValueChange?: (value: string) => void,
+	) => (
+		<Text
+			prefix=""
+			element={field}
+			resourceFiles={tableNames}
+			handleValueChange={handleValueChange}
+		>
+			{() => (
+				<BlueRefreshButton
+					title="reload table names"
+					handleClick={() =>
+						setTableNamesLoad({
+							srcInfo,
+							count: (tableNamesLoad?.count ?? 0) + 1,
+						})
+					}
+				/>
+			)}
+		</Text>
+	);
+	const renderColumnsText = (field: CommandOption) => (
+		<Text prefix="" element={field}>
+			{({ path, setPath }) => (
+				<CompareColumnsButton
+					caption={field.name}
+					oldTable={oldTable}
+					value={path}
+					setValue={setPath}
+				/>
+			)}
+		</Text>
+	);
+
 	return (
 		<SectionFieldset>
 			<SectionLegend
@@ -53,40 +93,11 @@ export default function XlsxCompareFormSection({
 				command="sections/xlsx-compare"
 				label="Compare"
 			/>
-			{tables.map((field) => (
-				<Text
-					key={field.name}
-					prefix=""
-					element={field}
-					resourceFiles={tableNames}
-					handleValueChange={
-						field === generate.oldTable ? setOldTable : undefined
-					}
-				>
-					{() => (
-						// 同じsrcInfoでも読み直すよう、毎回別のオブジェクトにする
-						<BlueRefreshButton
-							title="reload table names"
-							handleClick={() => setTableNamesSrcInfo({ ...srcInfo })}
-						/>
-					)}
-				</Text>
-			))}
-			{columns.map((field) => (
-				<Text key={field.name} prefix="" element={field}>
-					{({ path, setPath }) => (
-						<CompareColumnsButton
-							caption={field.name}
-							oldTable={oldTable}
-							value={path}
-							setValue={setPath}
-						/>
-					)}
-				</Text>
-			))}
-			{generate.compareSheetName && (
-				<PlainText prefix="" element={generate.compareSheetName} />
-			)}
+			{generate.oldTable && renderTableText(generate.oldTable, setOldTable)}
+			{newTable && renderTableText(newTable)}
+			{keys && renderColumnsText(keys)}
+			{compares && renderColumnsText(compares)}
+			{compareSheetName && <PlainText prefix="" element={compareSheetName} />}
 		</SectionFieldset>
 	);
 }

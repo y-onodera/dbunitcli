@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Text } from "../../../../components/dialog";
 import { ResourceDatalist } from "../../../../components/element/Input";
+import { splitComma } from "../../../../utils/arrayUtils";
 
 // 候補(datalist)付きのText。候補が無い間はdatalistを描画しない
 export function TextWithDatalist({
@@ -26,14 +27,6 @@ export function TextWithDatalist({
 			{hasOptions && <ResourceDatalist id={name} resources={options} />}
 		</>
 	);
-}
-
-// 前後の空白を除き、空の要素は持たない
-function splitComma(text: string): string[] {
-	return text
-		.split(",")
-		.map((it) => it.trim())
-		.filter((it) => it !== "");
 }
 
 // カンマ区切りで入力した文字列を配列として編集するText。
