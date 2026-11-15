@@ -45,7 +45,7 @@ const UNIT_VARIABLES: Record<string, UnitVariables> = {
 	},
 };
 
-// unitが返らない（固定成果物型）・未知の値のとき
+// unitが分からないとき
 const DEFAULT_VARIABLES: UnitVariables = {
 	candidates: ["tableName", "rowNumber"],
 	hint: "",

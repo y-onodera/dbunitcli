@@ -97,6 +97,8 @@ export type GenerateOptions = CommandOptions & {
 	command: "generate";
 	generateType: CommandOption;
 	unit?: CommandOption;
+	/** 固定成果物型の出力単位（引数ではないためunitの代わりに返る） */
+	fixedUnit?: string;
 	unitSetting?: CommandOption;
 	unitSettingEncoding?: CommandOption;
 	template?: CommandOption;

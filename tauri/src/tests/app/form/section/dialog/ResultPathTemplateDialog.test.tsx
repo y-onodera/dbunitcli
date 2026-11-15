@@ -56,7 +56,7 @@ describe("ResultPathTemplateDialog", () => {
 		expect(screen.getByText("(Enter a variable)")).toBeTruthy();
 	});
 
-	it("unitが無いとき（固定成果物型）はtableName・rowNumberを候補にし、説明は出さない", () => {
+	it("unitが分からないときはtableName・rowNumberを候補にし、説明は出さない", () => {
 		renderDialog(undefined);
 		expect(candidates()).toEqual(["tableName", "rowNumber"]);
 		expect(variableInput().value).toBe("tableName");

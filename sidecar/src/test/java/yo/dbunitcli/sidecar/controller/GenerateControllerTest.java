@@ -5,6 +5,7 @@ import io.micronaut.http.HttpRequest;
 import io.micronaut.http.client.HttpClient;
 import io.micronaut.http.client.annotation.Client;
 import io.micronaut.runtime.server.EmbeddedServer;
+import io.micronaut.serde.ObjectMapper;
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
 import jakarta.inject.Inject;
 import org.junit.jupiter.api.AfterEach;
@@ -16,6 +17,7 @@ import yo.dbunitcli.sidecar.domain.project.Workspace;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Map;
 
 @MicronautTest
 @Property(name = FileResources.PROPERTY_WORKSPACE, value = "target/test-temp/workspace/sample")
@@ -151,6 +153,15 @@ class GenerateControllerTest {
     public void testRefresh_xlsxTemplateMetaData_srcの項目がなくなる() throws IOException {
         assertRefresh("{\"-generateType\":\"xlsxTemplate\",\"-templateType\":\"metadata\",\"-src.srcType\":\"csv\",\"-src.src\":\"not/exists\"}"
                 , "generate-refresh-xlsxTemplate-metadata-response.json");
+    }
+
+    @Test
+    public void testRefresh_sql_固定の出力単位がfixedUnitで返る() throws IOException {
+        final String jsonResponse = this.client.toBlocking().retrieve(
+                HttpRequest.POST("dbunit-cli/generate/refresh", "{\"-generateType\":\"sql\"}"));
+        final Map<?, ?> response = ObjectMapper.getDefault().readValue(jsonResponse, Map.class);
+        Assertions.assertEquals("table", response.get("fixedUnit"));
+        Assertions.assertFalse(response.containsKey("unit"));
     }
 
     private void assertRefresh(final String requestJson, final String expectedFile) throws IOException {

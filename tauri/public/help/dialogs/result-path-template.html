@@ -38,8 +38,8 @@
     <tr><td><code>record</code></td><td><code>tableName</code> / <code>rowNumber</code></td><td>テーブル内の行番号（0 始まり）</td></tr>
     <tr><td><code>table</code></td><td><code>tableName</code> / <code>rowNumber</code></td><td>テーブルの通し番号（0 始まり）</td></tr>
     <tr><td><code>dataset</code></td><td>なし（出力は 1 ファイル。<code>tableName</code> は使えない）</td><td>常に 0</td></tr>
-    <tr><td>（<code>unit</code> の欄が無い固定成果物タイプ）</td><td><code>tableName</code> / <code>rowNumber</code>（説明は出さない）</td><td>—</td></tr>
   </table>
+  <p><code>unit</code> の欄が無い固定成果物タイプでも、そのタイプの出力単位（sql・ddl などは <code>table</code>、settings・xlsxTemplate は <code>dataset</code>）で上の表のとおりに候補が決まります。</p>
 
   <h2 id="section-operation">操作</h2>
   <table>
