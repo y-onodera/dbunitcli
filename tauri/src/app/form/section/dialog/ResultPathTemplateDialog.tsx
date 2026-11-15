@@ -29,14 +29,16 @@ const HINT_ID = "resultPathTemplate_hint";
 
 type UnitVariables = { candidates: string[]; hint: string };
 
+const TABLE_VARIABLES = ["tableName", "rowNumber"];
+
 // 出力1回分のパラメータに入る変数（core の ParameterUnit）
 const UNIT_VARIABLES: Record<string, UnitVariables> = {
 	record: {
-		candidates: ["tableName", "rowNumber"],
+		candidates: TABLE_VARIABLES,
 		hint: "unit=record: rowNumber is the row number within each table (from 0).",
 	},
 	table: {
-		candidates: ["tableName", "rowNumber"],
+		candidates: TABLE_VARIABLES,
 		hint: "unit=table: rowNumber is the table number (from 0).",
 	},
 	dataset: {
@@ -47,12 +49,12 @@ const UNIT_VARIABLES: Record<string, UnitVariables> = {
 
 // unitが分からないとき
 const DEFAULT_VARIABLES: UnitVariables = {
-	candidates: ["tableName", "rowNumber"],
+	candidates: TABLE_VARIABLES,
 	hint: "",
 };
 
 function unitVariables(unit: string | undefined): UnitVariables {
-	return (unit ? UNIT_VARIABLES[unit] : undefined) ?? DEFAULT_VARIABLES;
+	return UNIT_VARIABLES[unit ?? ""] ?? DEFAULT_VARIABLES;
 }
 
 type ResultPathTemplateDialogProps = {

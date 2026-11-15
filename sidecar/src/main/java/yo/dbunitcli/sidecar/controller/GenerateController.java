@@ -1,8 +1,8 @@
 package yo.dbunitcli.sidecar.controller;
 
 import io.micronaut.http.annotation.Controller;
+import yo.dbunitcli.application.CommandLineOption;
 import yo.dbunitcli.application.CommandParameters;
-import yo.dbunitcli.application.ParameterUnit;
 import yo.dbunitcli.application.command.GenerateOption;
 import yo.dbunitcli.application.command.Type;
 import yo.dbunitcli.sidecar.domain.project.Workspace;
@@ -26,13 +26,11 @@ public class GenerateController extends AbstractCommandController {
      */
     @Override
     protected Map<String, Object> serialize(final CommandParameters parameters) {
-        final Map<String, Object> result = super.serialize(parameters);
-        if (Type.generate.getCommand().parseOption(parameters.args()) instanceof final GenerateOption option
-                && option.generateType() != null) {
-            final ParameterUnit fixedUnit = option.generateType().strategy().fixedUnit();
-            if (fixedUnit != null) {
-                result.put("fixedUnit", fixedUnit.name());
-            }
+        final CommandLineOption<?> option = parameters.type().getCommand().parseOption(parameters.args());
+        final Map<String, Object> result = option.toParameters().serialize();
+        if (option instanceof final GenerateOption generate
+                && generate.generateType() != null && generate.generateType().strategy().isFixedTemplate()) {
+            result.put("fixedUnit", generate.unit().name());
         }
         return result;
     }

@@ -39,12 +39,6 @@ public abstract class AbstractCommandController implements ControllerExceptionHa
         this.workspace = workspace;
     }
 
-    /** フォーム値をコマンドのoptions構造へシリアライズしてJSON化する（refresh系の共通処理） */
-    static String optionsJson(final yo.dbunitcli.application.CommandType type,
-                              final Map<String, String> input) throws IOException {
-        return ObjectMapper.getDefault().writeValueAsString(new CommandParameters(type, input).serialize());
-    }
-
     /** SETTING/TEMPLATE等のworkspaceリソース系相対パスを絶対パスへ解決する（コマンド実行前の共通処理） */
     static CommandParameters resolveSidecarFilePaths(final CommandParameters parameters) {
         return parameters.resolveFilePaths((baseDir, value) ->
