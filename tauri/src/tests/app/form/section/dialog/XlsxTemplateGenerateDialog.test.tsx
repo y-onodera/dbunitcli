@@ -1,10 +1,7 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
-import {
-	XlsxMetaDataTemplateGenerateButton,
-	XlsxTemplateGenerateButton,
-} from "../../../../../app/form/section/dialog/XlsxTemplateGenerateDialog";
+import { XlsxTemplateGenerateButton } from "../../../../../app/form/section/dialog/XlsxTemplateGenerateDialog";
 import type { FetchParams } from "../../../../../utils/fetchUtils";
 import {
 	environmentFixture,
@@ -110,6 +107,42 @@ describe("XlsxTemplateGenerateDialogの描画テスト", () => {
 		);
 		const refreshBody = JSON.parse(String(refreshCall?.[0].options.body));
 		expect(refreshBody["-generateType"]).toBe("xlsxTemplate");
+		expect(document.querySelector("#xlsxTemplateType")).toHaveValue("table");
+	});
+
+	it("templateTypeを切り替えると種類ごとのフォームに替わり、fileNameは引き継ぐ", async () => {
+		const user = await openDialog();
+		await user.type(
+			document.querySelector('input[name="-fileName"]') as HTMLElement,
+			"keep",
+		);
+
+		await user.selectOptions(
+			document.querySelector("#xlsxTemplateType") as HTMLElement,
+			"compare",
+		);
+		await waitFor(() => {
+			expect(
+				document.querySelector("#xlsxCompareTemplateGenerateForm"),
+			).toBeInTheDocument();
+		});
+		expect(document.querySelector("#xlsxTemplateType")).toHaveValue("compare");
+		expect(document.querySelector('input[name="-fileName"]')).toHaveValue(
+			"keep",
+		);
+
+		await user.selectOptions(
+			document.querySelector("#xlsxTemplateType") as HTMLElement,
+			"metadata",
+		);
+		await waitFor(() => {
+			expect(
+				document.querySelector("#xlsxMetaDataTemplateGenerateForm"),
+			).toBeInTheDocument();
+		});
+		expect(document.querySelector('input[name="-fileName"]')).toHaveValue(
+			"keep",
+		);
 	});
 });
 
@@ -138,6 +171,7 @@ describe("XlsxTemplateGenerateDialogの実行テスト", () => {
 		const body = JSON.parse(String(call?.[0].options.body));
 		expect(body["-fileName"]).toBe("generated");
 		expect(body["-src.src"]).toBe("data/src");
+		expect(body).not.toHaveProperty("xlsxTemplateType");
 		expect(mockSetResourcesSettings).toHaveBeenCalled();
 	});
 
@@ -167,12 +201,10 @@ describe("XlsxMetaDataTemplateGenerateDialogの実行テスト", () => {
 	it("fileNameだけを入力し、template/generate-metadataへPOSTして拡張子を補った名前をtemplate欄へ反映する", async () => {
 		generateResponse.current = ["tableDef.xlsx"];
 		const setPath = vi.fn();
-		const user = userEvent.setup();
-		render(<XlsxMetaDataTemplateGenerateButton setPath={setPath} />);
-		await user.click(
-			screen.getByRole("button", {
-				name: "generate table definition template",
-			}),
+		const user = await openDialog(setPath);
+		await user.selectOptions(
+			document.querySelector("#xlsxTemplateType") as HTMLElement,
+			"metadata",
 		);
 		await waitFor(() => {
 			expect(

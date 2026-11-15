@@ -24,6 +24,7 @@ export function RefreshableDialogShell<OPTIONS>({
 	logs,
 	onExecute,
 	onClose,
+	header,
 	children,
 }: {
 	command: string;
@@ -36,6 +37,8 @@ export function RefreshableDialogShell<OPTIONS>({
 	logs: string[];
 	onExecute: () => void;
 	onClose: () => void;
+	// formの外に置き、読込中も表示する（送信値に含めない入力用）
+	header?: ReactNode;
 	children: (options: OPTIONS) => ReactNode;
 }) {
 	return createPortal(
@@ -44,6 +47,7 @@ export function RefreshableDialogShell<OPTIONS>({
 				<DialogTitle command={command} label={label}>
 					{title}
 				</DialogTitle>
+				{header}
 				{loadState.status === "loading" && (
 					<StatusMessage kind="loading">Loading...</StatusMessage>
 				)}

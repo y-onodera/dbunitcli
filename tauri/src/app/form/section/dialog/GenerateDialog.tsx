@@ -31,14 +31,16 @@ export type GenerateExecuteContext = {
 };
 
 // onExecuteで生成し、成功したら（中断されていなければ）結果をonDoneへ渡す
-function GenerateFormDialog<T>({
+export function GenerateFormDialog<T>({
 	config,
+	header,
 	leading,
 	onExecute,
 	onDone,
 	onClose,
 }: {
 	config: GenerateDialogConfig;
+	header?: ReactNode;
 	leading?: ReactNode;
 	onExecute: (
 		values: FormValues,
@@ -75,6 +77,7 @@ function GenerateFormDialog<T>({
 				}
 			}}
 			onClose={onClose}
+			header={header}
 		>
 			{(options) => (
 				<>
@@ -185,37 +188,6 @@ export function ModelGenerateButton<BUILDER, MODEL>({
 					config={config}
 					handleDialogClose={handleDialogClose}
 					handleSave={handleSave}
-				/>
-			)}
-		</GenerateButton>
-	);
-}
-
-type FileGenerate = (
-	values: FormValues,
-	context: GenerateExecuteContext,
-) => Promise<string>;
-
-// 生成のみで完結しパスを返す形式。generateは保存したファイル名を返す
-export function FileGenerateButton({
-	setPath,
-	config,
-	leading,
-	generate,
-}: GenerateButtonProps & {
-	config: GenerateDialogConfig;
-	leading?: ReactNode;
-	generate: FileGenerate;
-}) {
-	return (
-		<GenerateButton setPath={setPath}>
-			{(handleDialogClose, handleSave) => (
-				<GenerateFormDialog
-					config={config}
-					leading={leading}
-					onClose={handleDialogClose}
-					onExecute={generate}
-					onDone={handleSave}
 				/>
 			)}
 		</GenerateButton>
