@@ -11,3 +11,10 @@ export function replaceArray<T>(array: T[], newOne: T, index: number): T[] {
 export function removeArray<T>(array: T[], remove: number): T[] {
 	return array.filter((_, index) => index !== remove);
 }
+// カンマ区切りを分ける。前後の空白を除き、空の要素は持たない
+export function splitComma(text: string): string[] {
+	return text
+		.split(",")
+		.map((it) => it.trim())
+		.filter((it) => it !== "");
+}

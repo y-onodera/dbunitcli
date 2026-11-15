@@ -20,6 +20,7 @@ import {
 } from "../../../../hooks/useDatasetSettings";
 import { useJob } from "../../../../hooks/useJob";
 import { withAllTables } from "../../../../model/CommandOption";
+import { toggleCompareColumns } from "../../../../model/CompareColumns";
 import type { GenerateOptions } from "../../../../model/SelectParameter";
 import {
 	buildCompareTemplateRequest,
@@ -266,17 +267,15 @@ function KeyColumnsField({
 				selected={new Set(selected)}
 				onToggle={(column) =>
 					onChange(
-						selected.includes(column)
-							? selected.filter((it) => it !== column)
-							: [...selected, column],
+						toggleCompareColumns(
+							selected,
+							[column],
+							!selected.includes(column),
+						),
 					)
 				}
 				onToggleAll={(items, checked) =>
-					onChange(
-						checked
-							? [...selected, ...items.filter((it) => !selected.includes(it))]
-							: selected.filter((it) => !items.includes(it)),
-					)
+					onChange(toggleCompareColumns(selected, items, checked))
 				}
 				columnLabel="column"
 				filterPlaceholder="Filter columns"

@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import { GenerateForm } from "../../../app/form/GenerateForm";
@@ -34,6 +34,37 @@ vi.mock("../../../context/EnvironmentProvider", () => ({
 vi.mock("../../../hooks/useJdbc", () => ({
 	useJdbcConnectionTest: () => vi.fn(),
 	useSaveJdbcProperties: () => vi.fn(),
+}));
+// 読む指定（enabled）のときだけ候補を返す
+const { useDatasetTableNamesMock } = vi.hoisted(() => ({
+	useDatasetTableNamesMock: vi.fn(
+		(
+			_srcInfo: unknown,
+			_withLogs?: boolean,
+			options?: { enabled?: boolean },
+		) => ({
+			tableNames: (options?.enabled ?? true) ? ["OLD_USERS", "NEW_USERS"] : [],
+			loading: false,
+			logs: [],
+			error: "",
+		}),
+	),
+}));
+// OLD_USERSテーブルの列だけを返す
+const { useDatasetTableColumnsMock } = vi.hoisted(() => ({
+	useDatasetTableColumnsMock: vi.fn((_srcInfo: unknown, tableName: string) => ({
+		columns: tableName === "OLD_USERS" ? ["ID", "NAME", "AMT"] : [],
+		loading: false,
+		logs: [],
+		error: "",
+	})),
+}));
+vi.mock("../../../hooks/useDatasetSettings", async (importOriginal) => ({
+	...(await importOriginal<
+		typeof import("../../../hooks/useDatasetSettings")
+	>()),
+	useDatasetTableNames: useDatasetTableNamesMock,
+	useDatasetTableColumns: useDatasetTableColumnsMock,
 }));
 
 function makeGenerateProps(
@@ -390,7 +421,7 @@ describe("GenerateFormの描画テスト", () => {
 			expect(select).toHaveValue("compare");
 		});
 
-		it("compareセクションがgenerateとsrcの間に表示され、比較用の項目がこの順で並ぶ", () => {
+		it("compareセクションがsrcの後に表示され、比較用の項目がこの順で並ぶ", () => {
 			render(
 				<GenerateForm
 					{...makeGenerateProps(
@@ -399,11 +430,16 @@ describe("GenerateFormの描画テスト", () => {
 				/>,
 			);
 
-			const legends = document.querySelectorAll("fieldset legend");
+			const legends = [...document.querySelectorAll("fieldset legend")];
 			expect(legends[0]).toHaveTextContent("generate");
-			expect(legends[1]).toHaveTextContent("compare");
-			expect(legends[2]).toHaveTextContent("src");
-			const compareSection = document.querySelectorAll("fieldset")[1];
+			expect(legends[1]).toHaveTextContent("src");
+			const compareSection = legends
+				.find((legend) => legend.textContent?.startsWith("compare"))
+				?.closest("fieldset") as HTMLFieldSetElement;
+			expect(
+				legends[1].compareDocumentPosition(compareSection) &
+					Node.DOCUMENT_POSITION_FOLLOWING,
+			).toBeTruthy();
 			expect(
 				[...compareSection.querySelectorAll("input[type='text']")].map(
 					(input) => input.getAttribute("name"),
@@ -416,6 +452,66 @@ describe("GenerateFormの描画テスト", () => {
 				"-compareSheetName",
 			]);
 			expect(compareSection.querySelector("legend button")).toBeInTheDocument();
+		});
+
+		it("reloadボタンを押すと、oldTable・newTableにsrcのsetting適用後のテーブル名を候補として出す", async () => {
+			render(
+				<GenerateForm
+					{...makeGenerateProps(
+						generateRefreshXlsxTemplateCompareResponseFixture,
+					)}
+				/>,
+			);
+			const datalistValues = (name: string) =>
+				[
+					...(document.querySelector<HTMLInputElement>(`input[name="${name}"]`)
+						?.list?.options ?? []),
+				].map((option) => option.value);
+			expect(datalistValues("-oldTable")).toEqual([]);
+
+			await userEvent.click(
+				screen.getAllByRole("button", { name: "reload table names" })[1],
+			);
+
+			for (const name of ["-oldTable", "-newTable"]) {
+				expect(datalistValues(name)).toEqual(["OLD_USERS", "NEW_USERS"]);
+			}
+		});
+
+		it("keys・comparesのボタンから、oldTableの列を選んだ順にカンマ区切りで入れる", async () => {
+			const user = userEvent.setup();
+			render(
+				<GenerateForm
+					{...makeGenerateProps(
+						generateRefreshXlsxTemplateCompareResponseFixture,
+					)}
+				/>,
+			);
+			await user.type(
+				document.querySelector('input[name="-oldTable"]') as HTMLElement,
+				"OLD_USERS",
+			);
+			const keys = document.querySelector(
+				'input[name="-keys"]',
+			) as HTMLInputElement;
+			await user.type(keys, "ID:CODE,X");
+
+			await user.click(screen.getByRole("button", { name: "select keys" }));
+			const dialog = screen.getByRole("dialog");
+			expect(
+				within(dialog)
+					.getAllByRole("checkbox")
+					.slice(1)
+					.map((box) => (box as HTMLInputElement).checked),
+			).toEqual([true, false, false]);
+			await user.click(within(dialog).getByText("AMT"));
+			await user.click(within(dialog).getByRole("button", { name: "Apply" }));
+
+			// oldのIDを選んだままなので"ID:CODE"の対応は残し、列に無いXも消さない
+			expect(keys).toHaveValue("ID:CODE,X,AMT");
+			expect(
+				screen.getByRole("button", { name: "select compares" }),
+			).toBeInTheDocument();
 		});
 
 		it("templateTypeを変えるとフォームを再構成する", async () => {

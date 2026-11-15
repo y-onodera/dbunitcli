@@ -8,7 +8,7 @@
 <body>
   <p><a href="../index.html">&larr; ヘルプ一覧に戻る</a></p>
   <h1>compare</h1>
-  <p><a href="../commands/generate.html">Generate</a> で比較用の Excel テンプレートを生成するときに、比べる 2 テーブルと突合に使うカラムを指定するセクションです。<code>generate</code> セクションで <code>generateType = xlsxTemplate</code>、<code>templateType = compare</code> を選ぶと表示されます。</p>
+  <p><a href="../commands/generate.html">Generate</a> で比較用の Excel テンプレートを生成するときに、比べる 2 テーブルと突合に使うカラムを指定するセクションです。<code>generate</code> セクションで <code>generateType = xlsxTemplate</code>、<code>templateType = compare</code> を選ぶと、<code>src</code> セクションの後に表示されます。</p>
 
   <h2 id="toc">目次</h2>
   <ul>
@@ -48,10 +48,10 @@
   <h2 id="section-options">設定項目</h2>
   <table>
     <tr><th>項目</th><th>説明</th><th>デフォルト</th></tr>
-    <tr><td><code>oldTable</code>（必須）</td><td>比べる基準にするテーブルの名前。<code>src</code> の setting を適用した後のテーブル名で、大文字・小文字も含めて完全に一致させる</td><td>—</td></tr>
+    <tr><td><code>oldTable</code>（必須）</td><td>比べる基準にするテーブルの名前。<code>src</code> の setting を適用した後のテーブル名で、大文字・小文字も含めて完全に一致させる。横の reload ボタンを押すと、その時点の <code>src</code> セクションの入力値で読み込み setting を適用した後のテーブル名が、<code>oldTable</code> / <code>newTable</code> の入力欄の候補に出る。<code>src</code> を変えても候補は自動では変わらないため、押し直してください</td><td>—</td></tr>
     <tr><td><code>newTable</code>（必須）</td><td><code>oldTable</code> と突き合わせるテーブルの名前。<code>oldTable</code> と同じ名前は指定できない</td><td>—</td></tr>
-    <tr><td><code>keys</code>（必須）</td><td>行を突き合わせるキーのカラム。複数あれば複合キーにする（下記「keys / compares の書き方」）</td><td>—</td></tr>
-    <tr><td><code>compares</code></td><td>値を比べるカラム（下記「keys / compares の書き方」）</td><td>（空）。キー以外で両方のテーブルにある同じ名前のカラム</td></tr>
+    <tr><td><code>keys</code>（必須）</td><td>行を突き合わせるキーのカラム。複数あれば複合キーにする（下記「keys / compares の書き方」）。横の編集ボタンから <code>oldTable</code> のカラムを選べる（<a href="../dialogs/compare-columns.html">Select Compare Columns</a>）</td><td>—</td></tr>
+    <tr><td><code>compares</code></td><td>値を比べるカラム（下記「keys / compares の書き方」）。<code>keys</code> と同じく、横の編集ボタンから <code>oldTable</code> のカラムを選べる</td><td>（空）。キー以外で両方のテーブルにある同じ名前のカラム</td></tr>
     <tr><td><code>compareSheetName</code></td><td>比較シートの名前。テーブル名と同じ名前は指定できない</td><td><code>compare</code></td></tr>
   </table>
 
@@ -200,6 +200,7 @@ setting:
   <ul>
     <li><a href="../commands/generate/types/xlsxTemplate.html">generateType: xlsxTemplate</a> — テンプレートの雛型を生成する</li>
     <li><a href="../dialogs/xlsx-compare-template-generate.html">Generate Compare Template</a> — 画面から比較用テンプレートを作る。比較シートの生成ルール</li>
+    <li><a href="../dialogs/compare-columns.html">Select Compare Columns</a> — <code>keys</code> / <code>compares</code> のカラムを一覧から選ぶ</li>
     <li><a href="../dialogs/dataset-setting.html">Dataset Setting</a> — <code>name</code>・<code>filePath</code>・<code>tableName</code>・<code>separate</code>・<code>filter</code></li>
     <li><a href="traversal.html">Traversal</a> — <code>recursive</code>・<code>regInclude</code></li>
     <li><a href="../dialogs/regex-filter.html">Select from Table List</a> — 一覧から正規表現を組み立てる</li>
