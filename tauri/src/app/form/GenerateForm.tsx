@@ -186,7 +186,6 @@ export function GenerateForm(prop: {
 					)}
 					{generate.lazyLoad && <Check prefix="" element={generate.lazyLoad} />}
 				</SectionFieldset>
-				<XlsxCompareFormSection generate={generate} />
 				{/* srcを読まない生成（xlsxTemplateのmetadata）ではsrcの項目が返らない */}
 				{srcData.srcType && (
 					<DatasetLoadForm
@@ -198,6 +197,7 @@ export function GenerateForm(prop: {
 						parentSrcInfo={true}
 					/>
 				)}
+				<XlsxCompareFormSection generate={generate} />
 			</ResourceEncodingProvider>
 		</DatasetSrcInfoScope>
 	);

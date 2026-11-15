@@ -35,6 +35,17 @@ vi.mock("../../../hooks/useJdbc", () => ({
 	useJdbcConnectionTest: () => vi.fn(),
 	useSaveJdbcProperties: () => vi.fn(),
 }));
+vi.mock("../../../hooks/useDatasetSettings", async (importOriginal) => ({
+	...(await importOriginal<
+		typeof import("../../../hooks/useDatasetSettings")
+	>()),
+	useDatasetTableNames: () => ({
+		tableNames: ["OLD_USERS", "NEW_USERS"],
+		loading: false,
+		logs: [],
+		error: "",
+	}),
+}));
 
 function makeGenerateProps(
 	fixture: GenerateOptions = generateLoadResponseFixture,
@@ -390,7 +401,7 @@ describe("GenerateFormの描画テスト", () => {
 			expect(select).toHaveValue("compare");
 		});
 
-		it("compareセクションがgenerateとsrcの間に表示され、比較用の項目がこの順で並ぶ", () => {
+		it("compareセクションがsrcの後に表示され、比較用の項目がこの順で並ぶ", () => {
 			render(
 				<GenerateForm
 					{...makeGenerateProps(
@@ -399,11 +410,16 @@ describe("GenerateFormの描画テスト", () => {
 				/>,
 			);
 
-			const legends = document.querySelectorAll("fieldset legend");
+			const legends = [...document.querySelectorAll("fieldset legend")];
 			expect(legends[0]).toHaveTextContent("generate");
-			expect(legends[1]).toHaveTextContent("compare");
-			expect(legends[2]).toHaveTextContent("src");
-			const compareSection = document.querySelectorAll("fieldset")[1];
+			expect(legends[1]).toHaveTextContent("src");
+			const compareSection = legends
+				.find((legend) => legend.textContent?.startsWith("compare"))
+				?.closest("fieldset") as HTMLFieldSetElement;
+			expect(
+				legends[1].compareDocumentPosition(compareSection) &
+					Node.DOCUMENT_POSITION_FOLLOWING,
+			).toBeTruthy();
 			expect(
 				[...compareSection.querySelectorAll("input[type='text']")].map(
 					(input) => input.getAttribute("name"),
@@ -416,6 +432,32 @@ describe("GenerateFormの描画テスト", () => {
 				"-compareSheetName",
 			]);
 			expect(compareSection.querySelector("legend button")).toBeInTheDocument();
+		});
+
+		it("oldTable・newTableにsrcのsetting適用後のテーブル名を候補として出す", () => {
+			render(
+				<GenerateForm
+					{...makeGenerateProps(
+						generateRefreshXlsxTemplateCompareResponseFixture,
+					)}
+				/>,
+			);
+
+			for (const name of ["-oldTable", "-newTable"]) {
+				const input = document.querySelector(`input[name="${name}"]`);
+				const listId = input?.getAttribute("list");
+				expect(listId).toBeTruthy();
+				expect(
+					[
+						...(document
+							.getElementById(listId as string)
+							?.querySelectorAll("option") ?? []),
+					].map((option) => option.getAttribute("value")),
+				).toEqual(["OLD_USERS", "NEW_USERS"]);
+			}
+			expect(
+				document.querySelector('input[name="-keys"]')?.getAttribute("list"),
+			).toBeFalsy();
 		});
 
 		it("templateTypeを変えるとフォームを再構成する", async () => {

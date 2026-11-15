@@ -8,7 +8,7 @@
 <body>
   <p><a href="../index.html">&larr; ヘルプ一覧に戻る</a></p>
   <h1>compare</h1>
-  <p><a href="../commands/generate.html">Generate</a> で比較用の Excel テンプレートを生成するときに、比べる 2 テーブルと突合に使うカラムを指定するセクションです。<code>generate</code> セクションで <code>generateType = xlsxTemplate</code>、<code>templateType = compare</code> を選ぶと表示されます。</p>
+  <p><a href="../commands/generate.html">Generate</a> で比較用の Excel テンプレートを生成するときに、比べる 2 テーブルと突合に使うカラムを指定するセクションです。<code>generate</code> セクションで <code>generateType = xlsxTemplate</code>、<code>templateType = compare</code> を選ぶと、<code>src</code> セクションの後に表示されます。</p>
 
   <h2 id="toc">目次</h2>
   <ul>
@@ -48,7 +48,7 @@
   <h2 id="section-options">設定項目</h2>
   <table>
     <tr><th>項目</th><th>説明</th><th>デフォルト</th></tr>
-    <tr><td><code>oldTable</code>（必須）</td><td>比べる基準にするテーブルの名前。<code>src</code> の setting を適用した後のテーブル名で、大文字・小文字も含めて完全に一致させる</td><td>—</td></tr>
+    <tr><td><code>oldTable</code>（必須）</td><td>比べる基準にするテーブルの名前。<code>src</code> の setting を適用した後のテーブル名で、大文字・小文字も含めて完全に一致させる。入力欄の候補に、<code>src</code> セクションの入力値で読み込み setting を適用した後のテーブル名が出る（<code>newTable</code> も同じ）</td><td>—</td></tr>
     <tr><td><code>newTable</code>（必須）</td><td><code>oldTable</code> と突き合わせるテーブルの名前。<code>oldTable</code> と同じ名前は指定できない</td><td>—</td></tr>
     <tr><td><code>keys</code>（必須）</td><td>行を突き合わせるキーのカラム。複数あれば複合キーにする（下記「keys / compares の書き方」）</td><td>—</td></tr>
     <tr><td><code>compares</code></td><td>値を比べるカラム（下記「keys / compares の書き方」）</td><td>（空）。キー以外で両方のテーブルにある同じ名前のカラム</td></tr>
