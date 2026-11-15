@@ -130,7 +130,7 @@ export function OptionCheck({
 				checked={checked}
 				disabled={disabled}
 				onChange={(e) => onChange(e.target.checked)}
-				className="w-4 h-4 text-primary"
+				className="w-4 h-4 text-primary border border-border ring-primary-ring focus-visible:ring-3"
 			/>
 			{label}
 		</label>

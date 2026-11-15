@@ -1,4 +1,9 @@
-import { type ReactElement, type ReactNode, useState } from "react";
+import {
+	type ComponentProps,
+	type ReactElement,
+	type ReactNode,
+	useState,
+} from "react";
 import { AddButton } from "../../../../components/element/ButtonIcon";
 import type { JobContext } from "../../../../hooks/useJob";
 import type { GenerateOptions } from "../../../../model/SelectParameter";
@@ -34,6 +39,7 @@ export type GenerateExecuteContext = {
 export function GenerateFormDialog<T>({
 	config,
 	header,
+	size,
 	leading,
 	onExecute,
 	onDone,
@@ -41,6 +47,7 @@ export function GenerateFormDialog<T>({
 }: {
 	config: GenerateDialogConfig;
 	header?: ReactNode;
+	size?: ComponentProps<typeof RefreshableDialogShell>["size"];
 	leading?: ReactNode;
 	onExecute: (
 		values: FormValues,
@@ -78,6 +85,7 @@ export function GenerateFormDialog<T>({
 			}}
 			onClose={onClose}
 			header={header}
+			size={size}
 		>
 			{(options) => (
 				<>

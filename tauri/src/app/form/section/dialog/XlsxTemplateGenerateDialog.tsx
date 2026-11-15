@@ -22,6 +22,7 @@ import {
 	toSavedFileName,
 	type XlsxTemplateType,
 	type XlsxTemplateTypeDialogProps,
+	xlsxTemplateDialogSize,
 	xlsxTemplateDialogTitle,
 } from "./XlsxTemplateGenerateParts";
 
@@ -68,6 +69,7 @@ function XlsxTableTemplateGenerateDialog({
 		<GenerateFormDialog
 			config={tableDialogConfig}
 			header={header}
+			size={xlsxTemplateDialogSize}
 			leading={<FileNameField value={fileName} onChange={onFileNameChange} />}
 			onClose={onClose}
 			onExecute={generate}
@@ -116,6 +118,7 @@ function XlsxMetaDataTemplateGenerateDialog({
 			onExecute={execute}
 			onClose={onClose}
 			header={header}
+			size={xlsxTemplateDialogSize}
 		>
 			{() => <FileNameField value={fileName} onChange={onFileNameChange} />}
 		</RefreshableDialogShell>

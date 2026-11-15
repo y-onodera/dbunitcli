@@ -45,6 +45,7 @@ import {
 	fileNameField,
 	toSavedFileName,
 	type XlsxTemplateTypeDialogProps,
+	xlsxTemplateDialogSize,
 	xlsxTemplateDialogTitle,
 } from "./XlsxTemplateGenerateParts";
 
@@ -384,6 +385,7 @@ export function XlsxCompareTemplateGenerateDialog({
 			onExecute={execute}
 			onClose={onClose}
 			header={header}
+			size={xlsxTemplateDialogSize}
 		>
 			{(options) => (
 				<>

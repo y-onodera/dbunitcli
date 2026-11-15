@@ -80,3 +80,5 @@ export type XlsxTemplateTypeDialogProps = {
 };
 
 export const xlsxTemplateDialogTitle = "Generate Xlsx Template";
+// templateTypeを切り替えても幅が変わらないよう、最も広いcompareに合わせて固定する
+export const xlsxTemplateDialogSize = "lg";

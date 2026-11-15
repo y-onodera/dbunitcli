@@ -74,7 +74,7 @@ export default function SelectableTable({
 										onChange={(e) =>
 											onToggleAll(filteredItems, e.target.checked)
 										}
-										className="w-4 h-4 text-primary"
+										className="w-4 h-4 text-primary border border-border ring-primary-ring focus-visible:ring-3"
 									/>
 								)}
 							</Th>
@@ -93,7 +93,7 @@ export default function SelectableTable({
 									checked={selected.has(item)}
 									onChange={() => onToggle(item)}
 									onClick={(e) => e.stopPropagation()}
-									className="w-4 h-4 text-primary"
+									className="w-4 h-4 text-primary border border-border ring-primary-ring focus-visible:ring-3"
 								/>
 							</Td>
 							<Td>{renderItem(item)}</Td>
