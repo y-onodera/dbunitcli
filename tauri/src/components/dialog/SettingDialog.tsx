@@ -82,7 +82,6 @@ function SaveLocationFields({
 						<input
 							type="radio"
 							name="saveTarget"
-							className="w-4 h-4 text-primary"
 							checked={saveTarget === "overwrite"}
 							onChange={() => onChange("overwrite")}
 						/>
@@ -92,7 +91,6 @@ function SaveLocationFields({
 						<input
 							type="radio"
 							name="saveTarget"
-							className="w-4 h-4 text-primary"
 							checked={saveTarget === "defaultFolder"}
 							onChange={() => onChange("defaultFolder")}
 						/>

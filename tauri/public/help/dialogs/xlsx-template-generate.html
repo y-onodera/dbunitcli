@@ -9,10 +9,12 @@
   <p><a href="../index.html">&larr; ヘルプ一覧に戻る</a></p>
   <h1>Generate Xlsx Template</h1>
   <p>既存データセット（CSV / Excel / DB など）のテーブル・カラム構成から、jxls 用の Excel テンプレート（<code>.xlsx</code>）を自動生成して template リソースへ保存します。generateType が <code>xlsx</code> / <code>xls</code> のとき、template の ⋮ メニューの generate から開きます。</p>
+  <p>ダイアログ上部の <code>templateType</code> で作るテンプレートの種類を選びます。このページでは <code>table</code>（テーブルごとに 1 シート）を説明します。</p>
 
   <h2 id="toc">目次</h2>
   <ol>
     <li><a href="#section-simple">シンプルな使い方</a></li>
+    <li><a href="#section-type">テンプレートの種類</a></li>
     <li><a href="#section-overview">できること</a></li>
     <li><a href="#section-input">入力</a></li>
     <li><a href="#section-flow">操作の流れ</a></li>
@@ -38,6 +40,15 @@
     <li>書式や見出しの装飾は、保存されたファイルを Excel で開いて加える</li>
   </ul>
 
+  <h2 id="section-type">テンプレートの種類</h2>
+  <p><code>templateType</code> を切り替えると、その種類の入力項目に替わります。<code>fileName</code> の入力は引き継がれ、それ以外の入力は初期状態に戻ります。? ボタンは選んでいる種類のヘルプを開きます。</p>
+  <table>
+    <tr><th>値</th><th>作るテンプレート</th></tr>
+    <tr><td>table（デフォルト）</td><td>データセットのテーブルごとに 1 シートを持つ雛型。このページで説明する</td></tr>
+    <tr><td>compare</td><td>2 つのテーブルを複合キーで突合して値を比べるテンプレート（<a href="xlsx-compare-template-generate.html">Generate Compare Template</a>）</td></tr>
+    <tr><td>metadata</td><td>テーブル定義書のテンプレート（<a href="xlsx-metadata-template-generate.html">Generate Table Definition Template</a>）</td></tr>
+  </table>
+
   <h2 id="section-overview">できること</h2>
   <ul>
     <li>テーブルごとに 1 シートを作成し、1 行目にカラム名、2 行目に <code>${row.get('カラム名')}</code> 形式の埋め込み式を持つテンプレートを作る</li>
@@ -49,6 +60,7 @@
   <h2 id="section-input">入力</h2>
   <table>
     <tr><th>項目</th><th>説明</th></tr>
+    <tr><td>templateType</td><td>作るテンプレートの種類。<code>table</code> を選ぶ（上記「テンプレートの種類」）</td></tr>
     <tr><td>fileName（必須）</td><td>保存するテンプレートのファイル名。拡張子が <code>.xlsx</code> でなければ <code>.xlsx</code> が付与される（<code>generateType=xls</code> を選択していても出力は常に <code>.xlsx</code> 形式）。ディレクトリ区切り（<code>/</code> <code>\</code>）や <code>..</code> は使えない。同名のファイルがある場合は上書きされる。</td></tr>
     <tr><td>src</td><td>テンプレートの元にするデータセット。<code>srcType</code>・パス・文字コード・ヘッダ指定などを <a href="../sections/dataset-load-form.html">Dataset Load Form</a> と同じ要領で指定する。</td></tr>
   </table>

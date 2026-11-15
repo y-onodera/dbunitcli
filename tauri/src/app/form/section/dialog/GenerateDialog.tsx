@@ -1,4 +1,9 @@
-import { type ReactElement, type ReactNode, useState } from "react";
+import {
+	type ComponentProps,
+	type ReactElement,
+	type ReactNode,
+	useState,
+} from "react";
 import { AddButton } from "../../../../components/element/ButtonIcon";
 import type { JobContext } from "../../../../hooks/useJob";
 import type { GenerateOptions } from "../../../../model/SelectParameter";
@@ -31,14 +36,18 @@ export type GenerateExecuteContext = {
 };
 
 // onExecuteで生成し、成功したら（中断されていなければ）結果をonDoneへ渡す
-function GenerateFormDialog<T>({
+export function GenerateFormDialog<T>({
 	config,
+	header,
+	size,
 	leading,
 	onExecute,
 	onDone,
 	onClose,
 }: {
 	config: GenerateDialogConfig;
+	header?: ReactNode;
+	size?: ComponentProps<typeof RefreshableDialogShell>["size"];
 	leading?: ReactNode;
 	onExecute: (
 		values: FormValues,
@@ -75,6 +84,8 @@ function GenerateFormDialog<T>({
 				}
 			}}
 			onClose={onClose}
+			header={header}
+			size={size}
 		>
 			{(options) => (
 				<>
@@ -93,11 +104,9 @@ function GenerateFormDialog<T>({
 // トリガーボタンとダイアログの開閉・保存後のパス反映を担う
 export function GenerateButton({
 	setPath,
-	title = "generate",
 	children,
 }: {
 	setPath: (value: string) => void;
-	title?: string;
 	children: (
 		handleDialogClose: () => void,
 		handleSave: (fileName: string) => void,
@@ -116,7 +125,7 @@ export function GenerateButton({
 		<ResourceEditButton
 			renderDialog={renderDialog}
 			renderTrigger={(openDialog) => (
-				<AddButton title={title} handleClick={openDialog} />
+				<AddButton title="generate" handleClick={openDialog} />
 			)}
 		/>
 	);
@@ -185,37 +194,6 @@ export function ModelGenerateButton<BUILDER, MODEL>({
 					config={config}
 					handleDialogClose={handleDialogClose}
 					handleSave={handleSave}
-				/>
-			)}
-		</GenerateButton>
-	);
-}
-
-type FileGenerate = (
-	values: FormValues,
-	context: GenerateExecuteContext,
-) => Promise<string>;
-
-// 生成のみで完結しパスを返す形式。generateは保存したファイル名を返す
-export function FileGenerateButton({
-	setPath,
-	config,
-	leading,
-	generate,
-}: GenerateButtonProps & {
-	config: GenerateDialogConfig;
-	leading?: ReactNode;
-	generate: FileGenerate;
-}) {
-	return (
-		<GenerateButton setPath={setPath}>
-			{(handleDialogClose, handleSave) => (
-				<GenerateFormDialog
-					config={config}
-					leading={leading}
-					onClose={handleDialogClose}
-					onExecute={generate}
-					onDone={handleSave}
 				/>
 			)}
 		</GenerateButton>

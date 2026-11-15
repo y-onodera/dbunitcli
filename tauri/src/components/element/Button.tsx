@@ -92,8 +92,6 @@ export function Button(props: {
                          rounded-lg
                          ${props.border}
                          transition duration-100
-                         ring-primary-ring
-                         focus-visible:ring-3
                          disabled:bg-surface-disabled disabled:text-content-disabled disabled:border-border-subtle disabled:cursor-not-allowed disabled:hover:bg-surface-disabled`}
 			onClick={props.handleClick}
 		>

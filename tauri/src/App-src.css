@@ -2,7 +2,35 @@
 @import "./tokens.css";
 @plugin "@tailwindcss/forms";
 
+/* 入力欄・ボタンの共通の見た目。@tailwindcss/forms（base 層）より優先し、ユーティリティのクラスでは上書きできるよう components 層に置く */
 @layer components {
+	input:where(
+		:not(
+			[type="checkbox"],
+			[type="radio"],
+			[type="hidden"],
+			[type="file"],
+			[type="range"],
+			[type="color"],
+			[type="button"],
+			[type="submit"],
+			[type="reset"]
+		)
+	),
+	select,
+	textarea {
+		@apply border border-border bg-input disabled:bg-input-disabled focus:border-primary-ring;
+	}
+	[type="checkbox"],
+	[type="radio"] {
+		@apply w-4 h-4 text-primary border-border;
+	}
+	input,
+	select,
+	textarea,
+	button {
+		@apply ring-primary-ring focus-visible:ring-3;
+	}
 	.text-caption {
 		@apply text-xs text-content-secondary;
 	}
@@ -34,27 +62,5 @@
 	}
 	button {
 		cursor: pointer;
-	}
-	[type="text"]:focus,
-	[type="email"]:focus,
-	[type="url"]:focus,
-	[type="password"]:focus,
-	[type="number"]:focus,
-	[type="date"]:focus,
-	[type="datetime-local"]:focus,
-	[type="month"]:focus,
-	[type="search"]:focus,
-	[type="tel"]:focus,
-	[type="time"]:focus,
-	[type="week"]:focus,
-	[multiple]:focus,
-	textarea:focus,
-	select:focus {
-		--tw-ring-color: var(--color-primary-ring);
-		border-color: var(--color-primary-ring);
-	}
-	[type="checkbox"]:focus,
-	[type="radio"]:focus {
-		--tw-ring-color: var(--color-primary-ring);
 	}
 }

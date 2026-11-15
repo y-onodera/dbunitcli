@@ -1,7 +1,7 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
-import { XlsxCompareTemplateGenerateButton } from "../../../../../app/form/section/dialog/XlsxCompareTemplateGenerateDialog";
+import { XlsxTemplateGenerateButton } from "../../../../../app/form/section/dialog/XlsxTemplateGenerateDialog";
 import type { FetchParams } from "../../../../../utils/fetchUtils";
 import {
 	environmentFixture,
@@ -77,9 +77,11 @@ async function openDialog(setPath: (value: string) => void = vi.fn()) {
 		return Promise.resolve(new Response("{}"));
 	});
 	const user = userEvent.setup();
-	render(<XlsxCompareTemplateGenerateButton setPath={setPath} />);
-	await user.click(
-		screen.getByRole("button", { name: "generate compare template" }),
+	render(<XlsxTemplateGenerateButton setPath={setPath} />);
+	await user.click(screen.getByRole("button", { name: "generate" }));
+	await user.selectOptions(
+		document.getElementById("xlsxTemplateType") as HTMLElement,
+		"compare",
 	);
 	await waitFor(() => {
 		expect(

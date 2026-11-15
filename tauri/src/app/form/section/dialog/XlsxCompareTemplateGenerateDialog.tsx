@@ -31,9 +31,7 @@ import {
 } from "../../../../model/XlsxCompareTemplate";
 import { removeArray, replaceArray } from "../../../../utils/arrayUtils";
 import { DatasetLoadForm, DatasetSrcInfoScope } from "../DatasetLoadForm";
-import { GenerateButton } from "./GenerateDialog";
 import { RefreshableDialogShell } from "./RefreshableDialogShell";
-import type { ResourceEditButtonProp } from "./ResourceEditButton";
 import { postDialogForm } from "./refreshableDialogForm";
 import SelectableTable from "./SelectableTable";
 import {
@@ -43,10 +41,15 @@ import {
 	type SelectOption,
 } from "./SqlInsertParts";
 import { useRefreshableDialog } from "./useRefreshableDialog";
-import { toSavedFileName } from "./XlsxTemplateGenerateDialog";
+import {
+	FileNameField,
+	toSavedFileName,
+	type XlsxTemplateTypeDialogProps,
+	xlsxTemplateDialogSize,
+	xlsxTemplateDialogTitle,
+} from "./XlsxTemplateGenerateParts";
 
 const formId = "xlsxCompareTemplateGenerateForm";
-const fileNameField = "-fileName";
 const DEFAULT_COMPARE_SHEET_NAME = "compare";
 const EMPTY_PAIR: ColumnPair = { first: "", second: "" };
 
@@ -288,20 +291,20 @@ function KeyColumnsField({
 	);
 }
 
-function XlsxCompareTemplateGenerateDialog({
+// templateType=compareのテンプレート
+export function XlsxCompareTemplateGenerateDialog({
+	header,
+	fileName,
+	onFileNameChange,
 	onClose,
 	onSaved,
-}: {
-	onClose: () => void;
-	onSaved: (fileName: string) => void;
-}) {
+}: XlsxTemplateTypeDialogProps) {
 	const dialog = useRefreshableDialog<GenerateOptions>({
 		refreshEndpoint: "generate/refresh",
 		formId,
 		generateType: "xlsxTemplate",
 	});
 	const setResourcesSettings = useSetResourcesSettings();
-	const [fileName, setFileName] = useState("");
 	const [compareSheetName, setCompareSheetName] = useState(
 		DEFAULT_COMPARE_SHEET_NAME,
 	);
@@ -373,7 +376,7 @@ function XlsxCompareTemplateGenerateDialog({
 		<RefreshableDialogShell
 			command="dialogs/xlsx-compare-template-generate"
 			label="Generate Compare Template"
-			title="Generate Compare Template"
+			title={xlsxTemplateDialogTitle}
 			formId={formId}
 			loadState={dialog.loadState}
 			executing={dialog.executing}
@@ -381,15 +384,13 @@ function XlsxCompareTemplateGenerateDialog({
 			logs={dialog.logs}
 			onExecute={execute}
 			onClose={onClose}
+			header={header}
+			size={xlsxTemplateDialogSize}
 		>
 			{(options) => (
 				<>
 					<div>
-						<TextField
-							name={fileNameField}
-							value={fileName}
-							onChange={setFileName}
-						/>
+						<FileNameField value={fileName} onChange={onFileNameChange} />
 						<TextField
 							name="compare sheetName"
 							value={compareSheetName}
@@ -421,21 +422,5 @@ function XlsxCompareTemplateGenerateDialog({
 				</>
 			)}
 		</RefreshableDialogShell>
-	);
-}
-
-// template欄のdropdownに出す「比較用テンプレート生成」
-export function XlsxCompareTemplateGenerateButton({
-	setPath,
-}: Pick<ResourceEditButtonProp, "setPath">) {
-	return (
-		<GenerateButton setPath={setPath} title="generate compare template">
-			{(handleDialogClose, handleSave) => (
-				<XlsxCompareTemplateGenerateDialog
-					onClose={handleDialogClose}
-					onSaved={handleSave}
-				/>
-			)}
-		</GenerateButton>
 	);
 }

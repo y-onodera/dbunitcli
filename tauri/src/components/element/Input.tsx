@@ -161,11 +161,6 @@ export function CheckBox(props: {
 				name={props.name}
 				id={props.id}
 				type="checkbox"
-				className="w-4 h-4
-                           text-primary
-                           border border-border
-                           ring-primary-ring
-                           focus-visible:ring-3 "
 				style={props.hidden ? { display: "none" } : {}}
 				checked={checked}
 				value={`${checked}`}
@@ -248,12 +243,7 @@ export function TextArea({
 			className={`p-2.5
                        w-full flex-1 min-h-96
                        text-sm text-content
-                       rounded-lg
-                       bg-input
-                       disabled:bg-input-disabled
-                       border border-border
-                       ring-primary-ring
-                       focus-visible:ring-3`}
+                       rounded-lg`}
 			value={props.value}
 			readOnly={props.readOnly}
 			placeholder={props.placeholder}
@@ -280,7 +270,7 @@ export function FilterInput({
 				value={value}
 				onChange={(e) => onChange(e.target.value)}
 				placeholder={placeholder}
-				className={`w-full px-2 py-1 text-sm border border-border rounded bg-input focus-visible:ring-3 ring-primary-ring ${value === "" ? "" : "pe-8"}`}
+				className={`w-full px-2 py-1 text-sm rounded ${value === "" ? "" : "pe-8"}`}
 			/>
 			{value !== "" && (
 				<ClearButton
@@ -296,10 +286,5 @@ function inputStyle(wStyle: string) {
                p-2.5
                ${wStyle}
                text-sm text-content
-               rounded-lg
-               bg-input
-               disabled:bg-input-disabled
-               border border-border
-               ring-primary-ring
-               focus-visible:ring-3 `;
+               rounded-lg`;
 }

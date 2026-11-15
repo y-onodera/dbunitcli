@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import type { ComponentProps, ReactNode } from "react";
 import { createPortal } from "react-dom";
 import {
 	DialogBody,
@@ -24,6 +24,8 @@ export function RefreshableDialogShell<OPTIONS>({
 	logs,
 	onExecute,
 	onClose,
+	header,
+	size = "auto",
 	children,
 }: {
 	command: string;
@@ -36,14 +38,18 @@ export function RefreshableDialogShell<OPTIONS>({
 	logs: string[];
 	onExecute: () => void;
 	onClose: () => void;
+	// formの外に置き、読込中も表示する（送信値に含めない入力用）
+	header?: ReactNode;
+	size?: ComponentProps<typeof DialogBody>["size"];
 	children: (options: OPTIONS) => ReactNode;
 }) {
 	return createPortal(
 		<FullDialog onClose={onClose}>
-			<DialogBody size="auto">
+			<DialogBody size={size}>
 				<DialogTitle command={command} label={label}>
 					{title}
 				</DialogTitle>
+				{header}
 				{loadState.status === "loading" && (
 					<StatusMessage kind="loading">Loading...</StatusMessage>
 				)}

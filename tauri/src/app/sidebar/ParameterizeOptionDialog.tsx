@@ -21,9 +21,6 @@ import {
 import { useTableSelection } from "../../hooks/useTableSelection";
 import { ENCODING_CANDIDATES } from "../form/section/element/EncodingText";
 
-const CHECKBOX_CLASS =
-	"w-4 h-4 text-primary border border-border ring-primary-ring focus-visible:ring-3";
-
 type DialogProps = {
 	command: string;
 	name: string;
@@ -64,7 +61,6 @@ function Dialog({
 					<input
 						type="checkbox"
 						aria-label={candidate.key}
-						className={CHECKBOX_CLASS}
 						checked={selected.has(candidate.key)}
 						onChange={() => toggle(candidate.key)}
 					/>
@@ -90,7 +86,6 @@ function Dialog({
 								<input
 									type="checkbox"
 									aria-label="select all"
-									className={CHECKBOX_CLASS}
 									checked={allSelected}
 									onChange={() => toggleAll(keys, !allSelected)}
 								/>
