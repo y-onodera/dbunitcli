@@ -149,6 +149,7 @@ export function GenerateForm(prop: {
 								value={path}
 								setValue={setPath}
 								syntax={templateOptionValues.syntax}
+								unit={generate.unit?.value ?? generate.fixedUnit}
 							/>
 						)}
 					</PlainText>

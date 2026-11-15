@@ -27,10 +27,19 @@
   <table>
     <tr><th>項目</th><th>説明</th><th>デフォルト</th></tr>
     <tr><td><code>resultPath</code></td><td>編集中の <code>resultPath</code>。Insert はこの欄のカーソル位置に式を入れる（文字を選んでいれば置き換える）。直接入力もできる</td><td>開いたときの <code>resultPath</code> の値</td></tr>
-    <tr><td><code>Variable</code>（必須）</td><td>埋め込む変数名。候補から <code>tableName</code> / <code>rowNumber</code> を選ぶか、<code>row.ID</code>（<code>unit=record</code> の行の値）・<code>inputParam.xxx</code>（-P 値）などを直接入力する。使える変数は <a href="../commands/generate/types/txt.html">generateType: txt</a> の「テンプレート変数」を参照</td><td><code>tableName</code></td></tr>
+    <tr><td><code>Variable</code>（必須）</td><td>埋め込む変数名。候補から選ぶか、<code>row.ID</code>（<code>unit=record</code> の行の値）・<code>inputParam.xxx</code>（-P 値）などを直接入力する。候補と欄の下の説明は Generate の <code>unit</code> によって変わる（下表）。使える変数は <a href="../commands/generate/types/txt.html">generateType: txt</a> の「テンプレート変数」を参照</td><td>候補の先頭（<code>unit=dataset</code> では空）</td></tr>
     <tr><td><code>Format</code></td><td>値の書き方の変換。<code>snakeToCamel</code>（<code>ORDER_ITEMS</code> → <code>orderItems</code>）・<code>camelToUpperSnake</code> など。文字列の変数にだけ効く</td><td><code>(none)</code>＝変換しない</td></tr>
     <tr><td><code>Expression</code></td><td>Insert で入る式。<code>template option</code> の <code>templateParameterAttribute</code> / <code>templateVarStart</code> / <code>templateVarStop</code>（<code>generateType</code> が xlsx / xls なら <code>jxls option</code> の <code>templateParameterAttribute</code>）の入力中の値で組み立てる</td><td>—</td></tr>
   </table>
+
+  <h3>unit ごとの Variable の候補</h3>
+  <table>
+    <tr><th><code>unit</code></th><th>候補</th><th><code>rowNumber</code> の値</th></tr>
+    <tr><td><code>record</code></td><td><code>tableName</code> / <code>rowNumber</code></td><td>テーブル内の行番号（0 始まり）</td></tr>
+    <tr><td><code>table</code></td><td><code>tableName</code> / <code>rowNumber</code></td><td>テーブルの通し番号（0 始まり）</td></tr>
+    <tr><td><code>dataset</code></td><td>なし（出力は 1 ファイル。<code>tableName</code> は使えない）</td><td>常に 0</td></tr>
+  </table>
+  <p><code>unit</code> の欄が無い固定成果物タイプでも、そのタイプの出力単位（sql・ddl などは <code>table</code>、settings・xlsxTemplate は <code>dataset</code>）で上の表のとおりに候補が決まります。</p>
 
   <h2 id="section-operation">操作</h2>
   <table>
@@ -42,7 +51,7 @@
 
   <h2 id="section-notes">注意</h2>
   <ul>
-    <li>ボタンは <code>generateType</code> や <code>unit</code> によらず表示されますが、使える変数は <code>unit</code> によって変わります。<code>unit=dataset</code> では <code>tableName</code> は使えません。</li>
+    <li>ボタンは <code>generateType</code> や <code>unit</code> によらず表示されます。<code>Variable</code> の候補は開いたときの <code>unit</code> で決まります。</li>
     <li>テーブル単位の固定成果物タイプ（sql など）では <code>resultPath</code> はディレクトリとして扱われ、その下にテーブルごとのファイルが作られます。</li>
   </ul>
 

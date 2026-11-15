@@ -606,3 +606,47 @@ describe("unitSettingのPreview Unit Settings", () => {
 		expect(previewButton()).toBeInTheDocument();
 	});
 });
+
+describe("resultPathのテンプレート変数ダイアログ", () => {
+	async function openDialogCandidates(
+		fixture: GenerateOptions,
+	): Promise<string[]> {
+		render(<GenerateForm {...makeGenerateProps(fixture)} />);
+		await userEvent
+			.setup()
+			.click(screen.getByRole("button", { name: "template variable" }));
+		return Array.from(
+			document.querySelectorAll("#resultPathTemplate_variable_list option"),
+		).map((it) => it.getAttribute("value") ?? "");
+	}
+
+	it("unitのある型ではunitの値で候補を決める（loadレスポンスはunit=record）", async () => {
+		expect(await openDialogCandidates(generateLoadResponseFixture)).toEqual([
+			"tableName",
+			"rowNumber",
+		]);
+		expect(
+			document.getElementById("resultPathTemplate_hint"),
+		).toHaveTextContent("unit=record");
+	});
+
+	it("固定成果物型ではfixedUnitで候補を決める（sqlはtable）", async () => {
+		expect(
+			await openDialogCandidates(generateRefreshGenerateTypeSqlResponseFixture),
+		).toEqual(["tableName", "rowNumber"]);
+		expect(
+			document.getElementById("resultPathTemplate_hint"),
+		).toHaveTextContent("unit=table");
+	});
+
+	it("固定成果物型ではfixedUnitで候補を決める（xlsxTemplateはdatasetのため候補なし）", async () => {
+		expect(
+			await openDialogCandidates(
+				generateRefreshXlsxTemplateMetaDataResponseFixture,
+			),
+		).toEqual([]);
+		expect(
+			document.getElementById("resultPathTemplate_hint"),
+		).toHaveTextContent("unit=dataset");
+	});
+});

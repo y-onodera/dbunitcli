@@ -43,7 +43,7 @@ public class ScaffoldController implements ControllerExceptionHandler {
     @Post(uri = "refresh", produces = MediaType.APPLICATION_JSON)
     public String refresh(@Body final Map<String, String> input) {
         try {
-            return AbstractCommandController.optionsJson(Type.scaffold, input);
+            return ObjectMapper.getDefault().writeValueAsString(new CommandParameters(Type.scaffold, input).serialize());
         } catch (final Throwable th) {
             LOGGER.error("cause:", th);
             throw new ApplicationException(th);

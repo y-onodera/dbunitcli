@@ -999,6 +999,7 @@ export const generateRefreshGenerateTypeSqlResponseFixture = {
 	sqlFilePrefix: makeElement("sqlFilePrefix", "TEXT", "", "WORKSPACE", false),
 	sqlFileSuffix: makeElement("sqlFileSuffix", "TEXT", "", "WORKSPACE", false),
 	srcData: makeTableSrcData("src"),
+	fixedUnit: "table",
 } as GenerateOptions;
 
 // generate-refresh-xlsxTemplate-compare-response.json をもとにしたフィクスチャ
@@ -1029,6 +1030,7 @@ export const generateRefreshXlsxTemplateCompareResponseFixture = {
 	result: makeElement("result", "DIR", "", "RESULT", false),
 	resultPath: makeTextWithDefault("resultPath", "", "(parameter name)"),
 	srcData: makeCsvSrcData("src", ""),
+	fixedUnit: "dataset",
 } as GenerateOptions;
 
 // generate-refresh-xlsxTemplate-metadata-response.json をもとにしたフィクスチャ（srcの項目は返らない）
@@ -1053,6 +1055,7 @@ export const generateRefreshXlsxTemplateMetaDataResponseFixture = {
 	result: makeElement("result", "DIR", "", "RESULT", false),
 	resultPath: makeTextWithDefault("resultPath", "", "(parameter name)"),
 	srcData: { prefix: "src" },
+	fixedUnit: "dataset",
 } as unknown as GenerateOptions;
 
 // xlsxSchema生成ダイアログ（generate/refresh generateType=xlsxSchema）用fixture

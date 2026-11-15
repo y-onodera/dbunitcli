@@ -39,12 +39,6 @@ public abstract class AbstractCommandController implements ControllerExceptionHa
         this.workspace = workspace;
     }
 
-    /** フォーム値をコマンドのoptions構造へシリアライズしてJSON化する（refresh系の共通処理） */
-    static String optionsJson(final yo.dbunitcli.application.CommandType type,
-                              final Map<String, String> input) throws IOException {
-        return ObjectMapper.getDefault().writeValueAsString(new CommandParameters(type, input).serialize());
-    }
-
     /** SETTING/TEMPLATE等のworkspaceリソース系相対パスを絶対パスへ解決する（コマンド実行前の共通処理） */
     static CommandParameters resolveSidecarFilePaths(final CommandParameters parameters) {
         return parameters.resolveFilePaths((baseDir, value) ->
@@ -75,7 +69,7 @@ public abstract class AbstractCommandController implements ControllerExceptionHa
     @Get(uri = "reset", produces = MediaType.APPLICATION_JSON)
     public String reset() {
         try {
-            return this.toJson(new CommandParameters(this.getCommandType(), new String[]{}).serialize());
+            return this.toJson(this.serialize(new CommandParameters(this.getCommandType(), new String[]{})));
         } catch (final Throwable th) {
             LOGGER.error("cause:", th);
             throw new ApplicationException(th);
@@ -85,7 +79,7 @@ public abstract class AbstractCommandController implements ControllerExceptionHa
     @Post(uri = "refresh", produces = MediaType.APPLICATION_JSON)
     public String refresh(@Body final Map<String, String> input) {
         try {
-            return AbstractCommandController.optionsJson(this.getCommandType(), input);
+            return this.toJson(this.serialize(new CommandParameters(this.getCommandType(), input)));
         } catch (final Throwable th) {
             LOGGER.error("cause:", th);
             throw new ApplicationException(th);
@@ -219,7 +213,7 @@ public abstract class AbstractCommandController implements ControllerExceptionHa
     protected String load(final yo.dbunitcli.application.CommandType commandType, final String name) {
         return this.workspace.options().select(commandType, name).map(target -> {
             try {
-                final Map<String, Object> result = target.serialize();
+                final Map<String, Object> result = this.serialize(target);
                 final Map<String, String> inputParam = target.inputParam();
                 if (!inputParam.isEmpty()) {
                     result.put("inputParam", inputParam);
@@ -230,6 +224,13 @@ public abstract class AbstractCommandController implements ControllerExceptionHa
                 throw new ApplicationException(th);
             }
         }).orElse("{}");
+    }
+
+    /**
+     * load・reset・refreshのレスポンス。コマンド固有の、引数ではない項目を足すときに上書きする
+     */
+    protected Map<String, Object> serialize(final CommandParameters parameters) {
+        return parameters.serialize();
     }
 
     protected String parameterNames() throws IOException {

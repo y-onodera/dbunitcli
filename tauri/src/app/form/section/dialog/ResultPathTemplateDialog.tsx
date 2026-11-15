@@ -25,11 +25,42 @@ import { useTextareaInsert } from "./useTextareaInsert";
 const VALUE_ID = "resultPathTemplate_value";
 const VARIABLE_ID = "resultPathTemplate_variable";
 const FORMAT_ID = "resultPathTemplate_format";
-const VARIABLE_CANDIDATES = ["tableName", "rowNumber"];
+const HINT_ID = "resultPathTemplate_hint";
+
+type UnitVariables = { candidates: string[]; hint: string };
+
+const TABLE_VARIABLES = ["tableName", "rowNumber"];
+
+// 出力1回分のパラメータに入る変数（core の ParameterUnit）
+const UNIT_VARIABLES: Record<string, UnitVariables> = {
+	record: {
+		candidates: TABLE_VARIABLES,
+		hint: "unit=record: rowNumber is the row number within each table (from 0).",
+	},
+	table: {
+		candidates: TABLE_VARIABLES,
+		hint: "unit=table: rowNumber is the table number (from 0).",
+	},
+	dataset: {
+		candidates: [],
+		hint: "unit=dataset: output is a single file; tableName is not available and rowNumber is always 0.",
+	},
+};
+
+// unitが分からないとき
+const DEFAULT_VARIABLES: UnitVariables = {
+	candidates: TABLE_VARIABLES,
+	hint: "",
+};
+
+function unitVariables(unit: string | undefined): UnitVariables {
+	return UNIT_VARIABLES[unit ?? ""] ?? DEFAULT_VARIABLES;
+}
 
 type ResultPathTemplateDialogProps = {
 	currentValue: string;
 	syntax: TemplateExpressionSyntax;
+	unit?: string;
 	handleDialogClose: () => void;
 	handleSave: (value: string) => void;
 };
@@ -37,12 +68,14 @@ type ResultPathTemplateDialogProps = {
 export default function ResultPathTemplateDialog({
 	currentValue,
 	syntax,
+	unit,
 	handleDialogClose,
 	handleSave,
 }: ResultPathTemplateDialogProps) {
 	const { value, setValue, textareaRef, insert } =
 		useTextareaInsert<HTMLInputElement>(currentValue);
-	const [variable, setVariable] = useState("tableName");
+	const { candidates, hint } = unitVariables(unit);
+	const [variable, setVariable] = useState(candidates[0] ?? "");
 	const [format, setFormat] = useState("");
 	const expression = variable
 		? buildTemplateExpression(syntax, variable, format)
@@ -87,7 +120,12 @@ export default function ResultPathTemplateDialog({
 						value={variable}
 						handleChange={(ev) => setVariable(ev.target.value)}
 					/>
-					<ResourceDatalist id={VARIABLE_ID} resources={VARIABLE_CANDIDATES} />
+					<ResourceDatalist id={VARIABLE_ID} resources={candidates} />
+					{hint && (
+						<p id={HINT_ID} className="text-sm text-content-muted mt-1">
+							{hint}
+						</p>
+					)}
 				</DialogField>
 
 				<DialogField>
@@ -134,10 +172,12 @@ export function ResultPathTemplateButton({
 	value,
 	setValue,
 	syntax,
+	unit,
 }: {
 	value: string;
 	setValue: (value: string) => void;
 	syntax: TemplateExpressionSyntax;
+	unit?: string;
 }) {
 	const [showDialog, setShowDialog] = useState(false);
 	return (
@@ -150,6 +190,7 @@ export function ResultPathTemplateButton({
 				<ResultPathTemplateDialog
 					currentValue={value}
 					syntax={syntax}
+					unit={unit}
 					handleDialogClose={() => setShowDialog(false)}
 					handleSave={(newValue) => {
 						setValue(newValue);
