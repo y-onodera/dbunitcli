@@ -35,16 +35,25 @@ vi.mock("../../../hooks/useJdbc", () => ({
 	useJdbcConnectionTest: () => vi.fn(),
 	useSaveJdbcProperties: () => vi.fn(),
 }));
+// srcの入力値で呼ばれたときだけ候補を返す（読む前は値の無いsrcInfoで呼ばれる）
+const { useDatasetTableNamesMock } = vi.hoisted(() => ({
+	useDatasetTableNamesMock: vi.fn(
+		(srcInfo: { values: Record<string, string> }) => ({
+			tableNames:
+				Object.keys(srcInfo.values).length > 0
+					? ["OLD_USERS", "NEW_USERS"]
+					: [],
+			loading: false,
+			logs: [],
+			error: "",
+		}),
+	),
+}));
 vi.mock("../../../hooks/useDatasetSettings", async (importOriginal) => ({
 	...(await importOriginal<
 		typeof import("../../../hooks/useDatasetSettings")
 	>()),
-	useDatasetTableNames: () => ({
-		tableNames: ["OLD_USERS", "NEW_USERS"],
-		loading: false,
-		logs: [],
-		error: "",
-	}),
+	useDatasetTableNames: useDatasetTableNamesMock,
 }));
 
 function makeGenerateProps(
@@ -434,7 +443,7 @@ describe("GenerateFormの描画テスト", () => {
 			expect(compareSection.querySelector("legend button")).toBeInTheDocument();
 		});
 
-		it("oldTable・newTableにsrcのsetting適用後のテーブル名を候補として出す", () => {
+		it("oldTable・newTableにフォーカスすると、srcのsetting適用後のテーブル名を候補として出す", async () => {
 			render(
 				<GenerateForm
 					{...makeGenerateProps(
@@ -442,18 +451,19 @@ describe("GenerateFormの描画テスト", () => {
 					)}
 				/>,
 			);
+			const datalistValues = (name: string) =>
+				[
+					...(document.querySelector<HTMLInputElement>(`input[name="${name}"]`)
+						?.list?.options ?? []),
+				].map((option) => option.value);
+			expect(datalistValues("-oldTable")).toEqual([]);
+
+			await userEvent.click(
+				document.querySelector('input[name="-oldTable"]') as HTMLElement,
+			);
 
 			for (const name of ["-oldTable", "-newTable"]) {
-				const input = document.querySelector(`input[name="${name}"]`);
-				const listId = input?.getAttribute("list");
-				expect(listId).toBeTruthy();
-				expect(
-					[
-						...(document
-							.getElementById(listId as string)
-							?.querySelectorAll("option") ?? []),
-					].map((option) => option.getAttribute("value")),
-				).toEqual(["OLD_USERS", "NEW_USERS"]);
+				expect(datalistValues(name)).toEqual(["OLD_USERS", "NEW_USERS"]);
 			}
 			expect(
 				document.querySelector('input[name="-keys"]')?.getAttribute("list"),

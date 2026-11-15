@@ -1,8 +1,12 @@
+import { useState } from "react";
 import { SectionFieldset } from "../../../components/dialog";
 import { SectionLegend } from "../../../components/dialog/SectionFieldset";
 import { useDatasetSrcInfo } from "../../../context/DatasetSrcInfoProvider";
 import { useDatasetTableNames } from "../../../hooks/useDatasetSettings";
-import type { CommandOption } from "../../../model/CommandOption";
+import type {
+	CommandOption,
+	DatasetSrcInfo,
+} from "../../../model/CommandOption";
 import type { GenerateOptions } from "../../../model/SelectParameter";
 import PlainText from "./element/PlainText";
 import Text from "./element/Text";
@@ -31,7 +35,7 @@ export default function XlsxCompareFormSection({
 				command="sections/xlsx-compare"
 				label="Compare"
 			/>
-			<CompareTableTexts tables={tables} />
+			{tables.length > 0 && <CompareTableTexts tables={tables} />}
 			{columns.map((field) => (
 				<PlainText key={field.name} prefix="" element={field} />
 			))}
@@ -39,16 +43,26 @@ export default function XlsxCompareFormSection({
 	);
 }
 
+// srcが未指定なので読まない
+const NOT_LOADED: DatasetSrcInfo = { values: {} };
+
 // 実行時に照合するのはsrcの読込とsettingの適用が終わった後のテーブル名なので、
-// srcの入力値（settingTargetOnlyを含む）のまま読んだテーブル名を候補にする
+// srcの入力値（settingTargetOnlyを含む）のまま読んだテーブル名を候補にする。
+// srcの入力値は1文字ごとに変わり、そのたびにsidecarがデータセットを読み直すため、欄にフォーカスした時点の値で読む
 function CompareTableTexts({ tables }: { tables: CommandOption[] }) {
-	const { tableNames } = useDatasetTableNames(useDatasetSrcInfo());
-	return tables.map((field) => (
-		<Text
-			key={field.name}
-			prefix=""
-			element={field}
-			resourceFiles={tableNames}
-		/>
-	));
+	const srcInfo = useDatasetSrcInfo();
+	const [loadedSrcInfo, setLoadedSrcInfo] = useState(NOT_LOADED);
+	const { tableNames } = useDatasetTableNames(loadedSrcInfo);
+	return (
+		<fieldset onFocus={() => setLoadedSrcInfo(srcInfo)}>
+			{tables.map((field) => (
+				<Text
+					key={field.name}
+					prefix=""
+					element={field}
+					resourceFiles={tableNames}
+				/>
+			))}
+		</fieldset>
+	);
 }
