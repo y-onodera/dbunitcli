@@ -18,7 +18,7 @@ paths:
 - ダイアログ: `BlueButton`（左）→ `WhiteButton`（右）、生の `<button>` 禁止
 
 ## Tailwind CSS
-- フォーカスリング: `ring-primary-ring focus-visible:ring-3`
+- フォーカスリング: `ring-primary-ring focus-visible:ring-3`。チェックボックス・ラジオは `App-src.css` の base で指定済みのためクラスを付けない
 - 入力ボーダー: `border border-border`、背景: `bg-input`（入力専用）/ `bg-surface-subtle`（表示専用）
 - 色はセマンティッククラス（`bg-primary`/`text-content`等）。パレットクラス（`bg-indigo-500`等）禁止
 

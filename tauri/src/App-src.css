@@ -53,8 +53,16 @@
 		--tw-ring-color: var(--color-primary-ring);
 		border-color: var(--color-primary-ring);
 	}
+	[type="checkbox"],
+	[type="radio"] {
+		@apply w-4 h-4 text-primary border-border;
+	}
 	[type="checkbox"]:focus,
 	[type="radio"]:focus {
 		--tw-ring-color: var(--color-primary-ring);
+	}
+	[type="checkbox"]:focus-visible,
+	[type="radio"]:focus-visible {
+		@apply ring-3;
 	}
 }

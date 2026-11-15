@@ -161,11 +161,6 @@ export function CheckBox(props: {
 				name={props.name}
 				id={props.id}
 				type="checkbox"
-				className="w-4 h-4
-                           text-primary
-                           border border-border
-                           ring-primary-ring
-                           focus-visible:ring-3 "
 				style={props.hidden ? { display: "none" } : {}}
 				checked={checked}
 				value={`${checked}`}

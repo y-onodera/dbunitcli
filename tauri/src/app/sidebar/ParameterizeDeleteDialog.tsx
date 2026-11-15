@@ -12,9 +12,6 @@ import { BlueButton, WhiteButton } from "../../components/element/Button";
 import type { ParameterizeFile } from "../../hooks/useSelectParameter";
 import { useTableSelection } from "../../hooks/useTableSelection";
 
-const CHECKBOX_CLASS =
-	"w-4 h-4 text-primary border border-border ring-primary-ring focus-visible:ring-3";
-
 export default function ParameterizeDeleteDialog({
 	name,
 	files,
@@ -38,7 +35,6 @@ export default function ParameterizeDeleteDialog({
 					<input
 						type="checkbox"
 						aria-label={file.path}
-						className={CHECKBOX_CLASS}
 						checked={selected.has(file.path)}
 						disabled={shared}
 						onChange={() => toggle(file.path)}

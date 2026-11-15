@@ -41,7 +41,7 @@ export function GenerateForm(prop: {
 	const generateTypeValue = generate.generateType.value;
 	const isExcelGenerate =
 		generateTypeValue === "xlsx" || generateTypeValue === "xls";
-	// template欄のdropdown: xlsx/xlsはテキスト編集の代わりにxlsxTemplate生成を出す（種類はダイアログで選ぶ）
+	// template欄のdropdown: xlsx/xlsはテキスト編集の代わりにxlsxTemplate生成を出す
 	const templateEditButtons = isExcelGenerate
 		? (_: string, setPath: (value: string) => void) => [
 				<XlsxTemplateGenerateButton key="generate" setPath={setPath} />,

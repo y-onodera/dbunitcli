@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { type ReactElement, useState } from "react";
 import { useEnvironment } from "../../../../context/EnvironmentProvider";
 import { useSetResourcesSettings } from "../../../../context/WorkspaceResourcesProvider";
 import { useJob } from "../../../../hooks/useJob";
@@ -125,18 +125,14 @@ function XlsxMetaDataTemplateGenerateDialog({
 	);
 }
 
-function renderTemplateTypeDialog(
-	templateType: XlsxTemplateType,
-	props: XlsxTemplateTypeDialogProps,
-) {
-	if (templateType === "compare") {
-		return <XlsxCompareTemplateGenerateDialog {...props} />;
-	}
-	if (templateType === "metadata") {
-		return <XlsxMetaDataTemplateGenerateDialog {...props} />;
-	}
-	return <XlsxTableTemplateGenerateDialog {...props} />;
-}
+const templateTypeDialogs: Record<
+	XlsxTemplateType,
+	(props: XlsxTemplateTypeDialogProps) => ReactElement
+> = {
+	table: XlsxTableTemplateGenerateDialog,
+	compare: XlsxCompareTemplateGenerateDialog,
+	metadata: XlsxMetaDataTemplateGenerateDialog,
+};
 
 // templateTypeを選び、種類ごとのダイアログへ切り替える
 function XlsxTemplateGenerateDialog({
@@ -145,15 +141,18 @@ function XlsxTemplateGenerateDialog({
 }: Pick<XlsxTemplateTypeDialogProps, "onSaved" | "onClose">) {
 	const [templateType, setTemplateType] = useState<XlsxTemplateType>("table");
 	const [fileName, setFileName] = useState("");
-	return renderTemplateTypeDialog(templateType, {
-		header: (
-			<TemplateTypeField value={templateType} onChange={setTemplateType} />
-		),
-		fileName,
-		onFileNameChange: setFileName,
-		onSaved,
-		onClose,
-	});
+	const Dialog = templateTypeDialogs[templateType];
+	return (
+		<Dialog
+			header={
+				<TemplateTypeField value={templateType} onChange={setTemplateType} />
+			}
+			fileName={fileName}
+			onFileNameChange={setFileName}
+			onSaved={onSaved}
+			onClose={onClose}
+		/>
+	);
 }
 
 // template欄のdropdownに出す「xlsxTemplate生成」

@@ -42,7 +42,7 @@ import {
 } from "./SqlInsertParts";
 import { useRefreshableDialog } from "./useRefreshableDialog";
 import {
-	fileNameField,
+	FileNameField,
 	toSavedFileName,
 	type XlsxTemplateTypeDialogProps,
 	xlsxTemplateDialogSize,
@@ -291,7 +291,7 @@ function KeyColumnsField({
 	);
 }
 
-// templateType=compareのテンプレート（XlsxTemplateGenerateDialogから切り替えて開く）
+// templateType=compareのテンプレート
 export function XlsxCompareTemplateGenerateDialog({
 	header,
 	fileName,
@@ -390,11 +390,7 @@ export function XlsxCompareTemplateGenerateDialog({
 			{(options) => (
 				<>
 					<div>
-						<TextField
-							name={fileNameField}
-							value={fileName}
-							onChange={onFileNameChange}
-						/>
+						<FileNameField value={fileName} onChange={onFileNameChange} />
 						<TextField
 							name="compare sheetName"
 							value={compareSheetName}

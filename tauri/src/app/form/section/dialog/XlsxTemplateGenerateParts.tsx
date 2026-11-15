@@ -1,9 +1,6 @@
 import type { ReactNode } from "react";
-import {
-	ControllTextBox,
-	InputLabel,
-} from "../../../../components/element/Input";
-import { OptionSelect, type SelectOption } from "./SqlInsertParts";
+import { DialogField } from "../../../../components/dialog";
+import { OptionSelect, OptionText, type SelectOption } from "./SqlInsertParts";
 
 export const fileNameField = "-fileName";
 const xlsxExtension = ".xlsx";
@@ -23,33 +20,26 @@ export function FileNameField({
 	onChange: (value: string) => void;
 }) {
 	return (
-		<div>
-			<InputLabel
-				text={fileNameField}
-				id="xlsxTemplateFileName"
-				required={true}
-			/>
-			<ControllTextBox
-				name={fileNameField}
-				id="xlsxTemplateFileName"
-				required={true}
+		<DialogField>
+			<OptionText
+				id={fileNameField}
+				label={fileNameField}
 				value={value}
-				handleChange={(ev) => onChange(ev.target.value)}
+				required={true}
+				onChange={onChange}
 			/>
-		</div>
+		</DialogField>
 	);
 }
 
 // 値はgenerateTypeがxlsxTemplateのときのtemplateTypeに合わせる
-export type XlsxTemplateType = "table" | "compare" | "metadata";
+const templateTypes = ["table", "compare", "metadata"] as const;
+export type XlsxTemplateType = (typeof templateTypes)[number];
 
-const templateTypeOptions: SelectOption<XlsxTemplateType>[] = [
-	{ value: "table", label: "table" },
-	{ value: "compare", label: "compare" },
-	{ value: "metadata", label: "metadata" },
-];
+const templateTypeOptions: SelectOption<XlsxTemplateType>[] = templateTypes.map(
+	(value) => ({ value, label: value }),
+);
 
-// 生成の送信値に混ざらないよう、formの外（RefreshableDialogShellのheader）に置く
 export function TemplateTypeField({
 	value,
 	onChange,
@@ -58,7 +48,7 @@ export function TemplateTypeField({
 	onChange: (value: XlsxTemplateType) => void;
 }) {
 	return (
-		<div className="mb-6">
+		<DialogField last>
 			<OptionSelect
 				id="xlsxTemplateType"
 				label="templateType"
@@ -66,7 +56,7 @@ export function TemplateTypeField({
 				value={value}
 				onChange={onChange}
 			/>
-		</div>
+		</DialogField>
 	);
 }
 
