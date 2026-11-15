@@ -335,6 +335,27 @@ export const useSrcInfoColumnNames = (srcInfo: DatasetSrcInfo): string[] => {
 	return [...new Set(Object.values(data).flat())];
 };
 
+// tableNameのテーブル1つの列名
+export const useDatasetTableColumns = (
+	srcInfo: DatasetSrcInfo,
+	tableName: string,
+): {
+	columns: string[];
+	loading: boolean;
+	logs: string[];
+	error: string;
+} => {
+	const { data, loading, logs, error } = useDatasetLoad(
+		srcInfo,
+		"table-columns",
+		{ tableName },
+		!!tableName,
+		IDLE_ALL_COLUMNS,
+		true,
+	);
+	return { columns: data[tableName] ?? [], loading, logs, error };
+};
+
 // sidecarのDatasetTableNamesRequestDto.INLINE_SOURCE_TABLE_NAMEと揃える
 export const INLINE_SOURCE_TABLE_NAME = "inlineSource";
 

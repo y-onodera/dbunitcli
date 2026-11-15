@@ -12,6 +12,7 @@ import {
 	FixIcon,
 	OpenIcon,
 	PreviewIcon,
+	RefreshCircleIcon,
 	RemoveIcon,
 	SettingIcon,
 	SettingsApplicationIcon,
@@ -180,6 +181,15 @@ export function BlueSettingButton(props: IconButtonProps) {
 	return (
 		<BlueButtonIcon title={title} handleClick={props.handleClick}>
 			<SettingIcon title={title} fill="white" />
+		</BlueButtonIcon>
+	);
+}
+
+export function BlueRefreshButton(props: IconButtonProps) {
+	const title = props.title ?? "reload";
+	return (
+		<BlueButtonIcon title={title} handleClick={props.handleClick}>
+			<RefreshCircleIcon title={title} fill="white" />
 		</BlueButtonIcon>
 	);
 }

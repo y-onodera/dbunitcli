@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <title>ヘルプ - Select Compare Columns</title>
+  <link rel="stylesheet" href="../help.css" />
+</head>
+<body>
+  <p><a href="../index.html">&larr; ヘルプ一覧に戻る</a></p>
+  <h1>Select Compare Columns</h1>
+  <p><a href="../sections/xlsx-compare.html">compare</a> セクションの <code>keys</code> / <code>compares</code> に入れるカラムを、<code>oldTable</code> のカラムの一覧から選ぶダイアログです。<code>keys</code> / <code>compares</code> の横の編集ボタンから開きます（タイトルは Select keys / Select compares）。</p>
+
+  <h2 id="section-simple">シンプルな使い方</h2>
+  <pre>指定:
+  oldTable = USERS_OLD（カラム ID, SUB, NAME, AMT）
+  keys の横の編集ボタン → SUB、ID の順にチェック → Apply
+
+結果:
+  keys = SUB,ID</pre>
+
+  <h2 id="section-options">設定項目</h2>
+  <table>
+    <tr><th>項目</th><th>説明</th></tr>
+    <tr><td>カラムの一覧</td><td>開いたときの <code>oldTable</code> の入力値のテーブルのカラム。<code>src</code> セクションの入力値で読み込み、setting を適用した後のテーブルから読む。チェックした順に並べ、その順が複合キー・比較シートの列の順になる</td></tr>
+    <tr><td>選択中の値</td><td>Apply で入る値（カンマ区切り）</td></tr>
+  </table>
+
+  <h2 id="section-operation">操作</h2>
+  <table>
+    <tr><th>操作</th><th>説明</th></tr>
+    <tr><td>Apply</td><td>選んだカラムをカンマ区切りにして <code>keys</code> / <code>compares</code> に設定して閉じる</td></tr>
+    <tr><td>Close</td><td>値を変えずに閉じる</td></tr>
+  </table>
+
+  <h2 id="section-notes">注意</h2>
+  <ul>
+    <li>開く前に <code>oldTable</code> を入力してください。空のときは一覧が出ません。</li>
+    <li>選べるのは <code>oldTable</code> のカラムだけで、old と new で同じ名前のカラムとして入ります。new のカラム名が違う場合は、Apply の後に <code>old のカラム:new のカラム</code> の形に書き直してください（<a href="../sections/xlsx-compare.html">compare</a> の「keys / compares の書き方」）。</li>
+    <li>すでに <code>ID:CODE</code> のように書いた対応は、old 側のカラム（<code>ID</code>）をチェックしている間はそのまま残ります。一覧に無いカラム名を書いていた場合も消えません。</li>
+  </ul>
+
+  <h2 id="section-related">関連</h2>
+  <ul>
+    <li><a href="../sections/xlsx-compare.html">compare</a> — <code>oldTable</code>・<code>keys</code>・<code>compares</code></li>
+  </ul>
+</body>
+</html>
