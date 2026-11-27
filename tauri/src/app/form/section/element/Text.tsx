@@ -25,6 +25,7 @@ export default function Text({
 	handleValueChange: onValueChange,
 	children,
 	afterContent,
+	validate,
 }: TextProp) {
 	const [path, setPath] = useSyncedState(element.value);
 	const hasResources = resourceFiles.length > 0;
@@ -82,7 +83,10 @@ export default function Text({
 								{workspacePath}
 							</p>
 						)}
-						<FieldErrorMessages messages={fieldErrors} hidden={hidden} />
+						<FieldErrorMessages
+							messages={[...fieldErrors, ...(validate?.(path) ?? [])]}
+							hidden={hidden}
+						/>
 					</div>
 					{!hidden &&
 						children &&

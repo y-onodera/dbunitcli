@@ -22,6 +22,8 @@ export type TextProp = Prop & {
 		isValueInDatalist?: boolean;
 	}) => ReactNode;
 	handleValueChange?: (value: string) => void;
+	// 入力中の値をその場で検証し、サーバの検証エラーと同じ位置に出すメッセージを返す
+	validate?: (value: string) => string[];
 };
 export type SelectProp = Prop & {
 	handleTypeSelect: (selected: string) => Promise<void>;

@@ -7,6 +7,7 @@ import type { CommandOption, SrcElements } from "../../../model/CommandOption";
 import { useSyncedState } from "../../../utils/useResettableState";
 import { regexFilterSlot } from "./dialog/RegexFilterDialog";
 import Check from "./element/Check";
+import HeaderNameText from "./element/HeaderNameText";
 import PlainText from "./element/PlainText";
 
 export default function DataLoadFormSection({
@@ -36,7 +37,7 @@ export default function DataLoadFormSection({
 				label="Data Load"
 			/>
 			{options.headerName && (
-				<PlainText
+				<HeaderNameText
 					prefix={prefix}
 					element={options.headerName}
 					handleValueChange={handleValueChange(options.headerName)}
