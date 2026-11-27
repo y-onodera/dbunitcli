@@ -42,8 +42,14 @@ function CompareColumnsDialog({
 		srcInfo,
 		oldTable,
 	);
-	const newLoad = useDatasetTableColumns(srcInfo, newTable);
-	const newColumns = newLoad.columns;
+	// oldと同じテーブルは読み直さない。oldが未入力なら一覧を出さないので読まない
+	const readsNew = oldTable !== "" && newTable !== oldTable;
+	const {
+		columns: newTableColumns,
+		loading: newLoading,
+		logs: newLogs,
+	} = useDatasetTableColumns(srcInfo, readsNew ? newTable : "");
+	const newColumns = readsNew ? newTableColumns : columns;
 	const [entries, setEntries] = useState(() => splitComma(currentValue));
 	const selected = selectedOldColumns(entries);
 	const newColumnByOld = new Map(
@@ -57,27 +63,23 @@ function CompareColumnsDialog({
 		}
 		const found = newColumns.includes(newColumn);
 		return (
-			// biome-ignore lint/a11y/noStaticElementInteractions: プルダウン操作で行の選択を切り替えない
-			// biome-ignore lint/a11y/useKeyWithClickEvents: プルダウン操作で行の選択を切り替えない
-			<span onClick={(e) => e.stopPropagation()}>
-				<SelectBox
-					name={`new column of ${column}`}
-					id={`newColumn_${column}`}
-					required={false}
-					wStyle="w-full"
-					defaultValue={found ? newColumn : ""}
-					handleOnChange={(value) =>
-						setEntries(changeNewColumn(entries, column, value))
-					}
-				>
-					{!found && <option value="">(not in {newTable})</option>}
-					{newColumns.map((option) => (
-						<option key={option} value={option}>
-							{option}
-						</option>
-					))}
-				</SelectBox>
-			</span>
+			<SelectBox
+				name={`new column of ${column}`}
+				id={`newColumn_${column}`}
+				required={false}
+				wStyle="w-full"
+				defaultValue={found ? newColumn : ""}
+				handleOnChange={(value) =>
+					setEntries(changeNewColumn(entries, column, value))
+				}
+			>
+				{!found && <option value="">(not in {newTable})</option>}
+				{newColumns.map((option) => (
+					<option key={option} value={option}>
+						{option}
+					</option>
+				))}
+			</SelectBox>
 		);
 	};
 	// newTableの列が読めないときは、old側の列だけを選ぶ
@@ -96,9 +98,9 @@ function CompareColumnsDialog({
 		if (oldTable === "") {
 			return <StatusMessage kind="empty">Enter oldTable.</StatusMessage>;
 		}
-		if (loading || newLoad.loading) {
+		if (loading || newLoading) {
 			return (
-				<JobProgress title="Loading..." lines={loading ? logs : newLoad.logs} />
+				<JobProgress title="Loading..." lines={loading ? logs : newLogs} />
 			);
 		}
 		if (error) {

@@ -12,7 +12,7 @@ export function newColumnOf(entry: string): string {
 }
 
 // 同名なら":"を付けない
-export function compareEntry(oldColumn: string, newColumn: string): string {
+function compareEntry(oldColumn: string, newColumn: string): string {
 	return oldColumn === newColumn ? oldColumn : `${oldColumn}:${newColumn}`;
 }
 

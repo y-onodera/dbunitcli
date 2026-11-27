@@ -20,6 +20,13 @@ export type ExtraColumn = {
 
 const NO_EXTRA_COLUMNS: ExtraColumn[] = [];
 
+function isInteractive(target: EventTarget): boolean {
+	return (
+		target instanceof Element &&
+		target.closest("input,select,button,a,textarea") !== null
+	);
+}
+
 // フィルタ入力・全選択チェック・行クリックでの選択切替を持つ一覧
 export default function SelectableTable({
 	items,
@@ -89,13 +96,20 @@ export default function SelectableTable({
 					}
 				>
 					{filteredItems.map((item) => (
-						<Tr key={item} onClick={() => onToggle(item)}>
+						<Tr
+							key={item}
+							onClick={(e) => {
+								// 行内の入力欄は自身の操作で選択を変えるので、行クリックとして扱わない
+								if (!isInteractive(e.target)) {
+									onToggle(item);
+								}
+							}}
+						>
 							<Td>
 								<input
 									type="checkbox"
 									checked={selected.has(item)}
 									onChange={() => onToggle(item)}
-									onClick={(e) => e.stopPropagation()}
 								/>
 							</Td>
 							<Td>{renderItem(item)}</Td>
