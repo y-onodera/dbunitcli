@@ -5,6 +5,7 @@ import yo.dbunitcli.Strings;
 import java.io.*;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
@@ -28,6 +29,8 @@ public record FileResources() {
     public static final String OPTION_PARAMETERIZE_TEMPLATE_PATH = "option/parameterize/template";
     public static final String OPTION_COMPARE_SETTING_PATH = "option/compare/setting";
     public static final String OPTION_GENERATE_SETTING_PATH = "option/generate/setting";
+
+    private static final String[] PATH_ENVIRONMENT_VARIABLES = {"USERPROFILE", "HOME"};
 
     private static final ScopedValue<Context> CONTEXT = ScopedValue.newInstance();
 
@@ -182,12 +185,12 @@ public record FileResources() {
         return FileResources.searchInOrder(path, fixedColumnDefDir().toPath().normalize().toString(), FileResources::searchWorkspace);
     }
 
-    private static String expandEnvironmentVariables(final String path) {
+    public static String expandEnvironmentVariables(final String path) {
         if (Strings.isEmpty(path)) {
             return path;
         }
         String expandedPath = path;
-        for (final String varName : new String[]{"USERPROFILE", "HOME"}) {
+        for (final String varName : PATH_ENVIRONMENT_VARIABLES) {
             final String placeholder = "%" + varName + "%";
             if (expandedPath.contains(placeholder)) {
                 final String value = System.getenv(varName);
@@ -197,6 +200,47 @@ public record FileResources() {
             }
         }
         return expandedPath;
+    }
+
+    /**
+     * expandEnvironmentVariablesで戻せるよう、環境変数の値で始まる絶対パスの先頭を%変数名%にする
+     */
+    public static String abbreviateEnvironmentVariables(final String path) {
+        return abbreviateEnvironmentVariables(path, System.getenv());
+    }
+
+    static String abbreviateEnvironmentVariables(final String path, final Map<String, String> env) {
+        if (Strings.isEmpty(path)) {
+            return path;
+        }
+        final String target = path.replace('\\', '/');
+        String matchedVar = null;
+        String matchedValue = "";
+        for (final String varName : PATH_ENVIRONMENT_VARIABLES) {
+            final String value = trimTrailingSeparator(Optional.ofNullable(env.get(varName)).orElse("").replace('\\', '/'));
+            // ルートだけの値はどのパスにも一致してしまうため対象外
+            if (value.isEmpty() || value.length() <= matchedValue.length() || value.endsWith(":")) {
+                continue;
+            }
+            // Windowsのパスは大文字小文字を区別しないため合わせる。ディレクトリ名の途中では切らない
+            if (target.regionMatches(true, 0, value, 0, value.length())
+                    && (target.length() == value.length() || target.charAt(value.length()) == '/')) {
+                matchedVar = varName;
+                matchedValue = value;
+            }
+        }
+        if (matchedVar == null) {
+            return path;
+        }
+        return "%" + matchedVar + "%" + target.substring(matchedValue.length());
+    }
+
+    private static String trimTrailingSeparator(final String path) {
+        String result = path;
+        while (result.endsWith("/")) {
+            result = result.substring(0, result.length() - 1);
+        }
+        return result;
     }
 
     private static File searchInOrder(final String path, final String parent, final Function<String, File> next) {

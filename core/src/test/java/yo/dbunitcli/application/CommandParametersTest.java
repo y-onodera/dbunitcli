@@ -89,4 +89,17 @@ class CommandParametersTest {
 
         Assertions.assertEquals(Map.of("key1", "value1", "key2", "a=b"), params.inputParam());
     }
+
+    @Test
+    void resolveFilePaths_ファイル系以外のオプションには適用しない() {
+        final Map<String, String> input = new LinkedHashMap<>();
+        input.put("-src.src", "some/path");
+        input.put("-src.regInclude", "some/path");
+
+        final CommandParameters params = new CommandParameters(Type.convert, input)
+                .resolveFilePaths((baseDir, value) -> "/abs/" + value);
+
+        Assertions.assertTrue(Arrays.asList(params.args()).contains("-src.src=/abs/some/path"));
+        Assertions.assertTrue(Arrays.asList(params.args()).contains("-src.regInclude=some/path"));
+    }
 }

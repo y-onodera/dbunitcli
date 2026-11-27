@@ -59,4 +59,20 @@ class AbstractCommandControllerTest {
         assertEquals(this.workspace.resolve(FileResources.RESOURCES_SETTING_PATH).resolve("none.json").toFile().getAbsoluteFile()
                 , this.resolveSetting("none.json"));
     }
+
+    private static final String HOME_VAR = System.getenv("USERPROFILE") != null ? "USERPROFILE" : "HOME";
+
+    @Test
+    void resolveSidecarFilePaths_環境変数で始まるパスは絶対パスとして残す() {
+        assertEquals(new File("%" + HOME_VAR + "%/setting.json"), this.resolveSetting("%" + HOME_VAR + "%/setting.json"));
+    }
+
+    @Test
+    void abbreviateEnvironmentVariables_ファイル系オプションの先頭を環境変数に置き換える() {
+        final String home = System.getenv(HOME_VAR);
+        final CommandParameters result = AbstractCommandController.abbreviateEnvironmentVariables(
+                new CommandParameters(Type.convert, new String[]{"-src.src=" + home + "/data", "-src.setting=setting.json"}));
+        assertEquals("%" + HOME_VAR + "%/data", result.toOptionParameters().getArg("-src.src").value());
+        assertEquals("setting.json", result.toOptionParameters().getArg("-src.setting").value());
+    }
 }

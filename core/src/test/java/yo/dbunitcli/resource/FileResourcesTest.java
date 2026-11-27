@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Map;
 import java.util.Properties;
 
 class FileResourcesTest {
@@ -415,6 +416,63 @@ class FileResourcesTest {
             Assertions.assertEquals(expected, result);
 
             FileResourcesTest.restore();
+        }
+
+        @Test
+        void abbreviateRoundTrip() {
+            final String abbreviated = FileResources.abbreviateEnvironmentVariables(HOME_VALUE + "/data/a.csv");
+            Assertions.assertTrue(abbreviated.startsWith("%"), abbreviated);
+            Assertions.assertEquals(new File(HOME_VALUE + "/data/a.csv"), FileResources.searchWorkspace(abbreviated));
+        }
+    }
+
+    @Nested
+    class AbbreviateEnvironmentVariablesTest {
+        private static final Map<String, String> ENV = Map.of("USERPROFILE", "C:\\Users\\taro", "HOME", "C:\\Users");
+
+        @Test
+        void 一致する最も長い値の環境変数に置き換える() {
+            Assertions.assertEquals("%USERPROFILE%/Documents/a.csv",
+                    FileResources.abbreviateEnvironmentVariables("C:\\Users\\taro\\Documents\\a.csv", ENV));
+        }
+
+        @Test
+        void 区切り文字と大文字小文字を区別しない() {
+            Assertions.assertEquals("%USERPROFILE%/Documents",
+                    FileResources.abbreviateEnvironmentVariables("c:/users/TARO/Documents", ENV));
+        }
+
+        @Test
+        void 環境変数の値そのものも置き換える() {
+            Assertions.assertEquals("%USERPROFILE%",
+                    FileResources.abbreviateEnvironmentVariables("C:/Users/taro", ENV));
+        }
+
+        @Test
+        void ディレクトリ名の途中では置き換えない() {
+            Assertions.assertEquals("%HOME%/taro2/a.csv",
+                    FileResources.abbreviateEnvironmentVariables("C:/Users/taro2/a.csv", ENV));
+            Assertions.assertEquals("D:/Users/taro/a.csv",
+                    FileResources.abbreviateEnvironmentVariables("D:/Users/taro/a.csv", ENV));
+        }
+
+        @Test
+        void 相対パスは置き換えない() {
+            Assertions.assertEquals("data/a.csv", FileResources.abbreviateEnvironmentVariables("data/a.csv", ENV));
+        }
+
+        @Test
+        void ルートだけの値は対象外() {
+            Assertions.assertEquals("/data/a.csv",
+                    FileResources.abbreviateEnvironmentVariables("/data/a.csv", Map.of("HOME", "/")));
+            Assertions.assertEquals("C:/data/a.csv",
+                    FileResources.abbreviateEnvironmentVariables("C:/data/a.csv", Map.of("USERPROFILE", "C:\\")));
+        }
+
+        @Test
+        void 未定義の環境変数は無視する() {
+            Assertions.assertEquals("/home/taro/a.csv",
+                    FileResources.abbreviateEnvironmentVariables("/home/taro/a.csv", Map.of()));
         }
     }
 
