@@ -7,26 +7,32 @@ import {
 	StatusMessage,
 } from "../../../../components/dialog";
 import { BlueEditButton } from "../../../../components/element/ButtonIcon";
+import { SelectBox } from "../../../../components/element/Input";
 import { JobProgress } from "../../../../components/element/JobProgress";
 import { useDatasetSrcInfo } from "../../../../context/DatasetSrcInfoProvider";
 import { useDatasetTableColumns } from "../../../../hooks/useDatasetSettings";
 import {
+	changeNewColumn,
+	newColumnOf,
+	oldColumnOf,
 	selectedOldColumns,
 	toggleCompareColumns,
 } from "../../../../model/CompareColumns";
 import { splitComma } from "../../../../utils/arrayUtils";
-import SelectableTable from "./SelectableTable";
+import SelectableTable, { type ExtraColumn } from "./SelectableTable";
 
-// oldTableの列からkeys / comparesを選ぶ。"old:new"と書いた対応は、oldの列を選んでいる間は残す
+// oldTableの列からkeys / comparesを選ぶ。選んだ列ごとにnewTableの列を対応させる
 function CompareColumnsDialog({
 	caption,
 	oldTable,
+	newTable,
 	currentValue,
 	handleDialogClose,
 	handleSave,
 }: {
 	caption: string;
 	oldTable: string;
+	newTable: string;
 	currentValue: string;
 	handleDialogClose: () => void;
 	handleSave: (value: string) => void;
@@ -36,15 +42,64 @@ function CompareColumnsDialog({
 		srcInfo,
 		oldTable,
 	);
+	const newLoad = useDatasetTableColumns(srcInfo, newTable);
+	const newColumns = newLoad.columns;
 	const [entries, setEntries] = useState(() => splitComma(currentValue));
 	const selected = selectedOldColumns(entries);
+	const newColumnByOld = new Map(
+		entries.map((entry) => [oldColumnOf(entry), newColumnOf(entry)]),
+	);
+
+	const renderNewColumn = (column: string) => {
+		const newColumn = newColumnByOld.get(column);
+		if (newColumn === undefined) {
+			return null;
+		}
+		const found = newColumns.includes(newColumn);
+		return (
+			// biome-ignore lint/a11y/noStaticElementInteractions: プルダウン操作で行の選択を切り替えない
+			// biome-ignore lint/a11y/useKeyWithClickEvents: プルダウン操作で行の選択を切り替えない
+			<span onClick={(e) => e.stopPropagation()}>
+				<SelectBox
+					name={`new column of ${column}`}
+					id={`newColumn_${column}`}
+					required={false}
+					wStyle="w-full"
+					defaultValue={found ? newColumn : ""}
+					handleOnChange={(value) =>
+						setEntries(changeNewColumn(entries, column, value))
+					}
+				>
+					{!found && <option value="">(not in {newTable})</option>}
+					{newColumns.map((option) => (
+						<option key={option} value={option}>
+							{option}
+						</option>
+					))}
+				</SelectBox>
+			</span>
+		);
+	};
+	// newTableの列が読めないときは、old側の列だけを選ぶ
+	const extraColumns: ExtraColumn[] =
+		newColumns.length > 0
+			? [
+					{
+						label: `${newTable} column`,
+						value: (column) => newColumnByOld.get(column) ?? "",
+						render: renderNewColumn,
+					},
+				]
+			: [];
 
 	const renderColumns = () => {
 		if (oldTable === "") {
 			return <StatusMessage kind="empty">Enter oldTable.</StatusMessage>;
 		}
-		if (loading) {
-			return <JobProgress title="Loading..." lines={logs} />;
+		if (loading || newLoad.loading) {
+			return (
+				<JobProgress title="Loading..." lines={loading ? logs : newLoad.logs} />
+			);
 		}
 		if (error) {
 			return <JobFailure message={error} lines={logs} />;
@@ -55,15 +110,21 @@ function CompareColumnsDialog({
 				selected={selected}
 				onToggle={(column) =>
 					setEntries(
-						toggleCompareColumns(entries, [column], !selected.has(column)),
+						toggleCompareColumns(
+							entries,
+							[column],
+							!selected.has(column),
+							newColumns,
+						),
 					)
 				}
 				onToggleAll={(items, checked) =>
-					setEntries(toggleCompareColumns(entries, items, checked))
+					setEntries(toggleCompareColumns(entries, items, checked, newColumns))
 				}
 				columnLabel={`${oldTable} column`}
 				filterPlaceholder="Filter columns"
 				emptyMessage="No columns loaded."
+				extraColumns={extraColumns}
 			/>
 		);
 	};
@@ -95,11 +156,13 @@ function CompareColumnsDialog({
 export function CompareColumnsButton({
 	caption,
 	oldTable,
+	newTable,
 	value,
 	setValue,
 }: {
 	caption: string;
 	oldTable: string;
+	newTable: string;
 	value: string;
 	setValue: (value: string) => void;
 }) {
@@ -114,6 +177,7 @@ export function CompareColumnsButton({
 				<CompareColumnsDialog
 					caption={caption}
 					oldTable={oldTable}
+					newTable={newTable}
 					currentValue={value}
 					handleDialogClose={() => setShowDialog(false)}
 					handleSave={(newValue) => {

@@ -11,8 +11,12 @@ import { FilterInput } from "../../../../components/element/Input";
 // 引数の既定値にアロー関数を書くとReact Compilerが未対応のため、モジュールレベルで定義する
 const renderAsText = (item: string): ReactNode => item;
 
-// 項目の横に並べる列。フィルタの対象にもする
-export type ExtraColumn = { label: string; value: (item: string) => string };
+// 項目の横に並べる列。valueはフィルタの対象にもし、renderがあれば表示はrenderで行う
+export type ExtraColumn = {
+	label: string;
+	value: (item: string) => string;
+	render?: (item: string) => ReactNode;
+};
 
 const NO_EXTRA_COLUMNS: ExtraColumn[] = [];
 
@@ -96,7 +100,9 @@ export default function SelectableTable({
 							</Td>
 							<Td>{renderItem(item)}</Td>
 							{extraColumns.map((column) => (
-								<Td key={column.label}>{column.value(item)}</Td>
+								<Td key={column.label}>
+									{column.render ? column.render(item) : column.value(item)}
+								</Td>
 							))}
 						</Tr>
 					))}
