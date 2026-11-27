@@ -8,12 +8,16 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.EnumSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BiFunction;
 
 public record CommandParameters(CommandType type, String[] args) {
+
+    private static final EnumSet<Option.ParamType> FILE_PARAM_TYPES = EnumSet.of(
+            Option.ParamType.FILE, Option.ParamType.DIR, Option.ParamType.FILE_OR_DIR);
 
     public CommandParameters(CommandType type, final Map<String, String> input) {
         this(type, input.entrySet()
@@ -49,7 +53,9 @@ public record CommandParameters(CommandType type, String[] args) {
                 continue;
             }
             final String value = arg.value();
-            final String resolved = resolver.apply(arg.attribute().defaultPath(), value);
+            final String resolved = FILE_PARAM_TYPES.contains(arg.attribute().type())
+                    ? resolver.apply(arg.attribute().defaultPath(), value)
+                    : value;
             if (!resolved.equals(value)) {
                 changed = true;
             }

@@ -42,9 +42,14 @@ public abstract class AbstractCommandController implements ControllerExceptionHa
     /** SETTING/TEMPLATE等のworkspaceリソース系相対パスを絶対パスへ解決する（コマンド実行前の共通処理） */
     static CommandParameters resolveSidecarFilePaths(final CommandParameters parameters) {
         return parameters.resolveFilePaths((baseDir, value) ->
-                SIDECAR_RESOLVE_BASEDIR.contains(baseDir) && !new File(value).isAbsolute()
+                SIDECAR_RESOLVE_BASEDIR.contains(baseDir) && !new File(FileResources.expandEnvironmentVariables(value)).isAbsolute()
                         ? resolveSidecarFilePath(baseDir, value).getAbsolutePath()
                         : value);
+    }
+
+    /** ユーザーごとに異なるホームディレクトリを保存内容に固定しないため、環境変数に置き換える */
+    static CommandParameters abbreviateEnvironmentVariables(final CommandParameters parameters) {
+        return parameters.resolveFilePaths((baseDir, value) -> FileResources.abbreviateEnvironmentVariables(value));
     }
 
     // GUIのファイル選択は基準ディレクトリ外のworkspace配下をworkspaceからの相対パスにするため、
@@ -141,7 +146,8 @@ public abstract class AbstractCommandController implements ControllerExceptionHa
     @Post(uri = "save", produces = MediaType.TEXT_PLAIN)
     public String save(@Body final CommandRequestDto body) throws IOException {
         try {
-            this.workspace.options().update(body.getName(), new CommandParameters(this.getCommandType(), body.getInput()).shrink());
+            this.workspace.options().update(body.getName(), AbstractCommandController.abbreviateEnvironmentVariables(
+                    new CommandParameters(this.getCommandType(), body.getInput())).shrink());
         } catch (IOException e) {
             throw e;
         } catch (final Throwable th) {
