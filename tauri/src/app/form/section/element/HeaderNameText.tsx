@@ -1,9 +1,15 @@
 import { blankColumnPositions } from "../../../../model/HeaderName";
 import { BlankColumnFillButton } from "../dialog/BlankColumnFillDialog";
-import FieldErrorMessages from "./FieldErrorMessages";
 import type { TextProp } from "./FormElementProp";
 import { getName } from "./FormElementProp";
 import Text from "./Text";
+
+function blankColumnMessages(value: string): string[] {
+	const positions = blankColumnPositions(value);
+	return positions.length > 0
+		? [`blank column name at: ${positions.join(", ")}`]
+		: [];
+}
 
 export default function HeaderNameText({
 	prefix,
@@ -18,9 +24,7 @@ export default function HeaderNameText({
 			element={element}
 			hidden={hidden}
 			handleValueChange={handleValueChange}
-			afterContent={({ path }) => (
-				<BlankColumnMessage value={path} hidden={hidden} />
-			)}
+			validate={blankColumnMessages}
 		>
 			{({ path, setPath }) => (
 				<BlankColumnFillButton
@@ -30,19 +34,5 @@ export default function HeaderNameText({
 				/>
 			)}
 		</Text>
-	);
-}
-
-function BlankColumnMessage(props: { value: string; hidden?: boolean }) {
-	const positions = blankColumnPositions(props.value);
-	return (
-		<FieldErrorMessages
-			messages={
-				positions.length > 0
-					? [`blank column name at: ${positions.join(", ")}`]
-					: []
-			}
-			hidden={props.hidden}
-		/>
 	);
 }

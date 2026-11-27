@@ -16,6 +16,7 @@ import {
 	blankColumnPositions,
 	fillBlankColumns,
 } from "../../../../model/HeaderName";
+import ResourceEditButton from "./ResourceEditButton";
 
 const DEFAULT_NAME_ID = "blankColumnFill_defaultName";
 
@@ -24,27 +25,30 @@ export function BlankColumnFillButton(props: {
 	value: string;
 	onApply: (filled: string) => void;
 }) {
-	const [open, setOpen] = useState(false);
 	if (blankColumnPositions(props.value).length === 0) {
 		return null;
 	}
 	return (
-		<>
-			<BlueEditButton
-				title={`fill blank columns of ${props.fieldName}`}
-				handleClick={() => setOpen(true)}
-			/>
-			{open && (
-				<BlankColumnFillDialog
-					{...props}
-					onApply={(filled) => {
-						props.onApply(filled);
-						setOpen(false);
-					}}
-					onClose={() => setOpen(false)}
+		<ResourceEditButton
+			renderTrigger={(openDialog) => (
+				<BlueEditButton
+					title={`fill blank columns of ${props.fieldName}`}
+					handleClick={openDialog}
 				/>
 			)}
-		</>
+			renderDialog={(open, closeDialog) =>
+				open ? (
+					<BlankColumnFillDialog
+						{...props}
+						onApply={(filled) => {
+							props.onApply(filled);
+							closeDialog();
+						}}
+						onClose={closeDialog}
+					/>
+				) : null
+			}
+		/>
 	);
 }
 
