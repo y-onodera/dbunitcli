@@ -86,30 +86,36 @@
     <tr><td>2</td><td>この行の B 列（キーが複数なら <code>|</code> でつなぐ）</td><td>${row.get('ID')}</td><td>${row.get('NAME')}</td></tr>
   </table>
   <table>
+    <tr><th>シート: NEW_USERS</th><th>A</th><th>B</th><th>C</th><th>D</th></tr>
+    <tr><td>1</td><td>KEY</td><td>OLD_USERS match</td><td>ID</td><td>NAME</td></tr>
+    <tr><td>2</td><td>この行の C 列（キーが複数なら <code>|</code> でつなぐ）</td><td>OLD_USERS に同じ KEY があれば <code>○</code>、なければ <code>×</code></td><td>${row.get('ID')}</td><td>${row.get('NAME')}</td></tr>
+  </table>
+  <table>
     <tr><th>シート: compare</th><th>A</th><th>B</th><th>C</th><th>D</th><th>E</th><th>F</th></tr>
-    <tr><td>1</td><td>NEW_USERS only</td><td>NEW_USERS にだけあるキーの件数</td><td></td><td></td><td></td><td></td></tr>
-    <tr><td>2</td><td>KEY</td><td>NEW_USERS row</td><td>STATUS</td><td>NAME(OLD_USERS)</td><td>NAME(NEW_USERS)</td><td>NAME diff</td></tr>
-    <tr><td>3</td><td>OLD_USERS の同じ順番の行の KEY</td><td>NEW_USERS で同じ KEY がある行の番号</td><td>判定</td><td>OLD_USERS の値</td><td>NEW_USERS の値</td><td>値が違えば <code>×</code></td></tr>
+    <tr><td>1</td><td>NEW_USERS only</td><td>NEW_USERS にだけあるキーの件数（OLD_USERS match が <code>×</code> の行数）</td><td></td><td></td><td></td><td></td></tr>
+    <tr><td>2</td><td></td><td></td><td>STATUS が 1 以上の行数</td><td></td><td></td><td>この列の <code>×</code> の件数</td></tr>
+    <tr><td>3</td><td>KEY</td><td>NEW_USERS row</td><td>STATUS</td><td>NAME(OLD_USERS)</td><td>NAME(NEW_USERS)</td><td>NAME diff</td></tr>
+    <tr><td>4</td><td>OLD_USERS の同じ順番の行の KEY</td><td>NEW_USERS で同じ KEY がある行の番号</td><td>この行の diff 列の <code>×</code> の数</td><td>OLD_USERS の値</td><td>NEW_USERS の値</td><td>値が同じなら <code>○</code>、違えば <code>×</code></td></tr>
   </table>
   <p>generate コマンドの <code>generateType=xlsx</code>、<code>unit=dataset</code> で、<code>OLD_USERS</code>・<code>NEW_USERS</code> の 2 テーブルを含むデータセットを src にしてこのテンプレートを指定すると、各データシートに全行が展開され、比較シートは OLD_USERS の行数だけ展開されます。</p>
 
   <h2 id="section-rules">生成ルール</h2>
   <table>
     <tr><th>値</th><th>説明</th></tr>
-    <tr><td>STATUS が空</td><td>new に同じキーの行があり、比べたカラムの値がすべて同じ</td></tr>
-    <tr><td>STATUS が <code>diff</code></td><td>new に同じキーの行があり、値の違うカラムがある</td></tr>
-    <tr><td>STATUS が <code>missing</code></td><td>new に同じキーの行がない</td></tr>
-    <tr><td>diff 列が <code>×</code></td><td>2 つの値が違う。値は文字列として、大文字・小文字も区別して比べる</td></tr>
+    <tr><td>STATUS が <code>0</code></td><td>比べたカラムの値がすべて同じ</td></tr>
+    <tr><td>STATUS が 1 以上</td><td>値の違うカラムの数</td></tr>
+    <tr><td>new row が空</td><td>new に同じキーの行がない</td></tr>
+    <tr><td>diff 列が <code>○</code> / <code>×</code></td><td>2 つの値が同じ / 違う。値は文字列として、大文字・小文字も区別して比べる</td></tr>
   </table>
   <ul>
     <li>比較シートの行は old のシートの行に対応する。new にだけあるキーの行は比較シートに出ず、1 行目に件数だけを出す</li>
-    <li><code>missing</code> の行は new の値が空になり、old の値が空でないカラムの diff 列は <code>×</code> になる</li>
+    <li>new に同じキーの行がない行は new の値が空になり、old の値が空でないカラムの diff 列は <code>×</code> になる（STATUS と 2 行目の件数にも含まれる）</li>
     <li>数式は、列全体に付けた名前（<code>FIRST_B</code> = old のシートの B 列、<code>SECOND_A</code>、<code>COMPARE_C</code> など）と <code>ROW()</code> で同じ行の値を取る。比較シートの n 行目のデータは old のシートの n 行目のデータに対応するため、どちらかのシートだけに行を挿入・削除すると対応がずれる</li>
   </ul>
 
   <h2 id="section-notes">注意</h2>
   <ul>
-    <li>キーは、それぞれのシートの中で重複しない組み合わせを選んでください。重複していると、new では最初に見つかった行と比べ、1 行目の件数も正しく数えられません。</li>
+    <li>キーは、それぞれのシートの中で重複しない組み合わせを選んでください。重複していると、new では最初に見つかった行と比べます。</li>
     <li>シート名に <code>'</code> は使えません。3 つのシート名は互いに違う名前にしてください（大文字・小文字は区別しません）。</li>
     <li>テンプレートの生成にはデータ本体を読み込まず、カラム情報のみを使用します。</li>
     <li>Execute が失敗した場合は、ダイアログ内にエラーメッセージと実行中に出ていたログが表示されます。入力内容を見直して再度実行してください。</li>

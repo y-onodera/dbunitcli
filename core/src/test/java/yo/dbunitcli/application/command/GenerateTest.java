@@ -1021,7 +1021,7 @@ public class GenerateTest {
                 Assertions.assertEquals(3, workbook.getNumberOfSheets());
                 Assertions.assertEquals(java.util.List.of("Test3", "Test2", "compare")
                         , java.util.List.of(workbook.getSheetName(0), workbook.getSheetName(1), workbook.getSheetName(2)));
-                final Row header = workbook.getSheet("compare").getRow(1);
+                final Row header = workbook.getSheet("compare").getRow(2);
                 Assertions.assertEquals(java.util.List.of("KEY", "Test2 row", "STATUS"
                                 , "ColumnA(Test3)", "ColumnA(Test2)", "ColumnA diff"
                                 , "ColumnB(Test3)", "ColumnB(Test2)", "ColumnB diff")
@@ -1040,13 +1040,13 @@ public class GenerateTest {
                 final Sheet compare = workbook.getSheet("compare");
                 final org.apache.poi.ss.usermodel.FormulaEvaluator evaluator = workbook.getCreationHelper().createFormulaEvaluator();
                 final org.apache.poi.ss.usermodel.DataFormatter formatter = new org.apache.poi.ss.usermodel.DataFormatter();
-                // 集計行・見出し行の後にTest3の3行。PrimaryKey=1はTest2の1行目と突合する
-                Assertions.assertEquals(4, compare.getLastRowNum());
+                // 集計行・×件数行・見出し行の後にTest3の3行。PrimaryKey=1はTest2の1行目と突合する
+                Assertions.assertEquals(5, compare.getLastRowNum());
                 Assertions.assertEquals(java.util.List.of("1", "1", "29")
-                        , java.util.stream.IntStream.rangeClosed(2, 4)
+                        , java.util.stream.IntStream.rangeClosed(3, 5)
                                 .mapToObj(i -> formatter.formatCellValue(compare.getRow(i).getCell(0), evaluator)).toList());
-                Assertions.assertEquals(java.util.List.of("", "diff", "")
-                        , java.util.stream.IntStream.rangeClosed(2, 4)
+                Assertions.assertEquals(java.util.List.of("0", "2", "0")
+                        , java.util.stream.IntStream.rangeClosed(3, 5)
                                 .mapToObj(i -> formatter.formatCellValue(compare.getRow(i).getCell(2), evaluator)).toList());
             }
         }
