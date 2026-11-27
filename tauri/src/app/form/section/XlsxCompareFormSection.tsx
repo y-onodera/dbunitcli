@@ -35,14 +35,17 @@ export default function XlsxCompareFormSection({
 		false,
 		{ enabled: tableNamesLoad !== null, reloadKey: tableNamesLoad?.count },
 	);
-	// keys / comparesの列の選択はoldTableの入力中の値から読む
+	// keys / comparesの列の選択はoldTable・newTableの入力中の値から読む
 	const [oldTable, setOldTable] = useSyncedState(
 		generate.oldTable?.value ?? "",
 	);
-	const { newTable, keys, compares, compareSheetName } = generate;
+	const [newTable, setNewTable] = useSyncedState(
+		generate.newTable?.value ?? "",
+	);
+	const { keys, compares, compareSheetName } = generate;
 	if (
 		!generate.oldTable &&
-		!newTable &&
+		!generate.newTable &&
 		!keys &&
 		!compares &&
 		!compareSheetName
@@ -79,6 +82,7 @@ export default function XlsxCompareFormSection({
 				<CompareColumnsButton
 					caption={field.name}
 					oldTable={oldTable}
+					newTable={newTable}
 					value={path}
 					setValue={setPath}
 				/>
@@ -94,7 +98,7 @@ export default function XlsxCompareFormSection({
 				label="Compare"
 			/>
 			{generate.oldTable && renderTableText(generate.oldTable, setOldTable)}
-			{newTable && renderTableText(newTable)}
+			{generate.newTable && renderTableText(generate.newTable, setNewTable)}
 			{keys && renderColumnsText(keys)}
 			{compares && renderColumnsText(compares)}
 			{compareSheetName && <PlainText prefix="" element={compareSheetName} />}

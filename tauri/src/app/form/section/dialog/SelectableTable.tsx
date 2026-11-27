@@ -11,10 +11,21 @@ import { FilterInput } from "../../../../components/element/Input";
 // 引数の既定値にアロー関数を書くとReact Compilerが未対応のため、モジュールレベルで定義する
 const renderAsText = (item: string): ReactNode => item;
 
-// 項目の横に並べる列。フィルタの対象にもする
-export type ExtraColumn = { label: string; value: (item: string) => string };
+// 項目の横に並べる列。valueはフィルタの対象にもし、renderがあれば表示はrenderで行う
+export type ExtraColumn = {
+	label: string;
+	value: (item: string) => string;
+	render?: (item: string) => ReactNode;
+};
 
 const NO_EXTRA_COLUMNS: ExtraColumn[] = [];
+
+function isInteractive(target: EventTarget): boolean {
+	return (
+		target instanceof Element &&
+		target.closest("input,select,button,a,textarea") !== null
+	);
+}
 
 // フィルタ入力・全選択チェック・行クリックでの選択切替を持つ一覧
 export default function SelectableTable({
@@ -85,18 +96,27 @@ export default function SelectableTable({
 					}
 				>
 					{filteredItems.map((item) => (
-						<Tr key={item} onClick={() => onToggle(item)}>
+						<Tr
+							key={item}
+							onClick={(e) => {
+								// 行内の入力欄は自身の操作で選択を変えるので、行クリックとして扱わない
+								if (!isInteractive(e.target)) {
+									onToggle(item);
+								}
+							}}
+						>
 							<Td>
 								<input
 									type="checkbox"
 									checked={selected.has(item)}
 									onChange={() => onToggle(item)}
-									onClick={(e) => e.stopPropagation()}
 								/>
 							</Td>
 							<Td>{renderItem(item)}</Td>
 							{extraColumns.map((column) => (
-								<Td key={column.label}>{column.value(item)}</Td>
+								<Td key={column.label}>
+									{column.render ? column.render(item) : column.value(item)}
+								</Td>
 							))}
 						</Tr>
 					))}

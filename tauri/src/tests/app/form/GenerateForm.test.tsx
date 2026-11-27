@@ -50,10 +50,13 @@ const { useDatasetTableNamesMock } = vi.hoisted(() => ({
 		}),
 	),
 }));
-// OLD_USERSテーブルの列だけを返す
+const TABLE_COLUMNS: Record<string, string[]> = {
+	OLD_USERS: ["ID", "NAME", "AMT"],
+	NEW_USERS: ["ID", "name", "CODE"],
+};
 const { useDatasetTableColumnsMock } = vi.hoisted(() => ({
 	useDatasetTableColumnsMock: vi.fn((_srcInfo: unknown, tableName: string) => ({
-		columns: tableName === "OLD_USERS" ? ["ID", "NAME", "AMT"] : [],
+		columns: TABLE_COLUMNS[tableName] ?? [],
 		loading: false,
 		logs: [],
 		error: "",
@@ -512,6 +515,47 @@ describe("GenerateFormの描画テスト", () => {
 			expect(
 				screen.getByRole("button", { name: "select compares" }),
 			).toBeInTheDocument();
+		});
+
+		it("newTableを入れると、選んだoldの列にnewTableの同名の列を初期値として対応させ、変えられる", async () => {
+			const user = userEvent.setup();
+			render(
+				<GenerateForm
+					{...makeGenerateProps(
+						generateRefreshXlsxTemplateCompareResponseFixture,
+					)}
+				/>,
+			);
+			await user.type(
+				document.querySelector('input[name="-oldTable"]') as HTMLElement,
+				"OLD_USERS",
+			);
+			await user.type(
+				document.querySelector('input[name="-newTable"]') as HTMLElement,
+				"NEW_USERS",
+			);
+			const keys = document.querySelector(
+				'input[name="-keys"]',
+			) as HTMLInputElement;
+
+			await user.click(screen.getByRole("button", { name: "select keys" }));
+			const dialog = screen.getByRole("dialog");
+			await user.click(
+				within(dialog).getByRole("checkbox", { name: "Select all" }),
+			);
+			const newColumnOf = (column: string) =>
+				dialog.querySelector(
+					`select[name="new column of ${column}"]`,
+				) as HTMLSelectElement;
+			// 完全一致・大文字小文字違いは対応させ、該当が無ければ未選択のままにする
+			expect(newColumnOf("ID")).toHaveValue("ID");
+			expect(newColumnOf("NAME")).toHaveValue("name");
+			expect(newColumnOf("AMT")).toHaveValue("");
+			await user.selectOptions(newColumnOf("AMT"), "CODE");
+			expect(newColumnOf("AMT")).toHaveValue("CODE");
+			await user.click(within(dialog).getByRole("button", { name: "Apply" }));
+
+			expect(keys).toHaveValue("ID,NAME:name,AMT:CODE");
 		});
 
 		it("templateTypeを変えるとフォームを再構成する", async () => {

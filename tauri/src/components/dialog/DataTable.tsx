@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import type { MouseEvent, ReactNode } from "react";
 
 export function DataTable({
 	head,
@@ -45,7 +45,7 @@ export function Tr({
 	onClick,
 	children,
 }: {
-	onClick?: () => void;
+	onClick?: (event: MouseEvent<HTMLTableRowElement>) => void;
 	children: ReactNode;
 }) {
 	return (

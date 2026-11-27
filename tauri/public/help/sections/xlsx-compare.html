@@ -50,7 +50,7 @@
     <tr><th>項目</th><th>説明</th><th>デフォルト</th></tr>
     <tr><td><code>oldTable</code>（必須）</td><td>比べる基準にするテーブルの名前。<code>src</code> の setting を適用した後のテーブル名で、大文字・小文字も含めて完全に一致させる。横の reload ボタンを押すと、その時点の <code>src</code> セクションの入力値で読み込み setting を適用した後のテーブル名が、<code>oldTable</code> / <code>newTable</code> の入力欄の候補に出る。<code>src</code> を変えても候補は自動では変わらないため、押し直してください</td><td>—</td></tr>
     <tr><td><code>newTable</code>（必須）</td><td><code>oldTable</code> と突き合わせるテーブルの名前。<code>oldTable</code> と同じ名前は指定できない</td><td>—</td></tr>
-    <tr><td><code>keys</code>（必須）</td><td>行を突き合わせるキーのカラム。複数あれば複合キーにする（下記「keys / compares の書き方」）。横の編集ボタンから <code>oldTable</code> のカラムを選べる（<a href="../dialogs/compare-columns.html">Select Compare Columns</a>）</td><td>—</td></tr>
+    <tr><td><code>keys</code>（必須）</td><td>行を突き合わせるキーのカラム。複数あれば複合キーにする（下記「keys / compares の書き方」）。横の編集ボタンから <code>oldTable</code> のカラムと、対応する <code>newTable</code> のカラムを選べる（<a href="../dialogs/compare-columns.html">Select Compare Columns</a>）</td><td>—</td></tr>
     <tr><td><code>compares</code></td><td>値を比べるカラム（下記「keys / compares の書き方」）。<code>keys</code> と同じく、横の編集ボタンから <code>oldTable</code> のカラムを選べる</td><td>（空）。キー以外で両方のテーブルにある同じ名前のカラム</td></tr>
     <tr><td><code>compareSheetName</code></td><td>比較シートの名前。テーブル名と同じ名前は指定できない</td><td><code>compare</code></td></tr>
   </table>
