@@ -3,6 +3,7 @@ package yo.dbunitcli.resource.poi.jxls;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.ss.usermodel.FormulaEvaluator;
+import org.apache.poi.ss.usermodel.HorizontalAlignment;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
@@ -82,10 +83,15 @@ class JxlsCompareTemplateGeneratorTest {
                 Assertions.assertEquals("jx:area(lastCell=\"E2\")", old.getRow(0).getCell(0).getCellComment().getString().getString());
                 Assertions.assertEquals("jx:each(items=\"param.dataSet.get('old').rows\" var=\"row\" varIndex=\"index\" lastCell=\"E2\")"
                         , old.getRow(1).getCell(0).getCellComment().getString().getString());
-                Assertions.assertEquals("$[INDEX(SECOND_B,ROW())&\"|\"&INDEX(SECOND_C,ROW())]", rowStrings(workbook.getSheet("new"), 1).getFirst());
+                final Sheet newSheet = workbook.getSheet("new");
+                Assertions.assertEquals(List.of("KEY", "old match", "CODE", "SUB", "NAME2", "AMT"), rowStrings(newSheet, 0));
+                Assertions.assertEquals(List.of("$[INDEX(SECOND_C,ROW())&\"|\"&INDEX(SECOND_D,ROW())]"
+                                , "$[IF(ISNA(MATCH(INDEX(SECOND_A,ROW()),FIRST_A,0)),\"×\",\"○\")]")
+                        , rowStrings(newSheet, 1).subList(0, 2));
                 Assertions.assertEquals("'old'!$D:$D", workbook.getName("FIRST_D").getRefersToFormula());
                 Assertions.assertEquals("'new'!$A:$A", workbook.getName("SECOND_A").getRefersToFormula());
                 Assertions.assertEquals("'compare'!$I:$I", workbook.getName("COMPARE_I").getRefersToFormula());
+                Assertions.assertEquals("'compare'!$F$4:$F$1048576", workbook.getName("COMPARE_DATA_F").getRefersToFormula());
             }
         }
 
@@ -95,23 +101,32 @@ class JxlsCompareTemplateGeneratorTest {
             twoDatasets().write(file);
             try (final Workbook workbook = WorkbookFactory.create(file)) {
                 final Sheet compare = workbook.getSheet("compare");
-                Assertions.assertEquals(List.of("new only", "$[COUNTA(SECOND_A)-COUNTA(FIRST_A)+COUNTIF(COMPARE_C,\"missing\")]")
+                Assertions.assertEquals(List.of("new only", "$[COUNTIF(SECOND_B,\"×\")]")
                         , rowStrings(compare, 0));
-                Assertions.assertEquals(List.of("KEY", "new row", "STATUS", "NAME(old)", "NAME2(new)", "NAME diff", "AMT(old)", "AMT(new)", "AMT diff")
+                Assertions.assertEquals(List.of("", "", "$[COUNTIF(COMPARE_DATA_C,\">0\")]", "", "", "$[COUNTIF(COMPARE_DATA_F,\"×\")]"
+                                , "", "", "$[COUNTIF(COMPARE_DATA_I,\"×\")]")
                         , rowStrings(compare, 1));
-                Assertions.assertEquals(List.of(
-                                "$[INDEX(FIRST_A,ROW()-1)]"
-                                , "$[IFERROR(MATCH(INDEX(COMPARE_A,ROW()),SECOND_A,0),\"\")]"
-                                , "$[IF(INDEX(COMPARE_B,ROW())=\"\",\"missing\",IF(OR(INDEX(COMPARE_F,ROW())<>\"\",INDEX(COMPARE_I,ROW())<>\"\"),\"diff\",\"\"))]"
-                                , "$[INDEX(FIRST_D,ROW()-1)&\"\"]"
-                                , "$[IF(INDEX(COMPARE_B,ROW())=\"\",\"\",INDEX(SECOND_D,INDEX(COMPARE_B,ROW()))&\"\")]"
-                                , "$[IF(EXACT(INDEX(COMPARE_D,ROW()),INDEX(COMPARE_E,ROW())),\"\",\"×\")]"
-                                , "$[INDEX(FIRST_E,ROW()-1)&\"\"]"
-                                , "$[IF(INDEX(COMPARE_B,ROW())=\"\",\"\",INDEX(SECOND_E,INDEX(COMPARE_B,ROW()))&\"\")]"
-                                , "$[IF(EXACT(INDEX(COMPARE_G,ROW()),INDEX(COMPARE_H,ROW())),\"\",\"×\")]")
+                Assertions.assertEquals(List.of("KEY", "new row", "STATUS", "NAME(old)", "NAME2(new)", "NAME diff", "AMT(old)", "AMT(new)", "AMT diff")
                         , rowStrings(compare, 2));
-                Assertions.assertEquals("jx:each(items=\"param.dataSet.get('old').rows\" var=\"row\" varIndex=\"index\" lastCell=\"I3\")"
-                        , compare.getRow(2).getCell(0).getCellComment().getString().getString());
+                Assertions.assertEquals(List.of(
+                                "$[INDEX(FIRST_A,ROW()-2)]"
+                                , "$[IFERROR(MATCH(INDEX(COMPARE_A,ROW()),SECOND_A,0),\"\")]"
+                                , "$[0+(INDEX(COMPARE_F,ROW())=\"×\")+(INDEX(COMPARE_I,ROW())=\"×\")]"
+                                , "$[INDEX(FIRST_D,ROW()-2)&\"\"]"
+                                , "$[IF(INDEX(COMPARE_B,ROW())=\"\",\"\",INDEX(SECOND_E,INDEX(COMPARE_B,ROW()))&\"\")]"
+                                , "$[IF(EXACT(INDEX(COMPARE_D,ROW()),INDEX(COMPARE_E,ROW())),\"○\",\"×\")]"
+                                , "$[INDEX(FIRST_E,ROW()-2)&\"\"]"
+                                , "$[IF(INDEX(COMPARE_B,ROW())=\"\",\"\",INDEX(SECOND_F,INDEX(COMPARE_B,ROW()))&\"\")]"
+                                , "$[IF(EXACT(INDEX(COMPARE_G,ROW()),INDEX(COMPARE_H,ROW())),\"○\",\"×\")]")
+                        , rowStrings(compare, 3));
+                Assertions.assertEquals("jx:each(items=\"param.dataSet.get('old').rows\" var=\"row\" varIndex=\"index\" lastCell=\"I4\")"
+                        , compare.getRow(3).getCell(0).getCellComment().getString().getString());
+                for (final int row : List.of(1, 3)) {
+                    for (int column = 0; column < 9; column++) {
+                        Assertions.assertEquals(column == 5 || column == 8 ? HorizontalAlignment.CENTER : HorizontalAlignment.GENERAL
+                                , compare.getRow(row).getCell(column).getCellStyle().getAlignment(), "row " + row + " column " + column);
+                    }
+                }
             }
         }
 
@@ -123,8 +138,8 @@ class JxlsCompareTemplateGeneratorTest {
             new JxlsCompareTemplateGenerator(first, second, List.of(new ColumnPair("ID", "ID")), List.of(), "compare").write(file);
             try (final Workbook workbook = WorkbookFactory.create(file)) {
                 Assertions.assertEquals("$[INDEX(FIRST_B,ROW())&\"\"]", rowStrings(workbook.getSheet("before"), 1).getFirst());
-                Assertions.assertEquals(List.of("KEY", "after row", "STATUS"), rowStrings(workbook.getSheet("compare"), 1));
-                Assertions.assertEquals("$[IF(INDEX(COMPARE_B,ROW())=\"\",\"missing\",\"\")]", rowStrings(workbook.getSheet("compare"), 2).get(2));
+                Assertions.assertEquals(List.of("KEY", "after row", "STATUS"), rowStrings(workbook.getSheet("compare"), 2));
+                Assertions.assertEquals("$[0]", rowStrings(workbook.getSheet("compare"), 3).get(2));
             }
         }
     }
@@ -192,13 +207,16 @@ class JxlsCompareTemplateGeneratorTest {
                 final FormulaEvaluator evaluator = workbook.getCreationHelper().createFormulaEvaluator();
                 final Sheet old = workbook.getSheet("old");
                 Assertions.assertEquals(List.of("2|a", "2", "a", "y", "20"), rowValues(old, 2, evaluator));
-                Assertions.assertEquals(List.of("5|c", "5", "c", "v", "50"), rowValues(workbook.getSheet("new"), 4, evaluator));
+                Assertions.assertEquals(List.of("1|a", "○", "1", "a", "x", "10"), rowValues(workbook.getSheet("new"), 2, evaluator));
+                Assertions.assertEquals(List.of("5|c", "×", "5", "c", "v", "50"), rowValues(workbook.getSheet("new"), 4, evaluator));
                 final Sheet compare = workbook.getSheet("compare");
                 Assertions.assertEquals(List.of("new only", "2"), rowValues(compare, 0, evaluator));
-                Assertions.assertEquals(List.of("1|a", "3", "", "x", "x", "", "10", "10", ""), rowValues(compare, 2, evaluator));
-                Assertions.assertEquals(List.of("2|a", "2", "diff", "y", "Y", "×", "20", "20", ""), rowValues(compare, 3, evaluator));
-                Assertions.assertEquals(List.of("3|b", "", "missing", "z", "", "×", "30", "", "×"), rowValues(compare, 4, evaluator));
-                Assertions.assertEquals(4, compare.getLastRowNum());
+                Assertions.assertEquals(List.of("", "", "2", "", "", "2", "", "", "1"), rowValues(compare, 1, evaluator));
+                Assertions.assertEquals(List.of("1|a", "3", "0", "x", "x", "○", "10", "10", "○"), rowValues(compare, 3, evaluator));
+                Assertions.assertEquals(List.of("2|a", "2", "1", "y", "Y", "×", "20", "20", "○"), rowValues(compare, 4, evaluator));
+                Assertions.assertEquals(List.of("3|b", "", "2", "z", "", "×", "30", "", "×"), rowValues(compare, 5, evaluator));
+                Assertions.assertEquals(HorizontalAlignment.CENTER, compare.getRow(5).getCell(5).getCellStyle().getAlignment());
+                Assertions.assertEquals(5, compare.getLastRowNum());
             }
         }
     }
